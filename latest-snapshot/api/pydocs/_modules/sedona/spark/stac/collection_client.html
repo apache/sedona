@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.stac.collection_client &mdash; Apache Sedona Python Documentation</title>
@@ -227,8 +226,11 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">calendar</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Real</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">urllib.parse</span><span class="w"> </span><span class="kn">import</span> <span class="n">urlsplit</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">python_datetime</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">SparkSession</span>
@@ -318,7 +320,13 @@
         <span class="c1"># Move the specified attributes to 'properties'</span>
         <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attributes_to_move</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">item_dict</span><span class="p">:</span>
-                <span class="n">item_dict</span><span class="p">[</span><span class="s2">"properties"</span><span class="p">][</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">item_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">attr</span><span class="p">))</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">item_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">python_datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+                    <span class="c1"># PySpark materializes TimestampType with datetime.fromtimestamp(),</span>
+                    <span class="c1"># so a naïve value is in the Python process's local timezone.</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">astimezone</span><span class="p">(</span><span class="n">python_datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"+00:00"</span><span class="p">,</span> <span class="s2">"Z"</span><span class="p">)</span>
+                <span class="n">item_dict</span><span class="p">[</span><span class="s2">"properties"</span><span class="p">][</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">item_dict</span>
 
@@ -569,7 +577,10 @@
 <span class="sd">            If both bbox and geometry are provided, geometry takes precedence.</span>
 <span class="sd">        :param datetime: A single datetime, RFC 3339-compliant timestamp,</span>
 <span class="sd">            or a list of date-time ranges for filtering the items.</span>
-<span class="sd">        :param max_items: The maximum number of items to return from the search, even if there are more matching results.</span>
+<span class="sd">        :param max_items: The maximum number of STAC API results to return. Supported</span>
+<span class="sd">            single-collection bbox/datetime searches follow pystac-client semantics and</span>
+<span class="sd">            trust the API's matching behavior; extended Spark-side filters are applied</span>
+<span class="sd">            before the final result limit.</span>
 <span class="sd">        :return: An iterator of PyStacItem objects that match the specified filters.</span>
 <span class="sd">            If no filters are provided, the iterator contains all items in the collection.</span>
 <span class="sd">        :raises RuntimeError: If there is an error loading the data or applying the filters, a RuntimeError</span>
@@ -629,7 +640,10 @@
 <span class="sd">        :param datetime: A single datetime, RFC 3339-compliant timestamp,</span>
 <span class="sd">            or a list of date-time ranges for filtering the items.</span>
 <span class="sd">            Example: "2020-01-01T00:00:00Z" or python_datetime.datetime(2020, 1, 1) or [["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]</span>
-<span class="sd">        :param max_items: The maximum number of items to return from the search.</span>
+<span class="sd">        :param max_items: The maximum number of STAC API results to return. Supported</span>
+<span class="sd">            single-collection bbox/datetime searches follow pystac-client semantics and</span>
+<span class="sd">            trust the API's matching behavior; extended Spark-side filters are applied</span>
+<span class="sd">            before the final result limit.</span>
 <span class="sd">        :return: A Spark DataFrame containing the filtered items. If no filters are provided,</span>
 <span class="sd">            the DataFrame contains all items in the collection.</span>
 <span class="sd">        :raises RuntimeError: If there is an error loading the data or applying the filters, a RuntimeError</span>
@@ -718,6 +732,90 @@
 
         <span class="k">return</span> <span class="n">df</span>
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_enumeration_cap_options</span><span class="p">(</span><span class="n">max_items</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Reader options for a request whose filtering is owned by the STAC API.</span>
+
+<span class="sd">        This mirrors pystac-client: ``itemsLimitMax`` is the total number of</span>
+<span class="sd">        server-returned Items to enumerate, while ``itemsLimitPerRequest`` is</span>
+<span class="sd">        only the requested page size. Callers must not use these options when a</span>
+<span class="sd">        Spark-side predicate can still reject rows before the user's limit.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">max_items</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">max_items</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{}</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">"itemsLimitMax"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_items</span><span class="p">),</span>
+            <span class="s2">"itemsLimitPerRequest"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="n">max_items</span><span class="p">)),</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_api_search_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bbox</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">max_items</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Build a PySTAC-compatible Collection Items search when representable.</span>
+
+<span class="sd">        A single bbox and a single datetime interval map directly to STAC API</span>
+<span class="sd">        Collection Items parameters. Their semantics are owned by the API, including</span>
+<span class="sd">        interval-valued Items. Multiple bboxes/intervals and geometry filters</span>
+<span class="sd">        are Sedona extensions implemented with Spark predicates, so they keep</span>
+<span class="sd">        the uncapped fallback instead of applying a raw reader cap too early.</span>
+
+<span class="sd">        The datasource applies these private options to the Collection's advertised</span>
+<span class="sd">        JSON ``rel=items`` link. Keeping endpoint discovery in the datasource preserves</span>
+<span class="sd">        custom, cross-origin, and query-bearing Item endpoint URLs.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">max_items</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="ow">or</span> <span class="n">max_items</span> <span class="o">&lt;=</span> <span class="mi">0</span>
+            <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">collection_id</span>
+            <span class="ow">or</span> <span class="n">ids</span>
+            <span class="ow">or</span> <span class="n">geometry</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">bbox</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">datetime</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">parsed_base</span> <span class="o">=</span> <span class="n">urlsplit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_url</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">parsed_base</span><span class="o">.</span><span class="n">scheme</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"http"</span><span class="p">,</span> <span class="s2">"https"</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="ow">not</span> <span class="n">parsed_base</span><span class="o">.</span><span class="n">netloc</span>
+            <span class="ow">or</span> <span class="n">parsed_base</span><span class="o">.</span><span class="n">query</span>
+            <span class="ow">or</span> <span class="n">parsed_base</span><span class="o">.</span><span class="n">fragment</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">options</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="n">bbox</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bbox</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bbox</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="n">coordinates</span> <span class="o">=</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span>
+                <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Real</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">coordinates</span>
+            <span class="p">):</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="n">min_lon</span><span class="p">,</span> <span class="n">min_lat</span><span class="p">,</span> <span class="n">max_lon</span><span class="p">,</span> <span class="n">max_lat</span> <span class="o">=</span> <span class="n">coordinates</span>
+            <span class="c1"># Longitudes may wrap across the antimeridian (min_lon &gt; max_lon).</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="o">-</span><span class="mi">180</span> <span class="o">&lt;=</span> <span class="n">min_lon</span> <span class="o">&lt;=</span> <span class="mi">180</span> <span class="ow">and</span> <span class="o">-</span><span class="mi">180</span> <span class="o">&lt;=</span> <span class="n">max_lon</span> <span class="o">&lt;=</span> <span class="mi">180</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span>
+                <span class="o">-</span><span class="mi">90</span> <span class="o">&lt;=</span> <span class="n">min_lat</span> <span class="o">&lt;=</span> <span class="n">max_lat</span> <span class="o">&lt;=</span> <span class="mi">90</span>
+            <span class="p">):</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="n">options</span><span class="p">[</span><span class="s2">"__stacApiSearchBbox"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">","</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">coordinates</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">datetime</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">datetime</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">datetime</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="n">interval</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">interval</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
+                <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">interval</span>
+            <span class="p">):</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="n">options</span><span class="p">[</span><span class="s2">"__stacApiSearchDatetime"</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">interval</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">interval</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+
+        <span class="k">return</span> <span class="n">options</span>
+
 <div class="viewcode-block" id="CollectionClient.load_items_df"><a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.collection_client.CollectionClient.load_items_df">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">load_items_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bbox</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">max_items</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Loads items from the STAC collection as a Spark DataFrame.</span>
@@ -727,49 +825,65 @@
 <span class="sd">        """</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 
+        <span class="c1"># Ensure bbox is a list of lists</span>
+        <span class="k">if</span> <span class="n">bbox</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bbox</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Real</span><span class="p">):</span>
+            <span class="n">bbox</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">bbox</span><span class="p">)]</span>
+        <span class="c1"># Handle geometry parameter</span>
+        <span class="k">if</span> <span class="n">geometry</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">geometry</span> <span class="o">=</span> <span class="p">[</span><span class="n">geometry</span><span class="p">]</span>
+        <span class="c1"># Handle datetime parameter</span>
+        <span class="k">if</span> <span class="n">datetime</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">datetime</span><span class="p">,</span> <span class="n">python_datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+                <span class="n">normalized_datetime</span> <span class="o">=</span> <span class="n">datetime</span>
+                <span class="k">if</span> <span class="n">normalized_datetime</span><span class="o">.</span><span class="n">tzinfo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">normalized_datetime</span> <span class="o">=</span> <span class="n">normalized_datetime</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                        <span class="n">tzinfo</span><span class="o">=</span><span class="n">python_datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">normalized_datetime</span> <span class="o">=</span> <span class="n">normalized_datetime</span><span class="o">.</span><span class="n">astimezone</span><span class="p">(</span>
+                        <span class="n">python_datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span>
+                    <span class="p">)</span>
+                <span class="n">datetime_string</span> <span class="o">=</span> <span class="n">normalized_datetime</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"+00:00"</span><span class="p">,</span> <span class="s2">"Z"</span><span class="p">)</span>
+                <span class="n">datetime</span> <span class="o">=</span> <span class="p">[[</span><span class="n">datetime_string</span><span class="p">,</span> <span class="n">datetime_string</span><span class="p">]]</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">datetime</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">datetime</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_expand_date</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="p">))]</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">datetime</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">datetime</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">datetime</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">datetime</span><span class="p">)]</span>
+
+        <span class="n">api_search_options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api_search_options</span><span class="p">(</span>
+            <span class="n">bbox</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">max_items</span>
+        <span class="p">)</span>
+
         <span class="c1"># Prepare Spark DataFrameReader with headers if present</span>
         <span class="n">reader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"stac"</span><span class="p">)</span>
-
-        <span class="c1"># Encode headers as JSON string for passing to Spark</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">:</span>
-            <span class="n">headers_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
-            <span class="n">reader</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"headers"</span><span class="p">,</span> <span class="n">headers_json</span><span class="p">)</span>
+            <span class="n">reader</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"headers"</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">))</span>
 
-        <span class="c1"># Load the collection data from the specified collection URL</span>
-        <span class="k">if</span> <span class="p">(</span>
-            <span class="ow">not</span> <span class="n">ids</span>
-            <span class="ow">and</span> <span class="ow">not</span> <span class="n">bbox</span>
-            <span class="ow">and</span> <span class="ow">not</span> <span class="n">geometry</span>
-            <span class="ow">and</span> <span class="ow">not</span> <span class="n">datetime</span>
-            <span class="ow">and</span> <span class="n">max_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="p">):</span>
-            <span class="n">df</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"itemsLimitMax"</span><span class="p">,</span> <span class="n">max_items</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_url</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">df</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_url</span><span class="p">)</span>
-            <span class="c1"># Apply ID filters if provided</span>
+        <span class="c1"># In the PySTAC-compatible path, the datasource puts every search predicate</span>
+        <span class="c1"># on the advertised endpoint and itemsLimitMax counts exactly what the API returns.</span>
+        <span class="n">has_client_side_filters</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">ids</span> <span class="ow">or</span> <span class="n">bbox</span> <span class="ow">or</span> <span class="n">geometry</span> <span class="ow">or</span> <span class="n">datetime</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">api_search_options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">has_client_side_filters</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enumeration_cap_options</span><span class="p">(</span><span class="n">max_items</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">reader</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">api_search_options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">api_search_options</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">reader</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_url</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">api_search_options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># These extended shapes are evaluated by Spark. They deliberately</span>
+            <span class="c1"># stay uncapped in the reader so a residual cannot exhaust the cap</span>
+            <span class="c1"># before a later matching Item is reached.</span>
             <span class="k">if</span> <span class="n">ids</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
                     <span class="n">ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                     <span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">ids</span><span class="p">]</span>
                 <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">ids</span><span class="p">))</span>
-            <span class="c1"># Ensure bbox is a list of lists</span>
-            <span class="k">if</span> <span class="n">bbox</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bbox</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">float</span><span class="p">):</span>
-                <span class="n">bbox</span> <span class="o">=</span> <span class="p">[</span><span class="n">bbox</span><span class="p">]</span>
-            <span class="c1"># Handle geometry parameter</span>
-            <span class="k">if</span> <span class="n">geometry</span><span class="p">:</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                    <span class="n">geometry</span> <span class="o">=</span> <span class="p">[</span><span class="n">geometry</span><span class="p">]</span>
-            <span class="c1"># Handle datetime parameter</span>
-            <span class="k">if</span> <span class="n">datetime</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">datetime</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">python_datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">)):</span>
-                    <span class="n">datetime</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_expand_date</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="p">))]</span>
-                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">datetime</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
-                    <span class="n">datetime</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span>
-                <span class="p">):</span>
-                    <span class="n">datetime</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">datetime</span><span class="p">)]</span>
-            <span class="c1"># Apply spatial and temporal filters</span>
             <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_spatial_temporal_filters</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">bbox</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">datetime</span><span class="p">)</span>
+
         <span class="c1"># Limit the number of items if max_items is specified</span>
         <span class="k">if</span> <span class="n">max_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="n">max_items</span><span class="p">)</span>

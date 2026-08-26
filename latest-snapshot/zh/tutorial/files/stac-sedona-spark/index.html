@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6175,6 +6174,7 @@
     <span class="n">collection_id</span><span class="o">=</span><span class="s2">"aster-l1t"</span><span class="p">,</span> <span class="n">datetime</span><span class="o">=</span><span class="s2">"2020-05"</span><span class="p">,</span> <span class="n">return_dataframe</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">5</span>
 <span class="p">)</span>
 </code></pre></div>
+<p><code>max_items</code> 遵循 pystac-client 的语义：它限制 STAC API 返回的 Item 总数，而 <code>itemsLimitPerRequest</code> 仅控制建议的单页大小。对于指定 collection、最多包含一个 <code>bbox</code> 和一个 <code>datetime</code> 区间（且没有 ID 或 geometry 过滤）的搜索，Sedona 会把这些约束发送到 collection 公告的 Items 端点，信任符合规范的 STAC API 的空间和时间匹配语义，并在服务端返回 <code>max_items</code> 个结果后停止枚举。多个 bbox 或 datetime 区间、ID 过滤以及 <code>search()</code> 的 <code>geometry</code> 参数属于由 Spark 执行的 Sedona 扩展；这些搜索会先完整枚举，再由 Spark 应用过滤条件和最终 limit。</p>
 <h4 id="bbox">按 bbox 与时间区间搜索<a class="headerlink" href="#bbox" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="n">items</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
     <span class="n">collection_id</span><span class="o">=</span><span class="s2">"aster-l1t"</span><span class="p">,</span>
@@ -6348,13 +6348,14 @@
 <li><code>CollectionClient</code>：对应 collection 的 <code>CollectionClient</code> 实例。</li>
 </ul>
 <hr />
-<p><strong><code>search(*ids: Union[str, list], collection_id: str, bbox: Optional[list] = None, datetime: Optional[Union[str, datetime.datetime, list]] = None, max_items: Optional[int] = None, return_dataframe: bool = True) -&gt; Union[Iterator[PyStacItem], DataFrame]</code></strong>
+<p><strong><code>search(*ids: Union[str, list], collection_id: str, bbox: Optional[list] = None, geometry: Optional[Union[str, BaseGeometry, list]] = None, datetime: Optional[Union[str, datetime.datetime, list]] = None, max_items: Optional[int] = None, return_dataframe: bool = True) -&gt; Union[Iterator[PyStacItem], DataFrame]</code></strong>
 在指定 collection 中按可选过滤条件搜索 item。</p>
 <p>参数：</p>
 <ul>
 <li><code>ids</code> (<em>Union[str, list]</em>)：可变数量的 item ID，用于过滤。例如 <code>"item_id1"</code> 或 <code>["item_id1", "item_id2"]</code>。</li>
 <li><code>collection_id</code> (<em>str</em>)：要搜索的 collection ID。例如 <code>"aster-l1t"</code>。</li>
 <li><code>bbox</code> (<em>Optional[list]</em>)：用于过滤 item 的边界框列表，每项形如 <code>[min_lon, min_lat, max_lon, max_lat]</code>。例如 <code>[[ -180.0, -90.0, 180.0, 90.0 ]]</code>。</li>
+<li><code>geometry</code> (<em>Optional[Union[str, BaseGeometry, list]]</em>)：用于空间过滤的 Shapely 几何对象或 WKT 字符串；可以是单个几何、WKT 字符串或它们的列表。同时提供 <code>bbox</code> 和 <code>geometry</code> 时以 <code>geometry</code> 为准。geometry 过滤由 Spark 执行，而非 STAC API。例如 <code>"POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))"</code>。</li>
 <li><code>datetime</code> (<em>Optional[Union[str, datetime.datetime, list]]</em>)：单个日期时间、符合 RFC 3339 的时间戳，或一组时间区间。例如 <code>"2020-01-01T00:00:00Z"</code>、<code>datetime.datetime(2020, 1, 1)</code>、<code>[["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]</code>。</li>
 <li><code>max_items</code> (<em>Optional[int]</em>)：返回 item 的最大数量。例如 <code>100</code>。</li>
 <li><code>return_dataframe</code> (<em>bool</em>)：若为 <code>True</code>（默认），返回 Spark DataFrame，而不是 <code>PyStacItem</code> 迭代器。例如 <code>True</code>。</li>
@@ -6392,7 +6393,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月18日 17:23:19 UTC">2026年5月18日 17:23:19</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年8月26日 04:05:33 UTC">2026年8月26日 04:05:33</span>
   </span>
 
     

@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6175,6 +6174,7 @@
     <span class="n">collection_id</span><span class="o">=</span><span class="s2">"aster-l1t"</span><span class="p">,</span> <span class="n">datetime</span><span class="o">=</span><span class="s2">"2020-05"</span><span class="p">,</span> <span class="n">return_dataframe</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">5</span>
 <span class="p">)</span>
 </code></pre></div>
+<p><code>max_items</code> follows pystac-client semantics: it is the total number of Items returned by the STAC API, while <code>itemsLimitPerRequest</code> is only the requested page size. For a named collection with at most one <code>bbox</code> and one <code>datetime</code> interval (and no ID or geometry filter), Sedona sends those constraints to the Collection's advertised Items endpoint, trusts the conforming STAC API's spatial and temporal matching semantics, and stops enumeration after <code>max_items</code> server results. Multiple bounding boxes or datetime intervals, ID filters, and <code>search()</code>'s <code>geometry</code> parameter are Sedona extensions evaluated by Spark; those shapes are fully enumerated before Spark applies the filters and final limit.</p>
 <h4 id="search-items-with-bounding-box-and-interval">Search Items with Bounding Box and Interval<a class="headerlink" href="#search-items-with-bounding-box-and-interval" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="n">items</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
     <span class="n">collection_id</span><span class="o">=</span><span class="s2">"aster-l1t"</span><span class="p">,</span>
@@ -6348,13 +6348,14 @@ Retrieves a collection client for the specified collection ID.</p>
 <li><code>CollectionClient</code>: An instance of the <code>CollectionClient</code> class for the specified collection.</li>
 </ul>
 <hr />
-<p><strong><code>search(*ids: Union[str, list], collection_id: str, bbox: Optional[list] = None, datetime: Optional[Union[str, datetime.datetime, list]] = None, max_items: Optional[int] = None, return_dataframe: bool = True) -&gt; Union[Iterator[PyStacItem], DataFrame]</code></strong>
+<p><strong><code>search(*ids: Union[str, list], collection_id: str, bbox: Optional[list] = None, geometry: Optional[Union[str, BaseGeometry, list]] = None, datetime: Optional[Union[str, datetime.datetime, list]] = None, max_items: Optional[int] = None, return_dataframe: bool = True) -&gt; Union[Iterator[PyStacItem], DataFrame]</code></strong>
 Searches for items in the specified collection with optional filters.</p>
 <p>Parameters:</p>
 <ul>
 <li><code>ids</code> (<em>Union[str, list]</em>): A variable number of item IDs to filter the items. Example: <code>"item_id1"</code> or <code>["item_id1", "item_id2"]</code></li>
 <li><code>collection_id</code> (<em>str</em>): The ID of the collection to search in. Example: <code>"aster-l1t"</code></li>
 <li><code>bbox</code> (<em>Optional[list]</em>): A list of bounding boxes for filtering the items, represented as <code>[min_lon, min_lat, max_lon, max_lat]</code>. Example: <code>[[ -180.0, -90.0, 180.0, 90.0 ]]</code></li>
+<li><code>geometry</code> (<em>Optional[Union[str, BaseGeometry, list]]</em>): Shapely geometry object(s) or WKT string(s) for spatial filtering; a single geometry, a WKT string, or a list of either. If both <code>bbox</code> and <code>geometry</code> are provided, <code>geometry</code> takes precedence. Geometry filtering is evaluated by Spark, not by the STAC API. Example: <code>"POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))"</code></li>
 <li><code>datetime</code> (<em>Optional[Union[str, datetime.datetime, list]]</em>): A single datetime, RFC 3339-compliant timestamp, or a list of date-time ranges. Example: <code>"2020-01-01T00:00:00Z"</code>, <code>datetime.datetime(2020, 1, 1)</code>, <code>[["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]</code></li>
 <li><code>max_items</code> (<em>Optional[int]</em>): The maximum number of items to return. Example: <code>100</code></li>
 <li><code>return_dataframe</code> (<em>bool</em>): If <code>True</code> (default), return the result as a Spark DataFrame instead of an iterator of <code>PyStacItem</code> objects. Example: <code>True</code></li>
@@ -6392,7 +6393,7 @@ Searches for items in the specified collection with optional filters.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="May 18, 2026 17:23:19 UTC">May 18, 2026 17:23:19</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="August 26, 2026 04:05:33 UTC">August 26, 2026 04:05:33</span>
   </span>
 
     
