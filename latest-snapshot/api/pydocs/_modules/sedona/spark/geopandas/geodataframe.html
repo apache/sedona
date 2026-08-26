@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geodataframe &mdash; Apache Sedona Python Documentation</title>
@@ -1695,9 +1694,103 @@
 
 <div class="viewcode-block" id="GeoDataFrame.from_features"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_features">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_features</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">crs</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">columns</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">features</span><span class="p">,</span>
+        <span class="n">crs</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">columns</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeoDataFrame</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"from_features() is not implemented yet."</span><span class="p">)</span></div>
+<span class="w">        </span><span class="sd">"""Construct a GeoDataFrame from GeoJSON-like features.</span>
+
+<span class="sd">        .. versionadded:: 2.0.0</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        features</span>
+<span class="sd">            An iterable of feature mappings or objects implementing</span>
+<span class="sd">            ``__geo_interface__``; a FeatureCollection dictionary; or an object</span>
+<span class="sd">            whose ``__geo_interface__`` is a FeatureCollection.</span>
+<span class="sd">        crs : str, dict, pyproj.CRS, optional</span>
+<span class="sd">            Coordinate reference system to assign to the resulting frame. The</span>
+<span class="sd">            coordinates are not transformed.</span>
+<span class="sd">        columns : iterable of str, optional</span>
+<span class="sd">            Column names to include and their order in the resulting frame.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        GeoDataFrame</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This constructor first materializes all features in a local GeoPandas</span>
+<span class="sd">        GeoDataFrame on the driver. It is intended for small in-memory feature</span>
+<span class="sd">        collections. For large datasets, use Sedona's distributed GeoJSON or</span>
+<span class="sd">        GeoParquet Spark data source instead.</span>
+
+<span class="sd">        GeoPandas controls feature parsing and column selection; feature ``id``,</span>
+<span class="sd">        ``bbox``, and collection metadata are not added as columns. Once the</span>
+<span class="sd">        result is distributed, property values follow Spark schema inference:</span>
+<span class="sd">        nested mappings become structs, and columns with incompatible mixed</span>
+<span class="sd">        types are not supported.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from sedona.spark.geopandas import GeoDataFrame</span>
+<span class="sd">        &gt;&gt;&gt; feature_collection = {</span>
+<span class="sd">        ...     "type": "FeatureCollection",</span>
+<span class="sd">        ...     "features": [</span>
+<span class="sd">        ...         {</span>
+<span class="sd">        ...             "type": "Feature",</span>
+<span class="sd">        ...             "properties": {"name": "first"},</span>
+<span class="sd">        ...             "geometry": {</span>
+<span class="sd">        ...                 "type": "Point",</span>
+<span class="sd">        ...                 "coordinates": (1.0, 2.0),</span>
+<span class="sd">        ...             },</span>
+<span class="sd">        ...         },</span>
+<span class="sd">        ...         {</span>
+<span class="sd">        ...             "type": "Feature",</span>
+<span class="sd">        ...             "properties": {"name": "second"},</span>
+<span class="sd">        ...             "geometry": {</span>
+<span class="sd">        ...                 "type": "Point",</span>
+<span class="sd">        ...                 "coordinates": (2.0, 1.0),</span>
+<span class="sd">        ...             },</span>
+<span class="sd">        ...         },</span>
+<span class="sd">        ...     ],</span>
+<span class="sd">        ... }</span>
+<span class="sd">        &gt;&gt;&gt; GeoDataFrame.from_features(feature_collection)</span>
+<span class="sd">              geometry    name</span>
+<span class="sd">        0  POINT (1 2)   first</span>
+<span class="sd">        1  POINT (2 1)  second</span>
+<span class="sd">        """</span>
+        <span class="n">local</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="o">.</span><span class="n">from_features</span><span class="p">(</span>
+            <span class="n">features</span><span class="p">,</span>
+            <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span>
+            <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Spark 3 pandas-on-Spark only checks the first object value when</span>
+        <span class="c1"># looking for a user-defined type. Move one geometry forward for</span>
+        <span class="c1"># schema inference, then restore the GeoPandas RangeIndex order.</span>
+        <span class="n">restore_order</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">geometry_name</span> <span class="o">=</span> <span class="n">local</span><span class="o">.</span><span class="n">_geometry_column_name</span>
+        <span class="k">if</span> <span class="n">geometry_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">local</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">missing</span> <span class="o">=</span> <span class="n">local</span><span class="p">[</span><span class="n">geometry_name</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+            <span class="n">non_missing</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="o">~</span><span class="n">missing</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">missing</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">non_missing</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">first_geometry</span> <span class="o">=</span> <span class="n">non_missing</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="p">[</span><span class="n">first_geometry</span><span class="p">],</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">first_geometry</span><span class="p">),</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">first_geometry</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">local</span><span class="p">)),</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">local</span> <span class="o">=</span> <span class="n">local</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">order</span><span class="p">]</span>
+                <span class="n">restore_order</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">local</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">restore_order</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
 
 <div class="viewcode-block" id="GeoDataFrame.from_postgis"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_postgis">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_postgis</span><span class="p">(</span>
