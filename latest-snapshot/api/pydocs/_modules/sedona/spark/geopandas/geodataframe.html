@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geodataframe &mdash; Apache Sedona Python Documentation</title>
@@ -261,13 +260,18 @@
     <span class="n">FloatType</span><span class="p">,</span>
     <span class="n">IntegerType</span><span class="p">,</span>
     <span class="n">LongType</span><span class="p">,</span>
+    <span class="n">NullType</span><span class="p">,</span>
     <span class="n">NumericType</span><span class="p">,</span>
     <span class="n">ShortType</span><span class="p">,</span>
     <span class="n">StringType</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_advice</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._crs</span><span class="w"> </span><span class="kn">import</span> <span class="n">copy_crs_metadata</span><span class="p">,</span> <span class="n">with_crs_metadata</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._crs</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">copy_crs_metadata</span><span class="p">,</span>
+    <span class="n">read_crs_metadata</span><span class="p">,</span>
+    <span class="n">with_crs_metadata</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._explode</span><span class="w"> </span><span class="kn">import</span> <span class="n">expand_geometry_column</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Label</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoFrame</span>
@@ -918,8 +922,32 @@
         <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span> <span class="k">as</span> <span class="n">SparkDataFrame</span>
 
+        <span class="n">local_geometry_crs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Data built from a Python-native structure (dict, list of records,</span>
+        <span class="c1"># pandas/geopandas DataFrame, ...) is locally owned: we can safely</span>
+        <span class="c1"># record an authoritative "no CRS" state for its geometry column</span>
+        <span class="c1"># below when the caller didn't pass one. Wrapping an existing Sedona</span>
+        <span class="c1"># or raw distributed structure instead inherits whatever CRS state it</span>
+        <span class="c1"># already had.</span>
+        <span class="n">is_locally_owned</span> <span class="o">=</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span>
+            <span class="p">(</span>
+                <span class="n">GeoDataFrame</span><span class="p">,</span>
+                <span class="n">GeoSeries</span><span class="p">,</span>
+                <span class="n">PandasOnSparkDataFrame</span><span class="p">,</span>
+                <span class="n">SparkDataFrame</span><span class="p">,</span>
+                <span class="n">PandasOnSparkSeries</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">geometry_input</span> <span class="o">=</span> <span class="n">geometry</span>
+        <span class="n">distributed_geometry</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">geometry</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">GeoSeries</span><span class="p">,</span> <span class="n">PandasOnSparkSeries</span><span class="p">),</span>
+        <span class="p">)</span>
+
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">GeoSeries</span><span class="p">)):</span>
-            <span class="k">if</span> <span class="n">crs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">data</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="n">crs</span>
 
             <span class="c1"># For each of these super().__init__() calls, we let pyspark decide which inputs are valid or not</span>
@@ -943,11 +971,11 @@
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">):</span>
                 <span class="c1"># We can use GeoDataFrame.active_geometry_name once we drop support for geopandas &lt; 1.0.0.</span>
                 <span class="c1"># Below is the equivalent, since active_geometry_name simply calls _geometry_column_name.</span>
-                <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">_geometry_column_name</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">_geometry_column_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="c1"># GeoPandas stores CRS as metadata instead of inside shapely objects, so we must save it and set it manually later.</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">crs</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="n">crs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">crs</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">geometry</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">geometry</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="n">geometry</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">name</span>
 
             <span class="n">pd_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
@@ -960,6 +988,14 @@
 
             <span class="c1"># Spark complains if it's left as a geometry type.</span>
             <span class="n">geom_type_cols</span> <span class="o">=</span> <span class="n">pd_df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">"geometry"</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span>
+            <span class="c1"># GeoPandas stores one CRS on each GeometryArray. Converting those</span>
+            <span class="c1"># arrays to object dtype below is required for Spark, but would</span>
+            <span class="c1"># discard that per-column state unless it is captured first.</span>
+            <span class="n">local_geometry_crs</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">position</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">pd_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="n">position</span><span class="p">]</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="s2">"crs"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">column_dtype</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pd_df</span><span class="o">.</span><span class="n">dtypes</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">column_dtype</span><span class="p">,</span> <span class="n">GeometryDtype</span><span class="p">)</span>
+            <span class="p">}</span>
             <span class="n">pd_df</span><span class="p">[</span><span class="n">geom_type_cols</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd_df</span><span class="p">[</span><span class="n">geom_type_cols</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
 
             <span class="c1"># Initialize the parent class pyspark DataFrame with the pandas DataFrame.</span>
@@ -976,7 +1012,7 @@
             <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">crs</span> <span class="o">!=</span> <span class="n">crs</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">crs_mismatch_error</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">geometry</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">geometry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">existing_geometry</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_hashable</span><span class="p">(</span><span class="n">geometry</span><span class="p">):</span>
                 <span class="k">try</span><span class="p">:</span>
@@ -1033,11 +1069,47 @@
             <span class="c1"># No need to call set_geometry() here since it's already part of the df, just set the name.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_column_name</span> <span class="o">=</span> <span class="s2">"geometry"</span>
 
-        <span class="k">if</span> <span class="n">geometry</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">crs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">geometry</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">"Assigning CRS to a GeoDataFrame without a geometry column is not "</span>
                 <span class="s2">"supported. Supply geometry using the 'geometry=' keyword argument, "</span>
                 <span class="s2">"or by providing a DataFrame with column name 'geometry'"</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">is_locally_owned</span><span class="p">:</span>
+            <span class="n">active_position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_active_geometry_position</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">active_position</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">active_field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">[</span><span class="n">active_position</span><span class="p">]</span>
+
+                <span class="c1"># An explicitly supplied CRS applies to the active geometry.</span>
+                <span class="c1"># For an array-like geometry argument, set_geometry() has</span>
+                <span class="c1"># already normalized and copied its own CRS metadata, so that</span>
+                <span class="c1"># state takes precedence over a column it may have replaced.</span>
+                <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">local_geometry_crs</span><span class="p">[</span><span class="n">active_position</span><span class="p">]</span> <span class="o">=</span> <span class="n">crs</span>
+                <span class="k">elif</span> <span class="n">geometry_input</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_hashable</span><span class="p">(</span>
+                    <span class="n">geometry_input</span>
+                <span class="p">):</span>
+                    <span class="n">has_metadata</span><span class="p">,</span> <span class="n">active_crs</span> <span class="o">=</span> <span class="n">read_crs_metadata</span><span class="p">(</span><span class="n">active_field</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">has_metadata</span><span class="p">:</span>
+                        <span class="n">local_geometry_crs</span><span class="p">[</span><span class="n">active_position</span><span class="p">]</span> <span class="o">=</span> <span class="n">active_crs</span>
+                <span class="k">elif</span> <span class="p">(</span>
+                    <span class="nb">isinstance</span><span class="p">(</span><span class="n">active_field</span><span class="o">.</span><span class="n">spark_type</span><span class="p">,</span> <span class="n">NullType</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="ow">not</span> <span class="n">distributed_geometry</span>
+                <span class="p">):</span>
+                    <span class="c1"># A local active all-null column cannot be recognized as a</span>
+                    <span class="c1"># GeometryType by Spark, but its role as the active</span>
+                    <span class="c1"># geometry still makes its no-CRS state authoritative.</span>
+                    <span class="n">local_geometry_crs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">active_position</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="n">unknown_positions</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="p">{</span><span class="n">active_position</span><span class="p">}</span>
+                <span class="k">if</span> <span class="n">distributed_geometry</span> <span class="ow">and</span> <span class="n">active_position</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">else</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_local_geometry_crs_metadata</span><span class="p">(</span>
+                <span class="n">local_geometry_crs</span><span class="p">,</span>
+                <span class="n">unknown_positions</span><span class="o">=</span><span class="n">unknown_positions</span><span class="p">,</span>
             <span class="p">)</span></div>
 
     <span class="c1"># ============================================================================</span>
@@ -1210,7 +1282,11 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">level</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">geo_column_name</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">level</span> <span class="o">=</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">geo_column_name</span><span class="p">)</span>
+                <span class="c1"># Construct directly from the local array-like data (rather than</span>
+                <span class="c1"># pre-wrapping into a bare pspd.Series) so GeoSeries.__init__ can</span>
+                <span class="c1"># tell this is locally owned data and record authoritative</span>
+                <span class="c1"># no-CRS metadata below when 'crs' isn't given.</span>
+                <span class="n">level</span> <span class="o">=</span> <span class="n">sgpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">geo_column_name</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">sgpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">):</span>
                 <span class="c1"># Set the crs later, so we can allow_override=True</span>
@@ -1261,14 +1337,38 @@
 
         <span class="c1"># This operation throws a warning to the user asking them to set pspd.set_option('compute.ops_on_diff_frames', True)</span>
         <span class="c1"># to allow operations on different frames. We pass these warnings on to the user so they must manually set it themselves.</span>
-        <span class="k">if</span> <span class="n">crs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">level</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">allow_override</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="n">new_series</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="n">frame</span><span class="o">.</span><span class="n">_geometry_column_name</span> <span class="o">=</span> <span class="n">geo_column_name</span>
         <span class="k">if</span> <span class="n">new_series</span><span class="p">:</span>
-            <span class="c1"># Note: This casts GeoSeries back into pspd.Series, so we lose any metadata that's not serialized.</span>
+            <span class="c1"># Assignment casts GeoSeries back into pspd.Series and can drop</span>
+            <span class="c1"># custom field metadata. Restore only the CRS marker from the</span>
+            <span class="c1"># normalized source Series on the assigned column.</span>
             <span class="n">frame</span><span class="p">[</span><span class="n">geo_column_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">level</span>
+            <span class="n">assigned_geometry</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">geo_column_name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">assigned_geometry</span><span class="p">,</span> <span class="n">sgpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">):</span>
+                <span class="n">frame</span><span class="o">.</span><span class="n">_update_geometry_field</span><span class="p">(</span>
+                    <span class="n">assigned_geometry</span><span class="p">,</span>
+                    <span class="n">copy_crs_metadata</span><span class="p">(</span>
+                        <span class="n">level</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                        <span class="n">assigned_geometry</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">sgpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">level</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">data_type</span><span class="p">,</span> <span class="n">NullType</span>
+        <span class="p">):</span>
+            <span class="c1"># An all-null selected column has no geometry bytes from which an</span>
+            <span class="c1"># SRID could be inferred. Once selected as geometry, missing CRS</span>
+            <span class="c1"># metadata therefore means authoritative no-CRS.</span>
+            <span class="n">level_field</span> <span class="o">=</span> <span class="n">level</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">has_crs_metadata</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">read_crs_metadata</span><span class="p">(</span><span class="n">level_field</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">has_crs_metadata</span><span class="p">:</span>
+                <span class="n">frame</span><span class="o">.</span><span class="n">_update_geometry_field</span><span class="p">(</span>
+                    <span class="n">level</span><span class="p">,</span>
+                    <span class="n">with_crs_metadata</span><span class="p">(</span><span class="n">level_field</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                <span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">inplace</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">frame</span></div>
@@ -2023,6 +2123,134 @@
             <span class="n">data_fields</span><span class="o">=</span><span class="n">output_fields</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">PandasOnSparkDataFrame</span><span class="p">(</span><span class="n">result_internal</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_active_geometry_position</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return the active geometry's physical data-column position."""</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_column_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">active_spark_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_spark_column_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="n">MissingGeometryColumnError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_spark_column_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">active_spark_name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_geometry_field</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">geometry</span><span class="p">:</span> <span class="n">sgpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">,</span>
+        <span class="n">field</span><span class="p">:</span> <span class="n">InternalField</span><span class="p">,</span>
+        <span class="n">geometry_column</span><span class="p">:</span> <span class="n">Column</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Replace one geometry field while preserving its public identity."""</span>
+        <span class="n">geometry_column_name</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_spark_column_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">geometry_column_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">geometry_column</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">geometry_column</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_internal_frame</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">with_new_spark_column</span><span class="p">(</span>
+                <span class="n">geometry</span><span class="o">.</span><span class="n">_column_label</span><span class="p">,</span>
+                <span class="n">geometry_column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span>
+                    <span class="n">geometry_column_name</span><span class="p">,</span>
+                    <span class="n">metadata</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="n">field</span><span class="o">=</span><span class="n">field</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_local_geometry_crs_metadata</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">column_crs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span><span class="p">],</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">unknown_positions</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Restore authoritative per-column CRS state for local inputs.</span>
+
+<span class="sd">        ``column_crs`` is keyed by physical position because public labels can</span>
+<span class="sd">        be duplicated or multi-level. Membership records geometry provenance;</span>
+<span class="sd">        a value of ``None`` is therefore distinct from a non-geometry column.</span>
+
+<span class="sd">        All changes are made in one projection. Updating separately projected</span>
+<span class="sd">        Series would cross pandas-on-Spark anchors and could align on duplicate</span>
+<span class="sd">        indexes, multiplying rows.</span>
+<span class="sd">        """</span>
+        <span class="n">internal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">resolved_copy</span>
+
+        <span class="n">needs_update</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">output_columns</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">output_fields</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="p">(</span><span class="n">spark_column</span><span class="p">,</span> <span class="n">spark_name</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+            <span class="nb">zip</span><span class="p">(</span>
+                <span class="n">internal</span><span class="o">.</span><span class="n">data_spark_columns</span><span class="p">,</span>
+                <span class="n">internal</span><span class="o">.</span><span class="n">data_spark_column_names</span><span class="p">,</span>
+                <span class="n">internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">):</span>
+            <span class="n">has_crs_metadata</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">read_crs_metadata</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">position</span> <span class="ow">in</span> <span class="n">unknown_positions</span><span class="p">:</span>
+                <span class="n">target_crs</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">should_update</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">elif</span> <span class="n">position</span> <span class="ow">in</span> <span class="n">column_crs</span><span class="p">:</span>
+                <span class="n">target_crs</span> <span class="o">=</span> <span class="n">column_crs</span><span class="p">[</span><span class="n">position</span><span class="p">]</span>
+                <span class="n">should_update</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">spark_type</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">has_crs_metadata</span><span class="p">:</span>
+                <span class="c1"># GeometryType columns inferred from local Python objects have</span>
+                <span class="c1"># authoritative no-CRS provenance even without a GeometryArray.</span>
+                <span class="n">target_crs</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">should_update</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">target_crs</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">should_update</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="k">if</span> <span class="n">should_update</span><span class="p">:</span>
+                <span class="n">needs_update</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">target_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">normalized_crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">target_crs</span><span class="p">)</span>
+                    <span class="n">spark_column</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_SetSRID</span><span class="p">(</span>
+                        <span class="n">spark_column</span><span class="p">,</span>
+                        <span class="n">normalized_crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="n">field</span> <span class="o">=</span> <span class="n">with_crs_metadata</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">target_crs</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">spark_name</span><span class="p">)</span>
+                <span class="n">spark_column</span> <span class="o">=</span> <span class="n">spark_column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">spark_name</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
+            <span class="n">output_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spark_column</span><span class="p">)</span>
+            <span class="n">output_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">needs_update</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">output_sdf</span> <span class="o">=</span> <span class="n">internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="o">*</span><span class="p">[</span>
+                <span class="n">scol_for</span><span class="p">(</span><span class="n">internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">internal</span><span class="o">.</span><span class="n">index_spark_column_names</span>
+            <span class="p">],</span>
+            <span class="o">*</span><span class="n">output_columns</span><span class="p">,</span>
+            <span class="n">scol_for</span><span class="p">(</span><span class="n">internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">output_schema</span> <span class="o">=</span> <span class="n">output_sdf</span><span class="o">.</span><span class="n">schema</span>
+        <span class="n">output_fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">field</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span>
+                <span class="n">spark_type</span><span class="o">=</span><span class="n">output_schema</span><span class="p">[</span><span class="n">spark_name</span><span class="p">]</span><span class="o">.</span><span class="n">dataType</span><span class="p">,</span>
+                <span class="n">nullable</span><span class="o">=</span><span class="n">output_schema</span><span class="p">[</span><span class="n">spark_name</span><span class="p">]</span><span class="o">.</span><span class="n">nullable</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">spark_name</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                <span class="n">internal</span><span class="o">.</span><span class="n">data_spark_column_names</span><span class="p">,</span>
+                <span class="n">output_fields</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
+        <span class="n">result_internal</span> <span class="o">=</span> <span class="n">internal</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span>
+            <span class="n">spark_frame</span><span class="o">=</span><span class="n">output_sdf</span><span class="p">,</span>
+            <span class="n">index_spark_columns</span><span class="o">=</span><span class="p">[</span>
+                <span class="n">scol_for</span><span class="p">(</span><span class="n">output_sdf</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">internal</span><span class="o">.</span><span class="n">index_spark_column_names</span>
+            <span class="p">],</span>
+            <span class="n">data_spark_columns</span><span class="o">=</span><span class="p">[</span>
+                <span class="n">scol_for</span><span class="p">(</span><span class="n">output_sdf</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">internal</span><span class="o">.</span><span class="n">data_spark_column_names</span>
+            <span class="p">],</span>
+            <span class="n">data_fields</span><span class="o">=</span><span class="n">output_fields</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_internal_frame</span><span class="p">(</span><span class="n">result_internal</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_serialization_kwargs</span><span class="p">(</span><span class="n">method_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>

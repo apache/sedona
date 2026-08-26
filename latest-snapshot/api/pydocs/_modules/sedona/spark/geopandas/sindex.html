@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.sindex &mdash; Apache Sedona Python Documentation</title>
@@ -261,10 +260,11 @@
         <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">GeoSeries</span><span class="p">):</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas.geoseries</span><span class="w"> </span><span class="kn">import</span> <span class="n">_get_series_col_name</span>
-
-            <span class="n">column_name</span> <span class="o">=</span> <span class="n">_get_series_col_name</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
-            <span class="n">geometry</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span>
+            <span class="c1"># A public Series rename can remain a lazy alias in the InternalFrame.</span>
+            <span class="c1"># Resolve the Spark frame and its physical data-column name together.</span>
+            <span class="n">geometry_internal</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">resolved_copy</span>
+            <span class="n">column_name</span> <span class="o">=</span> <span class="n">geometry_internal</span><span class="o">.</span><span class="n">data_spark_column_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">geometry</span> <span class="o">=</span> <span class="n">geometry_internal</span><span class="o">.</span><span class="n">spark_frame</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="n">geometry</span>

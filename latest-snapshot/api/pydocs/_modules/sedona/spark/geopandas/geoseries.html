@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -233,6 +232,7 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">geopandas.array</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryArray</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sgpd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pyspark.pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pspd</span>
@@ -796,8 +796,26 @@
 <span class="sd">        dtype: geometry</span>
 <span class="sd">        """</span>
         <span class="k">assert</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">):</span>
-            <span class="n">crs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">crs</span>
+        <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">):</span>
+                <span class="n">crs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">crs</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">GeometryArray</span><span class="p">):</span>
+                <span class="n">crs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">crs</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">"array"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">GeometryArray</span>
+            <span class="p">):</span>
+                <span class="n">crs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">crs</span>
+
+        <span class="c1"># Locally owned data (a Python list, WKT/WKB, a plain pandas Series, a</span>
+        <span class="c1"># bare geopandas.GeoSeries, ...) is distinct from wrapping an existing</span>
+        <span class="c1"># Sedona-managed or raw distributed structure: only in the former case</span>
+        <span class="c1"># do we know, right now, whether a CRS is set, so only there do we</span>
+        <span class="c1"># need to record an authoritative "no CRS" state below when the user</span>
+        <span class="c1"># didn't pass one. Wrapping an existing structure just inherits</span>
+        <span class="c1"># whatever CRS state (known, known-absent, or unknown) it already had.</span>
+        <span class="n">is_locally_owned</span> <span class="o">=</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">GeoSeries</span><span class="p">,</span> <span class="n">PandasOnSparkSeries</span><span class="p">,</span> <span class="n">PandasOnSparkDataFrame</span><span class="p">)</span>
+        <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_anchor</span><span class="p">:</span> <span class="n">GeoDataFrame</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_col_label</span><span class="p">:</span> <span class="n">Label</span>
@@ -872,7 +890,27 @@
             <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">allow_override</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">allow_override</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">is_locally_owned</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_record_no_crs_metadata</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_record_no_crs_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"GeoSeries"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Record authoritative "no CRS" metadata without touching geometry bytes.</span>
+
+<span class="sd">        Unlike ``set_crs``, this never calls ``ST_SetSRID``, so any SRID</span>
+<span class="sd">        already embedded in the geometry (e.g. from WKB/EWKB input) survives</span>
+<span class="sd">        untouched even though the public ``.crs`` becomes authoritatively</span>
+<span class="sd">        ``None`` instead of falling back to a distributed SRID lookup.</span>
+<span class="sd">        """</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">,</span>
+            <span class="n">keep_name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">crs_override</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">inplace</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_inplace</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">invalidate_sindex</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">return</span> <span class="n">result</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Check if this GeoSeries has no rows without triggering a full Spark scan."""</span>
@@ -1098,10 +1136,11 @@
 
         <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span> <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">df</span>
 
+        <span class="c1"># Series names are arbitrary hashable Python objects (including</span>
+        <span class="c1"># falsy ones like 0 or ""), while Spark aliases must be strings.</span>
+        <span class="c1"># Keep the physical name fixed and carry the logical Series name in</span>
+        <span class="c1"># the rebuilt InternalFrame below, mirroring `_result_preserving_index`.</span>
         <span class="n">rename</span> <span class="o">=</span> <span class="n">SPARK_DEFAULT_SERIES_NAME</span>
-
-        <span class="k">if</span> <span class="n">keep_name</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
-            <span class="n">rename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 
         <span class="n">result_field</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">returns_geom</span><span class="p">:</span>
@@ -1152,12 +1191,13 @@
                 <span class="n">nullable</span><span class="o">=</span><span class="n">schema_field</span><span class="o">.</span><span class="n">nullable</span><span class="p">,</span>
             <span class="p">)</span>
 
+        <span class="n">result_column_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_column_label</span> <span class="k">if</span> <span class="n">keep_name</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="n">internal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span>
             <span class="n">spark_frame</span><span class="o">=</span><span class="n">sdf</span><span class="p">,</span>
             <span class="n">index_fields</span><span class="o">=</span><span class="n">index_fields</span><span class="p">,</span>
             <span class="n">index_spark_columns</span><span class="o">=</span><span class="n">index_spark_columns</span><span class="p">,</span>
             <span class="n">index_names</span><span class="o">=</span><span class="n">index_names</span> <span class="k">if</span> <span class="n">index_spark_columns</span> <span class="k">else</span> <span class="p">[</span><span class="kc">None</span><span class="p">],</span>
-            <span class="n">column_labels</span><span class="o">=</span><span class="p">([(</span><span class="n">rename</span><span class="p">,)]</span> <span class="k">if</span> <span class="n">is_aggr</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">column_labels</span><span class="p">),</span>
+            <span class="n">column_labels</span><span class="o">=</span><span class="p">[</span><span class="n">result_column_label</span><span class="p">],</span>
             <span class="n">data_spark_columns</span><span class="o">=</span><span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">sdf</span><span class="p">,</span> <span class="n">rename</span><span class="p">)],</span>
             <span class="n">data_fields</span><span class="o">=</span><span class="p">[</span>
                 <span class="p">(</span>
@@ -1166,13 +1206,11 @@
                     <span class="k">else</span> <span class="n">InternalField</span><span class="o">.</span><span class="n">from_struct_field</span><span class="p">(</span><span class="n">sdf</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="n">rename</span><span class="p">])</span>
                 <span class="p">)</span>
             <span class="p">],</span>
-            <span class="n">column_label_names</span><span class="o">=</span><span class="p">[(</span><span class="n">rename</span><span class="p">,)],</span>
+            <span class="n">column_label_names</span><span class="o">=</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">column_label_names</span> <span class="k">if</span> <span class="n">keep_name</span> <span class="k">else</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+            <span class="p">),</span>
         <span class="p">)</span>
         <span class="n">ps_series</span> <span class="o">=</span> <span class="n">first_series</span><span class="p">(</span><span class="n">PandasOnSparkDataFrame</span><span class="p">(</span><span class="n">internal</span><span class="p">))</span>
-
-        <span class="c1"># Convert Spark series default name to pandas series default name (None) if needed.</span>
-        <span class="n">series_name</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">rename</span> <span class="o">==</span> <span class="n">SPARK_DEFAULT_SERIES_NAME</span> <span class="k">else</span> <span class="n">rename</span>
-        <span class="n">ps_series</span> <span class="o">=</span> <span class="n">ps_series</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">series_name</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">ps_series</span><span class="p">)</span> <span class="k">if</span> <span class="n">returns_geom</span> <span class="k">else</span> <span class="n">ps_series</span>
 
@@ -1239,9 +1277,6 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">sindex</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SpatialIndex</span><span class="p">:</span>
-        <span class="n">geometry_column</span> <span class="o">=</span> <span class="n">_get_series_col_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">geometry_column</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"No geometry column found in GeoSeries"</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sindex</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_sindex</span> <span class="o">=</span> <span class="n">SpatialIndex</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sindex</span>
@@ -4437,7 +4472,11 @@
 <span class="sd">        GeoDataFrame.to_file : Write a ``GeoDataFrame`` to a file.</span>
 <span class="sd">        """</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">sgpd</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span></div>
+        <span class="c1"># File-backed columns have distributed provenance. Until a reader</span>
+        <span class="c1"># exposes authoritative CRS field metadata, retain the unknown state</span>
+        <span class="c1"># so `.crs` can use the embedded-SRID fallback on demand rather than</span>
+        <span class="c1"># launching an eager aggregation during construction.</span>
+        <span class="k">return</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span></div>
 
     <span class="c1"># GeoSeries-only (not in GeoDataFrame)</span>
 <div class="viewcode-block" id="GeoSeries.from_wkb"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.from_wkb">[docs]</a>    <span class="nd">@classmethod</span>
@@ -4743,10 +4782,13 @@
         <span class="n">name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">,</span> <span class="n">SPARK_DEFAULT_SERIES_NAME</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
-            <span class="n">spark_df</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span>
+            <span class="c1"># A public Series rename can remain a lazy alias in the InternalFrame.</span>
+            <span class="c1"># Resolve the Spark frame and its physical data-column name together.</span>
+            <span class="n">data_internal</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">resolved_copy</span>
+            <span class="n">spark_df</span> <span class="o">=</span> <span class="n">data_internal</span><span class="o">.</span><span class="n">spark_frame</span>
             <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
             <span class="n">spark_df</span> <span class="o">=</span> <span class="n">spark_df</span><span class="o">.</span><span class="n">withColumnRenamed</span><span class="p">(</span>
-                <span class="n">_get_series_col_name</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">schema</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+                <span class="n">data_internal</span><span class="o">.</span><span class="n">data_spark_column_names</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">schema</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">spark_df</span> <span class="o">=</span> <span class="n">default_session</span><span class="p">()</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span>
@@ -4764,7 +4806,15 @@
         <span class="n">ps_series</span> <span class="o">=</span> <span class="n">first_series</span><span class="p">(</span><span class="n">PandasOnSparkDataFrame</span><span class="p">(</span><span class="n">internal</span><span class="p">))</span>
         <span class="n">name</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">SPARK_DEFAULT_SERIES_NAME</span> <span class="k">else</span> <span class="n">name</span>
         <span class="n">ps_series</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">ps_series</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">ps_series</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># WKT and ordinary WKB are generally SRID-less, though EWKB may</span>
+            <span class="c1"># carry an embedded SRID (ST_GeomFromWKB preserves it). Either</span>
+            <span class="c1"># way the caller passed no explicit crs, so the resulting column</span>
+            <span class="c1"># is authoritatively CRS-less rather than of unknown provenance;</span>
+            <span class="c1"># this is metadata-only and must not rewrite any embedded SRID.</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">_record_no_crs_metadata</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
 
     <span class="c1"># ============================================================================</span>
     <span class="c1"># DATA ACCESS AND MANIPULATION</span>
@@ -5702,7 +5752,8 @@
     <span class="c1"># -----------------------------------------------------------------------------</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_inplace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="s2">"GeoSeries"</span><span class="p">,</span> <span class="n">invalidate_sindex</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_column_label</span> <span class="o">!=</span> <span class="n">result</span><span class="o">.</span><span class="n">_column_label</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_anchor</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">_anchor</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">invalidate_sindex</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_sindex</span> <span class="o">=</span> <span class="kc">None</span>
@@ -5745,15 +5796,6 @@
         <span class="n">result</span><span class="o">.</span><span class="n">_geometry_column_name</span> <span class="o">=</span> <span class="n">renamed</span><span class="o">.</span><span class="n">name</span>
         <span class="n">result</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span>
         <span class="k">return</span> <span class="n">result</span></div></div>
-
-
-<span class="c1"># -----------------------------------------------------------------------------</span>
-<span class="c1"># # Utils</span>
-<span class="c1"># -----------------------------------------------------------------------------</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_get_series_col_name</span><span class="p">(</span><span class="n">ps_series</span><span class="p">:</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">ps_series</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">ps_series</span><span class="o">.</span><span class="n">name</span> <span class="k">else</span> <span class="n">SPARK_DEFAULT_SERIES_NAME</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_to_bool</span><span class="p">(</span><span class="n">ps_series</span><span class="p">:</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>

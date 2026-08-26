@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.io &mdash; Apache Sedona Python Documentation</title>
@@ -235,6 +234,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">InternalFrame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate_mode</span><span class="p">,</span> <span class="n">log_advice</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pandas.api.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_integer_dtype</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_to_file</span><span class="p">(</span>
@@ -441,7 +441,25 @@
         <span class="n">index_spark_columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">sdf</span><span class="p">,</span> <span class="n">SPARK_DEFAULT_INDEX_NAME</span><span class="p">)]</span>
 
     <span class="n">internal</span> <span class="o">=</span> <span class="n">InternalFrame</span><span class="p">(</span><span class="n">spark_frame</span><span class="o">=</span><span class="n">sdf</span><span class="p">,</span> <span class="n">index_spark_columns</span><span class="o">=</span><span class="n">index_spark_columns</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">ps</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">internal</span><span class="p">))</span></div>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">ps</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">internal</span><span class="p">))</span>
+
+    <span class="c1"># Most readers use "geometry", but formats such as GeoPackage retain the</span>
+    <span class="c1"># source geometry column name (for example, "geom"). Selecting the sole</span>
+    <span class="c1"># GeometryType makes single-geometry file constructors usable without</span>
+    <span class="c1"># inspecting rows or triggering CRS inference. Prefer the conventional</span>
+    <span class="c1"># name when present; an ambiguous multi-geometry source needs reader-level</span>
+    <span class="c1"># primary-column metadata before one can be selected safely.</span>
+    <span class="n">geometry_columns</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">field</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">sdf</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">fields</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">dataType</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="s2">"geometry"</span> <span class="ow">in</span> <span class="n">geometry_columns</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">_geometry_column_name</span> <span class="o">=</span> <span class="s2">"geometry"</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">geometry_columns</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">_geometry_column_name</span> <span class="o">=</span> <span class="n">geometry_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">result</span></div>
 
 
 <div class="viewcode-block" id="read_parquet"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.io.html#sedona.spark.geopandas.io.read_parquet">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">read_parquet</span><span class="p">(</span>
