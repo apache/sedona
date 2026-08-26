@@ -17,8 +17,11 @@
 
 import calendar
 import logging
+import math
+from numbers import Real
 from typing import Iterator, Union, List
 from typing import Optional
+from urllib.parse import urlsplit
 
 import datetime as python_datetime
 from pyspark.sql import DataFrame, SparkSession
@@ -108,7 +111,13 @@ class CollectionClient:
         # Move the specified attributes to 'properties'
         for attr in attributes_to_move:
             if attr in item_dict:
-                item_dict["properties"][attr] = str(item_dict.pop(attr))
+                value = item_dict.pop(attr)
+                if isinstance(value, python_datetime.datetime):
+                    # PySpark materializes TimestampType with datetime.fromtimestamp(),
+                    # so a naïve value is in the Python process's local timezone.
+                    value = value.astimezone(python_datetime.timezone.utc)
+                    value = value.isoformat().replace("+00:00", "Z")
+                item_dict["properties"][attr] = value if value is None else str(value)
 
         return item_dict
 
@@ -359,7 +368,10 @@ class CollectionClient:
             If both bbox and geometry are provided, geometry takes precedence.
         :param datetime: A single datetime, RFC 3339-compliant timestamp,
             or a list of date-time ranges for filtering the items.
-        :param max_items: The maximum number of items to return from the search, even if there are more matching results.
+        :param max_items: The maximum number of STAC API results to return. Supported
+            single-collection bbox/datetime searches follow pystac-client semantics and
+            trust the API's matching behavior; extended Spark-side filters are applied
+            before the final result limit.
         :return: An iterator of PyStacItem objects that match the specified filters.
             If no filters are provided, the iterator contains all items in the collection.
         :raises RuntimeError: If there is an error loading the data or applying the filters, a RuntimeError
@@ -419,7 +431,10 @@ class CollectionClient:
         :param datetime: A single datetime, RFC 3339-compliant timestamp,
             or a list of date-time ranges for filtering the items.
             Example: "2020-01-01T00:00:00Z" or python_datetime.datetime(2020, 1, 1) or [["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]
-        :param max_items: The maximum number of items to return from the search.
+        :param max_items: The maximum number of STAC API results to return. Supported
+            single-collection bbox/datetime searches follow pystac-client semantics and
+            trust the API's matching behavior; extended Spark-side filters are applied
+            before the final result limit.
         :return: A Spark DataFrame containing the filtered items. If no filters are provided,
             the DataFrame contains all items in the collection.
         :raises RuntimeError: If there is an error loading the data or applying the filters, a RuntimeError
@@ -508,6 +523,90 @@ class CollectionClient:
 
         return df
 
+    @staticmethod
+    def _enumeration_cap_options(max_items):
+        """
+        Reader options for a request whose filtering is owned by the STAC API.
+
+        This mirrors pystac-client: ``itemsLimitMax`` is the total number of
+        server-returned Items to enumerate, while ``itemsLimitPerRequest`` is
+        only the requested page size. Callers must not use these options when a
+        Spark-side predicate can still reject rows before the user's limit.
+        """
+        if max_items is None or max_items <= 0:
+            return {}
+        return {
+            "itemsLimitMax": str(max_items),
+            "itemsLimitPerRequest": str(min(200, max_items)),
+        }
+
+    def _api_search_options(self, bbox, geometry, datetime, ids, max_items):
+        """Build a PySTAC-compatible Collection Items search when representable.
+
+        A single bbox and a single datetime interval map directly to STAC API
+        Collection Items parameters. Their semantics are owned by the API, including
+        interval-valued Items. Multiple bboxes/intervals and geometry filters
+        are Sedona extensions implemented with Spark predicates, so they keep
+        the uncapped fallback instead of applying a raw reader cap too early.
+
+        The datasource applies these private options to the Collection's advertised
+        JSON ``rel=items`` link. Keeping endpoint discovery in the datasource preserves
+        custom, cross-origin, and query-bearing Item endpoint URLs.
+        """
+        if (
+            max_items is None
+            or max_items <= 0
+            or not self.collection_id
+            or ids
+            or geometry
+            or (not bbox and not datetime)
+        ):
+            return None
+
+        parsed_base = urlsplit(self.collection_url)
+        if (
+            parsed_base.scheme not in ("http", "https")
+            or not parsed_base.netloc
+            or parsed_base.query
+            or parsed_base.fragment
+        ):
+            return None
+
+        options = {}
+
+        if bbox:
+            if len(bbox) != 1 or not isinstance(bbox[0], (list, tuple)):
+                return None
+            coordinates = bbox[0]
+            if len(coordinates) != 4 or any(
+                not isinstance(value, Real)
+                or isinstance(value, bool)
+                or not math.isfinite(float(value))
+                for value in coordinates
+            ):
+                return None
+            min_lon, min_lat, max_lon, max_lat = coordinates
+            # Longitudes may wrap across the antimeridian (min_lon > max_lon).
+            if not (-180 <= min_lon <= 180 and -180 <= max_lon <= 180) or not (
+                -90 <= min_lat <= max_lat <= 90
+            ):
+                return None
+            options["__stacApiSearchBbox"] = ",".join(
+                str(value) for value in coordinates
+            )
+
+        if datetime:
+            if len(datetime) != 1 or not isinstance(datetime[0], (list, tuple)):
+                return None
+            interval = datetime[0]
+            if len(interval) != 2 or not all(
+                isinstance(value, str) and value for value in interval
+            ):
+                return None
+            options["__stacApiSearchDatetime"] = f"{interval[0]}/{interval[1]}"
+
+        return options
+
     def load_items_df(self, bbox, geometry, datetime, ids, max_items):
         """
         Loads items from the STAC collection as a Spark DataFrame.
@@ -517,49 +616,65 @@ class CollectionClient:
         """
         import json
 
+        # Ensure bbox is a list of lists
+        if bbox and isinstance(bbox, (list, tuple)) and isinstance(bbox[0], Real):
+            bbox = [list(bbox)]
+        # Handle geometry parameter
+        if geometry:
+            if not isinstance(geometry, list):
+                geometry = [geometry]
+        # Handle datetime parameter
+        if datetime:
+            if isinstance(datetime, python_datetime.datetime):
+                normalized_datetime = datetime
+                if normalized_datetime.tzinfo is None:
+                    normalized_datetime = normalized_datetime.replace(
+                        tzinfo=python_datetime.timezone.utc
+                    )
+                else:
+                    normalized_datetime = normalized_datetime.astimezone(
+                        python_datetime.timezone.utc
+                    )
+                datetime_string = normalized_datetime.isoformat().replace("+00:00", "Z")
+                datetime = [[datetime_string, datetime_string]]
+            elif isinstance(datetime, str):
+                datetime = [self._expand_date(str(datetime))]
+            elif isinstance(datetime, (list, tuple)) and isinstance(datetime[0], str):
+                datetime = [list(datetime)]
+
+        api_search_options = self._api_search_options(
+            bbox, geometry, datetime, ids, max_items
+        )
+
         # Prepare Spark DataFrameReader with headers if present
         reader = self.spark.read.format("stac")
-
-        # Encode headers as JSON string for passing to Spark
         if self.headers:
-            headers_json = json.dumps(self.headers)
-            reader = reader.option("headers", headers_json)
+            reader = reader.option("headers", json.dumps(self.headers))
 
-        # Load the collection data from the specified collection URL
-        if (
-            not ids
-            and not bbox
-            and not geometry
-            and not datetime
-            and max_items is not None
-        ):
-            df = reader.option("itemsLimitMax", max_items).load(self.collection_url)
-        else:
-            df = reader.load(self.collection_url)
-            # Apply ID filters if provided
+        # In the PySTAC-compatible path, the datasource puts every search predicate
+        # on the advertised endpoint and itemsLimitMax counts exactly what the API returns.
+        has_client_side_filters = bool(ids or bbox or geometry or datetime)
+        if api_search_options is not None or not has_client_side_filters:
+            for key, value in self._enumeration_cap_options(max_items).items():
+                reader = reader.option(key, value)
+        if api_search_options is not None:
+            for key, value in api_search_options.items():
+                reader = reader.option(key, value)
+
+        df = reader.load(self.collection_url)
+
+        if api_search_options is None:
+            # These extended shapes are evaluated by Spark. They deliberately
+            # stay uncapped in the reader so a residual cannot exhaust the cap
+            # before a later matching Item is reached.
             if ids:
                 if isinstance(ids, tuple):
                     ids = list(ids)
                 if isinstance(ids, str):
                     ids = [ids]
                 df = df.filter(df.id.isin(ids))
-            # Ensure bbox is a list of lists
-            if bbox and isinstance(bbox[0], float):
-                bbox = [bbox]
-            # Handle geometry parameter
-            if geometry:
-                if not isinstance(geometry, list):
-                    geometry = [geometry]
-            # Handle datetime parameter
-            if datetime:
-                if isinstance(datetime, (str, python_datetime.datetime)):
-                    datetime = [self._expand_date(str(datetime))]
-                elif isinstance(datetime, (list, tuple)) and isinstance(
-                    datetime[0], str
-                ):
-                    datetime = [list(datetime)]
-            # Apply spatial and temporal filters
             df = self._apply_spatial_temporal_filters(df, bbox, geometry, datetime)
+
         # Limit the number of items if max_items is specified
         if max_items is not None:
             df = df.limit(max_items)

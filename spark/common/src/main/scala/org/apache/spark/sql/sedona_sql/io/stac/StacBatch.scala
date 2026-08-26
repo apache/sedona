@@ -27,7 +27,7 @@ import org.apache.spark.sql.sedona_sql.io.stac.StacUtils.getNumPartitions
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.util.SerializableConfiguration
 
-import java.net.URI
+import java.net.{URI, URLDecoder, URLEncoder}
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
@@ -72,6 +72,12 @@ case class StacBatch(
   }
   private val itemsLoadProcessReportThreshold =
     opts.getOrElse("itemsLoadProcessReportThreshold", "1000000").toInt
+  private val clientApiSearchBBox =
+    opts.get(StacBatch.ApiSearchBBoxOption).map(_.trim).filter(_.nonEmpty)
+  private val clientApiSearchDatetime =
+    opts.get(StacBatch.ApiSearchDatetimeOption).map(_.trim).filter(_.nonEmpty)
+  private val clientApiSearchRequested =
+    clientApiSearchBBox.isDefined || clientApiSearchDatetime.isDefined
   private var itemMaxLeft: Int = -1
   private var lastReportCount: Int = 0
 
@@ -248,6 +254,43 @@ case class StacBatch(
         }
       }
       false
+    }
+
+    // CollectionClient's PySTAC-compatible search mode deliberately trusts the API's bbox and
+    // datetime semantics: apply those parameters to the collection's advertised items endpoint
+    // and count the raw API results. Do not crawl child or direct item links and never combine
+    // this mode with Spark-pushed predicates, whose retained Filter would discard rows the cap
+    // already counted — this mode represents one Collection Items request, like pystac-client.
+    if (clientApiSearchRequested) {
+      require(needCountNextItems, "Client API search options require a positive itemsLimitMax")
+      require(
+        spatialFilter.isEmpty && temporalFilter.isEmpty,
+        "Client API search options cannot be combined with Spark-pushed filters")
+      val itemsEndpoint = linksNode
+        .elements()
+        .asScala
+        .find { link =>
+          link.path("rel").asText() == "items" && {
+            val hrefNode = link.get("href")
+            hrefNode != null && hrefNode.isTextual && hrefNode.asText().trim.nonEmpty &&
+            resolveLink(collectionUrl, hrefNode.asText()).startsWith("http")
+          }
+        }
+        .getOrElse(throw new IllegalArgumentException(
+          "Client API search requires a remote HTTP(S) items endpoint"))
+      val itemUrl = resolveLink(collectionUrl, itemsEndpoint.get("href").asText())
+      val searchUrl = StacBatch.applyClientApiSearchParameters(
+        itemUrl,
+        clientApiSearchBBox,
+        clientApiSearchDatetime)
+      val firstPageUrl = getItemLink(
+        searchUrl,
+        defaultItemsLimitPerRequest,
+        spatialFilter = None,
+        temporalFilter = None)
+      itemLinks += firstPageUrl
+      iterateItemsWithLimit(firstPageUrl, needCountNextItems)
+      return
     }
 
     while (iterator.hasNext) {
@@ -449,5 +492,53 @@ case class StacBatch(
         spatialFilter,
         temporalFilter)
     }
+  }
+}
+
+object StacBatch {
+
+  private[stac] val ApiSearchBBoxOption = "__stacApiSearchBbox"
+  private[stac] val ApiSearchDatetimeOption = "__stacApiSearchDatetime"
+
+  /**
+   * Adds CollectionClient's API-owned search parameters to an advertised items endpoint. Existing
+   * query bytes and the fragment are retained. A source-owned spatial or datetime constraint
+   * cannot be combined generically with another constraint of the same kind, so reject that
+   * ambiguous endpoint instead of widening, narrowing, or duplicating its source relation.
+   */
+  private[stac] def applyClientApiSearchParameters(
+      endpointUrl: String,
+      bbox: Option[String],
+      datetime: Option[String]): String = {
+    require(bbox.isDefined || datetime.isDefined, "At least one API search parameter is required")
+    val fragmentIndex = endpointUrl.indexOf('#')
+    val (urlWithoutFragment, fragment) = if (fragmentIndex >= 0) {
+      (endpointUrl.substring(0, fragmentIndex), endpointUrl.substring(fragmentIndex))
+    } else (endpointUrl, "")
+    val queryIndex = urlWithoutFragment.indexOf('?')
+    val (path, existingQuery) = if (queryIndex >= 0) {
+      (urlWithoutFragment.substring(0, queryIndex), urlWithoutFragment.substring(queryIndex + 1))
+    } else (urlWithoutFragment, "")
+    val existingParameters = existingQuery.split("&", -1).filter(_.nonEmpty).toVector
+    val existingNames = existingParameters.flatMap(decodedQueryParameterName).toSet
+
+    if (bbox.isDefined && existingNames.exists(Set("bbox", "bbox-crs", "intersects"))) {
+      throw new IllegalArgumentException(
+        "The advertised items endpoint already owns a spatial search constraint")
+    }
+    if (datetime.isDefined && existingNames.contains("datetime")) {
+      throw new IllegalArgumentException(
+        "The advertised items endpoint already owns a datetime search constraint")
+    }
+
+    val searchParameters = bbox.map(value => "bbox=" + URLEncoder.encode(value, "UTF-8")) ++
+      datetime.map(value => "datetime=" + URLEncoder.encode(value, "UTF-8"))
+    val query = (existingParameters ++ searchParameters).mkString("&")
+    s"$path?$query$fragment"
+  }
+
+  private def decodedQueryParameterName(parameter: String): Option[String] = {
+    val rawName = parameter.takeWhile(_ != '=')
+    Try(URLDecoder.decode(rawName, "UTF-8")).toOption
   }
 }

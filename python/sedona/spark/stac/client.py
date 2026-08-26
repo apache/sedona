@@ -14,6 +14,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
 from typing import Union, Optional, Iterator, List
 
 from sedona.spark.stac.collection_client import CollectionClient
@@ -175,8 +176,10 @@ class Client:
             - A list of date-time ranges can be provided for multiple intervals.
 
             Example: "2020-01-01T00:00:00Z" or python_datetime.datetime(2020, 1, 1) or [["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]
-        :param max_items: The maximum number of items to return from the search, even if there are more matching results.
-            Example: 100
+        :param max_items: The maximum number of STAC API results to return. Supported
+            single-collection bbox/datetime searches follow pystac-client semantics and
+            trust the API's matching behavior; extended Spark-side filters are applied
+            before the final result limit. Example: 100
         :param return_dataframe: If True, return the result as a Spark DataFrame instead of an iterator of PyStacItem objects.
             Example: True
         :return: An iterator of PyStacItem objects or a Spark DataFrame that match the specified filters.

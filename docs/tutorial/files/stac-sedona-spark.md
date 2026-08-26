@@ -240,6 +240,8 @@ items = client.search(
 )
 ```
 
+`max_items` follows pystac-client semantics: it is the total number of Items returned by the STAC API, while `itemsLimitPerRequest` is only the requested page size. For a named collection with at most one `bbox` and one `datetime` interval (and no ID or geometry filter), Sedona sends those constraints to the Collection's advertised Items endpoint, trusts the conforming STAC API's spatial and temporal matching semantics, and stops enumeration after `max_items` server results. Multiple bounding boxes or datetime intervals, ID filters, and `search()`'s `geometry` parameter are Sedona extensions evaluated by Spark; those shapes are fully enumerated before Spark applies the filters and final limit.
+
 #### Search Items with Bounding Box and Interval
 
 ```python
@@ -457,7 +459,7 @@ Returns:
 
 ---
 
-**`search(*ids: Union[str, list], collection_id: str, bbox: Optional[list] = None, datetime: Optional[Union[str, datetime.datetime, list]] = None, max_items: Optional[int] = None, return_dataframe: bool = True) -> Union[Iterator[PyStacItem], DataFrame]`**
+**`search(*ids: Union[str, list], collection_id: str, bbox: Optional[list] = None, geometry: Optional[Union[str, BaseGeometry, list]] = None, datetime: Optional[Union[str, datetime.datetime, list]] = None, max_items: Optional[int] = None, return_dataframe: bool = True) -> Union[Iterator[PyStacItem], DataFrame]`**
 Searches for items in the specified collection with optional filters.
 
 Parameters:
@@ -465,6 +467,7 @@ Parameters:
 * `ids` (*Union[str, list]*): A variable number of item IDs to filter the items. Example: `"item_id1"` or `["item_id1", "item_id2"]`
 * `collection_id` (*str*): The ID of the collection to search in. Example: `"aster-l1t"`
 * `bbox` (*Optional[list]*): A list of bounding boxes for filtering the items, represented as `[min_lon, min_lat, max_lon, max_lat]`. Example: `[[ -180.0, -90.0, 180.0, 90.0 ]]`
+* `geometry` (*Optional[Union[str, BaseGeometry, list]]*): Shapely geometry object(s) or WKT string(s) for spatial filtering; a single geometry, a WKT string, or a list of either. If both `bbox` and `geometry` are provided, `geometry` takes precedence. Geometry filtering is evaluated by Spark, not by the STAC API. Example: `"POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))"`
 * `datetime` (*Optional[Union[str, datetime.datetime, list]]*): A single datetime, RFC 3339-compliant timestamp, or a list of date-time ranges. Example: `"2020-01-01T00:00:00Z"`, `datetime.datetime(2020, 1, 1)`, `[["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]`
 * `max_items` (*Optional[int]*): The maximum number of items to return. Example: `100`
 * `return_dataframe` (*bool*): If `True` (default), return the result as a Spark DataFrame instead of an iterator of `PyStacItem` objects. Example: `True`
