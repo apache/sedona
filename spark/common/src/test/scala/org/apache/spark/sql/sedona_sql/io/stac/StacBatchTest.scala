@@ -220,6 +220,57 @@ class StacBatchTest extends TestBaseScala {
     }
   }
 
+  it("collectItemLinks should apply an uncapped client search and walk the full chain") {
+    val requests = mutable.ArrayBuffer[String]()
+    withHttpServer(exchange => {
+      val request = exchange.getRequestURI.toString
+      requests.synchronized(requests += request)
+      // A finite pagination chain: the second page is the last one.
+      if (request.contains("cursor=page-2")) {
+        """{"features":[{}],"links":[]}"""
+      } else {
+        s"""{"features":[{}],
+           |"links":[{"rel":"next","href":"?cursor=page-2"}]}""".stripMargin
+      }
+    }) { serverUrl =>
+      val collectionJson =
+        s"""{"id":"c","links":[
+           |{"rel":"child","href":"should-not-be-read"},
+           |{"rel":"items","href":"$serverUrl/custom/items",
+           | "type":"application/geo+json"}]}""".stripMargin
+      // The shape CollectionClient's save_to_geoparquet issues: API-owned search
+      // parameters with no itemsLimitMax. Planning must not require a cap.
+      val stacBatch = StacBatch(
+        null,
+        s"$serverUrl/api/collections/c",
+        collectionJson,
+        StructType(Seq()),
+        Map(
+          "itemsLimitPerRequest" -> "200",
+          StacBatch.ApiSearchBBoxOption -> "-114.0,-31.0,-108.0,37.0",
+          StacBatch.ApiSearchDatetimeOption ->
+            "2025-01-01T00:00:00Z/2025-02-01T00:00:00Z"),
+        None,
+        None,
+        None)
+      val itemLinks = mutable.ArrayBuffer[String]()
+
+      stacBatch.collectItemLinks(
+        s"$serverUrl/api/collections/c",
+        collectionJson,
+        itemLinks,
+        needCountNextItems = false)
+
+      val expected = s"$serverUrl/custom/items" +
+        "?bbox=-114.0%2C-31.0%2C-108.0%2C37.0" +
+        "&datetime=2025-01-01T00%3A00%3A00Z%2F2025-02-01T00%3A00%3A00Z" +
+        "&limit=200"
+      val secondPage = s"$serverUrl/custom/items?cursor=page-2"
+      assert(itemLinks == Seq(expected, secondPage))
+      assert(requests.forall(_.startsWith("/custom/items")))
+    }
+  }
+
   it("collectItemLinks should stop at the direct item limit without adding an extra link") {
     val collectionJson =
       """{"links":[{"rel":"item","href":"file:/one.json"},{"rel":"item","href":"two.json"}]}"""

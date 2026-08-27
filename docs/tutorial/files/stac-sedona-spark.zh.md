@@ -240,7 +240,7 @@ items = client.search(
 )
 ```
 
-`max_items` 遵循 pystac-client 的语义：它限制最终返回的 Item 总数，而 `itemsLimitPerRequest` 仅控制建议的单页大小。`search()` 不暴露 `itemsLimitPerRequest`——Python 客户端会自行选择页大小，该选项的默认值 10 仅适用于直接通过 DataFrame 读取器加载的场景。当 `max_items` 为正数、指定了 collection、最多包含一个 `datetime` 区间、可选一个或多个 `bbox`（且没有 ID 或 geometry 过滤）时，Sedona 会把每个 bbox 作为一个独立且有上限的搜索发送到 collection 公告的 Items 端点，页大小为 `min(200, max_items)`。Python 客户端会先合并多个 bbox 的结果并按 `(collection, id)` 去重，再应用全局 `max_items` 限制。多个 datetime 区间、ID 过滤以及 `search()` 的 `geometry` 参数属于由 Spark 执行的 Sedona 扩展；这些搜索在读取器层保持无上限，以便 Spark 检查每个 Item，但单次请求获取 200 个 Item，从而减少分页开销。
+`max_items` 遵循 pystac-client 的语义：它限制最终返回的 Item 总数，而 `itemsLimitPerRequest` 仅控制建议的单页大小。`search()` 不暴露 `itemsLimitPerRequest`——Python 客户端会自行选择页大小，该选项的默认值 10 仅适用于直接通过 DataFrame 读取器加载的场景。当指定了 collection、最多包含一个 `datetime` 区间、可选一个或多个 `bbox`（且没有 ID 或 geometry 过滤）时，Sedona 会把每个 bbox 作为一个独立的搜索发送到 collection 公告的 Items 端点。若 `max_items` 为正数，该搜索同时带有上限，页大小为 `min(200, max_items)`。若调用方未提供 `max_items`（例如 `save_to_geoparquet`），`bbox` 与 `datetime` 仍会下推到 API，由端点而非 Spark 过滤不匹配的 Item；每个 bbox 的搜索以单页 200 个 Item 遍历端点，不施加枚举上限。Python 客户端会先合并多个 bbox 的结果并按 `(collection, id)` 去重，再应用全局 `max_items` 限制。多个 datetime 区间、ID 过滤以及 `search()` 的 `geometry` 参数属于由 Spark 执行的 Sedona 扩展；这些搜索在读取器层保持无上限，以便 Spark 检查每个 Item，但单次请求获取 200 个 Item，从而减少分页开销。
 
 #### 按 bbox 与时间区间搜索
 
