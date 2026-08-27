@@ -29,6 +29,7 @@ import geopandas as gpd
 import pandas as pd
 import pyspark.pandas as pspd
 import sedona.spark.geopandas as sgpd
+from shapely.geometry.base import BaseGeometry
 from packaging.version import parse as parse_version
 from pyproj import CRS
 from pyspark.pandas import Series as PandasOnSparkSeries
@@ -1582,7 +1583,117 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         crs: Any | None = None,
         **kwargs,
     ) -> GeoDataFrame:
-        raise NotImplementedError("from_dict() is not implemented yet.")
+        """Construct a GeoDataFrame from a dictionary.
+
+        .. versionadded:: 2.0.0
+
+        Parameters
+        ----------
+        data : dict
+            Dictionary of the form ``{field: array-like}`` or
+            ``{field: dict}``.
+        geometry : str or array-like, optional
+            If a string, the column to use as the active geometry. If an
+            array-like, it is added as the ``"geometry"`` column.
+        crs : str, dict, pyproj.CRS, optional
+            Coordinate reference system to assign to the resulting frame. The
+            coordinates are not transformed.
+        **kwargs
+            Additional arguments passed to :meth:`pandas.DataFrame.from_dict`,
+            such as ``orient`` or ``columns``.
+
+        Returns
+        -------
+        GeoDataFrame
+
+        Notes
+        -----
+        This constructor first materializes the dictionary in a local
+        GeoPandas GeoDataFrame on the driver, then distributes it with Spark.
+        It is intended for small in-memory inputs. For large datasets, create
+        a Spark DataFrame or use a distributed Sedona data source instead.
+
+        Once distributed, dictionary values follow Spark schema inference.
+        Each column must contain values that Spark can represent with one
+        compatible type.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point
+        >>> from sedona.spark.geopandas import GeoDataFrame
+        >>> data = {
+        ...     "name": ["first", "second"],
+        ...     "geometry": [Point(1, 2), Point(2, 1)],
+        ... }
+        >>> GeoDataFrame.from_dict(data, crs="EPSG:4326")
+             name     geometry
+        0   first  POINT (1 2)
+        1  second  POINT (2 1)
+        """
+        local = gpd.GeoDataFrame.from_dict(
+            data,
+            geometry=geometry,
+            crs=crs,
+            **kwargs,
+        )
+        return cls._from_local_geopandas(local)
+
+    @classmethod
+    def _from_local_geopandas(cls, local: gpd.GeoDataFrame) -> GeoDataFrame:
+        """Distribute a locally constructed GeoPandas frame safely."""
+        geometry_name = local._geometry_column_name
+        restore_order_column = None
+
+        # Spark 3 pandas-on-Spark only checks the first object value when
+        # looking for a user-defined type. Give every geometry column that has
+        # a value a representative in a temporary first row, then remove it
+        # and restore the original positional order.
+        if len(local) > 0:
+            inference_values = {}
+            for position, dtype in enumerate(local.dtypes):
+                if not isinstance(
+                    dtype, GeometryDtype
+                ) and not pd.api.types.is_object_dtype(dtype):
+                    continue
+                missing = local.iloc[:, position].isna().to_numpy()
+                non_missing = np.flatnonzero(~missing)
+                if missing[0] and len(non_missing) > 0:
+                    value = local.iloc[non_missing[0], position]
+                    if isinstance(dtype, GeometryDtype) or isinstance(
+                        value, BaseGeometry
+                    ):
+                        inference_values[position] = value
+
+            if inference_values:
+                local = local.copy()
+
+                base_name = "__sedona_local_row_order__"
+                suffix = 0
+                while True:
+                    name = base_name if suffix == 0 else f"{base_name}_{suffix}"
+                    if isinstance(local.columns, pd.MultiIndex):
+                        candidate = (name,) + ("",) * (local.columns.nlevels - 1)
+                    else:
+                        candidate = name
+                    if candidate not in local.columns:
+                        restore_order_column = candidate
+                        break
+                    suffix += 1
+
+                local[restore_order_column] = np.arange(len(local))
+                inference_row = local.iloc[[0]].copy()
+                inference_row[restore_order_column] = -1
+                for position, value in inference_values.items():
+                    inference_row.iat[0, position] = value
+                local = pd.concat([inference_row, local])
+
+        result = cls(local)
+        if restore_order_column is not None:
+            result = result[result[restore_order_column] >= 0]
+            result.sort_values(restore_order_column, inplace=True)
+            result = cls(result.drop(columns=[restore_order_column]))
+            result._geometry_column_name = geometry_name
+        return result
 
     @classmethod
     def from_features(
@@ -1658,31 +1769,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             crs=crs,
             columns=columns,
         )
-
-        # Spark 3 pandas-on-Spark only checks the first object value when
-        # looking for a user-defined type. Move one geometry forward for
-        # schema inference, then restore the GeoPandas RangeIndex order.
-        restore_order = False
-        geometry_name = local._geometry_column_name
-        if geometry_name is not None and len(local) > 0:
-            missing = local[geometry_name].isna().to_numpy()
-            non_missing = np.flatnonzero(~missing)
-            if missing[0] and len(non_missing) > 0:
-                first_geometry = non_missing[0]
-                order = np.concatenate(
-                    (
-                        [first_geometry],
-                        np.arange(first_geometry),
-                        np.arange(first_geometry + 1, len(local)),
-                    )
-                )
-                local = local.iloc[order]
-                restore_order = True
-
-        result = cls(local)
-        if restore_order:
-            result.sort_index(inplace=True)
-        return result
+        return cls._from_local_geopandas(local)
 
     @classmethod
     def from_postgis(

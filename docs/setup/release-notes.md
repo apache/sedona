@@ -51,6 +51,7 @@
 * [<a href='https://github.com/apache/sedona/issues/3260'>GH-3260</a>] - Implement distributed GeoSeries and GeoDataFrame identical-geometry equality
 * [<a href='https://github.com/apache/sedona/issues/3273'>GH-3273</a>] - Implement distributed GeoSeries and GeoDataFrame polygonal coverage validation and invalid-edge diagnostics
 * [<a href='https://github.com/apache/sedona/issues/3281'>GH-3281</a>] - Implement `GeoDataFrame.from_features` for in-memory GeoJSON-like features
+* [<a href='https://github.com/apache/sedona/issues/3288'>GH-3288</a>] - Implement `GeoDataFrame.from_dict` for in-memory dictionaries
 
 ### Bug Fixes
 
