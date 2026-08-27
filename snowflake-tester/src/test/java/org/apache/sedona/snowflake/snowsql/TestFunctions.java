@@ -1297,6 +1297,18 @@ public class TestFunctions extends TestBase {
         "SELECT sedona.ST_IsPolygonCW(sedona.ST_GeomFromWKT('POLYGON EMPTY'))", true);
     verifySqlSingleRes(
         "SELECT sedona.ST_IsPolygonCW(sedona.ST_GeomFromWKT('MULTIPOLYGON EMPTY'))", true);
+    // Non-polygonal geometries and geometry collections with no polygonal components have
+    // nothing to violate the orientation, so PostGIS parity requires true here.
+    verifySqlSingleRes("SELECT sedona.ST_IsPolygonCW(sedona.ST_GeomFromWKT('POINT (0 0)'))", true);
+    verifySqlSingleRes(
+        "SELECT sedona.ST_IsPolygonCW(sedona.ST_GeomFromWKT('LINESTRING (0 0, 1 0, 0 0)'))", true);
+    // Recurses into nested geometry collections to find the polygonal component.
+    verifySqlSingleRes(
+        "SELECT sedona.ST_IsPolygonCW(sedona.ST_GeomFromWKT("
+            + "'GEOMETRYCOLLECTION (POINT (2 2), GEOMETRYCOLLECTION (POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))))'))",
+        true);
+    // Snowflake short-circuits SQL NULL input before invoking the handler.
+    verifySqlSingleRes("SELECT sedona.ST_IsPolygonCW(sedona.ST_GeomFromWKT(NULL))", null);
   }
 
   @Test
@@ -1325,6 +1337,20 @@ public class TestFunctions extends TestBase {
         "SELECT sedona.ST_IsPolygonCCW(sedona.ST_GeomFromWKT('POLYGON EMPTY'))", true);
     verifySqlSingleRes(
         "SELECT sedona.ST_IsPolygonCCW(sedona.ST_GeomFromWKT('MULTIPOLYGON EMPTY'))", true);
+    // Non-polygonal geometries and geometry collections with no polygonal components have
+    // nothing to violate the orientation, so PostGIS parity requires true here.
+    verifySqlSingleRes(
+        "SELECT sedona.ST_IsPolygonCCW(sedona.ST_GeomFromWKT('POINT (0 0)'))", true);
+    verifySqlSingleRes(
+        "SELECT sedona.ST_IsPolygonCCW(sedona.ST_GeomFromWKT('LINESTRING (0 0, 1 0, 0 0)'))",
+        true);
+    // Recurses into nested geometry collections to find the polygonal component.
+    verifySqlSingleRes(
+        "SELECT sedona.ST_IsPolygonCCW(sedona.ST_GeomFromWKT("
+            + "'GEOMETRYCOLLECTION (POINT (2 2), GEOMETRYCOLLECTION (POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))))'))",
+        true);
+    // Snowflake short-circuits SQL NULL input before invoking the handler.
+    verifySqlSingleRes("SELECT sedona.ST_IsPolygonCCW(sedona.ST_GeomFromWKT(NULL))", null);
   }
 
   @Test

@@ -1926,11 +1926,13 @@ public class FunctionsTest extends TestBase {
             0);
     assertTrue(Functions.isPolygonCW(mPoly));
 
+    // Non-polygonal geometries have no polygonal component to violate the orientation, so
+    // PostGIS (and Sedona 2.0.0+) vacuously returns true for them.
     Geometry point = Constructors.geomFromWKT("POINT (45 20)", 0);
-    assertFalse(Functions.isPolygonCW(point));
+    assertTrue(Functions.isPolygonCW(point));
 
     Geometry lineClosed = Constructors.geomFromWKT("LINESTRING (30 20, 20 25, 20 15, 30 20)", 0);
-    assertFalse(Functions.isPolygonCW(lineClosed));
+    assertTrue(Functions.isPolygonCW(lineClosed));
   }
 
   @Test
@@ -1954,11 +1956,13 @@ public class FunctionsTest extends TestBase {
             0);
     assertTrue(Functions.isPolygonCCW(mPoly));
 
+    // Non-polygonal geometries have no polygonal component to violate the orientation, so
+    // PostGIS (and Sedona 2.0.0+) vacuously returns true for them.
     Geometry point = Constructors.geomFromWKT("POINT (45 20)", 0);
-    assertFalse(Functions.isPolygonCCW(point));
+    assertTrue(Functions.isPolygonCCW(point));
 
     Geometry lineClosed = Constructors.geomFromWKT("LINESTRING (30 20, 20 25, 20 15, 30 20)", 0);
-    assertFalse(Functions.isPolygonCCW(lineClosed));
+    assertTrue(Functions.isPolygonCCW(lineClosed));
   }
 
   @Test
@@ -1983,6 +1987,38 @@ public class FunctionsTest extends TestBase {
 
     assertTrue(Functions.isPolygonCW(clockwiseWithEmpty));
     assertTrue(Functions.isPolygonCCW(counterClockwiseWithEmpty));
+  }
+
+  @Test
+  public void testIsPolygonOrientationRecursesIntoGeometryCollections() throws ParseException {
+    // Empty geometry collections have no polygonal components: vacuously true for both.
+    Geometry emptyCollection = Constructors.geomFromWKT("GEOMETRYCOLLECTION EMPTY", 0);
+    assertTrue(Functions.isPolygonCW(emptyCollection));
+    assertTrue(Functions.isPolygonCCW(emptyCollection));
+
+    // A point paired with a nested collection containing a clockwise polygon: the point is
+    // ignored, and the polygon is found by recursing into the nested collection.
+    Geometry nestedCW =
+        Constructors.geomFromWKT(
+            "GEOMETRYCOLLECTION (POINT (2 2), GEOMETRYCOLLECTION (POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))))",
+            0);
+    assertTrue(Functions.isPolygonCW(nestedCW));
+    assertFalse(Functions.isPolygonCCW(nestedCW));
+
+    Geometry nestedCCW =
+        Constructors.geomFromWKT(
+            "GEOMETRYCOLLECTION (POINT (2 2), GEOMETRYCOLLECTION (POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))))",
+            0);
+    assertFalse(Functions.isPolygonCW(nestedCCW));
+    assertTrue(Functions.isPolygonCCW(nestedCCW));
+
+    // A collection mixing a clockwise and a counter-clockwise polygon matches neither predicate.
+    Geometry mixedOrientation =
+        Constructors.geomFromWKT(
+            "GEOMETRYCOLLECTION (POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0)), POLYGON ((10 10, 11 10, 11 11, 10 11, 10 10)))",
+            0);
+    assertFalse(Functions.isPolygonCW(mixedOrientation));
+    assertFalse(Functions.isPolygonCCW(mixedOrientation));
   }
 
   @Test

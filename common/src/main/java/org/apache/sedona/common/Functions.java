@@ -26,6 +26,7 @@ import com.uber.h3core.exceptions.H3Exception;
 import com.uber.h3core.util.LatLng;
 import java.util.*;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.S2Geography.Geography;
@@ -1635,29 +1636,19 @@ public class Functions {
   }
 
   /**
-   * This function accepts Polygon and MultiPolygon, if any other type is provided then it will
-   * return false. If the exterior ring is clockwise and the interior ring(s) are counter-clockwise
-   * then returns true, otherwise false. Empty Polygon and MultiPolygon inputs return true because
-   * they contain no rings with the opposite orientation.
+   * Recursively inspects the polygonal components of the input (Polygon, MultiPolygon, or any
+   * nested GeometryCollection), and returns true if every one of them has a clockwise exterior
+   * ring and counter-clockwise interior ring(s). Non-polygonal components (points, line strings)
+   * are ignored. Inputs with no polygonal components at all, including points, line strings, and
+   * empty geometry collections, vacuously return true, matching PostGIS semantics. Empty Polygon
+   * and MultiPolygon inputs also return true because they contain no rings with the opposite
+   * orientation.
    *
-   * @param geom Polygon or MultiPolygon
+   * @param geom any geometry
    * @return
    */
   public static boolean isPolygonCW(Geometry geom) {
-    if (geom instanceof MultiPolygon) {
-      MultiPolygon multiPolygon = (MultiPolygon) geom;
-
-      for (int i = 0; i < multiPolygon.getNumGeometries(); i++) {
-        if (!checkIfPolygonCW((Polygon) multiPolygon.getGeometryN(i))) {
-          return false;
-        }
-      }
-      return true;
-    } else if (geom instanceof Polygon) {
-      return checkIfPolygonCW((Polygon) geom);
-    }
-    // False for remaining geometry types
-    return false;
+    return allPolygonalComponentsMatchOrientation(geom, Functions::checkIfPolygonCW);
   }
 
   private static boolean checkIfPolygonCW(Polygon geom) {
@@ -1679,6 +1670,30 @@ public class Functions {
     }
 
     return isExteriorRingCW && isInteriorRingCW;
+  }
+
+  /**
+   * Recursively walks a geometry's polygonal components (Polygon, MultiPolygon, or any nested
+   * GeometryCollection) and returns true only if every one of them satisfies {@code
+   * ringOrientationCheck}. Non-polygonal components (points, line strings) are ignored, and
+   * inputs with no polygonal components at all vacuously return true.
+   */
+  private static boolean allPolygonalComponentsMatchOrientation(
+      Geometry geom, Predicate<Polygon> ringOrientationCheck) {
+    if (geom instanceof Polygon) {
+      return ringOrientationCheck.test((Polygon) geom);
+    } else if (geom instanceof GeometryCollection) {
+      GeometryCollection collection = (GeometryCollection) geom;
+      for (int i = 0; i < collection.getNumGeometries(); i++) {
+        if (!allPolygonalComponentsMatchOrientation(
+            collection.getGeometryN(i), ringOrientationCheck)) {
+          return false;
+        }
+      }
+      return true;
+    }
+    // No polygonal component to violate the orientation for remaining geometry types
+    return true;
   }
 
   public static Geometry triangulatePolygon(Geometry geom) {
@@ -1792,29 +1807,19 @@ public class Functions {
   }
 
   /**
-   * This function accepts Polygon and MultiPolygon, if any other type is provided then it will
-   * return false. If the exterior ring is counter-clockwise and the interior ring(s) are clockwise
-   * then returns true, otherwise false. Empty Polygon and MultiPolygon inputs return true because
-   * they contain no rings with the opposite orientation.
+   * Recursively inspects the polygonal components of the input (Polygon, MultiPolygon, or any
+   * nested GeometryCollection), and returns true if every one of them has a counter-clockwise
+   * exterior ring and clockwise interior ring(s). Non-polygonal components (points, line strings)
+   * are ignored. Inputs with no polygonal components at all, including points, line strings, and
+   * empty geometry collections, vacuously return true, matching PostGIS semantics. Empty Polygon
+   * and MultiPolygon inputs also return true because they contain no rings with the opposite
+   * orientation.
    *
-   * @param geom Polygon or MultiPolygon
+   * @param geom any geometry
    * @return
    */
   public static boolean isPolygonCCW(Geometry geom) {
-    if (geom instanceof MultiPolygon) {
-      MultiPolygon multiPolygon = (MultiPolygon) geom;
-
-      for (int i = 0; i < multiPolygon.getNumGeometries(); i++) {
-        if (!checkIfPolygonCCW((Polygon) multiPolygon.getGeometryN(i))) {
-          return false;
-        }
-      }
-      return true;
-    } else if (geom instanceof Polygon) {
-      return checkIfPolygonCCW((Polygon) geom);
-    }
-    // False for remaining geometry types
-    return false;
+    return allPolygonalComponentsMatchOrientation(geom, Functions::checkIfPolygonCCW);
   }
 
   private static boolean checkIfPolygonCCW(Polygon geom) {
