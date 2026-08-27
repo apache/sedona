@@ -1637,11 +1637,11 @@ public class Functions {
 
   /**
    * Recursively inspects the polygonal components of the input (Polygon, MultiPolygon, or any
-   * nested GeometryCollection), and returns true if every one of them has a clockwise exterior
-   * ring and counter-clockwise interior ring(s). Non-polygonal components (points, line strings)
-   * are ignored. Inputs with no polygonal components at all, including points, line strings, and
-   * empty geometry collections, vacuously return true, matching PostGIS semantics. Empty Polygon
-   * and MultiPolygon inputs also return true because they contain no rings with the opposite
+   * nested GeometryCollection), and returns true if every one of them has a clockwise exterior ring
+   * and counter-clockwise interior ring(s). Non-polygonal components (points, line strings) are
+   * ignored. Inputs with no polygonal components at all, including points, line strings, and empty
+   * geometry collections, vacuously return true, matching PostGIS semantics. Empty Polygon and
+   * MultiPolygon inputs also return true because they contain no rings with the opposite
    * orientation.
    *
    * @param geom any geometry
@@ -1675,8 +1675,8 @@ public class Functions {
   /**
    * Recursively walks a geometry's polygonal components (Polygon, MultiPolygon, or any nested
    * GeometryCollection) and returns true only if every one of them satisfies {@code
-   * ringOrientationCheck}. Non-polygonal components (points, line strings) are ignored, and
-   * inputs with no polygonal components at all vacuously return true.
+   * ringOrientationCheck}. Non-polygonal components (points, line strings) are ignored, and inputs
+   * with no polygonal components at all vacuously return true.
    */
   private static boolean allPolygonalComponentsMatchOrientation(
       Geometry geom, Predicate<Polygon> ringOrientationCheck) {
