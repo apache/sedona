@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.stac.collection_client &mdash; Apache Sedona Python Documentation</title>
@@ -766,13 +765,17 @@
 <span class="sd">        remain Sedona extensions implemented with Spark predicates, so they keep the</span>
 <span class="sd">        uncapped fallback instead of applying a raw reader cap too early.</span>
 
+<span class="sd">        ``max_items`` is a result cap, not a precondition for search: a representable</span>
+<span class="sd">        predicate belongs on the API whether or not the caller bounded the result set.</span>
+<span class="sd">        An unbounded caller such as ``save_to_geoparquet`` would otherwise enumerate</span>
+<span class="sd">        the Collection and reject non-matching Items in Spark.</span>
+
 <span class="sd">        The datasource applies these private options to the Collection's advertised</span>
 <span class="sd">        JSON ``rel=items`` link. Keeping endpoint discovery in the datasource preserves</span>
 <span class="sd">        custom, cross-origin, and query-bearing Item endpoint URLs.</span>
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="p">(</span>
-            <span class="n">max_items</span> <span class="ow">is</span> <span class="kc">None</span>
-            <span class="ow">or</span> <span class="n">max_items</span> <span class="o">&lt;=</span> <span class="mi">0</span>
+            <span class="p">(</span><span class="n">max_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">max_items</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
             <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">collection_id</span>
             <span class="ow">or</span> <span class="n">ids</span>
             <span class="ow">or</span> <span class="n">geometry</span>
@@ -900,10 +903,17 @@
         <span class="c1"># on the advertised endpoint and itemsLimitMax counts exactly what the API returns.</span>
         <span class="n">has_client_side_filters</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">ids</span> <span class="ow">or</span> <span class="n">bbox</span> <span class="ow">or</span> <span class="n">geometry</span> <span class="ow">or</span> <span class="n">datetime</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">api_search_option_sets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cap_options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enumeration_cap_options</span><span class="p">(</span><span class="n">max_items</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">cap_options</span><span class="p">:</span>
+                <span class="c1"># An uncapped API search still pages through the endpoint;</span>
+                <span class="c1"># larger pages reduce request volume without changing the result set.</span>
+                <span class="n">cap_options</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">"itemsLimitPerRequest"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">_CLIENT_ITEMS_LIMIT_PER_REQUEST</span><span class="p">)</span>
+                <span class="p">}</span>
             <span class="n">dataframes</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">api_search_options</span> <span class="ow">in</span> <span class="n">api_search_option_sets</span><span class="p">:</span>
                 <span class="n">reader</span> <span class="o">=</span> <span class="n">new_reader</span><span class="p">()</span>
-                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enumeration_cap_options</span><span class="p">(</span><span class="n">max_items</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">cap_options</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="n">reader</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">api_search_options</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="n">reader</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
