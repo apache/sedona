@@ -556,13 +556,17 @@ class CollectionClient:
         remain Sedona extensions implemented with Spark predicates, so they keep the
         uncapped fallback instead of applying a raw reader cap too early.
 
+        ``max_items`` is a result cap, not a precondition for search: a representable
+        predicate belongs on the API whether or not the caller bounded the result set.
+        An unbounded caller such as ``save_to_geoparquet`` would otherwise enumerate
+        the Collection and reject non-matching Items in Spark.
+
         The datasource applies these private options to the Collection's advertised
         JSON ``rel=items`` link. Keeping endpoint discovery in the datasource preserves
         custom, cross-origin, and query-bearing Item endpoint URLs.
         """
         if (
-            max_items is None
-            or max_items <= 0
+            (max_items is not None and max_items <= 0)
             or not self.collection_id
             or ids
             or geometry
@@ -690,10 +694,17 @@ class CollectionClient:
         # on the advertised endpoint and itemsLimitMax counts exactly what the API returns.
         has_client_side_filters = bool(ids or bbox or geometry or datetime)
         if api_search_option_sets is not None:
+            cap_options = self._enumeration_cap_options(max_items)
+            if not cap_options:
+                # An uncapped API search still pages through the endpoint;
+                # larger pages reduce request volume without changing the result set.
+                cap_options = {
+                    "itemsLimitPerRequest": str(_CLIENT_ITEMS_LIMIT_PER_REQUEST)
+                }
             dataframes = []
             for api_search_options in api_search_option_sets:
                 reader = new_reader()
-                for key, value in self._enumeration_cap_options(max_items).items():
+                for key, value in cap_options.items():
                     reader = reader.option(key, value)
                 for key, value in api_search_options.items():
                     reader = reader.option(key, value)

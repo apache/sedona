@@ -257,12 +257,13 @@ case class StacBatch(
     }
 
     // CollectionClient's PySTAC-compatible search mode deliberately trusts the API's bbox and
-    // datetime semantics: apply those parameters to the collection's advertised items endpoint
-    // and count the raw API results. Do not crawl child or direct item links and never combine
-    // this mode with Spark-pushed predicates, whose retained Filter would discard rows the cap
-    // already counted — this mode represents one Collection Items request, like pystac-client.
+    // datetime semantics: apply those parameters to the collection's advertised items endpoint.
+    // A positive itemsLimitMax counts the raw API results and stops at the cap; an uncapped
+    // search walks the API's own pagination chain to the end, like every other uncapped scan.
+    // Do not crawl child or direct item links and never combine this mode with Spark-pushed
+    // predicates, whose retained Filter would discard rows the API already matched — this mode
+    // represents one Collection Items request, like pystac-client.
     if (clientApiSearchRequested) {
-      require(needCountNextItems, "Client API search options require a positive itemsLimitMax")
       require(
         spatialFilter.isEmpty && temporalFilter.isEmpty,
         "Client API search options cannot be combined with Spark-pushed filters")

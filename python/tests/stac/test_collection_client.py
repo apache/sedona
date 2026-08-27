@@ -660,6 +660,102 @@ class TestStacReader(TestBase):
             is None
         )
 
+    def test_api_search_options_allow_unbounded_result_sets(self) -> None:
+        client = CollectionClient.__new__(CollectionClient)
+        client.url = "https://stac.example.test/api/v1"
+        client.collection_id = "sentinel-2"
+        client.collection_url = (
+            "https://stac.example.test/api/v1/collections/sentinel-2"
+        )
+        one_bbox = [[-114.0, -31.0, -108.0, 37.0]]
+        one_interval = [["2025-01-01T00:00:00Z", "2025-02-01T00:00:00Z"]]
+
+        # max_items caps the result set; it does not decide whether the API can
+        # express the predicate. save_to_geoparquet never supplies one.
+        assert client._api_search_options(
+            one_bbox, None, one_interval, (), max_items=None
+        ) == {
+            "__stacApiSearchBbox": "-114.0,-31.0,-108.0,37.0",
+            "__stacApiSearchDatetime": ("2025-01-01T00:00:00Z/2025-02-01T00:00:00Z"),
+        }
+
+        # A non-positive cap remains a request for nothing, not an unbounded one.
+        for empty_cap in (0, -1):
+            assert (
+                client._api_search_options(
+                    one_bbox, None, one_interval, (), max_items=empty_cap
+                )
+                is None
+            )
+
+    def test_load_items_df_pushes_down_unbounded_representable_search(self) -> None:
+        class FakeDataFrame:
+            def __init__(self):
+                self.limits = []
+
+            def limit(self, value):
+                self.limits.append(value)
+                return self
+
+        class RecordingReader:
+            def __init__(self, dataframe):
+                self.dataframe = dataframe
+                self.options = {}
+                self.loaded_url = None
+
+            def format(self, value):
+                assert value == "stac"
+                return self
+
+            def option(self, key, value):
+                self.options[key] = str(value)
+                return self
+
+            def load(self, url):
+                self.loaded_url = url
+                return self.dataframe
+
+        class FakeSpark:
+            def __init__(self, reader):
+                self.read = reader
+
+        dataframe = FakeDataFrame()
+        reader = RecordingReader(dataframe)
+        client = CollectionClient.__new__(CollectionClient)
+        client.url = "https://stac.example.test/api/v1"
+        client.collection_id = "sentinel-2"
+        client.collection_url = (
+            "https://stac.example.test/api/v1/collections/sentinel-2"
+        )
+        client.headers = {}
+        client.spark = FakeSpark(reader)
+
+        # The shape save_to_geoparquet issues: one bbox, one interval, no cap.
+        with patch.object(
+            CollectionClient,
+            "_apply_spatial_temporal_filters",
+            side_effect=AssertionError("trusted API filters must not be reinterpreted"),
+        ):
+            result = client.load_items_df(
+                bbox=[[-114.0, -31.0, -108.0, 37.0]],
+                geometry=None,
+                datetime=[["2025-01-01T00:00:00Z", "2025-02-01T00:00:00Z"]],
+                ids=(),
+                max_items=None,
+            )
+
+        assert result is dataframe
+        assert reader.loaded_url == client.collection_url
+        assert reader.options["__stacApiSearchBbox"] == "-114.0,-31.0,-108.0,37.0"
+        assert reader.options["__stacApiSearchDatetime"] == (
+            "2025-01-01T00:00:00Z/2025-02-01T00:00:00Z"
+        )
+        # No cap was requested, so no enumeration ceiling is imposed; the search
+        # still pages at the client page size rather than the datasource default.
+        assert "itemsLimitMax" not in reader.options
+        assert reader.options["itemsLimitPerRequest"] == "200"
+        assert dataframe.limits == []
+
     def test_load_items_df_wires_pystac_compatible_request(self) -> None:
         import datetime as python_datetime
 
