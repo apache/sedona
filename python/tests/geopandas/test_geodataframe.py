@@ -101,6 +101,28 @@ class TestGeoDataFrameFromDict(TestGeopandasBase):
         assert materialized.index.tolist() == expected.index.tolist()
         assert_geodataframe_equal(materialized, expected)
 
+    def test_orient_tight_preserves_multiindex_geometry_and_crs(self):
+        from geopandas.testing import assert_geodataframe_equal
+
+        data = {
+            "index": ["row-b", "row-a"],
+            "columns": [["shape", "geometry"], ["attr", "name"]],
+            "data": [[None, "first"], [Point(1.0, 2.0), "second"]],
+            "index_names": ["row"],
+            "column_names": ["kind", "field"],
+        }
+        kwargs = {
+            "orient": "tight",
+            "geometry": ("shape", "geometry"),
+            "crs": "EPSG:4326",
+        }
+
+        expected = gpd.GeoDataFrame.from_dict(data, **kwargs)
+        result = GeoDataFrame.from_dict(data, **kwargs)
+
+        assert result._geometry_column_name == expected._geometry_column_name
+        assert_geodataframe_equal(result.to_geopandas(), expected)
+
     def test_empty_with_geometry_schema(self):
         data = {"geometry": [], "name": []}
         kwargs = {"geometry": "geometry", "crs": "EPSG:4326"}

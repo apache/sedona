@@ -1687,7 +1687,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                     inference_row.iat[0, position] = value
                 local = pd.concat([inference_row, local])
 
-        result = cls(local)
+        # Avoid pandas 1.5 sharing geometry blocks with the local GeoDataFrame;
+        # the constructor casts those blocks to object dtype for Spark.
+        result = cls(local, copy=True)
         if restore_order_column is not None:
             result = result[result[restore_order_column] >= 0]
             result.sort_values(restore_order_column, inplace=True)
