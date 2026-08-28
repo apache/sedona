@@ -44,6 +44,130 @@ from pandas.testing import assert_frame_equal
 from packaging.version import parse as parse_version
 
 
+class TestGeoDataFrameFromDict(TestGeopandasBase):
+    @pytest.mark.parametrize("geometry_in_data", [False, True])
+    def test_default_orientation(self, geometry_in_data):
+        from geopandas.testing import assert_geodataframe_equal
+
+        data = {
+            "name": ["first", "second"],
+            "value": [1, 2],
+        }
+        geometry = [Point(1.0, 2.0), Point(2.0, 1.0)]
+        kwargs = {"crs": "EPSG:4326"}
+        if geometry_in_data:
+            data["geometry"] = geometry
+        else:
+            kwargs["geometry"] = geometry
+
+        expected = gpd.GeoDataFrame.from_dict(data, **kwargs)
+        result = GeoDataFrame.from_dict(data, **kwargs)
+        materialized = result.to_geopandas()
+
+        assert list(result.columns) == list(expected.columns)
+        assert result.crs == expected.crs
+        assert_geodataframe_equal(materialized, expected)
+
+    def test_orient_index_preserves_leading_null_geometry_order(self):
+        from geopandas.testing import assert_geodataframe_equal
+
+        data = {
+            "row-b": {
+                "name": "first",
+                "geometry": None,
+                "__sedona_local_row_order__": "keep-b",
+            },
+            "row-a": {
+                "name": "second",
+                "geometry": None,
+                "__sedona_local_row_order__": "keep-a",
+            },
+            "row-c": {
+                "name": "third",
+                "geometry": Point(1.0, 2.0),
+                "__sedona_local_row_order__": "keep-c",
+            },
+        }
+        kwargs = {
+            "orient": "index",
+            "geometry": "geometry",
+            "crs": "EPSG:3857",
+        }
+
+        expected = gpd.GeoDataFrame.from_dict(data, **kwargs)
+        result = GeoDataFrame.from_dict(data, **kwargs)
+        materialized = result.to_geopandas()
+
+        assert materialized.index.tolist() == expected.index.tolist()
+        assert_geodataframe_equal(materialized, expected)
+
+    def test_orient_tight_preserves_multiindex_geometry_and_crs(self):
+        from geopandas.testing import assert_geodataframe_equal
+
+        data = {
+            "index": ["row-b", "row-a"],
+            "columns": [["shape", "geometry"], ["attr", "name"]],
+            "data": [[None, "first"], [Point(1.0, 2.0), "second"]],
+            "index_names": ["row"],
+            "column_names": ["kind", "field"],
+        }
+        kwargs = {
+            "orient": "tight",
+            "geometry": ("shape", "geometry"),
+            "crs": "EPSG:4326",
+        }
+
+        expected = gpd.GeoDataFrame.from_dict(data, **kwargs)
+        result = GeoDataFrame.from_dict(data, **kwargs)
+
+        assert result._geometry_column_name == expected._geometry_column_name
+        assert_geodataframe_equal(result.to_geopandas(), expected)
+
+    def test_empty_with_geometry_schema(self):
+        data = {"geometry": [], "name": []}
+        kwargs = {"geometry": "geometry", "crs": "EPSG:4326"}
+
+        expected = gpd.GeoDataFrame.from_dict(data, **kwargs)
+        result = GeoDataFrame.from_dict(data, **kwargs)
+
+        assert list(result.columns) == list(expected.columns)
+        assert result.crs == expected.crs
+        assert len(result) == 0
+
+    def test_multiple_geometry_columns_use_independent_inference_values(self):
+        from geopandas.testing import assert_geodataframe_equal
+
+        data = {
+            "geometry": gpd.GeoSeries([None, Point(1.0, 1.0)], crs="EPSG:4326"),
+            "secondary": gpd.GeoSeries([Point(2.0, 2.0), None], crs="EPSG:3857"),
+            "name": ["first", "second"],
+        }
+        kwargs = {"geometry": "geometry"}
+
+        expected = gpd.GeoDataFrame.from_dict(data, **kwargs)
+        result = GeoDataFrame.from_dict(data, **kwargs)
+
+        assert result.crs == expected.crs
+        assert result["secondary"].crs == expected["secondary"].crs
+        assert_geodataframe_equal(result.to_geopandas(), expected)
+
+    def test_inactive_object_geometry_column_with_leading_null(self):
+        from geopandas.testing import assert_geoseries_equal
+
+        data = {
+            "geometry": [Point(0.0, 0.0), Point(1.0, 1.0)],
+            "secondary": [None, Point(2.0, 2.0)],
+        }
+
+        result = GeoDataFrame.from_dict(data, geometry="geometry")
+
+        assert isinstance(result["secondary"], GeoSeries)
+        assert_geoseries_equal(
+            result["secondary"].to_geopandas(),
+            gpd.GeoSeries(data["secondary"], name="secondary"),
+        )
+
+
 class TestGeoDataFrameFromFeatures(TestGeopandasBase):
     def test_input_forms(self):
         feature_collection = {
