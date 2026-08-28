@@ -81,16 +81,6 @@ jobs:
             scala: 2.12.15
             jdk: '11'
             skipTests: ''
-          - spark: 3.4.0
-            scala: 2.13.8
-            jdk: '11'
-            skipTests: ''
-            skipLibPostalTests: 'true'
-          - spark: 3.4.0
-            scala: 2.12.15
-            jdk: '11'
-            skipTests: ''
-            skipLibPostalTests: 'true'
           - spark: 3.5.8
             scala: 2.12.15
             jdk: '17'

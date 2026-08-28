@@ -29,7 +29,8 @@ try:
     from pyspark.sql.connect.column import Column as ConnectColumn
     from pyspark.sql.utils import is_remote
 except ImportError:
-    # be backwards compatible with Spark < 3.4
+    # pyspark.sql.connect requires pandas and pyarrow, which are not Sedona
+    # dependencies; fall back to the non-Connect path when they are absent.
     def is_remote():
         return False
 

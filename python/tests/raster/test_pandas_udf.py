@@ -17,8 +17,6 @@
 
 import numpy as np
 import pandas as pd
-import pyspark
-import pytest
 import rasterio
 from pyspark.sql.functions import expr, pandas_udf
 from pyspark.sql.types import IntegerType
@@ -26,9 +24,6 @@ from tests.test_base import TestBase
 
 
 class TestRasterPandasUDF(TestBase):
-    @pytest.mark.skipif(
-        pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
-    )
     def test_raster_as_param(self):
         spark = TestRasterPandasUDF.spark
         df = spark.range(10).withColumn(

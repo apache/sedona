@@ -72,7 +72,7 @@ jobs:
             scala: '2.12.8'
             java: '11'
             python: '3.9'
-          - spark: '3.4.0'
+          - spark: '3.5.0'
             scala: '2.12.8'
             java: '11'
             python: '3.8'
@@ -158,7 +158,6 @@ jobs:
           uv sync
           uv run pytest -v tests/core/test_rdd.py tests/sql/test_dataframe_api.py
       - name: Run Spark Connect tests
-        if: ${{ matrix.spark >= '3.4.0' }}
         run: |
           cd python
           export SPARK_REMOTE=local

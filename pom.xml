@@ -82,8 +82,8 @@
         <!-- Actual scala, spark and log4j version will be set by activated profiles.
              Setting a default value helps IDE:s that can't make sense of profiles. -->
         <scala.compat.version>2.12</scala.compat.version>
-        <spark.version>3.4.0</spark.version>
-        <spark.compat.version>3.4</spark.compat.version>
+        <spark.version>3.5.0</spark.version>
+        <spark.compat.version>3.5</spark.compat.version>
         <spark.major.version>3</spark.major.version>
         <log4j.version>2.25.4</log4j.version>
         <graphframes.version>0.11.0</graphframes.version>
@@ -713,21 +713,6 @@
             </repositories>
         </profile>
         <profile>
-            <id>sedona-spark-3.4</id>
-            <activation>
-                <property>
-                    <name>spark</name>
-                    <value>3.4</value>
-                </property>
-            </activation>
-            <properties>
-                <spark.version>3.4.0</spark.version>
-                <spark.compat.version>3.4</spark.compat.version>
-                <log4j.version>2.19.0</log4j.version>
-                <skip.deploy.common.modules>false</skip.deploy.common.modules>
-            </properties>
-        </profile>
-        <profile>
             <id>sedona-spark-3.5</id>
             <activation>
                 <property>
@@ -739,8 +724,7 @@
                 <spark.version>3.5.0</spark.version>
                 <spark.compat.version>3.5</spark.compat.version>
                 <log4j.version>2.20.0</log4j.version>
-                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.4 -->
-                <skip.deploy.common.modules>true</skip.deploy.common.modules>
+                <skip.deploy.common.modules>false</skip.deploy.common.modules>
             </properties>
         </profile>
         <profile>
@@ -762,7 +746,7 @@
                 <scala.version>2.13.17</scala.version>
                 <scala.compat.version>2.13</scala.compat.version>
 
-                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.4 -->
+                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.5 -->
                 <skip.deploy.common.modules>true</skip.deploy.common.modules>
             </properties>
         </profile>
@@ -785,7 +769,7 @@
                 <scala.version>2.13.17</scala.version>
                 <scala.compat.version>2.13</scala.compat.version>
 
-                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.4 -->
+                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.5 -->
                 <skip.deploy.common.modules>true</skip.deploy.common.modules>
             </properties>
         </profile>
