@@ -5594,9 +5594,9 @@
   </header>
   <div class="md-post__content md-typeset">
     <h2 id="one-more-dimension-apache-sedona-enters-the-3d-world"><a class="toclink" href="2026/08/28/one-more-dimension-apache-sedona-enters-the-3d-world/">One More Dimension: Apache Sedona Enters the 3D World</a></h2>
-<p>A spatial query sees the world the way the noon sun does: as shadows on the ground. Two objects whose shadows touch can be four hundred feet apart, and flat geometry cannot tell the difference.</p>
-<p>The questions arriving at spatial engines have stopped being flat. Drones under FAA ceilings, aircraft over towers, apartments above restaurants, mineral deposits below mining leases: each one asks whether two volumes meet, and until now SQL answered in shadow form. Sedona 1.9.1 adds the missing axis. There is a <code>Box3D</code> type with constructors and accessors, 3D predicates and distances, a 3D extent aggregate, and query plans that know up from down.</p>
-<p><img alt="The cover: an isometric drawing of a San Diego neighborhood as extruded boxes, with the FAA drone ceiling as a translucent plane at 100 ft and orange towers piercing it, beside the post title" src="box3d-3d-world-cover.png" /></p>
+<p>In a flat spatial query the world is only its noon shadow on the ground. Two objects whose shadows touch can be four hundred feet apart, and from a flat predicate the answer is the same for both.</p>
+<p>The questions put to spatial engines have stopped being flat. Drones under FAA ceilings, aircraft over towers, apartments above restaurants, mineral deposits below mining leases: each one comes down to whether two volumes meet, and until now the SQL answer was the shadow version. Sedona 1.9.1 adds the missing axis. There is a <code>Box3D</code> type with constructors and accessors, 3D predicates and distances, a 3D extent aggregate, and query plans that account for the third axis.</p>
+<p><img alt="The cover: an isometric drawing of a San Diego neighborhood, its street grid on the ground and every building rendered as an extruded box, beside the post title" src="box3d-3d-world-cover.svg" /></p>
 
     
       <nav class="md-post__action">
