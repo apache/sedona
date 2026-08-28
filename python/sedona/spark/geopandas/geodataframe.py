@@ -788,6 +788,10 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 for position, column_dtype in enumerate(pd_df.dtypes)
                 if isinstance(column_dtype, GeometryDtype)
             }
+            if not copy and len(geom_type_cols):
+                # pandas 1.5 may share geometry blocks with caller-owned
+                # inputs. Detach before casting so they cannot be mutated.
+                pd_df = pd_df.copy()
             pd_df[geom_type_cols] = pd_df[geom_type_cols].astype(object)
 
             # Initialize the parent class pyspark DataFrame with the pandas DataFrame.

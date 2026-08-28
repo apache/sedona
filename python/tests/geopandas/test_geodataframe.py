@@ -265,6 +265,30 @@ class TestGeoDataFrameFromFeatures(TestGeopandasBase):
         assert len(result) == 0
 
 
+class TestGeoDataFrameLocalConstructor(TestGeopandasBase):
+    def test_geopandas_input_is_not_mutated(self):
+        from geopandas.testing import assert_geodataframe_equal
+
+        columns = pd.MultiIndex.from_tuples(
+            [("shape", "geometry"), ("attr", "name")],
+            names=["kind", "field"],
+        )
+        source = gpd.GeoDataFrame(
+            [[Point(0.0, 0.0), "first"], [Point(1.0, 1.0), "second"]],
+            index=pd.Index(["row-b", "row-a"], name="row"),
+            columns=columns,
+            geometry=("shape", "geometry"),
+            crs="EPSG:4326",
+        )
+        expected = source.copy()
+
+        result = GeoDataFrame(source, copy=False)
+
+        assert_geodataframe_equal(source, expected)
+        assert result._geometry_column_name == expected._geometry_column_name
+        assert_geodataframe_equal(result.to_geopandas(), expected)
+
+
 @pytest.mark.skipif(
     parse_version(shapely.__version__) < parse_version("2.0.0"),
     reason=f"Tests require shapely>=2.0.0, but found v{shapely.__version__}",
