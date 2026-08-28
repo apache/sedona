@@ -12,11 +12,11 @@ title: "One More Dimension: Apache Sedona Enters the 3D World"
 
 # One More Dimension: Apache Sedona Enters the 3D World
 
-A spatial query sees the world the way the noon sun does: as shadows on the ground. Two objects whose shadows touch can be four hundred feet apart, and flat geometry cannot tell the difference.
+In a flat spatial query the world is only its noon shadow on the ground. Two objects whose shadows touch can be four hundred feet apart, and from a flat predicate the answer is the same for both.
 
-The questions arriving at spatial engines have stopped being flat. Drones under FAA ceilings, aircraft over towers, apartments above restaurants, mineral deposits below mining leases: each one asks whether two volumes meet, and until now SQL answered in shadow form. Sedona 1.9.1 adds the missing axis. There is a `Box3D` type with constructors and accessors, 3D predicates and distances, a 3D extent aggregate, and query plans that know up from down.
+The questions put to spatial engines have stopped being flat. Drones under FAA ceilings, aircraft over towers, apartments above restaurants, mineral deposits below mining leases: each one comes down to whether two volumes meet, and until now the SQL answer was the shadow version. Sedona 1.9.1 adds the missing axis. There is a `Box3D` type with constructors and accessors, 3D predicates and distances, a 3D extent aggregate, and query plans that account for the third axis.
 
-![The cover: an isometric drawing of a San Diego neighborhood as extruded boxes, with the FAA drone ceiling as a translucent plane at 100 ft and orange towers piercing it, beside the post title](box3d-3d-world-cover.png)
+![The cover: an isometric drawing of a San Diego neighborhood, its street grid on the ground and every building rendered as an extruded box, beside the post title](box3d-3d-world-cover.svg)
 
 <!-- more -->
 
@@ -38,9 +38,9 @@ SELECT ST_Intersects(ST_3DMakeBox(ST_PointZ(0, 0, 0),  ST_PointZ(10, 10, 10)),
 +------------------+---------+
 ```
 
-The two boxes overlap in x and y. A 2D engine calls that an intersection; the third coordinate says they miss by ten vertical units. And the 3-4-12 point sits at Euclidean distance 13, which `ST_3DDWithin` treats inclusively, [mirroring PostGIS](https://sedona.apache.org/latest/api/sql/Predicates/ST_3DDWithin/).
+The two boxes overlap in x and y, which is enough for a true result from a 2D predicate; in the third coordinate the gap between them is ten units. And the 3-4-12 point sits at Euclidean distance 13, the inclusive bound, [mirroring PostGIS](https://sedona.apache.org/latest/api/sql/Predicates/ST_3DDWithin/).
 
-![An isometric diagram of two boxes: a teal box on the ground and an orange box floating 110 ft above it, their footprints overlapping in a plan-view inset; the caption reads that 2D calls it an intersection while Box3D says false](box3d-3d-world-concept.png)
+![An isometric diagram of two boxes: a teal box on the ground and an orange box floating 110 ft above it, their footprints overlapping in a plan-view inset; the caption notes that a 2D predicate returns true while ST_Intersects on Box3D returns false](box3d-3d-world-concept.svg)
 
 ## A city becomes boxes
 
@@ -62,7 +62,7 @@ SELECT id, names.primary AS name, geometry, height * 3.28084 AS height_ft,
 FROM b_raw WHERE height IS NOT NULL
 ```
 
-The GeoParquet reader prunes row groups against the bounding-box filter, so the query touches a San Diego-sized slice of a planetary dataset: 208,477 buildings, 178,384 of them with a height. The tallest is Symphony Towers at 499 ft, which already hints at the third dimension shaping the city: downtown sits under the approach path to San Diego International, and the FAA caps its towers.
+With row-group pruning against the bounding-box filter, the read covers a San Diego-sized slice of a planetary dataset: 208,477 buildings, 178,384 of them with a height. The tallest is Symphony Towers at 499 ft, a height the third dimension already constrains: downtown sits under the approach path to San Diego International, and the FAA caps its towers.
 
 ??? example "Session setup: released artifacts, anonymous S3"
 
@@ -106,7 +106,7 @@ FROM cells_raw
 
 ## Do the volumes meet?
 
-One join answers a question neither dataset can answer alone: which buildings rise above the drone ceiling over their own roof?
+The answer is in neither dataset alone. One join is enough: which buildings rise above the drone ceiling over their own roof?
 
 ```sql
 SELECT COUNT(DISTINCT b.id) AS total_above,
@@ -124,9 +124,9 @@ FROM bldg b JOIN cells c ON ST_Intersects(b.box, c.above_ceiling)
 
 Two numbers, one story. 31,425 buildings stand taller than the ceiling above them, and nearly all sit in the 0 ft cells: the FAA drew its no-fly zones where the city is tall. In the cells where drones may fly at all, only **139 buildings** rise into or above the permitted band. Those 139 are the ones a route planner has to know by name; the biggest names on the other list, led by Symphony Towers at 499 ft under a 0 ft ceiling, are the reason the zeroes exist.
 
-One neighborhood shows what the join sees. Around Cortez Hill the ceiling is 100 ft, drawn below as a translucent plane over the real building boxes; every orange volume is a row the join returns:
+Here is the geometry behind that join, in one neighborhood. Around Cortez Hill the ceiling is 100 ft, drawn below as a translucent plane over the real building boxes; every orange volume is a row the join returns:
 
-![An isometric drawing of the Cortez Hill neighborhood built from real Overture footprints and heights: teal boxes under a translucent blue ceiling plane at 100 ft, with orange towers punching through it](box3d-3d-world-ceiling.png)
+![An isometric drawing of the Cortez Hill neighborhood built from real Overture footprints and heights: teal boxes under a translucent blue ceiling plane at 100 ft, with orange towers punching through it](box3d-3d-world-ceiling.svg)
 
 The join itself runs through Sedona's spatial join machinery. The physical plan shows it:
 
@@ -159,13 +159,13 @@ FROM corridor c JOIN bldg b ON ST_Intersects(b.box, c.cbox)
 +------------+----------+
 ```
 
-Five buildings stand inside the corridor's altitude band, the tallest at 381 ft. Swap `ST_Intersects` for `ST_3DDWithin(b.box, c.cbox, 50.0)` and the join enforces a 50 ft clearance margin instead of bare contact.
+Five buildings stand inside the corridor's altitude band, the tallest at 381 ft. Swap `ST_Intersects` for `ST_3DDWithin(b.box, c.cbox, 50.0)` and the test becomes a 50 ft clearance margin instead of bare contact.
 
-![A side elevation along the corridor: building heights as bars over 2.6 miles, a translucent blue band from 250 to 350 ft, and five orange bars reaching into the band near downtown](box3d-3d-world-corridor.png)
+![A side elevation along the corridor: building heights as bars over 2.6 miles, a translucent blue band from 250 to 350 ft, and five orange bars reaching into the band near downtown](box3d-3d-world-corridor.svg)
 
 ## One dimension, many doors
 
-The same six doubles open more than airspace.
+The same six doubles apply well beyond airspace.
 
 **Aircraft separation.** Aviation's loss-of-separation rule is a volume: a horizontal radius measured on the curved Earth and a vertical band. The horizontal half belongs to 1.9.1's other new type, [Geography](https://sedona.apache.org/latest/api/sql/geography/Geography-Constructors/ST_GeogFromWKT/), which measures geodesic meters; the vertical half is arithmetic:
 
@@ -215,6 +215,6 @@ The grey field is the FAA's no-fly grid, visible as geography.
 
 ## The point
 
-Flat answers were an artifact of flat tools. The world your data describes has ceilings, floors, altitudes, and depths, and as of 1.9.1 a Sedona query can ask about all of them: build the volumes in one expression, join them with a planner that indexes the third axis, and draw the result in 3D without leaving the ecosystem.
+Flat answers were an artifact of flat tools. The world your data describes has ceilings, floors, altitudes, and depths, and as of 1.9.1 a Sedona query can express all of them: build the volumes in one expression, join them with a planner that indexes the third axis, and draw the result in 3D without leaving the ecosystem.
 
 *References: [Box3D constructors](https://sedona.apache.org/latest/api/sql/box3d/Box3D-Constructors/ST_3DMakeBox/), [ST_3DDWithin](https://sedona.apache.org/latest/api/sql/Predicates/ST_3DDWithin/), [ST_3DExtent](https://sedona.apache.org/latest/api/sql/Aggregate-Functions/ST_3DExtent/), and the [1.9.1 release notes](https://sedona.apache.org/latest/setup/release-notes/).*
