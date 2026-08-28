@@ -149,6 +149,17 @@ jobs:
           cd python
           export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
           uv run pytest -v tests
+      - name: Run pandas 1.5 compatibility regression
+        if: ${{ matrix.spark == '3.4.0' && matrix.python == '3.8' }}
+        run: |
+          cd python
+          VENV_PYTHON=$(pwd)/.venv/bin/python
+          uv pip install --python ${VENV_PYTHON} "pandas==1.5.3" "geopandas==0.13.2" "shapely==1.8.5.post1"
+          export PYSPARK_PYTHON=${VENV_PYTHON}
+          export PYSPARK_DRIVER_PYTHON=${VENV_PYTHON}
+          export SPARK_HOME=$(${VENV_PYTHON} -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
+          ${VENV_PYTHON} -m pytest -v \
+            tests/geopandas/test_geodataframe.py::TestGeoDataFrameLocalConstructor::test_geopandas_input_is_not_mutated
       - name: Run basic tests without rasterio
         run: |
           cd python
