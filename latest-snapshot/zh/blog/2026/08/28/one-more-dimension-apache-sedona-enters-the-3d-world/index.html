@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5831,9 +5830,9 @@
 
 
 <h1 id="one-more-dimension-apache-sedona-enters-the-3d-world">One More Dimension: Apache Sedona Enters the 3D World<a class="headerlink" href="#one-more-dimension-apache-sedona-enters-the-3d-world" title="Permanent link">&para;</a></h1>
-<p>A spatial query sees the world the way the noon sun does: as shadows on the ground. Two objects whose shadows touch can be four hundred feet apart, and flat geometry cannot tell the difference.</p>
-<p>The questions arriving at spatial engines have stopped being flat. Drones under FAA ceilings, aircraft over towers, apartments above restaurants, mineral deposits below mining leases: each one asks whether two volumes meet, and until now SQL answered in shadow form. Sedona 1.9.1 adds the missing axis. There is a <code>Box3D</code> type with constructors and accessors, 3D predicates and distances, a 3D extent aggregate, and query plans that know up from down.</p>
-<p><img alt="The cover: an isometric drawing of a San Diego neighborhood as extruded boxes, with the FAA drone ceiling as a translucent plane at 100 ft and orange towers piercing it, beside the post title" src="../../../../box3d-3d-world-cover.png" /></p>
+<p>In a flat spatial query the world is only its noon shadow on the ground. Two objects whose shadows touch can be four hundred feet apart, and from a flat predicate the answer is the same for both.</p>
+<p>The questions put to spatial engines have stopped being flat. Drones under FAA ceilings, aircraft over towers, apartments above restaurants, mineral deposits below mining leases: each one comes down to whether two volumes meet, and until now the SQL answer was the shadow version. Sedona 1.9.1 adds the missing axis. There is a <code>Box3D</code> type with constructors and accessors, 3D predicates and distances, a 3D extent aggregate, and query plans that account for the third axis.</p>
+<p><img alt="The cover: an isometric drawing of a San Diego neighborhood, its street grid on the ground and every building rendered as an extruded box, beside the post title" src="../../../../box3d-3d-world-cover.svg" /></p>
 <!-- more -->
 
 <h2 id="a-box-with-a-z">A box with a z<a class="headerlink" href="#a-box-with-a-z" title="Permanent link">&para;</a></h2>
@@ -5848,8 +5847,8 @@
 |             false|     true|
 +------------------+---------+
 </code></pre></div>
-<p>The two boxes overlap in x and y. A 2D engine calls that an intersection; the third coordinate says they miss by ten vertical units. And the 3-4-12 point sits at Euclidean distance 13, which <code>ST_3DDWithin</code> treats inclusively, <a href="https://sedona.apache.org/latest/api/sql/Predicates/ST_3DDWithin/">mirroring PostGIS</a>.</p>
-<p><img alt="An isometric diagram of two boxes: a teal box on the ground and an orange box floating 110 ft above it, their footprints overlapping in a plan-view inset; the caption reads that 2D calls it an intersection while Box3D says false" src="../../../../box3d-3d-world-concept.png" /></p>
+<p>The two boxes overlap in x and y, which is enough for a true result from a 2D predicate; in the third coordinate the gap between them is ten units. And the 3-4-12 point sits at Euclidean distance 13, the inclusive bound, <a href="https://sedona.apache.org/latest/api/sql/Predicates/ST_3DDWithin/">mirroring PostGIS</a>.</p>
+<p><img alt="An isometric diagram of two boxes: a teal box on the ground and an orange box floating 110 ft above it, their footprints overlapping in a plan-view inset; the caption notes that a 2D predicate returns true while ST_Intersects on Box3D returns false" src="../../../../box3d-3d-world-concept.svg" /></p>
 <h2 id="a-city-becomes-boxes">A city becomes boxes<a class="headerlink" href="#a-city-becomes-boxes" title="Permanent link">&para;</a></h2>
 <p>Overture Maps publishes building footprints with a <code>height</code> attribute as GeoParquet on S3, open to anonymous reads. One filter pulls a city out of the planet, and one expression gives every building a volume:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geoparquet"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
@@ -5864,7 +5863,7 @@
 <span class="w">                    </span><span class="n">ST_PointZ</span><span class="p">(</span><span class="n">ST_XMax</span><span class="p">(</span><span class="n">geometry</span><span class="p">),</span><span class="w"> </span><span class="n">ST_YMax</span><span class="p">(</span><span class="n">geometry</span><span class="p">),</span><span class="w"> </span><span class="n">height</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3</span><span class="p">.</span><span class="mi">28084</span><span class="p">))</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">box</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">b_raw</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">height</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span>
 </code></pre></div>
-<p>The GeoParquet reader prunes row groups against the bounding-box filter, so the query touches a San Diego-sized slice of a planetary dataset: 208,477 buildings, 178,384 of them with a height. The tallest is Symphony Towers at 499 ft, which already hints at the third dimension shaping the city: downtown sits under the approach path to San Diego International, and the FAA caps its towers.</p>
+<p>With row-group pruning against the bounding-box filter, the read covers a San Diego-sized slice of a planetary dataset: 208,477 buildings, 178,384 of them with a height. The tallest is Symphony Towers at 499 ft, a height the third dimension already constrains: downtown sits under the approach path to San Diego International, and the FAA caps its towers.</p>
 <details class="example">
 <summary>Session setup: released artifacts, anonymous S3</summary>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaContext</span>
@@ -5900,7 +5899,7 @@
 <span class="k">FROM</span><span class="w"> </span><span class="n">cells_raw</span>
 </code></pre></div>
 <h2 id="do-the-volumes-meet">Do the volumes meet?<a class="headerlink" href="#do-the-volumes-meet" title="Permanent link">&para;</a></h2>
-<p>One join answers a question neither dataset can answer alone: which buildings rise above the drone ceiling over their own roof?</p>
+<p>The answer is in neither dataset alone. One join is enough: which buildings rise above the drone ceiling over their own roof?</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="k">DISTINCT</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">total_above</span><span class="p">,</span>
 <span class="w">       </span><span class="k">COUNT</span><span class="p">(</span><span class="k">DISTINCT</span><span class="w"> </span><span class="k">CASE</span><span class="w"> </span><span class="k">WHEN</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">ceiling_ft</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="k">END</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">above_in_flyable_cells</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">bldg</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">cells</span><span class="w"> </span><span class="k">c</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">ST_Intersects</span><span class="p">(</span><span class="n">b</span><span class="p">.</span><span class="n">box</span><span class="p">,</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">above_ceiling</span><span class="p">)</span>
@@ -5912,8 +5911,8 @@
 +-----------+----------------------+
 </code></pre></div>
 <p>Two numbers, one story. 31,425 buildings stand taller than the ceiling above them, and nearly all sit in the 0 ft cells: the FAA drew its no-fly zones where the city is tall. In the cells where drones may fly at all, only <strong>139 buildings</strong> rise into or above the permitted band. Those 139 are the ones a route planner has to know by name; the biggest names on the other list, led by Symphony Towers at 499 ft under a 0 ft ceiling, are the reason the zeroes exist.</p>
-<p>One neighborhood shows what the join sees. Around Cortez Hill the ceiling is 100 ft, drawn below as a translucent plane over the real building boxes; every orange volume is a row the join returns:</p>
-<p><img alt="An isometric drawing of the Cortez Hill neighborhood built from real Overture footprints and heights: teal boxes under a translucent blue ceiling plane at 100 ft, with orange towers punching through it" src="../../../../box3d-3d-world-ceiling.png" /></p>
+<p>Here is the geometry behind that join, in one neighborhood. Around Cortez Hill the ceiling is 100 ft, drawn below as a translucent plane over the real building boxes; every orange volume is a row the join returns:</p>
+<p><img alt="An isometric drawing of the Cortez Hill neighborhood built from real Overture footprints and heights: teal boxes under a translucent blue ceiling plane at 100 ft, with orange towers punching through it" src="../../../../box3d-3d-world-ceiling.svg" /></p>
 <p>The join itself runs through Sedona's spatial join machinery. The physical plan shows it:</p>
 <div class="highlight"><pre><span></span><code>+- RangeJoin box: box3d, above_ceiling: box3d, INTERSECTS
 </code></pre></div>
@@ -5935,10 +5934,10 @@
 |           5|     381.0|
 +------------+----------+
 </code></pre></div>
-<p>Five buildings stand inside the corridor's altitude band, the tallest at 381 ft. Swap <code>ST_Intersects</code> for <code>ST_3DDWithin(b.box, c.cbox, 50.0)</code> and the join enforces a 50 ft clearance margin instead of bare contact.</p>
-<p><img alt="A side elevation along the corridor: building heights as bars over 2.6 miles, a translucent blue band from 250 to 350 ft, and five orange bars reaching into the band near downtown" src="../../../../box3d-3d-world-corridor.png" /></p>
+<p>Five buildings stand inside the corridor's altitude band, the tallest at 381 ft. Swap <code>ST_Intersects</code> for <code>ST_3DDWithin(b.box, c.cbox, 50.0)</code> and the test becomes a 50 ft clearance margin instead of bare contact.</p>
+<p><img alt="A side elevation along the corridor: building heights as bars over 2.6 miles, a translucent blue band from 250 to 350 ft, and five orange bars reaching into the band near downtown" src="../../../../box3d-3d-world-corridor.svg" /></p>
 <h2 id="one-dimension-many-doors">One dimension, many doors<a class="headerlink" href="#one-dimension-many-doors" title="Permanent link">&para;</a></h2>
-<p>The same six doubles open more than airspace.</p>
+<p>The same six doubles apply well beyond airspace.</p>
 <p><strong>Aircraft separation.</strong> Aviation's loss-of-separation rule is a volume: a horizontal radius measured on the curved Earth and a vertical band. The horizontal half belongs to 1.9.1's other new type, <a href="https://sedona.apache.org/latest/api/sql/geography/Geography-Constructors/ST_GeogFromWKT/">Geography</a>, which measures geodesic meters; the vertical half is arithmetic:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_DWithin</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">pos</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">pos</span><span class="p">,</span><span class="w"> </span><span class="mi">9260</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">within_5nm</span><span class="p">,</span>
 <span class="w">       </span><span class="k">ABS</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">alt_ft</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">alt_ft</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1000</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">within_1000ft</span><span class="p">,</span>
@@ -5969,7 +5968,7 @@
 <h2 id="the-flat-sibling-and-the-bindings">The flat sibling, and the bindings<a class="headerlink" href="#the-flat-sibling-and-the-bindings" title="Permanent link">&para;</a></h2>
 <p><code>Box3D</code> arrived alongside <code>Box2D</code>, its planar counterpart, which comes with <code>ST_Extent</code>, box predicates with join support, and GeoParquet row-group pushdown for <code>ST_BoxIntersects</code> filters. Python code receives both as first-class types through the new UDT bindings, and SedonaFlink ships the same constructors, accessors, and predicates for streams.</p>
 <h2 id="the-point">The point<a class="headerlink" href="#the-point" title="Permanent link">&para;</a></h2>
-<p>Flat answers were an artifact of flat tools. The world your data describes has ceilings, floors, altitudes, and depths, and as of 1.9.1 a Sedona query can ask about all of them: build the volumes in one expression, join them with a planner that indexes the third axis, and draw the result in 3D without leaving the ecosystem.</p>
+<p>Flat answers were an artifact of flat tools. The world your data describes has ceilings, floors, altitudes, and depths, and as of 1.9.1 a Sedona query can express all of them: build the volumes in one expression, join them with a planner that indexes the third axis, and draw the result in 3D without leaving the ecosystem.</p>
 <p><em>References: <a href="https://sedona.apache.org/latest/api/sql/box3d/Box3D-Constructors/ST_3DMakeBox/">Box3D constructors</a>, <a href="https://sedona.apache.org/latest/api/sql/Predicates/ST_3DDWithin/">ST_3DDWithin</a>, <a href="https://sedona.apache.org/latest/api/sql/Aggregate-Functions/ST_3DExtent/">ST_3DExtent</a>, and the <a href="https://sedona.apache.org/latest/setup/release-notes/">1.9.1 release notes</a>.</em></p>
 <div class="admonition tip">
 <p class="admonition-title">Star Apache Sedona on GitHub</p>
@@ -5998,7 +5997,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="August 28, 2026 09:37:06 UTC">August 28, 2026 09:37:06</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="August 28, 2026 15:12:15 UTC">August 28, 2026 15:12:15</span>
   </span>
 
     
