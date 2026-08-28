@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geodataframe &mdash; Apache Sedona Python Documentation</title>
@@ -239,6 +238,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pyspark.pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pspd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sgpd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseGeometry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">packaging.version</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse</span> <span class="k">as</span> <span class="n">parse_version</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Series</span> <span class="k">as</span> <span class="n">PandasOnSparkSeries</span>
@@ -1792,7 +1792,119 @@
         <span class="n">crs</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeoDataFrame</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"from_dict() is not implemented yet."</span><span class="p">)</span></div>
+<span class="w">        </span><span class="sd">"""Construct a GeoDataFrame from a dictionary.</span>
+
+<span class="sd">        .. versionadded:: 2.0.0</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : dict</span>
+<span class="sd">            Dictionary of the form ``{field: array-like}`` or</span>
+<span class="sd">            ``{field: dict}``.</span>
+<span class="sd">        geometry : str or array-like, optional</span>
+<span class="sd">            If a string, the column to use as the active geometry. If an</span>
+<span class="sd">            array-like, it is added as the ``"geometry"`` column.</span>
+<span class="sd">        crs : str, dict, pyproj.CRS, optional</span>
+<span class="sd">            Coordinate reference system to assign to the resulting frame. The</span>
+<span class="sd">            coordinates are not transformed.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Additional arguments passed to :meth:`pandas.DataFrame.from_dict`,</span>
+<span class="sd">            such as ``orient`` or ``columns``.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        GeoDataFrame</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This constructor first materializes the dictionary in a local</span>
+<span class="sd">        GeoPandas GeoDataFrame on the driver, then distributes it with Spark.</span>
+<span class="sd">        It is intended for small in-memory inputs. For large datasets, create</span>
+<span class="sd">        a Spark DataFrame or use a distributed Sedona data source instead.</span>
+
+<span class="sd">        Once distributed, dictionary values follow Spark schema inference.</span>
+<span class="sd">        Each column must contain values that Spark can represent with one</span>
+<span class="sd">        compatible type.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from shapely.geometry import Point</span>
+<span class="sd">        &gt;&gt;&gt; from sedona.spark.geopandas import GeoDataFrame</span>
+<span class="sd">        &gt;&gt;&gt; data = {</span>
+<span class="sd">        ...     "name": ["first", "second"],</span>
+<span class="sd">        ...     "geometry": [Point(1, 2), Point(2, 1)],</span>
+<span class="sd">        ... }</span>
+<span class="sd">        &gt;&gt;&gt; GeoDataFrame.from_dict(data, crs="EPSG:4326")</span>
+<span class="sd">             name     geometry</span>
+<span class="sd">        0   first  POINT (1 2)</span>
+<span class="sd">        1  second  POINT (2 1)</span>
+<span class="sd">        """</span>
+        <span class="n">local</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span>
+            <span class="n">geometry</span><span class="o">=</span><span class="n">geometry</span><span class="p">,</span>
+            <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_from_local_geopandas</span><span class="p">(</span><span class="n">local</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_from_local_geopandas</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">local</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Distribute a locally constructed GeoPandas frame safely."""</span>
+        <span class="n">geometry_name</span> <span class="o">=</span> <span class="n">local</span><span class="o">.</span><span class="n">_geometry_column_name</span>
+        <span class="n">restore_order_column</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Spark 3 pandas-on-Spark only checks the first object value when</span>
+        <span class="c1"># looking for a user-defined type. Give every geometry column that has</span>
+        <span class="c1"># a value a representative in a temporary first row, then remove it</span>
+        <span class="c1"># and restore the original positional order.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">local</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">inference_values</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">local</span><span class="o">.</span><span class="n">dtypes</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+                    <span class="n">dtype</span><span class="p">,</span> <span class="n">GeometryDtype</span>
+                <span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_object_dtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="n">missing</span> <span class="o">=</span> <span class="n">local</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="n">position</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+                <span class="n">non_missing</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="o">~</span><span class="n">missing</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">missing</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">non_missing</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">local</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">non_missing</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">position</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span> <span class="n">GeometryDtype</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span>
+                        <span class="n">value</span><span class="p">,</span> <span class="n">BaseGeometry</span>
+                    <span class="p">):</span>
+                        <span class="n">inference_values</span><span class="p">[</span><span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+            <span class="k">if</span> <span class="n">inference_values</span><span class="p">:</span>
+                <span class="n">local</span> <span class="o">=</span> <span class="n">local</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+                <span class="n">base_name</span> <span class="o">=</span> <span class="s2">"__sedona_local_row_order__"</span>
+                <span class="n">suffix</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="n">base_name</span> <span class="k">if</span> <span class="n">suffix</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">base_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">"</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">local</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">):</span>
+                        <span class="n">candidate</span> <span class="o">=</span> <span class="p">(</span><span class="n">name</span><span class="p">,)</span> <span class="o">+</span> <span class="p">(</span><span class="s2">""</span><span class="p">,)</span> <span class="o">*</span> <span class="p">(</span><span class="n">local</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">nlevels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">candidate</span> <span class="o">=</span> <span class="n">name</span>
+                    <span class="k">if</span> <span class="n">candidate</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">local</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                        <span class="n">restore_order_column</span> <span class="o">=</span> <span class="n">candidate</span>
+                        <span class="k">break</span>
+                    <span class="n">suffix</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="n">local</span><span class="p">[</span><span class="n">restore_order_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">local</span><span class="p">))</span>
+                <span class="n">inference_row</span> <span class="o">=</span> <span class="n">local</span><span class="o">.</span><span class="n">iloc</span><span class="p">[[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">inference_row</span><span class="p">[</span><span class="n">restore_order_column</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">inference_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">inference_row</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="n">local</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">inference_row</span><span class="p">,</span> <span class="n">local</span><span class="p">])</span>
+
+        <span class="c1"># Avoid pandas 1.5 sharing geometry blocks with the local GeoDataFrame;</span>
+        <span class="c1"># the constructor casts those blocks to object dtype for Spark.</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">local</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">restore_order_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">result</span><span class="p">[</span><span class="n">restore_order_column</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">restore_order_column</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">restore_order_column</span><span class="p">]))</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">_geometry_column_name</span> <span class="o">=</span> <span class="n">geometry_name</span>
+        <span class="k">return</span> <span class="n">result</span>
 
 <div class="viewcode-block" id="GeoDataFrame.from_features"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_features">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_features</span><span class="p">(</span>
@@ -1868,31 +1980,7 @@
             <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span>
             <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span>
         <span class="p">)</span>
-
-        <span class="c1"># Spark 3 pandas-on-Spark only checks the first object value when</span>
-        <span class="c1"># looking for a user-defined type. Move one geometry forward for</span>
-        <span class="c1"># schema inference, then restore the GeoPandas RangeIndex order.</span>
-        <span class="n">restore_order</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">geometry_name</span> <span class="o">=</span> <span class="n">local</span><span class="o">.</span><span class="n">_geometry_column_name</span>
-        <span class="k">if</span> <span class="n">geometry_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">local</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">missing</span> <span class="o">=</span> <span class="n">local</span><span class="p">[</span><span class="n">geometry_name</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
-            <span class="n">non_missing</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="o">~</span><span class="n">missing</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">missing</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">non_missing</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">first_geometry</span> <span class="o">=</span> <span class="n">non_missing</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
-                    <span class="p">(</span>
-                        <span class="p">[</span><span class="n">first_geometry</span><span class="p">],</span>
-                        <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">first_geometry</span><span class="p">),</span>
-                        <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">first_geometry</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">local</span><span class="p">)),</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-                <span class="n">local</span> <span class="o">=</span> <span class="n">local</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">order</span><span class="p">]</span>
-                <span class="n">restore_order</span> <span class="o">=</span> <span class="kc">True</span>
-
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">local</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">restore_order</span><span class="p">:</span>
-            <span class="n">result</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">result</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_from_local_geopandas</span><span class="p">(</span><span class="n">local</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeoDataFrame.from_postgis"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_postgis">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_postgis</span><span class="p">(</span>
