@@ -2022,6 +2022,12 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void testIsPolygonOrientationHandlesNullGeometry() {
+    assertFalse(Functions.isPolygonCW(null));
+    assertFalse(Functions.isPolygonCCW(null));
+  }
+
+  @Test
   public void testTriangulatePolygon() throws ParseException {
     Geometry geom =
         Constructors.geomFromWKT(

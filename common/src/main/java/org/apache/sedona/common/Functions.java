@@ -1648,6 +1648,9 @@ public class Functions {
    * @return
    */
   public static boolean isPolygonCW(Geometry geom) {
+    if (geom == null) {
+      return false;
+    }
     return allPolygonalComponentsMatchOrientation(geom, Functions::checkIfPolygonCW);
   }
 
@@ -1819,6 +1822,9 @@ public class Functions {
    * @return
    */
   public static boolean isPolygonCCW(Geometry geom) {
+    if (geom == null) {
+      return false;
+    }
     return allPolygonalComponentsMatchOrientation(geom, Functions::checkIfPolygonCCW);
   }
 
