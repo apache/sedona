@@ -27,16 +27,16 @@ SedonaSQL 支持 SQL/MM Part3 空间 SQL 标准。SedonaSQL 详细的 API 说明
 
 !!! abstract "使用 Apache Sedona 启动 spark-sql"
 
-	=== "Spark 3.3+ 与 Scala 2.12"
+	=== "Spark 3.5 与 Scala 2.12"
 
         ```sh
-        spark-sql --packages org.apache.sedona:sedona-spark-shaded-3.3_2.12:<VERSION>,org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }} \
+        spark-sql --packages org.apache.sedona:sedona-spark-shaded-3.5_2.12:<VERSION>,org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }} \
           --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
           --conf spark.kryo.registrator=org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator \
           --conf spark.sql.extensions=org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions
         ```
 
-        请将 artifact 名称中的 `3.3` 替换为对应的 Spark major.minor 版本。
+        Spark 4.0 及以上仅提供 Scala 2.13 构建，请将 artifact 名称替换为 `sedona-spark-shaded-4.0_2.13`。
 
 这会注册 SedonaSQL 与 SedonaViz 的全部类型、函数与优化规则。
 

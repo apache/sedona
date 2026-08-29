@@ -17,7 +17,7 @@
  under the License.
  -->
 
-We recommend Sedona-1.3.1-incubating and above for EMR. In the tutorial, we use AWS Elastic MapReduce (EMR) 6.9.0. It has the following applications installed: Hadoop 3.3.3, JupyterEnterpriseGateway 2.6.0, Livy 0.7.1, Spark 3.3.0.
+In the tutorial, we use AWS Elastic MapReduce (EMR) 7.9.0. It has the following applications installed: Hadoop 3.4.1, JupyterEnterpriseGateway 2.6.0, Livy 0.8.0-incubating, Spark 3.5.5. Any EMR 7.x release works, since they all ship Spark 3.5.
 
 This tutorial is tested on EMR on EC2 with EMR Studio (notebooks). EMR on EC2 uses YARN to manage resources.
 
@@ -35,7 +35,7 @@ In your S3 bucket, add a script that has the following content:
 sudo mkdir /jars
 
 # Download Sedona jar
-sudo curl -o /jars/sedona-spark-shaded-3.3_2.12-{{ sedona.current_version }}.jar "https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.3_2.12/{{ sedona.current_version }}/sedona-spark-shaded-3.3_2.12-{{ sedona.current_version }}.jar"
+sudo curl -o /jars/sedona-spark-shaded-3.5_2.12-{{ sedona.current_version }}.jar "https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/{{ sedona.current_version }}/sedona-spark-shaded-3.5_2.12-{{ sedona.current_version }}.jar"
 
 # Download GeoTools jar
 sudo curl -o /jars/geotools-wrapper-{{ sedona.current_geotools }}.jar "https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/{{ sedona.current_geotools }}/geotools-wrapper-{{ sedona.current_geotools }}.jar"
@@ -60,7 +60,7 @@ When you create an EMR cluster, in the software configuration, add the following
   {
     "Classification":"spark-defaults",
     "Properties":{
-      "spark.yarn.dist.jars": "/jars/sedona-spark-shaded-3.3_2.12-{{ sedona.current_version }}.jar,/jars/geotools-wrapper-{{ sedona.current_geotools }}.jar",
+      "spark.yarn.dist.jars": "/jars/sedona-spark-shaded-3.5_2.12-{{ sedona.current_version }}.jar,/jars/geotools-wrapper-{{ sedona.current_geotools }}.jar",
       "spark.serializer": "org.apache.spark.serializer.KryoSerializer",
       "spark.kryo.registrator": "org.apache.sedona.core.serde.SedonaKryoRegistrator",
       "spark.sql.extensions": "org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions"
