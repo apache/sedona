@@ -22,7 +22,7 @@
 本教程在带 EMR Studio（notebook）的 EMR on EC2 上完成测试。EMR on EC2 使用 YARN 进行资源管理。
 
 !!!note
-	如果您使用 Spark 3.5+ 与 Scala 2.12，请使用 `sedona-spark-shaded-3.5_2.12`。请注意 Spark 与 Scala 的版本后缀。
+	如果您使用 Spark 3.5 与 Scala 2.12，请使用 `sedona-spark-shaded-3.5_2.12`。Spark 4.0 及以上仅提供 Scala 2.13 构建，请使用 `sedona-spark-shaded-4.0_2.13`。请注意 Spark 与 Scala 的版本后缀。
 
 ## 准备初始化脚本
 

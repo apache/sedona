@@ -55,11 +55,11 @@ Sedona Scala/Java 代码是一个多模块项目，每个模块都是 Scala/Java
 * `-Dspark`：`{major}.{minor}`，例如 `-Dspark=3.5` 表示针对 Spark 3.5 编译。
 * `-Dscala`：`2.12` 或 `2.13`
 
-=== "Spark 3.5+ Scala 2.12"
+=== "Spark 3.5 Scala 2.12"
 	```
 	mvn clean install -DskipTests -Dspark=3.5 -Dscala=2.12
 	```
-    若要针对更高 Spark 版本编译，请将 `3.5` 替换为对应的 Spark major.minor 版本。
+    Scala 2.12 仅适用于 Spark 3.5。Spark 4.0 及以上仅提供 Scala 2.13 构建。
 === "Spark 3.5+ Scala 2.13"
 	```
 	mvn clean install -DskipTests -Dspark=3.5 -Dscala=2.13

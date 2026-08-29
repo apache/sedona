@@ -55,11 +55,11 @@ User can specify `-Dspark` and `-Dscala` command line options to compile with di
 * `-Dspark`: `{major}.{minor}`: For example, specify `-Dspark=3.5` to build for Spark 3.5.
 * `-Dscala`: `2.12` or `2.13`
 
-=== "Spark 3.5+ Scala 2.12"
+=== "Spark 3.5 Scala 2.12"
 	```
 	mvn clean install -DskipTests -Dspark=3.5 -Dscala=2.12
 	```
-    Please replace `3.5` with Spark major.minor version when building for higher Spark versions.
+    Scala 2.12 is only available for Spark 3.5. Spark 4.0 and above are built with Scala 2.13 only.
 === "Spark 3.5+ Scala 2.13"
 	```
 	mvn clean install -DskipTests -Dspark=3.5 -Dscala=2.13
