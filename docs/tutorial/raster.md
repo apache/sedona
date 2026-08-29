@@ -85,7 +85,7 @@ If you already have a SparkSession (Wherobots, AWS EMR, Databricks), skip ahead 
 	)
 	sedona = SedonaContext.create(config)
 	```
-	Replace `3.3` with the major.minor version of your Spark install (for example `sedona-spark-shaded-4.0_2.12`).
+	Replace `3.3` with the major.minor version of your Spark install (for example `sedona-spark-shaded-4.0_2.13`).
 
 You can also register Sedona by passing `--conf spark.sql.extensions=org.apache.sedona.sql.SedonaSqlExtensions` to `spark-submit` or `spark-shell`.
 

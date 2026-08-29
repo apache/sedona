@@ -107,7 +107,7 @@ SedonaSQL 详细 API 说明请参阅 [SedonaSQL API](../api/sql/Overview.md)。�
 	           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
 	    getOrCreate()
 	```
-    如使用其他 Spark 版本，请将 sedona-spark-shaded 包名中的 `3.3` 替换为对应的 Spark major.minor 版本，例如 `sedona-spark-shaded-4.0_2.12:{{ sedona.current_version }}`。
+    如使用其他 Spark 版本，请将 sedona-spark-shaded 包名中的 `3.3` 替换为对应的 Spark major.minor 版本，例如 `sedona-spark-shaded-4.0_2.13:{{ sedona.current_version }}`。
 
 ## 初始化 SedonaContext
 

@@ -115,7 +115,7 @@ Format:
 Example:
 
 ```bash
-./docker/build.sh 3.4.1 {{ sedona.current_version }}
+./docker/build.sh 4.0.1 {{ sedona.current_version }}
 ```
 
 `build_mode` is optional. If its value is not given or is `local`, the script will build the image locally. Otherwise, it will start a cross-platform compilation and push images directly to DockerHub.
@@ -133,7 +133,7 @@ Format:
 Example:
 
 ```bash
-./docker/build.sh 3.4.1 latest
+./docker/build.sh 4.0.1 latest
 ```
 
 `build_mode` is optional. If its value is not given or is `local`, the script will build the image locally. Otherwise, it will start a cross-platform compilation and push images directly to DockerHub.
@@ -175,5 +175,5 @@ Example:
 
 ```bash
 docker login
-./docker/build.sh 3.4.1 {{ sedona.current_version }} release
+./docker/build.sh 4.0.1 {{ sedona.current_version }} release
 ```

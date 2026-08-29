@@ -30,7 +30,7 @@ Sedona binary releases are compiled by Java 11/17 and Scala 2.12/2.13 and tested
 
 	|             | Spark 3.5 | Spark 4.0 | Spark 4.1 |
 	|:---------:|:---------:|:---------:|:---------:|
-	| Scala 2.12 |✅ |✅ | |
+	| Scala 2.12 |✅ | | |
 	| Scala 2.13 |✅ |✅ |✅ |
 
 === "Sedona Python"
@@ -46,4 +46,4 @@ Sedona binary releases are compiled by Java 11/17 and Scala 2.12/2.13 and tested
 
 	|             | Spark 3.5 | Spark 4.0 | Spark 4.1 |
 	|:---------:|:---------:|:---------:|:---------:|
-	| Scala 2.12 | ✅ | ✅ | |
+	| Scala 2.12 | ✅ | | |

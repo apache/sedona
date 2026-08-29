@@ -65,9 +65,6 @@ mvn -q deploy -DskipTests -Dspark=3.5 -Dscala=2.12
 # Spark 3.5 与 Scala 2.13
 mvn -q deploy -DskipTests -Dspark=3.5 -Dscala=2.13
 
-# Spark 4.0 与 Scala 2.12
-mvn -q deploy -DskipTests -Dspark=4.0 -Dscala=2.12
-
 # Spark 4.0 与 Scala 2.13
 mvn -q deploy -DskipTests -Dspark=4.0 -Dscala=2.13
 

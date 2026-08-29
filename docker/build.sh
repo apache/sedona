@@ -23,10 +23,17 @@ BUILD_MODE=$3
 GEOTOOLS_VERSION=${4:-auto}
 
 SEDONA_SPARK_VERSION=${SPARK_VERSION:0:3}
-if [ "${SPARK_VERSION:0:1}" -eq "3" ] && [ "${SPARK_VERSION:2:1}" -le "3" ]; then
-    # 3.0, 3.1, 3.2, 3.3
-    SEDONA_SPARK_VERSION=3.0
-fi
+# Reject Spark versions Sedona no longer builds for. Without this check an
+# unsupported -Dspark value simply matches no Maven profile, so the build
+# silently falls back to the default Spark version and produces jars that do
+# not match the Spark image they are installed into.
+case "$SEDONA_SPARK_VERSION" in
+    3.5 | 4.0 | 4.1) ;;
+    *)
+        echo "Unsupported Spark version: ${SPARK_VERSION}. Sedona supports Spark 3.5, 4.0 and 4.1." >&2
+        exit 1
+        ;;
+esac
 
 # Function to compare two version numbers
 version_gt() {

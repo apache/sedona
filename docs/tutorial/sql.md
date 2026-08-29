@@ -107,7 +107,7 @@ You can add additional Spark runtime config to the config builder. For example, 
 	           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
 	    getOrCreate()
 	```
-    If you are using a different Spark version, please replace the `3.3` in package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-4.0_2.12:{{ sedona.current_version }}`.
+    If you are using a different Spark version, please replace the `3.3` in package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-4.0_2.13:{{ sedona.current_version }}`.
 
 ## Initiate SedonaContext
 

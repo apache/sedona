@@ -85,7 +85,7 @@ Scala、Java、Python、R 等所有 Sedona 语言绑定都已支持栅格能力�
 	)
 	sedona = SedonaContext.create(config)
 	```
-	请将 `sedona-spark-shaded-3.3` 中的 `3.3` 替换为对应的 Spark 主.次版本号，例如 `sedona-spark-shaded-4.0_2.12`。
+	请将 `sedona-spark-shaded-3.3` 中的 `3.3` 替换为对应的 Spark 主.次版本号，例如 `sedona-spark-shaded-4.0_2.13`。
 
 你也可以通过给 `spark-submit` 或 `spark-shell` 传入 `--conf spark.sql.extensions=org.apache.sedona.sql.SedonaSqlExtensions` 来注册 Sedona。
 

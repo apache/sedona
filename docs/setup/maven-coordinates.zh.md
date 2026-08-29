@@ -53,22 +53,6 @@ Apache Sedona 针对每个受支持的 Spark 版本提供了不同的包。
 		</dependency>
 		```
 
-	=== "Spark 4.0 与 Scala 2.12"
-
-		```xml
-		<dependency>
-		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-spark-shaded-4.0_2.12</artifactId>
-		  <version>{{ sedona.current_version }}</version>
-		</dependency>
-		<!-- 可选：https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
-		<dependency>
-		    <groupId>org.datasyslab</groupId>
-		    <artifactId>geotools-wrapper</artifactId>
-		    <version>{{ sedona.current_geotools }}</version>
-		</dependency>
-		```
-
 !!! abstract "Sedona 与 Apache Spark + Scala 2.13"
 
 	=== "Spark 3.5 与 Scala 2.13"
@@ -183,20 +167,6 @@ Apache Sedona 针对每个受支持的 Spark 版本提供了不同的包。
 		    <version>{{ sedona.current_geotools }}</version>
 		</dependency>
 		```
-	=== "Spark 4.0 与 Scala 2.12"
-		```xml
-		<dependency>
-		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-spark-4.0_2.12</artifactId>
-		  <version>{{ sedona.current_version }}</version>
-		</dependency>
-		<dependency>
-		    <groupId>org.datasyslab</groupId>
-		    <artifactId>geotools-wrapper</artifactId>
-		    <version>{{ sedona.current_geotools }}</version>
-		</dependency>
-		```
-
 !!! abstract "Sedona 与 Apache Spark + Scala 2.13"
 
 	=== "Spark 3.5 与 Scala 2.13"
