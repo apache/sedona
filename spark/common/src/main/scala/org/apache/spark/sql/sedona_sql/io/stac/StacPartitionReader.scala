@@ -21,6 +21,7 @@ package org.apache.spark.sql.sedona_sql.io.stac
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.hadoop.conf.Configuration
 import org.apache.spark.broadcast.Broadcast
+import org.apache.spark.paths.SparkPath
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.json.JSONOptionsInRead
 import org.apache.spark.sql.connector.read.PartitionReader
@@ -34,7 +35,6 @@ import org.apache.spark.sql.types.{StringType, StructType}
 import org.apache.spark.util.SerializableConfiguration
 
 import java.io.{File, PrintWriter}
-import java.lang.reflect.Constructor
 import scala.io.Source
 
 class StacPartitionReader(
@@ -209,79 +209,17 @@ class StacPartitionReader(
   }
 
   /**
-   * Create a PartitionedFile instance using reflection. The constructor parameters differ between
-   * these versions, so we need to handle both cases. For Spark 3.4 and below, the constructor has
-   * 7 parameters, while for Spark 3.5 and above, it has 8 parameters. Additionally, the type of
-   * the second parameter may be `SparkPath` in some cases, which requires special handling.
+   * Create a PartitionedFile instance for a locally staged STAC item file.
    *
    * @param currentFile
    *   The file to create the PartitionedFile for.
    * @return
    *   The created PartitionedFile instance.
-   * @throws NoSuchMethodException
-   *   If no suitable constructor is found.
    */
-  def createPartitionedFile(currentFile: File): PartitionedFile = {
-    val partitionedFileClass =
-      Class.forName("org.apache.spark.sql.execution.datasources.PartitionedFile")
-    val constructors = partitionedFileClass.getConstructors
-    val constructor = constructors
-      .find(_.getParameterCount == 7)
-      .getOrElse(
-        constructors
-          .find(_.getParameterCount == 8)
-          .getOrElse(
-            throw new NoSuchMethodException("No constructor with 7 or 8 parameters found")))
-
-    val params = if (constructor.getParameterCount == 7) {
-      val secondParamType = constructor.getParameterTypes()(1)
-      if (secondParamType.getName == "org.apache.spark.paths.SparkPath") {
-        Array(
-          null,
-          createSparkPath(currentFile.getPath),
-          java.lang.Long.valueOf(0L),
-          java.lang.Long.valueOf(currentFile.length()),
-          Array.empty[String],
-          java.lang.Long.valueOf(0L),
-          java.lang.Long.valueOf(0L))
-      } else {
-        Array(
-          null,
-          currentFile.getPath,
-          java.lang.Long.valueOf(0L),
-          java.lang.Long.valueOf(currentFile.length()),
-          Array.empty[String],
-          java.lang.Long.valueOf(0L),
-          java.lang.Long.valueOf(0L))
-      }
-    } else {
-      Array(
-        null,
-        createSparkPath(currentFile.getPath),
-        java.lang.Long.valueOf(0L),
-        java.lang.Long.valueOf(currentFile.length()),
-        Array.empty[String],
-        java.lang.Long.valueOf(0L),
-        java.lang.Long.valueOf(0L),
-        null)
-    }
-
-    constructor.newInstance(params: _*).asInstanceOf[PartitionedFile]
-  }
-
-  /**
-   * Create a SparkPath instance using reflection. This is needed to support both Spark 3.3 and
-   * below and Spark 3.4 and above.
-   *
-   * @param pathString
-   *   The path to create the SparkPath for.
-   * @return
-   *   The created SparkPath instance.
-   */
-  def createSparkPath(pathString: String): Object = {
-    val sparkPathClass = Class.forName("org.apache.spark.paths.SparkPath")
-    val constructor: Constructor[_] = sparkPathClass.getDeclaredConstructor(classOf[String])
-    constructor.setAccessible(true) // Make the private constructor accessible
-    constructor.newInstance(pathString).asInstanceOf[Object]
-  }
+  def createPartitionedFile(currentFile: File): PartitionedFile =
+    PartitionedFile(
+      partitionValues = null,
+      filePath = SparkPath.fromPathString(currentFile.getPath),
+      start = 0L,
+      length = currentFile.length())
 }

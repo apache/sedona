@@ -19,9 +19,12 @@
 
 # ST_IsPolygonCW
 
-Introduction: Returns true if all polygonal components in the input geometry have their exterior rings oriented clockwise and interior rings oriented counter-clockwise.
+Introduction: Returns true if all polygonal components in the input geometry have their exterior rings oriented clockwise and interior rings oriented counter-clockwise. Polygonal components nested inside a `GEOMETRYCOLLECTION`, at any depth, are recursively inspected. Non-polygonal components (points, line strings, etc.) are ignored.
 
-`POLYGON EMPTY` and `MULTIPOLYGON EMPTY` return `true` because they contain no rings with the opposite orientation.
+An input with no polygonal components at all - points, line strings, and empty geometry collections included - vacuously returns `true`, since there is no ring to violate the requested orientation. This also covers `POLYGON EMPTY` and `MULTIPOLYGON EMPTY`. A SQL `NULL` input returns `NULL`.
+
+!!!note
+	Starting with Sedona 2.0.0, `ST_IsPolygonCW` matches PostGIS behavior for non-polygonal and `GEOMETRYCOLLECTION` inputs, and its Flink wrapper's return type changed from a primitive `boolean` to a nullable `Boolean` so `NULL` inputs propagate correctly. Earlier versions returned `false` for non-polygonal/collection inputs and for `NULL`. See the [release notes](../../../setup/release-notes.md#sedona-200) for details.
 
 ![ST_IsPolygonCW](../../../image/ST_IsPolygonCW/ST_IsPolygonCW.svg "ST_IsPolygonCW")
 

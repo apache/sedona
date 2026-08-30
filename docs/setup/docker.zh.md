@@ -115,7 +115,7 @@ docker run -d -e DRIVER_MEM=6g -e EXECUTOR_MEM=8g \
 示例：
 
 ```bash
-./docker/build.sh 3.4.1 {{ sedona.current_version }}
+./docker/build.sh 4.0.1 {{ sedona.current_version }}
 ```
 
 `build_mode` 为可选项。如果未提供或值为 `local`，脚本会在本地构建镜像；否则会启动跨平台编译并直接将镜像推送到 DockerHub。
@@ -133,7 +133,7 @@ docker run -d -e DRIVER_MEM=6g -e EXECUTOR_MEM=8g \
 示例：
 
 ```bash
-./docker/build.sh 3.4.1 latest
+./docker/build.sh 4.0.1 latest
 ```
 
 `build_mode` 为可选项，含义与上文相同。
@@ -175,5 +175,5 @@ docker login
 
 ```bash
 docker login
-./docker/build.sh 3.4.1 {{ sedona.current_version }} release
+./docker/build.sh 4.0.1 {{ sedona.current_version }} release
 ```

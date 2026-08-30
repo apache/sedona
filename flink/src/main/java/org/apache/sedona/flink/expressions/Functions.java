@@ -2051,12 +2051,15 @@ public class Functions {
 
   public static class ST_IsPolygonCW extends ScalarFunction {
     @DataTypeHint("Boolean")
-    public boolean eval(
+    public Boolean eval(
         @DataTypeHint(
                 value = "RAW",
                 rawSerializer = GeometryTypeSerializer.class,
                 bridgedTo = Geometry.class)
             Object o) {
+      if (o == null) {
+        return null;
+      }
       Geometry geom = (Geometry) o;
       return org.apache.sedona.common.Functions.isPolygonCW(geom);
     }
@@ -3544,12 +3547,15 @@ public class Functions {
 
   public static class ST_IsPolygonCCW extends ScalarFunction {
     @DataTypeHint("Boolean")
-    public boolean eval(
+    public Boolean eval(
         @DataTypeHint(
                 value = "RAW",
                 rawSerializer = GeometryTypeSerializer.class,
                 bridgedTo = Geometry.class)
             Object o) {
+      if (o == null) {
+        return null;
+      }
       Geometry geom = (Geometry) o;
       return org.apache.sedona.common.Functions.isPolygonCCW(geom);
     }

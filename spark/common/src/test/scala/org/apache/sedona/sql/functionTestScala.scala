@@ -1577,6 +1577,29 @@ class functionTestScala
       (0 until 4).foreach(index => assertTrue(actual.getBoolean(index)))
     }
 
+    it(
+      "Should align ST_IsPolygonCW/ST_IsPolygonCCW with PostGIS for non-polygonal and collection inputs") {
+      val actual = sparkSession
+        .sql("""
+            |SELECT
+            |  ST_IsPolygonCW(ST_GeomFromWKT('POINT (0 0)')),
+            |  ST_IsPolygonCCW(ST_GeomFromWKT('POINT (0 0)')),
+            |  ST_IsPolygonCW(ST_GeomFromWKT('LINESTRING (0 0, 1 0, 0 0)')),
+            |  ST_IsPolygonCCW(ST_GeomFromWKT('LINESTRING (0 0, 1 0, 0 0)')),
+            |  ST_IsPolygonCW(ST_GeomFromWKT('GEOMETRYCOLLECTION EMPTY')),
+            |  ST_IsPolygonCCW(ST_GeomFromWKT('GEOMETRYCOLLECTION EMPTY')),
+            |  ST_IsPolygonCW(ST_GeomFromWKT(
+            |    'GEOMETRYCOLLECTION (POINT (2 2), GEOMETRYCOLLECTION (POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))))')),
+            |  ST_IsPolygonCW(null),
+            |  ST_IsPolygonCCW(null)
+            |""".stripMargin)
+        .first()
+
+      (0 until 7).foreach(index => assertTrue(actual.getBoolean(index)))
+      assertTrue(actual.isNullAt(7))
+      assertTrue(actual.isNullAt(8))
+    }
+
     it("Should pass ST_IsLineStringCCW") {
       val actual = sparkSession
         .sql("""

@@ -16,7 +16,6 @@
 # under the License.
 
 import numpy as np
-import pyspark
 import pytest
 import rasterio
 from pyspark.sql.functions import col, expr, udf
@@ -197,9 +196,6 @@ class TestRasterSerde(TestBase):
             ),
         ],
     )
-    @pytest.mark.skipif(
-        pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
-    )
     def test_with_bands_retypes_packed_sample_models(
         self, num_bands, data_type, sample_model, expected_pixel_type
     ):
@@ -230,9 +226,6 @@ class TestRasterSerde(TestBase):
 
         assert result["pixel_type"] == expected_pixel_type
 
-    @pytest.mark.skipif(
-        pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
-    )
     def test_serialize_round_trip_via_udf(self):
         """Deserialize → serialize round-trip through a raster-returning UDF.
         Verifies that the Python-serialized bytes can be deserialized back
@@ -265,9 +258,6 @@ class TestRasterSerde(TestBase):
         round_tripped.close()
         original.close()
 
-    @pytest.mark.skipif(
-        pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
-    )
     def test_serialize_preserves_metadata(self):
         """Verify CRS, affine, and dimensions survive serialize round-trip."""
         from sedona.spark.raster import raster_serde

@@ -67,7 +67,7 @@ config = (
     SedonaContext.builder()
     .config(
         "spark.jars.packages",
-        "org.apache.sedona:sedona-spark-3.3_2.12:{{ sedona.current_version }},"
+        "org.apache.sedona:sedona-spark-3.5_2.12:{{ sedona.current_version }},"
         "org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}",
     )
     .config(
@@ -94,7 +94,7 @@ spark = (
     .config("spark.kryo.registrator", SedonaKryoRegistrator.getName)
     .config(
         "spark.jars.packages",
-        "org.apache.sedona:sedona-spark-shaded-3.3_2.12:{{ sedona.current_version }},"
+        "org.apache.sedona:sedona-spark-shaded-3.5_2.12:{{ sedona.current_version }},"
         "org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}",
     )
     .getOrCreate()

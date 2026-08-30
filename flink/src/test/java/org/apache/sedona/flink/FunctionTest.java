@@ -2750,6 +2750,42 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testIsPolygonOrientationForNonPolygonalAndCollectionGeometries() {
+    // Non-polygonal geometries and geometry collections with no polygonal components have
+    // nothing to violate the orientation, so PostGIS parity requires true here. A collection
+    // is also recursed into to find a nested polygonal component.
+    Table result =
+        tableEnv.sqlQuery(
+            "SELECT "
+                + "ST_IsPolygonCW(ST_GeomFromWKT('POINT (0 0)')), "
+                + "ST_IsPolygonCCW(ST_GeomFromWKT('POINT (0 0)')), "
+                + "ST_IsPolygonCW(ST_GeomFromWKT('LINESTRING (0 0, 1 0, 0 0)')), "
+                + "ST_IsPolygonCCW(ST_GeomFromWKT('LINESTRING (0 0, 1 0, 0 0)')), "
+                + "ST_IsPolygonCW(ST_GeomFromWKT('GEOMETRYCOLLECTION EMPTY')), "
+                + "ST_IsPolygonCCW(ST_GeomFromWKT('GEOMETRYCOLLECTION EMPTY')), "
+                + "ST_IsPolygonCW(ST_GeomFromWKT("
+                + "'GEOMETRYCOLLECTION (POINT (2 2), GEOMETRYCOLLECTION (POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))))'))");
+
+    Row row = first(result);
+    for (int i = 0; i < row.getArity(); i++) {
+      assertTrue((boolean) row.getField(i));
+    }
+  }
+
+  @Test
+  public void testIsPolygonOrientationNullPropagation() {
+    Table result =
+        tableEnv.sqlQuery(
+            "SELECT "
+                + "ST_IsPolygonCW(ST_GeomFromWKT(CAST(NULL AS STRING))), "
+                + "ST_IsPolygonCCW(ST_GeomFromWKT(CAST(NULL AS STRING)))");
+
+    Row row = first(result);
+    assertNull(row.getField(0));
+    assertNull(row.getField(1));
+  }
+
+  @Test
   public void testTranslate() {
     Table polyTable =
         tableEnv.sqlQuery(

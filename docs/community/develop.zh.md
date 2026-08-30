@@ -71,7 +71,7 @@ IDE 通常难以理解 Sedona 中较为复杂的项目结构。
 在终端中进入 Sedona 根目录运行 `mvn clean install`。全部测试需要超过 15 分钟。如果只想构建 jar，运行 `mvn clean install -DskipTests`。
 
 !!!Note
-    `mvn clean install` 默认基于 Spark 3.3、Scala 2.12 编译 Sedona。如果 $SPARK_HOME 中是不同版本的 Spark，请通过 `-Dspark` 命令行参数指定。例如基于 Spark 3.4 与 Scala 2.12 编译：`mvn clean install -Dspark=3.4 -Dscala=2.12`。
+    `mvn clean install` 默认基于 Spark 3.5、Scala 2.12 编译 Sedona。如果 $SPARK_HOME 中是不同版本的 Spark，请通过 `-Dspark` 命令行参数指定。例如基于 Spark 4.0 与 Scala 2.13 编译：`mvn clean install -Dspark=4.0 -Dscala=2.13`。
 
 更多细节请参阅 [编译 Sedona](../setup/compile.md)。
 

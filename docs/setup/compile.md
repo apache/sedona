@@ -46,28 +46,28 @@ To compile all modules, please make sure you are in the root folder of all modul
 	Geotools jars will be packaged into the produced fat jars.
 
 !!!note
-	By default, this command will compile Sedona with Spark 3.4 and Scala 2.12
+	By default, this command will compile Sedona with Spark 3.5 and Scala 2.12
 
 ### Compile with different targets
 
 User can specify `-Dspark` and `-Dscala` command line options to compile with different targets. Available targets are:
 
-* `-Dspark`: `{major}.{minor}`: For example, specify `-Dspark=3.4` to build for Spark 3.4.
+* `-Dspark`: `{major}.{minor}`: For example, specify `-Dspark=3.5` to build for Spark 3.5.
 * `-Dscala`: `2.12` or `2.13`
 
-=== "Spark 3.4+ Scala 2.12"
+=== "Spark 3.5 Scala 2.12"
 	```
-	mvn clean install -DskipTests -Dspark=3.4 -Dscala=2.12
+	mvn clean install -DskipTests -Dspark=3.5 -Dscala=2.12
 	```
-    Please replace `3.4` with Spark major.minor version when building for higher Spark versions.
-=== "Spark 3.4+ Scala 2.13"
+    Scala 2.12 is only available for Spark 3.5. Spark 4.0 and above are built with Scala 2.13 only.
+=== "Spark 3.5+ Scala 2.13"
 	```
-	mvn clean install -DskipTests -Dspark=3.4 -Dscala=2.13
+	mvn clean install -DskipTests -Dspark=3.5 -Dscala=2.13
 	```
-    Please replace `3.4` with Spark major.minor version when building for higher Spark versions.
+    Please replace `3.5` with Spark major.minor version when building for higher Spark versions.
 
 !!!tip
-	To get the Sedona Spark Shaded jar with all GeoTools jars included, simply append `-Dgeotools` option. The command is like this:`mvn clean install -DskipTests -Dscala=2.12 -Dspark=3.4 -Dgeotools`
+	To get the Sedona Spark Shaded jar with all GeoTools jars included, simply append `-Dgeotools` option. The command is like this:`mvn clean install -DskipTests -Dscala=2.12 -Dspark=3.5 -Dgeotools`
 
 ### Download staged jars
 
@@ -78,7 +78,7 @@ Sedona uses GitHub Actions to automatically generate jars per commit. You can go
 1) Set up Spark (download if needed) and environment variables
 
 ```bash
-export SPARK_VERSION=3.4.0   # or another supported version
+export SPARK_VERSION=3.5.0   # or another supported version
 wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.tgz
 tar -xvzf spark-${SPARK_VERSION}-bin-hadoop3.tgz
 rm spark-${SPARK_VERSION}-bin-hadoop3.tgz

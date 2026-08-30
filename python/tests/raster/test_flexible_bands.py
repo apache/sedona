@@ -18,7 +18,6 @@
 import math
 
 import numpy as np
-import pyspark
 import pytest
 from pyspark.sql.functions import col, expr, udf
 from tests.test_base import TestBase
@@ -27,9 +26,6 @@ from sedona.spark.sql.types import RasterType
 
 
 class TestFlexibleBands(TestBase):
-    @pytest.mark.skipif(
-        pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
-    )
     def test_reduce_bands_4_to_1(self):
         """Reduce from 4 bands to 1 band (NDVI-like calculation)."""
         spark = self.spark
@@ -63,9 +59,6 @@ class TestFlexibleBands(TestBase):
         for val in band:
             assert math.isfinite(val), f"Expected finite value, got {val}"
 
-    @pytest.mark.skipif(
-        pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
-    )
     def test_increase_bands_3_to_6(self):
         """Increase from 3 bands to 6 (original + squared features)."""
         spark = self.spark
@@ -107,9 +100,6 @@ class TestFlexibleBands(TestBase):
                 original = float(0 + y * 4 + x)
                 assert band4[y * 4 + x] == original**2
 
-    @pytest.mark.skipif(
-        pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
-    )
     def test_dtype_change_int_to_float(self):
         """Change dtype from int32 to float32 while keeping same band count."""
         spark = self.spark
@@ -136,9 +126,6 @@ class TestFlexibleBands(TestBase):
         for val in band:
             assert 0.0 <= val <= 1.0, f"Expected [0,1], got {val}"
 
-    @pytest.mark.skipif(
-        pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
-    )
     def test_mixed_band_and_dtype_change(self):
         """Simultaneous band count reduction and dtype change."""
         spark = self.spark
@@ -172,9 +159,6 @@ class TestFlexibleBands(TestBase):
                 expected = 1.0 + y * 4 + x
                 assert abs(band[y * 4 + x] - expected) < 0.01
 
-    @pytest.mark.skipif(
-        pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
-    )
     def test_jvm_mapalgebra_after_band_change(self):
         """JVM-side RS_MapAlgebra works on a raster that had bands changed by UDF."""
         spark = self.spark
@@ -203,9 +187,6 @@ class TestFlexibleBands(TestBase):
                 expected = float(y * 4 + x + 100)
                 assert band[y * 4 + x] == expected
 
-    @pytest.mark.skipif(
-        pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
-    )
     def test_reduce_bands_8_to_1_argmax(self):
         """8 bands to 1 band via argmax (KMeans-like cluster assignment)."""
         spark = self.spark
@@ -237,9 +218,6 @@ class TestFlexibleBands(TestBase):
         for val in band:
             assert val == 7.0, f"Expected 7.0, got {val}"
 
-    @pytest.mark.skipif(
-        pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
-    )
     def test_metadata_survives_band_change(self):
         """CRS, affine transform, and dimensions survive a band count change."""
         spark = self.spark
@@ -275,9 +253,6 @@ class TestFlexibleBands(TestBase):
         assert abs(result["scale_y"] - (-10.0)) < 0.001
         assert result["srid"] == 3857
 
-    @pytest.mark.skipif(
-        pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
-    )
     def test_nodata_defaults_to_inherited(self):
         """Without nodata=, each output band inherits it from the input band."""
         spark = self.spark
@@ -300,9 +275,6 @@ class TestFlexibleBands(TestBase):
         )
         assert result["nodata"] == 0.0
 
-    @pytest.mark.skipif(
-        pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
-    )
     def test_nodata_scalar_overrides_inherited(self):
         """A scalar nodata= reaches the JVM instead of the inherited value."""
         spark = self.spark
@@ -333,9 +305,6 @@ class TestFlexibleBands(TestBase):
         assert result["counted"] == 12
         assert result["total"] == 12
 
-    @pytest.mark.skipif(
-        pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
-    )
     def test_nodata_per_band_sequence(self):
         """A sequence nodata= assigns a different value to each output band."""
         spark = self.spark
@@ -366,9 +335,6 @@ class TestFlexibleBands(TestBase):
         for band, expected in enumerate([-1.0, -2.0, -3.0, -4.0] * 2, start=1):
             assert result[f"nodata{band}"] == expected, f"band {band}"
 
-    @pytest.mark.skipif(
-        pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
-    )
     def test_nodata_agrees_between_python_and_jvm_when_widening(self):
         """bands_meta and RS_BandNoDataValue report the same value for added bands."""
         spark = self.spark

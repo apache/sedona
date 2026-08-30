@@ -59,15 +59,15 @@ rm -f pom.xml.*
 mvn -q -B clean release:prepare -Dtag={{ sedona_create_release.current_git_tag }} -DreleaseVersion={{ sedona_create_release.current_version }} -DdevelopmentVersion={{ sedona_create_release.current_snapshot }} -Dresume=false -DdryRun=true -Penable-all-submodules -Darguments="-DskipTests"
 mvn -q -B release:clean -Penable-all-submodules
 
-# Spark 3.3 与 Scala 2.12
-mvn -q deploy -DskipTests -Dspark=3.3 -Dscala=2.12
+# Spark 3.5 与 Scala 2.12
+mvn -q deploy -DskipTests -Dspark=3.5 -Dscala=2.12
 
-# Spark 3.3 与 Scala 2.13
-mvn -q deploy -DskipTests -Dspark=3.3 -Dscala=2.13
+# Spark 3.5 与 Scala 2.13
+mvn -q deploy -DskipTests -Dspark=3.5 -Dscala=2.13
 
-# Spark 3.4 与 Scala 2.12
-mvn -q deploy -DskipTests -Dspark=3.4 -Dscala=2.12
+# Spark 4.0 与 Scala 2.13
+mvn -q deploy -DskipTests -Dspark=4.0 -Dscala=2.13
 
-# Spark 3.4 与 Scala 2.13
-mvn -q deploy -DskipTests -Dspark=3.4 -Dscala=2.13
+# Spark 4.1 与 Scala 2.13
+mvn -q deploy -DskipTests -Dspark=4.1 -Dscala=2.13
 ```

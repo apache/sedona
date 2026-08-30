@@ -23,7 +23,6 @@ drift from what actually runs. When an example changes there, change it here.
 import math
 
 import numpy as np
-import pyspark
 import pytest
 import rasterio.fill
 from pyspark.sql.functions import col, expr, udf
@@ -39,10 +38,6 @@ FOUR_BAND = (
     "4, 3, 100, 100, 10, -10, 0, 0, 3857)"
 )
 
-requires_spark_34 = pytest.mark.skipif(
-    pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
-)
-
 
 class TestRasterUdfDocExamples(TestBase):
 
@@ -51,7 +46,6 @@ class TestRasterUdfDocExamples(TestBase):
 
     # ---- "Raster to scalar" ----------------------------------------------
 
-    @requires_spark_34
     def test_raster_to_scalar(self):
         df = self._four_band_df()
 
@@ -63,7 +57,6 @@ class TestRasterUdfDocExamples(TestBase):
         # Band means are 5.5, 6.5, 7.5, 8.5.
         assert result == pytest.approx(7.0)
 
-    @requires_spark_34
     def test_raster_to_scalar_registered_for_sql(self):
         """The register-by-name form: pass the decorated UDF, no returnType."""
         sedona = self.spark
@@ -79,7 +72,6 @@ class TestRasterUdfDocExamples(TestBase):
 
     # ---- "Raster to raster" ----------------------------------------------
 
-    @requires_spark_34
     def test_raster_to_raster(self):
         df = self._four_band_df()
 
@@ -105,7 +97,6 @@ class TestRasterUdfDocExamples(TestBase):
         # Every band-0 value is below 1400, so the whole mask is set.
         assert all(value == 1.0 for value in result["band"])
 
-    @requires_spark_34
     def test_raster_to_raster_with_nodata(self):
         """The nodata= form from 'Setting NODATA on the output'."""
         NODATA = -9999.0
@@ -136,7 +127,6 @@ class TestRasterUdfDocExamples(TestBase):
         assert result["nodata"] == NODATA
         assert result["counted"] == 11
 
-    @requires_spark_34
     def test_per_band_nodata_sequence(self):
         """The nodata=[...] form, including float('nan') for 'no NODATA'."""
         df = self._four_band_df()
@@ -160,7 +150,6 @@ class TestRasterUdfDocExamples(TestBase):
 
     # ---- "NDVI, as map algebra and as a UDF" ------------------------------
 
-    @requires_spark_34
     def test_ndvi_udf_matches_map_algebra(self):
         """Both NDVI forms on the page must produce the same raster."""
         df = self._four_band_df()
@@ -192,7 +181,6 @@ class TestRasterUdfDocExamples(TestBase):
 
     # ---- "Two rasters" ----------------------------------------------------
 
-    @requires_spark_34
     def test_two_raster_udf(self):
         @udf(returnType=RasterType())
         def plus_five(raster):
@@ -224,7 +212,6 @@ class TestRasterUdfDocExamples(TestBase):
         assert result["num_bands"] == 1
         assert all(value == pytest.approx(5.0) for value in result["band"])
 
-    @requires_spark_34
     def test_two_raster_udf_keeps_holes_invalid(self):
         """A hole in either input must stay a hole, not become a plausible number.
 
@@ -287,7 +274,6 @@ class TestRasterUdfDocExamples(TestBase):
 
     # ---- "Using rasterio inside a UDF" ------------------------------------
 
-    @requires_spark_34
     def test_rasterio_inside_udf(self):
         """fillnodata must actually fill, and the recipe keeps the NODATA declared."""
         # Punch a -9999 hole at pixel 5, then run the documented recipe. The sentinel
@@ -337,7 +323,6 @@ class TestRasterUdfDocExamples(TestBase):
         assert result["nodata"] == -9999.0
         assert result["counted"] == 12
 
-    @requires_spark_34
     def test_rasterio_fill_keeps_unreachable_holes_invalid(self):
         """Cells fillnodata cannot reach keep the sentinel AND stay flagged invalid.
 
@@ -378,7 +363,6 @@ class TestRasterUdfDocExamples(TestBase):
         assert result["nodata"] == -9999.0
         assert result["counted"] == 144 - remaining
 
-    @requires_spark_34
     def test_as_rasterio_does_not_carry_nodata(self):
         """Pins the documented gap: GDAL cannot see Sedona's NODATA."""
         df = self.spark.range(1).withColumn(
@@ -402,7 +386,6 @@ class TestRasterUdfDocExamples(TestBase):
         assert mask_values == "[255]"  # everything reported valid
         assert sedona_nodata == "5.0"  # the raster itself knows
 
-    @requires_spark_34
     def test_numpy_scalar_nodata_accepted(self):
         """nodata= accepts NumPy scalars, not just Python floats."""
         raster = self.spark.sql(f"SELECT {FOUR_BAND} AS rast").first()["rast"]
@@ -413,7 +396,6 @@ class TestRasterUdfDocExamples(TestBase):
                 value
             ).__name__
 
-    @requires_spark_34
     def test_nodata_nan_clears_inherited_value(self):
         """float('nan') must clear a NODATA the source has, not silently inherit it."""
         df = self.spark.range(1).withColumn(
@@ -436,7 +418,6 @@ class TestRasterUdfDocExamples(TestBase):
         assert result["nodata"] is None
         assert result["counted"] == 12  # no pixel is skipped
 
-    @requires_spark_34
     def test_nodata_wider_than_source_dtype(self):
         """A byte source widened to float64 may carry a nodata a byte could not hold."""
         df = self.spark.range(1).withColumn(
@@ -459,7 +440,6 @@ class TestRasterUdfDocExamples(TestBase):
         )
         assert result["nodata"] == -99999.0
 
-    @requires_spark_34
     def test_inherited_nodata_is_retyped_with_output_pixels(self):
         """Inherited NODATA must not leave byte metadata on a float64 output."""
         df = self.spark.range(1).withColumn(
@@ -549,7 +529,6 @@ class TestRasterUdfDocExamples(TestBase):
         assert np.count_nonzero(np.isnan(masked)) == 1
         assert np.all(masked[~np.isnan(masked)] == 7)
 
-    @requires_spark_34
     def test_int8_negative_values_are_reinterpreted(self):
         """The dtype table's claim that int8 -2 reads back as 254."""
         df = self._four_band_df()
@@ -598,7 +577,6 @@ class TestRasterUdfDocExamples(TestBase):
         out = raster.with_bands(integral, nodata=254.0)
         assert out.bands_meta[0].nodata == pytest.approx(254.0)
 
-    @requires_spark_34
     def test_inherited_nodata_must_fit_output_dtype(self):
         """Narrowing a raster whose inherited NODATA no uint8 pixel can hold raises."""
         raster = self.spark.sql(
@@ -609,7 +587,6 @@ class TestRasterUdfDocExamples(TestBase):
         with pytest.raises(ValueError, match="inherited"):
             raster.with_bands(arr)
 
-    @requires_spark_34
     def test_int8_nodata_matches_reinterpreted_pixels(self):
         """nodata on an int8 band is stored the way the pixels are: -2 becomes 254."""
         df = self.spark.range(1).withColumn("rast", expr(FOUR_BAND))
@@ -633,7 +610,6 @@ class TestRasterUdfDocExamples(TestBase):
         assert result["band"][0] == 254.0
         assert result["counted"] == 11  # the reinterpreted hole is excluded
 
-    @requires_spark_34
     def test_uint32_nodata_matches_reinterpreted_pixels(self):
         """nodata above 2**31-1 on a uint32 band is reinterpreted like the pixels."""
         df = self.spark.range(1).withColumn("rast", expr(FOUR_BAND))
@@ -657,7 +633,6 @@ class TestRasterUdfDocExamples(TestBase):
         assert result["band"][0] == -1.0
         assert result["counted"] == 11
 
-    @requires_spark_34
     def test_float32_nodata_is_coerced_to_float32(self):
         """A nodata that is not float32-exact is rounded to what the pixels hold."""
         df = self.spark.range(1).withColumn("rast", expr(FOUR_BAND))

@@ -21,29 +21,29 @@ Sedona binary releases are compiled by Java 11/17 and Scala 2.12/2.13 and tested
 
 **Java Requirements:**
 
-- Spark 3.4 & 3.5: Java 11
+- Spark 3.5: Java 11
 - Spark 4.0 & 4.1: Java 17
 
-**Note:** Java 8 support is dropped since Sedona 1.8.0. Spark 3.3 support is dropped since Sedona 1.8.0.
+**Note:** Java 8 support is dropped since Sedona 1.8.0. Spark 3.3 support is dropped since Sedona 1.8.0. Spark 3.4 support is dropped since Sedona 2.0.0.
 
 === "Sedona Scala/Java"
 
-	|             | Spark 3.4| Spark 3.5 | Spark 4.0 | Spark 4.1 |
-	|:---------:|:---------:|:---------:|:---------:|:---------:|
-	| Scala 2.12 |✅ |✅ |✅ | |
-	| Scala 2.13 |✅ |✅ |✅ |✅ |
+	|             | Spark 3.5 | Spark 4.0 | Spark 4.1 |
+	|:---------:|:---------:|:---------:|:---------:|
+	| Scala 2.12 |✅ | | |
+	| Scala 2.13 |✅ |✅ |✅ |
 
 === "Sedona Python"
 
-    |             | Spark 3.4 (Scala 2.12)|Spark 3.5 (Scala 2.12)| Spark 4.0 (Scala 2.13)| Spark 4.1 (Scala 2.13)|
-    |:---------:|:---------:|:---------:|:---------:|:---------:|
-    | Python 3.7  |  ✅  |  ✅  | | |
-    | Python 3.8 |  ✅  |  ✅  |  | |
-    | Python 3.9 |  ✅  |  ✅  | ✅  | ✅ |
-    | Python 3.10 |  ✅  |  ✅  | ✅  | ✅ |
+    |             | Spark 3.5 (Scala 2.12)| Spark 4.0 (Scala 2.13)| Spark 4.1 (Scala 2.13)|
+    |:---------:|:---------:|:---------:|:---------:|
+    | Python 3.7  |  ✅  | | |
+    | Python 3.8 |  ✅  |  | |
+    | Python 3.9 |  ✅  | ✅  | ✅ |
+    | Python 3.10 |  ✅  | ✅  | ✅ |
 
 === "Sedona R"
 
-	|             | Spark 3.4 | Spark 3.5 | Spark 4.0 | Spark 4.1 |
-	|:---------:|:---------:|:---------:|:---------:|:---------:|
-	| Scala 2.12 | ✅ | ✅ | ✅ | |
+	|             | Spark 3.5 | Spark 4.0 | Spark 4.1 |
+	|:---------:|:---------:|:---------:|:---------:|
+	| Scala 2.12 | ✅ | | |

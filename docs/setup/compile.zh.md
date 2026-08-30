@@ -46,28 +46,28 @@ Sedona Scala/Java 代码是一个多模块项目，每个模块都是 Scala/Java
 	Geotools 相关 jar 会被打入生成的 fat jar 中。
 
 !!!note
-	默认情况下，该命令会针对 Spark 3.4 和 Scala 2.12 编译 Sedona。
+	默认情况下，该命令会针对 Spark 3.5 和 Scala 2.12 编译 Sedona。
 
 ### 针对不同目标编译
 
 可使用 `-Dspark` 与 `-Dscala` 命令行参数指定不同的目标：
 
-* `-Dspark`：`{major}.{minor}`，例如 `-Dspark=3.4` 表示针对 Spark 3.4 编译。
+* `-Dspark`：`{major}.{minor}`，例如 `-Dspark=3.5` 表示针对 Spark 3.5 编译。
 * `-Dscala`：`2.12` 或 `2.13`
 
-=== "Spark 3.4+ Scala 2.12"
+=== "Spark 3.5 Scala 2.12"
 	```
-	mvn clean install -DskipTests -Dspark=3.4 -Dscala=2.12
+	mvn clean install -DskipTests -Dspark=3.5 -Dscala=2.12
 	```
-    若要针对更高 Spark 版本编译，请将 `3.4` 替换为对应的 Spark major.minor 版本。
-=== "Spark 3.4+ Scala 2.13"
+    Scala 2.12 仅适用于 Spark 3.5。Spark 4.0 及以上仅提供 Scala 2.13 构建。
+=== "Spark 3.5+ Scala 2.13"
 	```
-	mvn clean install -DskipTests -Dspark=3.4 -Dscala=2.13
+	mvn clean install -DskipTests -Dspark=3.5 -Dscala=2.13
 	```
-    若要针对更高 Spark 版本编译，请将 `3.4` 替换为对应的 Spark major.minor 版本。
+    若要针对更高 Spark 版本编译，请将 `3.5` 替换为对应的 Spark major.minor 版本。
 
 !!!tip
-	如需获取打包好所有 GeoTools jar 的 Sedona Spark Shaded jar，只需追加 `-Dgeotools` 选项，例如：`mvn clean install -DskipTests -Dscala=2.12 -Dspark=3.4 -Dgeotools`
+	如需获取打包好所有 GeoTools jar 的 Sedona Spark Shaded jar，只需追加 `-Dgeotools` 选项，例如：`mvn clean install -DskipTests -Dscala=2.12 -Dspark=3.5 -Dgeotools`
 
 ### 下载 staged jar
 
@@ -78,7 +78,7 @@ Sedona 通过 GitHub Actions 在每次提交时自动生成 jar。您可以在 [
 1) 准备 Spark（如未安装则下载）并设置环境变量
 
 ```bash
-export SPARK_VERSION=3.4.0   # 或其他受支持的版本
+export SPARK_VERSION=3.5.0   # 或其他受支持的版本
 wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.tgz
 tar -xvzf spark-${SPARK_VERSION}-bin-hadoop3.tgz
 rm spark-${SPARK_VERSION}-bin-hadoop3.tgz
