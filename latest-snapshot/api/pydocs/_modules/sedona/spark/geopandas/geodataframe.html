@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geodataframe &mdash; Apache Sedona Python Documentation</title>
@@ -998,6 +997,10 @@
                 <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">column_dtype</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pd_df</span><span class="o">.</span><span class="n">dtypes</span><span class="p">)</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">column_dtype</span><span class="p">,</span> <span class="n">GeometryDtype</span><span class="p">)</span>
             <span class="p">}</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">copy</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">geom_type_cols</span><span class="p">):</span>
+                <span class="c1"># pandas 1.5 may share geometry blocks with caller-owned</span>
+                <span class="c1"># inputs. Detach before casting so they cannot be mutated.</span>
+                <span class="n">pd_df</span> <span class="o">=</span> <span class="n">pd_df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="n">pd_df</span><span class="p">[</span><span class="n">geom_type_cols</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd_df</span><span class="p">[</span><span class="n">geom_type_cols</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
 
             <span class="c1"># Initialize the parent class pyspark DataFrame with the pandas DataFrame.</span>
