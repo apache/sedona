@@ -22,19 +22,6 @@ SEDONA_VERSION=$2
 BUILD_MODE=$3
 GEOTOOLS_VERSION=${4:-auto}
 
-SEDONA_SPARK_VERSION=${SPARK_VERSION:0:3}
-# Reject Spark versions Sedona no longer builds for. Without this check an
-# unsupported -Dspark value simply matches no Maven profile, so the build
-# silently falls back to the default Spark version and produces jars that do
-# not match the Spark image they are installed into.
-case "$SEDONA_SPARK_VERSION" in
-    3.5 | 4.0 | 4.1) ;;
-    *)
-        echo "Unsupported Spark version: ${SPARK_VERSION}. Sedona supports Spark 3.5, 4.0 and 4.1." >&2
-        exit 1
-        ;;
-esac
-
 # Function to compare two version numbers
 version_gt() {
   # Compare two version numbers
@@ -85,6 +72,20 @@ if [ "$SEDONA_VERSION" = "latest" ]; then
         exit 1
     fi
     echo "Using latest geotools-wrapper version: $GEOTOOLS_WRAPPER_VERSION"
+
+    # Building master resolves Sedona's Spark profile from -Dspark. An unsupported
+    # value matches no profile, so Maven would fall back to the default Spark
+    # version and produce jars that do not match the Spark image they are
+    # installed into. Only this branch compiles; images for a published Sedona
+    # version take the jar from Maven Central and can still target older Spark.
+    SEDONA_SPARK_VERSION=${SPARK_VERSION:0:3}
+    case "$SEDONA_SPARK_VERSION" in
+        3.5 | 4.0 | 4.1) ;;
+        *)
+            echo "Cannot build Sedona master against Spark ${SPARK_VERSION}. Supported: 3.5, 4.0, 4.1." >&2
+            exit 1
+            ;;
+    esac
 
     # The compilation must take place outside Docker to avoid unnecessary maven packages
     mvn clean install -DskipTests -Dspark="${SEDONA_SPARK_VERSION}" -Dscala=2.13
