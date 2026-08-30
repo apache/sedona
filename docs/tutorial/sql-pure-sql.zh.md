@@ -36,7 +36,7 @@ SedonaSQL 支持 SQL/MM Part3 空间 SQL 标准。SedonaSQL 详细的 API 说明
           --conf spark.sql.extensions=org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions
         ```
 
-        Spark 4.0 及以上仅提供 Scala 2.13 构建，请将 artifact 名称替换为 `sedona-spark-shaded-4.0_2.13`。
+        Spark 4.0 及以上仅提供 Scala 2.13 构建。请替换为与您的 Spark 主.次版本一致的 artifact，例如 Spark 4.0 用 `sedona-spark-shaded-4.0_2.13`，Spark 4.1 用 `sedona-spark-shaded-4.1_2.13`。
 
 这会注册 SedonaSQL 与 SedonaViz 的全部类型、函数与优化规则。
 

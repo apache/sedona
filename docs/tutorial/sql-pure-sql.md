@@ -36,7 +36,7 @@ Start `spark-sql` as following (replace `<VERSION>` with actual version like `{{
           --conf spark.sql.extensions=org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions
         ```
 
-        Spark 4.0 and above are built with Scala 2.13 only; for those, replace the artifact name with `sedona-spark-shaded-4.0_2.13`.
+        Spark 4.0 and above are built with Scala 2.13 only. Replace the artifact with the one carrying your Spark major.minor version, such as `sedona-spark-shaded-4.0_2.13` for Spark 4.0 or `sedona-spark-shaded-4.1_2.13` for Spark 4.1.
 
 This will register all Sedona types, functions and optimizations in SedonaSQL and SedonaViz.
 

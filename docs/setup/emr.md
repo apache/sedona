@@ -22,7 +22,7 @@ In the tutorial, we use AWS Elastic MapReduce (EMR) 7.9.0. It has the following 
 This tutorial is tested on EMR on EC2 with EMR Studio (notebooks). EMR on EC2 uses YARN to manage resources.
 
 !!!note
-	If you are using Spark 3.5 and Scala 2.12, please use `sedona-spark-shaded-3.5_2.12`. Spark 4.0 and above are built with Scala 2.13 only, so use `sedona-spark-shaded-4.0_2.13` there. Please pay attention to the Spark version postfix and Scala version postfix.
+	Use the artifact whose Spark major.minor version matches your cluster: `sedona-spark-shaded-3.5_2.12` for Spark 3.5, `sedona-spark-shaded-4.0_2.13` for Spark 4.0, `sedona-spark-shaded-4.1_2.13` for Spark 4.1. Spark 4.0 and above are built with Scala 2.13 only.
 
 ## Prepare initialization script
 
