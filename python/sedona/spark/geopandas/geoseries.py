@@ -4706,6 +4706,165 @@ class GeoSeries(GeoFrame, pspd.Series):
         """Alias for `notna` method. See `notna` for more detail."""
         return self.notna()
 
+    def _fillna_with_limit(
+        self,
+        replacement: Union[PySparkColumn, "GeoSeries"],
+        limit: int,
+    ) -> "GeoSeries":
+        """Fill the first missing rows while preserving the exact left axis."""
+        left_order = "__fillna_left_order__"
+        left_present = "__fillna_left_present__"
+        right_order = "__fillna_right_order__"
+        right_present = "__fillna_right_present__"
+        position = "__fillna_position__"
+        fill_rank = "__fillna_rank__"
+        left_indexes = [
+            f"__fillna_left_index_{level}__"
+            for level in range(len(self._internal.index_spark_columns))
+        ]
+
+        left_source = self._internal.spark_frame
+        left_frame = left_source.select(
+            self.spark.column.alias("L"),
+            *[
+                column.alias(alias)
+                for column, alias in zip(
+                    self._internal.index_spark_columns, left_indexes
+                )
+            ],
+            scol_for(left_source, NATURAL_ORDER_COLUMN_NAME).alias(left_order),
+            F.lit(True).alias(left_present),
+        )
+
+        if isinstance(replacement, PySparkColumn):
+            aligned_frame = left_frame.select(
+                F.col("L"),
+                replacement.alias("R"),
+                *[F.col(column) for column in left_indexes],
+                F.col(left_order),
+            )
+        else:
+            right_indexes = [
+                f"__fillna_right_index_{level}__"
+                for level in range(len(replacement._internal.index_spark_columns))
+            ]
+            right_source = replacement._internal.spark_frame
+            right_frame = right_source.select(
+                replacement.spark.column.alias("R"),
+                *[
+                    column.alias(alias)
+                    for column, alias in zip(
+                        replacement._internal.index_spark_columns, right_indexes
+                    )
+                ],
+                scol_for(right_source, NATURAL_ORDER_COLUMN_NAME).alias(right_order),
+                F.lit(True).alias(right_present),
+            )
+            positioned_left = InternalFrame.attach_distributed_sequence_column(
+                left_frame.orderBy(left_order), position
+            )
+            positioned_right = InternalFrame.attach_distributed_sequence_column(
+                right_frame.orderBy(right_order), position
+            )
+            positional_join = positioned_left.join(
+                positioned_right, on=position, how="outer"
+            )
+
+            # Exact axes, including duplicate labels, pair positionally.
+            # Otherwise GeoPandas reindexes a unique RHS onto the full left key.
+            same_index_structure = len(left_indexes) == len(right_indexes)
+            if same_index_structure:
+                index_mismatch = (
+                    F.col(left_present).isNull() | F.col(right_present).isNull()
+                )
+                for left_index, right_index in zip(left_indexes, right_indexes):
+                    index_mismatch = index_mismatch | ~F.col(left_index).eqNullSafe(
+                        F.col(right_index)
+                    )
+            else:
+                index_mismatch = F.lit(True)
+
+            status = positional_join.agg(
+                F.count(F.col(left_present)).alias("left_count"),
+                F.count(F.col(right_present)).alias("right_count"),
+                F.max(index_mismatch.cast("int")).alias("index_mismatch"),
+                F.countDistinct(
+                    F.when(
+                        F.col(right_present).isNotNull(),
+                        F.struct(*[F.col(column) for column in right_indexes]),
+                    )
+                ).alias("right_distinct_count"),
+            ).first()
+            axes_equal = (
+                same_index_structure
+                and status["left_count"] == status["right_count"]
+                and not bool(status["index_mismatch"] or False)
+            )
+
+            if axes_equal:
+                aligned_frame = positional_join.select(
+                    F.col("L"),
+                    F.col("R"),
+                    *[F.col(column) for column in left_indexes],
+                    F.col(left_order),
+                )
+            elif status["right_count"] != status["right_distinct_count"]:
+                if len(right_indexes) > 1:
+                    raise ValueError("cannot handle a non-unique multi-index!")
+                raise ValueError("cannot reindex on an axis with duplicate labels")
+            elif not same_index_structure:
+                aligned_frame = left_frame.select(
+                    F.col("L"),
+                    stc.ST_GeomFromWKB(F.lit(None).cast("binary")).alias("R"),
+                    *[F.col(column) for column in left_indexes],
+                    F.col(left_order),
+                )
+            else:
+                left_alias = left_frame.alias("left")
+                right_alias = right_frame.alias("right")
+                join_condition = left_alias[left_indexes[0]].eqNullSafe(
+                    right_alias[right_indexes[0]]
+                )
+                for left_index, right_index in zip(left_indexes[1:], right_indexes[1:]):
+                    join_condition = join_condition & left_alias[left_index].eqNullSafe(
+                        right_alias[right_index]
+                    )
+                aligned_frame = left_alias.join(
+                    right_alias, on=join_condition, how="left"
+                ).select(
+                    left_alias["L"].alias("L"),
+                    right_alias["R"].alias("R"),
+                    *[left_alias[column].alias(column) for column in left_indexes],
+                    left_alias[left_order].alias(left_order),
+                )
+
+        ranked_missing = _attach_ordered_sequence_column(
+            aligned_frame.where(F.col("L").isNull()),
+            F.col(left_order).asc_nulls_last(),
+            fill_rank,
+        )
+        nonmissing = aligned_frame.where(F.col("L").isNotNull()).withColumn(
+            fill_rank, F.lit(-1).cast(LongType())
+        )
+        aligned_frame = (
+            nonmissing.unionByName(ranked_missing)
+            .withColumnRenamed(left_order, NATURAL_ORDER_COLUMN_NAME)
+            .orderBy(F.col(NATURAL_ORDER_COLUMN_NAME).asc_nulls_last())
+        )
+        result_expression = F.when(
+            (F.col(fill_rank) >= F.lit(0)) & (F.col(fill_rank) < F.lit(limit)),
+            F.coalesce(F.col("L"), F.col("R")),
+        ).otherwise(F.col("L"))
+        return self._result_preserving_index(
+            result_expression,
+            aligned_frame,
+            [scol_for(aligned_frame, name) for name in left_indexes],
+            self._internal.index_fields,
+            self._internal.index_names,
+            returns_geom=True,
+            keep_name=True,
+        )
+
     # GeoSeries-only (not in GeoDataFrame)
     def fillna(
         self, value=None, inplace: bool = False, limit=None, **kwargs
@@ -4725,6 +4884,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         limit : int, default None
             This is the maximum number of entries along the entire axis
             where NaNs will be filled. Must be greater than 0 if not None.
+
+        Notes
+        -----
+        Using ``limit`` requires a distributed global ordering of the missing
+        geometries and can be expensive for large GeoSeries.
 
         Returns
         -------
@@ -4786,15 +4950,28 @@ class GeoSeries(GeoFrame, pspd.Series):
         """
         from shapely.geometry.base import BaseGeometry
 
-        # TODO: Implement limit https://github.com/apache/sedona/issues/2068
-        if limit:
-            raise NotImplementedError(
-                "GeoSeries.fillna() with limit is not implemented yet."
-            )
+        if limit is not None:
+            if type(limit) is not int:
+                raise ValueError("Limit must be an integer")
+            if limit <= 0:
+                raise ValueError("Limit must be greater than 0")
+            if limit > 9_223_372_036_854_775_807:
+                # Distributed sequence positions use Spark LongType. Clamping
+                # retains limited-fill alignment semantics while still filling
+                # every representable row.
+                limit = 9_223_372_036_854_775_807
 
         align = True
 
-        if pd.isna(value) == True or isinstance(value, BaseGeometry):
+        if isinstance(value, (GeoSeries, gpd.GeoSeries)):
+
+            if not isinstance(value, GeoSeries):
+                value = GeoSeries(value)
+
+            replacement = value
+            other = value.fillna(None) if limit is None else value
+
+        elif pd.isna(value) == True or isinstance(value, BaseGeometry):
             if (
                 value is not None and pd.isna(value) == True
             ):  # ie. value is np.nan or pd.NA:
@@ -4805,30 +4982,31 @@ class GeoSeries(GeoFrame, pspd.Series):
 
                     value = GeometryCollection()
 
-            other, extended = self._make_series_of_val(value)
-            align = False if extended else align
-
-        elif isinstance(value, (GeoSeries, gpd.GeoSeries)):
-
-            if not isinstance(value, GeoSeries):
-                value = GeoSeries(value)
-
-            # Replace all None's with empty geometries (this is a recursive call)
-            other = value.fillna(None)
+            replacement = stc.ST_GeomFromWKB(
+                F.lit(value.wkb if value is not None else None).cast("binary")
+            )
+            other = self._query_geometry_column(
+                replacement,
+                keep_name=True,
+            )
+            align = False
 
         else:
             raise ValueError(f"Invalid value type: {type(value)}")
 
-        # Coalesce: If the value in L is null, use the corresponding value in R for that row
-        spark_expr = F.coalesce(F.col("L"), F.col("R"))
-        result = self._row_wise_operation(
-            spark_expr,
-            other,
-            align=align,
-            returns_geom=True,
-            default_val=None,
-            keep_name=True,
-        )
+        if limit is not None:
+            result = self._fillna_with_limit(replacement, limit)
+        else:
+            # Coalesce: If the value in L is null, use the corresponding value in R for that row
+            spark_expr = F.coalesce(F.col("L"), F.col("R"))
+            result = self._row_wise_operation(
+                spark_expr,
+                other,
+                align=align,
+                returns_geom=True,
+                default_val=None,
+                keep_name=True,
+            )
 
         if inplace:
             self._update_inplace(result)

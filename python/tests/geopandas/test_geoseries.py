@@ -76,6 +76,25 @@ requires_shapely_m_support = pytest.mark.skipif(
 )
 
 
+class TestGeoSeriesFillnaLimitCompatibility(TestGeopandasBase):
+    def test_fillna_limit_scalar_wkb_literal(self):
+        from geopandas.testing import assert_geoseries_equal
+
+        result = GeoSeries([Point(0, 0), None, None]).fillna(Point(1, 1), limit=1)
+        expected = gpd.GeoSeries([Point(0, 0), Point(1, 1), None])
+
+        assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
+
+    @pytest.mark.parametrize("values", [[], [Point(0, 0), Point(2, 2)]])
+    def test_fillna_limit_without_missing_rows(self, values):
+        from geopandas.testing import assert_geoseries_equal
+
+        result = GeoSeries(values).fillna(Point(1, 1), limit=1)
+        expected = gpd.GeoSeries(values)
+
+        assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
+
+
 @pytest.mark.skipif(
     parse_version(shapely.__version__) < parse_version("2.0.0"),
     reason=f"Tests require shapely>=2.0.0, but found v{shapely.__version__}",
@@ -969,6 +988,178 @@ class TestGeoSeries(TestGeopandasBase):
         result.fillna(None, inplace=True)
         expected = gpd.GeoSeries([Point(0, 0), GeometryCollection()], name="geometry")
         self.check_sgpd_equals_gpd(result, expected)
+
+    @pytest.mark.parametrize("value", [Point(9, 9), None])
+    def test_fillna_limit_scalar_uses_natural_order(self, value):
+        from geopandas.testing import assert_geoseries_equal
+
+        polygon = Polygon([(0, 0), (1, 0), (0, 1)])
+        source = GeoSeries(
+            GeoSeries(
+                [polygon, None, None, GeometryCollection(), None],
+                name="geometry",
+                crs="EPSG:4326",
+            ).sort_index(ascending=False)
+        )
+        result = source.fillna(value, limit=2).to_geopandas()
+        replacement = Point(9, 9) if value is not None else GeometryCollection()
+        expected = gpd.GeoSeries(
+            [replacement, GeometryCollection(), replacement, None, polygon],
+            index=[4, 3, 2, 1, 0],
+            name="geometry",
+            crs="EPSG:4326",
+        )
+
+        assert_geoseries_equal(result, expected, check_index_type=False)
+
+    @pytest.mark.parametrize("local_fill_values", [False, True])
+    def test_fillna_limit_counts_missing_aligned_values(self, local_fill_values):
+        from geopandas.testing import assert_geoseries_equal
+
+        source = GeoSeries(
+            GeoSeries(
+                [Point(7, 7), None, None, None],
+                name="geometry",
+                crs="EPSG:4326",
+            ).sort_index(ascending=False)
+        )
+        fill_values = gpd.GeoSeries(
+            [Point(3, 3), None, Point(4, 4), Point(99, 99)],
+            index=[1, 2, 3, 99],
+            crs="EPSG:4326",
+        )
+        if not local_fill_values:
+            fill_values = GeoSeries(fill_values)
+
+        result = source.fillna(fill_values, limit=2)
+        expected = gpd.GeoSeries(
+            [Point(4, 4), None, None, Point(7, 7)],
+            index=[3, 2, 1, 0],
+            name="geometry",
+            crs="EPSG:4326",
+        )
+
+        assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
+
+    def test_fillna_limit_pairs_equal_duplicate_indexes_positionally(self):
+        from geopandas.testing import assert_geoseries_equal
+
+        index = ["y", "x", "x"]
+        source = GeoSeries([Point(7, 7), None, None], index=index)
+        fill_values = GeoSeries([Point(8, 8), Point(1, 1), Point(2, 2)], index=index)
+
+        result = source.fillna(fill_values, limit=1)
+        expected = gpd.GeoSeries([Point(7, 7), Point(1, 1), None], index=index)
+
+        assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
+
+    def test_fillna_limit_uses_left_order_with_multiindex(self):
+        from geopandas.testing import assert_geoseries_equal
+
+        source_index = pd.MultiIndex.from_tuples(
+            [("z", 0), ("b", 0), ("a", 0)], names=["group", "row"]
+        )
+        fill_index = pd.MultiIndex.from_tuples(
+            [("a", 0), ("b", 0), ("z", 0)], names=["other_group", "other_row"]
+        )
+        source = GeoSeries([Point(7, 7), None, None], index=source_index)
+        fill_values = GeoSeries(
+            [Point(1, 1), Point(2, 2), Point(8, 8)], index=fill_index
+        )
+
+        result = source.fillna(fill_values, limit=1)
+        expected = gpd.GeoSeries([Point(7, 7), Point(2, 2), None], index=source_index)
+
+        assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
+
+    @pytest.mark.parametrize("left_is_multiindex", [False, True])
+    def test_fillna_limit_requires_full_index_shape(self, left_is_multiindex):
+        from geopandas.testing import assert_geoseries_equal
+
+        single_index = pd.Index(["a", "b"], name="id")
+        multi_index = pd.MultiIndex.from_tuples(
+            [("a", "x"), ("b", "y")], names=["id", "kind"]
+        )
+        left_index = multi_index if left_is_multiindex else single_index
+        right_index = single_index if left_is_multiindex else multi_index
+        source = GeoSeries([None, None], index=left_index)
+        fill_values = GeoSeries([Point(1, 1), Point(2, 2)], index=right_index)
+
+        result = source.fillna(fill_values, limit=1)
+        expected = gpd.GeoSeries([None, None], index=left_index)
+
+        assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
+
+    def test_fillna_limit_rejects_nonidentical_duplicate_fill_index(self):
+        source = GeoSeries([None, None], index=[1, 2])
+        fill_values = GeoSeries([Point(1, 1), Point(2, 2)], index=[1, 1])
+
+        with pytest.raises(
+            ValueError, match="cannot reindex on an axis with duplicate labels"
+        ):
+            source.fillna(fill_values, limit=1)
+
+    def test_fillna_limit_broadcasts_unique_value_to_duplicate_left_index(self):
+        from geopandas.testing import assert_geoseries_equal
+
+        source = GeoSeries([None, None, None], index=[1, 1, 2])
+        fill_values = GeoSeries([Point(1, 1), Point(2, 2)], index=[1, 2])
+
+        result = source.fillna(fill_values, limit=1)
+        expected = gpd.GeoSeries([Point(1, 1), None, None], index=[1, 1, 2])
+
+        assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
+
+    def test_fillna_limit_inplace(self):
+        from geopandas.testing import assert_geoseries_equal
+
+        result = GeoSeries([None, None, None], name="geometry", crs="EPSG:4326")
+
+        return_value = result.fillna(Point(1, 1), limit=1, inplace=True)
+        expected = gpd.GeoSeries(
+            [Point(1, 1), None, None], name="geometry", crs="EPSG:4326"
+        )
+
+        assert return_value is None
+        assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
+
+    @pytest.mark.parametrize("limit", [0, -1, 1.5, "1", True])
+    def test_fillna_limit_validation(self, limit):
+        message = (
+            "Limit must be greater than 0"
+            if isinstance(limit, int) and not isinstance(limit, bool)
+            else "Limit must be an integer"
+        )
+
+        with pytest.raises(ValueError, match=message):
+            GeoSeries([None]).fillna(Point(1, 1), limit=limit)
+
+    def test_fillna_limit_accepts_large_python_integer(self):
+        from geopandas.testing import assert_geoseries_equal
+
+        result = GeoSeries([None, None]).fillna(Point(1, 1), limit=2**63)
+        expected = gpd.GeoSeries([Point(1, 1), Point(1, 1)])
+
+        assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
+
+    def test_fillna_limit_plan_is_distributed_and_lazy(self, monkeypatch):
+        from pyspark.sql import DataFrame
+
+        source = GeoSeries([Point(0, 0), None, None])
+
+        def unexpected_action(*args, **kwargs):
+            raise AssertionError("fillna(limit=...) triggered a Spark action")
+
+        for operation in ["count", "collect", "toPandas", "first"]:
+            monkeypatch.setattr(DataFrame, operation, unexpected_action)
+
+        result = source.fillna(Point(1, 1), limit=1)
+        plan = (
+            result._internal.spark_frame._jdf.queryExecution().executedPlan().toString()
+        )
+
+        assert "SinglePartition" not in plan
+        assert "PythonUDF" not in plan
 
     @pytest.mark.parametrize(
         "kwargs",
