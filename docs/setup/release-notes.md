@@ -30,6 +30,11 @@
   whose state contains a serialized `ST_MinimumBoundingRadius` result cannot restore from a
   checkpoint or savepoint taken with the previous serializer** — such jobs need to be restarted
   without state, or migrated before upgrading.
+* **`ST_IsPolygonCW` and `ST_IsPolygonCCW`**: these predicates now match PostGIS by
+  recursively inspecting polygonal components in nested `GeometryCollection` values and returning
+  `true` when an input has no polygonal components; earlier releases returned `false` for those
+  inputs. Flink SQL `NULL` now returns `NULL`, matching Spark and Snowflake, and its wrappers return
+  nullable `Boolean` instead of primitive `boolean`.
 * **GeoPandas `set_crs`**: `GeoSeries.set_crs` and `GeoDataFrame.set_crs` now default to
   `allow_override=False`, matching GeoPandas. Replacing or removing an existing CRS now requires
   `allow_override=True`; direct `.crs` assignment remains an explicit override. Calls using the
