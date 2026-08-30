@@ -1,12 +1,11 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-          <title>org.apache.sedona:sedona-spark-common-3.4_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.io.stac.StacPartitionReader</title>
-          <meta name="description" content="org.apache.sedona sedona - spark - common - 3.4 2.12 2.0.0 - SNAPSHOT API - org.apache.spark.sql.sedona sql.io.stac.StacPartitionReader" />
-          <meta name="keywords" content="org.apache.sedona sedona spark common 3.4 2.12 2.0.0 SNAPSHOT API org.apache.spark.sql.sedona sql.io.stac.StacPartitionReader" />
+          <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.io.stac.StacPartitionReader</title>
+          <meta name="description" content="org.apache.sedona sedona - spark - common - 3.5 2.12 2.0.0 - SNAPSHOT API - org.apache.spark.sql.sedona sql.io.stac.StacPartitionReader" />
+          <meta name="keywords" content="org.apache.sedona sedona spark common 3.5 2.12 2.0.0 SNAPSHOT API org.apache.spark.sql.sedona sql.io.stac.StacPartitionReader" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       
@@ -29,7 +28,7 @@
         </head>
         <body>
       <div id="search">
-        <span id="doc-title">org.apache.sedona:sedona-spark-common-3.4_2.12 2.0.0-SNAPSHOT API<span id="doc-version"></span></span>
+        <span id="doc-title">org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API<span id="doc-version"></span></span>
         <span class="close-results"><span class="left">&lt;</span> Back</span>
         <div id="textfilter">
           <span class="input">
@@ -443,34 +442,10 @@
         <span class="name">createPartitionedFile</span><span class="params">(<span name="currentFile">currentFile: <span class="extype" name="java.io.File">File</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.execution.datasources.PartitionedFile">PartitionedFile</span></span>
       </span>
       
-      <p class="shortcomment cmt">Create a PartitionedFile instance using reflection.</p><div class="fullcomment"><div class="comment cmt"><p>Create a PartitionedFile instance using reflection. The constructor parameters differ between
-these versions, so we need to handle both cases. For Spark 3.4 and below, the constructor has
-7 parameters, while for Spark 3.5 and above, it has 8 parameters. Additionally, the type of
-the second parameter may be <code>SparkPath</code> in some cases, which requires special handling.
+      <p class="shortcomment cmt">Create a PartitionedFile instance for a locally staged STAC item file.</p><div class="fullcomment"><div class="comment cmt"><p>Create a PartitionedFile instance for a locally staged STAC item file.
 </p></div><dl class="paramcmts block"><dt class="param">currentFile</dt><dd class="cmt"><p>
   The file to create the PartitionedFile for.</p></dd><dt>returns</dt><dd class="cmt"><p>
-  The created PartitionedFile instance.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><span class="extype" name="NoSuchMethodException"><code>NoSuchMethodException</code></span> 
-  If no suitable constructor is found.</p></span></dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacPartitionReader#createSparkPath" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="createSparkPath(pathString:String):Object"></a><a id="createSparkPath(String):AnyRef"></a>
-      <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacPartitionReader.html#createSparkPath(pathString:String):Object" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">createSparkPath</span><span class="params">(<span name="pathString">pathString: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Create a SparkPath instance using reflection.</p><div class="fullcomment"><div class="comment cmt"><p>Create a SparkPath instance using reflection. This is needed to support both Spark 3.3 and
-below and Spark 3.4 and above.
-</p></div><dl class="paramcmts block"><dt class="param">pathString</dt><dd class="cmt"><p>
-  The path to create the SparkPath for.</p></dd><dt>returns</dt><dd class="cmt"><p>
-  The created SparkPath instance.</p></dd></dl></div>
+  The created PartitionedFile instance.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.connector.read.PartitionReader#currentMetricsValues" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="currentMetricsValues():Array[org.apache.spark.sql.connector.metric.CustomTaskMetric]"></a><a id="currentMetricsValues():Array[CustomTaskMetric]"></a>
       <span class="permalink">

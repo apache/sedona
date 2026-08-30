@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5696,11 +5695,11 @@
  under the License.
  -->
 
-<p>在 EMR 上推荐使用 Sedona-1.3.1-incubating 及以上版本。本教程使用 AWS Elastic MapReduce (EMR) 6.9.0，已预装以下应用：Hadoop 3.3.3、JupyterEnterpriseGateway 2.6.0、Livy 0.7.1、Spark 3.3.0。</p>
+<p>本教程使用 AWS Elastic MapReduce (EMR) 7.9.0，已预装以下应用：Hadoop 3.4.1、JupyterEnterpriseGateway 2.6.0、Livy 0.8.0-incubating、Spark 3.5.5。任何 EMR 7.x 版本均可，因为它们都搭载 Spark 3.5。</p>
 <p>本教程在带 EMR Studio（notebook）的 EMR on EC2 上完成测试。EMR on EC2 使用 YARN 进行资源管理。</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>如果您使用 Spark 3.4+ 与 Scala 2.12，请使用 <code>sedona-spark-shaded-3.4_2.12</code>。请注意 Spark 与 Scala 的版本后缀。</p>
+<p>请使用 Spark 主.次版本与集群一致的 artifact：Spark 3.5 用 <code>sedona-spark-shaded-3.5_2.12</code>，Spark 4.0 用 <code>sedona-spark-shaded-4.0_2.13</code>，Spark 4.1 用 <code>sedona-spark-shaded-4.1_2.13</code>。Spark 4.0 及以上仅提供 Scala 2.13 构建。</p>
 </div>
 <h2 id="_1">准备初始化脚本<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <p>在您的 S3 存储桶中添加一个内容如下的脚本：</p>
@@ -5710,7 +5709,7 @@
 sudo<span class="w"> </span>mkdir<span class="w"> </span>/jars
 
 <span class="c1"># 下载 Sedona jar</span>
-sudo<span class="w"> </span>curl<span class="w"> </span>-o<span class="w"> </span>/jars/sedona-spark-shaded-3.3_2.12-1.9.1.jar<span class="w"> </span><span class="s2">"https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.3_2.12/1.9.1/sedona-spark-shaded-3.3_2.12-1.9.1.jar"</span>
+sudo<span class="w"> </span>curl<span class="w"> </span>-o<span class="w"> </span>/jars/sedona-spark-shaded-3.5_2.12-1.9.1.jar<span class="w"> </span><span class="s2">"https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/1.9.1/sedona-spark-shaded-3.5_2.12-1.9.1.jar"</span>
 
 <span class="c1"># 下载 GeoTools jar</span>
 sudo<span class="w"> </span>curl<span class="w"> </span>-o<span class="w"> </span>/jars/geotools-wrapper-1.9.1-33.5.jar<span class="w"> </span><span class="s2">"https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.9.1-33.5/geotools-wrapper-1.9.1-33.5.jar"</span>
@@ -5730,7 +5729,7 @@ sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </
 <span class="w">  </span><span class="o">{</span>
 <span class="w">    </span><span class="s2">"Classification"</span>:<span class="s2">"spark-defaults"</span>,
 <span class="w">    </span><span class="s2">"Properties"</span>:<span class="o">{</span>
-<span class="w">      </span><span class="s2">"spark.yarn.dist.jars"</span>:<span class="w"> </span><span class="s2">"/jars/sedona-spark-shaded-3.3_2.12-1.9.1.jar,/jars/geotools-wrapper-1.9.1-33.5.jar"</span>,
+<span class="w">      </span><span class="s2">"spark.yarn.dist.jars"</span>:<span class="w"> </span><span class="s2">"/jars/sedona-spark-shaded-3.5_2.12-1.9.1.jar,/jars/geotools-wrapper-1.9.1-33.5.jar"</span>,
 <span class="w">      </span><span class="s2">"spark.serializer"</span>:<span class="w"> </span><span class="s2">"org.apache.spark.serializer.KryoSerializer"</span>,
 <span class="w">      </span><span class="s2">"spark.kryo.registrator"</span>:<span class="w"> </span><span class="s2">"org.apache.sedona.core.serde.SedonaKryoRegistrator"</span>,
 <span class="w">      </span><span class="s2">"spark.sql.extensions"</span>:<span class="w"> </span><span class="s2">"org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions"</span>
@@ -5763,7 +5762,7 @@ sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月8日 06:17:05 UTC">2026年5月8日 06:17:05</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年8月30日 05:22:11 UTC">2026年8月30日 05:22:11</span>
   </span>
 
     

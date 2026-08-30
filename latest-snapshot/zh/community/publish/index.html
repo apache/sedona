@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6153,7 +6152,7 @@ rm<span class="w"> </span>-rf<span class="w"> </span><span class="nv">$LOCAL_DIR
 <span class="nv">MAVEN_PLUGIN_VERSION</span><span class="o">=</span><span class="s2">"2.3.2"</span>
 
 <span class="c1"># Spark 与 Scala 版本</span>
-<span class="nb">declare</span><span class="w"> </span>-a<span class="w"> </span><span class="nv">SPARK_VERSIONS</span><span class="o">=(</span><span class="s2">"3.4"</span><span class="w"> </span><span class="s2">"3.5"</span><span class="w"> </span><span class="s2">"4.0"</span><span class="w"> </span><span class="s2">"4.1"</span><span class="o">)</span>
+<span class="nb">declare</span><span class="w"> </span>-a<span class="w"> </span><span class="nv">SPARK_VERSIONS</span><span class="o">=(</span><span class="s2">"3.5"</span><span class="w"> </span><span class="s2">"4.0"</span><span class="w"> </span><span class="s2">"4.1"</span><span class="o">)</span>
 <span class="nb">declare</span><span class="w"> </span>-a<span class="w"> </span><span class="nv">SCALA_VERSIONS</span><span class="o">=(</span><span class="s2">"2.12"</span><span class="w"> </span><span class="s2">"2.13"</span><span class="o">)</span>
 
 <span class="c1"># 根据 Spark 版本确定所需 Java 版本</span>
@@ -6409,19 +6408,6 @@ verify_java_version<span class="o">()</span><span class="w"> </span><span class=
 <span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"✓ Verified: Maven wrapper is using Java </span><span class="nv">$mvn_java_version</span><span class="s2">"</span>
 <span class="o">}</span>
 
-<span class="c1"># 使用 Java 11 编译 Spark 3.4</span>
-<span class="nv">JAVA_VERSION</span><span class="o">=</span><span class="k">$(</span>get_java_version<span class="w"> </span><span class="s2">"3.4"</span><span class="k">)</span>
-<span class="nv">MVN_WRAPPER</span><span class="o">=</span><span class="k">$(</span>create_mvn_wrapper<span class="w"> </span><span class="nv">$JAVA_VERSION</span><span class="k">)</span>
-verify_java_version<span class="w"> </span><span class="nv">$MVN_WRAPPER</span><span class="w"> </span><span class="nv">$JAVA_VERSION</span>
-
-<span class="nb">echo</span><span class="w"> </span><span class="s2">"Compiling for Spark 3.4 with Scala 2.12 using Java </span><span class="nv">$JAVA_VERSION</span><span class="s2">..."</span>
-<span class="nb">cd</span><span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nv">$MVN_WRAPPER</span><span class="w"> </span>clean<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nv">$MVN_WRAPPER</span><span class="w"> </span>install<span class="w"> </span>-DskipTests<span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.4<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.12<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>..
-cp<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src/spark-shaded/target/sedona-*<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>.jar<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin/
-
-<span class="nb">echo</span><span class="w"> </span><span class="s2">"Compiling for Spark 3.4 with Scala 2.13 using Java </span><span class="nv">$JAVA_VERSION</span><span class="s2">..."</span>
-<span class="nb">cd</span><span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nv">$MVN_WRAPPER</span><span class="w"> </span>clean<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nv">$MVN_WRAPPER</span><span class="w"> </span>install<span class="w"> </span>-DskipTests<span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.4<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>..
-cp<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src/spark-shaded/target/sedona-*<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>.jar<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin/
-
 <span class="c1"># 使用 Java 11 编译 Spark 3.5</span>
 <span class="nv">JAVA_VERSION</span><span class="o">=</span><span class="k">$(</span>get_java_version<span class="w"> </span><span class="s2">"3.5"</span><span class="k">)</span>
 <span class="nv">MVN_WRAPPER</span><span class="o">=</span><span class="k">$(</span>create_mvn_wrapper<span class="w"> </span><span class="nv">$JAVA_VERSION</span><span class="k">)</span>
@@ -6675,7 +6661,7 @@ R<span class="w"> </span>CMD<span class="w"> </span>check<span class="w"> </span
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月26日 06:31:28 UTC">2026年5月26日 06:31:28</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年8月30日 05:22:11 UTC">2026年8月30日 05:22:11</span>
   </span>
 
     

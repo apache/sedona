@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5696,11 +5695,11 @@
  under the License.
  -->
 
-<p>We recommend Sedona-1.3.1-incubating and above for EMR. In the tutorial, we use AWS Elastic MapReduce (EMR) 6.9.0. It has the following applications installed: Hadoop 3.3.3, JupyterEnterpriseGateway 2.6.0, Livy 0.7.1, Spark 3.3.0.</p>
+<p>In the tutorial, we use AWS Elastic MapReduce (EMR) 7.9.0. It has the following applications installed: Hadoop 3.4.1, JupyterEnterpriseGateway 2.6.0, Livy 0.8.0-incubating, Spark 3.5.5. Any EMR 7.x release works, since they all ship Spark 3.5.</p>
 <p>This tutorial is tested on EMR on EC2 with EMR Studio (notebooks). EMR on EC2 uses YARN to manage resources.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>If you are using Spark 3.4+ and Scala 2.12, please use <code>sedona-spark-shaded-3.4_2.12</code>. Please pay attention to the Spark version postfix and Scala version postfix.</p>
+<p>Use the artifact whose Spark major.minor version matches your cluster: <code>sedona-spark-shaded-3.5_2.12</code> for Spark 3.5, <code>sedona-spark-shaded-4.0_2.13</code> for Spark 4.0, <code>sedona-spark-shaded-4.1_2.13</code> for Spark 4.1. Spark 4.0 and above are built with Scala 2.13 only.</p>
 </div>
 <h2 id="prepare-initialization-script">Prepare initialization script<a class="headerlink" href="#prepare-initialization-script" title="Permanent link">&para;</a></h2>
 <p>In your S3 bucket, add a script that has the following content:</p>
@@ -5710,7 +5709,7 @@
 sudo<span class="w"> </span>mkdir<span class="w"> </span>/jars
 
 <span class="c1"># Download Sedona jar</span>
-sudo<span class="w"> </span>curl<span class="w"> </span>-o<span class="w"> </span>/jars/sedona-spark-shaded-3.3_2.12-1.9.1.jar<span class="w"> </span><span class="s2">"https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.3_2.12/1.9.1/sedona-spark-shaded-3.3_2.12-1.9.1.jar"</span>
+sudo<span class="w"> </span>curl<span class="w"> </span>-o<span class="w"> </span>/jars/sedona-spark-shaded-3.5_2.12-1.9.1.jar<span class="w"> </span><span class="s2">"https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/1.9.1/sedona-spark-shaded-3.5_2.12-1.9.1.jar"</span>
 
 <span class="c1"># Download GeoTools jar</span>
 sudo<span class="w"> </span>curl<span class="w"> </span>-o<span class="w"> </span>/jars/geotools-wrapper-1.9.1-33.5.jar<span class="w"> </span><span class="s2">"https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.9.1-33.5/geotools-wrapper-1.9.1-33.5.jar"</span>
@@ -5730,7 +5729,7 @@ sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </
 <span class="w">  </span><span class="o">{</span>
 <span class="w">    </span><span class="s2">"Classification"</span>:<span class="s2">"spark-defaults"</span>,
 <span class="w">    </span><span class="s2">"Properties"</span>:<span class="o">{</span>
-<span class="w">      </span><span class="s2">"spark.yarn.dist.jars"</span>:<span class="w"> </span><span class="s2">"/jars/sedona-spark-shaded-3.3_2.12-1.9.1.jar,/jars/geotools-wrapper-1.9.1-33.5.jar"</span>,
+<span class="w">      </span><span class="s2">"spark.yarn.dist.jars"</span>:<span class="w"> </span><span class="s2">"/jars/sedona-spark-shaded-3.5_2.12-1.9.1.jar,/jars/geotools-wrapper-1.9.1-33.5.jar"</span>,
 <span class="w">      </span><span class="s2">"spark.serializer"</span>:<span class="w"> </span><span class="s2">"org.apache.spark.serializer.KryoSerializer"</span>,
 <span class="w">      </span><span class="s2">"spark.kryo.registrator"</span>:<span class="w"> </span><span class="s2">"org.apache.sedona.core.serde.SedonaKryoRegistrator"</span>,
 <span class="w">      </span><span class="s2">"spark.sql.extensions"</span>:<span class="w"> </span><span class="s2">"org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions"</span>
@@ -5763,7 +5762,7 @@ sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="December 4, 2024 07:01:47 UTC">December 4, 2024 07:01:47</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="August 30, 2026 05:22:11 UTC">August 30, 2026 05:22:11</span>
   </span>
 
     

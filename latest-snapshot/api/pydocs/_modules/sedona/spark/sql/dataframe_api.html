@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.dataframe_api &mdash; Apache Sedona Python Documentation</title>
@@ -239,7 +238,8 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.connect.column</span><span class="w"> </span><span class="kn">import</span> <span class="n">Column</span> <span class="k">as</span> <span class="n">ConnectColumn</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_remote</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="c1"># be backwards compatible with Spark &lt; 3.4</span>
+    <span class="c1"># pyspark.sql.connect requires pandas and pyarrow, which are not Sedona</span>
+    <span class="c1"># dependencies; fall back to the non-Connect path when they are absent.</span>
 <div class="viewcode-block" id="is_remote"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.dataframe_api.is_remote">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">is_remote</span><span class="p">():</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 

@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5799,45 +5798,17 @@
 <p>对于 R 用户，这是在您的环境中使用 Sedona 的唯一方式。</p>
 </div>
 <p>Apache Sedona 针对每个受支持的 Spark 版本提供了不同的包。</p>
-<p>请使用 artifact 名称中包含 Spark major.minor 版本号的 artifact。例如，对于 Spark 3.4，应使用 <code>sedona-spark-shaded-3.4_2.12</code>。</p>
+<p>请使用 artifact 名称中包含 Spark major.minor 版本号的 artifact。例如，对于 Spark 3.5，应使用 <code>sedona-spark-shaded-3.5_2.12</code>。</p>
 <p>如果使用基于 Scala 2.13 编译的 Spark，则应使用对应的 Scala 2.13 版本，其后缀为 <code>_2.13</code>。</p>
 <p>可选的 GeoTools 库仅在使用栅格算子时才需要。矢量 CRS 转换（ST_Transform）现在默认使用内置的 proj4sedona，无需 GeoTools。该 wrapper 库是 GeoTools 官方 jar 的再分发，目的仅是把 GeoTools jar 从 OSGEO 仓库带入 Maven Central。该库基于 GNU Lesser General Public License (LGPL) 协议，因此无法打包进 Sedona 官方发行版中。</p>
 <div class="admonition abstract">
 <p class="admonition-title">Sedona 与 Apache Spark + Scala 2.12</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Spark 3.4 与 Scala 2.12</label><label for="__tabbed_1_2">Spark 3.5 与 Scala 2.12</label><label for="__tabbed_1_3">Spark 4.0 与 Scala 2.12</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:1"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Spark 3.5 与 Scala 2.12</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
 <span class="w">  </span><span class="nt">&lt;groupId&gt;</span>org.apache.sedona<span class="nt">&lt;/groupId&gt;</span>
-<span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>sedona-spark-shaded-3.4_2.12<span class="nt">&lt;/artifactId&gt;</span>
-<span class="w">  </span><span class="nt">&lt;version&gt;</span>1.9.1<span class="nt">&lt;/version&gt;</span>
-<span class="nt">&lt;/dependency&gt;</span>
-<span class="cm">&lt;!-- 可选：https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
-<span class="nt">&lt;dependency&gt;</span>
-<span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.datasyslab<span class="nt">&lt;/groupId&gt;</span>
-<span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>geotools-wrapper<span class="nt">&lt;/artifactId&gt;</span>
-<span class="w">    </span><span class="nt">&lt;version&gt;</span>1.9.1-33.5<span class="nt">&lt;/version&gt;</span>
-<span class="nt">&lt;/dependency&gt;</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
-<span class="w">  </span><span class="nt">&lt;groupId&gt;</span>org.apache.sedona<span class="nt">&lt;/groupId&gt;</span>
 <span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>sedona-spark-shaded-3.5_2.12<span class="nt">&lt;/artifactId&gt;</span>
-<span class="w">  </span><span class="nt">&lt;version&gt;</span>1.9.1<span class="nt">&lt;/version&gt;</span>
-<span class="nt">&lt;/dependency&gt;</span>
-<span class="cm">&lt;!-- 可选：https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
-<span class="nt">&lt;dependency&gt;</span>
-<span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.datasyslab<span class="nt">&lt;/groupId&gt;</span>
-<span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>geotools-wrapper<span class="nt">&lt;/artifactId&gt;</span>
-<span class="w">    </span><span class="nt">&lt;version&gt;</span>1.9.1-33.5<span class="nt">&lt;/version&gt;</span>
-<span class="nt">&lt;/dependency&gt;</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
-<span class="w">  </span><span class="nt">&lt;groupId&gt;</span>org.apache.sedona<span class="nt">&lt;/groupId&gt;</span>
-<span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>sedona-spark-shaded-4.0_2.12<span class="nt">&lt;/artifactId&gt;</span>
 <span class="w">  </span><span class="nt">&lt;version&gt;</span>1.9.1<span class="nt">&lt;/version&gt;</span>
 <span class="nt">&lt;/dependency&gt;</span>
 <span class="cm">&lt;!-- 可选：https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
@@ -5853,22 +5824,8 @@
 </div>
 <div class="admonition abstract">
 <p class="admonition-title">Sedona 与 Apache Spark + Scala 2.13</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:4"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Spark 3.4 与 Scala 2.13</label><label for="__tabbed_2_2">Spark 3.5 与 Scala 2.13</label><label for="__tabbed_2_3">Spark 4.0 与 Scala 2.13</label><label for="__tabbed_2_4">Spark 4.1 与 Scala 2.13</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Spark 3.5 与 Scala 2.13</label><label for="__tabbed_2_2">Spark 4.0 与 Scala 2.13</label><label for="__tabbed_2_3">Spark 4.1 与 Scala 2.13</label></div>
 <div class="tabbed-content">
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
-<span class="w">  </span><span class="nt">&lt;groupId&gt;</span>org.apache.sedona<span class="nt">&lt;/groupId&gt;</span>
-<span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>sedona-spark-shaded-3.4_2.13<span class="nt">&lt;/artifactId&gt;</span>
-<span class="w">  </span><span class="nt">&lt;version&gt;</span>1.9.1<span class="nt">&lt;/version&gt;</span>
-<span class="nt">&lt;/dependency&gt;</span>
-<span class="cm">&lt;!-- 可选：https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
-<span class="nt">&lt;dependency&gt;</span>
-<span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.datasyslab<span class="nt">&lt;/groupId&gt;</span>
-<span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>geotools-wrapper<span class="nt">&lt;/artifactId&gt;</span>
-<span class="w">    </span><span class="nt">&lt;version&gt;</span>1.9.1-33.5<span class="nt">&lt;/version&gt;</span>
-<span class="nt">&lt;/dependency&gt;</span>
-</code></pre></div>
-</div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
 <span class="w">  </span><span class="nt">&lt;groupId&gt;</span>org.apache.sedona<span class="nt">&lt;/groupId&gt;</span>
@@ -5962,43 +5919,17 @@
 <p>Scala、Java、Python 用户仅在同时满足以下条件时才考虑使用下面的 jar：(1) 您知道如何在复杂应用中排除传递依赖；(2) 您的环境可以访问公网；(3) 您正在使用某种 Maven 包解析器，或 pom.xml/build.sbt，它通常以 <code>GroupID:ArtifactID:Version</code> 的形式接收输入。如果您不清楚以上含义，那么下面的 jar 不适合您。</p>
 </div>
 <p>Apache Sedona 针对每个受支持的 Spark 版本提供了不同的包。</p>
-<p>请使用 artifact 名称中包含 Spark major.minor 版本号的 artifact。例如，对于 Spark 3.4，应使用 <code>sedona-spark-3.4_2.12</code>。</p>
+<p>请使用 artifact 名称中包含 Spark major.minor 版本号的 artifact。例如，对于 Spark 3.5，应使用 <code>sedona-spark-3.5_2.12</code>。</p>
 <p>如果使用基于 Scala 2.13 编译的 Spark，则应使用对应的 Scala 2.13 版本（后缀为 <code>_2.13</code>）。</p>
 <p>可选的 GeoTools 库仅在使用栅格算子时才需要。矢量 CRS 转换（ST_Transform）现在默认使用内置的 proj4sedona，无需 GeoTools。该 wrapper 库是 GeoTools 官方 jar 的再分发，目的仅是把 GeoTools jar 从 OSGEO 仓库带入 Maven Central。该库基于 GNU Lesser General Public License (LGPL) 协议，因此无法打包进 Sedona 官方发行版中。</p>
 <div class="admonition abstract">
 <p class="admonition-title">Sedona 与 Apache Spark + Scala 2.12</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Spark 3.4 与 Scala 2.12</label><label for="__tabbed_5_2">Spark 3.5 与 Scala 2.12</label><label for="__tabbed_5_3">Spark 4.0 与 Scala 2.12</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:1"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Spark 3.5 与 Scala 2.12</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
 <span class="w">  </span><span class="nt">&lt;groupId&gt;</span>org.apache.sedona<span class="nt">&lt;/groupId&gt;</span>
-<span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>sedona-spark-3.4_2.12<span class="nt">&lt;/artifactId&gt;</span>
-<span class="w">  </span><span class="nt">&lt;version&gt;</span>1.9.1<span class="nt">&lt;/version&gt;</span>
-<span class="nt">&lt;/dependency&gt;</span>
-<span class="nt">&lt;dependency&gt;</span>
-<span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.datasyslab<span class="nt">&lt;/groupId&gt;</span>
-<span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>geotools-wrapper<span class="nt">&lt;/artifactId&gt;</span>
-<span class="w">    </span><span class="nt">&lt;version&gt;</span>1.9.1-33.5<span class="nt">&lt;/version&gt;</span>
-<span class="nt">&lt;/dependency&gt;</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
-<span class="w">  </span><span class="nt">&lt;groupId&gt;</span>org.apache.sedona<span class="nt">&lt;/groupId&gt;</span>
 <span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>sedona-spark-3.5_2.12<span class="nt">&lt;/artifactId&gt;</span>
-<span class="w">  </span><span class="nt">&lt;version&gt;</span>1.9.1<span class="nt">&lt;/version&gt;</span>
-<span class="nt">&lt;/dependency&gt;</span>
-<span class="nt">&lt;dependency&gt;</span>
-<span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.datasyslab<span class="nt">&lt;/groupId&gt;</span>
-<span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>geotools-wrapper<span class="nt">&lt;/artifactId&gt;</span>
-<span class="w">    </span><span class="nt">&lt;version&gt;</span>1.9.1-33.5<span class="nt">&lt;/version&gt;</span>
-<span class="nt">&lt;/dependency&gt;</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
-<span class="w">  </span><span class="nt">&lt;groupId&gt;</span>org.apache.sedona<span class="nt">&lt;/groupId&gt;</span>
-<span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>sedona-spark-4.0_2.12<span class="nt">&lt;/artifactId&gt;</span>
 <span class="w">  </span><span class="nt">&lt;version&gt;</span>1.9.1<span class="nt">&lt;/version&gt;</span>
 <span class="nt">&lt;/dependency&gt;</span>
 <span class="nt">&lt;dependency&gt;</span>
@@ -6013,21 +5944,8 @@
 </div>
 <div class="admonition abstract">
 <p class="admonition-title">Sedona 与 Apache Spark + Scala 2.13</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:4"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><input id="__tabbed_6_4" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Spark 3.4 与 Scala 2.13</label><label for="__tabbed_6_2">Spark 3.5 与 Scala 2.13</label><label for="__tabbed_6_3">Spark 4.0 与 Scala 2.13</label><label for="__tabbed_6_4">Spark 4.1 与 Scala 2.13</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Spark 3.5 与 Scala 2.13</label><label for="__tabbed_6_2">Spark 4.0 与 Scala 2.13</label><label for="__tabbed_6_3">Spark 4.1 与 Scala 2.13</label></div>
 <div class="tabbed-content">
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
-<span class="w">  </span><span class="nt">&lt;groupId&gt;</span>org.apache.sedona<span class="nt">&lt;/groupId&gt;</span>
-<span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>sedona-spark-3.4_2.13<span class="nt">&lt;/artifactId&gt;</span>
-<span class="w">  </span><span class="nt">&lt;version&gt;</span>1.9.1<span class="nt">&lt;/version&gt;</span>
-<span class="nt">&lt;/dependency&gt;</span>
-<span class="nt">&lt;dependency&gt;</span>
-<span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.datasyslab<span class="nt">&lt;/groupId&gt;</span>
-<span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>geotools-wrapper<span class="nt">&lt;/artifactId&gt;</span>
-<span class="w">    </span><span class="nt">&lt;version&gt;</span>1.9.1-33.5<span class="nt">&lt;/version&gt;</span>
-<span class="nt">&lt;/dependency&gt;</span>
-</code></pre></div>
-</div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
 <span class="w">  </span><span class="nt">&lt;groupId&gt;</span>org.apache.sedona<span class="nt">&lt;/groupId&gt;</span>
@@ -6164,7 +6082,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月8日 06:17:05 UTC">2026年5月8日 06:17:05</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年8月30日 05:22:11 UTC">2026年8月30日 05:22:11</span>
   </span>
 
     
