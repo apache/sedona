@@ -4975,6 +4975,65 @@ class GeoSeries(GeoFrame, pspd.Series):
         ).orderBy(NATURAL_ORDER_COLUMN_NAME)
         return aligned_frame, left_indexes
 
+    def _fillna_with_limit(
+        self,
+        replacement: Union[PySparkColumn, "GeoSeries"],
+        limit: int,
+    ) -> "GeoSeries":
+        """Fill the first missing rows while preserving the exact left axis."""
+        fill_rank = "__fillna_rank__"
+
+        if isinstance(replacement, GeoSeries):
+            aligned_frame, left_indexes = self._align_fillna_series(replacement)
+        else:
+            source_frame = self._internal.spark_frame
+            left_indexes = [
+                f"__fillna_left_index_{level}__"
+                for level in range(len(self._internal.index_spark_columns))
+            ]
+            aligned_frame = source_frame.select(
+                self.spark.column.alias("L"),
+                replacement.alias("R"),
+                *[
+                    column.alias(alias)
+                    for column, alias in zip(
+                        self._internal.index_spark_columns, left_indexes
+                    )
+                ],
+                scol_for(source_frame, NATURAL_ORDER_COLUMN_NAME),
+            )
+
+        ranked_missing = _attach_ordered_sequence_column(
+            aligned_frame.where(F.col("L").isNull()),
+            F.col(NATURAL_ORDER_COLUMN_NAME),
+            fill_rank,
+        )
+        nonmissing = aligned_frame.where(F.col("L").isNotNull()).withColumn(
+            fill_rank, F.lit(-1).cast(LongType())
+        )
+        ranked_frame = nonmissing.unionByName(ranked_missing).orderBy(
+            NATURAL_ORDER_COLUMN_NAME
+        )
+
+        left_crs = self.crs
+        left_srid = (left_crs.to_epsg() or 0) if left_crs is not None else 0
+        result_expression = F.when(
+            (F.col(fill_rank) >= F.lit(0)) & (F.col(fill_rank) < F.lit(limit)),
+            F.coalesce(
+                F.col("L"),
+                stf.ST_SetSRID(F.col("R"), left_srid),
+            ),
+        ).otherwise(F.col("L"))
+        return self._result_preserving_index(
+            result_expression,
+            ranked_frame,
+            [scol_for(ranked_frame, name) for name in left_indexes],
+            self._internal.index_fields,
+            self._internal.index_names,
+            returns_geom=True,
+            keep_name=True,
+        )
+
     # GeoSeries-only (not in GeoDataFrame)
     def fillna(
         self, value=None, inplace: bool = False, limit=None, **kwargs
@@ -5004,6 +5063,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         Filling from an independent ``GeoSeries`` validates its distributed index
         before returning. Filling from another column of the same ``GeoDataFrame``
         remains lazy.
+
+        Using ``limit`` requires a distributed global ordering of the missing
+        geometries and can be expensive for large GeoSeries.
 
         Examples
         --------
@@ -5061,11 +5123,13 @@ class GeoSeries(GeoFrame, pspd.Series):
         """
         from shapely.geometry.base import BaseGeometry
 
-        # TODO: Implement limit https://github.com/apache/sedona/issues/2068
-        if limit:
-            raise NotImplementedError(
-                "GeoSeries.fillna() with limit is not implemented yet."
-            )
+        if limit is not None:
+            if type(limit) is not int:
+                raise ValueError("Limit must be an integer")
+            if limit <= 0:
+                raise ValueError("Limit must be greater than 0")
+            # Distributed sequence positions use Spark LongType.
+            limit = min(limit, 9_223_372_036_854_775_807)
 
         align = True
 
@@ -5083,21 +5147,24 @@ class GeoSeries(GeoFrame, pspd.Series):
                     crs=value_crs,
                 )
 
-            aligned_frame, left_indexes = self._align_fillna_series(value)
-            left_crs = self.crs
-            left_srid = (left_crs.to_epsg() or 0) if left_crs is not None else 0
-            result = self._result_preserving_index(
-                F.coalesce(
-                    F.col("L"),
-                    stf.ST_SetSRID(F.col("R"), left_srid),
-                ),
-                aligned_frame,
-                [scol_for(aligned_frame, name) for name in left_indexes],
-                self._internal.index_fields,
-                self._internal.index_names,
-                returns_geom=True,
-                keep_name=True,
-            )
+            if limit is not None:
+                result = self._fillna_with_limit(value, limit)
+            else:
+                aligned_frame, left_indexes = self._align_fillna_series(value)
+                left_crs = self.crs
+                left_srid = (left_crs.to_epsg() or 0) if left_crs is not None else 0
+                result = self._result_preserving_index(
+                    F.coalesce(
+                        F.col("L"),
+                        stf.ST_SetSRID(F.col("R"), left_srid),
+                    ),
+                    aligned_frame,
+                    [scol_for(aligned_frame, name) for name in left_indexes],
+                    self._internal.index_fields,
+                    self._internal.index_names,
+                    returns_geom=True,
+                    keep_name=True,
+                )
 
         elif pd.isna(value) == True or isinstance(value, BaseGeometry):
             if (
@@ -5110,19 +5177,25 @@ class GeoSeries(GeoFrame, pspd.Series):
 
                     value = GeometryCollection()
 
-            other, extended = self._make_series_of_val(value)
-            align = False if extended else align
+            if limit is not None:
+                replacement = stc.ST_GeomFromWKB(
+                    F.lit(value.wkb if value is not None else None).cast("binary")
+                )
+                result = self._fillna_with_limit(replacement, limit)
+            else:
+                other, extended = self._make_series_of_val(value)
+                align = False if extended else align
 
-            # Coalesce: If the value in L is null, use the corresponding value in R for that row
-            spark_expr = F.coalesce(F.col("L"), F.col("R"))
-            result = self._row_wise_operation(
-                spark_expr,
-                other,
-                align=align,
-                returns_geom=True,
-                default_val=None,
-                keep_name=True,
-            )
+                # Coalesce: If the value in L is null, use the corresponding value in R for that row
+                spark_expr = F.coalesce(F.col("L"), F.col("R"))
+                result = self._row_wise_operation(
+                    spark_expr,
+                    other,
+                    align=align,
+                    returns_geom=True,
+                    default_val=None,
+                    keep_name=True,
+                )
 
         else:
             raise ValueError(f"Invalid value type: {type(value)}")
