@@ -78,14 +78,14 @@ If you already have a SparkSession (Wherobots, AWS EMR, Databricks), skip ahead 
 	    SedonaContext.builder()
 	    .config(
 	        "spark.jars.packages",
-	        "org.apache.sedona:sedona-spark-shaded-3.3_2.12:{{ sedona.current_version }},"
+	        "org.apache.sedona:sedona-spark-shaded-3.5_2.12:{{ sedona.current_version }},"
 	        "org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}",
 	    )
 	    .getOrCreate()
 	)
 	sedona = SedonaContext.create(config)
 	```
-	Replace `3.3` with the major.minor version of your Spark install (for example `sedona-spark-shaded-3.4_2.12`).
+	Replace `3.5` with the major.minor version of your Spark install (for example `sedona-spark-shaded-4.0_2.13`).
 
 You can also register Sedona by passing `--conf spark.sql.extensions=org.apache.sedona.sql.SedonaSqlExtensions` to `spark-submit` or `spark-shell`.
 

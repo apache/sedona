@@ -116,7 +116,7 @@ abstract class AbstractCatalog {
   // Builds the catalyst aggregate for a UDAF so the FunctionRegistry.builtin entry can be the
   // real implementation rather than a non-invocable placeholder. The required Spark API is
   // package-private in Scala (public in bytecode) and moved between versions, hence reflection:
-  // Spark 3.4/3.5 expose UserDefinedAggregator.scalaAggregator(children), Spark 4.x the
+  // Spark 3.5 exposes UserDefinedAggregator.scalaAggregator(children), Spark 4.x the
   // ScalaAggregator companion's apply(udaf, children).
   private lazy val builtinAggregateBuilder
       : Option[(UserDefinedFunction, Seq[Expression]) => Expression] = {

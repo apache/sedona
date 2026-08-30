@@ -55,12 +55,12 @@ object SchemaMergeUtils extends Logging {
       caseSensitive: Boolean): StructType = {
     mergeMethodWithCaseSensitive match {
       case Some(method) =>
-        // Use the cached method with caseSensitive parameter (Spark 3.5 or later)
+        // Use the cached method with caseSensitive parameter (Spark 3.5.1 or later)
         method
           .invoke(schema1, schema2, caseSensitive.asInstanceOf[AnyRef])
           .asInstanceOf[StructType]
       case None =>
-        // Fall back to merge without caseSensitive parameter (Spark 3.4)
+        // Fall back to merge without caseSensitive parameter (Spark 3.5.0)
         schema1.merge(schema2)
     }
   }

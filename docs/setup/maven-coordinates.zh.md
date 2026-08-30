@@ -29,7 +29,7 @@
 
 Apache Sedona 针对每个受支持的 Spark 版本提供了不同的包。
 
-请使用 artifact 名称中包含 Spark major.minor 版本号的 artifact。例如，对于 Spark 3.4，应使用 `sedona-spark-shaded-3.4_2.12`。
+请使用 artifact 名称中包含 Spark major.minor 版本号的 artifact。例如，对于 Spark 3.5，应使用 `sedona-spark-shaded-3.5_2.12`。
 
 如果使用基于 Scala 2.13 编译的 Spark，则应使用对应的 Scala 2.13 版本，其后缀为 `_2.13`。
 
@@ -37,21 +37,6 @@ Apache Sedona 针对每个受支持的 Spark 版本提供了不同的包。
 
 !!! abstract "Sedona 与 Apache Spark + Scala 2.12"
 
-	=== "Spark 3.4 与 Scala 2.12"
-
-		```xml
-		<dependency>
-		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-spark-shaded-3.4_2.12</artifactId>
-		  <version>{{ sedona.current_version }}</version>
-		</dependency>
-		<!-- 可选：https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
-		<dependency>
-		    <groupId>org.datasyslab</groupId>
-		    <artifactId>geotools-wrapper</artifactId>
-		    <version>{{ sedona.current_geotools }}</version>
-		</dependency>
-		```
 	=== "Spark 3.5 与 Scala 2.12"
 
 		```xml
@@ -68,39 +53,8 @@ Apache Sedona 针对每个受支持的 Spark 版本提供了不同的包。
 		</dependency>
 		```
 
-	=== "Spark 4.0 与 Scala 2.12"
-
-		```xml
-		<dependency>
-		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-spark-shaded-4.0_2.12</artifactId>
-		  <version>{{ sedona.current_version }}</version>
-		</dependency>
-		<!-- 可选：https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
-		<dependency>
-		    <groupId>org.datasyslab</groupId>
-		    <artifactId>geotools-wrapper</artifactId>
-		    <version>{{ sedona.current_geotools }}</version>
-		</dependency>
-		```
-
 !!! abstract "Sedona 与 Apache Spark + Scala 2.13"
 
-	=== "Spark 3.4 与 Scala 2.13"
-
-		```xml
-		<dependency>
-		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-spark-shaded-3.4_2.13</artifactId>
-		  <version>{{ sedona.current_version }}</version>
-		</dependency>
-		<!-- 可选：https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
-		<dependency>
-		    <groupId>org.datasyslab</groupId>
-		    <artifactId>geotools-wrapper</artifactId>
-		    <version>{{ sedona.current_geotools }}</version>
-		</dependency>
-		```
 	=== "Spark 3.5 与 Scala 2.13"
 
 		```xml
@@ -192,7 +146,7 @@ Apache Sedona 针对每个受支持的 Spark 版本提供了不同的包。
 
 Apache Sedona 针对每个受支持的 Spark 版本提供了不同的包。
 
-请使用 artifact 名称中包含 Spark major.minor 版本号的 artifact。例如，对于 Spark 3.4，应使用 `sedona-spark-3.4_2.12`。
+请使用 artifact 名称中包含 Spark major.minor 版本号的 artifact。例如，对于 Spark 3.5，应使用 `sedona-spark-3.5_2.12`。
 
 如果使用基于 Scala 2.13 编译的 Spark，则应使用对应的 Scala 2.13 版本（后缀为 `_2.13`）。
 
@@ -200,19 +154,6 @@ Apache Sedona 针对每个受支持的 Spark 版本提供了不同的包。
 
 !!! abstract "Sedona 与 Apache Spark + Scala 2.12"
 
-	=== "Spark 3.4 与 Scala 2.12"
-		```xml
-		<dependency>
-		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-spark-3.4_2.12</artifactId>
-		  <version>{{ sedona.current_version }}</version>
-		</dependency>
-		<dependency>
-		    <groupId>org.datasyslab</groupId>
-		    <artifactId>geotools-wrapper</artifactId>
-		    <version>{{ sedona.current_geotools }}</version>
-		</dependency>
-		```
 	=== "Spark 3.5 与 Scala 2.12"
 		```xml
 		<dependency>
@@ -226,35 +167,8 @@ Apache Sedona 针对每个受支持的 Spark 版本提供了不同的包。
 		    <version>{{ sedona.current_geotools }}</version>
 		</dependency>
 		```
-	=== "Spark 4.0 与 Scala 2.12"
-		```xml
-		<dependency>
-		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-spark-4.0_2.12</artifactId>
-		  <version>{{ sedona.current_version }}</version>
-		</dependency>
-		<dependency>
-		    <groupId>org.datasyslab</groupId>
-		    <artifactId>geotools-wrapper</artifactId>
-		    <version>{{ sedona.current_geotools }}</version>
-		</dependency>
-		```
-
 !!! abstract "Sedona 与 Apache Spark + Scala 2.13"
 
-	=== "Spark 3.4 与 Scala 2.13"
-		```xml
-		<dependency>
-		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-spark-3.4_2.13</artifactId>
-		  <version>{{ sedona.current_version }}</version>
-		</dependency>
-		<dependency>
-		    <groupId>org.datasyslab</groupId>
-		    <artifactId>geotools-wrapper</artifactId>
-		    <version>{{ sedona.current_geotools }}</version>
-		</dependency>
-		```
 	=== "Spark 3.5 与 Scala 2.13"
 		```xml
 		<dependency>

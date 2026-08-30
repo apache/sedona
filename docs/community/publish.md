@@ -127,7 +127,7 @@ rm -rf $LOCAL_DIR && git clone --depth 1 --branch $TAG $REPO_URL $LOCAL_DIR && c
 MAVEN_PLUGIN_VERSION="2.3.2"
 
 # Define Spark and Scala versions
-declare -a SPARK_VERSIONS=("3.4" "3.5" "4.0" "4.1")
+declare -a SPARK_VERSIONS=("3.5" "4.0" "4.1")
 declare -a SCALA_VERSIONS=("2.12" "2.13")
 
 # Function to get Java version for Spark version
@@ -382,19 +382,6 @@ verify_java_version() {
   fi
   echo "✓ Verified: Maven wrapper is using Java $mvn_java_version"
 }
-
-# Compile for Spark 3.4 with Java 11
-JAVA_VERSION=$(get_java_version "3.4")
-MVN_WRAPPER=$(create_mvn_wrapper $JAVA_VERSION)
-verify_java_version $MVN_WRAPPER $JAVA_VERSION
-
-echo "Compiling for Spark 3.4 with Scala 2.12 using Java $JAVA_VERSION..."
-cd apache-sedona-${SEDONA_VERSION}-src && $MVN_WRAPPER clean && $MVN_WRAPPER install -DskipTests -Dspark=3.4 -Dscala=2.12 && cd ..
-cp apache-sedona-${SEDONA_VERSION}-src/spark-shaded/target/sedona-*${SEDONA_VERSION}.jar apache-sedona-${SEDONA_VERSION}-bin/
-
-echo "Compiling for Spark 3.4 with Scala 2.13 using Java $JAVA_VERSION..."
-cd apache-sedona-${SEDONA_VERSION}-src && $MVN_WRAPPER clean && $MVN_WRAPPER install -DskipTests -Dspark=3.4 -Dscala=2.13 && cd ..
-cp apache-sedona-${SEDONA_VERSION}-src/spark-shaded/target/sedona-*${SEDONA_VERSION}.jar apache-sedona-${SEDONA_VERSION}-bin/
 
 # Compile for Spark 3.5 with Java 11
 JAVA_VERSION=$(get_java_version "3.5")

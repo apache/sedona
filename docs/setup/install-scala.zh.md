@@ -40,12 +40,12 @@
 
     * 本地模式：无需搭建集群即可测试 Sedona
     ```
-    ./bin/spark-shell --packages org.apache.sedona:sedona-spark-shaded-3.3_2.12:{{ sedona.current_version }},org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
+    ./bin/spark-shell --packages org.apache.sedona:sedona-spark-shaded-3.5_2.12:{{ sedona.current_version }},org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
     ```
 
     * 集群模式：需要指定 Spark Master IP
     ```
-    ./bin/spark-shell --master spark://localhost:7077 --packages org.apache.sedona:sedona-spark-shaded-3.3_2.12:{{ sedona.current_version }},org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
+    ./bin/spark-shell --master spark://localhost:7077 --packages org.apache.sedona:sedona-spark-shaded-3.5_2.12:{{ sedona.current_version }},org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
     ```
 
 ### 手动下载 Sedona jar
@@ -61,16 +61,16 @@
 ./bin/spark-shell --jars /Path/To/SedonaJars.jar
 ```
 
-请使用文件名中包含 Spark major.minor 版本号的 jar，例如 `sedona-spark-shaded-3.3_2.12-{{ sedona.current_version }}`。
+请使用文件名中包含 Spark major.minor 版本号的 jar，例如 `sedona-spark-shaded-3.5_2.12-{{ sedona.current_version }}`。
 
     * 本地模式：无需搭建集群即可测试 Sedona
     ```
-    ./bin/spark-shell --jars /path/to/sedona-spark-shaded-3.3_2.12-{{ sedona.current_version }}.jar,/path/to/geotools-wrapper-{{ sedona.current_geotools }}.jar
+    ./bin/spark-shell --jars /path/to/sedona-spark-shaded-3.5_2.12-{{ sedona.current_version }}.jar,/path/to/geotools-wrapper-{{ sedona.current_geotools }}.jar
     ```
 
     * 集群模式：需要指定 Spark Master IP
     ```
-    ./bin/spark-shell --master spark://localhost:7077 --jars /path/to/sedona-spark-shaded-3.3_2.12-{{ sedona.current_version }}.jar,/path/to/geotools-wrapper-{{ sedona.current_geotools }}.jar
+    ./bin/spark-shell --master spark://localhost:7077 --jars /path/to/sedona-spark-shaded-3.5_2.12-{{ sedona.current_version }}.jar,/path/to/geotools-wrapper-{{ sedona.current_geotools }}.jar
     ```
 
 ## Spark SQL shell
