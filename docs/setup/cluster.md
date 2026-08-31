@@ -49,3 +49,34 @@ Go the root folder of the uncompressed Apache Spark folder. Start your Spark clu
 ```
 ./sbin/start-all.sh
 ```
+
+## Start a Spark Connect server
+
+Spark Connect runs SQL functions in the remote server process. The Sedona jars and SQL extension must therefore be configured when the server starts. Installing Sedona only on the Python client, or calling `SedonaContext.create()` after connecting, does not register Sedona SQL functions on the server.
+
+From the root of your Spark distribution, start the server with packages that match your Spark and Scala versions:
+
+```bash
+./sbin/start-connect-server.sh \
+  --packages org.apache.spark:spark-connect_<SCALA_VERSION>:<SPARK_VERSION>,org.apache.sedona:sedona-spark-shaded-<SPARK_MAJOR_MINOR>_<SCALA_VERSION>:{{ sedona.current_version }},org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }} \
+  --repositories https://artifacts.unidata.ucar.edu/repository/unidata-all \
+  --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
+  --conf spark.kryo.registrator=org.apache.sedona.core.serde.SedonaKryoRegistrator \
+  --conf spark.sql.extensions=org.apache.sedona.sql.SedonaSqlExtensions
+```
+
+Replace `<SPARK_VERSION>`, `<SPARK_MAJOR_MINOR>`, and `<SCALA_VERSION>` with the versions from your Spark distribution. For example, Spark 3.5 built with Scala 2.12 uses `spark-connect_2.12:<SPARK_VERSION>` and `sedona-spark-shaded-3.5_2.12:{{ sedona.current_version }}`. See [Sedona Maven coordinates](maven-coordinates.md) for the supported combinations. Spark 4.0 and later include Spark Connect, so omit the `org.apache.spark:spark-connect_...` package from `--packages` for those versions.
+
+After the server starts, connect from Python using the server URL. The default Spark Connect port is `15002`:
+
+```python
+from pyspark.sql import SparkSession
+from sedona.spark import SedonaContext
+
+spark = SparkSession.builder.remote("sc://localhost:15002").getOrCreate()
+sedona = SedonaContext.create(spark)
+
+sedona.sql("SELECT ST_GeomFromWKT('POINT (1 2)') AS geom").show()
+```
+
+The Sedona Python package on the client should use the same Sedona version as the server package. See [Install Sedona Python](install-python.md) for client installation details.
