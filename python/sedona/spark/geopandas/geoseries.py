@@ -4743,6 +4743,18 @@ class GeoSeries(GeoFrame, pspd.Series):
                 *[F.col(column) for column in left_indexes],
                 F.col(left_order),
             )
+        elif same_anchor(self, replacement):
+            aligned_frame = left_source.select(
+                self.spark.column.alias("L"),
+                replacement.spark.column.alias("R"),
+                *[
+                    column.alias(alias)
+                    for column, alias in zip(
+                        self._internal.index_spark_columns, left_indexes
+                    )
+                ],
+                scol_for(left_source, NATURAL_ORDER_COLUMN_NAME).alias(left_order),
+            )
         else:
             right_indexes = [
                 f"__fillna_right_index_{level}__"
@@ -4888,7 +4900,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         Notes
         -----
         Using ``limit`` requires a distributed global ordering of the missing
-        geometries and can be expensive for large GeoSeries.
+        geometries and can be expensive for large GeoSeries. An independently
+        constructed GeoSeries replacement also requires eager index validation.
 
         Returns
         -------
@@ -4963,13 +4976,14 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         align = True
 
-        if isinstance(value, (GeoSeries, gpd.GeoSeries)):
+        # Keep local GeoPandas conversion scoped to the limited path. GH-3307
+        # tracks the different alignment semantics needed by unlimited fills.
+        if limit is not None and isinstance(value, (GeoSeries, gpd.GeoSeries)):
 
             if not isinstance(value, GeoSeries):
                 value = GeoSeries(value)
 
             replacement = value
-            other = value.fillna(None) if limit is None else value
 
         elif pd.isna(value) == True or isinstance(value, BaseGeometry):
             if (
@@ -4985,11 +4999,16 @@ class GeoSeries(GeoFrame, pspd.Series):
             replacement = stc.ST_GeomFromWKB(
                 F.lit(value.wkb if value is not None else None).cast("binary")
             )
-            other = self._query_geometry_column(
-                replacement,
-                keep_name=True,
-            )
-            align = False
+
+            if limit is None:
+                other = self._query_geometry_column(
+                    replacement,
+                    keep_name=True,
+                )
+                align = False
+
+        elif isinstance(value, GeoSeries):
+            other = value.fillna(None)
 
         else:
             raise ValueError(f"Invalid value type: {type(value)}")

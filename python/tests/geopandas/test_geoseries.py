@@ -1110,6 +1110,43 @@ class TestGeoSeries(TestGeopandasBase):
 
         assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
 
+    def test_fillna_limit_same_anchor_series_is_lazy_and_positional(self, monkeypatch):
+        from geopandas.testing import assert_geoseries_equal
+        from pyspark.sql import DataFrame
+
+        index = pd.Index(["x", "x", "y"], name="feature_id")
+        frame = GeoDataFrame(
+            gpd.GeoDataFrame(
+                {
+                    "geometry": gpd.GeoSeries([Point(7, 7), None, None], index=index),
+                    "replacement": gpd.GeoSeries(
+                        [Point(8, 8), Point(1, 1), Point(2, 2)], index=index
+                    ),
+                },
+                geometry="geometry",
+            )
+        )
+
+        def unexpected_action(*args, **kwargs):
+            raise AssertionError("same-anchor fillna(limit=...) ran a Spark action")
+
+        monkeypatch.setattr(DataFrame, "first", unexpected_action)
+
+        result = frame.geometry.fillna(frame["replacement"], limit=1)
+        plan = (
+            result._internal.spark_frame._jdf.queryExecution()
+            .optimizedPlan()
+            .toString()
+        )
+        expected = gpd.GeoSeries(
+            [Point(7, 7), Point(1, 1), None],
+            index=index,
+            name="geometry",
+        )
+
+        assert "Join" not in plan
+        assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
+
     def test_fillna_limit_inplace(self):
         from geopandas.testing import assert_geoseries_equal
 
@@ -1142,13 +1179,13 @@ class TestGeoSeries(TestGeopandasBase):
 
         assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
 
-    def test_fillna_limit_plan_is_distributed_and_lazy(self, monkeypatch):
+    def test_fillna_limit_scalar_plan_is_distributed_and_lazy(self, monkeypatch):
         from pyspark.sql import DataFrame
 
         source = GeoSeries([Point(0, 0), None, None])
 
         def unexpected_action(*args, **kwargs):
-            raise AssertionError("fillna(limit=...) triggered a Spark action")
+            raise AssertionError("scalar fillna(limit=...) triggered a Spark action")
 
         for operation in ["count", "collect", "toPandas", "first"]:
             monkeypatch.setattr(DataFrame, operation, unexpected_action)
