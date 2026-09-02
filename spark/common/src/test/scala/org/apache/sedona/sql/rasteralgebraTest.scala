@@ -879,9 +879,20 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val expected = -999
       assertEquals(expected, actual, 0.001d)
 
-      val actualNull =
-        df.selectExpr("RS_BandNoDataValue(RS_SetBandNoDataValue(raster, 1, null))").first().get(0)
-      assertNull(actualNull)
+      // Passing a null noDataValue removes the no-data value instead of returning a null raster
+      val cleared = df
+        .selectExpr(
+          "RS_SetBandNoDataValue(RS_SetBandNoDataValue(raster, 1, -999), 1, null) as raster")
+      assertNotNull(cleared.first().get(0))
+      assertNull(cleared.selectExpr("RS_BandNoDataValue(raster)").first().get(0))
+
+      val clearedNoBandIndex = df
+        .selectExpr("RS_SetBandNoDataValue(RS_SetBandNoDataValue(raster, -999), null) as raster")
+      assertNotNull(clearedNoBandIndex.first().get(0))
+      assertNull(clearedNoBandIndex.selectExpr("RS_BandNoDataValue(raster)").first().get(0))
+
+      // A null raster still yields a null result
+      assertNull(sparkSession.sql("SELECT RS_SetBandNoDataValue(null, -999)").first().get(0))
     }
 
     it("Passed RS_SetBandNoDataValue with empty raster") {
