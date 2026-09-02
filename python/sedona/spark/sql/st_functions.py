@@ -1002,6 +1002,20 @@ def ST_H3ToGeom(cells: Union[ColumnOrName, list]) -> Column:
     return _call_st_function("ST_H3ToGeom", cells)
 
 
+@validate_argument_types
+def ST_H3ToParent(
+    cell: Union[ColumnOrName, int], resolution: Union[ColumnOrName, int]
+) -> Column:
+    """Return the parent of an H3 cell at the requested resolution.
+    :param cell: H3 cell
+    :param resolution: resolution of the parent cell
+    :return: parent H3 cell
+    :rtype: Long
+    """
+    args = (cell, resolution)
+    return _call_st_function("ST_H3ToParent", args)
+
+
 # =========================================================================
 # Bing Tile functions
 # =========================================================================
