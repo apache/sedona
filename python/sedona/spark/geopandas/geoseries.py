@@ -37,13 +37,18 @@ from pyspark.pandas.utils import same_anchor, scol_for, verify_temp_column_name
 from pyspark.sql.types import (
     ArrayType,
     BooleanType,
+    DataType,
+    DateType,
+    DecimalType,
     DoubleType,
     FloatType,
     IntegralType,
     LongType,
+    NumericType,
     NullType,
     StructField,
     StructType,
+    TimestampType,
 )
 from sedona.spark.sql.types import GeometryType
 
@@ -230,6 +235,67 @@ def _attach_ordered_sequence_column(
         sdf.orderBy(order_column),
         sequence_column,
     )
+
+
+def _fillna_index_columns_equal(
+    left: PySparkColumn,
+    right: PySparkColumn,
+    left_type: DataType,
+    right_type: DataType,
+    positional: bool,
+) -> PySparkColumn:
+    """Compare index keys without Spark's unrelated-type coercions."""
+    floating_types = (FloatType, DoubleType)
+    decimal_floating = (
+        isinstance(left_type, DecimalType) and isinstance(right_type, floating_types)
+    ) or (isinstance(left_type, floating_types) and isinstance(right_type, DecimalType))
+    both_numeric = (
+        isinstance(left_type, NumericType)
+        and isinstance(right_type, NumericType)
+        and not decimal_floating
+    )
+    temporal_types = (DateType, TimestampType)
+    both_temporal = isinstance(left_type, temporal_types) and isinstance(
+        right_type, temporal_types
+    )
+    boolean_numeric = (
+        isinstance(left_type, BooleanType) and isinstance(right_type, NumericType)
+    ) or (isinstance(left_type, NumericType) and isinstance(right_type, BooleanType))
+    # Spark's Decimal/float coercion can equate values that pandas keeps
+    # distinct, such as Decimal("0.1") and binary 0.1. Exact cross-type
+    # comparison is not available as a simple Catalyst expression, so keep
+    # those key families distinct.
+    #
+    # pandas treats boolean/numeric axes as equal positionally, but does not
+    # label-reindex between those types when their order differs.
+    if (
+        left_type == right_type
+        or both_numeric
+        or both_temporal
+        or (positional and boolean_numeric)
+    ):
+        return left.eqNullSafe(right)
+    return left.isNull() & right.isNull()
+
+
+def _fillna_index_dtypes_can_equal(
+    left_dtype: Any,
+    right_dtype: Any,
+    left_type: DataType,
+    right_type: DataType,
+) -> bool:
+    """Whether pandas can consider two index dtypes positionally equal."""
+    if left_dtype == right_dtype:
+        return True
+
+    temporal_types = (DateType, TimestampType)
+    if isinstance(left_type, temporal_types) and isinstance(right_type, temporal_types):
+        return True
+
+    # NumPy-backed indexes use value equality across dtypes, including object-
+    # backed values such as Decimal. Pandas extension dtypes only compare equal
+    # when the dtypes themselves match, which the first branch handles.
+    return isinstance(left_dtype, np.dtype) and isinstance(right_dtype, np.dtype)
 
 
 def _dwithin_expression(
@@ -4706,6 +4772,205 @@ class GeoSeries(GeoFrame, pspd.Series):
         """Alias for `notna` method. See `notna` for more detail."""
         return self.notna()
 
+    def _align_fillna_series(self, replacement: "GeoSeries"):
+        """Align a replacement GeoSeries to the exact left axis."""
+        position = "__fillna_position__"
+        left_order = "__fillna_left_order__"
+        right_order = "__fillna_right_order__"
+        left_present = "__fillna_left_present__"
+        right_present = "__fillna_right_present__"
+        left_indexes = [
+            f"__fillna_left_index_{level}__"
+            for level in range(len(self._internal.index_spark_columns))
+        ]
+        right_indexes = [
+            f"__fillna_right_index_{level}__"
+            for level in range(len(replacement._internal.index_spark_columns))
+        ]
+
+        left_source = self._internal.spark_frame
+        if same_anchor(self, replacement):
+            aligned_frame = left_source.select(
+                self.spark.column.alias("L"),
+                replacement.spark.column.alias("R"),
+                *[
+                    column.alias(alias)
+                    for column, alias in zip(
+                        self._internal.index_spark_columns, left_indexes
+                    )
+                ],
+                scol_for(left_source, NATURAL_ORDER_COLUMN_NAME).alias(left_order),
+            )
+            aligned_frame = aligned_frame.withColumnRenamed(
+                left_order, NATURAL_ORDER_COLUMN_NAME
+            ).orderBy(NATURAL_ORDER_COLUMN_NAME)
+            return aligned_frame, left_indexes
+
+        left_frame = left_source.select(
+            self.spark.column.alias("L"),
+            *[
+                column.alias(alias)
+                for column, alias in zip(
+                    self._internal.index_spark_columns, left_indexes
+                )
+            ],
+            scol_for(left_source, NATURAL_ORDER_COLUMN_NAME).alias(left_order),
+            F.lit(True).alias(left_present),
+        )
+        right_source = replacement._internal.spark_frame
+        right_frame = right_source.select(
+            replacement.spark.column.alias("R"),
+            *[
+                column.alias(alias)
+                for column, alias in zip(
+                    replacement._internal.index_spark_columns, right_indexes
+                )
+            ],
+            scol_for(right_source, NATURAL_ORDER_COLUMN_NAME).alias(right_order),
+            F.lit(True).alias(right_present),
+        )
+        left_index_types = [
+            left_frame.schema[column].dataType for column in left_indexes
+        ]
+        right_index_types = [
+            right_frame.schema[column].dataType for column in right_indexes
+        ]
+        index_dtypes_can_equal = all(
+            _fillna_index_dtypes_can_equal(
+                left_field.dtype,
+                right_field.dtype,
+                left_type,
+                right_type,
+            )
+            for left_field, right_field, left_type, right_type in zip(
+                self._internal.index_fields,
+                replacement._internal.index_fields,
+                left_index_types,
+                right_index_types,
+            )
+        )
+
+        same_index_structure = len(left_indexes) == len(right_indexes)
+        if not same_index_structure:
+            status = right_frame.agg(
+                F.count(F.col(right_present)).alias("right_count"),
+                F.countDistinct(
+                    F.struct(*[F.col(column) for column in right_indexes])
+                ).alias("right_unique_count"),
+            ).first()
+            if status["right_count"] != status["right_unique_count"]:
+                if len(right_indexes) > 1:
+                    raise ValueError("cannot handle a non-unique multi-index!")
+                raise ValueError("cannot reindex on an axis with duplicate labels")
+
+            # A flat Index and a MultiIndex have no complete keys in common.
+            aligned_frame = left_frame.select(
+                F.col("L"),
+                stc.ST_GeomFromWKB(F.lit(None).cast("binary")).alias("R"),
+                *[F.col(column) for column in left_indexes],
+                F.col(left_order),
+            )
+            aligned_frame = aligned_frame.withColumnRenamed(
+                left_order, NATURAL_ORDER_COLUMN_NAME
+            ).orderBy(NATURAL_ORDER_COLUMN_NAME)
+            return aligned_frame, left_indexes
+
+        positioned_left = _attach_ordered_sequence_column(
+            left_frame, F.col(left_order), position
+        )
+        positioned_right = _attach_ordered_sequence_column(
+            right_frame, F.col(right_order), position
+        )
+        positional_join = positioned_left.join(
+            positioned_right,
+            on=position,
+            how="outer",
+        )
+
+        # Exact axes, including duplicate labels, pair positionally. Otherwise,
+        # GeoPandas reindexes a unique replacement onto the complete left key.
+        index_mismatch = F.col(left_present).isNull() | F.col(right_present).isNull()
+        for left_index, right_index, left_type, right_type in zip(
+            left_indexes,
+            right_indexes,
+            left_index_types,
+            right_index_types,
+        ):
+            index_mismatch = index_mismatch | ~_fillna_index_columns_equal(
+                F.col(left_index),
+                F.col(right_index),
+                left_type,
+                right_type,
+                positional=True,
+            )
+        status = positional_join.agg(
+            F.count(F.col(left_present)).alias("left_count"),
+            F.count(F.col(right_present)).alias("right_count"),
+            F.countDistinct(
+                F.when(
+                    F.col(right_present).isNotNull(),
+                    F.struct(*[F.col(column) for column in right_indexes]),
+                )
+            ).alias("right_unique_count"),
+            F.max(index_mismatch.cast("int")).alias("index_mismatch"),
+        ).first()
+        axes_equal = (
+            index_dtypes_can_equal
+            and status["left_count"] == status["right_count"]
+            and not bool(status["index_mismatch"] or False)
+        )
+
+        if not axes_equal and status["right_count"] != status["right_unique_count"]:
+            if len(right_indexes) > 1:
+                raise ValueError("cannot handle a non-unique multi-index!")
+            raise ValueError("cannot reindex on an axis with duplicate labels")
+
+        if axes_equal:
+            aligned_frame = positional_join.select(
+                F.col("L"),
+                F.col("R"),
+                *[F.col(column) for column in left_indexes],
+                F.col(left_order),
+            )
+        else:
+            left_alias = left_frame.alias("left")
+            right_alias = right_frame.alias("right")
+            join_condition = _fillna_index_columns_equal(
+                left_alias[left_indexes[0]],
+                right_alias[right_indexes[0]],
+                left_index_types[0],
+                right_index_types[0],
+                positional=False,
+            )
+            for left_index, right_index, left_type, right_type in zip(
+                left_indexes[1:],
+                right_indexes[1:],
+                left_index_types[1:],
+                right_index_types[1:],
+            ):
+                join_condition = join_condition & _fillna_index_columns_equal(
+                    left_alias[left_index],
+                    right_alias[right_index],
+                    left_type,
+                    right_type,
+                    positional=False,
+                )
+            aligned_frame = left_alias.join(
+                right_alias,
+                on=join_condition,
+                how="left",
+            ).select(
+                left_alias["L"].alias("L"),
+                right_alias["R"].alias("R"),
+                *[left_alias[column].alias(column) for column in left_indexes],
+                left_alias[left_order].alias(left_order),
+            )
+
+        aligned_frame = aligned_frame.withColumnRenamed(
+            left_order, NATURAL_ORDER_COLUMN_NAME
+        ).orderBy(NATURAL_ORDER_COLUMN_NAME)
+        return aligned_frame, left_indexes
+
     # GeoSeries-only (not in GeoDataFrame)
     def fillna(
         self, value=None, inplace: bool = False, limit=None, **kwargs
@@ -4729,6 +4994,12 @@ class GeoSeries(GeoFrame, pspd.Series):
         Returns
         -------
         GeoSeries
+
+        Notes
+        -----
+        Filling from an independent ``GeoSeries`` validates its distributed index
+        before returning. Filling from another column of the same ``GeoDataFrame``
+        remains lazy.
 
         Examples
         --------
@@ -4794,7 +5065,37 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         align = True
 
-        if pd.isna(value) == True or isinstance(value, BaseGeometry):
+        if isinstance(value, (GeoSeries, gpd.GeoSeries)):
+
+            if isinstance(value, gpd.GeoSeries):
+                value_crs = value.crs
+                value = GeoSeries(
+                    pd.Series(
+                        value.to_numpy(dtype=object, copy=False),
+                        index=value.index,
+                        name=value.name,
+                        dtype=object,
+                    ),
+                    crs=value_crs,
+                )
+
+            aligned_frame, left_indexes = self._align_fillna_series(value)
+            left_crs = self.crs
+            left_srid = (left_crs.to_epsg() or 0) if left_crs is not None else 0
+            result = self._result_preserving_index(
+                F.coalesce(
+                    F.col("L"),
+                    stf.ST_SetSRID(F.col("R"), left_srid),
+                ),
+                aligned_frame,
+                [scol_for(aligned_frame, name) for name in left_indexes],
+                self._internal.index_fields,
+                self._internal.index_names,
+                returns_geom=True,
+                keep_name=True,
+            )
+
+        elif pd.isna(value) == True or isinstance(value, BaseGeometry):
             if (
                 value is not None and pd.isna(value) == True
             ):  # ie. value is np.nan or pd.NA:
@@ -4808,27 +5109,19 @@ class GeoSeries(GeoFrame, pspd.Series):
             other, extended = self._make_series_of_val(value)
             align = False if extended else align
 
-        elif isinstance(value, (GeoSeries, gpd.GeoSeries)):
-
-            if not isinstance(value, GeoSeries):
-                value = GeoSeries(value)
-
-            # Replace all None's with empty geometries (this is a recursive call)
-            other = value.fillna(None)
+            # Coalesce: If the value in L is null, use the corresponding value in R for that row
+            spark_expr = F.coalesce(F.col("L"), F.col("R"))
+            result = self._row_wise_operation(
+                spark_expr,
+                other,
+                align=align,
+                returns_geom=True,
+                default_val=None,
+                keep_name=True,
+            )
 
         else:
             raise ValueError(f"Invalid value type: {type(value)}")
-
-        # Coalesce: If the value in L is null, use the corresponding value in R for that row
-        spark_expr = F.coalesce(F.col("L"), F.col("R"))
-        result = self._row_wise_operation(
-            spark_expr,
-            other,
-            align=align,
-            returns_geom=True,
-            default_val=None,
-            keep_name=True,
-        )
 
         if inplace:
             self._update_inplace(result)
