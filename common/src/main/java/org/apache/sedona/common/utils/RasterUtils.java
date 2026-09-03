@@ -109,6 +109,24 @@ public class RasterUtils {
     if (keepMetadata) {
       propertyMap = referenceRaster.getProperties();
     }
+    return clone(
+        raster, gridGeometry2D, bands, referenceRaster, noDataValue, keepMetadata, propertyMap);
+  }
+
+  /**
+   * Variant of {@link #clone(WritableRaster, GridGeometry2D, GridSampleDimension[], GridCoverage2D,
+   * Double, boolean)} taking the coverage property map explicitly instead of copying it from the
+   * reference raster, so callers can filter properties (e.g. drop the GC_NODATA no-data sentinel)
+   * while keeping the rest of the metadata.
+   */
+  public static GridCoverage2D clone(
+      WritableRaster raster,
+      GridGeometry2D gridGeometry2D,
+      GridSampleDimension[] bands,
+      GridCoverage2D referenceRaster,
+      Double noDataValue,
+      boolean keepMetadata,
+      Map propertyMap) {
     ColorModel originalColorModel = referenceRaster.getRenderedImage().getColorModel();
     if (Objects.isNull(gridGeometry2D)) {
       gridGeometry2D = referenceRaster.getGridGeometry();

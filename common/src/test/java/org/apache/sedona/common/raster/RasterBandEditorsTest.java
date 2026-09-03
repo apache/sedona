@@ -22,6 +22,7 @@ import static org.apache.sedona.common.raster.RasterBandEditors.rasterUnion;
 import static org.apache.sedona.common.utils.RasterUtils.flipVerticallyPixelSpace;
 import static org.junit.Assert.*;
 
+import it.geosolutions.jaiext.range.NoDataContainer;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -66,6 +67,41 @@ public class RasterBandEditorsTest extends RasterTestBase {
     String actual = Arrays.toString(grid.getSampleDimensions());
     String expected = "[RenderedSampleDimension[\"PALETTE_INDEX\"]]";
     assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testSetBandNoDataValueWithNullOnSecondBand() throws FactoryException {
+    // The clear must consult the target band's no-data value, not band 1's:
+    // band 1 has none here, which used to short-circuit the removal on band 2.
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(2, 20, 20, 0, 0, 8, 8, 0.1, 0.1, 0);
+    GridCoverage2D grid = RasterBandEditors.setBandNoDataValue(raster, 2, 444d);
+    grid = RasterBandEditors.setBandNoDataValue(grid, 2, null);
+    assertNull(RasterBandAccessors.getBandNoDataValue(grid, 2));
+    assertNull(RasterBandAccessors.getBandNoDataValue(grid, 1));
+  }
+
+  @Test
+  public void testSetBandNoDataValueWithNullClearsNoDataProperty()
+      throws IOException, ClassNotFoundException {
+    GridCoverage2D raster =
+        rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
+    GridCoverage2D grid = RasterBandEditors.setBandNoDataValue(raster, 1, null);
+
+    // The GC_NODATA sentinel must be gone from both the coverage properties and the
+    // rendered image, or serialization and GeoTIFF writers resurrect the cleared value.
+    Map properties = grid.getProperties();
+    assertTrue(properties == null || !properties.containsKey(NoDataContainer.GC_NODATA));
+    assertSame(
+        java.awt.Image.UndefinedProperty,
+        grid.getRenderedImage().getProperty(NoDataContainer.GC_NODATA));
+    assert (Arrays.equals(MapAlgebra.bandAsArray(raster, 1), MapAlgebra.bandAsArray(grid, 1)));
+
+    GridCoverage2D roundTripped = Serde.deserialize(Serde.serialize(grid));
+    assertNull(RasterBandAccessors.getBandNoDataValue(roundTripped, 1));
+    Map roundTrippedProperties = roundTripped.getProperties();
+    assertTrue(
+        roundTrippedProperties == null
+            || !roundTrippedProperties.containsKey(NoDataContainer.GC_NODATA));
   }
 
   @Test

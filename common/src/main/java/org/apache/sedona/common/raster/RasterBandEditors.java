@@ -18,11 +18,13 @@
  */
 package org.apache.sedona.common.raster;
 
+import it.geosolutions.jaiext.range.NoDataContainer;
 import java.awt.geom.Point2D;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
 import java.util.Collections;
+import java.util.Map;
 import javax.media.jai.RasterFactory;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -53,14 +55,22 @@ public class RasterBandEditors {
 
     // Remove no-Data if it is null
     if (noDataValue == null) {
-      if (RasterBandAccessors.getBandNoDataValue(raster) == null) {
+      if (rasterNoData == null) {
         return raster;
       }
       GridSampleDimension[] sampleDimensions = raster.getSampleDimensions();
       sampleDimensions[bandIndex - 1] =
           RasterUtils.removeNoDataValue(sampleDimensions[bandIndex - 1]);
-      return RasterUtils.clone(
-          raster.getRenderedImage(), null, sampleDimensions, raster, null, true);
+      // The GC_NODATA sentinel also rides on the rendered image itself as an image
+      // property and survives serialization there, so cloning the image would let
+      // readers and writers resurrect the cleared value. Copy the pixels into a
+      // property-free image and drop the sentinel from the coverage properties too.
+      Map propertyMap = raster.getProperties();
+      if (propertyMap != null) {
+        propertyMap.remove(NoDataContainer.GC_NODATA);
+      }
+      WritableRaster pixels = raster.getRenderedImage().copyData(null);
+      return RasterUtils.clone(pixels, null, sampleDimensions, raster, null, true, propertyMap);
     }
 
     if (rasterNoData != null && rasterNoData.equals(noDataValue)) {
