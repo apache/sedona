@@ -4813,6 +4813,9 @@ class GeoSeries(GeoFrame, pspd.Series):
             if not isinstance(value, GeoSeries):
                 value = GeoSeries(value)
 
+            if self.index.equals(value.index):
+                align = False
+
             # Replace all None's with empty geometries (this is a recursive call)
             other = value.fillna(None)
 
