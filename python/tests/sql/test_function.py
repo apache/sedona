@@ -2424,6 +2424,22 @@ class TestPredicateJoin(TestBase):
         exact_rings, all_rings, original_cells = df.take(1)[0]
         assert set(exact_rings + original_cells) == set(all_rings)
 
+    def test_st_h3_to_parent(self):
+        child, parent = self.spark.sql("""
+        SELECT
+            cell,
+            ST_H3ToParent(cell, 5)
+        FROM (
+            SELECT ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[0] AS cell
+        )
+        """).first()
+        assert child == 614552609325318143
+        assert parent == 601041811137363967
+        null_parent = self.spark.sql(
+            "SELECT ST_H3ToParent(CAST(NULL AS BIGINT), 5)"
+        ).first()[0]
+        assert null_parent is None
+
     def test_st_h3_togeom(self):
         df = self.spark.sql("""
         SELECT

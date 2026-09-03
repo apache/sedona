@@ -2055,6 +2055,17 @@ public class Functions {
   }
 
   /**
+   * Returns the parent of an H3 cell at the requested resolution.
+   *
+   * @param cell the H3 cell
+   * @param resolution the resolution of the parent cell
+   * @return the parent H3 cell
+   */
+  public static long h3ToParent(long cell, int resolution) {
+    return H3Utils.h3.cellToParent(cell, resolution);
+  }
+
+  /**
    * gets the polygon for each h3 index provided
    *
    * @param cells: the set of cells

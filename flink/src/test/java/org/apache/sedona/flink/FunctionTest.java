@@ -32,6 +32,7 @@ import org.apache.flink.table.api.Table;
 import org.apache.flink.types.Row;
 import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.geometryObjects.Box3D;
+import org.apache.sedona.common.utils.H3Utils;
 import org.apache.sedona.flink.expressions.Functions;
 import org.apache.sedona.flink.expressions.FunctionsProj4;
 import org.datasyslab.proj4sedona.core.Proj;
@@ -2348,6 +2349,22 @@ public class FunctionTest extends TestBase {
     assertTrue(actual[0].intersects(target));
     assertTrue(actual[11].intersects(target));
     assertTrue(actual[20].intersects(target));
+  }
+
+  @Test
+  public void testH3ToParent() {
+    Table pointTable =
+        tableEnv.sqlQuery(
+            "SELECT ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[1], ST_H3ToParent(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[1], 5)");
+    Row result = first(pointTable);
+    long child = (Long) Objects.requireNonNull(result.getField(0));
+    long parent = (Long) Objects.requireNonNull(result.getField(1));
+
+    assertEquals(5, H3Utils.h3.getResolution(parent));
+    assertTrue(H3Utils.h3.cellToChildren(parent, 8).contains(child));
+
+    Table nullTable = tableEnv.sqlQuery("SELECT ST_H3ToParent(CAST(NULL AS BIGINT), 5)");
+    assertNull(first(nullTable).getField(0));
   }
 
   @Test
