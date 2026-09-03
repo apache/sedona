@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.st_functions &mdash; Apache Sedona Python Documentation</title>
@@ -1210,6 +1209,20 @@
 <span class="sd">    :rtype: Geometry</span>
 <span class="sd">    """</span>
     <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">"ST_H3ToGeom"</span><span class="p">,</span> <span class="n">cells</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ST_H3ToParent"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_H3ToParent">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_H3ToParent</span><span class="p">(</span>
+    <span class="n">cell</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">resolution</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the parent of an H3 cell at the requested resolution.</span>
+<span class="sd">    :param cell: H3 cell</span>
+<span class="sd">    :param resolution: resolution of the parent cell</span>
+<span class="sd">    :return: parent H3 cell</span>
+<span class="sd">    :rtype: Long</span>
+<span class="sd">    """</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">"ST_H3ToParent"</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
 
 
 <span class="c1"># =========================================================================</span>
