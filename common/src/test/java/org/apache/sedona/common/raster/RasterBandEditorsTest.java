@@ -23,6 +23,7 @@ import static org.apache.sedona.common.utils.RasterUtils.flipVerticallyPixelSpac
 import static org.junit.Assert.*;
 
 import it.geosolutions.jaiext.range.NoDataContainer;
+import java.awt.image.RenderedImage;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -31,12 +32,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import javax.media.jai.operator.TranslateDescriptor;
 import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.raster.serde.Serde;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.operation.TransformException;
+import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.GridEnvelope2D;
+import org.geotools.coverage.grid.GridGeometry2D;
+import org.geotools.coverage.util.CoverageUtilities;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
@@ -88,20 +94,54 @@ public class RasterBandEditorsTest extends RasterTestBase {
     GridCoverage2D grid = RasterBandEditors.setBandNoDataValue(raster, 1, null);
 
     // The GC_NODATA sentinel must be gone from both the coverage properties and the
-    // rendered image, or serialization and GeoTIFF writers resurrect the cleared value.
-    Map properties = grid.getProperties();
-    assertTrue(properties == null || !properties.containsKey(NoDataContainer.GC_NODATA));
+    // rendered image: GridCoverage2D.getProperty falls through to the image, so GeoTools
+    // operations would otherwise keep treating the cleared value as no-data.
+    assertNull(CoverageUtilities.getNoDataProperty(grid));
     assertSame(
         java.awt.Image.UndefinedProperty,
         grid.getRenderedImage().getProperty(NoDataContainer.GC_NODATA));
     assert (Arrays.equals(MapAlgebra.bandAsArray(raster, 1), MapAlgebra.bandAsArray(grid, 1)));
 
+    // Clearing must not mutate the input raster's own metadata.
+    assertNotNull(CoverageUtilities.getNoDataProperty(raster));
+    assertEquals(0.0, RasterBandAccessors.getBandNoDataValue(raster, 1), 0.0001d);
+
     GridCoverage2D roundTripped = Serde.deserialize(Serde.serialize(grid));
     assertNull(RasterBandAccessors.getBandNoDataValue(roundTripped, 1));
-    Map roundTrippedProperties = roundTripped.getProperties();
-    assertTrue(
-        roundTrippedProperties == null
-            || !roundTrippedProperties.containsKey(NoDataContainer.GC_NODATA));
+    assertNull(CoverageUtilities.getNoDataProperty(roundTripped));
+  }
+
+  @Test
+  public void testSetBandNoDataValueWithNullOnTranslatedRaster() throws IOException {
+    // A coverage whose image origin is not (0, 0): clearing must stay on a RenderedImage
+    // path. Copying the pixels instead would both materialize a lazily decoded image and
+    // fail, since BufferedImage rejects a raster with a non-zero minX/minY.
+    GridCoverage2D raster =
+        rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
+    RenderedImage translatedImage =
+        TranslateDescriptor.create(raster.getRenderedImage(), 5f, 7f, null, null);
+    GridCoverage2D translated =
+        CoverageFactoryFinder.getGridCoverageFactory(null)
+            .create(
+                "translated",
+                translatedImage,
+                new GridGeometry2D(
+                    new GridEnvelope2D(
+                        translatedImage.getMinX(),
+                        translatedImage.getMinY(),
+                        translatedImage.getWidth(),
+                        translatedImage.getHeight()),
+                    raster.getGridGeometry().getGridToCRS(),
+                    raster.getCoordinateReferenceSystem()),
+                raster.getSampleDimensions(),
+                null,
+                null);
+
+    GridCoverage2D grid = RasterBandEditors.setBandNoDataValue(translated, 1, null);
+    assertNull(RasterBandAccessors.getBandNoDataValue(grid, 1));
+    assertNull(CoverageUtilities.getNoDataProperty(grid));
+    assertEquals(5, grid.getRenderedImage().getMinX());
+    assertEquals(7, grid.getRenderedImage().getMinY());
   }
 
   @Test

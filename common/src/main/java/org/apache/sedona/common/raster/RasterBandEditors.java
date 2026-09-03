@@ -24,10 +24,12 @@ import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import javax.media.jai.RasterFactory;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.sedona.common.utils.PropertyMaskedRenderedImage;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.parameter.ParameterValueGroup;
 import org.geotools.api.referencing.FactoryException;
@@ -61,16 +63,19 @@ public class RasterBandEditors {
       GridSampleDimension[] sampleDimensions = raster.getSampleDimensions();
       sampleDimensions[bandIndex - 1] =
           RasterUtils.removeNoDataValue(sampleDimensions[bandIndex - 1]);
-      // The GC_NODATA sentinel also rides on the rendered image itself as an image
-      // property and survives serialization there, so cloning the image would let
-      // readers and writers resurrect the cleared value. Copy the pixels into a
-      // property-free image and drop the sentinel from the coverage properties too.
-      Map propertyMap = raster.getProperties();
-      if (propertyMap != null) {
-        propertyMap.remove(NoDataContainer.GC_NODATA);
-      }
-      WritableRaster pixels = raster.getRenderedImage().copyData(null);
-      return RasterUtils.clone(pixels, null, sampleDimensions, raster, null, true, propertyMap);
+      // The GC_NODATA sentinel is carried both by the coverage properties and by the
+      // rendered image, and GridCoverage2D.getProperty falls through to the image, so it
+      // has to be dropped from both or GeoTools operations keep treating the cleared
+      // value as no-data. Masking wraps the image lazily: no pixels are copied, so a
+      // streamed raster stays undecoded and a non-zero image origin is preserved.
+      RenderedImage image =
+          PropertyMaskedRenderedImage.mask(raster.getRenderedImage(), NoDataContainer.GC_NODATA);
+      Map<?, ?> properties = raster.getProperties();
+      Map<Object, Object> retainedProperties =
+          properties == null ? new HashMap<>() : new HashMap<>(properties);
+      retainedProperties.remove(NoDataContainer.GC_NODATA);
+      return RasterUtils.clone(
+          image, null, sampleDimensions, raster, null, true, retainedProperties);
     }
 
     if (rasterNoData != null && rasterNoData.equals(noDataValue)) {

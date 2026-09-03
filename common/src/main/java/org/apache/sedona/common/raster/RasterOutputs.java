@@ -63,9 +63,10 @@ public class RasterOutputs {
       throw new RuntimeException(e);
     }
     ParameterValueGroup defaultParams = writer.getFormat().getWriteParameters();
-    // Without this, GeoTiffWriter writes a default GDAL_NODATA of 0 for coverages that
-    // have no no-data value, so a cleared (or never set) no-data value comes back as 0
-    // when the written bytes are read again.
+    // GeoTiffWriter writes a default GDAL_NODATA of 0 for coverages that have no no-data
+    // value, so a cleared (or never set) no-data value would come back as 0 when the
+    // written bytes are read again. Only opt out in that case: forcing the flag on when a
+    // no-data value is present would override an explicit -Dgeotiff.writenodata=false.
     boolean hasNoDataValue = false;
     for (int band = 1; band <= raster.getNumSampleDimensions(); band++) {
       if (RasterBandAccessors.getBandNoDataValue(raster, band) != null) {
@@ -73,9 +74,9 @@ public class RasterOutputs {
         break;
       }
     }
-    defaultParams
-        .parameter(GeoTiffFormat.WRITE_NODATA.getName().toString())
-        .setValue(hasNoDataValue);
+    if (!hasNoDataValue) {
+      defaultParams.parameter(GeoTiffFormat.WRITE_NODATA.getName().toString()).setValue(false);
+    }
     if (compressionType != null && compressionQuality >= 0 && compressionQuality <= 1) {
       GeoTiffWriteParams params = new GeoTiffWriteParams();
       params.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
