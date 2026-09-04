@@ -115,7 +115,7 @@ Twenty-six rows, 7,006,027 pixels summarized, 56 seconds from a cold session on 
 +----------------------------+---------+------+-----+------+
 ```
 
-![Dumbbell chart of all 26 Swiss cantons, each showing minimum, mean and maximum elevation; Valais spans 4,166 m while Genève spans 197 m](zonal-statistics-relief.png)
+![Dumbbell chart of all 26 Swiss cantons, each showing minimum, mean and maximum elevation; Valais spans 4,166 m while Genève spans 197 m](zonal-statistics-relief.svg)
 
 Valais covers 4,166 m of vertical range. Genève covers 197 m. Both are one row of the same table.
 
@@ -184,7 +184,7 @@ def slope_deg(raster):
 
 Wrap the DEM column in `slope_deg(...)`, run the identical join and aggregate, and the ranking changes. Uri averages 28.3° across its whole area and tops out at 72.5°, steeper than Valais at 26.1°, even though Valais sits 237 m higher on average. Height and steepness are different questions, answered by the same 62 pairs:
 
-![Scatter of mean slope against mean elevation for all 26 cantons, with Uri highest on slope and Valais highest on elevation](zonal-statistics-slope.png)
+![Scatter of mean slope against mean elevation for all 26 cantons, with Uri highest on slope and Valais highest on elevation](zonal-statistics-slope.svg)
 
 ## What else fits this shape
 
