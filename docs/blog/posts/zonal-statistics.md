@@ -12,7 +12,7 @@ title: "GROUP BY, But for Pixels"
 
 # GROUP BY, But for Pixels
 
-Almost every raster question ends at a polygon. Mean elevation per canton, forest cover per district, flood depth per parcel. The imagery arrives as a grid of numbers; the answer has to arrive as a table with one row per zone. Zonal statistics is the operation between the two, and in Sedona it is one function call inside an ordinary spatial join. Below: every Swiss canton, summarized from 7 million elevation pixels pulled straight off S3, in 56 seconds on a laptop.
+Almost every raster question ends at a polygon. Mean elevation per canton, forest cover per district, flood depth per parcel. The imagery arrives as a grid of numbers; the answer has to arrive as a table with one row per zone. Zonal statistics is the operation between the two, and in Sedona it is one function call inside an ordinary spatial join. Below: every Swiss canton, summarized from 7 million elevation pixels pulled straight off S3, in 56 seconds with one query.
 
 ![Shaded relief of Switzerland and the Alps, each canton tinted by its mean elevation from pale blue in the lowlands to deep blue across Valais and Graubünden](zonal-statistics-cover.png)
 
@@ -98,7 +98,7 @@ GROUP BY name
 ORDER BY mean_m DESC
 ```
 
-Twenty-six rows, 7,006,027 pixels summarized, 56 seconds from a cold session on four laptop cores. The top of the table is the Alps:
+Twenty-six rows, 7,006,027 pixels summarized, 56 seconds from a cold session. The top of the table is the Alps:
 
 ```
 +----------------------------+---------+------+-----+------+
@@ -132,7 +132,7 @@ Valais covers 4,166 m of vertical range. Genève covers 197 m. Both are one row 
 +------+--------+--------+----------------------------------------------------------------------------------------------------------------------------------------------+
 ```
 
-That fan-out is the reason the pattern scales. Every pair is an independent unit of work: one tile, one polygon, no coordination with any other pair. On a laptop the 62 pairs fill four cores. Point the same query at a continent of tiles and a national parcel layer and the pair count grows into the millions, spread across whatever cluster you have, with the query text unchanged. The tiles themselves never pass through the driver.
+That fan-out is the reason the pattern scales. Every pair is an independent unit of work: one tile, one polygon, no coordination with any other pair. The 62 pairs here already run in parallel. Point the same query at a continent of tiles and a national parcel layer and the pair count grows into the millions, spread across every executor in the cluster, with the query text unchanged. The tiles never pass through the driver.
 
 ## Which numbers survive the reassembly
 
