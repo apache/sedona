@@ -3936,6 +3936,25 @@ public class RasterEditorsTest extends RasterTestBase {
   }
 
   @Test
+  public void testResampleUnknownAlgorithm() throws FactoryException {
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 4, 3, 0, 0, 2, -2, 0, 0, 0);
+    assertThrows(
+        "Invalid 'algorithm': 'sinc'. Expected one of: NearestNeighbor, Bilinear, Bicubic.",
+        IllegalArgumentException.class,
+        () -> RasterEditors.resample(raster, 6, 5, 1, -1, false, "sinc"));
+  }
+
+  @Test
+  public void testReprojectMatchUnknownAlgorithm() throws FactoryException {
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 4, 3, 0, 0, 2, -2, 0, 0, 0);
+    GridCoverage2D alignTo = RasterConstructors.makeEmptyRaster(1, "d", 6, 5, 0, 0, 1, -1, 0, 0, 0);
+    assertThrows(
+        "Invalid 'algorithm': 'sinc'. Expected one of: NearestNeighbor, Bilinear, Bicubic.",
+        IllegalArgumentException.class,
+        () -> RasterEditors.reprojectMatch(raster, alignTo, "sinc"));
+  }
+
+  @Test
   public void testNormalizeAll() throws FactoryException {
     GridCoverage2D raster1 = RasterConstructors.makeEmptyRaster(2, 4, 4, 0, 0, 1);
     GridCoverage2D raster2 = RasterConstructors.makeEmptyRaster(2, 4, 4, 0, 0, 1);
