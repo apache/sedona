@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+from datetime import date
 from decimal import Decimal
 import typing
 import warnings
@@ -74,6 +75,35 @@ requires_shapely_m_support = pytest.mark.skipif(
         f"{getattr(shapely, 'geos_version_string', 'unknown')}"
     ),
 )
+
+
+class TestGeoSeriesFillnaCompatibility(TestGeopandasBase):
+    def test_fillna_accepts_local_geoseries_replacement(self):
+        from geopandas.testing import assert_geoseries_equal
+
+        _ = self.spark
+        left_index = pd.Index([3, 2, 1, 0], name="feature_id")
+        source = GeoSeries(
+            [Point(7, 7), None, None, None],
+            index=left_index,
+            name="geometry",
+            crs="EPSG:4326",
+        )
+        replacement = gpd.GeoSeries(
+            [Point(3, 3), None, Point(4, 4), Point(99, 99)],
+            index=pd.Index([1, 2, 3, 99], name="other_id"),
+            crs="EPSG:3857",
+        )
+        expected = gpd.GeoSeries(
+            [Point(7, 7), None, Point(3, 3), None],
+            index=left_index,
+            name="geometry",
+            crs="EPSG:4326",
+        )
+
+        result = source.fillna(replacement)
+
+        assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
 
 
 @pytest.mark.skipif(
@@ -969,6 +999,346 @@ class TestGeoSeries(TestGeopandasBase):
         result.fillna(None, inplace=True)
         expected = gpd.GeoSeries([Point(0, 0), GeometryCollection()], name="geometry")
         self.check_sgpd_equals_gpd(result, expected)
+
+    def test_fillna_series_replacement_preserves_nulls(self):
+        from geopandas.testing import assert_geoseries_equal
+
+        index = pd.Index(["a", "b"], name="feature_id")
+        source = GeoSeries(
+            [None, None],
+            index=index,
+            name="geometry",
+            crs="EPSG:4326",
+        )
+        replacement = gpd.GeoSeries(
+            [Point(1, 1), None],
+            index=index,
+            crs="EPSG:3857",
+        )
+        replacement = GeoSeries(replacement)
+        expected = gpd.GeoSeries(
+            [Point(1, 1), None],
+            index=index,
+            name="geometry",
+            crs="EPSG:4326",
+        )
+
+        result = source.fillna(replacement)
+
+        assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
+
+    def test_fillna_series_replacement_preserves_left_axis(self):
+        from geopandas.testing import assert_geoseries_equal
+
+        left_index = pd.Index([3, 2, 1, 0], name="feature_id")
+        source = GeoSeries(
+            [Point(7, 7), None, None, None],
+            index=left_index,
+            name="geometry",
+            crs="EPSG:4326",
+        )
+        replacement = gpd.GeoSeries(
+            [Point(3, 3), None, Point(4, 4), Point(99, 99)],
+            index=pd.Index([1, 2, 3, 99], name="other_id"),
+            crs="EPSG:3857",
+        )
+        replacement = GeoSeries(replacement)
+        expected = gpd.GeoSeries(
+            [Point(7, 7), None, Point(3, 3), None],
+            index=left_index,
+            name="geometry",
+            crs="EPSG:4326",
+        )
+
+        result = source.fillna(replacement)
+
+        assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
+
+    def test_fillna_series_replacement_uses_left_crs_for_embedded_srid(self):
+        source = GeoSeries([None], crs="EPSG:4326")
+        replacement = GeoSeries([Point(1, 1)], crs="EPSG:3857")
+
+        result = source.fillna(replacement)
+        embedded_srid = result._internal.spark_frame.select(
+            stf.ST_SRID(result.spark.column).alias("srid")
+        ).first()["srid"]
+        expected = gpd.GeoSeries([Point(1, 1)], crs="EPSG:4326").to_crs(3857)
+
+        assert result.crs.to_epsg() == 4326
+        assert embedded_srid == 4326
+        self.check_sgpd_equals_gpd(result.to_crs(3857), expected)
+
+    @pytest.mark.parametrize(
+        ("left_index", "right_index"),
+        [
+            (
+                pd.Index(["y", "x", "x"], name="feature_id"),
+                pd.Index(["y", "x", "x"], name="feature_id"),
+            ),
+            (
+                pd.Index([0, 1, 1], name="feature_id"),
+                pd.Index([0.0, 1.0, 1.0], name="feature_id"),
+            ),
+        ],
+    )
+    def test_fillna_series_replacement_pairs_equal_duplicate_indexes_positionally(
+        self, left_index, right_index
+    ):
+        from geopandas.testing import assert_geoseries_equal
+
+        source = GeoSeries([Point(7, 7), None, None], index=left_index)
+        replacement = GeoSeries(
+            [Point(8, 8), Point(1, 1), Point(2, 2)],
+            index=right_index,
+        )
+        expected = gpd.GeoSeries(
+            [Point(7, 7), Point(1, 1), Point(2, 2)],
+            index=left_index,
+        )
+
+        result = source.fillna(replacement)
+
+        assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
+
+    @pytest.mark.parametrize(
+        ("left_index", "right_index"),
+        [
+            (
+                pd.Index(["a", "a"], dtype=object),
+                pd.Index(["a", "a"], dtype="string"),
+            ),
+            (
+                pd.Index([1, 1], dtype="int64"),
+                pd.Index([1, 1], dtype="Int64"),
+            ),
+            (
+                pd.Index([Decimal("0.1"), Decimal("0.1")], dtype=object),
+                pd.Index([0.1, 0.1], dtype="float64"),
+            ),
+        ],
+    )
+    def test_fillna_series_replacement_rejects_duplicate_index_dtype_mismatch(
+        self, left_index, right_index
+    ):
+        source = GeoSeries([None, None], index=left_index)
+        replacement = GeoSeries(
+            [Point(1, 1), Point(2, 2)],
+            index=right_index,
+        )
+
+        with pytest.raises(
+            ValueError, match="cannot reindex on an axis with duplicate labels"
+        ):
+            source.fillna(replacement)
+
+    def test_fillna_series_replacement_does_not_coerce_decimal_to_float_index(self):
+        source = GeoSeries([None], index=pd.Index([Decimal("0.1")], dtype=object))
+        replacement = GeoSeries([Point(1, 1)], index=pd.Index([0.1]))
+
+        result = source.fillna(replacement).to_geopandas()
+
+        assert result.iloc[0] is None
+
+    def test_fillna_series_replacement_broadcasts_unique_index_to_duplicate_left(self):
+        from geopandas.testing import assert_geoseries_equal
+
+        source = GeoSeries([None, None, None], index=pd.Index([1, 1, 2]))
+        replacement = GeoSeries(
+            [Point(1, 1), Point(2, 2)],
+            index=pd.Index([1, 2]),
+        )
+        expected = gpd.GeoSeries(
+            [Point(1, 1), Point(1, 1), Point(2, 2)],
+            index=pd.Index([1, 1, 2]),
+        )
+
+        result = source.fillna(replacement)
+
+        assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
+
+    @pytest.mark.parametrize(
+        ("left_index", "right_index"),
+        [
+            (pd.Index([1]), pd.Index(["1"])),
+            (pd.Index(["1"]), pd.Index([1])),
+        ],
+    )
+    def test_fillna_series_replacement_does_not_match_numeric_and_string_keys(
+        self, left_index, right_index
+    ):
+        source = GeoSeries([None], index=left_index)
+        replacement = GeoSeries([Point(1, 1)], index=right_index)
+
+        result = source.fillna(replacement).to_geopandas()
+
+        assert result.iloc[0] is None
+
+    @pytest.mark.parametrize(
+        ("left_index", "right_index"),
+        [
+            (pd.Index([2, 1]), pd.Index([1.0, 2.0])),
+            (pd.Index([True]), pd.Index([1])),
+            (
+                pd.DatetimeIndex(["2020-01-02", "2020-01-01"]),
+                pd.Index([date(2020, 1, 1), date(2020, 1, 2)]),
+            ),
+            (
+                pd.Index(["b", "a"], dtype=object),
+                pd.Index(["a", "b"], dtype="string"),
+            ),
+        ],
+    )
+    def test_fillna_series_replacement_matches_compatible_index_keys(
+        self, left_index, right_index
+    ):
+        from geopandas.testing import assert_geoseries_equal
+
+        fill_values = [
+            Point(position, position) for position in range(len(right_index))
+        ]
+        source = GeoSeries([None] * len(left_index), index=left_index)
+        replacement = GeoSeries(fill_values, index=right_index)
+        expected = gpd.GeoSeries([None] * len(left_index), index=left_index).fillna(
+            gpd.GeoSeries(fill_values, index=right_index)
+        )
+
+        result = source.fillna(replacement).to_geopandas()
+
+        assert_geoseries_equal(result, expected, check_index_type=False)
+
+    def test_fillna_series_replacement_does_not_reindex_boolean_as_numeric(self):
+        source = GeoSeries([None, None], index=pd.Index([True, False]))
+        replacement = GeoSeries([Point(0, 0), Point(1, 1)], index=pd.Index([0, 1]))
+
+        result = source.fillna(replacement).to_geopandas()
+
+        assert result.isna().all()
+
+    @pytest.mark.parametrize("multiindex", [False, True])
+    def test_fillna_series_replacement_rejects_nonidentical_duplicate_index(
+        self, multiindex
+    ):
+        if multiindex:
+            source_index = pd.MultiIndex.from_tuples([("a", 1), ("b", 2)])
+            replacement_index = pd.MultiIndex.from_tuples([("a", 1), ("a", 1)])
+            message = "cannot handle a non-unique multi-index!"
+        else:
+            source_index = pd.Index([1, 2])
+            replacement_index = pd.Index([1, 1])
+            message = "cannot reindex on an axis with duplicate labels"
+
+        source = GeoSeries([None, None], index=source_index)
+        replacement = GeoSeries(
+            [Point(1, 1), Point(2, 2)],
+            index=replacement_index,
+        )
+
+        with pytest.raises(ValueError, match=message):
+            source.fillna(replacement)
+
+    @pytest.mark.parametrize("left_is_multiindex", [False, True])
+    def test_fillna_series_replacement_requires_full_index_shape(
+        self, left_is_multiindex
+    ):
+        from geopandas.testing import assert_geoseries_equal
+
+        single_index = pd.Index(["a", "b"], name="id")
+        multi_index = pd.MultiIndex.from_tuples(
+            [("a", "x"), ("b", "y")], names=["id", "kind"]
+        )
+        left_index = multi_index if left_is_multiindex else single_index
+        right_index = single_index if left_is_multiindex else multi_index
+        source = GeoSeries([None, None], index=left_index)
+        replacement = GeoSeries([Point(1, 1), Point(2, 2)], index=right_index)
+        expected = gpd.GeoSeries([None, None], index=left_index)
+
+        result = source.fillna(replacement)
+
+        assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
+
+    @pytest.mark.parametrize("left_is_multiindex", [False, True])
+    def test_fillna_series_replacement_rejects_duplicate_different_index_shape(
+        self, left_is_multiindex
+    ):
+        single_index = pd.Index(["a", "a"], name="id")
+        multi_index = pd.MultiIndex.from_tuples(
+            [("a", "x"), ("a", "x")], names=["id", "kind"]
+        )
+        left_index = (
+            pd.MultiIndex.from_tuples([("a", "x"), ("b", "y")])
+            if left_is_multiindex
+            else pd.Index(["a", "b"])
+        )
+        right_index = single_index if left_is_multiindex else multi_index
+        message = (
+            "cannot reindex on an axis with duplicate labels"
+            if left_is_multiindex
+            else "cannot handle a non-unique multi-index!"
+        )
+        source = GeoSeries([None, None], index=left_index)
+        replacement = GeoSeries([Point(1, 1), Point(2, 2)], index=right_index)
+
+        with pytest.raises(ValueError, match=message):
+            source.fillna(replacement)
+
+    def test_fillna_series_replacement_uses_full_multiindex_in_left_order(self):
+        from geopandas.testing import assert_geoseries_equal
+
+        left_index = pd.MultiIndex.from_tuples(
+            [("z", 0), ("b", 0), ("a", 0)], names=["group", "row"]
+        )
+        right_index = pd.MultiIndex.from_tuples(
+            [("a", 0), ("b", 0), ("z", 0)],
+            names=["other_group", "other_row"],
+        )
+        source = GeoSeries([Point(7, 7), None, None], index=left_index)
+        replacement = GeoSeries(
+            [Point(1, 1), Point(2, 2), Point(8, 8)], index=right_index
+        )
+        expected = gpd.GeoSeries(
+            [Point(7, 7), Point(2, 2), Point(1, 1)], index=left_index
+        )
+
+        result = source.fillna(replacement)
+
+        assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
+
+    def test_fillna_same_anchor_series_is_lazy_and_positional(self, monkeypatch):
+        from geopandas.testing import assert_geoseries_equal
+        from pyspark.sql import DataFrame
+
+        index = pd.Index(["x", "x", "y"], name="feature_id")
+        frame = GeoDataFrame(
+            gpd.GeoDataFrame(
+                {
+                    "geometry": gpd.GeoSeries([Point(7, 7), None, None], index=index),
+                    "replacement": gpd.GeoSeries(
+                        [Point(8, 8), Point(1, 1), Point(2, 2)], index=index
+                    ),
+                },
+                geometry="geometry",
+            )
+        )
+
+        def unexpected_action(*args, **kwargs):
+            raise AssertionError("same-anchor fillna ran a Spark action")
+
+        monkeypatch.setattr(DataFrame, "first", unexpected_action)
+
+        result = frame.geometry.fillna(frame["replacement"])
+        plan = (
+            result._internal.spark_frame._jdf.queryExecution()
+            .optimizedPlan()
+            .toString()
+        )
+        expected = gpd.GeoSeries(
+            [Point(7, 7), Point(1, 1), Point(2, 2)],
+            index=index,
+            name="geometry",
+        )
+
+        assert "Join" not in plan
+        assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
 
     @pytest.mark.parametrize(
         "kwargs",
