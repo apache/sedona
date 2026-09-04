@@ -12,21 +12,29 @@ title: "GROUP BY, But for Pixels"
 
 # GROUP BY, But for Pixels
 
-Almost every raster question ends at a polygon. Mean elevation per canton, forest cover per district, flood depth per parcel. The imagery arrives as a grid of numbers; the answer has to arrive as a table with one row per zone. Zonal statistics is the operation between the two, and in Sedona it is one function call inside an ordinary spatial join. Below: every Swiss canton, summarized from 7 million elevation pixels pulled straight off S3, in 56 seconds with one query.
+Many raster analyses need one result for each polygon. Examples include mean elevation by canton, forest cover by district, and flood depth by parcel. A raster stores values in a grid of pixels. A polygon defines an area, also called a zone.
 
-![Shaded relief of Switzerland and the Alps, each canton tinted by its mean elevation from pale blue in the lowlands to deep blue across Valais and Graubünden](zonal-statistics-cover.png)
+Zonal statistics summarize the raster pixels inside each zone. A spatial join matches data by location. Apache Sedona performs both steps in one query. This example reads 7,006,027 elevation pixels from Amazon S3 and summarizes all 26 Swiss cantons in 56 seconds.
+
+![Map of Switzerland. Each canton is shaded by its mean elevation. Low cantons are light blue. Valais and Graubünden are dark blue.](zonal-statistics-cover.png)
 
 <!-- more -->
 
 ## One call, nine numbers
 
-`RS_ZonalStatsAll(raster, zone)` takes a raster column and a geometry and returns a struct: `count`, `sum`, `mean`, `median`, `mode`, `stddev`, `variance`, `min`, `max`. `RS_ZonalStats(raster, zone, 'mean')` returns a single statistic.
+`RS_ZonalStatsAll(raster, zone)` calculates nine statistics for the raster pixels inside a geometry. It returns a struct with these named fields: `count`, `sum`, `mean`, `median`, `mode`, `stddev`, `variance`, `min`, and `max`. A struct is one value that contains several named fields. The mean is the arithmetic average. Use `RS_ZonalStats(raster, zone, 'mean')` when one statistic is enough.
 
-Two defaults shape the output. A pixel counts when its center falls inside the zone, which is the right rule for large zones and the wrong one for zones smaller than a few pixels; pass `allTouched = true` to include every pixel the geometry touches. NODATA pixels are excluded from the arithmetic, so a partly-masked zone reports a mean over the valid pixels. If the zone's CRS differs from the raster's, Sedona reprojects the zone first.
+By default, Sedona includes a pixel when its center is inside the zone. This rule works well for large zones. For a zone that is only a few pixels wide, pass `allTouched = true` to include every pixel that the geometry touches.
+
+`RS_ZonalStatsAll` excludes NODATA pixels by default. NODATA marks a pixel that has no valid measurement. If a zone contains NODATA pixels, its mean uses the remaining valid pixels.
+
+Sedona also checks the coordinate reference system, or CRS. A CRS defines how coordinates map to locations on Earth. If the zone and raster use different systems, Sedona converts the zone to the raster's CRS before it calculates the statistics.
 
 ## Switzerland in one query
 
-The elevation comes from the [Copernicus 90 m DEM](https://registry.opendata.aws/copernicus-dem/), an open bucket with one GeoTIFF per 1° tile. Eighteen of them cover Switzerland. The tiled `raster` reader from [our 2 GB wall post](https://sedona.apache.org/latest/blog/2026/07/10/open-huge-geotiffs-without-the-2-gb-wall/) reads them without a download step, and `retile = false` keeps each file as a single row:
+The elevation data comes from the [Copernicus 90 m DEM](https://registry.opendata.aws/copernicus-dem/). A digital elevation model, or DEM, stores ground height in a raster. This public dataset stores one GeoTIFF raster file for each 1° tile. Eighteen files cover Switzerland.
+
+The tiled `raster` reader from [our post about the 2 GB limit](https://sedona.apache.org/latest/blog/2026/07/10/open-huge-geotiffs-without-the-2-gb-wall/) reads the files from S3. The option `retile = false` keeps each file in one row:
 
 ```python
 dem = (
@@ -40,9 +48,9 @@ dem = (
 dem.createOrReplaceTempView("dem")
 ```
 
-Each row is 1200 × 1200 pixels of EPSG:4326 at 3 arc-seconds. The zones are the 26 Swiss cantons, read from the Overture divisions theme as ordinary GeoParquet.
+Each row contains 1,200 × 1,200 pixels. The data uses EPSG:4326, a geographic CRS, with a pixel size of 3 arc-seconds. The 26 Swiss cantons are the zones. Sedona reads their polygons from the Overture divisions dataset. The files use GeoParquet, a format for geographic data.
 
-??? example "Session setup and the canton pull"
+??? example "Session setup and canton data"
 
     ```python
     from sedona.spark import SedonaContext
@@ -81,7 +89,7 @@ Each row is 1200 × 1200 pixels of EPSG:4326 at 3 arc-seconds. The zones are the
     cantons.createOrReplaceTempView("cantons")
     ```
 
-Now the whole thing, as one statement:
+This SQL query joins the raster tiles to the cantons and calculates the results:
 
 ```sql
 WITH parts AS (
@@ -98,7 +106,7 @@ GROUP BY name
 ORDER BY mean_m DESC
 ```
 
-Twenty-six rows, 7,006,027 pixels summarized, 56 seconds from a cold session. The top of the table is the Alps:
+The query returns 26 rows and summarizes 7,006,027 pixels. The first run has no cached data and takes 56 seconds. Cantons in the Alps appear at the top of the table:
 
 ```
 +----------------------------+---------+------+-----+------+
@@ -115,13 +123,15 @@ Twenty-six rows, 7,006,027 pixels summarized, 56 seconds from a cold session. Th
 +----------------------------+---------+------+-----+------+
 ```
 
-![Dumbbell chart of all 26 Swiss cantons, each showing minimum, mean and maximum elevation; Valais spans 4,166 m while Genève spans 197 m](zonal-statistics-relief.svg)
+![Chart showing the lowest, mean, and highest elevation for all 26 Swiss cantons. Valais spans 4,166 m from lowest to highest, while Genève spans 197 m.](zonal-statistics-relief.svg)
 
-Valais covers 4,166 m of vertical range. Genève covers 197 m. Both are one row of the same table.
+The difference between the lowest and highest point is 4,166 m in Valais. The difference is 197 m in Genève. Both results come from the same query.
 
-## Why one canton becomes several rows
+## Why one canton can produce several rows
 
-`RS_Intersects(d.rast, c.geometry)` is a raster-vector spatial join, and it pairs each tile with each zone that overlaps it. Twenty-six cantons and eighteen tiles produce **62 pairs**, because a canton that straddles a tile boundary is measured once per tile. Genève sits on the 6°E line, so it comes back twice:
+`RS_Intersects(d.rast, c.geometry)` joins each raster tile to every canton that overlaps it. This is a raster-vector spatial join: one side contains raster tiles, and the other contains polygon shapes. The 26 cantons and 18 tiles produce **62 matching pairs**. A canton that crosses a tile boundary has one result for each tile.
+
+Genève crosses the 6°E tile boundary, so it produces two rows:
 
 ```
 +------+--------+--------+----------------------------------------------------------------------------------------------------------------------------------------------+
@@ -132,18 +142,18 @@ Valais covers 4,166 m of vertical range. Genève covers 197 m. Both are one row 
 +------+--------+--------+----------------------------------------------------------------------------------------------------------------------------------------------+
 ```
 
-That fan-out is the reason the pattern scales. Every pair is an independent unit of work: one tile, one polygon, no coordination with any other pair. The 62 pairs here already run in parallel. Point the same query at a continent of tiles and a national parcel layer and the pair count grows into the millions, spread across every executor in the cluster, with the query text unchanged. The tiles never pass through the driver.
+Each tile and canton pair is a separate unit of work. Spark can process the 62 pairs in parallel. The same SQL pattern also works with more tiles and zones. Spark sends the pairs to worker processes across the cluster. The driver manages the query, but it does not receive the raster tiles.
 
-## Which numbers survive the reassembly
+## How to combine results from several tiles
 
-The price of the fan-out is that the final `GROUP BY` has to put the pieces back together correctly, and not every statistic can be reassembled:
+When a canton overlaps several tiles, the final `GROUP BY` must combine the partial results. Each statistic needs the correct formula:
 
-- **`count` and `sum` add.** Both hold across any number of pairs.
-- **`min` and `max` combine** by taking the extreme of the extremes.
-- **`mean` is a ratio**, so it is `SUM(s.sum) / SUM(s.count)`. Averaging the per-pair means weights a 2,761-pixel sliver the same as a 44,656-pixel remainder, and Genève's answer moves by 5 m.
-- **`median`, `mode`, `stddev` and `variance` do not combine.** No arithmetic over per-tile medians produces the median of the union. Those statistics need the whole zone inside a single raster row: read with `retile = false` as above, or mosaic the tiles with `RS_Union_Aggr` before the zonal call.
+- **Add `count` and `sum`.** Addition works for any number of pairs.
+- **Combine `min` and `max`** by taking the lowest minimum and the highest maximum.
+- **Calculate `mean` as a ratio:** `SUM(s.sum) / SUM(s.count)`. Do not average the mean from each pair. That method gives the same weight to 2,761 pixels and 44,656 pixels, which changes Genève's result by 5 m.
+- **Do not combine `median`, `mode`, `stddev`, or `variance` from the partial values.** For example, the median of several tile medians is not the median of all pixels. These statistics need all pixels for the zone in one raster row. `retile = false` is enough when the zone fits inside one source raster. Otherwise, merge the tiles with `RS_Union_Aggr` before the zonal statistics call.
 
-One more trap produces a wrong number without any error. `RS_Intersects` compares the raster's footprint against the geometry, so a tile can qualify while holding no pixel *center* inside the zone. One of the 62 pairs is that case, and its struct comes back populated:
+One more case can produce a wrong number without an error. `RS_Intersects` compares the tile boundary with the zone. A tile can overlap a zone even when no pixel center is inside it. One of the 62 pairs has this result, and `RS_ZonalStatsAll` returns nine zeros:
 
 ```
 +----------------------------+---------------------------------------------+
@@ -153,7 +163,7 @@ One more trap produces a wrong number without any error. `RS_Intersects` compare
 +----------------------------+---------------------------------------------+
 ```
 
-Nine zeros, and one of them is a `min`. Fold that into `MIN(s.min)` and the deepest valley in Graubünden drops to sea level:
+One of those zeros is the `min` value. If that row enters `MIN(s.min)`, the result for Graubünden becomes 0 m:
 
 ```
 +----------------------------+---------+------------+
@@ -163,11 +173,11 @@ Nine zeros, and one of them is a `min`. Fold that into `MIN(s.min)` and the deep
 +----------------------------+---------+------------+
 ```
 
-`WHERE s.count > 0` is the fix, and 255.5 m is the canton's true floor. Drop empty pairs before the aggregate in every zonal pipeline.
+The filter `WHERE s.count > 0` removes empty pairs. The correct minimum for Graubünden is 255.5 m. Apply this filter before the final `GROUP BY`.
 
-## The same 62 pairs, a different question
+## Use the same pairs for another question
 
-Zonal statistics summarize any raster column, including one computed on the way in. The DEM carries elevation; slope is a short pass of NumPy over the pixel grid, and [raster Python UDFs](https://sedona.apache.org/latest/blog/2026/08/14/seven-lines-of-numpy-121-million-pixels/) turn that pass into a raster column:
+Zonal statistics can process a raster that a query creates. This example starts with the elevation DEM. A Python user-defined function, or UDF, uses NumPy to calculate the slope of each pixel. The UDF returns the slope values as a new raster column:
 
 ```python
 @udf(returnType=RasterType())
@@ -182,18 +192,24 @@ def slope_deg(raster):
     return raster.with_bands(out, nodata=-9999.0)
 ```
 
-Wrap the DEM column in `slope_deg(...)`, run the identical join and aggregate, and the ranking changes. Uri averages 28.3° across its whole area and tops out at 72.5°, steeper than Valais at 26.1°, even though Valais sits 237 m higher on average. Height and steepness are different questions, answered by the same 62 pairs:
+Wrap the DEM column in `slope_deg(...)`, then run the same join and aggregate. The canton ranking changes. Uri has a mean slope of 28.3° and a maximum slope of 72.5°. Valais has a mean slope of 26.1°, but its mean elevation is 237 m higher than Uri's.
 
-![Scatter of mean slope against mean elevation for all 26 cantons, with Uri highest on slope and Valais highest on elevation](zonal-statistics-slope.svg)
+Elevation and slope answer different questions, but both use the same 62 pairs:
 
-## What else fits this shape
+![Chart of mean slope and mean elevation for all 26 Swiss cantons. Uri has the highest mean slope, and Valais has the highest mean elevation.](zonal-statistics-slope.svg)
 
-Anything with a raster on one side and geometry on the other. Swap the DEM for [ESA WorldCover](https://registry.opendata.aws/esa-worldcover/) and a UDF that flags one class, and the `sum` of the flag over a zone is that zone's forest or built-up pixel count. Swap the cantons for a million parcels and the join is the same join. Use the [`geotiff.metadata` reader](https://sedona.apache.org/latest/blog/2026/08/07/index-a-million-rasters-without-reading-a-pixel/) to pick which tiles to open.
+## Use the pattern with other data
 
-Resolution is a knob. The same query against the 30 m Copernicus product puts Valais's ceiling at 4,539 m instead of 4,534 m, for nine times the pixels. Both figures describe a surface model sampled on a grid, so they are terrain estimates. The query that produces them is character-for-character the same.
+The same pattern works with other raster and polygon datasets. For example, replace the DEM with [ESA WorldCover](https://registry.opendata.aws/esa-worldcover/). A UDF can mark pixels that contain one type of land cover, such as forest or built-up land. The sum of the marked pixels gives the pixel count for each zone.
 
-## The point
+The polygons can also represent parcels instead of cantons. The spatial join does not change. Use the [`geotiff.metadata` reader](https://sedona.apache.org/latest/blog/2026/08/07/index-a-million-rasters-without-reading-a-pixel/) to find the raster tiles that overlap the polygons before opening those tiles.
 
-Rasters and polygons are two different data models, and the join between them is usually where a pipeline turns into an export step, a Python script, and a folder of intermediate files. `RS_ZonalStatsAll` collapses that into a function call in a join, on data you never downloaded. Get the aggregation right, drop the empty pairs, and one query answers the question for 26 zones or 26 million.
+Raster resolution sets the size of each pixel. A 30 m DEM uses nine times as many pixels as a 90 m DEM to cover the same area. With the 30 m Copernicus DEM, the highest value in Valais is 4,539 m instead of 4,534 m. Both values estimate terrain height from a surface model stored on a grid. The SQL query stays the same.
 
-*Full parameter list in the [`RS_ZonalStatsAll` reference](https://sedona.apache.org/latest/api/sql/Raster-Band-Accessors/RS_ZonalStatsAll/); reading and writing patterns in the [raster tutorial](https://sedona.apache.org/latest/tutorial/raster/). Contains modified Copernicus DEM data (2026).*
+## The main idea
+
+Raster grids and polygon shapes use different data models. Many pipelines join them by exporting data, running a Python script, and saving intermediate files. `RS_ZonalStatsAll` keeps the join and the statistics in one SQL query. It can read raster data from object storage such as S3.
+
+Use the correct formula for each statistic, and remove pairs with no valid pixels. The same SQL pattern can then process a small set of zones or a large one.
+
+*See the [`RS_ZonalStatsAll` reference](https://sedona.apache.org/latest/api/sql/Raster-Band-Accessors/RS_ZonalStatsAll/) for all parameters. See the [raster tutorial](https://sedona.apache.org/latest/tutorial/raster/) for reading and writing examples. This example contains modified Copernicus DEM data (2026).*
