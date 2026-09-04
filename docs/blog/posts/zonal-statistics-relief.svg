@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="930" viewBox="0 0 960 930" role="img" aria-labelledby="relief-title relief-desc">
+  <title id="relief-title">Elevation range for every Swiss canton</title>
+  <desc id="relief-desc">Each line shows the lowest and highest elevation in one Swiss canton. The red dot shows the mean. The difference is 4,166 metres in Valais and 197 metres in Genève.</desc>
+  <style>
+    text { font-family: Inter, "Helvetica Neue", Arial, sans-serif; fill: #1c1c1c; }
+    .kicker { fill: #ca463a; font-size: 12px; font-weight: 700; letter-spacing: 1.8px; }
+    .title { font-size: 29px; font-weight: 700; letter-spacing: -0.45px; }
+    .subtitle { fill: #59616d; font-size: 15px; }
+    .grid, .tick line { stroke: #e5e9ee; stroke-width: 1; shape-rendering: crispEdges; }
+    .tick text { fill: #59616d; font-size: 13px; }
+    .axis-label { fill: #59616d; font-size: 15px; font-weight: 500; }
+    .row-label { fill: #59616d; font-size: 14px; font-weight: 500; }
+    .row-label.emphasis { fill: #1c1c1c; font-weight: 700; }
+    .range { stroke: #aab3bd; stroke-width: 3; stroke-linecap: butt; }
+    .endpoint { stroke: #1c1c1c; stroke-width: 1.75; stroke-linecap: butt; }
+    .mean { fill: #ca463a; stroke: #ffffff; stroke-width: 1.5; }
+    .leader { fill: none; stroke: #59616d; stroke-width: 1.25; stroke-linecap: butt; }
+    .callout-name { fill: #ca463a; font-size: 11px; font-weight: 800; letter-spacing: 1.2px; }
+    .callout-value { fill: #1c1c1c; font-size: 15px; font-weight: 700; }
+  </style>
+  <rect width="960" height="930" fill="#ffffff"/>
+  <text class="kicker" x="44" y="26">COPERNICUS 90 M ELEVATION</text>
+  <text class="title" x="44" y="58">Elevation range for every Swiss canton</text>
+  <text class="subtitle" x="44" y="84">Lowest, mean, and highest elevation from RS_ZonalStatsAll</text>
+  <text class="subtitle" x="920" y="84" text-anchor="end">line = lowest to highest · <tspan fill="#ca463a" font-weight="700">red dot = mean</tspan></text>
+  <g aria-hidden="true">
+    <g class="tick"><line x1="220" y1="118" x2="220" y2="850"/><text x="220" y="876" text-anchor="middle">0</text></g>
+    <g class="tick"><line x1="360" y1="118" x2="360" y2="850"/><text x="360" y="876" text-anchor="middle">1,000</text></g>
+    <g class="tick"><line x1="500" y1="118" x2="500" y2="850"/><text x="500" y="876" text-anchor="middle">2,000</text></g>
+    <g class="tick"><line x1="640" y1="118" x2="640" y2="850"/><text x="640" y="876" text-anchor="middle">3,000</text></g>
+    <g class="tick"><line x1="780" y1="118" x2="780" y2="850"/><text x="780" y="876" text-anchor="middle">4,000</text></g>
+    <g class="tick"><line x1="920" y1="118" x2="920" y2="850"/><text x="920" y="876" text-anchor="middle">5,000</text></g>
+    <line class="grid" x1="220" y1="850" x2="920" y2="850"/>
+  </g>
+  <g>
+    <g class="canton" data-name="Valais" data-min="368" data-mean="2138" data-max="4534">
+      <text class="row-label emphasis" x="204" y="155" text-anchor="end">Valais</text>
+      <line class="range" x1="271.52" y1="150" x2="854.76" y2="150"/>
+      <line class="endpoint" x1="271.52" y1="145" x2="271.52" y2="155"/>
+      <line class="endpoint" x1="854.76" y1="145" x2="854.76" y2="155"/>
+      <circle class="mean" cx="519.32" cy="150" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Graubünden" data-min="256" data-mean="2023" data-max="3961">
+      <text class="row-label" x="204" y="182" text-anchor="end">Graubünden</text>
+      <line class="range" x1="255.84" y1="177" x2="774.54" y2="177"/>
+      <line class="endpoint" x1="255.84" y1="172" x2="255.84" y2="182"/>
+      <line class="endpoint" x1="774.54" y1="172" x2="774.54" y2="182"/>
+      <circle class="mean" cx="503.22" cy="177" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Uri" data-min="433" data-mean="1901" data-max="3579">
+      <text class="row-label" x="204" y="209" text-anchor="end">Uri</text>
+      <line class="range" x1="280.62" y1="204" x2="721.06" y2="204"/>
+      <line class="endpoint" x1="280.62" y1="199" x2="280.62" y2="209"/>
+      <line class="endpoint" x1="721.06" y1="199" x2="721.06" y2="209"/>
+      <circle class="mean" cx="486.14" cy="204" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Glarus" data-min="411" data-mean="1584" data-max="3597">
+      <text class="row-label" x="204" y="236" text-anchor="end">Glarus</text>
+      <line class="range" x1="277.54" y1="231" x2="723.58" y2="231"/>
+      <line class="endpoint" x1="277.54" y1="226" x2="277.54" y2="236"/>
+      <line class="endpoint" x1="723.58" y1="226" x2="723.58" y2="236"/>
+      <circle class="mean" cx="441.76" cy="231" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Ticino" data-min="193" data-mean="1400" data-max="3360">
+      <text class="row-label" x="204" y="263" text-anchor="end">Ticino</text>
+      <line class="range" x1="247.02" y1="258" x2="690.4" y2="258"/>
+      <line class="endpoint" x1="247.02" y1="253" x2="247.02" y2="263"/>
+      <line class="endpoint" x1="690.4" y1="253" x2="690.4" y2="263"/>
+      <circle class="mean" cx="416" cy="258" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Obwalden" data-min="433" data-mean="1342" data-max="3172">
+      <text class="row-label" x="204" y="290" text-anchor="end">Obwalden</text>
+      <line class="range" x1="280.62" y1="285" x2="664.08" y2="285"/>
+      <line class="endpoint" x1="280.62" y1="280" x2="280.62" y2="290"/>
+      <line class="endpoint" x1="664.08" y1="280" x2="664.08" y2="290"/>
+      <circle class="mean" cx="407.88" cy="285" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Bern" data-min="402" data-mean="1202" data-max="4082">
+      <text class="row-label" x="204" y="317" text-anchor="end">Bern</text>
+      <line class="range" x1="276.28" y1="312" x2="791.48" y2="312"/>
+      <line class="endpoint" x1="276.28" y1="307" x2="276.28" y2="317"/>
+      <line class="endpoint" x1="791.48" y1="307" x2="791.48" y2="317"/>
+      <circle class="mean" cx="388.28" cy="312" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Appenzell Innerrhoden" data-min="571" data-mean="1133" data-max="2431">
+      <text class="row-label" x="204" y="344" text-anchor="end">Appenzell Innerrhoden</text>
+      <line class="range" x1="299.94" y1="339" x2="560.34" y2="339"/>
+      <line class="endpoint" x1="299.94" y1="334" x2="299.94" y2="344"/>
+      <line class="endpoint" x1="560.34" y1="334" x2="560.34" y2="344"/>
+      <circle class="mean" cx="378.62" cy="339" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Schwyz" data-min="405" data-mean="1100" data-max="2752">
+      <text class="row-label" x="204" y="371" text-anchor="end">Schwyz</text>
+      <line class="range" x1="276.7" y1="366" x2="605.28" y2="366"/>
+      <line class="endpoint" x1="276.7" y1="361" x2="276.7" y2="371"/>
+      <line class="endpoint" x1="605.28" y1="361" x2="605.28" y2="371"/>
+      <circle class="mean" cx="374" cy="366" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Nidwalden" data-min="433" data-mean="1076" data-max="2836">
+      <text class="row-label" x="204" y="398" text-anchor="end">Nidwalden</text>
+      <line class="range" x1="280.62" y1="393" x2="617.04" y2="393"/>
+      <line class="endpoint" x1="280.62" y1="388" x2="280.62" y2="398"/>
+      <line class="endpoint" x1="617.04" y1="388" x2="617.04" y2="398"/>
+      <circle class="mean" cx="370.64" cy="393" r="4.5"/>
+    </g>
+    <g class="canton" data-name="St. Gallen" data-min="394" data-mean="986" data-max="3177">
+      <text class="row-label" x="204" y="425" text-anchor="end">St. Gallen</text>
+      <line class="range" x1="275.16" y1="420" x2="664.78" y2="420"/>
+      <line class="endpoint" x1="275.16" y1="415" x2="275.16" y2="425"/>
+      <line class="endpoint" x1="664.78" y1="415" x2="664.78" y2="425"/>
+      <circle class="mean" cx="358.04" cy="420" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Appenzell Ausserrhoden" data-min="436" data-mean="935" data-max="2395">
+      <text class="row-label" x="204" y="452" text-anchor="end">Appenzell Ausserrhoden</text>
+      <line class="range" x1="281.04" y1="447" x2="555.3" y2="447"/>
+      <line class="endpoint" x1="281.04" y1="442" x2="281.04" y2="452"/>
+      <line class="endpoint" x1="555.3" y1="442" x2="555.3" y2="452"/>
+      <circle class="mean" cx="350.9" cy="447" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Neuchâtel" data-min="425" data-mean="918" data-max="1534">
+      <text class="row-label" x="204" y="479" text-anchor="end">Neuchâtel</text>
+      <line class="range" x1="279.5" y1="474" x2="434.76" y2="474"/>
+      <line class="endpoint" x1="279.5" y1="469" x2="279.5" y2="479"/>
+      <line class="endpoint" x1="434.76" y1="469" x2="434.76" y2="479"/>
+      <circle class="mean" cx="348.52" cy="474" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Fribourg" data-min="429" data-mean="859" data-max="2331">
+      <text class="row-label" x="204" y="506" text-anchor="end">Fribourg</text>
+      <line class="range" x1="280.06" y1="501" x2="546.34" y2="501"/>
+      <line class="endpoint" x1="280.06" y1="496" x2="280.06" y2="506"/>
+      <line class="endpoint" x1="546.34" y1="496" x2="546.34" y2="506"/>
+      <circle class="mean" cx="340.26" cy="501" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Vaud" data-min="368" data-mean="845" data-max="3139">
+      <text class="row-label" x="204" y="533" text-anchor="end">Vaud</text>
+      <line class="range" x1="271.52" y1="528" x2="659.46" y2="528"/>
+      <line class="endpoint" x1="271.52" y1="523" x2="271.52" y2="533"/>
+      <line class="endpoint" x1="659.46" y1="523" x2="659.46" y2="533"/>
+      <circle class="mean" cx="338.3" cy="528" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Luzern" data-min="403" data-mean="774" data-max="2300">
+      <text class="row-label" x="204" y="560" text-anchor="end">Luzern</text>
+      <line class="range" x1="276.42" y1="555" x2="542" y2="555"/>
+      <line class="endpoint" x1="276.42" y1="550" x2="276.42" y2="560"/>
+      <line class="endpoint" x1="542" y1="550" x2="542" y2="560"/>
+      <circle class="mean" cx="328.36" cy="555" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Jura" data-min="365" data-mean="697" data-max="1289">
+      <text class="row-label" x="204" y="587" text-anchor="end">Jura</text>
+      <line class="range" x1="271.1" y1="582" x2="400.46" y2="582"/>
+      <line class="endpoint" x1="271.1" y1="577" x2="271.1" y2="587"/>
+      <line class="endpoint" x1="400.46" y1="577" x2="400.46" y2="587"/>
+      <circle class="mean" cx="317.58" cy="582" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Zug" data-min="387" data-mean="669" data-max="1559">
+      <text class="row-label" x="204" y="614" text-anchor="end">Zug</text>
+      <line class="range" x1="274.18" y1="609" x2="438.26" y2="609"/>
+      <line class="endpoint" x1="274.18" y1="604" x2="274.18" y2="614"/>
+      <line class="endpoint" x1="438.26" y1="604" x2="438.26" y2="614"/>
+      <circle class="mean" cx="313.66" cy="609" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Solothurn" data-min="286" data-mean="623" data-max="1430">
+      <text class="row-label" x="204" y="641" text-anchor="end">Solothurn</text>
+      <line class="range" x1="260.04" y1="636" x2="420.2" y2="636"/>
+      <line class="endpoint" x1="260.04" y1="631" x2="260.04" y2="641"/>
+      <line class="endpoint" x1="420.2" y1="631" x2="420.2" y2="641"/>
+      <circle class="mean" cx="307.22" cy="636" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Schaffhausen" data-min="343" data-mean="546" data-max="931">
+      <text class="row-label" x="204" y="668" text-anchor="end">Schaffhausen</text>
+      <line class="range" x1="268.02" y1="663" x2="350.34" y2="663"/>
+      <line class="endpoint" x1="268.02" y1="658" x2="268.02" y2="668"/>
+      <line class="endpoint" x1="350.34" y1="658" x2="350.34" y2="668"/>
+      <circle class="mean" cx="296.44" cy="663" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Zürich" data-min="332" data-mean="539" data-max="1275">
+      <text class="row-label" x="204" y="695" text-anchor="end">Zürich</text>
+      <line class="range" x1="266.48" y1="690" x2="398.5" y2="690"/>
+      <line class="endpoint" x1="266.48" y1="685" x2="266.48" y2="695"/>
+      <line class="endpoint" x1="398.5" y1="685" x2="398.5" y2="695"/>
+      <circle class="mean" cx="295.46" cy="690" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Basel-Landschaft" data-min="249" data-mean="523" data-max="1166">
+      <text class="row-label" x="204" y="722" text-anchor="end">Basel-Landschaft</text>
+      <line class="range" x1="254.86" y1="717" x2="383.24" y2="717"/>
+      <line class="endpoint" x1="254.86" y1="712" x2="254.86" y2="722"/>
+      <line class="endpoint" x1="383.24" y1="712" x2="383.24" y2="722"/>
+      <circle class="mean" cx="293.22" cy="717" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Thurgau" data-min="368" data-mean="499" data-max="992">
+      <text class="row-label" x="204" y="749" text-anchor="end">Thurgau</text>
+      <line class="range" x1="271.52" y1="744" x2="358.88" y2="744"/>
+      <line class="endpoint" x1="271.52" y1="739" x2="271.52" y2="749"/>
+      <line class="endpoint" x1="358.88" y1="739" x2="358.88" y2="749"/>
+      <circle class="mean" cx="289.86" cy="744" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Aargau" data-min="260" data-mean="480" data-max="914">
+      <text class="row-label" x="204" y="776" text-anchor="end">Aargau</text>
+      <line class="range" x1="256.4" y1="771" x2="347.96" y2="771"/>
+      <line class="endpoint" x1="256.4" y1="766" x2="256.4" y2="776"/>
+      <line class="endpoint" x1="347.96" y1="766" x2="347.96" y2="776"/>
+      <circle class="mean" cx="287.2" cy="771" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Genève" data-min="332" data-mean="420" data-max="529">
+      <text class="row-label emphasis" x="204" y="803" text-anchor="end">Genève</text>
+      <line class="range" x1="266.48" y1="798" x2="294.06" y2="798"/>
+      <line class="endpoint" x1="266.48" y1="793" x2="266.48" y2="803"/>
+      <line class="endpoint" x1="294.06" y1="793" x2="294.06" y2="803"/>
+      <circle class="mean" cx="278.8" cy="798" r="4.5"/>
+    </g>
+    <g class="canton" data-name="Basel-Stadt" data-min="245" data-mean="299" data-max="520">
+      <text class="row-label" x="204" y="830" text-anchor="end">Basel-Stadt</text>
+      <line class="range" x1="254.3" y1="825" x2="292.8" y2="825"/>
+      <line class="endpoint" x1="254.3" y1="820" x2="254.3" y2="830"/>
+      <line class="endpoint" x1="292.8" y1="820" x2="292.8" y2="830"/>
+      <circle class="mean" cx="261.86" cy="825" r="4.5"/>
+    </g>
+  </g>
+  <g aria-label="Valais has 4,166 metres of relief">
+    <path class="leader" d="M 854.76 143 L 864.76 120 L 900 120"/>
+    <text class="callout-name" x="900" y="105" text-anchor="end">VALAIS</text>
+    <text class="callout-value" x="900" y="121" text-anchor="end">4,166 m difference</text>
+  </g>
+  <g aria-label="Genève has 197 metres of relief">
+    <path class="leader" d="M 299.06 798 L 338 798"/>
+    <text class="callout-name" x="348" y="793">GENÈVE</text>
+    <text class="callout-value" x="348" y="810">197 m difference</text>
+  </g>
+  <text class="axis-label" x="570" y="908" text-anchor="middle">Elevation in metres</text>
+</svg>

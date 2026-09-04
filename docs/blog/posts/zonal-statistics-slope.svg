@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="650" viewBox="0 0 960 650" role="img" aria-labelledby="slope-title slope-desc">
+  <title id="slope-title">The highest canton is not the steepest</title>
+  <desc id="slope-desc">Each dot represents one Swiss canton. The horizontal axis shows mean elevation. The vertical axis shows mean slope. Uri has the highest mean slope at 28.3 degrees. Valais has the highest mean elevation at 2,138 metres.</desc>
+  <style>
+    text { font-family: Inter, "Helvetica Neue", Arial, sans-serif; fill: #1c1c1c; }
+    .kicker { fill: #ca463a; font-size: 12px; font-weight: 700; letter-spacing: 1.8px; }
+    .title { font-size: 29px; font-weight: 700; letter-spacing: -0.45px; }
+    .subtitle { fill: #59616d; font-size: 15px; }
+    .grid, .tick line { stroke: #e5e9ee; stroke-width: 1; shape-rendering: crispEdges; }
+    .tick text, .axis-label { fill: #59616d; font-size: 13px; }
+    .axis-label { font-size: 15px; font-weight: 500; }
+    .point { fill: #91a5bd; stroke: #ffffff; stroke-width: 1.5; }
+    .point.uri { fill: #ca463a; }
+    .point.valais { fill: #406b9d; }
+    .guide-uri { stroke: #ca463a; }
+    .guide-valais { stroke: #406b9d; }
+    .guide-uri, .guide-valais { fill: none; stroke-width: 1.25; stroke-dasharray: 4 5; opacity: 0.28; stroke-linecap: butt; }
+    .label-leader { stroke: #87919d; stroke-width: 1; stroke-linecap: butt; }
+    .support-label { fill: #59616d; font-size: 13px; font-weight: 500; }
+    .callout-name { font-size: 11px; font-weight: 800; letter-spacing: 1.2px; }
+    .callout-value { fill: #1c1c1c; font-size: 16px; font-weight: 700; }
+    .leader { fill: none; stroke-width: 1.3; stroke-linecap: butt; }
+  </style>
+  <rect width="960" height="650" fill="#ffffff"/>
+  <text class="kicker" x="60" y="26">MEAN ELEVATION AND SLOPE</text>
+  <text class="title" x="60" y="58">The highest canton is not the steepest</text>
+  <text class="subtitle" x="60" y="84">The same 62 tile and canton pairs show elevation and slope</text>
+  <g aria-hidden="true">
+    <g class="tick"><line x1="262.96" y1="116" x2="262.96" y2="566"/><text x="262.96" y="590" text-anchor="middle">500</text></g>
+    <g class="tick"><line x1="439.91" y1="116" x2="439.91" y2="566"/><text x="439.91" y="590" text-anchor="middle">1,000</text></g>
+    <g class="tick"><line x1="616.87" y1="116" x2="616.87" y2="566"/><text x="616.87" y="590" text-anchor="middle">1,500</text></g>
+    <g class="tick"><line x1="793.83" y1="116" x2="793.83" y2="566"/><text x="793.83" y="590" text-anchor="middle">2,000</text></g>
+    <g class="tick"><line x1="86" y1="566" x2="900" y2="566"/><text x="70" y="570" text-anchor="end">0</text></g>
+    <g class="tick"><line x1="86" y1="495.69" x2="900" y2="495.69"/><text x="70" y="499.69" text-anchor="end">5</text></g>
+    <g class="tick"><line x1="86" y1="425.38" x2="900" y2="425.38"/><text x="70" y="429.38" text-anchor="end">10</text></g>
+    <g class="tick"><line x1="86" y1="355.06" x2="900" y2="355.06"/><text x="70" y="359.06" text-anchor="end">15</text></g>
+    <g class="tick"><line x1="86" y1="284.75" x2="900" y2="284.75"/><text x="70" y="288.75" text-anchor="end">20</text></g>
+    <g class="tick"><line x1="86" y1="214.44" x2="900" y2="214.44"/><text x="70" y="218.44" text-anchor="end">25</text></g>
+    <g class="tick"><line x1="86" y1="144.13" x2="900" y2="144.13"/><text x="70" y="148.13" text-anchor="end">30</text></g>
+  </g>
+  <g aria-hidden="true">
+    <path class="guide-uri" d="M 86 168.03 H 758.79 V 566"/>
+    <path class="guide-valais" d="M 86 198.97 H 842.67 V 566"/>
+  </g>
+  <g>
+    <g class="canton-point" data-name="Basel-Stadt" data-elevation="299" data-slope="3.6"><circle class="point" cx="191.82" cy="515.37" r="5.2"/></g>
+    <g class="canton-point" data-name="Genève" data-elevation="420" data-slope="2.6"><circle class="point" cx="234.64" cy="529.44" r="5.2"/></g>
+    <g class="canton-point" data-name="Aargau" data-elevation="480" data-slope="7.8"><circle class="point" cx="255.88" cy="456.31" r="5.2"/></g>
+    <g class="canton-point" data-name="Thurgau" data-elevation="499" data-slope="4.4"><circle class="point" cx="262.6" cy="504.12" r="5.2"/></g>
+    <g class="canton-point" data-name="Basel-Landschaft" data-elevation="523" data-slope="11.4"><circle class="point" cx="271.1" cy="405.69" r="5.2"/></g>
+    <g class="canton-point" data-name="Zürich" data-elevation="539" data-slope="6.9"><circle class="point" cx="276.76" cy="468.97" r="5.2"/></g>
+    <g class="canton-point" data-name="Schaffhausen" data-elevation="546" data-slope="8.8"><circle class="point" cx="279.24" cy="442.25" r="5.2"/></g>
+    <g class="canton-point" data-name="Solothurn" data-elevation="623" data-slope="11"><circle class="point" cx="306.49" cy="411.31" r="5.2"/></g>
+    <g class="canton-point" data-name="Zug" data-elevation="669" data-slope="8.2"><circle class="point" cx="322.77" cy="450.69" r="5.2"/></g>
+    <g class="canton-point" data-name="Jura" data-elevation="697" data-slope="11.2"><circle class="point" cx="332.68" cy="408.5" r="5.2"/></g>
+    <g class="canton-point" data-name="Luzern" data-elevation="774" data-slope="10.9"><circle class="point" cx="359.93" cy="412.72" r="5.2"/></g>
+    <g class="canton-point" data-name="Vaud" data-elevation="845" data-slope="9.5"><circle class="point" cx="385.06" cy="432.41" r="5.2"/></g>
+    <g class="canton-point" data-name="Fribourg" data-elevation="859" data-slope="10.3"><circle class="point" cx="390.01" cy="421.16" r="5.2"/></g>
+    <g class="canton-point" data-name="Neuchâtel" data-elevation="918" data-slope="9.5"><circle class="point" cx="410.89" cy="432.41" r="5.2"/></g>
+    <g class="canton-point" data-name="Appenzell Ausserrhoden" data-elevation="935" data-slope="12.8"><circle class="point" cx="416.91" cy="386" r="5.2"/></g>
+    <g class="canton-point" data-name="St. Gallen" data-elevation="986" data-slope="15.5"><circle class="point" cx="434.96" cy="348.03" r="5.2"/></g>
+    <g class="canton-point" data-name="Nidwalden" data-elevation="1076" data-slope="21"><circle class="point" cx="466.81" cy="270.69" r="5.2"/></g>
+    <g class="canton-point" data-name="Schwyz" data-elevation="1100" data-slope="17.2"><circle class="point" cx="475.3" cy="324.12" r="5.2"/></g>
+    <g class="canton-point" data-name="Appenzell Innerrhoden" data-elevation="1133" data-slope="17.7"><circle class="point" cx="486.98" cy="317.09" r="5.2"/></g>
+    <g class="canton-point" data-name="Bern" data-elevation="1202" data-slope="16.9"><circle class="point" cx="511.4" cy="328.34" r="5.2"/></g>
+    <g class="canton-point" data-name="Obwalden" data-elevation="1342" data-slope="21.4"><circle class="point" cx="560.95" cy="265.06" r="5.2"/></g>
+    <g class="canton-point" data-name="Ticino" data-elevation="1400" data-slope="27.1"><circle class="point" cx="581.48" cy="184.91" r="5.2"/></g>
+    <g class="canton-point" data-name="Glarus" data-elevation="1584" data-slope="27.6"><circle class="point" cx="646.6" cy="177.87" r="5.2"/></g>
+    <g class="canton-point" data-name="Graubünden" data-elevation="2023" data-slope="25.3"><circle class="point" cx="801.97" cy="210.22" r="5.2"/></g>
+    <g class="canton-point" data-name="Uri" data-elevation="1901" data-slope="28.3"><circle class="point uri" cx="758.79" cy="168.03" r="7"/></g>
+    <g class="canton-point" data-name="Valais" data-elevation="2138" data-slope="26.1"><circle class="point valais" cx="842.67" cy="198.97" r="7"/></g>
+  </g>
+  <g>
+    <g aria-label="Basel-Stadt"><line class="label-leader" x1="191.82" y1="515.37" x2="91" y2="489"/><text class="support-label" x="98" y="493" text-anchor="start">Basel-Stadt</text></g>
+    <g aria-label="Genève"><line class="label-leader" x1="234.64" y1="529.44" x2="233" y2="542"/><text class="support-label" x="240" y="546" text-anchor="start">Genève</text></g>
+    <g aria-label="Ticino"><line class="label-leader" x1="581.48" y1="184.91" x2="523" y2="174"/><text class="support-label" x="516" y="178" text-anchor="end">Ticino</text></g>
+    <g aria-label="Glarus"><line class="label-leader" x1="646.6" y1="177.87" x2="632" y2="141"/><text class="support-label" x="625" y="145" text-anchor="end">Glarus</text></g>
+    <g aria-label="Graubünden"><line class="label-leader" x1="801.97" y1="210.22" x2="813" y2="231"/><text class="support-label" x="806" y="235" text-anchor="end">Graubünden</text></g>
+  </g>
+  <g aria-label="Uri has the highest mean slope at 28.3 degrees">
+    <path class="leader guide-uri" d="M 753.79 163.03 L 712 126" opacity="1"/>
+    <text class="callout-name" fill="#ca463a" x="702" y="111" text-anchor="end">URI</text>
+    <text class="callout-value" x="702" y="129" text-anchor="end">highest mean slope: 28.3°</text>
+  </g>
+  <g aria-label="Valais has the highest mean elevation at 2,138 metres">
+    <path class="leader guide-valais" d="M 847.67 203.97 L 890 226" opacity="1"/>
+    <text class="callout-name" fill="#406b9d" x="890" y="244" text-anchor="end">VALAIS</text>
+    <text class="callout-value" x="890" y="262" text-anchor="end">highest mean elevation: 2,138 m</text>
+  </g>
+  <text class="axis-label" x="493" y="626" text-anchor="middle">Mean elevation in metres</text>
+  <text class="axis-label" x="22" y="341" text-anchor="middle" transform="rotate(-90 22 341)">Mean slope in degrees</text>
+</svg>
