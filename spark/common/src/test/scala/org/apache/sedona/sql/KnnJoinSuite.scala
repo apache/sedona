@@ -459,6 +459,14 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
       df1.join(df2, expr("ST_KNN(geom1, geom2, 1)")).count() should be(0)
     }
 
+    it("KNN Join with Geography columns") {
+      val df1 = sparkSession.sql("SELECT 1 as id, ST_GeographyFromText('POINT(-122.33 47.60)') as geog1")
+      val df2 = sparkSession.sql("SELECT 2 as id, ST_GeographyFromText('POINT(-122.34 47.61)') as geog2")
+
+      val result = df1.join(df2, expr("ST_KNN(geog1, geog2, 1)")).collect()
+      assert(result.length == 1)
+    }
+
     it("KNN Join using spider data source") {
       val dfRandomSquares = sparkSession.read
         .format("spider")

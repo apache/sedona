@@ -619,6 +619,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
 
             // ST_KNN
             case ST_KNN(Seq(leftShape, rightShape, k)) =>
+              val isGeography = leftShape.dataType == GeographyUDT || rightShape.dataType == GeographyUDT
               Some(
                 JoinQueryDetection(
                   left,
@@ -626,12 +627,13 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
                   leftShape,
                   rightShape,
                   spatialPredicate = SpatialPredicate.KNN,
-                  isGeography = false,
+                  isGeography = isGeography,
                   condition,
                   Some(k)))
 
             case ST_KNN(Seq(leftShape, rightShape, k, useSpheroid)) =>
               val useSpheroidUnwrapped = useSpheroid.eval().asInstanceOf[Boolean]
+              val isGeography = leftShape.dataType == GeographyUDT || rightShape.dataType == GeographyUDT || useSpheroidUnwrapped
               Some(
                 JoinQueryDetection(
                   left,
@@ -639,7 +641,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
                   leftShape,
                   rightShape,
                   spatialPredicate = SpatialPredicate.KNN,
-                  isGeography = useSpheroidUnwrapped,
+                  isGeography = isGeography,
                   condition,
                   Some(k)))
 

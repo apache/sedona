@@ -1213,4 +1213,13 @@ public class Functions {
   private static double radiansToMeters(double radians) {
     return radians * Haversine.AVG_EARTH_RADIUS;
   }
+
+  public static boolean knn(Geography leftGeography, Geography rightGeography, int k) {
+    throw new UnsupportedOperationException("KNN predicate is not supported");
+  }
+
+  public static boolean knn(
+      Geography leftGeography, Geography rightGeography, int k, boolean useSpheroid) {
+    throw new UnsupportedOperationException("KNN predicate is not supported");
+  }
 }

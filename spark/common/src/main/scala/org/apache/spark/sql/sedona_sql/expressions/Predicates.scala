@@ -364,7 +364,9 @@ private[apache] case class ST_3DDWithin(inputExpressions: Seq[Expression])
 private[apache] case class ST_KNN(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction3(Predicates.knn),
-      inferrableFunction4(Predicates.knn)) {
+      inferrableFunction4(Predicates.knn),
+      inferrableFunction3(org.apache.sedona.common.geography.Functions.knn),
+      inferrableFunction4(org.apache.sedona.common.geography.Functions.knn)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
