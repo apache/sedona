@@ -345,6 +345,10 @@ public class RasterEditors {
       boolean useScale,
       String algorithm)
       throws TransformException {
+    // Validated before the no-op early return below, so an unknown algorithm
+    // name errors even when the requested grid matches the source's.
+    Interpolation resamplingAlgorithm = createInterpolationAlgorithm(algorithm);
+
     /*
      * Old Parameters
      */
@@ -461,7 +465,6 @@ public class RasterEditors {
             transform,
             crs,
             null);
-    Interpolation resamplingAlgorithm = createInterpolationAlgorithm(algorithm);
     GridCoverage2D newRaster;
     GridCoverage2D noDataValueMask;
     GridCoverage2D resampledNoDataValueMask;

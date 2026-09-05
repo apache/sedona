@@ -31,7 +31,7 @@ The `useScale` parameter controls whether to use width-height or scaleX-scaleY. 
 
 Currently, RS_Resample does not support skewed rasters, and hence even if a skewed reference raster is provided, its skew values are ignored. If the input raster is skewed, the output raster geometry and interpolation may be incorrect.
 
-The default algorithm used for resampling is `NearestNeighbor`, and hence if a null, empty or invalid value of algorithm is provided, RS_Resample defaults to using `NearestNeighbor`. However, the algorithm parameter is non-optional.
+The default algorithm used for resampling is `NearestNeighbor`: if a null or empty algorithm is provided, RS_Resample defaults to using `NearestNeighbor`. An unknown algorithm name raises an `IllegalArgumentException`. The algorithm parameter is non-optional.
 
 Following are valid values for the algorithm parameter (Case-insensitive):
 
