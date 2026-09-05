@@ -110,7 +110,11 @@ jobs:
       # user happens to own a placeholder email address.
       - run: git config --global user.name "github-actions[bot]"
       - run: git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-      - run: uv run mkdocs build
+      - name: Build documentation and check localized sitemaps
+        run: |
+          uv run mkdocs build
+          cmp site/sitemap.xml site/zh/sitemap.xml
+          cmp site/sitemap.xml.gz site/zh/sitemap.xml.gz
       - name: Deploy the doc to the website branch
         if: ${{ github.event_name != 'pull_request' && github.repository == 'apache/sedona' }}
         run: |

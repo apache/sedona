@@ -185,6 +185,7 @@ class SpiderTests extends TestBaseScala with BeforeAndAfterAll {
         .option("numPartitions", "4")
         .option("percentage", "0.7")
         .option("distribution", "diagonal")
+        .option("seed", "42")
         .load()
       assert(spiderDf.rdd.getNumPartitions == 4)
       val records = spiderDf.collect()
@@ -194,7 +195,11 @@ class SpiderTests extends TestBaseScala with BeforeAndAfterAll {
         val geom = row.getAs[Geometry]("geometry").getCentroid
         Math.abs(geom.getX - geom.getY) < 0.000001
       }
-      assert(numPoints >= 650 && numPoints <= 750)
+      // With seed 42, exactly 676 of the 1000 generated points lie on the diagonal,
+      // consistent with percentage=0.7. Without a fixed seed the count is binomial
+      // (drawn with the current time as the seed), so a statistically valid sample
+      // can fall outside any bounded range and fail the test spuriously.
+      assert(numPoints == 676)
     }
 
     it("generate parcel data") {

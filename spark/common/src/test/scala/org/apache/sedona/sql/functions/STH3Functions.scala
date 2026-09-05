@@ -143,5 +143,28 @@ class STH3Functions extends TestBaseScala with Matchers with GeometrySample with
       Then("the result of spark sql should match with direct common library call")
       exacts should equal(expects)
     }
+
+    it("should return the parent cell at the requested resolution") {
+      Given("DataFrame with a valid Geometry")
+      val geometryTable = Seq("POINT(1 2)").map(geom => Tuple1(wktReader.read(geom))).toDF("geom")
+
+      When("finding the resolution 5 parent of a resolution 8 cell")
+      val result = geometryTable
+        .withColumn("cell", expr("ST_H3CellIDs(geom, 8, true)[0]"))
+        .select(col("cell"), expr("ST_H3ToParent(cell, 5)"))
+        .first()
+      val child = result.getLong(0)
+      val parent = result.getLong(1)
+
+      Then("the result should be the requested ancestor")
+      H3Utils.h3.getResolution(parent) should equal(5)
+      H3Utils.h3.cellToChildren(parent, 8).contains(child) should be(true)
+
+      Then("null input should return null")
+      sparkSession
+        .sql("SELECT ST_H3ToParent(CAST(NULL AS BIGINT), 5)")
+        .first()
+        .isNullAt(0) should be(true)
+    }
   }
 }

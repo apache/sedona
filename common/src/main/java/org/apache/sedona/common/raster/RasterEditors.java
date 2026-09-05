@@ -345,6 +345,10 @@ public class RasterEditors {
       boolean useScale,
       String algorithm)
       throws TransformException {
+    // Validated before the no-op early return below, so an unknown algorithm
+    // name errors even when the requested grid matches the source's.
+    Interpolation resamplingAlgorithm = createInterpolationAlgorithm(algorithm);
+
     /*
      * Old Parameters
      */
@@ -461,7 +465,6 @@ public class RasterEditors {
             transform,
             crs,
             null);
-    Interpolation resamplingAlgorithm = createInterpolationAlgorithm(algorithm);
     GridCoverage2D newRaster;
     GridCoverage2D noDataValueMask;
     GridCoverage2D resampledNoDataValueMask;
@@ -710,17 +713,20 @@ public class RasterEditors {
   }
 
   private static Interpolation createInterpolationAlgorithm(String algorithm) {
-    Interpolation interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
-    if (!Objects.isNull(algorithm) && !algorithm.isEmpty()) {
-      if (algorithm.equalsIgnoreCase("nearestneighbor")) {
-        interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
-      } else if (algorithm.equalsIgnoreCase("bilinear")) {
-        interp = Interpolation.getInstance(Interpolation.INTERP_BILINEAR);
-      } else if (algorithm.equalsIgnoreCase("bicubic")) {
-        interp = Interpolation.getInstance(Interpolation.INTERP_BICUBIC);
-      }
+    if (Objects.isNull(algorithm) || algorithm.isEmpty()) {
+      return Interpolation.getInstance(Interpolation.INTERP_NEAREST);
     }
-    return interp;
+    if (algorithm.equalsIgnoreCase("nearestneighbor")) {
+      return Interpolation.getInstance(Interpolation.INTERP_NEAREST);
+    } else if (algorithm.equalsIgnoreCase("bilinear")) {
+      return Interpolation.getInstance(Interpolation.INTERP_BILINEAR);
+    } else if (algorithm.equalsIgnoreCase("bicubic")) {
+      return Interpolation.getInstance(Interpolation.INTERP_BICUBIC);
+    }
+    throw new IllegalArgumentException(
+        "Invalid 'algorithm': '"
+            + algorithm
+            + "'. Expected one of: NearestNeighbor, Bilinear, Bicubic.");
   }
 
   private static double castRasterDataType(double value, int dataType) {

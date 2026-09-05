@@ -2004,6 +2004,11 @@ class TestDataFrameAPI(TestBase):
         for future in futures:
             future.result()
 
+    def test_st_h3_to_parent(self):
+        df = self.spark.createDataFrame([(614552609325318143,)], ["cell"])
+        parent = df.select(stf.ST_H3ToParent("cell", 5)).first()[0]
+        assert parent == 601041811137363967
+
     def test_coverage_validation_catalog_calls(self):
         rows = self.spark.createDataFrame(
             [

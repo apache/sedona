@@ -2086,6 +2086,17 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(neighborsExactRing.toSet.subsetOf(neighborsAll.toSet))
     }
 
+    it("Passed ST_H3ToParent") {
+      val result = sparkSession
+        .sql("SELECT ST_Point(1.0, 2.0) geom")
+        .withColumn("cell", element_at(ST_H3CellIDs("geom", 8, true), 1))
+        .select(col("cell"), ST_H3ToParent(col("cell"), 5))
+        .first()
+
+      assert(result.getLong(0) == 614552609325318143L)
+      assert(result.getLong(1) == 601041811137363967L)
+    }
+
     it("Passed ST_DistanceSphere") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('POINT (0 0)') AS geom1, ST_GeomFromWKT('POINT (90 0)') AS geom2")

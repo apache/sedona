@@ -1597,6 +1597,16 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void h3ToParent() {
+    long child = H3Utils.coordinateToCell(new Coordinate(1, 2), 8);
+    long parent = Functions.h3ToParent(child, 5);
+
+    assertEquals(5, H3Utils.h3.getResolution(parent));
+    assertTrue(H3Utils.h3.cellToChildren(parent, 8).contains(child));
+    assertEquals(child, Functions.h3ToParent(child, 8));
+  }
+
+  @Test
   public void geometricMedian() throws Exception {
     MultiPoint multiPoint =
         GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(1480, 0, 620, 0));
