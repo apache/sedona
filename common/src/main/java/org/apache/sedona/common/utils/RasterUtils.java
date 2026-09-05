@@ -184,6 +184,26 @@ public class RasterUtils {
       GridCoverage2D referenceRaster,
       Double noDataValue,
       boolean keepMetadata) {
+    Map propertyMap = keepMetadata ? referenceRaster.getProperties() : null;
+    return clone(
+        image, gridGeometry2D, bands, referenceRaster, noDataValue, keepMetadata, propertyMap);
+  }
+
+  /**
+   * Variant of {@link #clone(RenderedImage, GridGeometry2D, GridSampleDimension[], GridCoverage2D,
+   * Double, boolean)} taking the coverage property map explicitly instead of copying it from the
+   * reference raster, so callers can filter properties (e.g. drop the GC_NODATA no-data sentinel,
+   * which {@link GridCoverage2D#getProperty} would otherwise keep reporting) while retaining the
+   * rest of the metadata.
+   */
+  public static GridCoverage2D clone(
+      RenderedImage image,
+      GridGeometry2D gridGeometry2D,
+      GridSampleDimension[] bands,
+      GridCoverage2D referenceRaster,
+      Double noDataValue,
+      boolean keepMetadata,
+      Map propertyMap) {
     int numBand = image.getSampleModel().getNumBands();
     if (Objects.isNull(gridGeometry2D)) {
       gridGeometry2D = referenceRaster.getGridGeometry();
@@ -201,10 +221,6 @@ public class RasterUtils {
     }
     GridCoverage2D[] referenceRasterSources =
         keepMetadata ? referenceRaster.getSources().toArray(new GridCoverage2D[0]) : null;
-    Map propertyMap = null;
-    if (keepMetadata) {
-      propertyMap = referenceRaster.getProperties();
-    }
     CharSequence rasterName = keepMetadata ? referenceRaster.getName() : "genericCoverage";
     return gridCoverageFactory.create(
         rasterName, image, gridGeometry2D, bands, referenceRasterSources, propertyMap);

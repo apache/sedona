@@ -879,9 +879,52 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val expected = -999
       assertEquals(expected, actual, 0.001d)
 
-      val actualNull =
-        df.selectExpr("RS_BandNoDataValue(RS_SetBandNoDataValue(raster, 1, null))").first().get(0)
-      assertNull(actualNull)
+      // Passing a null noDataValue removes the no-data value instead of returning a null raster
+      val cleared = df
+        .selectExpr(
+          "RS_SetBandNoDataValue(RS_SetBandNoDataValue(raster, 1, -999), 1, null) as raster")
+      assertNotNull(cleared.first().get(0))
+      assertNull(cleared.selectExpr("RS_BandNoDataValue(raster)").first().get(0))
+
+      val clearedNoBandIndex = df
+        .selectExpr("RS_SetBandNoDataValue(RS_SetBandNoDataValue(raster, -999), null) as raster")
+      assertNotNull(clearedNoBandIndex.first().get(0))
+      assertNull(clearedNoBandIndex.selectExpr("RS_BandNoDataValue(raster)").first().get(0))
+
+      // A null raster still yields a null result
+      assertNull(sparkSession.sql("SELECT RS_SetBandNoDataValue(null, -999)").first().get(0))
+    }
+
+    it("Passed RS_SetBandNoDataValue clearing a band other than band 1") {
+      // The clear consults the target band's no-data value; band 1 having none
+      // must not short-circuit the removal on band 2.
+      var df = sparkSession.sql(
+        "SELECT RS_MakeEmptyRaster(2, 20, 20, 0, 0, 8, 8, 0.1, 0.1, 0) AS raster")
+      df = df.selectExpr("RS_SetBandNoDataValue(raster, 2, 444) AS raster")
+      assertEquals(
+        444.0,
+        df.selectExpr("RS_BandNoDataValue(raster, 2)").first().getDouble(0),
+        0.001d)
+      val cleared = df.selectExpr("RS_SetBandNoDataValue(raster, 2, null) AS raster")
+      assertNotNull(cleared.first().get(0))
+      assertNull(cleared.selectExpr("RS_BandNoDataValue(raster, 2)").first().get(0))
+      assertNull(cleared.selectExpr("RS_BandNoDataValue(raster, 1)").first().get(0))
+    }
+
+    it("Passed RS_SetBandNoDataValue null clear survives a GeoTiff round trip") {
+      // The image-level GC_NODATA property must be cleared along with the band
+      // metadata, or writing and re-reading the raster resurrects the old value.
+      val df = sparkSession.read
+        .format("binaryFile")
+        .load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
+      val cleared =
+        df.selectExpr("RS_SetBandNoDataValue(RS_FromGeoTiff(content), null) AS raster")
+      val actual = cleared
+        .selectExpr("RS_AsGeoTiff(raster) AS bytes")
+        .selectExpr("RS_BandNoDataValue(RS_FromGeoTiff(bytes))")
+        .first()
+        .get(0)
+      assertNull(actual)
     }
 
     it("Passed RS_SetBandNoDataValue with empty raster") {
