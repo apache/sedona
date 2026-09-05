@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5572,7 +5571,7 @@ georeferencing attributes (scaleX and scaleY).</p>
 <p>For the purpose of resampling, width-height pair and scaleX-scaleY pair are mutually exclusive, meaning any one of them can be used at a time.</p>
 <p>The <code>useScale</code> parameter controls whether to use width-height or scaleX-scaleY. If <code>useScale</code> is false, the provided <code>widthOrScale</code> and <code>heightOrScale</code> values will be floored to integers and considered as width and height respectively (floating point width and height are not allowed). Otherwise, they are considered as scaleX and scaleY respectively.</p>
 <p>Currently, RS_Resample does not support skewed rasters, and hence even if a skewed reference raster is provided, its skew values are ignored. If the input raster is skewed, the output raster geometry and interpolation may be incorrect.</p>
-<p>The default algorithm used for resampling is <code>NearestNeighbor</code>, and hence if a null, empty or invalid value of algorithm is provided, RS_Resample defaults to using <code>NearestNeighbor</code>. However, the algorithm parameter is non-optional.</p>
+<p>The default algorithm used for resampling is <code>NearestNeighbor</code>: if a null or empty algorithm is provided, RS_Resample defaults to using <code>NearestNeighbor</code>. An unknown algorithm name raises an <code>IllegalArgumentException</code>. The algorithm parameter is non-optional.</p>
 <p>Following are valid values for the algorithm parameter (Case-insensitive):</p>
 <ol>
 <li>NearestNeighbor</li>
@@ -5675,7 +5674,7 @@ georeferencing attributes (scaleX and scaleY).</p>
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="May 17, 2026 06:48:55 UTC">May 17, 2026 06:48:55</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 5, 2026 07:14:35 UTC">September 5, 2026 07:14:35</span>
   </span>
 
     
