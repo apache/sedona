@@ -83,14 +83,20 @@ public class RasterBandEditors {
       int width = RasterAccessors.getWidth(raster);
       WritableRaster wr =
           RasterFactory.createBandedRaster(dataTypeCode, width, height, numBands, null);
-      double[] bandData =
-          rasterData.getSamples(0, 0, width, height, bandIndex - 1, (double[]) null);
-      for (int i = 0; i < bandData.length; i++) {
-        if (bandData[i] == rasterNoData) {
-          bandData[i] = noDataValue;
+      // The replacement writes into a freshly allocated raster, so every band has to be carried
+      // over. Copying only the target band would leave the others reading back as the allocation
+      // default of 0 while their sample dimensions still describe the original data.
+      for (int band = 0; band < numBands; band++) {
+        double[] bandData = rasterData.getSamples(0, 0, width, height, band, (double[]) null);
+        if (band == bandIndex - 1) {
+          for (int i = 0; i < bandData.length; i++) {
+            if (bandData[i] == rasterNoData) {
+              bandData[i] = noDataValue;
+            }
+          }
         }
+        wr.setSamples(0, 0, width, height, band, bandData);
       }
-      wr.setSamples(0, 0, width, height, bandIndex - 1, bandData);
       return RasterUtils.clone(wr, null, bands, raster, null, true);
     }
 

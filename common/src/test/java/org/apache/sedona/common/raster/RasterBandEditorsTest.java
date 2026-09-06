@@ -152,6 +152,41 @@ public class RasterBandEditorsTest extends RasterTestBase {
   }
 
   @Test
+  public void testSetBandNoDataValueWithReplaceOptionKeepsOtherBands() throws FactoryException {
+    // The replacement writes into a freshly allocated raster. Copying only the target band left
+    // every other band reading back as zeros while its sample dimension still described the
+    // original data.
+    double[] band1 = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    double[] band2 = {11, 12, 13, 14, 15, 16, 17, 18, 19};
+    double[] band3 = {21, 22, 23, 24, 25, 26, 27, 28, 29};
+    GridCoverage2D raster =
+        RasterConstructors.makeNonEmptyRaster(
+            3, "d", 3, 3, 0, 3, 1, -1, 0, 0, 0, new double[][] {band1, band2, band3});
+
+    GridCoverage2D replacedFirst =
+        RasterBandEditors.setBandNoDataValue(
+            RasterBandEditors.setBandNoDataValue(raster, 1, 5.0), 1, -999.0, true);
+    assertArrayEquals(
+        new double[] {1, 2, 3, 4, -999, 6, 7, 8, 9},
+        MapAlgebra.bandAsArray(replacedFirst, 1),
+        0.0001d);
+    assertArrayEquals(band2, MapAlgebra.bandAsArray(replacedFirst, 2), 0.0001d);
+    assertArrayEquals(band3, MapAlgebra.bandAsArray(replacedFirst, 3), 0.0001d);
+
+    // Replacing on a band other than the first leaves the first band alone too.
+    GridCoverage2D replacedSecond =
+        RasterBandEditors.setBandNoDataValue(
+            RasterBandEditors.setBandNoDataValue(raster, 2, 15.0), 2, -777.0, true);
+    assertArrayEquals(band1, MapAlgebra.bandAsArray(replacedSecond, 1), 0.0001d);
+    assertArrayEquals(
+        new double[] {11, 12, 13, 14, -777, 16, 17, 18, 19},
+        MapAlgebra.bandAsArray(replacedSecond, 2),
+        0.0001d);
+    assertArrayEquals(band3, MapAlgebra.bandAsArray(replacedSecond, 3), 0.0001d);
+    assertEquals(-777.0, RasterBandAccessors.getBandNoDataValue(replacedSecond, 2), 0.0001d);
+  }
+
+  @Test
   public void testSetBandNoDataValueWithEmptyRaster() throws FactoryException {
     GridCoverage2D emptyRaster =
         RasterConstructors.makeEmptyRaster(1, 20, 20, 0, 0, 8, 8, 0.1, 0.1, 4326);
