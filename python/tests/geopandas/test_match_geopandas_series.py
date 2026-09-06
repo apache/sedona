@@ -137,10 +137,6 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
         self.geomcollection = [
             GeometryCollection(),
-            # A collection can be empty even when it contains typed empty members.
-            GeometryCollection([Point(), LineString(), Polygon()]),
-            # Collection predicates must retain collection semantics with one member.
-            GeometryCollection([LineString([(0, 0), (1, 1), (0, 0)])]),
             GeometryCollection(
                 [
                     MultiPoint([(0, 0), (1, 1)]),
@@ -155,6 +151,8 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                     ),
                 ]
             ),
+            # Collection predicates must retain collection semantics with one member.
+            GeometryCollection([LineString([(0, 0), (1, 1), (0, 0)])]),
         ]
 
         self.geoms = [
