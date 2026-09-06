@@ -23,6 +23,9 @@ Introduction: This sets the no data value for a specified band in the raster. If
 
 No-data values are tracked per band, so clearing one band leaves the other bands' no-data values in place and functions that read them keep excluding those pixels.
 
+!!!Note
+    A raster whose bands disagree about their no-data value cannot be written to GeoTiff, which stores a single no-data value per file. [RS_AsGeoTiff](../Raster-Output/RS_AsGeoTiff.md) rejects such a raster rather than writing one band's value for all of them.
+
 Since `v1.5.1`, this function supports the ability to replace the current no-data value with the new `noDataValue`.
 
 !!!Note

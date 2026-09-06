@@ -91,6 +91,36 @@ public class RasterOutputTest extends RasterTestBase {
   }
 
   @Test
+  public void testAsGeoTiffRejectsBandsWithDifferentNoDataValues()
+      throws FactoryException, IOException {
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(2, 20, 20, 0, 0, 1, -1, 0, 0, 4326);
+
+    // Only one band has a no-data value. GeoTIFF stores one value for the whole file, so
+    // band 2 would silently read back with band 1's value.
+    GridCoverage2D oneBandSet = RasterBandEditors.setBandNoDataValue(raster, 1, 0.0);
+    IllegalArgumentException oneSet =
+        assertThrows(IllegalArgumentException.class, () -> RasterOutputs.asGeoTiff(oneBandSet));
+    assertTrue(oneSet.getMessage().contains("different no-data values"));
+
+    // Both bands have a no-data value, but they disagree.
+    GridCoverage2D bothSet = RasterBandEditors.setBandNoDataValue(oneBandSet, 2, 5.0);
+    IllegalArgumentException differing =
+        assertThrows(IllegalArgumentException.class, () -> RasterOutputs.asGeoTiff(bothSet));
+    assertTrue(differing.getMessage().contains("different no-data values"));
+
+    // Agreeing bands, and bands with no no-data value at all, both write fine.
+    GridCoverage2D agreeing = RasterBandEditors.setBandNoDataValue(oneBandSet, 2, 0.0);
+    assertEquals(
+        0.0,
+        RasterBandAccessors.getBandNoDataValue(
+            RasterConstructors.fromGeoTiff(RasterOutputs.asGeoTiff(agreeing)), 2),
+        0.0001d);
+    assertNull(
+        RasterBandAccessors.getBandNoDataValue(
+            RasterConstructors.fromGeoTiff(RasterOutputs.asGeoTiff(raster)), 1));
+  }
+
+  @Test
   public void testWriteToDiskFile() throws IOException {
     new File(System.getProperty("user.dir") + "/target/estToGeoTiffFunction/").mkdirs();
     GridCoverage2D rasterOg = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");

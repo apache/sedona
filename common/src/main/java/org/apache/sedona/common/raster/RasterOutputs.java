@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.Base64;
+import java.util.Objects;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.media.jai.InterpolationNearest;
@@ -63,18 +64,28 @@ public class RasterOutputs {
       throw new RuntimeException(e);
     }
     ParameterValueGroup defaultParams = writer.getFormat().getWriteParameters();
+    // GDAL_NODATA is a single value for the whole file, so a raster whose bands disagree about
+    // their no-data value cannot be written faithfully: every band reads back with whichever
+    // value was written. Reject that instead of changing it silently.
+    Double firstNoDataValue = RasterBandAccessors.getBandNoDataValue(raster, 1);
+    for (int band = 2; band <= raster.getNumSampleDimensions(); band++) {
+      if (!Objects.equals(firstNoDataValue, RasterBandAccessors.getBandNoDataValue(raster, band))) {
+        throw new IllegalArgumentException(
+            "Cannot write a GeoTIFF for a raster whose bands have different no-data values, "
+                + "because GeoTIFF stores one no-data value for the whole file. Band 1 has "
+                + firstNoDataValue
+                + " and band "
+                + band
+                + " has "
+                + RasterBandAccessors.getBandNoDataValue(raster, band)
+                + ". Set the same no-data value on every band, or clear it on every band.");
+      }
+    }
     // GeoTiffWriter writes a default GDAL_NODATA of 0 for coverages that have no no-data
     // value, so a cleared (or never set) no-data value would come back as 0 when the
     // written bytes are read again. Only opt out in that case: forcing the flag on when a
     // no-data value is present would override an explicit -Dgeotiff.writenodata=false.
-    boolean hasNoDataValue = false;
-    for (int band = 1; band <= raster.getNumSampleDimensions(); band++) {
-      if (RasterBandAccessors.getBandNoDataValue(raster, band) != null) {
-        hasNoDataValue = true;
-        break;
-      }
-    }
-    if (!hasNoDataValue) {
+    if (firstNoDataValue == null) {
       defaultParams.parameter(GeoTiffFormat.WRITE_NODATA.getName().toString()).setValue(false);
     }
     if (compressionType != null && compressionQuality >= 0 && compressionQuality <= 1) {

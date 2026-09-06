@@ -25,6 +25,9 @@ Possible values for `compressionType`: `None`, `PackBits`, `Deflate`, `Huffman`,
 
 Possible values for `imageQuality`: any decimal number between 0 and 1. 0 means the lowest quality and 1 means the highest quality.
 
+!!!Note
+    GeoTiff stores one no-data value for the whole file, so every band of the input raster must agree on its no-data value. An `IllegalArgumentException` is thrown when the bands differ, including when only some of them have a no-data value. Use [RS_SetBandNoDataValue](../Raster-Operators/RS_SetBandNoDataValue.md) to give every band the same no-data value, or to clear it on every band, before writing.
+
 Format:
 
 `RS_AsGeoTiff(raster: Raster)`
