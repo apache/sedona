@@ -26,6 +26,7 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.junit.Assert;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
@@ -506,6 +507,174 @@ public class RasterizationTest extends RasterTestBase {
       0, 0, 0, 0, 0, 0,
     };
     Assert.assertArrayEquals(expected, band, 0d);
+  }
+
+  @Test
+  public void testLineCrossingRasterWithBothEndpointsOutside()
+      throws ParseException, FactoryException {
+    // A segment that crosses the raster must be rasterized even though neither endpoint is inside
+    // it. Clipping used to treat "both endpoints outside" as "no intersection" and drop it.
+    GridCoverage2D raster = unitGrid6x6();
+
+    double[] row3 = new double[36];
+    java.util.Arrays.fill(row3, 18, 24, 1d);
+    assertLineBurns(raster, "LINESTRING (-1 2.5, 7 2.5)", row3);
+    assertLineBurns(raster, "LINESTRING (7 2.5, -1 2.5)", row3);
+
+    double[] column2 = new double[36];
+    for (int row = 0; row < 6; row++) {
+      column2[row * 6 + 2] = 1d;
+    }
+    assertLineBurns(raster, "LINESTRING (2.5 -1, 2.5 7)", column2);
+    assertLineBurns(raster, "LINESTRING (2.5 7, 2.5 -1)", column2);
+
+    double[] antiDiagonal = new double[36];
+    for (int row = 0; row < 6; row++) {
+      antiDiagonal[row * 6 + (5 - row)] = 1d;
+    }
+    assertLineBurns(raster, "LINESTRING (-1 -1, 7 7)", antiDiagonal);
+    assertLineBurns(raster, "LINESTRING (7 7, -1 -1)", antiDiagonal);
+  }
+
+  @Test
+  public void testClippedEndpointKeepsGridLineSide() throws ParseException, FactoryException {
+    // Inside the raster this line is strictly above y = 3, so it belongs to row 2. Interpolating
+    // the clipped endpoint at x = 0 rounds it onto y = 3 exactly, which used to move the burn to
+    // row 3.
+    GridCoverage2D raster = unitGrid6x6();
+    double[] expected = new double[36];
+    expected[2 * 6] = 1d;
+    assertLineBurns(raster, "LINESTRING (-1 3.0000000000000004, 1 3.0)", expected);
+    assertLineBurns(raster, "LINESTRING (1 3.0, -1 3.0000000000000004)", expected);
+
+    // The mirrored case below the grid line stays in row 3.
+    double[] below = new double[36];
+    below[3 * 6] = 1d;
+    assertLineBurns(raster, "LINESTRING (-1 2.9999999999999996, 1 3.0)", below);
+    assertLineBurns(raster, "LINESTRING (1 3.0, -1 2.9999999999999996)", below);
+
+    // The same rounding on the other axis: strictly left of x = 3 inside the raster, so column 2.
+    double[] leftOfColumn3 = new double[36];
+    leftOfColumn3[5 * 6 + 2] = 1d;
+    assertLineBurns(raster, "LINESTRING (2.9999999999999996 -1, 3.0 1)", leftOfColumn3);
+    assertLineBurns(raster, "LINESTRING (3.0 1, 2.9999999999999996 -1)", leftOfColumn3);
+  }
+
+  @Test
+  public void testLineTouchingRasterAtASinglePointBurnsNothing()
+      throws ParseException, FactoryException {
+    // The segment meets the window only at the corner (6, 6) in world space, which is a single
+    // point and therefore has no length inside the raster.
+    GridCoverage2D raster = unitGrid6x6();
+    assertLineBurns(raster, "LINESTRING (5 7, 7 5)", new double[36]);
+    assertLineBurns(raster, "LINESTRING (7 5, 5 7)", new double[36]);
+  }
+
+  @Test
+  public void testLineWithExtremeCoordinatesCrossesTheRaster()
+      throws ParseException, FactoryException {
+    // Endpoints far enough apart that their difference overflows to infinity. The clip must still
+    // produce the crossing rather than a NaN-driven omission or a partial streak.
+    GridCoverage2D raster = unitGrid6x6();
+
+    double[] row3 = new double[36];
+    java.util.Arrays.fill(row3, 18, 24, 1d);
+    assertLineBurns(raster, "LINESTRING (-1E308 2.5, 1E308 2.5)", row3);
+    assertLineBurns(raster, "LINESTRING (1E308 2.5, -1E308 2.5)", row3);
+
+    double[] column2 = new double[36];
+    for (int row = 0; row < 6; row++) {
+      column2[row * 6 + 2] = 1d;
+    }
+    assertLineBurns(raster, "LINESTRING (2.5 -1E308, 2.5 1E308)", column2);
+    assertLineBurns(raster, "LINESTRING (2.5 1E308, 2.5 -1E308)", column2);
+  }
+
+  @Test
+  public void testDegenerateLineStringBurnsItsOwnCell() throws ParseException, FactoryException {
+    // A LineString that was degenerate to begin with still marks the cell holding it, unlike a
+    // nondegenerate segment that clipping collapses to a single point.
+    GridCoverage2D raster = unitGrid6x6();
+    double[] expected = new double[36];
+    expected[3 * 6 + 2] = 1d;
+    assertLineBurns(raster, "LINESTRING (2.5 2.5, 2.5 2.5)", expected);
+  }
+
+  @Test
+  public void testLineClipAgreesWithExactRationalOracle() throws ParseException, FactoryException {
+    // Cross-check the clipper against an independent exact-rational clip of the same segment
+    // against the same window. The oracle runs entirely in BigInteger rationals, so a segment that
+    // grazes a grid line is resolved rather than dropped.
+    GridCoverage2D raster = unitGrid6x6();
+    String[] segments = {
+      "LINESTRING (-1 2.5, 7 2.5)",
+      "LINESTRING (-1 -1, 7 7)",
+      "LINESTRING (-4 3, 9 3)",
+      "LINESTRING (3 -4, 3 9)",
+      "LINESTRING (-1 3.0000000000000004, 1 3.0)",
+      "LINESTRING (-2 0.5, 8 5.5)",
+      "LINESTRING (0.5 -2, 5.5 8)",
+      "LINESTRING (-3 7, 7 -3)",
+      "LINESTRING (1.25 5.75, 3.75 0.25)",
+      "LINESTRING (1.5 1.5, 4.5 4.5)",
+      "LINESTRING (0 0, 6 6)",
+      "LINESTRING (0 6, 6 0)",
+      "LINESTRING (-1 6, 1 4)",
+      "LINESTRING (2.5 2.5, 3.5 2.5)",
+      "LINESTRING (-0.5 0.25, 6.5 0.25)",
+    };
+
+    for (String wkt : segments) {
+      Geometry forward = Constructors.geomFromWKT(wkt, 0);
+      double[] band =
+          MapAlgebra.bandAsArray(
+              RasterConstructors.asRaster(forward, raster, "d", false, 1d, 0d, false), 1);
+      double[] reverseBand =
+          MapAlgebra.bandAsArray(
+              RasterConstructors.asRaster(forward.reverse(), raster, "d", false, 1d, 0d, false), 1);
+      Assert.assertArrayEquals(wkt + " must not depend on vertex order", band, reverseBand, 0d);
+
+      Coordinate[] coords = forward.getCoordinates();
+      // unitGrid6x6 puts the origin at (0, 6) with unit pixels and scaleY = -1.
+      SegmentClipOracle.Clip clip =
+          SegmentClipOracle.clip(coords[0].x, 6 - coords[0].y, coords[1].x, 6 - coords[1].y, 6, 6);
+
+      if (clip == null) {
+        Assert.assertArrayEquals(
+            wkt + " has no length inside the raster", new double[36], band, 0d);
+        continue;
+      }
+      assertBurned(wkt + " start", band, clip.x0, clip.x1, clip.y0, clip.y1);
+      assertBurned(wkt + " end", band, clip.x1, clip.x0, clip.y1, clip.y0);
+    }
+  }
+
+  private static void assertBurned(
+      String message,
+      double[] band,
+      SegmentClipOracle.Rational x,
+      SegmentClipOracle.Rational otherX,
+      SegmentClipOracle.Rational y,
+      SegmentClipOracle.Rational otherY) {
+    int column = SegmentClipOracle.cellOf(x, otherX);
+    int row = SegmentClipOracle.cellOf(y, otherY);
+    if (column < 0 || column >= 6 || row < 0 || row >= 6) {
+      return;
+    }
+    Assert.assertEquals(
+        message + " expected cell (row " + row + ", column " + column + ") to be burned",
+        1d,
+        band[row * 6 + column],
+        0d);
+  }
+
+  private void assertLineBurns(GridCoverage2D raster, String wkt, double[] expected)
+      throws ParseException, FactoryException {
+    Geometry geom = Constructors.geomFromWKT(wkt, 0);
+    double[] band =
+        MapAlgebra.bandAsArray(
+            RasterConstructors.asRaster(geom, raster, "d", false, 1d, 0d, false), 1);
+    Assert.assertArrayEquals(wkt, expected, band, 0d);
   }
 
   private GridCoverage2D unitGrid6x6() throws FactoryException {

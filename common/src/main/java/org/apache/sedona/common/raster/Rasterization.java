@@ -153,7 +153,7 @@ public class Rasterization {
       case "LineString":
       case "MultiLineString":
       case "LinearRing":
-        rasterizeLineString(geom, params, value, geomExtent);
+        rasterizeLineString(geom, params, value);
         break;
       default:
         rasterizePolygon(geom, params, geomExtent, value, allTouched);
@@ -216,32 +216,50 @@ public class Rasterization {
     }
   }
 
-  private static void rasterizeLineString(
-      Geometry geom, RasterizationParams params, double value, ReferencedEnvelope geomExtent) {
+  private static void rasterizeLineString(Geometry geom, RasterizationParams params, double value) {
+    int width = params.writableRaster.getWidth();
+    int height = params.writableRaster.getHeight();
+    double[] clipped = new double[4];
+
     for (int i = 0; i < geom.getNumGeometries(); i++) {
       LineString line = (LineString) geom.getGeometryN(i);
       Coordinate[] coords = line.getCoordinates();
 
       for (int j = 0; j < coords.length - 1; j++) {
-        // Extract start and end points for the segment
-        LineSegment clippedSegment =
-            clipSegmentToRasterBounds(coords[j], coords[j + 1], geomExtent);
+        // Clip in pixel space, where the window edges are the integers 0, width and height. In
+        // world space the edges are grid lines that only round-trip approximately, and an
+        // interpolated endpoint landing a rounding step off a grid line selects the wrong cell.
+        double x0 = (coords[j].x - params.upperLeftX) / params.scaleX;
+        double y0 = (coords[j].y - params.upperLeftY) / params.scaleY;
+        double x1 = (coords[j + 1].x - params.upperLeftX) / params.scaleX;
+        double y1 = (coords[j + 1].y - params.upperLeftY) / params.scaleY;
 
-        Coordinate start;
-        Coordinate end;
-        if (clippedSegment != null) {
-          start = new Coordinate(clippedSegment.p0.x, clippedSegment.p0.y);
-          end = new Coordinate(clippedSegment.p1.x, clippedSegment.p1.y);
-        } else {
-          continue; // Skip case where segment is completely outside geomExtent
+        if (x0 == x1 && y0 == y1) {
+          // A segment that was degenerate to begin with still marks the cell holding it. This is
+          // distinct from a nondegenerate segment that clipping collapses to a tangent point,
+          // which the clipper rejects below.
+          if (x0 >= 0 && x0 <= width && y0 >= 0 && y0 <= height) {
+            traverseSegment(params, x0, y0, x1, y1, value);
+          }
+          continue;
         }
 
-        double x0 = (start.x - params.upperLeftX) / params.scaleX;
-        double y0 = (start.y - params.upperLeftY) / params.scaleY;
-        double x1 = (end.x - params.upperLeftX) / params.scaleX;
-        double y1 = (end.y - params.upperLeftY) / params.scaleY;
+        // Order the endpoints before clipping, so the cells burned cannot depend on which vertex
+        // the line visits first. The two directions reach a clip edge at complementary parameters
+        // that are equal in exact arithmetic but round apart as doubles, and interpolating with
+        // them lands a coordinate on either side of an exact grid corner.
+        if (x1 < x0 || (x1 == x0 && y1 < y0)) {
+          double swap = x0;
+          x0 = x1;
+          x1 = swap;
+          swap = y0;
+          y0 = y1;
+          y1 = swap;
+        }
 
-        traverseSegment(params, x0, y0, x1, y1, value);
+        if (clipSegmentToRaster(x0, y0, x1, y1, width, height, clipped)) {
+          traverseSegment(params, clipped[0], clipped[1], clipped[2], clipped[3], value);
+        }
       }
     }
   }
@@ -335,77 +353,161 @@ public class Rasterization {
     }
   }
 
-  private static LineSegment clipSegmentToRasterBounds(
-      Coordinate p1, Coordinate p2, ReferencedEnvelope geomExtent) {
-    double minX = geomExtent.getMinX();
-    double maxX = geomExtent.getMaxX();
-    double minY = geomExtent.getMinY();
-    double maxY = geomExtent.getMaxY();
+  private static final int AXIS_NONE = -1;
+  private static final int AXIS_X = 0;
+  private static final int AXIS_Y = 1;
 
-    double x1 = p1.x, y1 = p1.y;
-    double x2 = p2.x, y2 = p2.y;
+  /**
+   * Clips a nondegenerate pixel-space segment to the raster window [0, width] x [0, height] and
+   * writes the result into {@code out} as {x0, y0, x1, y1}.
+   *
+   * <p>Returns false only when the segment and the window share no positive-length piece, which
+   * covers a disjoint segment, one running parallel to and outside an edge, and one that meets the
+   * window at a single point such as a corner. A segment that crosses the window is kept whether or
+   * not either original endpoint is inside it.
+   *
+   * <p>Both ends come from the same pair of edge crossings, so reversing the input reverses the
+   * clipped segment and nothing else.
+   */
+  private static boolean clipSegmentToRaster(
+      double x0, double y0, double x1, double y1, int width, int height, double[] out) {
 
-    boolean p1Inside = isInsideBounds(x1, y1, minX, maxX, minY, maxY);
-    boolean p2Inside = isInsideBounds(x2, y2, minX, maxX, minY, maxY);
+    // The parameters at which the segment enters and leaves the window, and which edge produced
+    // each. The clipped coordinate on that edge is the edge value exactly; only the other
+    // coordinate is interpolated, and only it can round onto a grid line.
+    double tEnter = 0.0;
+    double tExit = 1.0;
+    int enterAxis = AXIS_NONE;
+    int exitAxis = AXIS_NONE;
+    double enterEdge = 0.0;
+    double exitEdge = 0.0;
 
-    if (p1Inside && p2Inside) {
-      // Both points inside: no clipping needed
-      return new LineSegment(p1, p2);
-    }
+    for (int axis = AXIS_X; axis <= AXIS_Y; axis++) {
+      double from = axis == AXIS_X ? x0 : y0;
+      double to = axis == AXIS_X ? x1 : y1;
+      double far = axis == AXIS_X ? width : height;
 
-    if (!p1Inside && !p2Inside) {
-      // Both points outside: no clipping needed
-      return null;
-    }
-
-    double dx = x2 - x1;
-    double dy = y2 - y1;
-
-    // Clip using parametric line equation
-    double[] tValues = {0, 1}; // Stores valid segment proportions
-
-    // Clip against minX and maxX
-    if (dx != 0) {
-      double tMin = (minX - x1) / dx;
-      double tMax = (maxX - x1) / dx;
-      if (dx < 0) {
-        double temp = tMin;
-        tMin = tMax;
-        tMax = temp;
+      if (from == to) {
+        // Parallel to this axis' edges: either wholly within the band or wholly outside it.
+        if (from < 0.0 || from > far) {
+          return false;
+        }
+        continue;
       }
-      tValues[0] = Math.max(tValues[0], tMin);
-      tValues[1] = Math.min(tValues[1], tMax);
-    }
 
-    // Clip against minY and maxY
-    if (dy != 0) {
-      double tMin = (minY - y1) / dy;
-      double tMax = (maxY - y1) / dy;
-      if (dy < 0) {
-        double temp = tMin;
-        tMin = tMax;
-        tMax = temp;
+      // (edge - from) / (to - from), with the difference halved when it would otherwise overflow
+      // to infinity for two large opposite-sign endpoints. Halving is exact for normal doubles, so
+      // the parameters are the same ones the direct form would produce.
+      double delta = to - from;
+      double tAtZero;
+      double tAtFar;
+      if (Double.isInfinite(delta)) {
+        double halfDelta = to * 0.5 - from * 0.5;
+        tAtZero = -(from * 0.5) / halfDelta;
+        tAtFar = (far * 0.5 - from * 0.5) / halfDelta;
+      } else {
+        tAtZero = -from / delta;
+        tAtFar = (far - from) / delta;
       }
-      tValues[0] = Math.max(tValues[0], tMin);
-      tValues[1] = Math.min(tValues[1], tMax);
+
+      boolean increasing = to > from;
+      double tNear = increasing ? tAtZero : tAtFar;
+      double tFarther = increasing ? tAtFar : tAtZero;
+      double edgeNear = increasing ? 0.0 : far;
+      double edgeFarther = increasing ? far : 0.0;
+
+      if (tNear > tEnter) {
+        tEnter = tNear;
+        enterAxis = axis;
+        enterEdge = edgeNear;
+      }
+      if (tFarther < tExit) {
+        tExit = tFarther;
+        exitAxis = axis;
+        exitEdge = edgeFarther;
+      }
     }
 
-    // If tValues are invalid (segment is outside), return null
-    if (tValues[0] > tValues[1]) {
-      return null; // No valid clipped segment
+    // Negated so a NaN parameter lands here rather than propagating into the traversal.
+    if (!(tEnter <= tExit)) {
+      return false;
     }
 
-    // Compute new clipped endpoints
-    Coordinate newP1 = new Coordinate(x1 + tValues[0] * dx, y1 + tValues[0] * dy);
-    Coordinate newP2 = new Coordinate(x1 + tValues[1] * dx, y1 + tValues[1] * dy);
+    writeClippedEndpoint(out, 0, enterAxis, enterEdge, tEnter, x0, y0, x1, y1);
+    writeClippedEndpoint(out, 2, exitAxis, exitEdge, tExit, x0, y0, x1, y1);
 
-    return new LineSegment(newP1, newP2);
+    // Whether the piece inside the window has length is read from the clipped endpoints rather
+    // than from the parameters. The parameters answer it for a single-point touch such as a
+    // corner, but they collapse together for a crossing whose endpoints are far enough apart that
+    // the whole window falls inside one rounding step of the segment.
+    return out[0] != out[2] || out[1] != out[3];
   }
 
-  // Helper function to check if a point is inside the bounding box
-  private static boolean isInsideBounds(
-      double x, double y, double minX, double maxX, double minY, double maxY) {
-    return x >= minX && x <= maxX && y >= minY && y <= maxY;
+  private static void writeClippedEndpoint(
+      double[] out,
+      int offset,
+      int axis,
+      double edge,
+      double t,
+      double x0,
+      double y0,
+      double x1,
+      double y1) {
+    if (axis == AXIS_NONE) {
+      out[offset] = t == 0.0 ? x0 : x1;
+      out[offset + 1] = t == 0.0 ? y0 : y1;
+    } else if (axis == AXIS_X) {
+      out[offset] = edge;
+      out[offset + 1] = preserveGridLineSide(interpolate(y0, y1, t), x0, y0, x1, y1, edge, true);
+    } else {
+      out[offset + 1] = edge;
+      out[offset] = preserveGridLineSide(interpolate(x0, x1, t), x0, y0, x1, y1, edge, false);
+    }
+  }
+
+  /**
+   * Interpolates in the form that stays between the endpoints, so a segment spanning the full
+   * double range does not overflow on the way. It also reproduces the endpoints exactly at t = 0
+   * and t = 1.
+   */
+  private static double interpolate(double from, double to, double t) {
+    return (1.0 - t) * from + t * to;
+  }
+
+  /**
+   * Restores which side of a pixel grid line an interpolated clip coordinate lies on.
+   *
+   * <p>The coordinate is rounded to a double, so a true value within half a rounding step of a grid
+   * line lands exactly on it. {@link #interiorCell} then reads the segment as starting on the line
+   * and selects the neighbouring cell. The robust orientation predicate resolves the true side
+   * exactly, and one representable step off the line records it. Only a coordinate that landed on a
+   * grid line consults the predicate, so ordinary finite segments stay in plain doubles.
+   */
+  private static double preserveGridLineSide(
+      double interpolated,
+      double x0,
+      double y0,
+      double x1,
+      double y1,
+      double edge,
+      boolean edgeIsX) {
+    if (!Double.isFinite(interpolated) || interpolated != Math.floor(interpolated)) {
+      return interpolated;
+    }
+    double qx = edgeIsX ? edge : interpolated;
+    double qy = edgeIsX ? interpolated : edge;
+    int orientation = CGAlgorithmsDD.orientationIndex(x0, y0, x1, y1, qx, qy);
+    if (orientation == 0) {
+      // The segment runs exactly through the lattice point, so the coordinate belongs on the line.
+      return interpolated;
+    }
+    // Solving the clip for the interpolated coordinate leaves the cross product the predicate
+    // returns, divided by the delta along the clipped axis.
+    int side =
+        edgeIsX
+            ? -orientation * Integer.signum(Double.compare(x1, x0))
+            : orientation * Integer.signum(Double.compare(y1, y0));
+    return side > 0 ? Math.nextUp(interpolated) : Math.nextDown(interpolated);
   }
 
   static ReferencedEnvelope rasterizeGeomExtent(
@@ -695,7 +797,7 @@ public class Rasterization {
       int numPoints = coords.length;
 
       if (allTouched) {
-        rasterizeLineString(ring, params, value, geomExtent);
+        rasterizeLineString(ring, params, value);
       }
 
       for (int i = 0; i < numPoints - 1; i++) {
