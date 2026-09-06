@@ -151,6 +151,8 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                     ),
                 ]
             ),
+            # Collection predicates must retain collection semantics with one member.
+            GeometryCollection([LineString([(0, 0), (1, 1), (0, 0)])]),
         ]
 
         self.geoms = [
