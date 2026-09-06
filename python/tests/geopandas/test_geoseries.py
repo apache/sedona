@@ -1173,6 +1173,45 @@ class TestGeoSeries(TestGeopandasBase):
 
         assert result.iloc[0] is None
 
+    def test_fillna_series_replacement_matches_null_keys_positionally(self):
+        from geopandas.testing import assert_geoseries_equal
+
+        left_index = pd.Index([None], dtype=object, name="feature_id")
+        right_index = pd.Index([np.nan], dtype="float64", name="replacement_id")
+        source = GeoSeries([None], index=left_index, name="geometry")
+        replacement = GeoSeries([Point(1, 1)], index=right_index)
+        expected = gpd.GeoSeries([None], index=left_index, name="geometry").fillna(
+            gpd.GeoSeries([Point(1, 1)], index=right_index)
+        )
+
+        assert_geoseries_equal(
+            source.fillna(replacement).to_geopandas(),
+            expected,
+            check_index_type=False,
+        )
+
+    def test_fillna_series_replacement_does_not_reindex_null_keys_across_dtypes(
+        self,
+    ):
+        from geopandas.testing import assert_geoseries_equal
+
+        left_index = pd.Index([None, "left-only"], dtype=object, name="feature_id")
+        right_index = pd.Index([1.0, np.nan], dtype="float64", name="replacement_id")
+        source_values = [None, None]
+        replacement_values = [Point(1, 1), Point(2, 2)]
+        source = GeoSeries(source_values, index=left_index, name="geometry")
+        replacement = GeoSeries(replacement_values, index=right_index)
+        expected = gpd.GeoSeries(
+            source_values, index=left_index, name="geometry"
+        ).fillna(gpd.GeoSeries(replacement_values, index=right_index))
+
+        assert expected.isna().all()
+        assert_geoseries_equal(
+            source.fillna(replacement).to_geopandas(),
+            expected,
+            check_index_type=False,
+        )
+
     @pytest.mark.parametrize(
         ("left_index", "right_index"),
         [
@@ -1317,6 +1356,22 @@ class TestGeoSeries(TestGeopandasBase):
                     ),
                 },
                 geometry="geometry",
+            )
+        )
+        reversed_sdf = frame._internal.spark_frame.orderBy(
+            F.col(NATURAL_ORDER_COLUMN_NAME).desc()
+        )
+        frame._update_internal_frame(
+            frame._internal.copy(
+                spark_frame=reversed_sdf,
+                index_spark_columns=[
+                    scol_for(reversed_sdf, name)
+                    for name in frame._internal.index_spark_column_names
+                ],
+                data_spark_columns=[
+                    scol_for(reversed_sdf, name)
+                    for name in frame._internal.data_spark_column_names
+                ],
             )
         )
 

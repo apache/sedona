@@ -275,7 +275,11 @@ def _fillna_index_columns_equal(
         or (positional and boolean_numeric)
     ):
         return left.eqNullSafe(right)
-    return left.isNull() & right.isNull()
+    # Missing labels can make otherwise incompatible axes positionally equal,
+    # but pandas does not label-reindex between those index families.
+    if positional:
+        return left.isNull() & right.isNull()
+    return F.lit(False)
 
 
 def _fillna_index_dtypes_can_equal(
