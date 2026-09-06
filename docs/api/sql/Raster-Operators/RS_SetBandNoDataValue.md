@@ -21,6 +21,8 @@
 
 Introduction: This sets the no data value for a specified band in the raster. If the band index is not provided, band 1 is assumed by default. Passing a `null` value for `noDataValue` will remove the no data value and that will ensure all pixels are included in functions rather than excluded as no data.
 
+No-data values are tracked per band, so clearing one band leaves the other bands' no-data values in place and functions that read them keep excluding those pixels.
+
 Since `v1.5.1`, this function supports the ability to replace the current no-data value with the new `noDataValue`.
 
 !!!Note

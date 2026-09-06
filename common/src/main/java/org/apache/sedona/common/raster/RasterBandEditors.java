@@ -63,11 +63,20 @@ public class RasterBandEditors {
       GridSampleDimension[] sampleDimensions = raster.getSampleDimensions();
       sampleDimensions[bandIndex - 1] =
           RasterUtils.removeNoDataValue(sampleDimensions[bandIndex - 1]);
-      // The GC_NODATA sentinel is carried both by the coverage properties and by the
-      // rendered image, and GridCoverage2D.getProperty falls through to the image, so it
-      // has to be dropped from both or GeoTools operations keep treating the cleared
-      // value as no-data. Masking wraps the image lazily: no pixels are copied, so a
-      // streamed raster stays undecoded and a non-zero image origin is preserved.
+      // No-data values are per band on the sample dimensions, but GC_NODATA is a single
+      // sentinel for the whole coverage, carried both by the coverage properties and by the
+      // rendered image. Bands that were not cleared still declare their no-data value, and
+      // GeoTools operations that read the sentinel rather than the sample dimensions --
+      // Jiffle map algebra among them -- would stop honouring those bands if it were
+      // dropped here. So keep it until no band declares a no-data value at all.
+      if (hasNoDataValue(sampleDimensions)) {
+        return RasterUtils.clone(
+            raster.getRenderedImage(), null, sampleDimensions, raster, null, true);
+      }
+      // GridCoverage2D.getProperty falls through to the image, so the sentinel has to be
+      // dropped from both or GeoTools keeps treating the cleared value as no-data. Masking
+      // wraps the image lazily: no pixels are copied, so a streamed raster stays undecoded
+      // and a non-zero image origin is preserved.
       RenderedImage image =
           PropertyMaskedRenderedImage.mask(raster.getRenderedImage(), NoDataContainer.GC_NODATA);
       Map<?, ?> properties = raster.getProperties();
@@ -110,6 +119,19 @@ public class RasterBandEditors {
     }
 
     return RasterUtils.clone(raster.getRenderedImage(), null, bands, raster, null, true);
+  }
+
+  /**
+   * @param sampleDimensions Bands to inspect
+   * @return true when at least one band declares a no-data value
+   */
+  private static boolean hasNoDataValue(GridSampleDimension[] sampleDimensions) {
+    for (GridSampleDimension sampleDimension : sampleDimensions) {
+      if (!Double.isNaN(RasterUtils.getNoDataValue(sampleDimension))) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

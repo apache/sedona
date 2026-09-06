@@ -144,6 +144,76 @@ public class RasterBandEditorsTest extends RasterTestBase {
     assertEquals(7, grid.getRenderedImage().getMinY());
   }
 
+  /**
+   * A two-band raster whose bands both use no-data 0, round-tripped through GeoTIFF so that the
+   * coverage carries the image-level GC_NODATA sentinel a real GeoTIFF has.
+   */
+  private GridCoverage2D twoBandRasterWithNoDataZero() throws FactoryException, IOException {
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(2, 20, 20, 0, 0, 1, -1, 0, 0, 4326);
+    raster = RasterBandEditors.setBandNoDataValue(raster, 1, 0.0);
+    raster = RasterBandEditors.setBandNoDataValue(raster, 2, 0.0);
+    return RasterConstructors.fromGeoTiff(RasterOutputs.asGeoTiff(raster));
+  }
+
+  /** Runs {@code rast[0] + 1} over band 1 and returns the top-left pixel. */
+  private static double band1PlusOne(GridCoverage2D raster) {
+    GridCoverage2D result = MapAlgebra.mapAlgebra(raster, "d", "out = rast[0] + 1;");
+    return result.getRenderedImage().getData().getSampleDouble(0, 0, 0);
+  }
+
+  @Test
+  public void testSetBandNoDataValueWithNullKeepsNoDataOnOtherBands()
+      throws FactoryException, IOException {
+    GridCoverage2D raster = twoBandRasterWithNoDataZero();
+    assertEquals(0.0, RasterBandAccessors.getBandNoDataValue(raster, 1), 0.0001d);
+    assertEquals(0.0, RasterBandAccessors.getBandNoDataValue(raster, 2), 0.0001d);
+    assertTrue(Double.isNaN(band1PlusOne(raster)));
+
+    // Clearing band 2 must leave band 1 alone. GC_NODATA is one sentinel for the whole
+    // coverage, so dropping it here would also stop map algebra from treating band 1's
+    // zeros as no-data.
+    GridCoverage2D clearedSecond = RasterBandEditors.setBandNoDataValue(raster, 2, null);
+    assertNull(RasterBandAccessors.getBandNoDataValue(clearedSecond, 2));
+    assertEquals(0.0, RasterBandAccessors.getBandNoDataValue(clearedSecond, 1), 0.0001d);
+    assertNotNull(CoverageUtilities.getNoDataProperty(clearedSecond));
+    assertNotSame(
+        java.awt.Image.UndefinedProperty,
+        clearedSecond.getRenderedImage().getProperty(NoDataContainer.GC_NODATA));
+    assertTrue(Double.isNaN(band1PlusOne(clearedSecond)));
+
+    // The same holds the other way round: clearing band 1 leaves band 2's no-data value.
+    GridCoverage2D clearedFirst = RasterBandEditors.setBandNoDataValue(raster, 1, null);
+    assertNull(RasterBandAccessors.getBandNoDataValue(clearedFirst, 1));
+    assertEquals(0.0, RasterBandAccessors.getBandNoDataValue(clearedFirst, 2), 0.0001d);
+    assertNotNull(CoverageUtilities.getNoDataProperty(clearedFirst));
+
+    // Clearing must not mutate the input raster.
+    assertEquals(0.0, RasterBandAccessors.getBandNoDataValue(raster, 2), 0.0001d);
+  }
+
+  @Test
+  public void testSetBandNoDataValueWithNullOnEveryBandClearsNoDataProperty()
+      throws FactoryException, IOException {
+    GridCoverage2D raster = twoBandRasterWithNoDataZero();
+
+    GridCoverage2D cleared = RasterBandEditors.setBandNoDataValue(raster, 2, null);
+    cleared = RasterBandEditors.setBandNoDataValue(cleared, 1, null);
+
+    // Once no band declares a no-data value the sentinel goes, and map algebra reads the
+    // zeros as ordinary data.
+    assertNull(RasterBandAccessors.getBandNoDataValue(cleared, 1));
+    assertNull(RasterBandAccessors.getBandNoDataValue(cleared, 2));
+    assertNull(CoverageUtilities.getNoDataProperty(cleared));
+    assertSame(
+        java.awt.Image.UndefinedProperty,
+        cleared.getRenderedImage().getProperty(NoDataContainer.GC_NODATA));
+    assertEquals(1.0, band1PlusOne(cleared), 0.0001d);
+
+    GridCoverage2D roundTripped = RasterConstructors.fromGeoTiff(RasterOutputs.asGeoTiff(cleared));
+    assertNull(RasterBandAccessors.getBandNoDataValue(roundTripped, 1));
+    assertNull(RasterBandAccessors.getBandNoDataValue(roundTripped, 2));
+  }
+
   @Test
   public void testGetSummaryStats() throws IOException {
     GridCoverage2D raster =
