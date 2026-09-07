@@ -5003,26 +5003,18 @@ class GeoSeries(GeoFrame, pspd.Series):
                 scol_for(source_frame, NATURAL_ORDER_COLUMN_NAME),
             )
 
-        ranked_missing = _attach_ordered_sequence_column(
-            aligned_frame.where(F.col("L").isNull()),
-            F.col(NATURAL_ORDER_COLUMN_NAME),
+        # Rank missing rows first, avoiding separate branches that repeat alignment.
+        ranked_frame = _attach_ordered_sequence_column(
+            aligned_frame,
+            F.struct(F.col("L").isNotNull(), F.col(NATURAL_ORDER_COLUMN_NAME)),
             fill_rank,
-        )
-        nonmissing = aligned_frame.where(F.col("L").isNotNull()).withColumn(
-            fill_rank, F.lit(-1).cast(LongType())
-        )
-        ranked_frame = nonmissing.unionByName(ranked_missing).orderBy(
-            NATURAL_ORDER_COLUMN_NAME
-        )
+        ).orderBy(NATURAL_ORDER_COLUMN_NAME)
 
         left_crs = self.crs
         left_srid = (left_crs.to_epsg() or 0) if left_crs is not None else 0
         result_expression = F.when(
-            (F.col(fill_rank) >= F.lit(0)) & (F.col(fill_rank) < F.lit(limit)),
-            F.coalesce(
-                F.col("L"),
-                stf.ST_SetSRID(F.col("R"), left_srid),
-            ),
+            F.col("L").isNull() & (F.col(fill_rank) < F.lit(limit)),
+            stf.ST_SetSRID(F.col("R"), left_srid),
         ).otherwise(F.col("L"))
         return self._result_preserving_index(
             result_expression,
@@ -5064,8 +5056,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         before returning. Filling from another column of the same ``GeoDataFrame``
         remains lazy.
 
-        Using ``limit`` requires a distributed global ordering of the missing
-        geometries and can be expensive for large GeoSeries.
+        Using ``limit`` requires distributed global ordering and can be expensive
+        for large GeoSeries.
 
         Examples
         --------

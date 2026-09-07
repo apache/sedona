@@ -1718,6 +1718,56 @@ class TestGeoSeries(TestGeopandasBase):
 
         assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
 
+    @pytest.mark.parametrize(
+        "replacement_kind", ["scalar", "same_anchor", "independent"]
+    )
+    def test_fillna_limit_does_not_duplicate_input_plan(self, replacement_kind):
+        from geopandas.testing import assert_geoseries_equal
+
+        row_id = F.col("id")
+        replacement_column = F.when(row_id != 4, stc.ST_Point(row_id + 100, F.lit(1)))
+        rows = self.spark.range(24, numPartitions=4).select(
+            row_id,
+            F.when(row_id % 3 == 0, stc.ST_Point(row_id, F.lit(0))).alias("geometry"),
+            replacement_column.alias("replacement"),
+        )
+        frame = GeoDataFrame(rows.pandas_api(index_col="id"), geometry="geometry")
+        expected = gpd.GeoSeries(
+            [Point(i, 0) if i % 3 == 0 else None for i in range(24)],
+            index=pd.Index(range(24), name="id"),
+            name="geometry",
+        )
+        if replacement_kind == "scalar":
+            replacement = expected_replacement = Point(99, 1)
+        else:
+            expected_replacement = gpd.GeoSeries(
+                [Point(i + 100, 1) if i != 4 else None for i in range(24)],
+                index=expected.index,
+            )
+            if replacement_kind == "same_anchor":
+                replacement = frame["replacement"]
+            else:
+                replacement_rows = self.spark.range(24, numPartitions=3).select(
+                    row_id, replacement_column.alias("replacement")
+                )
+                replacement = GeoSeries(
+                    replacement_rows.pandas_api(index_col="id")["replacement"]
+                )
+
+        result = frame.geometry.fillna(replacement, limit=5)
+        query = result._internal.spark_frame._jdf.queryExecution()
+        plan = query.optimizedPlan().toString()
+        expected_inputs = 2 if replacement_kind == "independent" else 1
+
+        assert plan.count("Range (") == expected_inputs
+        assert "Union" not in plan
+        assert "SinglePartition" not in query.executedPlan().toString()
+        assert_geoseries_equal(
+            result.to_geopandas(),
+            expected.fillna(expected_replacement, limit=5),
+            check_index_type=False,
+        )
+
     def test_fillna_limit_scalar_plan_is_distributed_and_lazy(self, monkeypatch):
         from pyspark.sql import DataFrame
 
