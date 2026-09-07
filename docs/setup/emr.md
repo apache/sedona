@@ -78,3 +78,50 @@ spark.sql("SELECT ST_Point(0, 0)").show()
 ```
 
 Note that: you don't need to run the `SedonaRegistrator.registerAll(spark)` or `SedonaContext.create(spark)` because `org.apache.sedona.sql.SedonaSqlExtensions` in the config will take care of that.
+
+## Use Sedona in R
+
+The [`apache.sedona`](https://cran.r-project.org/package=apache.sedona) R package is a [`sparklyr`](https://spark.rstudio.com) extension. Attaching it before `spark_connect()` is enough to register Sedona's serializers, UDTs and UDFs, so there is no R equivalent of `SedonaContext.create()` to call by hand.
+
+!!!note
+	The R interface supports Spark 3.x only. Make sure the EMR release you pick ships a Spark 3 version.
+
+### Extend the initialization script
+
+Add the following to the bootstrap script above, so that R and the two R packages are available on the node you run R from:
+
+```bash
+# Install R and the Sedona R interface
+sudo yum install -y R
+sudo R -e 'install.packages(c("sparklyr", "apache.sedona"), repos = "https://cloud.r-project.org")'
+```
+
+### Connect to the cluster from R
+
+EMR installs Spark under `/usr/lib/spark`. Point `SEDONA_JAR_FILES` at the jars the bootstrap script already downloaded into `/jars` so that `sparklyr` uses them instead of resolving the Sedona coordinates from Maven Central every time you connect:
+
+```r
+library(sparklyr)
+library(apache.sedona)
+
+Sys.setenv(
+  "SEDONA_JAR_FILES" = paste(
+    "/jars/sedona-spark-shaded-3.3_2.12-{{ sedona.current_version }}.jar",
+    "/jars/geotools-wrapper-{{ sedona.current_geotools }}.jar",
+    sep = ":"
+  )
+)
+
+sc <- spark_connect(master = "yarn", spark_home = "/usr/lib/spark")
+```
+
+!!!note
+	`SEDONA_JAR_FILES` holds a `:`-separated list and replaces *both* Maven coordinates that `apache.sedona` would otherwise request, which is why the GeoTools wrapper jar has to be listed next to the Sedona jar. If you leave `SEDONA_JAR_FILES` unset, every connection downloads `org.apache.sedona:sedona-spark-shaded-<spark version>_<scala version>:{{ sedona.current_version }}` and `org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}`. That requires outbound internet access from the driver and can take long enough to exceed the default `sparklyr.connect.timeout`.
+
+### Verify the R installation
+
+```r
+sdf_sql(sc, "SELECT ST_Point(0.0, 0.0) AS geom") %>% collect()
+```
+
+For more on what the R interface offers, see the [Sedona R documentation](https://sedona.apache.org/latest/api/rdocs/).
