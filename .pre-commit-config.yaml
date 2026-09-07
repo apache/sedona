@@ -59,11 +59,11 @@ repos:
       - id: prettier
         name: run prettier
         description: format files with prettier
-        entry: prettier --write '**/*.js' '**/*.yaml' '**/*.yml'
+        entry: prettier --write
         files: \.(js|ya?ml)$
         language: node
-        additional_dependencies: ['prettier@3.8.4']
-        pass_filenames: false
+        additional_dependencies:
+          - 'prettier/prettier#8f0c95057cc91d5836409466cd9d9af3bb901e84' # 3.9.6
       - id: maven-spotless-apply
         name: maven spotless apply
         description: automatically formats Java and Scala code using mvn spotless:apply.
