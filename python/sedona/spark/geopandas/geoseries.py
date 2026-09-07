@@ -5744,6 +5744,18 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         ]
 
         """
+        if geometry_encoding == "WKB":
+            # Collect Sedona's WKB instead of round-tripping GeometryType through
+            # Python first. Some JTS/Shapely combinations otherwise infer a Z
+            # dimension for collections whose members are all typed empties.
+            wkb = self.to_wkb()._to_internal_pandas()
+            wkb = wkb.map(lambda value: bytes(value) if value is not None else None)
+            return gpd.GeoSeries.from_wkb(
+                wkb,
+                index=wkb.index,
+                crs=self.crs,
+            ).to_arrow(geometry_encoding=geometry_encoding)
+
         # Because this function returns the Arrow array in memory, we simply rely on GeoPandas's implementation.
         # This also returns a GeoPandas-specific data type, which can be converted to an actual PyArrow array,
         # so there is no direct Sedona equivalent. This way we also get all of the arguments implemented for free.

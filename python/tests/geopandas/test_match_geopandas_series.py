@@ -137,6 +137,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
         self.geomcollection = [
             GeometryCollection(),
+            GeometryCollection([Point(), LineString(), Polygon()]),
             GeometryCollection(
                 [
                     MultiPoint([(0, 0), (1, 1)]),
