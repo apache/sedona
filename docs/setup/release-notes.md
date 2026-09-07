@@ -65,6 +65,7 @@
 * [<a href='https://github.com/apache/sedona/issues/3269'>GH-3269</a>] - Warn when `geom_equals` or `geom_equals_exact` compares geometry operands with mismatched CRSs
 * [<a href='https://github.com/apache/sedona/issues/3271'>GH-3271</a>] - Preserve per-column CRS state in distributed GeoPandas constructors and select `geometry` or the sole geometry column as active on file reads
 * [<a href='https://github.com/apache/sedona/issues/3293'>GH-3293</a>] - Prevent `GeoDataFrame` construction from mutating caller-owned GeoPandas geometry columns
+* [<a href='https://github.com/apache/sedona/issues/3307'>GH-3307</a>] - Preserve left-index and null-value semantics when `GeoSeries.fillna` uses another GeoSeries
 
 ## Sedona 1.9.1
 
