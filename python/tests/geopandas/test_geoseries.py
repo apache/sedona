@@ -1485,6 +1485,22 @@ class TestGeoSeries(TestGeopandasBase):
         assert embedded_srid == 4326
         self.check_sgpd_equals_gpd(result.to_crs(3857), expected)
 
+    @pytest.mark.parametrize("limit", [None, 1])
+    def test_fillna_scalar_replacement_uses_left_crs_for_embedded_srid(self, limit):
+        source = GeoSeries([Point(0, 0), None], crs="EPSG:4326")
+
+        result = source.fillna(Point(1, 1), limit=limit)
+        embedded_srids = result._internal.spark_frame.select(
+            stf.ST_SRID(result.spark.column).alias("srid")
+        ).collect()
+        expected = gpd.GeoSeries([Point(0, 0), Point(1, 1)], crs="EPSG:4326").to_crs(
+            3857
+        )
+
+        assert result.crs.to_epsg() == 4326
+        assert [row["srid"] for row in embedded_srids] == [4326, 4326]
+        self.check_sgpd_equals_gpd(result.to_crs(3857), expected)
+
     def test_fillna_limit_pairs_equal_duplicate_indexes_positionally(self):
         from geopandas.testing import assert_geoseries_equal
 
@@ -1673,7 +1689,7 @@ class TestGeoSeries(TestGeopandasBase):
         assert return_value is None
         assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
 
-    @pytest.mark.parametrize("limit", [0, -1, 1.5, "1", True])
+    @pytest.mark.parametrize("limit", [0, -1, 1.5, "1", True, np.bool_(True)])
     def test_fillna_limit_validation(self, limit):
         message = (
             "Limit must be greater than 0"
@@ -1684,10 +1700,20 @@ class TestGeoSeries(TestGeopandasBase):
         with pytest.raises(ValueError, match=message):
             GeoSeries([None]).fillna(Point(1, 1), limit=limit)
 
-    def test_fillna_limit_accepts_large_python_integer(self):
+    @pytest.mark.parametrize("limit", [np.int32(1), np.int64(1), np.uint64(1)])
+    def test_fillna_limit_accepts_numpy_integer(self, limit):
         from geopandas.testing import assert_geoseries_equal
 
-        result = GeoSeries([None, None]).fillna(Point(1, 1), limit=2**63)
+        result = GeoSeries([None, None]).fillna(Point(1, 1), limit=limit)
+        expected = gpd.GeoSeries([Point(1, 1), None])
+
+        assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
+
+    @pytest.mark.parametrize("limit", [2**63, np.uint64(2**64 - 1)])
+    def test_fillna_limit_accepts_large_integer(self, limit):
+        from geopandas.testing import assert_geoseries_equal
+
+        result = GeoSeries([None, None]).fillna(Point(1, 1), limit=limit)
         expected = gpd.GeoSeries([Point(1, 1), Point(1, 1)])
 
         assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)

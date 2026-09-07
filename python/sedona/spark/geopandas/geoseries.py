@@ -4777,7 +4777,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         return self.notna()
 
     def _align_fillna_series(self, replacement: "GeoSeries"):
-        """Align a replacement GeoSeries to the exact left axis."""
+        """Align to the exact left axis; callers restore natural row order."""
         position = "__fillna_position__"
         left_order = "__fillna_left_order__"
         right_order = "__fillna_right_order__"
@@ -4807,7 +4807,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             )
             aligned_frame = aligned_frame.withColumnRenamed(
                 left_order, NATURAL_ORDER_COLUMN_NAME
-            ).orderBy(NATURAL_ORDER_COLUMN_NAME)
+            )
             return aligned_frame, left_indexes
 
         left_frame = left_source.select(
@@ -4876,7 +4876,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             )
             aligned_frame = aligned_frame.withColumnRenamed(
                 left_order, NATURAL_ORDER_COLUMN_NAME
-            ).orderBy(NATURAL_ORDER_COLUMN_NAME)
+            )
             return aligned_frame, left_indexes
 
         positioned_left = _attach_ordered_sequence_column(
@@ -4972,7 +4972,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         aligned_frame = aligned_frame.withColumnRenamed(
             left_order, NATURAL_ORDER_COLUMN_NAME
-        ).orderBy(NATURAL_ORDER_COLUMN_NAME)
+        )
         return aligned_frame, left_indexes
 
     def _fillna_with_limit(
@@ -5124,8 +5124,12 @@ class GeoSeries(GeoFrame, pspd.Series):
         from shapely.geometry.base import BaseGeometry
 
         if limit is not None:
-            if type(limit) is not int:
+            if isinstance(limit, (bool, np.bool_)):
                 raise ValueError("Limit must be an integer")
+            try:
+                limit = operator.index(limit)
+            except TypeError as exc:
+                raise ValueError("Limit must be an integer") from exc
             if limit <= 0:
                 raise ValueError("Limit must be greater than 0")
             # Distributed sequence positions use Spark LongType.
@@ -5151,6 +5155,7 @@ class GeoSeries(GeoFrame, pspd.Series):
                 result = self._fillna_with_limit(value, limit)
             else:
                 aligned_frame, left_indexes = self._align_fillna_series(value)
+                aligned_frame = aligned_frame.orderBy(NATURAL_ORDER_COLUMN_NAME)
                 left_crs = self.crs
                 left_srid = (left_crs.to_epsg() or 0) if left_crs is not None else 0
                 result = self._result_preserving_index(
@@ -5186,8 +5191,11 @@ class GeoSeries(GeoFrame, pspd.Series):
                 other, extended = self._make_series_of_val(value)
                 align = False if extended else align
 
-                # Coalesce: If the value in L is null, use the corresponding value in R for that row
-                spark_expr = F.coalesce(F.col("L"), F.col("R"))
+                left_crs = self.crs
+                left_srid = (left_crs.to_epsg() or 0) if left_crs is not None else 0
+                spark_expr = F.coalesce(
+                    F.col("L"), stf.ST_SetSRID(F.col("R"), left_srid)
+                )
                 result = self._row_wise_operation(
                     spark_expr,
                     other,
