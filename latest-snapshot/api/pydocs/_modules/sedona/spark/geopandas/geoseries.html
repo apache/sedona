@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -247,13 +246,18 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">ArrayType</span><span class="p">,</span>
     <span class="n">BooleanType</span><span class="p">,</span>
+    <span class="n">DataType</span><span class="p">,</span>
+    <span class="n">DateType</span><span class="p">,</span>
+    <span class="n">DecimalType</span><span class="p">,</span>
     <span class="n">DoubleType</span><span class="p">,</span>
     <span class="n">FloatType</span><span class="p">,</span>
     <span class="n">IntegralType</span><span class="p">,</span>
     <span class="n">LongType</span><span class="p">,</span>
+    <span class="n">NumericType</span><span class="p">,</span>
     <span class="n">NullType</span><span class="p">,</span>
     <span class="n">StructField</span><span class="p">,</span>
     <span class="n">StructType</span><span class="p">,</span>
+    <span class="n">TimestampType</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
 
@@ -440,6 +444,71 @@
         <span class="n">sdf</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">order_column</span><span class="p">),</span>
         <span class="n">sequence_column</span><span class="p">,</span>
     <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_fillna_index_columns_equal</span><span class="p">(</span>
+    <span class="n">left</span><span class="p">:</span> <span class="n">PySparkColumn</span><span class="p">,</span>
+    <span class="n">right</span><span class="p">:</span> <span class="n">PySparkColumn</span><span class="p">,</span>
+    <span class="n">left_type</span><span class="p">:</span> <span class="n">DataType</span><span class="p">,</span>
+    <span class="n">right_type</span><span class="p">:</span> <span class="n">DataType</span><span class="p">,</span>
+    <span class="n">positional</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PySparkColumn</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Compare index keys without Spark's unrelated-type coercions."""</span>
+    <span class="n">floating_types</span> <span class="o">=</span> <span class="p">(</span><span class="n">FloatType</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">)</span>
+    <span class="n">decimal_floating</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">left_type</span><span class="p">,</span> <span class="n">DecimalType</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">right_type</span><span class="p">,</span> <span class="n">floating_types</span><span class="p">)</span>
+    <span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">left_type</span><span class="p">,</span> <span class="n">floating_types</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">right_type</span><span class="p">,</span> <span class="n">DecimalType</span><span class="p">))</span>
+    <span class="n">both_numeric</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">left_type</span><span class="p">,</span> <span class="n">NumericType</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">right_type</span><span class="p">,</span> <span class="n">NumericType</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="ow">not</span> <span class="n">decimal_floating</span>
+    <span class="p">)</span>
+    <span class="n">temporal_types</span> <span class="o">=</span> <span class="p">(</span><span class="n">DateType</span><span class="p">,</span> <span class="n">TimestampType</span><span class="p">)</span>
+    <span class="n">both_temporal</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">left_type</span><span class="p">,</span> <span class="n">temporal_types</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
+        <span class="n">right_type</span><span class="p">,</span> <span class="n">temporal_types</span>
+    <span class="p">)</span>
+    <span class="n">boolean_numeric</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">left_type</span><span class="p">,</span> <span class="n">BooleanType</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">right_type</span><span class="p">,</span> <span class="n">NumericType</span><span class="p">)</span>
+    <span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">left_type</span><span class="p">,</span> <span class="n">NumericType</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">right_type</span><span class="p">,</span> <span class="n">BooleanType</span><span class="p">))</span>
+    <span class="c1"># Spark's Decimal/float coercion can equate values that pandas keeps</span>
+    <span class="c1"># distinct, such as Decimal("0.1") and binary 0.1. Exact cross-type</span>
+    <span class="c1"># comparison is not available as a simple Catalyst expression, so keep</span>
+    <span class="c1"># those key families distinct.</span>
+    <span class="c1">#</span>
+    <span class="c1"># pandas treats boolean/numeric axes as equal positionally, but does not</span>
+    <span class="c1"># label-reindex between those types when their order differs.</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">left_type</span> <span class="o">==</span> <span class="n">right_type</span>
+        <span class="ow">or</span> <span class="n">both_numeric</span>
+        <span class="ow">or</span> <span class="n">both_temporal</span>
+        <span class="ow">or</span> <span class="p">(</span><span class="n">positional</span> <span class="ow">and</span> <span class="n">boolean_numeric</span><span class="p">)</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="n">left</span><span class="o">.</span><span class="n">eqNullSafe</span><span class="p">(</span><span class="n">right</span><span class="p">)</span>
+    <span class="c1"># Missing labels can make otherwise incompatible axes positionally equal,</span>
+    <span class="c1"># but pandas does not label-reindex between those index families.</span>
+    <span class="k">if</span> <span class="n">positional</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">left</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">right</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_fillna_index_dtypes_can_equal</span><span class="p">(</span>
+    <span class="n">left_dtype</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">right_dtype</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">left_type</span><span class="p">:</span> <span class="n">DataType</span><span class="p">,</span>
+    <span class="n">right_type</span><span class="p">:</span> <span class="n">DataType</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether pandas can consider two index dtypes positionally equal."""</span>
+    <span class="k">if</span> <span class="n">left_dtype</span> <span class="o">==</span> <span class="n">right_dtype</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="n">temporal_types</span> <span class="o">=</span> <span class="p">(</span><span class="n">DateType</span><span class="p">,</span> <span class="n">TimestampType</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">left_type</span><span class="p">,</span> <span class="n">temporal_types</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">right_type</span><span class="p">,</span> <span class="n">temporal_types</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="c1"># NumPy-backed indexes use value equality across dtypes, including object-</span>
+    <span class="c1"># backed values such as Decimal. Pandas extension dtypes only compare equal</span>
+    <span class="c1"># when the dtypes themselves match, which the first branch handles.</span>
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">left_dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">right_dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_dwithin_expression</span><span class="p">(</span>
@@ -4916,6 +4985,205 @@
 <span class="w">        </span><span class="sd">"""Alias for `notna` method. See `notna` for more detail."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span></div>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_align_fillna_series</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replacement</span><span class="p">:</span> <span class="s2">"GeoSeries"</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Align a replacement GeoSeries to the exact left axis."""</span>
+        <span class="n">position</span> <span class="o">=</span> <span class="s2">"__fillna_position__"</span>
+        <span class="n">left_order</span> <span class="o">=</span> <span class="s2">"__fillna_left_order__"</span>
+        <span class="n">right_order</span> <span class="o">=</span> <span class="s2">"__fillna_right_order__"</span>
+        <span class="n">left_present</span> <span class="o">=</span> <span class="s2">"__fillna_left_present__"</span>
+        <span class="n">right_present</span> <span class="o">=</span> <span class="s2">"__fillna_right_present__"</span>
+        <span class="n">left_indexes</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sa">f</span><span class="s2">"__fillna_left_index_</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s2">__"</span>
+            <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">))</span>
+        <span class="p">]</span>
+        <span class="n">right_indexes</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sa">f</span><span class="s2">"__fillna_right_index_</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s2">__"</span>
+            <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">replacement</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">))</span>
+        <span class="p">]</span>
+
+        <span class="n">left_source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span>
+        <span class="k">if</span> <span class="n">same_anchor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replacement</span><span class="p">):</span>
+            <span class="n">aligned_frame</span> <span class="o">=</span> <span class="n">left_source</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span>
+                <span class="n">replacement</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"R"</span><span class="p">),</span>
+                <span class="o">*</span><span class="p">[</span>
+                    <span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">alias</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">column</span><span class="p">,</span> <span class="n">alias</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">,</span> <span class="n">left_indexes</span>
+                    <span class="p">)</span>
+                <span class="p">],</span>
+                <span class="n">scol_for</span><span class="p">(</span><span class="n">left_source</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">left_order</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">aligned_frame</span> <span class="o">=</span> <span class="n">aligned_frame</span><span class="o">.</span><span class="n">withColumnRenamed</span><span class="p">(</span>
+                <span class="n">left_order</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">aligned_frame</span><span class="p">,</span> <span class="n">left_indexes</span>
+
+        <span class="n">left_frame</span> <span class="o">=</span> <span class="n">left_source</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span>
+            <span class="o">*</span><span class="p">[</span>
+                <span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">alias</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">column</span><span class="p">,</span> <span class="n">alias</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">,</span> <span class="n">left_indexes</span>
+                <span class="p">)</span>
+            <span class="p">],</span>
+            <span class="n">scol_for</span><span class="p">(</span><span class="n">left_source</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">left_order</span><span class="p">),</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">left_present</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">right_source</span> <span class="o">=</span> <span class="n">replacement</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span>
+        <span class="n">right_frame</span> <span class="o">=</span> <span class="n">right_source</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="n">replacement</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"R"</span><span class="p">),</span>
+            <span class="o">*</span><span class="p">[</span>
+                <span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">alias</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">column</span><span class="p">,</span> <span class="n">alias</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="n">replacement</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">,</span> <span class="n">right_indexes</span>
+                <span class="p">)</span>
+            <span class="p">],</span>
+            <span class="n">scol_for</span><span class="p">(</span><span class="n">right_source</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">right_order</span><span class="p">),</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">right_present</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">left_index_types</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">left_frame</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">dataType</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">left_indexes</span>
+        <span class="p">]</span>
+        <span class="n">right_index_types</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">right_frame</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">dataType</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">right_indexes</span>
+        <span class="p">]</span>
+        <span class="n">index_dtypes_can_equal</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span>
+            <span class="n">_fillna_index_dtypes_can_equal</span><span class="p">(</span>
+                <span class="n">left_field</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+                <span class="n">right_field</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+                <span class="n">left_type</span><span class="p">,</span>
+                <span class="n">right_type</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">left_field</span><span class="p">,</span> <span class="n">right_field</span><span class="p">,</span> <span class="n">left_type</span><span class="p">,</span> <span class="n">right_type</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_fields</span><span class="p">,</span>
+                <span class="n">replacement</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_fields</span><span class="p">,</span>
+                <span class="n">left_index_types</span><span class="p">,</span>
+                <span class="n">right_index_types</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">same_index_structure</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">left_indexes</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">right_indexes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">same_index_structure</span><span class="p">:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">right_frame</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_present</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"right_count"</span><span class="p">),</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">countDistinct</span><span class="p">(</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">struct</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">column</span><span class="p">)</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">right_indexes</span><span class="p">])</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"right_unique_count"</span><span class="p">),</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">status</span><span class="p">[</span><span class="s2">"right_count"</span><span class="p">]</span> <span class="o">!=</span> <span class="n">status</span><span class="p">[</span><span class="s2">"right_unique_count"</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">right_indexes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"cannot handle a non-unique multi-index!"</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"cannot reindex on an axis with duplicate labels"</span><span class="p">)</span>
+
+            <span class="c1"># A flat Index and a MultiIndex have no complete keys in common.</span>
+            <span class="n">aligned_frame</span> <span class="o">=</span> <span class="n">left_frame</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span>
+                <span class="n">stc</span><span class="o">.</span><span class="n">ST_GeomFromWKB</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">"binary"</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"R"</span><span class="p">),</span>
+                <span class="o">*</span><span class="p">[</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">column</span><span class="p">)</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">left_indexes</span><span class="p">],</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_order</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">aligned_frame</span> <span class="o">=</span> <span class="n">aligned_frame</span><span class="o">.</span><span class="n">withColumnRenamed</span><span class="p">(</span>
+                <span class="n">left_order</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">aligned_frame</span><span class="p">,</span> <span class="n">left_indexes</span>
+
+        <span class="n">positioned_left</span> <span class="o">=</span> <span class="n">_attach_ordered_sequence_column</span><span class="p">(</span>
+            <span class="n">left_frame</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_order</span><span class="p">),</span> <span class="n">position</span>
+        <span class="p">)</span>
+        <span class="n">positioned_right</span> <span class="o">=</span> <span class="n">_attach_ordered_sequence_column</span><span class="p">(</span>
+            <span class="n">right_frame</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_order</span><span class="p">),</span> <span class="n">position</span>
+        <span class="p">)</span>
+        <span class="n">positional_join</span> <span class="o">=</span> <span class="n">positioned_left</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">positioned_right</span><span class="p">,</span>
+            <span class="n">on</span><span class="o">=</span><span class="n">position</span><span class="p">,</span>
+            <span class="n">how</span><span class="o">=</span><span class="s2">"outer"</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Exact axes, including duplicate labels, pair positionally. Otherwise,</span>
+        <span class="c1"># GeoPandas reindexes a unique replacement onto the complete left key.</span>
+        <span class="n">index_mismatch</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_present</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span> <span class="o">|</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_present</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">left_index</span><span class="p">,</span> <span class="n">right_index</span><span class="p">,</span> <span class="n">left_type</span><span class="p">,</span> <span class="n">right_type</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">left_indexes</span><span class="p">,</span>
+            <span class="n">right_indexes</span><span class="p">,</span>
+            <span class="n">left_index_types</span><span class="p">,</span>
+            <span class="n">right_index_types</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="n">index_mismatch</span> <span class="o">=</span> <span class="n">index_mismatch</span> <span class="o">|</span> <span class="o">~</span><span class="n">_fillna_index_columns_equal</span><span class="p">(</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_index</span><span class="p">),</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_index</span><span class="p">),</span>
+                <span class="n">left_type</span><span class="p">,</span>
+                <span class="n">right_type</span><span class="p">,</span>
+                <span class="n">positional</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="n">positional_join</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_present</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"left_count"</span><span class="p">),</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_present</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"right_count"</span><span class="p">),</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">countDistinct</span><span class="p">(</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_present</span><span class="p">)</span><span class="o">.</span><span class="n">isNotNull</span><span class="p">(),</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">struct</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">column</span><span class="p">)</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">right_indexes</span><span class="p">]),</span>
+                <span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"right_unique_count"</span><span class="p">),</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">index_mismatch</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">"int"</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"index_mismatch"</span><span class="p">),</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+        <span class="n">axes_equal</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">index_dtypes_can_equal</span>
+            <span class="ow">and</span> <span class="n">status</span><span class="p">[</span><span class="s2">"left_count"</span><span class="p">]</span> <span class="o">==</span> <span class="n">status</span><span class="p">[</span><span class="s2">"right_count"</span><span class="p">]</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="n">status</span><span class="p">[</span><span class="s2">"index_mismatch"</span><span class="p">]</span> <span class="ow">or</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">axes_equal</span> <span class="ow">and</span> <span class="n">status</span><span class="p">[</span><span class="s2">"right_count"</span><span class="p">]</span> <span class="o">!=</span> <span class="n">status</span><span class="p">[</span><span class="s2">"right_unique_count"</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">right_indexes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"cannot handle a non-unique multi-index!"</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"cannot reindex on an axis with duplicate labels"</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">axes_equal</span><span class="p">:</span>
+            <span class="n">aligned_frame</span> <span class="o">=</span> <span class="n">positional_join</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">),</span>
+                <span class="o">*</span><span class="p">[</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">column</span><span class="p">)</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">left_indexes</span><span class="p">],</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_order</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">left_alias</span> <span class="o">=</span> <span class="n">left_frame</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"left"</span><span class="p">)</span>
+            <span class="n">right_alias</span> <span class="o">=</span> <span class="n">right_frame</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"right"</span><span class="p">)</span>
+            <span class="n">join_condition</span> <span class="o">=</span> <span class="n">_fillna_index_columns_equal</span><span class="p">(</span>
+                <span class="n">left_alias</span><span class="p">[</span><span class="n">left_indexes</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+                <span class="n">right_alias</span><span class="p">[</span><span class="n">right_indexes</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+                <span class="n">left_index_types</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">right_index_types</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">positional</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">left_index</span><span class="p">,</span> <span class="n">right_index</span><span class="p">,</span> <span class="n">left_type</span><span class="p">,</span> <span class="n">right_type</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                <span class="n">left_indexes</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
+                <span class="n">right_indexes</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
+                <span class="n">left_index_types</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
+                <span class="n">right_index_types</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
+            <span class="p">):</span>
+                <span class="n">join_condition</span> <span class="o">=</span> <span class="n">join_condition</span> <span class="o">&amp;</span> <span class="n">_fillna_index_columns_equal</span><span class="p">(</span>
+                    <span class="n">left_alias</span><span class="p">[</span><span class="n">left_index</span><span class="p">],</span>
+                    <span class="n">right_alias</span><span class="p">[</span><span class="n">right_index</span><span class="p">],</span>
+                    <span class="n">left_type</span><span class="p">,</span>
+                    <span class="n">right_type</span><span class="p">,</span>
+                    <span class="n">positional</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="n">aligned_frame</span> <span class="o">=</span> <span class="n">left_alias</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">right_alias</span><span class="p">,</span>
+                <span class="n">on</span><span class="o">=</span><span class="n">join_condition</span><span class="p">,</span>
+                <span class="n">how</span><span class="o">=</span><span class="s2">"left"</span><span class="p">,</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+                <span class="n">left_alias</span><span class="p">[</span><span class="s2">"L"</span><span class="p">]</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span>
+                <span class="n">right_alias</span><span class="p">[</span><span class="s2">"R"</span><span class="p">]</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"R"</span><span class="p">),</span>
+                <span class="o">*</span><span class="p">[</span><span class="n">left_alias</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">column</span><span class="p">)</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">left_indexes</span><span class="p">],</span>
+                <span class="n">left_alias</span><span class="p">[</span><span class="n">left_order</span><span class="p">]</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">left_order</span><span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="n">aligned_frame</span> <span class="o">=</span> <span class="n">aligned_frame</span><span class="o">.</span><span class="n">withColumnRenamed</span><span class="p">(</span>
+            <span class="n">left_order</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">aligned_frame</span><span class="p">,</span> <span class="n">left_indexes</span>
+
     <span class="c1"># GeoSeries-only (not in GeoDataFrame)</span>
 <div class="viewcode-block" id="GeoSeries.fillna"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.fillna">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">fillna</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
@@ -4939,6 +5207,12 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        GeoSeries</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Filling from an independent ``GeoSeries`` validates its distributed index</span>
+<span class="sd">        before returning. Filling from another column of the same ``GeoDataFrame``</span>
+<span class="sd">        remains lazy.</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
@@ -5004,7 +5278,37 @@
 
         <span class="n">align</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="kc">True</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">BaseGeometry</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="n">GeoSeries</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">)):</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">):</span>
+                <span class="n">value_crs</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">crs</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+                    <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+                        <span class="n">value</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                        <span class="n">index</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+                        <span class="n">name</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                        <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">,</span>
+                    <span class="p">),</span>
+                    <span class="n">crs</span><span class="o">=</span><span class="n">value_crs</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="n">aligned_frame</span><span class="p">,</span> <span class="n">left_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_align_fillna_series</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">left_crs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span>
+            <span class="n">left_srid</span> <span class="o">=</span> <span class="p">(</span><span class="n">left_crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">left_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result_preserving_index</span><span class="p">(</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span>
+                    <span class="n">stf</span><span class="o">.</span><span class="n">ST_SetSRID</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">),</span> <span class="n">left_srid</span><span class="p">),</span>
+                <span class="p">),</span>
+                <span class="n">aligned_frame</span><span class="p">,</span>
+                <span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">aligned_frame</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">left_indexes</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_fields</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_names</span><span class="p">,</span>
+                <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">keep_name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="kc">True</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">BaseGeometry</span><span class="p">):</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="kc">True</span>
             <span class="p">):</span>  <span class="c1"># ie. value is np.nan or pd.NA:</span>
@@ -5018,27 +5322,19 @@
             <span class="n">other</span><span class="p">,</span> <span class="n">extended</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_series_of_val</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
             <span class="n">align</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">extended</span> <span class="k">else</span> <span class="n">align</span>
 
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="n">GeoSeries</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">)):</span>
-
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">GeoSeries</span><span class="p">):</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-
-            <span class="c1"># Replace all None's with empty geometries (this is a recursive call)</span>
-            <span class="n">other</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+            <span class="c1"># Coalesce: If the value in L is null, use the corresponding value in R for that row</span>
+            <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">))</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_row_wise_operation</span><span class="p">(</span>
+                <span class="n">spark_expr</span><span class="p">,</span>
+                <span class="n">other</span><span class="p">,</span>
+                <span class="n">align</span><span class="o">=</span><span class="n">align</span><span class="p">,</span>
+                <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">default_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">keep_name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Invalid value type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-
-        <span class="c1"># Coalesce: If the value in L is null, use the corresponding value in R for that row</span>
-        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">))</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_row_wise_operation</span><span class="p">(</span>
-            <span class="n">spark_expr</span><span class="p">,</span>
-            <span class="n">other</span><span class="p">,</span>
-            <span class="n">align</span><span class="o">=</span><span class="n">align</span><span class="p">,</span>
-            <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">default_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">keep_name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">inplace</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_update_inplace</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
