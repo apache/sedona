@@ -53,7 +53,9 @@ public class RasterBandEditors {
 
     // Remove no-Data if it is null
     if (noDataValue == null) {
-      if (RasterBandAccessors.getBandNoDataValue(raster) == null) {
+      // Consult the target band, not band 1: otherwise clearing band N is a no-op
+      // whenever band 1 happens to have no no-data value.
+      if (rasterNoData == null) {
         return raster;
       }
       GridSampleDimension[] sampleDimensions = raster.getSampleDimensions();
