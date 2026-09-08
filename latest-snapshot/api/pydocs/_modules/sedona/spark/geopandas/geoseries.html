@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -4987,7 +4986,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span></div>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_align_fillna_series</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replacement</span><span class="p">:</span> <span class="s2">"GeoSeries"</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Align a replacement GeoSeries to the exact left axis."""</span>
+<span class="w">        </span><span class="sd">"""Align to the exact left axis; callers restore natural row order."""</span>
         <span class="n">position</span> <span class="o">=</span> <span class="s2">"__fillna_position__"</span>
         <span class="n">left_order</span> <span class="o">=</span> <span class="s2">"__fillna_left_order__"</span>
         <span class="n">right_order</span> <span class="o">=</span> <span class="s2">"__fillna_right_order__"</span>
@@ -5017,7 +5016,7 @@
             <span class="p">)</span>
             <span class="n">aligned_frame</span> <span class="o">=</span> <span class="n">aligned_frame</span><span class="o">.</span><span class="n">withColumnRenamed</span><span class="p">(</span>
                 <span class="n">left_order</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span>
+            <span class="p">)</span>
             <span class="k">return</span> <span class="n">aligned_frame</span><span class="p">,</span> <span class="n">left_indexes</span>
 
         <span class="n">left_frame</span> <span class="o">=</span> <span class="n">left_source</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
@@ -5086,7 +5085,7 @@
             <span class="p">)</span>
             <span class="n">aligned_frame</span> <span class="o">=</span> <span class="n">aligned_frame</span><span class="o">.</span><span class="n">withColumnRenamed</span><span class="p">(</span>
                 <span class="n">left_order</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span>
+            <span class="p">)</span>
             <span class="k">return</span> <span class="n">aligned_frame</span><span class="p">,</span> <span class="n">left_indexes</span>
 
         <span class="n">positioned_left</span> <span class="o">=</span> <span class="n">_attach_ordered_sequence_column</span><span class="p">(</span>
@@ -5182,8 +5181,59 @@
 
         <span class="n">aligned_frame</span> <span class="o">=</span> <span class="n">aligned_frame</span><span class="o">.</span><span class="n">withColumnRenamed</span><span class="p">(</span>
             <span class="n">left_order</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">aligned_frame</span><span class="p">,</span> <span class="n">left_indexes</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fillna_with_limit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">replacement</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PySparkColumn</span><span class="p">,</span> <span class="s2">"GeoSeries"</span><span class="p">],</span>
+        <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"GeoSeries"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Fill the first missing rows while preserving the exact left axis."""</span>
+        <span class="n">fill_rank</span> <span class="o">=</span> <span class="s2">"__fillna_rank__"</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">replacement</span><span class="p">,</span> <span class="n">GeoSeries</span><span class="p">):</span>
+            <span class="n">aligned_frame</span><span class="p">,</span> <span class="n">left_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_align_fillna_series</span><span class="p">(</span><span class="n">replacement</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">source_frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span>
+            <span class="n">left_indexes</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="sa">f</span><span class="s2">"__fillna_left_index_</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s2">__"</span>
+                <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">))</span>
+            <span class="p">]</span>
+            <span class="n">aligned_frame</span> <span class="o">=</span> <span class="n">source_frame</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span>
+                <span class="n">replacement</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"R"</span><span class="p">),</span>
+                <span class="o">*</span><span class="p">[</span>
+                    <span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">alias</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">column</span><span class="p">,</span> <span class="n">alias</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">,</span> <span class="n">left_indexes</span>
+                    <span class="p">)</span>
+                <span class="p">],</span>
+                <span class="n">scol_for</span><span class="p">(</span><span class="n">source_frame</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Rank missing rows first, avoiding separate branches that repeat alignment.</span>
+        <span class="n">ranked_frame</span> <span class="o">=</span> <span class="n">_attach_ordered_sequence_column</span><span class="p">(</span>
+            <span class="n">aligned_frame</span><span class="p">,</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">struct</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">)</span><span class="o">.</span><span class="n">isNotNull</span><span class="p">(),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)),</span>
+            <span class="n">fill_rank</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span>
+
+        <span class="n">left_crs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span>
+        <span class="n">left_srid</span> <span class="o">=</span> <span class="p">(</span><span class="n">left_crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">left_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">result_expression</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">fill_rank</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">limit</span><span class="p">)),</span>
+            <span class="n">stf</span><span class="o">.</span><span class="n">ST_SetSRID</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">),</span> <span class="n">left_srid</span><span class="p">),</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result_preserving_index</span><span class="p">(</span>
+            <span class="n">result_expression</span><span class="p">,</span>
+            <span class="n">ranked_frame</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">ranked_frame</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">left_indexes</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_fields</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_names</span><span class="p">,</span>
+            <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">keep_name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="c1"># GeoSeries-only (not in GeoDataFrame)</span>
 <div class="viewcode-block" id="GeoSeries.fillna"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.fillna">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">fillna</span><span class="p">(</span>
@@ -5214,6 +5264,9 @@
 <span class="sd">        Filling from an independent ``GeoSeries`` validates its distributed index</span>
 <span class="sd">        before returning. Filling from another column of the same ``GeoDataFrame``</span>
 <span class="sd">        remains lazy.</span>
+
+<span class="sd">        Using ``limit`` requires distributed global ordering and can be expensive</span>
+<span class="sd">        for large GeoSeries.</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
@@ -5271,11 +5324,17 @@
 <span class="sd">        """</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseGeometry</span>
 
-        <span class="c1"># TODO: Implement limit https://github.com/apache/sedona/issues/2068</span>
-        <span class="k">if</span> <span class="n">limit</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                <span class="s2">"GeoSeries.fillna() with limit is not implemented yet."</span>
-            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">limit</span><span class="p">,</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Limit must be an integer"</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">limit</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">limit</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Limit must be an integer"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+            <span class="k">if</span> <span class="n">limit</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Limit must be greater than 0"</span><span class="p">)</span>
+            <span class="c1"># Distributed sequence positions use Spark LongType.</span>
+            <span class="n">limit</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">limit</span><span class="p">,</span> <span class="mi">9_223_372_036_854_775_807</span><span class="p">)</span>
 
         <span class="n">align</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -5293,21 +5352,25 @@
                     <span class="n">crs</span><span class="o">=</span><span class="n">value_crs</span><span class="p">,</span>
                 <span class="p">)</span>
 
-            <span class="n">aligned_frame</span><span class="p">,</span> <span class="n">left_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_align_fillna_series</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-            <span class="n">left_crs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span>
-            <span class="n">left_srid</span> <span class="o">=</span> <span class="p">(</span><span class="n">left_crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">left_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
-            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result_preserving_index</span><span class="p">(</span>
-                <span class="n">F</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span>
-                    <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span>
-                    <span class="n">stf</span><span class="o">.</span><span class="n">ST_SetSRID</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">),</span> <span class="n">left_srid</span><span class="p">),</span>
-                <span class="p">),</span>
-                <span class="n">aligned_frame</span><span class="p">,</span>
-                <span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">aligned_frame</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">left_indexes</span><span class="p">],</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_fields</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_names</span><span class="p">,</span>
-                <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">keep_name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fillna_with_limit</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">aligned_frame</span><span class="p">,</span> <span class="n">left_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_align_fillna_series</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="n">aligned_frame</span> <span class="o">=</span> <span class="n">aligned_frame</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span>
+                <span class="n">left_crs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span>
+                <span class="n">left_srid</span> <span class="o">=</span> <span class="p">(</span><span class="n">left_crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">left_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result_preserving_index</span><span class="p">(</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span>
+                        <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span>
+                        <span class="n">stf</span><span class="o">.</span><span class="n">ST_SetSRID</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">),</span> <span class="n">left_srid</span><span class="p">),</span>
+                    <span class="p">),</span>
+                    <span class="n">aligned_frame</span><span class="p">,</span>
+                    <span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">aligned_frame</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">left_indexes</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_fields</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_names</span><span class="p">,</span>
+                    <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">keep_name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="kc">True</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">BaseGeometry</span><span class="p">):</span>
             <span class="k">if</span> <span class="p">(</span>
@@ -5320,19 +5383,28 @@
 
                     <span class="n">value</span> <span class="o">=</span> <span class="n">GeometryCollection</span><span class="p">()</span>
 
-            <span class="n">other</span><span class="p">,</span> <span class="n">extended</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_series_of_val</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-            <span class="n">align</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">extended</span> <span class="k">else</span> <span class="n">align</span>
+            <span class="k">if</span> <span class="n">limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">replacement</span> <span class="o">=</span> <span class="n">stc</span><span class="o">.</span><span class="n">ST_GeomFromWKB</span><span class="p">(</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">wkb</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">"binary"</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fillna_with_limit</span><span class="p">(</span><span class="n">replacement</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">other</span><span class="p">,</span> <span class="n">extended</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_series_of_val</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="n">align</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">extended</span> <span class="k">else</span> <span class="n">align</span>
 
-            <span class="c1"># Coalesce: If the value in L is null, use the corresponding value in R for that row</span>
-            <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">))</span>
-            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_row_wise_operation</span><span class="p">(</span>
-                <span class="n">spark_expr</span><span class="p">,</span>
-                <span class="n">other</span><span class="p">,</span>
-                <span class="n">align</span><span class="o">=</span><span class="n">align</span><span class="p">,</span>
-                <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">default_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                <span class="n">keep_name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="p">)</span>
+                <span class="n">left_crs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span>
+                <span class="n">left_srid</span> <span class="o">=</span> <span class="p">(</span><span class="n">left_crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">left_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+                <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_SetSRID</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">),</span> <span class="n">left_srid</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_row_wise_operation</span><span class="p">(</span>
+                    <span class="n">spark_expr</span><span class="p">,</span>
+                    <span class="n">other</span><span class="p">,</span>
+                    <span class="n">align</span><span class="o">=</span><span class="n">align</span><span class="p">,</span>
+                    <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">default_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">keep_name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Invalid value type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
