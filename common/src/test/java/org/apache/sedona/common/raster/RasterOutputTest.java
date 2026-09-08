@@ -30,6 +30,27 @@ import org.junit.Test;
 public class RasterOutputTest extends RasterTestBase {
 
   @Test
+  public void testAsGeoTiffDoesNotInventNoDataValue() throws FactoryException, IOException {
+    // GeoTiffWriter writes a default GDAL_NODATA of 0 unless told otherwise, which made a
+    // raster that never had a no-data value read back claiming one.
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 20, 20, 0, 0, 1, -1, 0, 0, 4326);
+    assertNull(RasterBandAccessors.getBandNoDataValue(raster, 1));
+
+    GridCoverage2D roundTripped = RasterConstructors.fromGeoTiff(RasterOutputs.asGeoTiff(raster));
+    assertNull(RasterBandAccessors.getBandNoDataValue(roundTripped, 1));
+  }
+
+  @Test
+  public void testAsGeoTiffKeepsNoDataValue() throws FactoryException, IOException {
+    // The opt-out must only apply when there is no no-data value to write.
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 20, 20, 0, 0, 1, -1, 0, 0, 4326);
+    raster = RasterBandEditors.setBandNoDataValue(raster, 1, -999d);
+
+    GridCoverage2D roundTripped = RasterConstructors.fromGeoTiff(RasterOutputs.asGeoTiff(raster));
+    assertEquals(-999d, RasterBandAccessors.getBandNoDataValue(roundTripped, 1), 0.0001d);
+  }
+
+  @Test
   public void testAsBase64() throws IOException {
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
