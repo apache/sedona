@@ -59,6 +59,23 @@ class TestGeomSerdeSpeedup:
 
         assert coordinate_type == geometry_serde_general.CoordinateType.XYZ
 
+    @pytest.mark.parametrize(
+        "wkt",
+        [
+            "LINESTRING EMPTY",
+            "LINESTRING Z EMPTY",
+            "GEOMETRYCOLLECTION (LINESTRING EMPTY)",
+            "GEOMETRYCOLLECTION (POINT EMPTY, LINESTRING EMPTY, POLYGON EMPTY)",
+            "GEOMETRYCOLLECTION (GEOMETRYCOLLECTION (LINESTRING EMPTY))",
+        ],
+    )
+    def test_empty_linestring_roundtrip_keeps_dimension(self, wkt):
+        geometry = wkt_loads(wkt)
+        actual = self.serde_roundtrip(geometry)
+
+        # Spatial equality does not distinguish the dimensions of empty geometries.
+        assert actual.wkb == geometry.wkb
+
     def test_multi_point(self):
         multi_points = [
             wkt_loads("MULTIPOINT EMPTY"),
@@ -168,6 +185,8 @@ class TestGeomSerdeSpeedup:
             "POINT ZM (1 2 3 4)",
             "LINESTRING M (0 0 1, 2 3 4)",
             "LINESTRING ZM (0 0 1 2, 3 4 5 6)",
+            "LINESTRING M EMPTY",
+            "LINESTRING ZM EMPTY",
             "POLYGON M ((0 0 1, 2 0 2, 0 2 3, 0 0 1))",
             "GEOMETRYCOLLECTION ZM (POINT ZM (1 2 3 4), "
             "LINESTRING ZM (0 0 1 2, 3 4 5 6))",
@@ -232,13 +251,7 @@ class TestGeomSerdeSpeedup:
         for geom in geoms:
             geom_actual = TestGeomSerdeSpeedup.serde_roundtrip(geom)
             assert geom_actual.equals_exact(geom, 1e-6)
-            # GEOSGeom_createEmptyLineString in libgeos creates LineString with
-            # Z dimension, This bug has been fixed by
-            # https://github.com/libgeos/geos/pull/745
-            geom_actual_wkt = geom_actual.wkt.replace(
-                "LINESTRING Z EMPTY", "LINESTRING EMPTY"
-            )
-            assert geom.wkt == geom_actual_wkt
+            assert geom.wkt == geom_actual.wkt
 
     @staticmethod
     def serde_roundtrip(geom: BaseGeometry) -> BaseGeometry:
