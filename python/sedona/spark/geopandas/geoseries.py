@@ -4777,7 +4777,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         return self.notna()
 
     def _align_fillna_series(self, replacement: "GeoSeries"):
-        """Align a replacement GeoSeries to the exact left axis."""
+        """Align to the exact left axis; callers restore natural row order."""
         position = "__fillna_position__"
         left_order = "__fillna_left_order__"
         right_order = "__fillna_right_order__"
@@ -4807,7 +4807,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             )
             aligned_frame = aligned_frame.withColumnRenamed(
                 left_order, NATURAL_ORDER_COLUMN_NAME
-            ).orderBy(NATURAL_ORDER_COLUMN_NAME)
+            )
             return aligned_frame, left_indexes
 
         left_frame = left_source.select(
@@ -4876,7 +4876,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             )
             aligned_frame = aligned_frame.withColumnRenamed(
                 left_order, NATURAL_ORDER_COLUMN_NAME
-            ).orderBy(NATURAL_ORDER_COLUMN_NAME)
+            )
             return aligned_frame, left_indexes
 
         positioned_left = _attach_ordered_sequence_column(
@@ -4972,8 +4972,59 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         aligned_frame = aligned_frame.withColumnRenamed(
             left_order, NATURAL_ORDER_COLUMN_NAME
-        ).orderBy(NATURAL_ORDER_COLUMN_NAME)
+        )
         return aligned_frame, left_indexes
+
+    def _fillna_with_limit(
+        self,
+        replacement: Union[PySparkColumn, "GeoSeries"],
+        limit: int,
+    ) -> "GeoSeries":
+        """Fill the first missing rows while preserving the exact left axis."""
+        fill_rank = "__fillna_rank__"
+
+        if isinstance(replacement, GeoSeries):
+            aligned_frame, left_indexes = self._align_fillna_series(replacement)
+        else:
+            source_frame = self._internal.spark_frame
+            left_indexes = [
+                f"__fillna_left_index_{level}__"
+                for level in range(len(self._internal.index_spark_columns))
+            ]
+            aligned_frame = source_frame.select(
+                self.spark.column.alias("L"),
+                replacement.alias("R"),
+                *[
+                    column.alias(alias)
+                    for column, alias in zip(
+                        self._internal.index_spark_columns, left_indexes
+                    )
+                ],
+                scol_for(source_frame, NATURAL_ORDER_COLUMN_NAME),
+            )
+
+        # Rank missing rows first, avoiding separate branches that repeat alignment.
+        ranked_frame = _attach_ordered_sequence_column(
+            aligned_frame,
+            F.struct(F.col("L").isNotNull(), F.col(NATURAL_ORDER_COLUMN_NAME)),
+            fill_rank,
+        ).orderBy(NATURAL_ORDER_COLUMN_NAME)
+
+        left_crs = self.crs
+        left_srid = (left_crs.to_epsg() or 0) if left_crs is not None else 0
+        result_expression = F.when(
+            F.col("L").isNull() & (F.col(fill_rank) < F.lit(limit)),
+            stf.ST_SetSRID(F.col("R"), left_srid),
+        ).otherwise(F.col("L"))
+        return self._result_preserving_index(
+            result_expression,
+            ranked_frame,
+            [scol_for(ranked_frame, name) for name in left_indexes],
+            self._internal.index_fields,
+            self._internal.index_names,
+            returns_geom=True,
+            keep_name=True,
+        )
 
     # GeoSeries-only (not in GeoDataFrame)
     def fillna(
@@ -5004,6 +5055,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         Filling from an independent ``GeoSeries`` validates its distributed index
         before returning. Filling from another column of the same ``GeoDataFrame``
         remains lazy.
+
+        Using ``limit`` requires distributed global ordering and can be expensive
+        for large GeoSeries.
 
         Examples
         --------
@@ -5061,11 +5115,17 @@ class GeoSeries(GeoFrame, pspd.Series):
         """
         from shapely.geometry.base import BaseGeometry
 
-        # TODO: Implement limit https://github.com/apache/sedona/issues/2068
-        if limit:
-            raise NotImplementedError(
-                "GeoSeries.fillna() with limit is not implemented yet."
-            )
+        if limit is not None:
+            if isinstance(limit, (bool, np.bool_)):
+                raise ValueError("Limit must be an integer")
+            try:
+                limit = operator.index(limit)
+            except TypeError as exc:
+                raise ValueError("Limit must be an integer") from exc
+            if limit <= 0:
+                raise ValueError("Limit must be greater than 0")
+            # Distributed sequence positions use Spark LongType.
+            limit = min(limit, 9_223_372_036_854_775_807)
 
         align = True
 
@@ -5083,21 +5143,25 @@ class GeoSeries(GeoFrame, pspd.Series):
                     crs=value_crs,
                 )
 
-            aligned_frame, left_indexes = self._align_fillna_series(value)
-            left_crs = self.crs
-            left_srid = (left_crs.to_epsg() or 0) if left_crs is not None else 0
-            result = self._result_preserving_index(
-                F.coalesce(
-                    F.col("L"),
-                    stf.ST_SetSRID(F.col("R"), left_srid),
-                ),
-                aligned_frame,
-                [scol_for(aligned_frame, name) for name in left_indexes],
-                self._internal.index_fields,
-                self._internal.index_names,
-                returns_geom=True,
-                keep_name=True,
-            )
+            if limit is not None:
+                result = self._fillna_with_limit(value, limit)
+            else:
+                aligned_frame, left_indexes = self._align_fillna_series(value)
+                aligned_frame = aligned_frame.orderBy(NATURAL_ORDER_COLUMN_NAME)
+                left_crs = self.crs
+                left_srid = (left_crs.to_epsg() or 0) if left_crs is not None else 0
+                result = self._result_preserving_index(
+                    F.coalesce(
+                        F.col("L"),
+                        stf.ST_SetSRID(F.col("R"), left_srid),
+                    ),
+                    aligned_frame,
+                    [scol_for(aligned_frame, name) for name in left_indexes],
+                    self._internal.index_fields,
+                    self._internal.index_names,
+                    returns_geom=True,
+                    keep_name=True,
+                )
 
         elif pd.isna(value) == True or isinstance(value, BaseGeometry):
             if (
@@ -5110,19 +5174,28 @@ class GeoSeries(GeoFrame, pspd.Series):
 
                     value = GeometryCollection()
 
-            other, extended = self._make_series_of_val(value)
-            align = False if extended else align
+            if limit is not None:
+                replacement = stc.ST_GeomFromWKB(
+                    F.lit(value.wkb if value is not None else None).cast("binary")
+                )
+                result = self._fillna_with_limit(replacement, limit)
+            else:
+                other, extended = self._make_series_of_val(value)
+                align = False if extended else align
 
-            # Coalesce: If the value in L is null, use the corresponding value in R for that row
-            spark_expr = F.coalesce(F.col("L"), F.col("R"))
-            result = self._row_wise_operation(
-                spark_expr,
-                other,
-                align=align,
-                returns_geom=True,
-                default_val=None,
-                keep_name=True,
-            )
+                left_crs = self.crs
+                left_srid = (left_crs.to_epsg() or 0) if left_crs is not None else 0
+                spark_expr = F.coalesce(
+                    F.col("L"), stf.ST_SetSRID(F.col("R"), left_srid)
+                )
+                result = self._row_wise_operation(
+                    spark_expr,
+                    other,
+                    align=align,
+                    returns_geom=True,
+                    default_val=None,
+                    keep_name=True,
+                )
 
         else:
             raise ValueError(f"Invalid value type: {type(value)}")
