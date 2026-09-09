@@ -22,6 +22,11 @@ import shapely
 from shapely.geometry import LineString, Point, Polygon
 from shapely.wkt import loads as wkt_loads
 
+try:
+    from shapely import geos_version
+except ImportError:
+    from shapely.geos import geos_version
+
 from sedona.spark.utils import geometry_serde, geometry_serde_general
 
 EMPTY_PRIMITIVES = [("POINT", 1), ("LINESTRING", 2), ("POLYGON", 3)]
@@ -43,12 +48,72 @@ COLLECTIONS = [
 ]
 
 
+def _require_empty_layout(geometry, coord_type):
+    if geometry.geom_type == "Point" and geos_version < (3, 9):
+        if coord_type == 2:
+            pytest.skip("Legacy empty Points use XY without WKB support")
+        return
+
+    # Some older WKT readers change the requested empty layout before serde runs.
+    # Check the source geometry so the fixed header assertions remain meaningful.
+    source_wkb = geometry.wkb
+    byte_order = "<I" if source_wkb[0] else ">I"
+    source_type = struct.unpack_from(byte_order, source_wkb, 1)[0]
+    source_coord_type = 2 if source_type & 0x80000000 else 1
+    if source_coord_type != coord_type:
+        pytest.skip("GEOS WKT reader cannot construct the requested empty layout")
+
+
+def _assert_geometry_equal(actual, expected):
+    assert actual.geom_type == expected.geom_type
+    if geos_version < (3, 9):
+        if expected.geom_type == "GeometryCollection":
+            # GEOS < 3.9 also cannot write collections containing empty Points.
+            assert len(actual.geoms) == len(expected.geoms)
+            for actual_member, expected_member in zip(actual.geoms, expected.geoms):
+                _assert_geometry_equal(actual_member, expected_member)
+            return
+        if expected.geom_type == "Point" and expected.is_empty:
+            assert actual.is_empty
+            assert geometry_serde_general.serialize(actual) == struct.pack(
+                "BBBBi", 0x12, 0, 0, 0, 0
+            )
+            return
+
+    expected_wkb = expected.wkb
+    assert expected_wkb  # Comparing two failed WKB writes would hide a regression.
+    assert actual.wkb == expected_wkb
+
+
+@pytest.mark.parametrize("wkt", [None, "POINT EMPTY", "POINT Z EMPTY"])
+def test_general_empty_point_without_wkb_support(monkeypatch, wkt):
+    geometry = Point() if wkt is None else wkt_loads(wkt)
+
+    def unsupported_wkb(_geometry):
+        raise AssertionError("GEOS < 3.9 cannot write empty Points as WKB")
+
+    monkeypatch.setattr(
+        geometry_serde_general, "geos_version", (3, 8, 0), raising=False
+    )
+    monkeypatch.setattr(geometry_serde_general, "wkb_dumps", unsupported_wkb)
+
+    buffer = geometry_serde_general.serialize(geometry)
+    actual, offset = geometry_serde_general.deserialize(buffer)
+
+    assert buffer == struct.pack("BBBBi", 0x12, 0, 0, 0, 0)
+    assert offset == len(buffer)
+    assert actual.geom_type == "Point"
+    assert actual.is_empty
+    assert geometry_serde_general.serialize(actual) == buffer
+
+
 @pytest.mark.parametrize("geometry_type,type_id", EMPTY_PRIMITIVES)
 @pytest.mark.parametrize("dimension,coord_type", EMPTY_LAYOUTS)
 def test_general_empty_serializer_keeps_dimension(
     geometry_type, type_id, dimension, coord_type
 ):
     geometry = wkt_loads(f"{geometry_type}{dimension} EMPTY")
+    _require_empty_layout(geometry, coord_type)
 
     buffer = geometry_serde_general.serialize(geometry)
 
@@ -66,11 +131,13 @@ def test_general_empty_deserializer_keeps_stored_dimension(
     # Build the eight-byte internal header independently of the Python serializer,
     # as it can also come from the JVM or the C extension.
     buffer = struct.pack("BBBBi", (type_id << 4) | (coord_type << 1), 0, 0, 0, 0)
+    expected = wkt_loads(f"{geometry_type}{dimension} EMPTY")
+    _require_empty_layout(expected, coord_type)
 
     actual, offset = geometry_serde_general.deserialize(buffer)
 
     assert offset == len(buffer)
-    assert actual.wkb == wkt_loads(f"{geometry_type}{dimension} EMPTY").wkb
+    _assert_geometry_equal(actual, expected)
 
 
 @pytest.mark.parametrize(
@@ -93,7 +160,7 @@ def test_general_empty_collection_members_keep_dimension(wkt):
     actual, offset = geometry_serde_general.deserialize(buffer)
 
     assert offset == len(buffer)
-    assert actual.wkb == geometry.wkb
+    _assert_geometry_equal(actual, geometry)
 
 
 @pytest.mark.skipif(
@@ -118,7 +185,7 @@ def test_empty_dimensions_cross_decoder_roundtrip(wkt, c_serializes):
     actual, offset = deserializer.deserialize(buffer)
 
     assert offset == len(buffer)
-    assert actual.wkb == geometry.wkb
+    _assert_geometry_equal(actual, geometry)
 
 
 @pytest.mark.parametrize("geometry_type,type_id", EMPTY_PRIMITIVES)

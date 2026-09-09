@@ -36,6 +36,11 @@ from shapely.geometry.base import BaseGeometry
 from shapely.wkb import dumps as wkb_dumps
 from shapely.wkt import loads as wkt_loads
 
+try:
+    from shapely import geos_version
+except ImportError:
+    from shapely.geos import geos_version
+
 CoordType = Union[
     Tuple[float, float], Tuple[float, float, float], Tuple[float, float, float, float]
 ]
@@ -87,6 +92,10 @@ class CoordinateType:
 
     @staticmethod
     def type_of_empty(geom) -> int:
+        # GEOS < 3.9 cannot write empty Points as WKB. Keep the fallback's
+        # existing XY encoding on those versions without calling the writer.
+        if isinstance(geom, Point) and geos_version < (3, 9, 0):
+            return CoordinateType.XY
         # Shapely 1.x reports _ndim == 2 even for explicit XYZ empty geometries.
         # Their WKB still records Z, so read its type flag instead.
         wkb = wkb_dumps(geom)
