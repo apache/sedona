@@ -4855,30 +4855,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
         same_index_structure = len(left_indexes) == len(right_indexes)
-        if not same_index_structure:
-            status = right_frame.agg(
-                F.count(F.col(right_present)).alias("right_count"),
-                F.countDistinct(
-                    F.struct(*[F.col(column) for column in right_indexes])
-                ).alias("right_unique_count"),
-            ).first()
-            if status["right_count"] != status["right_unique_count"]:
-                if len(right_indexes) > 1:
-                    raise ValueError("cannot handle a non-unique multi-index!")
-                raise ValueError("cannot reindex on an axis with duplicate labels")
-
-            # A flat Index and a MultiIndex have no complete keys in common.
-            aligned_frame = left_frame.select(
-                F.col("L"),
-                stc.ST_GeomFromWKB(F.lit(None).cast("binary")).alias("R"),
-                *[F.col(column) for column in left_indexes],
-                F.col(left_order),
-            )
-            aligned_frame = aligned_frame.withColumnRenamed(
-                left_order, NATURAL_ORDER_COLUMN_NAME
-            )
-            return aligned_frame, left_indexes
-
         positioned_left = _attach_ordered_sequence_column(
             left_frame, F.col(left_order), position
         )
@@ -4907,7 +4883,14 @@ class GeoSeries(GeoFrame, pspd.Series):
                 right_type,
                 positional=True,
             )
-        status = positional_join.agg(
+        # Both validation and filling consume this alignment. Hash the complete
+        # row so column pruning cannot give the consumers different exchanges;
+        # With spark.sql.exchange.reuse enabled (the default), Spark shares this
+        # shuffle within the query without a user-managed cache.
+        row = "__fillna_row__"
+        shared = positional_join.select(F.struct("*").alias(row)).repartition(row)
+        aligned = shared.select(f"{row}.*")
+        status = aligned.agg(
             F.count(F.col(left_present)).alias("left_count"),
             F.count(F.col(right_present)).alias("right_count"),
             F.countDistinct(
@@ -4917,28 +4900,57 @@ class GeoSeries(GeoFrame, pspd.Series):
                 )
             ).alias("right_unique_count"),
             F.max(index_mismatch.cast("int")).alias("index_mismatch"),
-        ).first()
-        axes_equal = (
-            index_dtypes_can_equal
-            and status["left_count"] == status["right_count"]
-            and not bool(status["index_mismatch"] or False)
+        )
+        axes_equal = "__fillna_axes_equal__"
+        invalid = "__fillna_invalid_index__"
+        status = status.withColumn(
+            axes_equal,
+            F.lit(same_index_structure and index_dtypes_can_equal)
+            & (F.col("left_count") == F.col("right_count"))
+            & (F.coalesce(F.col("index_mismatch"), F.lit(0)) == 0),
+        ).select(
+            F.col(axes_equal),
+            (
+                ~F.col(axes_equal)
+                & (F.col("right_count") != F.col("right_unique_count"))
+            ).alias(invalid),
+        )
+        message = (
+            "cannot handle a non-unique multi-index!"
+            if len(right_indexes) > 1
+            else "cannot reindex on an axis with duplicate labels"
+        )
+        left = aligned.crossJoin(F.broadcast(status)).where(
+            # Keep validation in the row filter, including right-only rows, so
+            # it is not skipped for non-null geometries or an empty left axis.
+            F.when(F.col(invalid), F.raise_error(message).cast("boolean")).otherwise(
+                F.col(left_present).isNotNull()
+            )
         )
 
-        if not axes_equal and status["right_count"] != status["right_unique_count"]:
-            if len(right_indexes) > 1:
-                raise ValueError("cannot handle a non-unique multi-index!")
-            raise ValueError("cannot reindex on an axis with duplicate labels")
-
-        if axes_equal:
-            aligned_frame = positional_join.select(
+        if not same_index_structure:
+            # A flat Index and a MultiIndex have no complete keys in common.
+            aligned_frame = left.select(
                 F.col("L"),
-                F.col("R"),
+                stc.ST_GeomFromWKB(F.lit(None).cast("binary")).alias("R"),
                 *[F.col(column) for column in left_indexes],
                 F.col(left_order),
             )
         else:
-            left_alias = left_frame.alias("left")
-            right_alias = right_frame.alias("right")
+            # Exact axes use the positional value already in `left`. Only feed
+            # the label join when reindexing is needed, avoiding duplicate-label
+            # expansion on the exact-axis path.
+            right = aligned.crossJoin(F.broadcast(status)).where(
+                F.when(F.col(axes_equal) | F.col(invalid), F.lit(False)).otherwise(
+                    F.col(right_present).isNotNull()
+                )
+            )
+            left_alias = left.select(
+                "L", "R", *left_indexes, left_order, axes_equal
+            ).alias("left")
+            right_alias = right.select(
+                *[F.col(column).alias(column) for column in ["R", *right_indexes]]
+            ).alias("right")
             join_condition = _fillna_index_columns_equal(
                 left_alias[left_indexes[0]],
                 right_alias[right_indexes[0]],
@@ -4965,7 +4977,9 @@ class GeoSeries(GeoFrame, pspd.Series):
                 how="left",
             ).select(
                 left_alias["L"].alias("L"),
-                right_alias["R"].alias("R"),
+                F.when(left_alias[axes_equal], left_alias["R"])
+                .otherwise(right_alias["R"])
+                .alias("R"),
                 *[left_alias[column].alias(column) for column in left_indexes],
                 left_alias[left_order].alias(left_order),
             )
@@ -5052,9 +5066,11 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Notes
         -----
-        Filling from an independent ``GeoSeries`` validates its distributed index
-        before returning. Filling from another column of the same ``GeoDataFrame``
-        remains lazy.
+        Index alignment with another ``GeoSeries`` is lazy. Invalid duplicate
+        replacement indexes raise a Spark error when the result is evaluated,
+        rather than a Python ``ValueError`` when calling ``fillna``. This also
+        applies to ``inplace=True``. A query that skips evaluating the result may
+        skip this validation.
 
         Using ``limit`` requires distributed global ordering and can be expensive
         for large GeoSeries.

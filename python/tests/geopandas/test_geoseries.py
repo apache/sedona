@@ -1145,10 +1145,11 @@ class TestGeoSeries(TestGeopandasBase):
             index=right_index,
         )
 
+        result = source.fillna(replacement)
         with pytest.raises(
-            ValueError, match="cannot reindex on an axis with duplicate labels"
+            Exception, match="cannot reindex on an axis with duplicate labels"
         ):
-            source.fillna(replacement)
+            result.to_geopandas()
 
     def test_fillna_series_replacement_does_not_coerce_decimal_to_float_index(self):
         source = GeoSeries([None], index=pd.Index([Decimal("0.1")], dtype=object))
@@ -1291,8 +1292,9 @@ class TestGeoSeries(TestGeopandasBase):
             index=replacement_index,
         )
 
-        with pytest.raises(ValueError, match=message):
-            source.fillna(replacement)
+        result = source.fillna(replacement)
+        with pytest.raises(Exception, match=message):
+            result.to_geopandas()
 
     @pytest.mark.parametrize("left_is_multiindex", [False, True])
     def test_fillna_series_replacement_requires_full_index_shape(
@@ -1336,8 +1338,9 @@ class TestGeoSeries(TestGeopandasBase):
         source = GeoSeries([None, None], index=left_index)
         replacement = GeoSeries([Point(1, 1), Point(2, 2)], index=right_index)
 
-        with pytest.raises(ValueError, match=message):
-            source.fillna(replacement)
+        result = source.fillna(replacement)
+        with pytest.raises(Exception, match=message):
+            result.to_geopandas()
 
     def test_fillna_series_replacement_uses_full_multiindex_in_left_order(self):
         from geopandas.testing import assert_geoseries_equal
@@ -1625,8 +1628,9 @@ class TestGeoSeries(TestGeopandasBase):
         source = GeoSeries([None, None], index=left_index)
         fill_values = GeoSeries([Point(1, 1), Point(2, 2)], index=right_index)
 
-        with pytest.raises(ValueError, match=message):
-            source.fillna(fill_values, limit=1)
+        result = source.fillna(fill_values, limit=1)
+        with pytest.raises(Exception, match=message):
+            result.to_geopandas()
 
     def test_fillna_limit_broadcasts_unique_value_to_duplicate_left_index(self):
         from geopandas.testing import assert_geoseries_equal
@@ -1638,6 +1642,65 @@ class TestGeoSeries(TestGeopandasBase):
         expected = gpd.GeoSeries([Point(1, 1), None, None], index=[1, 1, 2])
 
         assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
+
+    @pytest.mark.parametrize("limit", [None, 1])
+    @pytest.mark.parametrize("duplicate", [False, True])
+    @pytest.mark.parametrize("different_index_shape", [False, True])
+    def test_fillna_independent_series_is_lazy(
+        self, monkeypatch, limit, duplicate, different_index_shape
+    ):
+        source = GeoSeries([None, None], index=[1, 2])
+        dataframe_type = type(source._internal.spark_frame)
+        right_index = (
+            pd.MultiIndex.from_tuples([("a", 1), ("a", 1 if duplicate else 2)])
+            if different_index_shape
+            else pd.Index([1, 1 if duplicate else 2])
+        )
+        replacement = GeoSeries([Point(1, 1), Point(2, 2)], index=right_index)
+
+        def unexpected_action(*args, **kwargs):
+            raise AssertionError("independent fillna triggered a Spark action")
+
+        tracker = self.spark.sparkContext.statusTracker()
+        jobs_before = set(tracker.getJobIdsForGroup(None))
+        with monkeypatch.context() as actions:
+            for operation in ["count", "collect", "toPandas", "first", "head", "take"]:
+                actions.setattr(dataframe_type, operation, unexpected_action)
+            result = source.fillna(replacement, limit=limit)
+
+        assert isinstance(result, GeoSeries)
+        assert set(tracker.getJobIdsForGroup(None)) <= jobs_before
+
+    @pytest.mark.parametrize("limit", [None, 1])
+    @pytest.mark.parametrize("left_values", [[], [Point(0, 0)], [None]])
+    @pytest.mark.parametrize("projection", ["geometry", "index", "count"])
+    def test_fillna_duplicate_validation_is_not_pruned(
+        self, limit, left_values, projection
+    ):
+        source = GeoSeries(left_values, index=pd.Index(range(len(left_values))))
+        replacement = GeoSeries([Point(1, 1), None], index=[9, 9])
+
+        result = source.fillna(replacement, limit=limit)
+        frame = result._internal.spark_frame
+        with pytest.raises(
+            Exception, match="cannot reindex on an axis with duplicate labels"
+        ):
+            if projection == "geometry":
+                result.to_geopandas()
+            elif projection == "index":
+                frame.select(*result._internal.index_spark_columns).collect()
+            else:
+                frame.count()
+
+    def test_fillna_inplace_defers_duplicate_validation(self):
+        source = GeoSeries([None], index=[0])
+        replacement = GeoSeries([Point(1, 1), Point(2, 2)], index=[1, 1])
+
+        assert source.fillna(replacement, inplace=True) is None
+        with pytest.raises(
+            Exception, match="cannot reindex on an axis with duplicate labels"
+        ):
+            source.to_geopandas()
 
     def test_fillna_limit_same_anchor_series_is_lazy_and_positional(self, monkeypatch):
         from geopandas.testing import assert_geoseries_equal
@@ -1718,10 +1781,22 @@ class TestGeoSeries(TestGeopandasBase):
 
         assert_geoseries_equal(result.to_geopandas(), expected, check_index_type=False)
 
+    @pytest.mark.parametrize("adaptive", [False, True])
     @pytest.mark.parametrize(
-        "replacement_kind", ["scalar", "same_anchor", "independent"]
+        "replacement_kind",
+        ["scalar", "same_anchor", "independent", "independent_reindexed"],
     )
-    def test_fillna_limit_does_not_duplicate_input_plan(self, replacement_kind):
+    def test_fillna_limit_does_not_duplicate_input_plan(
+        self, replacement_kind, adaptive
+    ):
+        original_adaptive = self.spark.conf.get("spark.sql.adaptive.enabled")
+        try:
+            self.spark.conf.set("spark.sql.adaptive.enabled", str(adaptive).lower())
+            self._check_fillna_limit_input_plan(replacement_kind)
+        finally:
+            self.spark.conf.set("spark.sql.adaptive.enabled", original_adaptive)
+
+    def _check_fillna_limit_input_plan(self, replacement_kind):
         from geopandas.testing import assert_geoseries_equal
 
         row_id = F.col("id")
@@ -1747,8 +1822,12 @@ class TestGeoSeries(TestGeopandasBase):
             if replacement_kind == "same_anchor":
                 replacement = frame["replacement"]
             else:
+                right_index = row_id
+                if replacement_kind == "independent_reindexed":
+                    right_index = (23 - row_id).alias("id")
+                    expected_replacement.index = expected_replacement.index[::-1]
                 replacement_rows = self.spark.range(24, numPartitions=3).select(
-                    row_id, replacement_column.alias("replacement")
+                    right_index, replacement_column.alias("replacement")
                 )
                 replacement = GeoSeries(
                     replacement_rows.pandas_api(index_col="id")["replacement"]
@@ -1757,11 +1836,29 @@ class TestGeoSeries(TestGeopandasBase):
         result = frame.geometry.fillna(replacement, limit=5)
         query = result._internal.spark_frame._jdf.queryExecution()
         plan = query.optimizedPlan().toString()
-        expected_inputs = 2 if replacement_kind == "independent" else 1
-
-        assert plan.count("Range (") == expected_inputs
         assert "Union" not in plan
-        assert "SinglePartition" not in query.executedPlan().toString()
+        if replacement_kind.startswith("independent"):
+            # Validation and filling share an exchange, which is only visible
+            # in the executed plan, not in the logical tree's repeated inputs.
+            result._internal.spark_frame.collect()
+            executed = query.executedPlan()
+            if executed.nodeName() == "AdaptiveSparkPlan":
+                executed = executed.executedPlan()
+            physical = executed.toString()
+            assert physical.count("Range (") == 2
+            assert physical.count("FullOuter") == 1
+            assert "ReusedExchange" in physical
+            assert "Union" not in physical
+            # Only the bounded partial index statistics go to one partition;
+            # the geometry rows and global rank remain distributed.
+            lines = physical.splitlines()
+            for line_number, line in enumerate(lines):
+                if "SinglePartition" in line:
+                    assert "HashAggregate(keys=[]" in lines[line_number + 1]
+                    assert "partial_" in lines[line_number + 1]
+        else:
+            assert plan.count("Range (") == 1
+            assert "SinglePartition" not in query.executedPlan().toString()
         assert_geoseries_equal(
             result.to_geopandas(),
             expected.fillna(expected_replacement, limit=5),
