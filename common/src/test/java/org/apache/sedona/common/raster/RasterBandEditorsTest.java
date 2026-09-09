@@ -69,6 +69,19 @@ public class RasterBandEditorsTest extends RasterTestBase {
   }
 
   @Test
+  public void testSetBandNoDataValueWithNullOnSecondBand() throws FactoryException {
+    // The clear must consult the target band's no-data value, not band 1's: band 1 has
+    // none here, which used to short-circuit the removal on band 2.
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(2, 20, 20, 0, 0, 8, 8, 0.1, 0.1, 0);
+    GridCoverage2D grid = RasterBandEditors.setBandNoDataValue(raster, 2, 444d);
+    assertEquals(444, (double) RasterBandAccessors.getBandNoDataValue(grid, 2), 0.1d);
+
+    grid = RasterBandEditors.setBandNoDataValue(grid, 2, null);
+    assertNull(RasterBandAccessors.getBandNoDataValue(grid, 2));
+    assertNull(RasterBandAccessors.getBandNoDataValue(grid, 1));
+  }
+
+  @Test
   public void testGetSummaryStats() throws IOException {
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");

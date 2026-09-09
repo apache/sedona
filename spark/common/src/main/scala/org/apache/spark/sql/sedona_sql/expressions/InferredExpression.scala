@@ -468,4 +468,45 @@ object InferrableFunction {
       })
   }
 
+  /**
+   * A variant of ternary inferred expression which allows the third argument to be null. This is
+   * not an overload of [[allowRightNull]] since overloading it breaks eta-expansion of the
+   * overloaded methods passed to it at existing call sites.
+   * @param f
+   *   Function to be wrapped as a catalyst expression.
+   * @param typeTag
+   *   Type tag of the function.
+   * @tparam R
+   *   Return type of the function.
+   * @tparam A1
+   *   Type of the first argument.
+   * @tparam A2
+   *   Type of the second argument.
+   * @tparam A3
+   *   Type of the third argument.
+   * @return
+   *   InferrableFunction.
+   */
+  def allowRightNull3[R, A1, A2, A3](f: (A1, A2, A3) => R)(implicit
+      typeTag: TypeTag[(A1, A2, A3) => R]): InferrableFunction = {
+    apply(
+      typeTag,
+      extractors => {
+        val func = f.asInstanceOf[(Any, Any, Any) => Any]
+        val extractor1 = extractors(0)
+        val extractor2 = extractors(1)
+        val extractor3 = extractors(2)
+        input => {
+          val arg1 = extractor1(input)
+          val arg2 = extractor2(input)
+          val arg3 = extractor3(input)
+          if (arg1 != null && arg2 != null) {
+            func(arg1, arg2, arg3)
+          } else {
+            null
+          }
+        }
+      })
+  }
+
 }

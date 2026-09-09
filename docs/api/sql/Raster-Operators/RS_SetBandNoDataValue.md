@@ -30,6 +30,8 @@ Since `v1.5.1`, this function supports the ability to replace the current no-dat
 
     To use this for no-data replacement, the input raster must first set its no-data value, which can then be selectively replaced via this function.
 
+    `noDataValue` must be non-null when using the `replace` variant; to remove a no data value, use the 2 or 3 argument form.
+
 Format:
 
 ```
