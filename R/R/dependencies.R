@@ -17,9 +17,15 @@
 
 
 spark_dependencies <- function(spark_version, scala_version, ...) {
-  if (spark_version[1, 1] == "3") {
-    spark_version <- spark_version
+  spark_major <- as.character(spark_version[1, 1])
+  if (spark_major == "3") {
+    # Sedona publishes Scala 2.12 artifacts for Spark 3.x
     scala_version <- scala_version %||% "2.12"
+  } else if (spark_major == "4") {
+    # Spark 4.x and Sedona's Spark 4 artifacts are Scala 2.13 only. sparklyr
+    # still passes extensions "2.12" for every Spark >= 3.0, so do not rely on
+    # the value it hands us here.
+    scala_version <- "2.13"
   } else {
     stop("Unsupported Spark version: ", spark_version)
   }

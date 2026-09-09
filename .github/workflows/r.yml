@@ -63,6 +63,14 @@ jobs:
         hadoop: [3]
         scala: [2.12.15]
         r: [oldrel, release]
+        java: [11]
+        include:
+          # Spark 4 is Scala 2.13 only and needs Java 17
+          - spark: 4.0.2
+            hadoop: 3
+            scala: 2.13.16
+            r: release
+            java: 17
     env:
       SPARK_VERSION: ${{ matrix.spark }}
       HADOOP_VERSION: ${{ matrix.hadoop }}
@@ -115,7 +123,7 @@ jobs:
       - uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5.6.0
         with:
           distribution: 'temurin'
-          java-version: '11'
+          java-version: ${{ matrix.java }}
           cache: 'maven'
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
