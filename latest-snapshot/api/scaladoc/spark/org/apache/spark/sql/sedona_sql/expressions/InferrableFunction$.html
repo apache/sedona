@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.expressions.InferrableFunction</title>
@@ -436,6 +435,31 @@
   Return type of the function.</p></dd><dt class="tparam">A1</dt><dd class="cmt"><p>
   Type of the first argument.</p></dd><dt class="tparam">A2</dt><dd class="cmt"><p>
   Type of the second argument.</p></dd><dt class="param">f</dt><dd class="cmt"><p>
+  Function to be wrapped as a catalyst expression.</p></dd><dt class="param">typeTag</dt><dd class="cmt"><p>
+  Type tag of the function.</p></dd><dt>returns</dt><dd class="cmt"><p>
+  InferrableFunction.</p></dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction#allowRightNull3" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="allowRightNull3[R,A1,A2,A3](f:(A1,A2,A3)=&gt;R)(implicittypeTag:reflect.runtime.universe.TypeTag[(A1,A2,A3)=&gt;R]):org.apache.spark.sql.sedona_sql.expressions.InferrableFunction"></a><a id="allowRightNull3[R,A1,A2,A3]((A1,A2,A3)⇒R)(scala.reflect.api.JavaUniverse.TypeTag[(A1,A2,A3)⇒R]):InferrableFunction"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferrableFunction$.html#allowRightNull3[R,A1,A2,A3](f:(A1,A2,A3)=&gt;R)(implicittypeTag:reflect.runtime.universe.TypeTag[(A1,A2,A3)=&gt;R]):org.apache.spark.sql.sedona_sql.expressions.InferrableFunction" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">allowRightNull3</span><span class="tparams">[<span name="R">R</span>, <span name="A1">A1</span>, <span name="A2">A2</span>, <span name="A3">A3</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction.allowRightNull3.A1">A1</span>, <span class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction.allowRightNull3.A2">A2</span>, <span class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction.allowRightNull3.A3">A3</span>) ⇒ <span class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction.allowRightNull3.R">R</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="typeTag">typeTag: <span class="extype" name="scala.reflect.api.TypeTags.TypeTag">scala.reflect.api.JavaUniverse.TypeTag</span>[(<span class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction.allowRightNull3.A1">A1</span>, <span class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction.allowRightNull3.A2">A2</span>, <span class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction.allowRightNull3.A3">A3</span>) ⇒ <span class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction.allowRightNull3.R">R</span>]</span>)</span><span class="result">: <a href="InferrableFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction">InferrableFunction</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A variant of ternary inferred expression which allows the third argument to be null.</p><div class="fullcomment"><div class="comment cmt"><p>A variant of ternary inferred expression which allows the third argument to be null. This is
+not an overload of <a href="#allowRightNull[R,A1,A2](f:(A1,A2)=&gt;R)(implicittypeTag:reflect.runtime.universe.TypeTag[(A1,A2)=&gt;R]):org.apache.spark.sql.sedona_sql.expressions.InferrableFunction" class="extmbr" name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction#allowRightNull">allowRightNull</a> since overloading it breaks eta-expansion of the
+overloaded methods passed to it at existing call sites.</p></div><dl class="paramcmts block"><dt class="tparam">R</dt><dd class="cmt"><p>
+  Return type of the function.</p></dd><dt class="tparam">A1</dt><dd class="cmt"><p>
+  Type of the first argument.</p></dd><dt class="tparam">A2</dt><dd class="cmt"><p>
+  Type of the second argument.</p></dd><dt class="tparam">A3</dt><dd class="cmt"><p>
+  Type of the third argument.</p></dd><dt class="param">f</dt><dd class="cmt"><p>
   Function to be wrapped as a catalyst expression.</p></dd><dt class="param">typeTag</dt><dd class="cmt"><p>
   Type tag of the function.</p></dd><dt>returns</dt><dd class="cmt"><p>
   InferrableFunction.</p></dd></dl></div>
