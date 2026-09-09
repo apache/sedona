@@ -167,7 +167,7 @@ test_that("sedona_read_geojson_to_typed_rdd() creates PolygonRDD correctly", {
   expect_equal(polygon_rdd$.jobj %>% invoke("approximateTotalCount"), 1001)
   expect_false(is.null(polygon_rdd$.jobj %>% invoke("boundaryEnvelope")))
   first_2 <- polygon_rdd$.jobj %>%
-    invoke("%>%", list("rawSpatialRDD"), list("take", 2L))
+    invoke("%>%", list("rawSpatialRDD"), list("take", 2L), list("toArray"))
   expected_data <- c(
     "01\t077\t011501\t5\t1500000US010770115015\t010770115015\t5\tBG\t6844991\t32636",
     "01\t045\t021102\t4\t1500000US010450211024\t010450211024\t4\tBG\t11360854\t0"
@@ -647,7 +647,7 @@ test_that("sedona_save_spatial_rdd() works as expected", {
       sdf$.jobj %>% invoke("%>%", list("rawSpatialRDD"), list("count")), 1
     )
     pts <- sdf$.jobj %>%
-      invoke("%>%", list("rawSpatialRDD"), list("takeOrdered", 1L))
+      invoke("%>%", list("rawSpatialRDD"), list("takeOrdered", 1L), list("toArray"))
     expect_equal(pts[[1]] %>% invoke("getX"), 123)
     expect_equal(pts[[1]] %>% invoke("getY"), 456)
     expect_equal(pts[[1]] %>% invoke("getUserData"), "1.0\ta point\tpoint")
