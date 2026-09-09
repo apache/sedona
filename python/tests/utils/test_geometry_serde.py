@@ -35,6 +35,27 @@ from sedona.spark.sql.types import GeometryType
 
 class TestGeometrySerde(TestBase):
     @pytest.mark.parametrize(
+        "wkt",
+        [
+            "POINT EMPTY",
+            "POINT Z EMPTY",
+            "LINESTRING EMPTY",
+            "LINESTRING Z EMPTY",
+            "POLYGON EMPTY",
+            "POLYGON Z EMPTY",
+            "GEOMETRYCOLLECTION (POINT EMPTY, LINESTRING EMPTY, POLYGON EMPTY)",
+            "GEOMETRYCOLLECTION Z (POINT Z EMPTY, LINESTRING Z EMPTY, POLYGON Z EMPTY)",
+        ],
+    )
+    def test_spark_empty_geometry_dimensions(self, wkt):
+        geometry = wkt_loads(wkt)
+        actual = self.spark.createDataFrame(
+            [(geometry,)], StructType().add("geom", GeometryType())
+        ).first()[0]
+
+        assert actual.wkb == geometry.wkb
+
+    @pytest.mark.parametrize(
         "geom",
         [
             GeometryCollection(
