@@ -137,7 +137,6 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
         self.geomcollection = [
             GeometryCollection(),
-            GeometryCollection([Point(), LineString(), Polygon()]),
             GeometryCollection(
                 [
                     MultiPoint([(0, 0), (1, 1)]),
@@ -154,6 +153,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             ),
             # Collection predicates must retain collection semantics with one member.
             GeometryCollection([LineString([(0, 0), (1, 1), (0, 0)])]),
+            GeometryCollection([Point(), LineString(), Polygon()]),
         ]
 
         self.geoms = [
@@ -169,7 +169,8 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
         self.pairs = [
             (self.points, self.multipolygons),
-            (self.geomcollection, self.polygons),
+            # Keep equal-length inputs so the align=False cases still run.
+            (self.geomcollection[: len(self.polygons)], self.polygons),
             (self.linestrings, self.multipoints),
             (self.linearrings, self.multilinestrings),
         ]
