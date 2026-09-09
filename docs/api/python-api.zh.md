@@ -17,11 +17,11 @@
  under the License.
  -->
 
-# Python API reference
+# Python API 参考
 
-The [Python API reference](pydocs/index.html) documents Sedona's Python modules, classes, and functions, including their parameters and return types.
+[Python API 参考文档](pydocs/index.html)介绍了 Sedona 的 Python 模块、类和函数，包括参数和返回类型。该参考文档为英文版。
 
-For functions used with PySpark DataFrames, see the [SQL function reference](pydocs/sedona.spark.sql.html). For example, [ST_Length](pydocs/sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_Length) calculates the length of a linestring geometry:
+要了解在 PySpark DataFrame 中使用的函数，请参阅 [SQL 函数参考](pydocs/sedona.spark.sql.html)。例如，[ST_Length](pydocs/sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_Length) 可以计算线几何对象的长度：
 
 ```python
 from sedona.spark.sql.st_functions import ST_Length
@@ -29,4 +29,4 @@ from sedona.spark.sql.st_functions import ST_Length
 df.select(ST_Length("geometry").alias("length"))
 ```
 
-This example assumes a DataFrame named `df` with a geometry column named `geometry` and a Spark session configured with Sedona. See the [Python installation guide](../setup/install-python.md) for setup instructions and the [DataFrame API guide](sql/DataFrameAPI.md) for argument conventions and more examples.
+此示例假设已有名为 `df` 的 DataFrame，其中包含名为 `geometry` 的几何列，并且 Spark 会话已配置 Sedona。有关配置步骤，请参阅 [Python 安装指南](../setup/install-python.md)；有关参数约定和更多示例，请参阅 [DataFrame API 指南](sql/DataFrameAPI.md)。
