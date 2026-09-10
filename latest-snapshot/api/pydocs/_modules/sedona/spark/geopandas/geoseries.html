@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -5065,30 +5064,6 @@
         <span class="p">)</span>
 
         <span class="n">same_index_structure</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">left_indexes</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">right_indexes</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">same_index_structure</span><span class="p">:</span>
-            <span class="n">status</span> <span class="o">=</span> <span class="n">right_frame</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span>
-                <span class="n">F</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_present</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"right_count"</span><span class="p">),</span>
-                <span class="n">F</span><span class="o">.</span><span class="n">countDistinct</span><span class="p">(</span>
-                    <span class="n">F</span><span class="o">.</span><span class="n">struct</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">column</span><span class="p">)</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">right_indexes</span><span class="p">])</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"right_unique_count"</span><span class="p">),</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">status</span><span class="p">[</span><span class="s2">"right_count"</span><span class="p">]</span> <span class="o">!=</span> <span class="n">status</span><span class="p">[</span><span class="s2">"right_unique_count"</span><span class="p">]:</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">right_indexes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"cannot handle a non-unique multi-index!"</span><span class="p">)</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"cannot reindex on an axis with duplicate labels"</span><span class="p">)</span>
-
-            <span class="c1"># A flat Index and a MultiIndex have no complete keys in common.</span>
-            <span class="n">aligned_frame</span> <span class="o">=</span> <span class="n">left_frame</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
-                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span>
-                <span class="n">stc</span><span class="o">.</span><span class="n">ST_GeomFromWKB</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">"binary"</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"R"</span><span class="p">),</span>
-                <span class="o">*</span><span class="p">[</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">column</span><span class="p">)</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">left_indexes</span><span class="p">],</span>
-                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_order</span><span class="p">),</span>
-            <span class="p">)</span>
-            <span class="n">aligned_frame</span> <span class="o">=</span> <span class="n">aligned_frame</span><span class="o">.</span><span class="n">withColumnRenamed</span><span class="p">(</span>
-                <span class="n">left_order</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span>
-            <span class="p">)</span>
-            <span class="k">return</span> <span class="n">aligned_frame</span><span class="p">,</span> <span class="n">left_indexes</span>
-
         <span class="n">positioned_left</span> <span class="o">=</span> <span class="n">_attach_ordered_sequence_column</span><span class="p">(</span>
             <span class="n">left_frame</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_order</span><span class="p">),</span> <span class="n">position</span>
         <span class="p">)</span>
@@ -5117,7 +5092,14 @@
                 <span class="n">right_type</span><span class="p">,</span>
                 <span class="n">positional</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="n">status</span> <span class="o">=</span> <span class="n">positional_join</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span>
+        <span class="c1"># Both validation and filling consume this alignment. Hash the complete</span>
+        <span class="c1"># row so column pruning cannot give the consumers different exchanges;</span>
+        <span class="c1"># With spark.sql.exchange.reuse enabled (the default), Spark shares this</span>
+        <span class="c1"># shuffle within the query without a user-managed cache.</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="s2">"__fillna_row__"</span>
+        <span class="n">shared</span> <span class="o">=</span> <span class="n">positional_join</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">struct</span><span class="p">(</span><span class="s2">"*"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">row</span><span class="p">))</span><span class="o">.</span><span class="n">repartition</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+        <span class="n">aligned</span> <span class="o">=</span> <span class="n">shared</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">row</span><span class="si">}</span><span class="s2">.*"</span><span class="p">)</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="n">aligned</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span>
             <span class="n">F</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_present</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"left_count"</span><span class="p">),</span>
             <span class="n">F</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_present</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"right_count"</span><span class="p">),</span>
             <span class="n">F</span><span class="o">.</span><span class="n">countDistinct</span><span class="p">(</span>
@@ -5127,28 +5109,61 @@
                 <span class="p">)</span>
             <span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"right_unique_count"</span><span class="p">),</span>
             <span class="n">F</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">index_mismatch</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">"int"</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"index_mismatch"</span><span class="p">),</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
-        <span class="n">axes_equal</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">index_dtypes_can_equal</span>
-            <span class="ow">and</span> <span class="n">status</span><span class="p">[</span><span class="s2">"left_count"</span><span class="p">]</span> <span class="o">==</span> <span class="n">status</span><span class="p">[</span><span class="s2">"right_count"</span><span class="p">]</span>
-            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="n">status</span><span class="p">[</span><span class="s2">"index_mismatch"</span><span class="p">]</span> <span class="ow">or</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">axes_equal</span> <span class="o">=</span> <span class="s2">"__fillna_axes_equal__"</span>
+        <span class="n">invalid</span> <span class="o">=</span> <span class="s2">"__fillna_invalid_index__"</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span>
+            <span class="n">axes_equal</span><span class="p">,</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">same_index_structure</span> <span class="ow">and</span> <span class="n">index_dtypes_can_equal</span><span class="p">)</span>
+            <span class="o">&amp;</span> <span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"left_count"</span><span class="p">)</span> <span class="o">==</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"right_count"</span><span class="p">))</span>
+            <span class="o">&amp;</span> <span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"index_mismatch"</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">axes_equal</span><span class="p">),</span>
+            <span class="p">(</span>
+                <span class="o">~</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">axes_equal</span><span class="p">)</span>
+                <span class="o">&amp;</span> <span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"right_count"</span><span class="p">)</span> <span class="o">!=</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"right_unique_count"</span><span class="p">))</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">invalid</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="c1"># Join this single-row summary without broadcasting it: with AQE off,</span>
+        <span class="c1"># the broadcast timeout would also cover all upstream alignment work.</span>
+        <span class="c1"># The non-broadcast join buffers only its single right-hand row.</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">hint</span><span class="p">(</span><span class="s2">"SHUFFLE_REPLICATE_NL"</span><span class="p">)</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">"GeoSeries.fillna: "</span> <span class="o">+</span> <span class="p">(</span>
+            <span class="s2">"cannot handle a non-unique multi-index!"</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">right_indexes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
+            <span class="k">else</span> <span class="s2">"cannot reindex on an axis with duplicate labels"</span>
+        <span class="p">)</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="n">aligned</span><span class="o">.</span><span class="n">crossJoin</span><span class="p">(</span><span class="n">status</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="c1"># Keep validation in the row filter, including right-only rows, so</span>
+            <span class="c1"># it is not skipped for non-null geometries or an empty left axis.</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">invalid</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">raise_error</span><span class="p">(</span><span class="n">message</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">"boolean"</span><span class="p">))</span><span class="o">.</span><span class="n">otherwise</span><span class="p">(</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_present</span><span class="p">)</span><span class="o">.</span><span class="n">isNotNull</span><span class="p">()</span>
+            <span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">axes_equal</span> <span class="ow">and</span> <span class="n">status</span><span class="p">[</span><span class="s2">"right_count"</span><span class="p">]</span> <span class="o">!=</span> <span class="n">status</span><span class="p">[</span><span class="s2">"right_unique_count"</span><span class="p">]:</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">right_indexes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"cannot handle a non-unique multi-index!"</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"cannot reindex on an axis with duplicate labels"</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">axes_equal</span><span class="p">:</span>
-            <span class="n">aligned_frame</span> <span class="o">=</span> <span class="n">positional_join</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">same_index_structure</span><span class="p">:</span>
+            <span class="c1"># A flat Index and a MultiIndex have no complete keys in common.</span>
+            <span class="n">aligned_frame</span> <span class="o">=</span> <span class="n">left</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
                 <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span>
-                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">),</span>
+                <span class="n">stc</span><span class="o">.</span><span class="n">ST_GeomFromWKB</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">"binary"</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"R"</span><span class="p">),</span>
                 <span class="o">*</span><span class="p">[</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">column</span><span class="p">)</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">left_indexes</span><span class="p">],</span>
                 <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_order</span><span class="p">),</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">left_alias</span> <span class="o">=</span> <span class="n">left_frame</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"left"</span><span class="p">)</span>
-            <span class="n">right_alias</span> <span class="o">=</span> <span class="n">right_frame</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"right"</span><span class="p">)</span>
+            <span class="c1"># Exact axes use the positional value already in `left`. Only feed</span>
+            <span class="c1"># the label join when reindexing is needed, avoiding duplicate-label</span>
+            <span class="c1"># expansion on the exact-axis path.</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="n">aligned</span><span class="o">.</span><span class="n">crossJoin</span><span class="p">(</span><span class="n">status</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">axes_equal</span><span class="p">)</span> <span class="o">|</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">invalid</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">False</span><span class="p">))</span><span class="o">.</span><span class="n">otherwise</span><span class="p">(</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_present</span><span class="p">)</span><span class="o">.</span><span class="n">isNotNull</span><span class="p">()</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">left_alias</span> <span class="o">=</span> <span class="n">left</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+                <span class="s2">"L"</span><span class="p">,</span> <span class="s2">"R"</span><span class="p">,</span> <span class="o">*</span><span class="n">left_indexes</span><span class="p">,</span> <span class="n">left_order</span><span class="p">,</span> <span class="n">axes_equal</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"left"</span><span class="p">)</span>
+            <span class="n">right_alias</span> <span class="o">=</span> <span class="n">right</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+                <span class="o">*</span><span class="p">[</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">column</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">column</span><span class="p">)</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"R"</span><span class="p">,</span> <span class="o">*</span><span class="n">right_indexes</span><span class="p">]]</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"right"</span><span class="p">)</span>
             <span class="n">join_condition</span> <span class="o">=</span> <span class="n">_fillna_index_columns_equal</span><span class="p">(</span>
                 <span class="n">left_alias</span><span class="p">[</span><span class="n">left_indexes</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
                 <span class="n">right_alias</span><span class="p">[</span><span class="n">right_indexes</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
@@ -5175,7 +5190,9 @@
                 <span class="n">how</span><span class="o">=</span><span class="s2">"left"</span><span class="p">,</span>
             <span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
                 <span class="n">left_alias</span><span class="p">[</span><span class="s2">"L"</span><span class="p">]</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span>
-                <span class="n">right_alias</span><span class="p">[</span><span class="s2">"R"</span><span class="p">]</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"R"</span><span class="p">),</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">left_alias</span><span class="p">[</span><span class="n">axes_equal</span><span class="p">],</span> <span class="n">left_alias</span><span class="p">[</span><span class="s2">"R"</span><span class="p">])</span>
+                <span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">right_alias</span><span class="p">[</span><span class="s2">"R"</span><span class="p">])</span>
+                <span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"R"</span><span class="p">),</span>
                 <span class="o">*</span><span class="p">[</span><span class="n">left_alias</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">column</span><span class="p">)</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">left_indexes</span><span class="p">],</span>
                 <span class="n">left_alias</span><span class="p">[</span><span class="n">left_order</span><span class="p">]</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">left_order</span><span class="p">),</span>
             <span class="p">)</span>
@@ -5262,9 +5279,21 @@
 
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
-<span class="sd">        Filling from an independent ``GeoSeries`` validates its distributed index</span>
-<span class="sd">        before returning. Filling from another column of the same ``GeoDataFrame``</span>
-<span class="sd">        remains lazy.</span>
+<span class="sd">        Index alignment with another ``GeoSeries`` is lazy. Invalid duplicate</span>
+<span class="sd">        replacement indexes raise a Spark error when the result is evaluated,</span>
+<span class="sd">        rather than a Python ``ValueError`` when calling ``fillna``. This also</span>
+<span class="sd">        applies to ``inplace=True``. A query that skips evaluating the result may</span>
+<span class="sd">        skip this validation.</span>
+
+<span class="sd">        On Spark 3.5.0--3.5.3, evaluating the same failed result again can hang</span>
+<span class="sd">        with adaptive query execution enabled (SPARK-49979). This also affects</span>
+<span class="sd">        failed ``inplace=True`` results. Use Spark 3.5.4 or newer to avoid this</span>
+<span class="sd">        upstream issue.</span>
+
+<span class="sd">        Sharing the alignment relies on ``spark.sql.exchange.reuse=true`` (the</span>
+<span class="sd">        default). Disabling it can execute the alignment four times instead of</span>
+<span class="sd">        once. Validation does not force a broadcast; normal Spark broadcast</span>
+<span class="sd">        settings still apply to the separate label join.</span>
 
 <span class="sd">        Using ``limit`` requires distributed global ordering and can be expensive</span>
 <span class="sd">        for large GeoSeries.</span>

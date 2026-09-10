@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -1987,9 +1986,19 @@ where NaNs will be filled. Must be greater than 0 if not None.</p></li>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
-<p>Filling from an independent <code class="docutils literal notranslate"><span class="pre">GeoSeries</span></code> validates its distributed index
-before returning. Filling from another column of the same <code class="docutils literal notranslate"><span class="pre">GeoDataFrame</span></code>
-remains lazy.</p>
+<p>Index alignment with another <code class="docutils literal notranslate"><span class="pre">GeoSeries</span></code> is lazy. Invalid duplicate
+replacement indexes raise a Spark error when the result is evaluated,
+rather than a Python <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> when calling <code class="docutils literal notranslate"><span class="pre">fillna</span></code>. This also
+applies to <code class="docutils literal notranslate"><span class="pre">inplace=True</span></code>. A query that skips evaluating the result may
+skip this validation.</p>
+<p>On Spark 3.5.0–3.5.3, evaluating the same failed result again can hang
+with adaptive query execution enabled (SPARK-49979). This also affects
+failed <code class="docutils literal notranslate"><span class="pre">inplace=True</span></code> results. Use Spark 3.5.4 or newer to avoid this
+upstream issue.</p>
+<p>Sharing the alignment relies on <code class="docutils literal notranslate"><span class="pre">spark.sql.exchange.reuse=true</span></code> (the
+default). Disabling it can execute the alignment four times instead of
+once. Validation does not force a broadcast; normal Spark broadcast
+settings still apply to the separate label join.</p>
 <p>Using <code class="docutils literal notranslate"><span class="pre">limit</span></code> requires distributed global ordering and can be expensive
 for large GeoSeries.</p>
 <p class="rubric">Examples</p>
