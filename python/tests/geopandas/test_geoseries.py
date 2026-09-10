@@ -1662,6 +1662,8 @@ class TestGeoSeries(TestGeopandasBase):
             raise AssertionError("independent fillna triggered a Spark action")
 
         tracker = self.spark.sparkContext.statusTracker()
+        listener_bus = self.spark.sparkContext._jsc.sc().listenerBus()
+        listener_bus.waitUntilEmpty()
         jobs_before = set(tracker.getJobIdsForGroup(None))
         with monkeypatch.context() as actions:
             for operation in ["count", "collect", "toPandas", "first", "head", "take"]:
@@ -1669,6 +1671,7 @@ class TestGeoSeries(TestGeopandasBase):
             result = source.fillna(replacement, limit=limit)
 
         assert isinstance(result, GeoSeries)
+        listener_bus.waitUntilEmpty()
         assert set(tracker.getJobIdsForGroup(None)) <= jobs_before
 
     @pytest.mark.parametrize("limit", [None, 1])
@@ -1698,7 +1701,8 @@ class TestGeoSeries(TestGeopandasBase):
 
         assert source.fillna(replacement, inplace=True) is None
         with pytest.raises(
-            Exception, match="cannot reindex on an axis with duplicate labels"
+            Exception,
+            match=r"GeoSeries\.fillna: cannot reindex on an axis with duplicate labels",
         ):
             source.to_geopandas()
 
@@ -1790,11 +1794,26 @@ class TestGeoSeries(TestGeopandasBase):
         self, replacement_kind, adaptive
     ):
         original_adaptive = self.spark.conf.get("spark.sql.adaptive.enabled")
+        original_broadcast = self.spark.conf.get("spark.sql.autoBroadcastJoinThreshold")
+        original_shuffle_partitions = self.spark.conf.get(
+            "spark.sql.shuffle.partitions"
+        )
         try:
             self.spark.conf.set("spark.sql.adaptive.enabled", str(adaptive).lower())
+            # Allow automatic broadcasting of the tiny status row, but not the
+            # 24-row label table. This catches both an explicit status broadcast
+            # and accidentally dropping the non-broadcast status hint.
+            self.spark.conf.set("spark.sql.autoBroadcastJoinThreshold", "64")
+            self.spark.conf.set("spark.sql.shuffle.partitions", "4")
             self._check_fillna_limit_input_plan(replacement_kind)
         finally:
             self.spark.conf.set("spark.sql.adaptive.enabled", original_adaptive)
+            self.spark.conf.set(
+                "spark.sql.autoBroadcastJoinThreshold", original_broadcast
+            )
+            self.spark.conf.set(
+                "spark.sql.shuffle.partitions", original_shuffle_partitions
+            )
 
     def _check_fillna_limit_input_plan(self, replacement_kind):
         from geopandas.testing import assert_geoseries_equal
@@ -1849,11 +1868,13 @@ class TestGeoSeries(TestGeopandasBase):
             assert physical.count("FullOuter") == 1
             assert "ReusedExchange" in physical
             assert "Union" not in physical
+            assert "BroadcastExchange" not in physical
+            assert "CartesianProduct" in physical
             # Only the bounded partial index statistics go to one partition;
             # the geometry rows and global rank remain distributed.
             lines = physical.splitlines()
             for line_number, line in enumerate(lines):
-                if "SinglePartition" in line:
+                if "SinglePartition" in line and "ReusedExchange" not in line:
                     assert "HashAggregate(keys=[]" in lines[line_number + 1]
                     assert "partial_" in lines[line_number + 1]
         else:

@@ -4915,12 +4915,16 @@ class GeoSeries(GeoFrame, pspd.Series):
                 & (F.col("right_count") != F.col("right_unique_count"))
             ).alias(invalid),
         )
-        message = (
+        # Join this single-row summary without broadcasting it: with AQE off,
+        # the broadcast timeout would also cover all upstream alignment work.
+        # The non-broadcast join buffers only its single right-hand row.
+        status = status.hint("SHUFFLE_REPLICATE_NL")
+        message = "GeoSeries.fillna: " + (
             "cannot handle a non-unique multi-index!"
             if len(right_indexes) > 1
             else "cannot reindex on an axis with duplicate labels"
         )
-        left = aligned.crossJoin(F.broadcast(status)).where(
+        left = aligned.crossJoin(status).where(
             # Keep validation in the row filter, including right-only rows, so
             # it is not skipped for non-null geometries or an empty left axis.
             F.when(F.col(invalid), F.raise_error(message).cast("boolean")).otherwise(
@@ -4940,7 +4944,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             # Exact axes use the positional value already in `left`. Only feed
             # the label join when reindexing is needed, avoiding duplicate-label
             # expansion on the exact-axis path.
-            right = aligned.crossJoin(F.broadcast(status)).where(
+            right = aligned.crossJoin(status).where(
                 F.when(F.col(axes_equal) | F.col(invalid), F.lit(False)).otherwise(
                     F.col(right_present).isNotNull()
                 )
@@ -5071,6 +5075,16 @@ class GeoSeries(GeoFrame, pspd.Series):
         rather than a Python ``ValueError`` when calling ``fillna``. This also
         applies to ``inplace=True``. A query that skips evaluating the result may
         skip this validation.
+
+        On Spark 3.5.0--3.5.3, evaluating the same failed result again can hang
+        with adaptive query execution enabled (SPARK-49979). This also affects
+        failed ``inplace=True`` results. Use Spark 3.5.4 or newer to avoid this
+        upstream issue.
+
+        Sharing the alignment relies on ``spark.sql.exchange.reuse=true`` (the
+        default). Disabling it can execute the alignment four times instead of
+        once. Validation does not force a broadcast; normal Spark broadcast
+        settings still apply to the separate label join.
 
         Using ``limit`` requires distributed global ordering and can be expensive
         for large GeoSeries.

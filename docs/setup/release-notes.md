@@ -44,7 +44,10 @@
 * **GeoPandas `fillna`**: Index validation for an independent GeoSeries replacement
   is now deferred until Spark evaluates the result. Invalid duplicate indexes raise
   a Spark error instead of an immediate Python `ValueError`, including when using
-  `inplace=True`.
+  `inplace=True`. On Spark 3.5.0--3.5.3 with adaptive query execution enabled,
+  evaluating the same failed result again can hang because of
+  [SPARK-49979](https://issues.apache.org/jira/browse/SPARK-49979). This includes
+  failed `inplace=True` results. Spark 3.5.4 and newer fix this upstream issue.
 * **Mixed coordinate layouts in polygons and multi-geometries**: Serializing a `Polygon`,
   `MultiPoint`, `MultiLineString`, or `MultiPolygon` whose parts mix XY, XYZ, XYM, or XYZM layouts
   now raises `IllegalArgumentException` instead of silently losing or corrupting ordinates based on
