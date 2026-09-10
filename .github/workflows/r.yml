@@ -59,21 +59,26 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        spark: [3.5.0]
-        hadoop: [3]
-        scala: [2.12.15]
-        r: [oldrel, release]
-        java: [11]
         include:
-          # Spark 4 is Scala 2.13 only and needs Java 17
-          - spark: 4.0.2
-            hadoop: 3
+          - spark: 4.1.1
             scala: 2.13.16
+            java: '17'
             r: release
-            java: 17
+          - spark: 4.0.2
+            scala: 2.13.16
+            java: '17'
+            r: release
+          - spark: 3.5.0
+            scala: 2.12.15
+            java: '11'
+            r: release
+          - spark: 3.5.0
+            scala: 2.12.15
+            java: '11'
+            r: oldrel
     env:
       SPARK_VERSION: ${{ matrix.spark }}
-      HADOOP_VERSION: ${{ matrix.hadoop }}
+      HADOOP_VERSION: 3
       SCALA_VERSION: ${{ matrix.scala }}
       # Ensure the temporary auth token for this workflow, instead of the
       # bundled GitHub PAT from the `remotes` package is used for
