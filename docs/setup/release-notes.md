@@ -41,6 +41,13 @@
   former positional `GeoDataFrame.set_crs(crs, inplace, allow_override)` signature remain
   temporarily supported with a `FutureWarning`. When CRS metadata is unavailable, validation can
   require a distributed lookup of the first non-null geometry's SRID.
+* **GeoPandas `fillna`**: Index validation for an independent GeoSeries replacement
+  is now deferred until Spark evaluates the result. Invalid duplicate indexes raise
+  a Spark error instead of an immediate Python `ValueError`, including when using
+  `inplace=True`. On Spark 3.5.0--3.5.3 with adaptive query execution enabled,
+  evaluating the same failed result again can hang because of
+  [SPARK-49979](https://issues.apache.org/jira/browse/SPARK-49979). This includes
+  failed `inplace=True` results. Spark 3.5.4 and newer fix this upstream issue.
 * **Mixed coordinate layouts in polygons and multi-geometries**: Serializing a `Polygon`,
   `MultiPoint`, `MultiLineString`, or `MultiPolygon` whose parts mix XY, XYZ, XYM, or XYZM layouts
   now raises `IllegalArgumentException` instead of silently losing or corrupting ordinates based on
@@ -66,6 +73,7 @@
 * [<a href='https://github.com/apache/sedona/issues/3269'>GH-3269</a>] - Warn when `geom_equals` or `geom_equals_exact` compares geometry operands with mismatched CRSs
 * [<a href='https://github.com/apache/sedona/issues/3271'>GH-3271</a>] - Preserve per-column CRS state in distributed GeoPandas constructors and select `geometry` or the sole geometry column as active on file reads
 * [<a href='https://github.com/apache/sedona/issues/3293'>GH-3293</a>] - Prevent `GeoDataFrame` construction from mutating caller-owned GeoPandas geometry columns
+* [<a href='https://github.com/apache/sedona/issues/3306'>GH-3306</a>] - Defer GeoSeries fillna index validation and reuse its distributed alignment
 * [<a href='https://github.com/apache/sedona/issues/3307'>GH-3307</a>] - Preserve left-index and null-value semantics when `GeoSeries.fillna` uses another GeoSeries
 
 ## Sedona 1.9.1
