@@ -33,3 +33,19 @@ SQL Example
 var df = sedona.read.format("binaryFile").load("/some/path/*.tiff")
 df = df.withColumn("raster", f.expr("RS_FromGeoTiff(content)"))
 ```
+
+A single serialized `Raster` value must fit in a Java byte array, which limits its size to roughly 2 GiB, including pixel data and metadata. A compressed GeoTIFF can be much smaller than its decoded raster. The number of pixels that fits depends on the band count, data types, and metadata.
+
+For large GeoTIFFs, use the [raster reader](../../../tutorial/raster.md#tile-size-overrides) with explicit tile dimensions:
+
+```python
+df = (
+    sedona.read.format("raster")
+    .option("retile", "true")
+    .option("tileWidth", "256")
+    .option("tileHeight", "256")
+    .load("/some/path/*.tiff")
+)
+```
+
+If the file bytes are already in a `binaryFile` DataFrame, nest `RS_FromGeoTiff` directly inside [RS_TileExplode](../Raster-Tiles/RS_TileExplode.md) to avoid serializing the whole raster as one value.

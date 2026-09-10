@@ -20,6 +20,9 @@ package org.apache.sedona.common.raster.serde;
 
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.kryo.io.UnsafeOutput;
+import java.awt.Point;
+import java.awt.image.BandedSampleModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferDouble;
@@ -27,11 +30,86 @@ import java.awt.image.DataBufferFloat;
 import java.awt.image.DataBufferInt;
 import java.awt.image.DataBufferShort;
 import java.awt.image.DataBufferUShort;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class DataBufferSerializerTest extends KryoSerializerTestBase {
   private static final DataBufferSerializer serializer = new DataBufferSerializer();
+
+  @Test
+  public void rejectOversizedBankPayloadsBeforeCopyingPixels() {
+    // The writer emits every bank in full, even when banks share the same backing array.
+    // Each buffer below needs 2 GiB on the wire but only 1-8 MiB of pixel storage in this test.
+    DataBuffer[] buffers = {
+      new DataBufferByte((byte[][]) repeatBank(new byte[1 << 20], 2048), 1),
+      new DataBufferShort((short[][]) repeatBank(new short[1 << 20], 1024), 1),
+      new DataBufferUShort((short[][]) repeatBank(new short[1 << 20], 1024), 1),
+      new DataBufferInt((int[][]) repeatBank(new int[1 << 20], 512), 1),
+      new DataBufferFloat((float[][]) repeatBank(new float[1 << 20], 512), 1),
+      new DataBufferDouble((double[][]) repeatBank(new double[1 << 20], 256), 1)
+    };
+    for (DataBuffer buffer : buffers) {
+      // Bound output allocation so the unfixed writer fails safely, without allocating GiB.
+      try (Output out = new UnsafeOutput(65536, 65536)) {
+        IllegalArgumentException error =
+            Assert.assertThrows(
+                IllegalArgumentException.class, () -> serializer.write(kryo, out, buffer));
+        Assert.assertTrue(error.getMessage().contains("too large to serialize"));
+        Assert.assertTrue(error.getMessage().contains("RS_TileExplode"));
+        Assert.assertTrue("No pixel bank should have been copied", out.position() < 65536);
+      }
+    }
+  }
+
+  @Test
+  public void includeExistingOutputAndBankHeadersInSizeLimit() {
+    float[][] banks = (float[][]) repeatBank(new float[1 << 20], 512);
+    banks[511] = new float[(1 << 20) - 2048];
+    // Pixel payload is 2 GiB - 8192 bytes. With 4096 bytes already written and
+    // 4112 bytes of DataBuffer headers, the complete value needs 2147483664 bytes.
+    DataBufferFloat buffer = new DataBufferFloat(banks, 1);
+    try (Output out = new UnsafeOutput(65536, 65536)) {
+      out.writeBytes(new byte[4096]);
+      IllegalArgumentException error =
+          Assert.assertThrows(
+              IllegalArgumentException.class, () -> serializer.write(kryo, out, buffer));
+      Assert.assertTrue(error.getMessage().contains("2147483664"));
+      Assert.assertTrue(error.getMessage().contains("RS_TileExplode"));
+    }
+  }
+
+  @Test
+  public void serializeChildRasterWithoutUnusedParentBanks() {
+    float[] bank = new float[1 << 20];
+    bank[0] = 42;
+    DataBufferFloat buffer = new DataBufferFloat((float[][]) repeatBank(bank, 512), bank.length);
+    WritableRaster parent =
+        Raster.createWritableRaster(
+            new BandedSampleModel(DataBuffer.TYPE_FLOAT, 1024, 1024, 512), buffer, new Point());
+    WritableRaster child = parent.createWritableChild(0, 0, 2, 2, 0, 0, new int[] {0});
+    AWTRasterSerializer rasterSerializer = new AWTRasterSerializer();
+    try (Output out = createOutput()) {
+      rasterSerializer.write(kryo, out, child);
+      Assert.assertTrue("Only the small child should be serialized", out.position() < 1024);
+      try (Input in = createInput(out)) {
+        Raster restored = rasterSerializer.read(kryo, in, Raster.class);
+        Assert.assertEquals(2, restored.getWidth());
+        Assert.assertEquals(2, restored.getHeight());
+        Assert.assertEquals(1, restored.getNumBands());
+        Assert.assertEquals(42, restored.getSampleFloat(0, 0, 0), 0);
+      }
+    }
+  }
+
+  private static Object[] repeatBank(Object bank, int count) {
+    Object[] banks = (Object[]) Array.newInstance(bank.getClass(), count);
+    Arrays.fill(banks, bank);
+    return banks;
+  }
 
   private static void assertEquals(DataBuffer expected, DataBuffer actual) {
     Assert.assertEquals(expected.getDataType(), actual.getDataType());
