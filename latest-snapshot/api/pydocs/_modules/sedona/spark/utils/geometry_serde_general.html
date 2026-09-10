@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.utils.geometry_serde_general &mdash; Apache Sedona Python Documentation</title>
@@ -246,6 +245,11 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.wkb</span><span class="w"> </span><span class="kn">import</span> <span class="n">dumps</span> <span class="k">as</span> <span class="n">wkb_dumps</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.wkt</span><span class="w"> </span><span class="kn">import</span> <span class="n">loads</span> <span class="k">as</span> <span class="n">wkt_loads</span>
 
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">shapely</span><span class="w"> </span><span class="kn">import</span> <span class="n">geos_version</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geos</span><span class="w"> </span><span class="kn">import</span> <span class="n">geos_version</span>
+
 <span class="n">CoordType</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span>
     <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
 <span class="p">]</span>
@@ -294,6 +298,19 @@
             <span class="k">return</span> <span class="n">CoordinateType</span><span class="o">.</span><span class="n">XYZ</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Invalid coordinate dimension: </span><span class="si">{</span><span class="n">geom</span><span class="o">.</span><span class="n">_ndim</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CoordinateType.type_of_empty"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.CoordinateType.type_of_empty">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">type_of_empty</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="c1"># GEOS &lt; 3.9 cannot write empty Points as WKB. Keep the fallback's</span>
+        <span class="c1"># existing XY encoding on those versions without calling the writer.</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">Point</span><span class="p">)</span> <span class="ow">and</span> <span class="n">geos_version</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">CoordinateType</span><span class="o">.</span><span class="n">XY</span>
+        <span class="c1"># Shapely 1.x reports _ndim == 2 even for explicit XYZ empty geometries.</span>
+        <span class="c1"># Their WKB still records Z, so read its type flag instead.</span>
+        <span class="n">wkb</span> <span class="o">=</span> <span class="n">wkb_dumps</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
+        <span class="n">byte_order</span> <span class="o">=</span> <span class="s2">"&lt;I"</span> <span class="k">if</span> <span class="n">wkb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="s2">"&gt;I"</span>
+        <span class="n">geometry_type</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="n">byte_order</span><span class="p">,</span> <span class="n">wkb</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">CoordinateType</span><span class="o">.</span><span class="n">XYZ</span> <span class="k">if</span> <span class="n">geometry_type</span> <span class="o">&amp;</span> <span class="mh">0x80000000</span> <span class="k">else</span> <span class="n">CoordinateType</span><span class="o">.</span><span class="n">XY</span></div>
 
 <div class="viewcode-block" id="CoordinateType.bytes_per_coord"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.CoordinateType.bytes_per_coord">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">bytes_per_coord</span><span class="p">(</span><span class="n">coord_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
@@ -372,6 +389,12 @@
         <span class="n">coord</span> <span class="o">=</span> <span class="n">get_coordinate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords_offset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coord_type</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coords_offset</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bytes_per_coord</span>
         <span class="k">return</span> <span class="n">coord</span></div>
+
+<div class="viewcode-block" id="GeometryBuffer.read_empty"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer.read_empty">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">read_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometry_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseGeometry</span><span class="p">:</span>
+        <span class="c1"># Constructors such as Point() create empty GeometryCollections in</span>
+        <span class="c1"># Shapely 1.x. WKT preserves both the primitive type and its dimension.</span>
+        <span class="n">dimension</span> <span class="o">=</span> <span class="s2">" Z"</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">coord_type</span> <span class="o">==</span> <span class="n">CoordinateType</span><span class="o">.</span><span class="n">XYZ</span> <span class="k">else</span> <span class="s2">""</span>
+        <span class="k">return</span> <span class="n">wkt_loads</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">geometry_type</span><span class="si">}{</span><span class="n">dimension</span><span class="si">}</span><span class="s2"> EMPTY"</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeometryBuffer.read_int"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer.read_int">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">read_int</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s2">"i"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ints_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -537,15 +560,14 @@
         <span class="n">coords</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">pack_format</span><span class="p">,</span> <span class="n">preamble_byte</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">coords</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">"BBBBi"</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">generate_header_bytes</span><span class="p">(</span>
+            <span class="n">GeometryTypeID</span><span class="o">.</span><span class="n">POINT</span><span class="p">,</span> <span class="n">CoordinateType</span><span class="o">.</span><span class="n">type_of_empty</span><span class="p">(</span><span class="n">geom</span><span class="p">),</span> <span class="mi">0</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="deserialize_point"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.deserialize_point">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">deserialize_point</span><span class="p">(</span><span class="n">geom_buffer</span><span class="p">:</span> <span class="n">GeometryBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Point</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">num_coords</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="c1"># Here we don't call Point() directly since it would create an empty GeometryCollection</span>
-        <span class="c1"># in shapely 1.x. You'll find similar code for creating empty geometries in other</span>
-        <span class="c1"># deserialization functions.</span>
-        <span class="k">return</span> <span class="n">wkt_loads</span><span class="p">(</span><span class="s2">"POINT EMPTY"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">read_empty</span><span class="p">(</span><span class="s2">"POINT"</span><span class="p">)</span>
     <span class="n">coord</span> <span class="o">=</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">read_coordinate</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">Point</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span></div>
 
@@ -595,12 +617,14 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">header</span> <span class="o">+</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">"d"</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">coords</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">c</span><span class="p">])</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">generate_header_bytes</span><span class="p">(</span><span class="n">GeometryTypeID</span><span class="o">.</span><span class="n">LINESTRING</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">generate_header_bytes</span><span class="p">(</span>
+            <span class="n">GeometryTypeID</span><span class="o">.</span><span class="n">LINESTRING</span><span class="p">,</span> <span class="n">CoordinateType</span><span class="o">.</span><span class="n">type_of_empty</span><span class="p">(</span><span class="n">geom</span><span class="p">),</span> <span class="mi">0</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="deserialize_linestring"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.deserialize_linestring">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">deserialize_linestring</span><span class="p">(</span><span class="n">geom_buffer</span><span class="p">:</span> <span class="n">GeometryBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LineString</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">num_coords</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">wkt_loads</span><span class="p">(</span><span class="s2">"LINESTRING EMPTY"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">read_empty</span><span class="p">(</span><span class="s2">"LINESTRING"</span><span class="p">)</span>
     <span class="n">coords</span> <span class="o">=</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">read_coordinates</span><span class="p">(</span><span class="n">geom_buffer</span><span class="o">.</span><span class="n">num_coords</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">LineString</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span></div>
 
@@ -647,7 +671,9 @@
     <span class="n">num_rings</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="n">int_format</span><span class="p">,</span> <span class="n">wkb_string</span><span class="p">,</span> <span class="mi">5</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">num_rings</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">generate_header_bytes</span><span class="p">(</span><span class="n">GeometryTypeID</span><span class="o">.</span><span class="n">POLYGON</span><span class="p">,</span> <span class="n">CoordinateType</span><span class="o">.</span><span class="n">XY</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">generate_header_bytes</span><span class="p">(</span>
+            <span class="n">GeometryTypeID</span><span class="o">.</span><span class="n">POLYGON</span><span class="p">,</span> <span class="n">CoordinateType</span><span class="o">.</span><span class="n">type_of_empty</span><span class="p">(</span><span class="n">geom</span><span class="p">),</span> <span class="mi">0</span>
+        <span class="p">)</span>
 
     <span class="n">coord_bytes</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">""</span>
     <span class="n">ring_lengths</span> <span class="o">=</span> <span class="p">[]</span>
@@ -674,7 +700,7 @@
 
 <div class="viewcode-block" id="deserialize_polygon"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.deserialize_polygon">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">deserialize_polygon</span><span class="p">(</span><span class="n">geom_buffer</span><span class="p">:</span> <span class="n">GeometryBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Polygon</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">num_coords</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">wkt_loads</span><span class="p">(</span><span class="s2">"POLYGON EMPTY"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">read_empty</span><span class="p">(</span><span class="s2">"POLYGON"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">read_polygon</span><span class="p">()</span></div>
 
 
