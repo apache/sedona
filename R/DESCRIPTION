@@ -39,5 +39,5 @@ Suggests:
     rmarkdown
 Encoding: UTF-8
 RoxygenNote: 7.3.2
-SystemRequirements: 'Apache Spark' 3.x
+SystemRequirements: 'Apache Spark' 3.x or 4.x
 Roxygen: list(markdown = TRUE)

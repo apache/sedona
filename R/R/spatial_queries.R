@@ -91,8 +91,10 @@ sedona_knn_query <- function(rdd,
                              index_type = c("quadtree", "rtree"),
                              result_type = c("rdd", "sdf", "raw")) {
   as.spatial_rdd <- function(sc, query_result) {
-    query_result <-
-      invoke_static(sc, "java.util.Arrays", "asList", query_result)
+    if (!inherits(query_result, "spark_jobj")) {
+      query_result <-
+        invoke_static(sc, "java.util.Arrays", "asList", query_result)
+    }
     raw_spatial_rdd <- invoke(java_context(sc), "parallelize", query_result)
     spatial_rdd <- invoke_new(
       sc,
@@ -111,7 +113,7 @@ sedona_knn_query <- function(rdd,
     switch(result_type,
       rdd = as.spatial_rdd(sc, query_result),
       sdf = as.spatial_rdd(sc, query_result) %>% sdf_register(),
-      raw = query_result
+      raw = as_r_list(query_result)
     )
   }
 
@@ -206,7 +208,7 @@ sedona_range_query <- function(rdd,
     switch(result_type,
       rdd = as.spatial_rdd(sc, result_rdd),
       sdf = as.spatial_rdd(sc, result_rdd) %>% sdf_register(),
-      raw = result_rdd %>% invoke("collect")
+      raw = result_rdd %>% invoke("collect") %>% as_r_list()
     )
   }
 
@@ -236,4 +238,17 @@ ensure_spatial_indexing <- function(rdd, index_type = c("quadtree", "rtree")) {
 
 has_raw_partition_index <- function(rdd) {
   !is.null(rdd$.state$raw_partition_index_type)
+}
+
+# `java.util.List` results that wrap a Scala `Seq` (for example the ones
+# returned by `JavaRDD.take()`, `JavaRDD.collect()` and `KNNQuery`) are
+# unwrapped into R lists by the sparklyr backend for Spark 3, but the backend
+# for Spark 4 hands them back as a single Java object. Convert on the JVM side
+# so callers see an R list of Java objects on both.
+as_r_list <- function(x) {
+  if (inherits(x, "spark_jobj")) {
+    invoke(x, "toArray")
+  } else {
+    x
+  }
 }
