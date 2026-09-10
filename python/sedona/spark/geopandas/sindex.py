@@ -80,6 +80,20 @@ class SpatialIndex:
                 "Invalid type for `geometry`. Expected np.array, GeoSeries, or PySparkDataFrame."
             )
 
+    @property
+    def valid_query_predicates(self) -> set:
+        """Return the supported values for the ``query`` predicate.
+
+        .. versionadded:: 2.0.0
+
+        Returns
+        -------
+        set
+            A new set containing ``None``, ``"intersects"``, and ``"contains"``.
+            ``None`` selects the default ``"intersects"`` behavior.
+        """
+        return {None, *ALLOWED_PREDICATES}
+
     def query(self, geometry: BaseGeometry, predicate: str = None, sort: bool = False):
         """
         Query the spatial index for geometries that intersect the given geometry.

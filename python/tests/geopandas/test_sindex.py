@@ -94,6 +94,32 @@ class TestSpatialIndex(TestBase):
         assert hasattr(self.polygons, "sindex")
         assert hasattr(self.lines, "sindex")
 
+    @pytest.mark.parametrize("distributed", [False, True])
+    def test_valid_query_predicates(self, distributed):
+        geometries = [Point(0, 0), Point(1, 1), Point(2, 2)]
+        sindex = (
+            GeoSeries(geometries).sindex
+            if distributed
+            else SpatialIndex(np.array(geometries))
+        )
+        assert sindex.valid_query_predicates == {None, "intersects", "contains"}
+
+        for predicate in sindex.valid_query_predicates:
+            result = sindex.query(box(0.5, 0.5, 1.5, 1.5), predicate=predicate)
+            assert list(result) == ([Point(1, 1)] if distributed else [1])
+
+    @pytest.mark.parametrize("geometries", [[], [Point(0, 0)]])
+    def test_valid_query_predicates_returns_independent_set(self, geometries):
+        sindex = SpatialIndex(np.array(geometries, dtype=object))
+        predicates = sindex.valid_query_predicates
+        predicates.clear()
+        predicates.add("within")
+
+        assert sindex.valid_query_predicates == {None, "intersects", "contains"}
+        if geometries:
+            with pytest.raises(ValueError, match="Predicate must be"):
+                sindex.query(Point(0, 0), predicate="within")
+
     def test_geodataframe_sindex_property_exists(self):
         """Test that the sindex property exists on GeoDataFrame."""
         assert hasattr(self.points.to_geoframe(), "sindex")
