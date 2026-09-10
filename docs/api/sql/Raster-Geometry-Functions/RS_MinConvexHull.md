@@ -28,6 +28,9 @@ The created geometry representing the min convex hull has world coordinates of t
 !!!Note
     If the specified band does not exist in the raster, RS_MinConvexHull throws an IllegalArgumentException
 
+!!!Note
+    If every considered pixel is a NoData pixel, RS_MinConvexHull returns null.
+
 Format:
 
 `RS_MinConvexHull(raster: Raster)`

@@ -808,4 +808,64 @@ public class RasterBandAccessorsTest extends RasterTestBase {
       assertFalse(RasterBandAccessors.bandIsNoData(raster, 2));
     }
   }
+
+  @Test
+  public void testNaNNoDataValueStats() throws ParseException, FactoryException {
+    // Same layout as a GDAL float raster with GDAL_NODATA=nan: two NaN pixels among 1..14 and 7.5
+    double[] values = {Double.NaN, 1, 2, 3, 4, Double.NaN, 6, 7, 8, 9, 10, 11, 12, 13, 14, 7.5};
+    GridCoverage2D raster =
+        RasterBandEditors.setBandNoDataValue(
+            RasterConstructors.makeNonEmptyRaster(
+                1, "f", 4, 4, 0, 4, 1, -1, 0, 0, 4326, new double[][] {values}),
+            1,
+            Double.NaN);
+    Double noDataValue = RasterBandAccessors.getBandNoDataValue(raster);
+    assertNotNull(noDataValue);
+    assertTrue(Double.isNaN(noDataValue));
+
+    // The NaN pixels are nodata and must be excluded from the count.
+    assertEquals(14, RasterBandAccessors.getCount(raster, 1, true));
+    assertEquals(16, RasterBandAccessors.getCount(raster, 1, false));
+
+    // 14 valid pixels: 1..14 without 5, plus 7.5, so the sum is 107.5.
+    double[] stats = RasterBandAccessors.getSummaryStatsAll(raster, 1, true);
+    assertEquals(14, stats[0], 0);
+    assertEquals(107.5, stats[1], 1e-9);
+    assertEquals(107.5 / 14, stats[2], 1e-9);
+    assertEquals(1.0, stats[4], 1e-9);
+    assertEquals(14.0, stats[5], 1e-9);
+    // Keeping nodata pixels pollutes the statistics with NaN.
+    double[] statsWithNoData = RasterBandAccessors.getSummaryStatsAll(raster, 1, false);
+    assertEquals(16, statsWithNoData[0], 0);
+    assertTrue(Double.isNaN(statsWithNoData[2]));
+
+    assertFalse(RasterBandAccessors.bandIsNoData(raster, 1));
+
+    Geometry roi = Constructors.geomFromWKT("POLYGON ((0 0, 4 0, 4 4, 0 4, 0 0))", 4326);
+    assertEquals(
+        14.0, RasterBandAccessors.getZonalStats(raster, roi, 1, "count", false, true), 1e-9);
+    assertEquals(
+        107.5 / 14, RasterBandAccessors.getZonalStats(raster, roi, 1, "mean", false, true), 1e-9);
+
+    // A float band holding only NaN with a NaN nodata value is entirely nodata.
+    GridCoverage2D empty = RasterConstructors.makeEmptyRaster(1, "F", 2, 2, 0, 0, 1);
+    double[] allNaN = new double[4];
+    Arrays.fill(allNaN, Double.NaN);
+    GridCoverage2D allNoData = MapAlgebra.addBandFromArray(empty, allNaN, 1, Double.NaN);
+    assertTrue(Double.isNaN(RasterBandAccessors.getBandNoDataValue(allNoData, 1)));
+    assertTrue(RasterBandAccessors.bandIsNoData(allNoData, 1));
+  }
+
+  @Test
+  public void testCountWithSignedZeroNoData() throws FactoryException {
+    // -0.0 and 0.0 are the same nodata value, as everywhere else in the nodata helpers
+    GridCoverage2D raster =
+        RasterBandEditors.setBandNoDataValue(
+            RasterConstructors.makeNonEmptyRaster(
+                1, "f", 2, 2, 0, 0, 1, -1, 0, 0, 4326, new double[][] {{-0.0, 1, 0.0, 3}}),
+            1,
+            0.0);
+    assertEquals(2, RasterBandAccessors.getCount(raster, 1, true));
+    assertEquals(4, RasterBandAccessors.getCount(raster, 1, false));
+  }
 }

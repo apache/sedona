@@ -462,4 +462,42 @@ public class RasterUtilsTest {
           category.getRange().getMinimum(true) <= category.getRange().getMaximum(true));
     }
   }
+
+  @Test
+  public void testHasNoDataValueAndIsNoDataNaN() throws FactoryException {
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "F", 2, 2, 0, 0, 1);
+    GridSampleDimension band = raster.getSampleDimension(0);
+    Assert.assertFalse(RasterUtils.hasNoDataValue(band));
+    Assert.assertTrue(Double.isNaN(RasterUtils.getNoDataValue(band)));
+
+    GridSampleDimension withNaN =
+        RasterUtils.createSampleDimensionWithNoDataValue(band, Double.NaN);
+    Assert.assertTrue(RasterUtils.hasNoDataValue(withNaN));
+    Assert.assertTrue(Double.isNaN(RasterUtils.getNoDataValue(withNaN)));
+    Assert.assertSame(
+        withNaN, RasterUtils.createSampleDimensionWithNoDataValue(withNaN, Double.NaN));
+    Assert.assertFalse(RasterUtils.hasNoDataValue(RasterUtils.removeNoDataValue(withNaN)));
+
+    GridSampleDimension withZero = RasterUtils.createSampleDimensionWithNoDataValue(band, 0.0);
+    Assert.assertTrue(RasterUtils.hasNoDataValue(withZero));
+    assertEquals(0.0, RasterUtils.getNoDataValue(withZero), 0);
+
+    // NaN and numeric nodata values can replace each other.
+    assertEquals(
+        0.0,
+        RasterUtils.getNoDataValue(RasterUtils.createSampleDimensionWithNoDataValue(withNaN, 0.0)),
+        0);
+    Assert.assertTrue(
+        Double.isNaN(
+            RasterUtils.getNoDataValue(
+                RasterUtils.createSampleDimensionWithNoDataValue(withZero, Double.NaN))));
+
+    Assert.assertFalse(RasterUtils.isNoData(1.0, null));
+    Assert.assertFalse(RasterUtils.isNoData(Double.NaN, null));
+    Assert.assertTrue(RasterUtils.isNoData(Double.NaN, Double.NaN));
+    Assert.assertFalse(RasterUtils.isNoData(1.0, Double.NaN));
+    Assert.assertTrue(RasterUtils.isNoData(0.0, 0.0));
+    Assert.assertTrue(RasterUtils.isNoData(-0.0, 0.0));
+    Assert.assertFalse(RasterUtils.isNoData(Double.NaN, 0.0));
+  }
 }

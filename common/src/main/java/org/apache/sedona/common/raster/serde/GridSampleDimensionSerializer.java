@@ -108,30 +108,60 @@ public class GridSampleDimensionSerializer extends Serializer<GridSampleDimensio
    *     encode the nodata value; a byte source widened to double by a UDF must encode against
    *     double, not byte
    * @return the original sample dimension, or a new one carrying the declared nodata value
+   * @throws IllegalArgumentException if an inherited NaN nodata value cannot be represented by an
+   *     integral output type
    */
   public static GridSampleDimension reconcileNoDataValue(
       DeclaredSampleDimension declared, SampleDimensionType sampleDimensionType) {
     GridSampleDimension sampleDimension = declared.sampleDimension;
     boolean noDataValueOverride = (declared.metadataOverrideFlags & NO_DATA_VALUE_OVERRIDE) != 0;
     boolean sampleTypeOverride = (declared.metadataOverrideFlags & SAMPLE_TYPE_OVERRIDE) != 0;
+    // Capture what the replayed categories declare before retyping discards them: a NaN nodata
+    // value travels as NaN on the wire, exactly like "no nodata value", so only the categories
+    // and the override flags can tell the two apart.
+    boolean sourceHasNoDataValue = RasterUtils.hasNoDataValue(sampleDimension);
+    double sourceNoDataValue = RasterUtils.getNoDataValue(sampleDimension);
     if (sampleTypeOverride) {
       // with_bands() changed the Java storage type. Its opaque source categories no longer
       // describe the output pixels, so replace them with the standard full range for that type
       // before applying the output's NODATA declaration.
       sampleDimension = retypeSampleDimension(sampleDimension, sampleDimensionType);
     }
-    double categoryNoDataValue = RasterUtils.getNoDataValue(sampleDimension);
     if (Double.isNaN(declared.noDataValue)) {
-      if (Double.isNaN(categoryNoDataValue)) {
-        // Neither side declares a nodata value; nothing to do. This is the path for rasters
-        // serialized before the declared value was honored.
+      if (noDataValueOverride) {
+        // with_bands(nodata=float("nan")) is the documented way to ask for "no nodata value";
+        // honour it whether the source declared a numeric or a NaN nodata value.
+        return RasterUtils.removeNoDataValue(sampleDimension);
+      }
+      if (!sourceHasNoDataValue) {
+        // Neither side declares a nodata value. This is also the path for rasters serialized
+        // before the declared value was honored.
         return sampleDimension;
       }
-      // NaN was declared against categories that carry a real nodata value, which only happens
-      // when a writer asked for "no nodata" over replayed categories. Honour that by dropping
-      // the category, otherwise the source's value silently survives into the output.
+      if (Double.isNaN(sourceNoDataValue)) {
+        // The source's nodata value is NaN and nothing asked to change it. Retyping dropped the
+        // category, so recreate it when the output type can hold NaN. Refuse an integral output
+        // rather than silently turning nodata pixels into valid values.
+        if (sampleTypeOverride) {
+          if (!isFloatingPoint(sampleDimensionType)) {
+            throw new IllegalArgumentException(
+                "Inherited NaN nodata cannot be represented by integral output sample type '"
+                    + sampleDimensionType
+                    + "'; pass nodata= with a representable value or use a floating-point output "
+                    + "dtype");
+          }
+          return RasterUtils.createSampleDimensionWithNoDataValue(
+              sampleDimension, Double.NaN, sampleDimensionType);
+        }
+        return sampleDimension;
+      }
+      // NaN was declared against categories that carry a numeric nodata value without the
+      // override marker, which only older writers produce when asking for "no nodata" over
+      // replayed categories. Honour that by dropping the category, otherwise the source's value
+      // silently survives into the output.
       return RasterUtils.removeNoDataValue(sampleDimension);
     }
+    double categoryNoDataValue = RasterUtils.getNoDataValue(sampleDimension);
     if (!noDataValueOverride
         && !sampleTypeOverride
         && Double.compare(categoryNoDataValue, declared.noDataValue) == 0) {
@@ -145,6 +175,11 @@ public class GridSampleDimensionSerializer extends Serializer<GridSampleDimensio
     GridSampleDimension stripped = RasterUtils.removeNoDataValue(sampleDimension);
     return RasterUtils.createSampleDimensionWithNoDataValue(
         stripped, declared.noDataValue, sampleDimensionType);
+  }
+
+  private static boolean isFloatingPoint(SampleDimensionType sampleDimensionType) {
+    return sampleDimensionType == SampleDimensionType.REAL_32BITS
+        || sampleDimensionType == SampleDimensionType.REAL_64BITS;
   }
 
   /** Rebuild a source sample dimension with a default quantitative category for the output type. */

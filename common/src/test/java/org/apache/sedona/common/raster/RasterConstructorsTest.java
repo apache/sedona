@@ -21,6 +21,10 @@ package org.apache.sedona.common.raster;
 import static org.apache.sedona.common.utils.RasterUtils.flipVerticallyPixelSpace;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
@@ -29,6 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -1291,7 +1296,7 @@ public class RasterConstructorsTest extends RasterTestBase {
     GridCoverage2D raster =
         createRandomRaster(DataBuffer.TYPE_BYTE, 100, 100, 1000, 1010, 10, 1, "EPSG:3857");
     TileGenerator.Tile[] tiles =
-        collectTiles(RasterConstructors.generateTiles(raster, null, 10, 10, false, Double.NaN));
+        collectTiles(RasterConstructors.generateTiles(raster, null, 10, 10, false, null));
     assertTilesSameWithGridCoverage(tiles, raster, null, 10, 10, Double.NaN);
   }
 
@@ -1300,7 +1305,7 @@ public class RasterConstructorsTest extends RasterTestBase {
     GridCoverage2D raster =
         createRandomRaster(DataBuffer.TYPE_BYTE, 100, 100, 1000, 1010, 10, 1, "EPSG:3857");
     TileGenerator.Tile[] tiles =
-        collectTiles(RasterConstructors.generateTiles(raster, null, 9, 9, false, Double.NaN));
+        collectTiles(RasterConstructors.generateTiles(raster, null, 9, 9, false, null));
     assertTilesSameWithGridCoverage(tiles, raster, null, 9, 9, Double.NaN);
   }
 
@@ -1309,7 +1314,7 @@ public class RasterConstructorsTest extends RasterTestBase {
     GridCoverage2D raster =
         createRandomRaster(DataBuffer.TYPE_BYTE, 100, 100, 1000, 1010, 10, 2, "EPSG:3857");
     TileGenerator.Tile[] tiles =
-        collectTiles(RasterConstructors.generateTiles(raster, null, 9, 9, true, 100));
+        collectTiles(RasterConstructors.generateTiles(raster, null, 9, 9, true, 100.0));
     assertTilesSameWithGridCoverage(tiles, raster, null, 9, 9, 100);
   }
 
@@ -1319,7 +1324,7 @@ public class RasterConstructorsTest extends RasterTestBase {
         createRandomRaster(DataBuffer.TYPE_BYTE, 100, 100, 1000, 1010, 10, 2, "EPSG:3857");
     int[] bandIndices = {2};
     TileGenerator.Tile[] tiles =
-        collectTiles(RasterConstructors.generateTiles(raster, bandIndices, 9, 9, true, 100));
+        collectTiles(RasterConstructors.generateTiles(raster, bandIndices, 9, 9, true, 100.0));
     assertTilesSameWithGridCoverage(tiles, raster, bandIndices, 9, 9, 100);
   }
 
@@ -1329,7 +1334,7 @@ public class RasterConstructorsTest extends RasterTestBase {
         createRandomRaster(DataBuffer.TYPE_BYTE, 100, 100, 1000, 1010, 10, 4, "EPSG:3857");
     int[] bandIndices = {3, 1};
     TileGenerator.Tile[] tiles =
-        collectTiles(RasterConstructors.generateTiles(raster, bandIndices, 8, 7, true, 100));
+        collectTiles(RasterConstructors.generateTiles(raster, bandIndices, 8, 7, true, 100.0));
     assertTilesSameWithGridCoverage(tiles, raster, bandIndices, 8, 7, 100);
   }
 
@@ -1339,7 +1344,7 @@ public class RasterConstructorsTest extends RasterTestBase {
         createRandomRaster(DataBuffer.TYPE_BYTE, 100, 100, 1000, 1010, 10, 1, "EPSG:3857");
     raster = MapAlgebra.addBandFromArray(raster, MapAlgebra.bandAsArray(raster, 1), 1, 13.0);
     TileGenerator.Tile[] tiles =
-        collectTiles(RasterConstructors.generateTiles(raster, null, 9, 9, true, Double.NaN));
+        collectTiles(RasterConstructors.generateTiles(raster, null, 9, 9, true, null));
     assertTilesSameWithGridCoverage(tiles, raster, null, 9, 9, 13);
   }
 
@@ -1349,7 +1354,7 @@ public class RasterConstructorsTest extends RasterTestBase {
         createRandomRaster(DataBuffer.TYPE_BYTE, 100, 100, 1000, 1010, 10, 1, "EPSG:3857");
     raster = MapAlgebra.addBandFromArray(raster, MapAlgebra.bandAsArray(raster, 1), 1, 13.0);
     TileGenerator.Tile[] tiles =
-        collectTiles(RasterConstructors.generateTiles(raster, null, 9, 9, true, 42));
+        collectTiles(RasterConstructors.generateTiles(raster, null, 9, 9, true, 42.0));
     assertTilesSameWithGridCoverage(tiles, raster, null, 9, 9, 42);
   }
 
@@ -1525,5 +1530,121 @@ public class RasterConstructorsTest extends RasterTestBase {
     String expectedRecordInfo =
         "O3(time=2, z=2, lat=48, lon=80)\n" + "\n" + "NO2(time=2, z=2, lat=48, lon=80)";
     assertEquals(expectedRecordInfo, actualRecordInfo);
+  }
+
+  @Test
+  public void testLegacyPrimitiveTileApisRemainCompatible() throws NoSuchMethodException {
+    Class<?>[] arguments = {
+      GridCoverage2D.class, int[].class, int.class, int.class, boolean.class, double.class
+    };
+    assertNotNull(RasterConstructors.class.getMethod("generateTiles", arguments));
+    assertNotNull(TileGenerator.class.getMethod("generateInDbTiles", arguments));
+    assertNotNull(TileGenerator.InDbTileIterator.class.getConstructor(arguments));
+
+    GridCoverage2D raster =
+        createRandomRaster(DataBuffer.TYPE_BYTE, 10, 10, 1000, 1010, 10, 1, "EPSG:3857");
+    raster = MapAlgebra.addBandFromArray(raster, MapAlgebra.bandAsArray(raster, 1), 1, 13.0);
+    double legacyInheritMarker = Double.NaN;
+    TileGenerator.Tile[] tiles =
+        collectTiles(
+            RasterConstructors.generateTiles(raster, null, 9, 9, true, legacyInheritMarker));
+    assertTilesSameWithGridCoverage(tiles, raster, null, 9, 9, 13);
+  }
+
+  @Test
+  public void fromGeoTiffWithNaNNoData() throws IOException {
+    byte[] content =
+        Files.readAllBytes(Paths.get(resourceFolder + "raster_geotiff_nodata/nan_nodata.tif"));
+    GridCoverage2D raster = RasterConstructors.fromGeoTiff(content);
+
+    // GDAL writes GDAL_NODATA="nan" for float rasters; the reader must surface it as a real
+    // nodata value instead of dropping it as "no nodata".
+    assertTrue(RasterUtils.hasNoDataValue(raster.getSampleDimension(0)));
+    Double noDataValue = RasterBandAccessors.getBandNoDataValue(raster, 1);
+    assertNotNull(noDataValue);
+    assertTrue(Double.isNaN(noDataValue));
+
+    Raster data = RasterUtils.getRaster(raster.getRenderedImage());
+    assertTrue(Double.isNaN(data.getSampleDouble(0, 0, 0)));
+    assertTrue(Double.isNaN(data.getSampleDouble(1, 1, 0)));
+    assertEquals(1.0, data.getSampleDouble(1, 0, 0), 1e-9);
+    assertEquals(7.5, data.getSampleDouble(3, 3, 0), 1e-9);
+
+    // The NaN pixels are nodata and must be excluded from the count.
+    assertEquals(14, RasterBandAccessors.getCount(raster, 1, true));
+    assertEquals(16, RasterBandAccessors.getCount(raster, 1, false));
+  }
+
+  @Test
+  public void fromGeoTiffWithNaNNoDataAndRescaling() throws IOException {
+    // Same fixture with scale=0.5 and offset=10 in the GDAL metadata, which the reader applies.
+    // The NaN nodata value must survive the rescaling path, and the NaN pixels must not be
+    // rescaled.
+    byte[] content =
+        Files.readAllBytes(
+            Paths.get(resourceFolder + "raster_geotiff_nodata/nan_nodata_scaled.tif"));
+
+    GridCoverage2D rescaled = RasterConstructors.fromGeoTiff(content);
+    assertEquals(
+        DataBuffer.TYPE_DOUBLE, rescaled.getRenderedImage().getSampleModel().getDataType());
+    Double noDataValue = RasterBandAccessors.getBandNoDataValue(rescaled, 1);
+    assertNotNull(noDataValue);
+    assertTrue(Double.isNaN(noDataValue));
+    Raster data = RasterUtils.getRaster(rescaled.getRenderedImage());
+    assertTrue(Double.isNaN(data.getSampleDouble(0, 0, 0)));
+    assertEquals(1 * 0.5 + 10, data.getSampleDouble(1, 0, 0), 1e-9);
+    assertEquals(7.5 * 0.5 + 10, data.getSampleDouble(3, 3, 0), 1e-9);
+    assertEquals(14, RasterBandAccessors.getCount(rescaled, 1, true));
+    rescaled.dispose(true);
+  }
+
+  @Test
+  public void fromGeoTiffWithInfiniteNoData() throws IOException {
+    // GDAL writes GDAL_NODATA=inf / -inf for infinite nodata values. Such a file must load, but
+    // an infinite value cannot be a band nodata value, so the band reports none and every pixel,
+    // NaN ones included, counts as data.
+    for (String name : new String[] {"inf_nodata_scaled.tif", "neg_inf_nodata_scaled.tif"}) {
+      byte[] content =
+          Files.readAllBytes(Paths.get(resourceFolder + "raster_geotiff_nodata/" + name));
+
+      GridCoverage2D rescaled = RasterConstructors.fromGeoTiff(content);
+      assertEquals(
+          DataBuffer.TYPE_DOUBLE, rescaled.getRenderedImage().getSampleModel().getDataType());
+      assertNull(RasterBandAccessors.getBandNoDataValue(rescaled, 1));
+      assertFalse(RasterUtils.hasNoDataValue(rescaled.getSampleDimension(0)));
+      Raster data = RasterUtils.getRaster(rescaled.getRenderedImage());
+      assertTrue(Double.isNaN(data.getSampleDouble(0, 0, 0)));
+      assertEquals(1 * 0.5 + 10, data.getSampleDouble(1, 0, 0), 1e-9);
+      assertEquals(16, RasterBandAccessors.getCount(rescaled, 1, true));
+      rescaled.dispose(true);
+    }
+  }
+
+  @Test
+  public void testInDbTileExplicitNaNPadding() {
+    // A float band without a nodata value, tiled with an explicit NaN padding value: the padded
+    // tiles must declare NaN as their nodata value so the padding does not count as data.
+    double[] values = new double[25];
+    Arrays.fill(values, 3);
+    GridCoverage2D raster =
+        RasterConstructors.makeNonEmptyRaster(
+            1, "f", 5, 5, 0, 5, 1, -1, 0, 0, 4326, new double[][] {values});
+    assertNull(RasterBandAccessors.getBandNoDataValue(raster, 1));
+
+    GridCoverage2D[] tiles = RasterConstructors.rsTile(raster, null, 4, 4, true, Double.NaN);
+    assertEquals(4, tiles.length);
+    // The last tile covers a single source pixel and 15 padded ones
+    GridCoverage2D corner = tiles[3];
+    assertEquals(4, RasterAccessors.getWidth(corner));
+    assertEquals(4, RasterAccessors.getHeight(corner));
+    Double noDataValue = RasterBandAccessors.getBandNoDataValue(corner, 1);
+    assertNotNull(noDataValue);
+    assertTrue(Double.isNaN(noDataValue));
+    assertEquals(1, RasterBandAccessors.getCount(corner, 1, true));
+    assertEquals(16, RasterBandAccessors.getCount(corner, 1, false));
+
+    // Without an explicit value the band still has no nodata value to inherit
+    GridCoverage2D[] inherited = RasterConstructors.rsTile(raster, null, 4, 4, true, null);
+    assertNull(RasterBandAccessors.getBandNoDataValue(inherited[3], 1));
   }
 }

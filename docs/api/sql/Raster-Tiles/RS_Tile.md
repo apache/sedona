@@ -36,7 +36,7 @@ otherwise bands specified by `bandIndices` will be included. Band indices are 1-
 
 If `padWithNoData` = false, edge tiles on the right and bottom sides of the raster may have different dimensions than the rest of
 the tiles. If `padWithNoData` = true, all tiles will have the same dimensions with the possibility that edge tiles being padded with
-NODATA values. If raster band(s) do not have NODATA value(s) specified, one can be specified by setting `noDataVal`.
+NODATA values. If raster band(s) do not have NODATA value(s) specified, one can be specified by setting `noDataVal`. A `NaN` `noDataVal` pads floating point bands with `NaN` and declares `NaN` as the NODATA value of the padded tiles.
 
 SQL example:
 

@@ -332,7 +332,8 @@ public class RasterUtils {
     // callers that copy an existing range-valued NODATA category pass its minimum here and expect
     // the range to remain intact. Wire-level authoritative overrides remove that category before
     // calling this shared helper.
-    if (Double.compare(getNoDataValue(sampleDimension), effectiveNoDataValue) == 0) {
+    if (hasNoDataValue(sampleDimension)
+        && Double.compare(getNoDataValue(sampleDimension), effectiveNoDataValue) == 0) {
       return sampleDimension;
     }
 
@@ -432,6 +433,11 @@ public class RasterUtils {
    * ArcGrid writer uses the same algorithm as our method for finding no data values when writing
    * the metadata of raster bands.
    *
+   * <p>NaN is itself a legal no data value (GDAL writes {@code GDAL_NODATA=nan} for floating point
+   * rasters), so a NaN result is ambiguous: use {@link #hasNoDataValue(GridSampleDimension)} to
+   * tell a NaN no data value from a missing one, and {@link #isNoData(double, Double)} to compare
+   * pixels against it.
+   *
    * @param sampleDimension The sample dimension to be processed.
    * @return The no data value, or {@link Double#NaN} if the sample dimension does not contain no
    *     data value.
@@ -445,6 +451,44 @@ public class RasterUtils {
       }
     }
     return Double.NaN;
+  }
+
+  /**
+   * Tells whether the given sample dimension declares a no data value. Unlike {@link
+   * #getNoDataValue(GridSampleDimension)}, this distinguishes a band whose no data value is {@link
+   * Double#NaN} (as written by GDAL for floating point rasters) from a band without any no data
+   * value.
+   *
+   * @param sampleDimension The sample dimension to be processed.
+   * @return true if the sample dimension carries a no data category, false otherwise.
+   */
+  public static boolean hasNoDataValue(GridSampleDimension sampleDimension) {
+    InternationalString noDataCategoryName = Category.NODATA.getName();
+    for (Category category : sampleDimension.getCategories()) {
+      if (category.getName().equals(noDataCategoryName)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Tells whether a pixel value is the no data value of its band. This is the comparison every no
+   * data check should use: it is NaN-safe (a NaN pixel matches a NaN no data value, which the
+   * {@code ==} operator never does) and treats {@code -0.0} as {@code 0.0}, unlike {@link
+   * Double#compare(double, double)}.
+   *
+   * @param value The pixel value.
+   * @param noDataValue The no data value of the band, or null if the band has none.
+   * @return true if the pixel is a no data pixel, false otherwise (always false when the band has
+   *     no no data value).
+   */
+  public static boolean isNoData(double value, Double noDataValue) {
+    if (noDataValue == null) {
+      return false;
+    }
+    double noData = noDataValue;
+    return value == noData || (Double.isNaN(value) && Double.isNaN(noData));
   }
 
   /**
@@ -1051,7 +1095,7 @@ public class RasterUtils {
 
         if (nx >= 0 && nx < width && ny >= 0 && ny < height && !(dx == 0 && dy == 0)) {
           double value = raster.getSampleDouble(nx, ny, band); // Now checks the specified band
-          if (value != noDataValue) {
+          if (!isNoData(value, noDataValue)) {
             neighbors.add(value);
           }
         }
@@ -1061,12 +1105,37 @@ public class RasterUtils {
   }
 
   /**
-   * Replaces noDataValue pixels in each band with mean of neighboring pixel values
+   * Replaces noDataValue pixels in each band with the median of their valid neighboring pixels. A
+   * single pass leaves the nodata pixels whose neighbors are all nodata untouched; see {@link
+   * #replaceNoDataValues(GridCoverage2D, int)} to fill deeper holes.
    *
    * @param raster
    * @return A new grid coverage with noDataValues pixels replaced
    */
   public static GridCoverage2D replaceNoDataValues(GridCoverage2D raster) {
+    return replaceNoDataValues(raster, 1);
+  }
+
+  /**
+   * Replaces noDataValue pixels in each band with the median of their valid neighboring pixels,
+   * repeating the pass so that each pass sees the pixels filled by the previous one. A caller that
+   * interpolates over the result should ask for as many passes as the interpolation kernel radius,
+   * otherwise a nodata sentinel deep inside a hole leaks into the interpolated pixels around it.
+   *
+   * @param raster
+   * @param passes the number of filling passes; each fills one more pixel inwards from the hole
+   *     border
+   * @return A new grid coverage with noDataValues pixels replaced
+   */
+  public static GridCoverage2D replaceNoDataValues(GridCoverage2D raster, int passes) {
+    GridCoverage2D result = raster;
+    for (int pass = 0; pass < passes; pass++) {
+      result = replaceNoDataValuesOnce(result);
+    }
+    return result;
+  }
+
+  private static GridCoverage2D replaceNoDataValuesOnce(GridCoverage2D raster) {
     Raster rasterData = raster.getRenderedImage().getData();
     WritableRaster writableRaster = rasterData.createCompatibleWritableRaster();
 
@@ -1075,13 +1144,13 @@ public class RasterUtils {
     // Iterate over each band
     for (int band = 0; band < raster.getNumSampleDimensions(); band++) {
       GridSampleDimension sampleDimension = raster.getSampleDimension(band);
-      double noDataValue = RasterUtils.getNoDataValue(sampleDimension);
+      Double noDataValue = hasNoDataValue(sampleDimension) ? getNoDataValue(sampleDimension) : null;
 
       // Replace no data values with the median of neighboring pixels for each band
       for (int y = 0; y < rasterData.getHeight(); y++) {
         for (int x = 0; x < rasterData.getWidth(); x++) {
           double originalValue = rasterData.getSampleDouble(x, y, band);
-          if (originalValue == noDataValue) {
+          if (isNoData(originalValue, noDataValue)) {
             List<Double> neighbors =
                 RasterUtils.getNeighboringPixels(x, y, band, rasterData, noDataValue);
             double[] neighborArray = neighbors.stream().mapToDouble(Double::doubleValue).toArray();
@@ -1108,10 +1177,14 @@ public class RasterUtils {
   }
 
   /**
-   * Filters out the noDataValue pixels from each band as a grid coverage
+   * Builds a mask flagging the no data pixels of each band: 1 where the pixel is the band's no data
+   * value, 0 elsewhere. The flag is representable in every pixel type, so the mask can be built for
+   * integer bands (a NaN marker would collapse to 0 there) and for bands whose no data value is
+   * itself NaN. {@link #applyRasterMask(GridCoverage2D, GridCoverage2D)} restores the flagged
+   * pixels to the band's no data value.
    *
-   * @param raster
-   * @return Returns a grid coverage with noDataValues and valid data values as Double.Nan
+   * @param raster The raster to extract the mask from.
+   * @return A raster of the same shape and type holding 1 for no data pixels and 0 otherwise.
    */
   public static GridCoverage2D extractNoDataValueMask(GridCoverage2D raster) {
     Raster rasterData = raster.getRenderedImage().getData();
@@ -1122,16 +1195,12 @@ public class RasterUtils {
     // Iterate over each band
     for (int band = 0; band < raster.getNumSampleDimensions(); band++) {
       GridSampleDimension sampleDimension = raster.getSampleDimension(band);
-      Double noDataValue = RasterUtils.getNoDataValue(sampleDimension);
+      Double noDataValue = hasNoDataValue(sampleDimension) ? getNoDataValue(sampleDimension) : null;
 
       for (int y = 0; y < rasterData.getHeight(); y++) {
         for (int x = 0; x < rasterData.getWidth(); x++) {
           double originalValue = rasterData.getSampleDouble(x, y, band);
-          if (originalValue == noDataValue) {
-            writableRaster.setSample(x, y, band, originalValue);
-          } else {
-            writableRaster.setSample(x, y, band, Double.NaN);
-          }
+          writableRaster.setSample(x, y, band, isNoData(originalValue, noDataValue) ? 1 : 0);
         }
       }
     }
@@ -1143,18 +1212,19 @@ public class RasterUtils {
             raster.getSampleDimensions(),
             raster,
             null,
-            true);
+            false);
     return modifiedRaster;
   }
 
   /**
-   * Superimposes the mask values onto the original raster, maintaining the original values where
-   * the mask is NaN.
+   * Restores the no data pixels flagged by a mask from {@link
+   * #extractNoDataValueMask(GridCoverage2D)}: wherever the mask is non-zero, the pixel is set to
+   * the no data value of the corresponding band of {@code raster}; every other pixel keeps its
+   * value.
    *
-   * @param raster The original raster to which the mask will be applied.
-   * @param mask Grid coverage mask to be applied, containing the values to overlay. This mask
-   *     should have the same dimensions and number of bands as the original raster.
-   * @return A new GridCoverage2D object with the mask applied.
+   * @param raster The raster to restore no data pixels in; its bands carry the no data values.
+   * @param mask The flag mask, with the same dimensions and number of bands as the raster.
+   * @return A new GridCoverage2D object with the no data pixels restored.
    */
   public static GridCoverage2D applyRasterMask(GridCoverage2D raster, GridCoverage2D mask) {
     Raster rasterData = raster.getRenderedImage().getData();
@@ -1165,12 +1235,14 @@ public class RasterUtils {
 
     // Iterate over each band
     for (int band = 0; band < raster.getNumSampleDimensions(); band++) {
+      GridSampleDimension sampleDimension = raster.getSampleDimension(band);
+      Double noDataValue = hasNoDataValue(sampleDimension) ? getNoDataValue(sampleDimension) : null;
       for (int y = 0; y < rasterData.getHeight(); y++) {
         for (int x = 0; x < rasterData.getWidth(); x++) {
           double originalValue = rasterData.getSampleDouble(x, y, band);
-          double maskValue = maskData.getSampleDouble(x, y, band);
-          if (!Double.isNaN(maskValue)) {
-            writableRaster.setSample(x, y, band, maskValue);
+          boolean flagged = maskData.getSampleDouble(x, y, band) != 0;
+          if (flagged && noDataValue != null) {
+            writableRaster.setSample(x, y, band, noDataValue);
           } else {
             writableRaster.setSample(x, y, band, originalValue);
           }

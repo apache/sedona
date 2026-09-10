@@ -89,7 +89,7 @@ public class RasterBandEditors {
       double[] bandData =
           rasterData.getSamples(0, 0, width, height, bandIndex - 1, (double[]) null);
       for (int i = 0; i < bandData.length; i++) {
-        if (bandData[i] == rasterNoData) {
+        if (RasterUtils.isNoData(bandData[i], rasterNoData)) {
           bandData[i] = noDataValue;
         }
       }

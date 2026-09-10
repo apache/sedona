@@ -87,7 +87,7 @@ public class GeometryFunctions {
         for (int currBand = start; currBand <= end; currBand++) {
           double currBandValue = bandPixelValues[currBand - 1];
           Double bandNoDataValue = RasterBandAccessors.getBandNoDataValue(raster, currBand);
-          if ((bandNoDataValue == null) || currBandValue != bandNoDataValue) {
+          if (!RasterUtils.isNoData(currBandValue, bandNoDataValue)) {
             // getWorldCoordinates internally takes 1-indexed coordinates, increment and track
             minX = Math.min(minX, i + 1);
             maxX = Math.max(maxX, i + 1);
@@ -96,6 +96,10 @@ public class GeometryFunctions {
           }
         }
       }
+    }
+    if (minX == Integer.MAX_VALUE) {
+      // Every considered pixel is nodata, so there is no hull to build.
+      return null;
     }
     GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
     Point2D worldUpperLeft = RasterUtils.getWorldCornerCoordinates(raster, minX, minY);

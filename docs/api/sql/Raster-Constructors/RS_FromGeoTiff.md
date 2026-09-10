@@ -21,6 +21,8 @@
 
 Introduction: Returns a raster geometry from a GeoTiff file.
 
+A finite `GDAL_NODATA` tag, or the `nan` value GDAL writes for floating point rasters, becomes the no data value of every band (see [RS_BandNoDataValue](../Raster-Band-Accessors/RS_BandNoDataValue.md)). An infinite `GDAL_NODATA` value (`inf` or `-inf`) cannot be represented as a band no data value and is ignored, so `RS_BandNoDataValue` returns `null` for such files.
+
 Format: `RS_FromGeoTiff(asc: ARRAY[Byte])`
 
 Return type: `Raster`

@@ -185,7 +185,7 @@ object RasterPartitionReader {
       }
 
       val iter =
-        RasterConstructors.generateTiles(currentRaster, null, tw, th, padWithNoData, Double.NaN)
+        RasterConstructors.generateTiles(currentRaster, null, tw, th, padWithNoData, null)
       iter.asScala.map { tile =>
         val tileRaster = tile.getCoverage
         writer.reset()

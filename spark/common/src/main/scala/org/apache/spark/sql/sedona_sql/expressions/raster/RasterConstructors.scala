@@ -119,12 +119,13 @@ private[apache] case class RS_TileExplode(children: Seq[Expression])
     val tileWidth = arguments.tileWidthExpr.eval(input).asInstanceOf[Int]
     val tileHeight = arguments.tileHeightExpr.eval(input).asInstanceOf[Int]
     val padWithNoDataValue = arguments.padWithNoDataExpr.eval(input).asInstanceOf[Boolean]
-    val noDataValue = arguments.noDataValExpr.eval(input) match {
-      case null => Double.NaN
-      case value: Integer => value.toDouble
-      case value: Decimal => value.toDouble
-      case value: Float => value.toDouble
-      case value: Double => value
+    // null inherits the source band's nodata value; an explicit NaN is a NaN nodata value
+    val noDataValue: java.lang.Double = arguments.noDataValExpr.eval(input) match {
+      case null => null
+      case value: Integer => java.lang.Double.valueOf(value.toDouble)
+      case value: Decimal => java.lang.Double.valueOf(value.toDouble)
+      case value: Float => java.lang.Double.valueOf(value.toDouble)
+      case value: Double => java.lang.Double.valueOf(value)
       case value: Any =>
         throw new IllegalArgumentException("Unsupported class for noDataValue: " + value.getClass)
     }

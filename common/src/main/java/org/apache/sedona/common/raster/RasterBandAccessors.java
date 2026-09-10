@@ -40,12 +40,12 @@ public class RasterBandAccessors {
   public static Double getBandNoDataValue(GridCoverage2D raster, int band) {
     RasterUtils.ensureBand(raster, band);
     GridSampleDimension bandSampleDimension = raster.getSampleDimension(band - 1);
-    double noDataValue = RasterUtils.getNoDataValue(bandSampleDimension);
-    if (Double.isNaN(noDataValue)) {
+    if (!RasterUtils.hasNoDataValue(bandSampleDimension)) {
       return null;
-    } else {
-      return noDataValue;
     }
+    // NaN is a legal no data value (GDAL writes it for floating point rasters), so it is returned
+    // as-is rather than being mistaken for "no no data value".
+    return RasterUtils.getNoDataValue(bandSampleDimension);
   }
 
   public static Double getBandNoDataValue(GridCoverage2D raster) {
@@ -62,7 +62,7 @@ public class RasterBandAccessors {
       double[] pixels = r.getSamples(0, 0, width, height, band - 1, (double[]) null);
       long numberOfPixel = 0;
       for (double bandValue : pixels) {
-        if (Double.compare(bandValue, bandNoDataValue) != 0) {
+        if (!RasterUtils.isNoData(bandValue, bandNoDataValue)) {
           numberOfPixel += 1;
         }
       }
@@ -412,7 +412,7 @@ public class RasterBandAccessors {
       // as initialized when constructing the raster via
       // RasterConstructors.asRasterWithRasterExtent.
       if (rasterizedPixelData[k] == 0
-          || excludeNoData && noDataValue != null && rasterPixelData[k] == noDataValue) {
+          || (excludeNoData && RasterUtils.isNoData(rasterPixelData[k], noDataValue))) {
         continue;
       } else {
         pixelData.add(rasterPixelData[k]);
@@ -476,7 +476,7 @@ public class RasterBandAccessors {
       pixelData = new ArrayList<>();
       Double noDataValue = RasterBandAccessors.getBandNoDataValue(rasterGeom, band);
       for (double pixel : pixels) {
-        if (noDataValue == null || pixel != noDataValue) {
+        if (!RasterUtils.isNoData(pixel, noDataValue)) {
           pixelData.add(pixel);
         }
       }
@@ -607,13 +607,13 @@ public class RasterBandAccessors {
     Raster rasterData = RasterUtils.getRaster(raster.getRenderedImage());
     int width = rasterData.getWidth();
     int height = rasterData.getHeight();
-    double noDataValue = RasterUtils.getNoDataValue(raster.getSampleDimension(band - 1));
-    if (Double.isNaN(noDataValue)) {
+    Double noDataValue = getBandNoDataValue(raster, band);
+    if (noDataValue == null) {
       return false;
     }
     double[] pixels = rasterData.getSamples(0, 0, width, height, band - 1, (double[]) null);
     for (double pixel : pixels) {
-      if (Double.compare(pixel, noDataValue) != 0) {
+      if (!RasterUtils.isNoData(pixel, noDataValue)) {
         return false;
       }
     }

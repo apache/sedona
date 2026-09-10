@@ -72,7 +72,8 @@ public class TileGenerator {
    * @param tileHeight the height of the tiles
    * @param padWithNoData whether to pad the tiles with no data value
    * @param padNoDataValue the no data value for padded tiles, only used when padWithNoData is true.
-   *     If the value is NaN, the no data value of the original band will be used.
+   *     If null, the no data value of the original band is used; an explicit NaN pads with NaN and
+   *     declares NaN as the no data value of the padded tiles.
    * @return a lazy iterator of tiles
    */
   public static InDbTileIterator generateInDbTiles(
@@ -81,9 +82,29 @@ public class TileGenerator {
       int tileWidth,
       int tileHeight,
       boolean padWithNoData,
-      double padNoDataValue) {
+      Double padNoDataValue) {
     return new InDbTileIterator(
         gridCoverage2D, bandIndices, tileWidth, tileHeight, padWithNoData, padNoDataValue);
+  }
+
+  /**
+   * Backward-compatible in-db tiling entry point whose {@code NaN} padding marker inherits the
+   * source band's no data value.
+   */
+  public static InDbTileIterator generateInDbTiles(
+      GridCoverage2D gridCoverage2D,
+      int[] bandIndices,
+      int tileWidth,
+      int tileHeight,
+      boolean padWithNoData,
+      double padNoDataValue) {
+    return generateInDbTiles(
+        gridCoverage2D,
+        bandIndices,
+        tileWidth,
+        tileHeight,
+        padWithNoData,
+        Double.isNaN(padNoDataValue) ? null : Double.valueOf(padNoDataValue));
   }
 
   public abstract static class TileIterator implements Iterator<Tile> {
@@ -176,7 +197,7 @@ public class TileGenerator {
     private final int tileWidth;
     private final int tileHeight;
     private final boolean padWithNoData;
-    private final double padNoDataValue;
+    private final Double padNoDataValue;
     private final AffineTransform2D affine;
     private final RenderedImage image;
     private final double[] noDataValues;
@@ -190,6 +211,22 @@ public class TileGenerator {
         int tileHeight,
         boolean padWithNoData,
         double padNoDataValue) {
+      this(
+          gridCoverage2D,
+          bandIndices,
+          tileWidth,
+          tileHeight,
+          padWithNoData,
+          Double.isNaN(padNoDataValue) ? null : Double.valueOf(padNoDataValue));
+    }
+
+    public InDbTileIterator(
+        GridCoverage2D gridCoverage2D,
+        int[] bandIndices,
+        int tileWidth,
+        int tileHeight,
+        boolean padWithNoData,
+        Double padNoDataValue) {
       super(gridCoverage2D);
       this.bandIndices = bandIndices;
       this.tileWidth = tileWidth;
@@ -252,7 +289,7 @@ public class TileGenerator {
         // Copy sample dimensions from source bands, and pad with no data value if necessary
         GridSampleDimension sampleDimension = gridCoverage2D.getSampleDimension(bandIndex);
         double noDataValue = noDataValues[k];
-        if (needPadding && !Double.isNaN(padNoDataValue)) {
+        if (needPadding && padNoDataValue != null) {
           sampleDimension =
               RasterUtils.createSampleDimensionWithNoDataValue(sampleDimension, padNoDataValue);
           noDataValue = padNoDataValue;

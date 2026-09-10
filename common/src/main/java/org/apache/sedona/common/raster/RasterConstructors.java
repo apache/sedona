@@ -655,7 +655,8 @@ public class RasterConstructors {
    * @param tileHeight the height of the tiles
    * @param padWithNoData whether to pad the tiles with no data value
    * @param padNoDataValue the no data value for padded tiles, only used when padWithNoData is true.
-   *     If the value is NaN, the no data value of the original band will be used.
+   *     If null, the no data value of the original band is used; an explicit NaN pads with NaN and
+   *     declares NaN as the no data value of the padded tiles.
    * @return a lazy iterator of tiles
    */
   public static TileGenerator.TileIterator generateTiles(
@@ -664,7 +665,7 @@ public class RasterConstructors {
       int tileWidth,
       int tileHeight,
       boolean padWithNoData,
-      double padNoDataValue) {
+      Double padNoDataValue) {
     int numBands = gridCoverage2D.getNumSampleDimensions();
     if (bandIndices == null || bandIndices.length == 0) {
       // Select all the bands
@@ -685,6 +686,26 @@ public class RasterConstructors {
         gridCoverage2D, bandIndices, tileWidth, tileHeight, padWithNoData, padNoDataValue);
   }
 
+  /**
+   * Backward-compatible tiling entry point whose {@code NaN} padding marker inherits the source
+   * band's no data value.
+   */
+  public static TileGenerator.TileIterator generateTiles(
+      GridCoverage2D gridCoverage2D,
+      int[] bandIndices,
+      int tileWidth,
+      int tileHeight,
+      boolean padWithNoData,
+      double padNoDataValue) {
+    return generateTiles(
+        gridCoverage2D,
+        bandIndices,
+        tileWidth,
+        tileHeight,
+        padWithNoData,
+        Double.isNaN(padNoDataValue) ? null : Double.valueOf(padNoDataValue));
+  }
+
   public static GridCoverage2D[] rsTile(
       GridCoverage2D gridCoverage2D,
       int[] bandIndices,
@@ -694,9 +715,6 @@ public class RasterConstructors {
       Double padNoDataValue) {
     if (gridCoverage2D == null) {
       return null;
-    }
-    if (padNoDataValue == null) {
-      padNoDataValue = Double.NaN;
     }
     TileGenerator.TileIterator tileIterator =
         generateTiles(
@@ -716,7 +734,7 @@ public class RasterConstructors {
       int tileWidth,
       int tileHeight,
       boolean padWithNoData) {
-    return rsTile(gridCoverage2D, bandIndices, tileWidth, tileHeight, padWithNoData, Double.NaN);
+    return rsTile(gridCoverage2D, bandIndices, tileWidth, tileHeight, padWithNoData, null);
   }
 
   public static GridCoverage2D[] rsTile(
