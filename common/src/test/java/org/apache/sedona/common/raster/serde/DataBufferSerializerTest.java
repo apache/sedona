@@ -60,7 +60,11 @@ public class DataBufferSerializerTest extends KryoSerializerTestBase {
                 IllegalArgumentException.class, () -> serializer.write(kryo, out, buffer));
         Assert.assertTrue(error.getMessage().contains("too large to serialize"));
         Assert.assertTrue(error.getMessage().contains("RS_TileExplode"));
-        Assert.assertTrue("No pixel bank should have been copied", out.position() < 65536);
+        // Only the data type, offsets array, and logical size should have been written.
+        Assert.assertEquals(
+            "No pixel bank should have been copied",
+            (3 + buffer.getNumBanks()) * Integer.BYTES,
+            out.position());
       }
     }
   }

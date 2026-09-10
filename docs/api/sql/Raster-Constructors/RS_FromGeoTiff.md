@@ -27,10 +27,12 @@ Return type: `Raster`
 
 Since: `v1.4.0`
 
-SQL Example
+Python example
 
-```scala
-var df = sedona.read.format("binaryFile").load("/some/path/*.tiff")
+```python
+from pyspark.sql import functions as f
+
+df = sedona.read.format("binaryFile").load("/some/path/*.tiff")
 df = df.withColumn("raster", f.expr("RS_FromGeoTiff(content)"))
 ```
 
