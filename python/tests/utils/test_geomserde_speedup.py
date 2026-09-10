@@ -59,6 +59,53 @@ class TestGeomSerdeSpeedup:
 
         assert coordinate_type == geometry_serde_general.CoordinateType.XYZ
 
+    @pytest.mark.parametrize(
+        "wkt",
+        [
+            "POINT EMPTY",
+            "POINT Z EMPTY",
+            "LINESTRING EMPTY",
+            "LINESTRING Z EMPTY",
+            "POLYGON EMPTY",
+            "POLYGON Z EMPTY",
+            "GEOMETRYCOLLECTION (LINESTRING EMPTY)",
+            "GEOMETRYCOLLECTION (POINT EMPTY, LINESTRING EMPTY, POLYGON EMPTY)",
+            "GEOMETRYCOLLECTION (GEOMETRYCOLLECTION (LINESTRING EMPTY))",
+            "GEOMETRYCOLLECTION Z (POINT Z EMPTY, LINESTRING Z EMPTY, POLYGON Z EMPTY)",
+            "GEOMETRYCOLLECTION (POINT EMPTY, LINESTRING Z EMPTY, POLYGON Z EMPTY)",
+            "GEOMETRYCOLLECTION (GEOMETRYCOLLECTION Z (POINT Z EMPTY, POLYGON Z EMPTY))",
+        ],
+    )
+    def test_empty_geometry_roundtrip_keeps_dimension(self, wkt):
+        geometry = wkt_loads(wkt)
+        actual = self.serde_roundtrip(geometry)
+
+        # Spatial equality does not distinguish the dimensions of empty geometries.
+        assert actual.wkb == geometry.wkb
+
+    @pytest.mark.parametrize("geom_type", ["POINT", "LINESTRING", "POLYGON"])
+    @pytest.mark.parametrize(
+        "coord_type", [1, 2, 3, 4], ids=["XY", "XYZ", "XYM", "XYZM"]
+    )
+    def test_decode_empty_geometry_keeps_stored_layout(self, geom_type, coord_type):
+        if coord_type in (3, 4) and (
+            parse_version(shapely.__version__) < parse_version("2.1")
+            or getattr(shapely, "geos_version", (0, 0, 0)) < (3, 12, 0)
+        ):
+            pytest.skip("M coordinates require Shapely 2.1 and GEOS 3.12 or newer")
+
+        # Build the stored header directly so the serializer cannot hide a decoder bug.
+        buffer = geometry_serde_general.generate_header_bytes(
+            getattr(geometry_serde_general.GeometryTypeID, geom_type), coord_type, 0
+        )
+        actual, offset = geometry_serde.deserialize(buffer)
+        dimension = ["", "Z", "M", "ZM"][coord_type - 1]
+        expected = wkt_loads(f"{geom_type} {dimension} EMPTY")
+
+        assert offset == len(buffer)
+        assert actual.wkb == expected.wkb
+        assert geometry_serde.serialize(actual) == buffer
+
     def test_multi_point(self):
         multi_points = [
             wkt_loads("MULTIPOINT EMPTY"),
@@ -166,9 +213,16 @@ class TestGeomSerdeSpeedup:
         [
             "POINT M (1 2 3)",
             "POINT ZM (1 2 3 4)",
+            "POINT M EMPTY",
+            "POINT ZM EMPTY",
             "LINESTRING M (0 0 1, 2 3 4)",
             "LINESTRING ZM (0 0 1 2, 3 4 5 6)",
+            "LINESTRING M EMPTY",
+            "LINESTRING ZM EMPTY",
             "POLYGON M ((0 0 1, 2 0 2, 0 2 3, 0 0 1))",
+            "POLYGON M EMPTY",
+            "POLYGON ZM EMPTY",
+            "GEOMETRYCOLLECTION ZM (POINT ZM EMPTY, LINESTRING ZM EMPTY, POLYGON ZM EMPTY)",
             "GEOMETRYCOLLECTION ZM (POINT ZM (1 2 3 4), "
             "LINESTRING ZM (0 0 1 2, 3 4 5 6))",
         ],
@@ -180,6 +234,7 @@ class TestGeomSerdeSpeedup:
         assert shapely.to_wkt(actual) == shapely.to_wkt(geometry)
         assert actual.has_z == geometry.has_z
         assert actual.has_m == geometry.has_m
+        assert actual.wkb == geometry.wkb
 
     @pytest.mark.skipif(
         parse_version(shapely.__version__) < parse_version("2.1")
@@ -232,13 +287,7 @@ class TestGeomSerdeSpeedup:
         for geom in geoms:
             geom_actual = TestGeomSerdeSpeedup.serde_roundtrip(geom)
             assert geom_actual.equals_exact(geom, 1e-6)
-            # GEOSGeom_createEmptyLineString in libgeos creates LineString with
-            # Z dimension, This bug has been fixed by
-            # https://github.com/libgeos/geos/pull/745
-            geom_actual_wkt = geom_actual.wkt.replace(
-                "LINESTRING Z EMPTY", "LINESTRING EMPTY"
-            )
-            assert geom.wkt == geom_actual_wkt
+            assert geom.wkt == geom_actual.wkt
 
     @staticmethod
     def serde_roundtrip(geom: BaseGeometry) -> BaseGeometry:

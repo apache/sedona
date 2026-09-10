@@ -153,6 +153,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             ),
             # Collection predicates must retain collection semantics with one member.
             GeometryCollection([LineString([(0, 0), (1, 1), (0, 0)])]),
+            GeometryCollection([Point(), LineString(), Polygon()]),
         ]
 
         self.geoms = [
@@ -168,7 +169,8 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
         self.pairs = [
             (self.points, self.multipolygons),
-            (self.geomcollection, self.polygons),
+            # Keep equal-length inputs so the align=False cases still run.
+            (self.geomcollection[: len(self.polygons)], self.polygons),
             (self.linestrings, self.multipoints),
             (self.linearrings, self.multilinestrings),
         ]
@@ -569,14 +571,6 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         import pyarrow as pa
 
         for geom in self.geoms:
-            # LINEARRING EMPTY and LineString EMPTY
-            # result in 01EA03000000000000 instead of 010200000000000000.
-            # Sedona returns the right result, so this bug is likely in pyarrow or geoarrow
-            # Below we set the modify the failing case as a workaround to pass the test
-            # Occurs in python 3.9, but fixed by python 3.10.
-            if geom[0] in [LineString(), LinearRing()]:
-                geom[0] = LineString([(0, 0), (1, 1)])
-
             sgpd_result = pa.array(GeoSeries(geom).to_arrow())
             gpd_result = pa.array(gpd.GeoSeries(geom).to_arrow())
             assert sgpd_result == gpd_result

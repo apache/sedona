@@ -147,7 +147,10 @@ static SedonaErrorCode copy_coord_seq_to_buffer(
 static SedonaErrorCode copy_buffer_to_coord_seq(
     GEOSContextHandle_t handle, double *buf, int num_coords, int has_z,
     int has_m, GEOSCoordSequence **p_coord_seq) {
-  if (dyn_GEOSCoordSeq_copyFromBuffer_r != NULL) {
+  /* Older GEOS versions infer XYZ for an empty buffer. Use the explicit
+   * dimension constructor below for empty XY/XYZ sequences. M layouts need
+   * copyFromBuffer, which preserves their dimensions on GEOS >= 3.12. */
+  if (dyn_GEOSCoordSeq_copyFromBuffer_r != NULL && (num_coords > 0 || has_m)) {
     /* fast path for libgeos >= 3.10.0 */
     GEOSCoordSequence *coord_seq = dyn_GEOSCoordSeq_copyFromBuffer_r(
         handle, buf, num_coords, has_z, has_m);
