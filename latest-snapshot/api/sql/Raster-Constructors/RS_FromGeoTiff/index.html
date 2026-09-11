@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5569,10 +5568,23 @@
 <p>Format: <code>RS_FromGeoTiff(asc: ARRAY[Byte])</code></p>
 <p>Return type: <code>Raster</code></p>
 <p>Since: <code>v1.4.0</code></p>
-<p>SQL Example</p>
-<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"binaryFile"</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">"/some/path/*.tiff"</span><span class="p">)</span>
-<span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df</span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">"raster"</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">expr</span><span class="p">(</span><span class="s">"RS_FromGeoTiff(content)"</span><span class="p">))</span>
+<p>Python example</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">functions</span> <span class="k">as</span> <span class="n">f</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"binaryFile"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/some/path/*.tiff"</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"raster"</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">expr</span><span class="p">(</span><span class="s2">"RS_FromGeoTiff(content)"</span><span class="p">))</span>
 </code></pre></div>
+<p>A single serialized <code>Raster</code> value must fit in a Java byte array, which limits its size to roughly 2 GiB, including pixel data and metadata. A compressed GeoTIFF can be much smaller than its decoded raster. The number of pixels that fits depends on the band count, data types, and metadata.</p>
+<p>For large GeoTIFFs, use the <a href="../../../../tutorial/raster/#tile-size-overrides">raster reader</a> with explicit tile dimensions:</p>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"raster"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"retile"</span><span class="p">,</span> <span class="s2">"true"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"tileWidth"</span><span class="p">,</span> <span class="s2">"256"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"tileHeight"</span><span class="p">,</span> <span class="s2">"256"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/some/path/*.tiff"</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>If the file bytes are already in a <code>binaryFile</code> DataFrame, nest <code>RS_FromGeoTiff</code> directly inside <a href="../../Raster-Tiles/RS_TileExplode/">RS_TileExplode</a> to avoid serializing the whole raster as one value.</p>
 
 
 
@@ -5593,7 +5605,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="March 4, 2026 08:31:50 UTC">March 4, 2026 08:31:50</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 11, 2026 06:05:36 UTC">September 11, 2026 06:05:36</span>
   </span>
 
     
