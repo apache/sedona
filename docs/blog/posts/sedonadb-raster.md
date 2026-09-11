@@ -7,10 +7,10 @@ links:
   - Planet Crisis Response data: https://source.coop/planet/disasterdata
 authors:
   - jia
-title: "SELECT * FROM Satellite"
+title: "SELECT * FROM Satellite, in a Rust Database"
 ---
 
-# SELECT * FROM Satellite
+# SELECT * FROM Satellite, in a Rust Database
 
 Satellite scenes are tables now, in a Rust database engine. [SedonaDB](https://sedona.apache.org/sedonadb/latest/) 0.4.1 ships a raster layer: rasters stream from cloud storage without a download, they clip and reproject in SQL, zonal statistics and polygonization are functions, and pixels move to NumPy and back without a copy. One machine, one `pip install`. The tutorial below runs every piece on one event, the Gironde and Landes wildfire of July 2026, which burned through the pine forest west of Bordeaux and prompted 250,000 evacuations. Eleven PlanetScope scenes go in; burn perimeters, hectares per commune and a GeoTIFF come out.
 
