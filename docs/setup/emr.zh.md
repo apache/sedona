@@ -84,21 +84,23 @@ spark.sql("SELECT ST_Point(0, 0)").show()
 [`apache.sedona`](https://cran.r-project.org/package=apache.sedona) R 包是一个 [`sparklyr`](https://spark.rstudio.com) 扩展。只要在 `spark_connect()` 之前加载它，Sedona 的序列化器、UDT 与 UDF 就会自动注册，因此 R 中不需要手动调用与 `SedonaContext.create()` 等价的方法。
 
 !!!note
-	R 接口仅支持 Spark 3.x。请确认您选择的 EMR 版本自带的是 Spark 3 系列版本。
+	CRAN 上的 `apache.sedona` 1.9.1 版本仅支持 Spark 3.x。所有 EMR 7.x 版本都搭载 Spark 3.5，因此均可使用。
 
 ### 扩展初始化脚本
 
-在上面的引导脚本中追加以下内容，以便在运行 R 的节点上安装 R 及这两个 R 包：
+在上面的引导脚本中追加以下内容。与脚本的其余部分一样，它会在集群的每个节点上运行。从 R 执行 Spark SQL 查询时，只有运行 R 的节点需要这些 R 包；只有在使用 `spark_apply()` 于 executor 上运行 R 代码时，工作节点才需要它们。
 
 ```bash
-# 安装 R 以及 Sedona 的 R 接口
-sudo yum install -y R
-sudo R -e 'install.packages(c("sparklyr", "apache.sedona"), repos = "https://cloud.r-project.org")'
+# 安装 R 以及 Sedona 的 R 接口。sparklyr 依赖的 R curl 包需要 libcurl-devel 才能编译。
+sudo yum install -y R libcurl-devel
+sudo R -e 'install.packages(c("sparklyr", "apache.sedona"), repos = "https://cloud.r-project.org", Ncpus = parallel::detectCores()); stopifnot(all(c("sparklyr", "apache.sedona") %in% rownames(installed.packages())))'
 ```
+
+包编译失败时 `install.packages()` 只会给出警告，因此需要通过 `stopifnot()` 让 `R` 命令以失败退出，而不是报告成功。安装 R 预计会使每个节点的引导时间增加几分钟。
 
 ### 从 R 连接集群
 
-EMR 将 Spark 安装在 `/usr/lib/spark` 下。请将 `SEDONA_JAR_FILES` 指向引导脚本已经下载到 `/jars` 的 jar 包，这样 `sparklyr` 就会直接使用它们，而不必在每次连接时从 Maven Central 解析 Sedona 坐标：
+EMR 将 Spark 安装在 `/usr/lib/spark` 下。从 R 连接时，Spark driver 以 YARN client 模式运行在运行 R 的节点上。上面的 `spark.yarn.dist.jars` 设置只会把 jar 分发给 executor，并不会把 Sedona 加入 driver 的 classpath。`apache.sedona` 会自行把 jar 加入 driver：要么从 Maven Central 下载，要么使用 `SEDONA_JAR_FILES` 中列出的本地文件。请将 `SEDONA_JAR_FILES` 指向引导脚本已经下载到 `/jars` 的 jar 包：
 
 ```r
 library(sparklyr)
@@ -106,7 +108,7 @@ library(apache.sedona)
 
 Sys.setenv(
   "SEDONA_JAR_FILES" = paste(
-    "/jars/sedona-spark-shaded-3.3_2.12-{{ sedona.current_version }}.jar",
+    "/jars/sedona-spark-shaded-3.5_2.12-{{ sedona.current_version }}.jar",
     "/jars/geotools-wrapper-{{ sedona.current_geotools }}.jar",
     sep = ":"
   )
@@ -115,8 +117,10 @@ Sys.setenv(
 sc <- spark_connect(master = "yarn", spark_home = "/usr/lib/spark")
 ```
 
+上面的 Jupyter 示例不需要这一步，因为 EMR 以 cluster 部署模式运行 Livy，driver 运行在能收到这些 jar 的 YARN 容器中。
+
 !!!note
-	`SEDONA_JAR_FILES` 是一个以 `:` 分隔的列表，并且会同时替换 `apache.sedona` 原本请求的*两个* Maven 坐标，因此必须把 GeoTools wrapper 的 jar 与 Sedona 的 jar 一起列出。如果不设置 `SEDONA_JAR_FILES`，每次连接都会下载 `org.apache.sedona:sedona-spark-shaded-<spark 版本>_<scala 版本>:{{ sedona.current_version }}` 与 `org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}`。这要求 driver 能够访问外网，并且耗时可能超过 `sparklyr.connect.timeout` 的默认值。
+	`SEDONA_JAR_FILES` 是一个以 `:` 分隔的 jar 列表，设置它只会替换 Sedona 的 Maven 坐标。`apache.sedona` 仍会通过 `--packages` 请求 `org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}`，因此无论如何 driver 都需要能访问 Maven Central，或者 Ivy 缓存中已有该 jar。在 `SEDONA_JAR_FILES` 中列出 GeoTools wrapper 的 jar 并无害处。如果不设置 `SEDONA_JAR_FILES`，`apache.sedona` 还会请求 `org.apache.sedona:sedona-spark-shaded-<spark 版本>_<scala 版本>:{{ sedona.current_version }}`。Ivy 会按用户缓存下载的 jar，因此只有首次连接需要下载，但在网络较慢时，首次连接可能超过 `sparklyr.connect.timeout` 的默认值。
 
 ### 验证 R 端安装
 
