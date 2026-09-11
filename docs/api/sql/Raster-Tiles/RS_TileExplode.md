@@ -47,6 +47,15 @@ The returned records have the following schema:
 - `y`: The index of the tile along Y axis (0-based).
 - `tile`: The tile.
 
+For large GeoTIFFs in a `binaryFile` DataFrame, nest `RS_FromGeoTiff` directly inside `RS_TileExplode`:
+
+```sql
+SELECT RS_TileExplode(RS_FromGeoTiff(content), 256, 256)
+FROM binary_rasters
+```
+
+Here, `binary_rasters` is a view of the `binaryFile` DataFrame. `RS_TileExplode` accepts a `Raster`, so raw TIFF bytes such as `content` must first pass through `RS_FromGeoTiff`. Nesting the calls avoids serializing the whole raster as one value. Materializing the whole raster first, for example by caching or writing it, can exceed the [single raster size limit](../Raster-Constructors/RS_FromGeoTiff.md) before tiling runs. Each resulting tile must also fit within that limit.
+
 SQL example:
 
 ```sql

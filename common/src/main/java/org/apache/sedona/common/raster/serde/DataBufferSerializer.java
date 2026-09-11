@@ -28,6 +28,7 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
 import java.awt.image.DataBufferShort;
 import java.awt.image.DataBufferUShort;
+import java.lang.reflect.Array;
 
 public class DataBufferSerializer extends Serializer<DataBuffer> {
   @Override
@@ -39,30 +40,60 @@ public class DataBufferSerializer extends Serializer<DataBuffer> {
     switch (dataType) {
       case DataBuffer.TYPE_BYTE:
         byte[][] byteDataArray = ((DataBufferByte) dataBuffer).getBankData();
+        checkBufferSize(output, byteDataArray, Byte.BYTES);
         KryoUtil.writeByteArrays(output, byteDataArray);
         break;
       case DataBuffer.TYPE_USHORT:
         short[][] uShortDataArray = ((DataBufferUShort) dataBuffer).getBankData();
+        checkBufferSize(output, uShortDataArray, Short.BYTES);
         KryoUtil.writeShortArrays(output, uShortDataArray);
         break;
       case DataBuffer.TYPE_SHORT:
         short[][] shortDataArray = ((DataBufferShort) dataBuffer).getBankData();
+        checkBufferSize(output, shortDataArray, Short.BYTES);
         KryoUtil.writeShortArrays(output, shortDataArray);
         break;
       case DataBuffer.TYPE_INT:
         int[][] intDataArray = ((DataBufferInt) dataBuffer).getBankData();
+        checkBufferSize(output, intDataArray, Integer.BYTES);
         KryoUtil.writeIntArrays(output, intDataArray);
         break;
       case DataBuffer.TYPE_FLOAT:
         float[][] floatDataArray = DataBufferUtils.getBankDataFloat(dataBuffer);
+        checkBufferSize(output, floatDataArray, Float.BYTES);
         KryoUtil.writeFloatArrays(output, floatDataArray);
         break;
       case DataBuffer.TYPE_DOUBLE:
         double[][] doubleDataArray = DataBufferUtils.getBankDataDouble(dataBuffer);
+        checkBufferSize(output, doubleDataArray, Double.BYTES);
         KryoUtil.writeDoubleArrays(output, doubleDataArray);
         break;
       default:
         throw new RuntimeException("Unknown data type: " + dataType);
+    }
+  }
+
+  private static void checkBufferSize(Output output, Object[] banks, int bytesPerElement) {
+    // Serde.serialize uses one in-memory output. Stream-backed outputs can flush their buffers.
+    if (output.getOutputStream() != null) {
+      return;
+    }
+    // Count actual backing arrays: packed pixels, padding, and shared banks make logical
+    // width/height/band counts insufficient. Existing raster metadata is already in the output.
+    long requiredBytes = (long) output.position() + Integer.BYTES;
+    for (Object bank : banks) {
+      requiredBytes += Integer.BYTES + (long) Array.getLength(bank) * bytesPerElement;
+    }
+    // Kryo 4's maximum capacity for an in-memory Output constructed with maxBufferSize = -1.
+    long maxBytes = Integer.MAX_VALUE - 8L;
+    if (requiredBytes > maxBytes) {
+      throw new IllegalArgumentException(
+          "Raster is too large to serialize as a single value: requires "
+              + requiredBytes
+              + " bytes, exceeding the "
+              + maxBytes
+              + " byte limit. Use the raster reader with retile=true and tileWidth/tileHeight, "
+              + "or RS_TileExplode, to serialize smaller tiles.");
     }
   }
 
