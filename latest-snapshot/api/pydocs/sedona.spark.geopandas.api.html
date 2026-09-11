@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7769,6 +7768,24 @@ List of the corresponding indices if constructed from a np.array.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sedona.spark.geopandas.sindex.SpatialIndex.valid_query_predicates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">valid_query_predicates</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.14)"><span class="pre">set</span></a></em><a class="headerlink" href="#sedona.spark.geopandas.sindex.SpatialIndex.valid_query_predicates" title="Permalink to this definition"></a></dt>
+<dd><p>Return the supported values for the <code class="docutils literal notranslate"><span class="pre">query</span></code> predicate.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.0.0.</span></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A new set containing <code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;intersects&quot;</span></code>, and <code class="docutils literal notranslate"><span class="pre">&quot;contains&quot;</span></code>.
+<code class="docutils literal notranslate"><span class="pre">None</span></code> selects the default <code class="docutils literal notranslate"><span class="pre">&quot;intersects&quot;</span></code> behavior.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.14)">set</a></p>
 </dd>
 </dl>
 </dd></dl>
