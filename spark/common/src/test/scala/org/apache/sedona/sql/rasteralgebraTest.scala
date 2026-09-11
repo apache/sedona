@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.sql
 
-import org.apache.sedona.common.raster.MapAlgebra
+import org.apache.sedona.common.raster.{MapAlgebra, RasterBandAccessors}
 import org.apache.sedona.common.utils.RasterUtils
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
@@ -893,6 +893,27 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
       // A null raster still yields a null result
       assertNull(sparkSession.sql("SELECT RS_SetBandNoDataValue(null, -999)").first().get(0))
+    }
+
+    it("Passed RS_SetBandNoDataValue replacement preserves other bands") {
+      val input =
+        Seq((Seq(1.25, 5.0, 3.0, 4.0), Seq(11.0, 5.0, 13.0, 14.0), Seq(21.0, 22.0, 5.0, 24.5)))
+          .toDF("band1", "band2", "band3")
+      val raster = input.selectExpr(
+        "RS_AddBandFromArray(RS_AddBandFromArray(RS_AddBandFromArray(" +
+          "RS_MakeEmptyRaster(3, 'd', 2, 2, 0, 2, 1, -1, 0, 0, 4326), " +
+          "band1, 1, 5d), band2, 2, 13d), band3, 3, 24.5d) AS raster")
+      // Collect the raster itself to cover the four-argument SQL binding and serialization.
+      val result = raster
+        .selectExpr("RS_SetBandNoDataValue(raster, 2, -999d, true)")
+        .first()
+        .getAs[GridCoverage2D](0)
+      assert(MapAlgebra.bandAsArray(result, 1).toSeq == Seq(1.25, 5.0, 3.0, 4.0))
+      assert(MapAlgebra.bandAsArray(result, 2).toSeq == Seq(11.0, 5.0, -999.0, 14.0))
+      assert(MapAlgebra.bandAsArray(result, 3).toSeq == Seq(21.0, 22.0, 5.0, 24.5))
+      assertEquals(5.0, RasterBandAccessors.getBandNoDataValue(result, 1), 0)
+      assertEquals(-999.0, RasterBandAccessors.getBandNoDataValue(result, 2), 0)
+      assertEquals(24.5, RasterBandAccessors.getBandNoDataValue(result, 3), 0)
     }
 
     it("Passed RS_SetBandNoDataValue clearing a band other than band 1") {
