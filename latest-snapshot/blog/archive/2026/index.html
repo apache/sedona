@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5526,6 +5525,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#select-from-satellite-in-a-rust-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SELECT * FROM Satellite, in a Rust Database
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#group-by-but-for-pixels" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5624,17 +5634,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#sedonadb-04-gpu-accelerated-spatial-joins" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        SedonaDB 0.4: GPU-Accelerated Spatial Joins
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -5649,6 +5648,51 @@
       <header class="md-typeset">
         <h1 id="september-2026">September 2026<a class="headerlink" href="#september-2026" title="Permanent link">&para;</a></h1>
       </header>
+      
+        <article class="md-post md-post--excerpt">
+  <header class="md-post__header">
+    
+      <nav class="md-post__authors md-typeset">
+        
+          <span class="md-author">
+            <img src="../../../assets/authors/jia.jpeg" alt="Jia Yu">
+          </span>
+        
+      </nav>
+    
+    <div class="md-post__meta md-meta">
+      <ul class="md-meta__list">
+        <li class="md-meta__item">
+          <time datetime="2026-09-11 00:00:00+00:00">Friday, September 11, 2026</time></li>
+        
+        
+          
+          <li class="md-meta__item">
+            
+              7 min read
+            
+          </li>
+        
+        
+      </ul>
+      
+    </div>
+  </header>
+  <div class="md-post__content md-typeset">
+    <h2 id="select-from-satellite-in-a-rust-database"><a class="toclink" href="../../2026/09/11/select-from-satellite-in-a-rust-database/">SELECT * FROM Satellite, in a Rust Database</a></h2>
+<p><a href="https://sedona.apache.org/sedonadb/latest/">SedonaDB</a> 0.4.1 supports raster analysis in SQL and Python on a single machine. This example uses eleven PlanetScope satellite images to estimate the area burned in the <a href="https://source.coop/planet/disasterdata/gironde-wildfire-2026">Gironde and Landes wildfire of July 2026</a>. SQL selects and aligns the images, NumPy identifies vegetation loss, and raster functions convert the result into polygons and area estimates by municipality.</p>
+<p><img alt="PlanetScope image of the Gironde coast on 28 July 2026 with estimated burn boundaries in red. The analysis uses 11 scenes and produces 173 polygons covering 24,091 hectares" src="../../sedonadb-raster-cover.png" /></p>
+
+    
+      <nav class="md-post__action">
+        <a href="../../2026/09/11/select-from-satellite-in-a-rust-database/">
+          Continue reading
+        </a>
+      </nav>
+    
+    
+  </div>
+</article>
       
         <article class="md-post md-post--excerpt">
   <header class="md-post__header">
@@ -6049,51 +6093,6 @@
     
       <nav class="md-post__action">
         <a href="../../2026/07/10/open-huge-geotiffs-without-the-2-gb-wall/">
-          Continue reading
-        </a>
-      </nav>
-    
-    
-  </div>
-</article>
-      
-        <article class="md-post md-post--excerpt">
-  <header class="md-post__header">
-    
-      <nav class="md-post__authors md-typeset">
-        
-          <span class="md-author">
-            <img src="../../../assets/authors/jia.jpeg" alt="Jia Yu">
-          </span>
-        
-      </nav>
-    
-    <div class="md-post__meta md-meta">
-      <ul class="md-meta__list">
-        <li class="md-meta__item">
-          <time datetime="2026-06-26 00:00:00+00:00">Friday, June 26, 2026</time></li>
-        
-        
-          
-          <li class="md-meta__item">
-            
-              3 min read
-            
-          </li>
-        
-        
-      </ul>
-      
-    </div>
-  </header>
-  <div class="md-post__content md-typeset">
-    <h2 id="sedonadb-04-gpu-accelerated-spatial-joins"><a class="toclink" href="../../2026/06/26/sedonadb-04-gpu-accelerated-spatial-joins/">SedonaDB 0.4: GPU-Accelerated Spatial Joins</a></h2>
-<p>In SedonaDB 0.4, we taught this Rust database to run spatial joins on your $1,500 gaming GPU's ray tracing cores, and it beats an H100.</p>
-<p><img alt="SedonaDB 0.4 GPU-Accelerated Spatial Joins — ray tracing cores, repurposed for the database" src="../../raybooster-gpu-spatial-join-cover.png" /></p>
-
-    
-      <nav class="md-post__action">
-        <a href="../../2026/06/26/sedonadb-04-gpu-accelerated-spatial-joins/">
           Continue reading
         </a>
       </nav>

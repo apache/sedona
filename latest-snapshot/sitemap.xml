@@ -6875,6 +6875,13 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/2026/01/11/apache-sedona-2025-year-in-review/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/blog/2026/09/11/select-from-satellite-in-a-rust-database/</loc>
+        <lastmod>2026-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/blog/2026/09/11/select-from-satellite-in-a-rust-database/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/2026/09/11/select-from-satellite-in-a-rust-database/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/blog/2026/01/08/spatial-query-benchmarking-databricks/</loc>
         <lastmod>2026-09-11</lastmod>
         <changefreq>daily</changefreq>
@@ -6929,6 +6936,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/blog/page/2/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/page/2/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/blog/page/3/</loc>
+        <lastmod>2026-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/blog/page/3/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/page/3/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/blog/archive/2026/page/2/</loc>
@@ -13812,6 +13826,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/2026/01/11/apache-sedona-2025-year-in-review/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/zh/blog/2026/09/11/select-from-satellite-in-a-rust-database/</loc>
+        <lastmod>2026-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/2026/09/11/select-from-satellite-in-a-rust-database/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/2026/09/11/select-from-satellite-in-a-rust-database/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/zh/blog/2026/01/08/spatial-query-benchmarking-databricks/</loc>
         <lastmod>2026-09-11</lastmod>
         <changefreq>daily</changefreq>
@@ -13866,6 +13887,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/page/2/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/page/2/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/blog/page/3/</loc>
+        <lastmod>2026-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/page/3/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/page/3/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/zh/blog/archive/2026/page/2/</loc>
