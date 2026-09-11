@@ -8,6 +8,7 @@ links:
 authors:
   - jia
 title: "SELECT * FROM Satellite, in a Rust Database"
+slug: select-from-satellite-in-a-rust-database
 ---
 
 # SELECT * FROM Satellite, in a Rust Database
