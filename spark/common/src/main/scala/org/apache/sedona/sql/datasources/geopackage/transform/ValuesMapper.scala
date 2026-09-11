@@ -53,9 +53,9 @@ object ValuesMapper {
         case (GeoPackageType.BOOLEAN, _) =>
           rs.getBoolean(column.name)
         case (GeoPackageType.DATE, _) =>
-          DataTypesTransformations.getDays(rs.getString(column.name))
+          parseNullable(rs.getString(column.name))(DataTypesTransformations.getDays)
         case (GeoPackageType.DATETIME, _) =>
-          DataTypesTransformations.epoch(rs.getString(column.name)) * 1000
+          parseNullable(rs.getString(column.name))(DataTypesTransformations.epoch(_) * 1000)
         case (GeoPackageType.POINT, _) =>
           GeometryReader.extractWKB(rs.getBytes(column.name))
         case (GeoPackageType.LINESTRING, _) =>
@@ -77,4 +77,12 @@ object ValuesMapper {
       }
     })
   }
+
+  /**
+   * A SQL NULL in a DATE or DATETIME column comes back from the driver as a null string. The
+   * parsers in [[DataTypesTransformations]] throw NullPointerException on null input, so map NULL
+   * straight through instead of parsing it.
+   */
+  private def parseNullable[T](value: String)(parse: String => T): Any =
+    if (value == null) null else parse(value)
 }
