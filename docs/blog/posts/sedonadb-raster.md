@@ -28,9 +28,10 @@ Planet publishes its crisis imagery as Cloud Optimized GeoTIFFs (COGs), which su
 ??? example "Scene selection"
 
     ```python
-    import sedonadb
+    # pip install "apache-sedona[db]"
+    import sedona.db
 
-    sd = sedonadb.connect()
+    sd = sedona.db.connect()
     EV = "https://data.source.coop/planet/disasterdata/gironde-wildfire-2026"
     AOI = "POLYGON((-1.30 44.70, -0.95 44.70, -0.95 45.02, -1.30 45.02, -1.30 44.70))"
 
@@ -78,7 +79,9 @@ The scene has four bands with 3 m pixels in the UTM zone 30N coordinate referenc
     from urllib.parse import urljoin
 
     import numpy as np
-    from sedonadb.raster import Raster
+    from sedonadb.raster import (
+        Raster,
+    )  # the raster helper ships in the sedonadb package that apache-sedona[db] installs
 
     W, H = 2374, 3017  # 12 m cells over the 28 x 36 km study area, UTM 30N
     GT = [633936.0, 12, 0, 4987224.0, 0, -12]
