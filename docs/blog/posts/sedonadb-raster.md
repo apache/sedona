@@ -79,9 +79,9 @@ The scene has four bands with 3 m pixels in the UTM zone 30N coordinate referenc
     from urllib.parse import urljoin
 
     import numpy as np
-    from sedonadb.raster import (
-        Raster,
-    )  # the raster helper ships in the sedonadb package that apache-sedona[db] installs
+
+    # Raster lives in the sedonadb package that apache-sedona[db] installs
+    from sedonadb.raster import Raster
 
     W, H = 2374, 3017  # 12 m cells over the 28 x 36 km study area, UTM 30N
     GT = [633936.0, 12, 0, 4987224.0, 0, -12]
