@@ -12,15 +12,17 @@ title: "SELECT * FROM Satellite, in a Rust Database"
 
 # SELECT * FROM Satellite, in a Rust Database
 
-Satellite scenes are tables now, in a Rust database engine. [SedonaDB](https://sedona.apache.org/sedonadb/latest/) 0.4.1 ships a raster layer: rasters stream from cloud storage without a download, they clip and reproject in SQL, zonal statistics and polygonization are functions, and pixels move to NumPy and back without a copy. One machine, one `pip install`. The tutorial below runs every piece on one event, the Gironde and Landes wildfire of July 2026, which burned through the pine forest west of Bordeaux and prompted 250,000 evacuations. Eleven PlanetScope scenes go in; burn perimeters, hectares per commune and a GeoTIFF come out.
+[SedonaDB](https://sedona.apache.org/sedonadb/latest/) 0.4.1 supports raster analysis in SQL and Python on a single machine. This example uses eleven PlanetScope satellite images to estimate the area burned in the [Gironde and Landes wildfire of July 2026](https://source.coop/planet/disasterdata/gironde-wildfire-2026). SQL selects and aligns the images, NumPy identifies vegetation loss, and raster functions convert the result into polygons and area estimates by municipality.
 
-![Left: the title as a SQL query and three numbers. Right: PlanetScope true-color image of the Gironde coast on 28 July 2026 with the burn scar outlined in red polygons](sedonadb-raster-cover.png)
+![PlanetScope image of the Gironde coast on 28 July 2026 with estimated burn boundaries in red. The analysis uses 11 scenes and produces 173 polygons covering 24,091 hectares](sedonadb-raster-cover.png)
 
 <!-- more -->
 
-## The catalog is a table
+The code excerpts below show the main raster operations. Mosaic assembly, threshold calculation, and loading municipality boundaries are described but not included in full. The [SedonaDB quickstart](https://sedona.apache.org/sedonadb/latest/quickstart-python/) covers installation.
 
-Planet publishes its crisis imagery as public Cloud Optimized GeoTIFFs with a [STAC-GeoParquet](https://source.coop/planet/disasterdata) index per event. SedonaDB reads the index over HTTPS, the footprints are a geometry column, and picking scenes is `ST_Intersects` against the study area:
+## Select scenes from the catalog
+
+Planet publishes its crisis imagery as Cloud Optimized GeoTIFFs (COGs), which support reading parts of an image over HTTP. Each event has a [STAC-GeoParquet](https://source.coop/planet/disasterdata) index: a Parquet table of scene metadata that follows the SpatioTemporal Asset Catalog (STAC) format. SedonaDB reads this table over HTTPS. `ST_Intersects` selects scenes whose footprints overlap the study area:
 
 ??? example "Scene selection"
 
@@ -55,21 +57,25 @@ Planet publishes its crisis imagery as public Cloud Optimized GeoTIFFs with a [S
 10  post  20260728_105822_78_2562      5
 ```
 
-Eight scenes from 8 July, before the fire started on the 23rd, and three from 28 July, while it was still burning. Two seconds, and no pixel has been read.
+The query selects eight scenes from 8 July and three from 28 July. These dates fall before and after the fire started on 23 July. Scene selection took about two seconds in the recorded run and read only catalog metadata.
 
-## Rasters stay where they are
+## Read and align raster pixels
 
-`RS_FromPath` opens a file's header and returns an out-of-database raster: georeferencing in the value, bands pointing at the source, pixels fetched only when a function asks. A scene is half a gigabyte and opens in about a second:
+`RS_FromPath` reads a file's header and returns an out-of-database raster. This value stores the raster's location and spatial metadata; pixel values remain in the source file until an operation reads them. Opening one scene of about half a gigabyte took roughly a second and returned this metadata:
 
 ```
 {'w': 12715, 'h': 9085, 'nb': 4, 'srid': 32630, 'sx': 3.0, 't': 'UNSIGNED_16BITS', 'nodata': 0.0}
 ```
 
-Four bands at 3 m in UTM zone 30, each scene on its own origin. The analysis needs one grid, so the grid is a raster too: a NumPy array of zeros at 12 m over the study area, handed to SQL as a query parameter. `RS_Clip` reads only the window inside the study area and `RS_ReprojectMatch` averages the 3 m pixels onto the 12 m cells. The scenes of a date are rows of one `VALUES` table, so one statement fans the reads out across cores:
+The scene has four bands with 3 m pixels in the UTM zone 30N coordinate reference system (EPSG:32630). Scene grids have different origins, so the comparison needs a common grid. A NumPy array defines a reference raster with 12 m cells over the study area, and SQL receives it as a query parameter.
 
-??? example "Clip and align every scene of a date in one statement"
+`RS_Clip` limits each raster to the study area. `RS_ReprojectMatch` then averages the 3 m pixels onto the reference grid. A `VALUES` table groups the scenes for each date into one query:
+
+??? example "Clip and align scenes from one date"
 
     ```python
+    from urllib.parse import urljoin
+
     import numpy as np
     from sedonadb.raster import Raster
 
@@ -78,9 +84,16 @@ Four bands at 3 m in UTM zone 30, each scene on its own origin. The analysis nee
     ref = Raster.from_numpy(np.zeros((H, W), np.uint8), crs="EPSG:32630", transform=GT)
 
 
+    def asset_url(phase, scene_id, href):
+        date = f"{scene_id[:4]}-{scene_id[4:6]}-{scene_id[6:8]}"
+        return urljoin(f"{EV}/{phase}-event/{date}/items/{scene_id}/", href)
+
+
     def aligned(phase, band, algorithm="Average"):
         rows = scenes[scenes.phase == phase]
-        values = ", ".join(f"('{r.id}', '{r.href}')" for r in rows.itertuples())
+        values = ", ".join(
+            f"('{r.id}', '{asset_url(phase, r.id, r.href)}')" for r in rows.itertuples()
+        )
         tbl = sd.sql(
             f"""
             SELECT id, RS_ReprojectMatch(
@@ -96,11 +109,17 @@ Four bands at 3 m in UTM zone 30, each scene on its own origin. The analysis nee
         }
     ```
 
-Red, near-infrared and the usable-data mask each take one statement per date, six in all, and `to_numpy()` hands every result to NumPy as a view. The six statements take eleven and a half minutes together, nearly all of it range requests over HTTPS. A few lines of NumPy stack the scenes into one mosaic per date, first clear pixel wins; the eleven scenes cover 87 percent of the grid, the rest is ocean and the gaps between strips.
+The catalog's asset paths are relative to each scene's item directory. `asset_url` resolves them to HTTPS URLs before the query opens them.
 
-## NumPy in the middle
+The analysis reads the red and near-infrared bands, plus Planet's usable-data mask, for each date. The mask identifies clear pixels; it is read from a separate asset with nearest-neighbor resampling. These six queries took about eleven and a half minutes in the recorded run. `to_numpy()` exposes each result as a NumPy view.
 
-The burn index is the drop in NDVI between the two dates. Otsu's method picks the cutoff from the data, splitting the histogram of that drop over pixels that were vegetated before the fire, and lands at 0.225. The resulting 0/1 array becomes an in-database raster with `Raster.from_numpy`, and the rest of the post is SQL against it.
+NumPy combines the scenes into one image, or mosaic, per date. Scenes are processed in cloud-cover order, and each grid cell keeps the first clear pixel. The mosaics cover about 87 percent of the grid. Cloud, smoke, ocean, and gaps between scenes can leave cells without usable observations.
+
+## Estimate vegetation loss with NumPy
+
+The normalized difference vegetation index (NDVI) compares red and near-infrared reflectance. A drop in NDVI between the two dates indicates vegetation loss, which can result from fire or other changes such as harvesting. Otsu's method selects a threshold by dividing the distribution of NDVI changes into two groups. Applied to pixels with pre-fire NDVI above 0.35, it gave a threshold of 0.225 for this dataset.
+
+The excerpt below assumes that `pre_red`, `pre_nir`, `post_red`, and `post_nir` are floating-point mosaics. `both_dates` marks cells with usable observations on both dates. The resulting mask contains 1 for vegetation loss that meets the thresholds and 0 elsewhere. `Raster.from_numpy` passes it back to SQL as an in-database raster, with its pixels held in memory.
 
 ??? example "NDVI drop to burn mask"
 
@@ -114,9 +133,9 @@ The burn index is the drop in NDVI between the two dates. Otsu's method picks th
     mask = Raster.from_numpy(burn, crs="EPSG:32630", transform=GT)
     ```
 
-## RS_Polygonize: the scar becomes geometry
+## Convert the mask to polygons
 
-One function turns connected runs of equal-valued pixels into polygons, and `unnest` turns the list into rows:
+`RS_Polygonize` converts connected pixels with the same value into polygons. `unnest` expands the returned list into rows, and the filter keeps polygons with a mask value of 1:
 
 ```python
 sd.sql(
@@ -135,13 +154,15 @@ sd.sql(
 2    303.0  POINT(-0.9643428713835945 44.76723745400395)
 ```
 
-Polygonizing the 7-million-cell mask takes 2.5 seconds and yields 3,769 patches. Dropping everything under a hectare leaves **173 polygons covering 24,091 ha**, and one of them is the fire: a single 21,090 ha geometry between Le Porge and Lanton.
+The output above lists the area in hectares and centroid of the three largest polygons, after sorting by area. Polygonizing the 7-million-cell mask took about three seconds and produced 3,769 patches. Keeping patches of at least one hectare leaves **173 polygons covering 24,091 ha**. The largest covers 21,090 ha between Le Porge and Lanton.
 
-![PlanetScope true-color image of the coast between Lacanau and the Arcachon Basin on 28 July 2026, the burn scar dark purple, outlined by 173 red polygons; smoke plumes still rise from the western edge](sedonadb-raster-burn.png)
+![PlanetScope image between Lacanau and the Arcachon Basin on 28 July 2026. Red polygons outline the estimated burn area, with smoke visible along its western edge](sedonadb-raster-burn.png)
 
-## Zonal statistics on the mask
+## Calculate area by municipality
 
-The same raster parameter works in `RS_ZonalStats`. The sum of a 0/1 mask over a polygon is a pixel count, so hectares per commune, read earlier from Overture's divisions theme, are one multiplication away:
+Zonal statistics summarize raster values within a polygon. `RS_ZonalStats` sums the 0/1 mask within each French municipality, or commune. Each 12 m cell covers 144 square meters, or 0.0144 hectares, so multiplying the sum by 0.0144 gives an area estimate.
+
+This query assumes a `communes` view with `name` and `geometry` columns loaded from [Overture Maps division areas](https://docs.overturemaps.org/guides/divisions/). It uses the full mask, including patches smaller than one hectare:
 
 ```python
 per_commune = sd.sql(
@@ -155,11 +176,13 @@ per_commune = sd.sql(
 
 ![Horizontal bar chart of burned hectares by commune: Le Porge 6,202, Saumos 4,045, Lanton 3,499, Arès 3,498, Lacanau 2,025, Le Temple 1,667, then three communes under 250](sedonadb-raster-communes.svg)
 
-Twenty-seven communes in 12.5 seconds.
+The query evaluated 27 communes in about fourteen seconds. The chart shows the nine with more than 50 hectares flagged by the mask.
 
-## Three rasters, one grid
+## Compare the mask with land cover
 
-Any raster aligns to the grid the same way. ESA WorldCover, the 10 m land-cover map from [last week's post](https://sedona.apache.org/latest/blog/2026/09/04/group-by-but-for-pixels/), goes through the same `RS_Clip` and `RS_ReprojectMatch` pair with `NearestNeighbor` in place of `Average`, and a NumPy crosstab says what burned:
+ESA WorldCover provides a 10 m land-cover map for 2021, described in the [zonal statistics post](https://sedona.apache.org/latest/blog/2026/09/04/group-by-but-for-pixels/). `RS_Clip` and `RS_ReprojectMatch` align it to the same 12 m grid. `NearestNeighbor` preserves class values such as tree cover and cropland; averaging those codes would change their meaning.
+
+A NumPy count groups flagged pixels by land-cover class. Like the commune query, this step uses the full mask, which covers about 24,347 ha before small patches are removed. The four largest classes are:
 
 ```
    land_cover  class  burned_ha  share_pct
@@ -169,11 +192,11 @@ Any raster aligns to the grid the same way. ESA WorldCover, the 10 m land-cover 
      built-up     50       23.7        0.1
 ```
 
-Three quarters of the scar is the Landes pine forest. The 549 ha of cropland is a caveat worth reading off the map: a few harvested center-pivot fields at the southeast edge lost as much NDVI as a burned stand, and a vegetation-drop index cannot tell the two apart. The land-cover column is how that gets filtered when it matters.
+Tree cover accounts for 75 percent of the flagged area in the 2021 map. This class does not identify tree species, and land use may have changed by 2026. The roughly 549 ha classified as cropland also need care: harvested fields can lose as much NDVI as burned vegetation. A forest-only analysis could select the tree-cover class, but NDVI loss alone does not establish that a pixel burned.
 
-## Write it back
+## Export the results
 
-`RS_AsGeoTiff` encodes the mask as a tiled, compressed GeoTIFF of 137 KB, and the polygons leave as GeoParquet through `to_parquet`.
+`RS_AsGeoTiff` encodes the mask as a tiled, compressed GeoTIFF of 137 KB. `to_parquet` exports the polygons as GeoParquet.
 
 ??? example "Export"
 
@@ -187,12 +210,12 @@ Three quarters of the scar is the Landes pine forest. The 549 ha of cropland is 
     ).to_parquet("burn_patches.parquet")
     ```
 
-## What the numbers are and are not
+## Interpret the estimate
 
-The whole pipeline ran in twelve minutes in one process, and all but thirty seconds of that was streaming pixels. The 24,091 ha is the scar visible on the morning of 28 July at 12 m, with the pixels under that morning's smoke plumes masked out by Planet's usable-data layer; the fire kept burning after those scenes, and the estimates published for the whole complex run from 34,000 to 45,000 ha. Rerunning against a later scene is a change of one line in the catalog query.
+The recorded raster run took about twelve minutes in one process, including about eleven and a half minutes to read and align pixels. It used previously saved commune boundaries. Loading those boundaries, comparing land cover, and making the figures were separate steps; these timings are from this run, not a general performance benchmark.
 
-## The point
+The 24,091 ha estimate covers flagged patches of at least one hectare in the 28 July imagery at 12 m resolution. It excludes pixels rejected by Planet's usable-data mask and may include vegetation loss unrelated to fire. The fire continued after the images were taken. [Planet's event catalog](https://source.coop/planet/disasterdata/gironde-wildfire-2026) reports 34,000 to 45,000 ha for the wildfire complex, so the two figures describe different extents and dates.
 
-Rasters used to leave the database to be analysed and come back as a shapefile. In a Rust engine that installs with `pip`, they stay: `RS_FromPath` reads them where they are, `RS_Clip` and `RS_ReprojectMatch` put them on a common grid, NumPy does the band math without a copy, `RS_Polygonize` turns the answer into geometry, `RS_ZonalStats` summarizes it by any polygon, and `RS_AsGeoTiff` writes it out. One session, one machine, one language.
+Later imagery can update the estimate, but its coverage, usable pixels, and NDVI threshold need to be checked again.
 
 *SedonaDB reference: [`RS_FromPath`](https://sedona.apache.org/sedonadb/latest/reference/sql/rs_frompath/), [`RS_ReprojectMatch`](https://sedona.apache.org/sedonadb/latest/reference/sql/rs_reprojectmatch/), [`RS_Polygonize`](https://sedona.apache.org/sedonadb/latest/reference/sql/rs_polygonize/), [`RS_ZonalStats`](https://sedona.apache.org/sedonadb/latest/reference/sql/rs_zonalstats/). Imagery © Planet Labs PBC, Crisis Response Program, CC BY-NC 4.0. Land cover © ESA WorldCover project 2021, contains modified Copernicus Sentinel data (2021). Commune boundaries from Overture Maps.*
