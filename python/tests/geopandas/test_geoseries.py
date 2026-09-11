@@ -677,6 +677,92 @@ class TestGeoSeries(TestGeopandasBase):
         sgpd_series = sgpd.GeoSeries(obj)
         assert isinstance(sgpd_series, sgpd.GeoSeries)
 
+    @pytest.mark.parametrize(
+        "wrap",
+        [list, tuple, np.asarray, pd.Series, gpd.GeoSeries, gpd.array.from_shapely],
+        ids=["list", "tuple", "numpy", "pandas", "geopandas", "geometry_array"],
+    )
+    def test_constructor_leading_null_local_inputs(self, wrap):
+        from geopandas.testing import assert_geoseries_equal
+
+        _ = self.spark
+        values = [None, Point(1, 0), None, Point()]
+        result = GeoSeries(wrap(values))
+
+        assert_geoseries_equal(
+            result.to_geopandas(), gpd.GeoSeries(values), check_index_type=False
+        )
+        assert result.crs is None
+
+    @pytest.mark.parametrize(
+        "missing", [None, np.nan, pd.NA, pd.NaT, np.datetime64("NaT")]
+    )
+    def test_constructor_leading_missing_values(self, missing):
+        from geopandas.testing import assert_geoseries_equal
+
+        _ = self.spark
+        result = GeoSeries([missing, Point(1, 0), missing])
+
+        assert_geoseries_equal(
+            result.to_geopandas(),
+            gpd.GeoSeries([None, Point(1, 0), None]),
+            check_index_type=False,
+        )
+
+    @pytest.mark.parametrize(
+        "name, inherited_crs, crs",
+        [
+            (None, None, None),
+            ("geometry", "EPSG:4326", None),
+            (("geometry", "shape"), "EPSG:4326", "EPSG:3857"),
+        ],
+    )
+    def test_constructor_leading_null_metadata(self, name, inherited_crs, crs):
+        from geopandas.testing import assert_geoseries_equal
+
+        _ = self.spark
+        index = pd.MultiIndex.from_tuples(
+            [("b", 2), ("a", 1), ("b", 2)], names=["letter", "number"]
+        )
+        values = [None, Point(1, 0, 2), Point(3, 4)]
+        local = gpd.GeoSeries(values, index=index, name=name, crs=inherited_crs)
+        result = GeoSeries(local, crs=crs)
+        expected = gpd.GeoSeries(
+            values, index=index, name=name, crs=crs or inherited_crs
+        )
+
+        assert result.name == name
+        assert_geoseries_equal(result.to_geopandas(), expected)
+        assert_geoseries_equal(
+            local, gpd.GeoSeries(values, index=index, name=name, crs=inherited_crs)
+        )
+
+    @pytest.mark.parametrize("values", [[], [None, None], [Point(1, 0), None]])
+    def test_constructor_null_and_empty_controls(self, values):
+        from geopandas.testing import assert_geoseries_equal
+
+        _ = self.spark
+        assert_geoseries_equal(
+            GeoSeries(values).to_geopandas(),
+            gpd.GeoSeries(values),
+            check_index_type=False,
+        )
+
+    def test_constructor_leading_null_preserves_embedded_srid(self):
+        from shapely import wkb
+        from sedona.spark.sql.types import GeometryType
+
+        _ = self.spark
+        point = wkb.loads(wkb.dumps(Point(1, 2, 3), srid=4326))
+        result = GeoSeries([None, point])
+
+        assert result.spark.data_type == GeometryType()
+        assert result.crs is None
+        assert result.spark.transform(stf.ST_SRID).to_pandas().dropna().tolist() == [
+            4326
+        ]
+        assert result.spark.transform(stf.ST_Z).to_pandas().dropna().tolist() == [3]
+
     def test_constructor_pandas_on_spark(self):
         obj = ps.Series([Point(x, x) for x in range(3)])
         sgpd_series = GeoSeries(obj)
