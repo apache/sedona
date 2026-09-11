@@ -65,6 +65,7 @@
 * [<a href='https://github.com/apache/sedona/issues/3273'>GH-3273</a>] - Implement distributed GeoSeries and GeoDataFrame polygonal coverage validation and invalid-edge diagnostics
 * [<a href='https://github.com/apache/sedona/issues/3281'>GH-3281</a>] - Implement `GeoDataFrame.from_features` for in-memory GeoJSON-like features
 * [<a href='https://github.com/apache/sedona/issues/3288'>GH-3288</a>] - Implement `GeoDataFrame.from_dict` for in-memory dictionaries
+* [<a href='https://github.com/apache/sedona/issues/3344'>GH-3344</a>] - Expose `SpatialIndex.valid_query_predicates`
 
 ### Bug Fixes
 

@@ -82,7 +82,8 @@ class SpatialIndex:
 
     @property
     def valid_query_predicates(self) -> set:
-        """Return the supported values for the ``query`` predicate.
+        """
+        Return the supported values for the ``query`` predicate.
 
         .. versionadded:: 2.0.0
 
