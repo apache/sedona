@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1268,6 +1267,56 @@
       
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#r-sedona" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        在 R 中使用 Sedona
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="在 R 中使用 Sedona">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        扩展初始化脚本
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        从 R 连接集群
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        验证 R 端安装
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -5647,6 +5696,56 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#r-sedona" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        在 R 中使用 Sedona
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="在 R 中使用 Sedona">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        扩展初始化脚本
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        从 R 连接集群
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        验证 R 端安装
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -5743,6 +5842,43 @@ sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </
 <div class="highlight"><pre><span></span><code><span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"SELECT ST_Point(0, 0)"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>注意：您不需要再调用 <code>SedonaRegistrator.registerAll(spark)</code> 或 <code>SedonaContext.create(spark)</code>，因为配置中的 <code>org.apache.sedona.sql.SedonaSqlExtensions</code> 已经为您完成了这些工作。</p>
+<h2 id="r-sedona">在 R 中使用 Sedona<a class="headerlink" href="#r-sedona" title="Permanent link">&para;</a></h2>
+<p><a href="https://cran.r-project.org/package=apache.sedona"><code>apache.sedona</code></a> R 包是一个 <a href="https://spark.rstudio.com"><code>sparklyr</code></a> 扩展。只要在 <code>spark_connect()</code> 之前加载它，Sedona 的序列化器、UDT 与 UDF 就会自动注册，因此 R 中不需要手动调用与 <code>SedonaContext.create()</code> 等价的方法。</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>CRAN 上的 <code>apache.sedona</code> 1.9.1 版本仅支持 Spark 3.x。所有 EMR 7.x 版本都搭载 Spark 3.5，因此均可使用。</p>
+</div>
+<h3 id="_4">扩展初始化脚本<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<p>在上面的引导脚本中追加以下内容。与脚本的其余部分一样，它会在集群的每个节点上运行。从 R 执行 Spark SQL 查询时，只有运行 R 的节点需要这些 R 包；只有在使用 <code>spark_apply()</code> 于 executor 上运行 R 代码时，工作节点才需要它们。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 安装 R 以及 Sedona 的 R 接口。sparklyr 依赖的 R curl 包需要 libcurl-devel 才能编译。</span>
+sudo<span class="w"> </span>yum<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>R<span class="w"> </span>libcurl-devel
+sudo<span class="w"> </span>R<span class="w"> </span>-e<span class="w"> </span><span class="s1">'install.packages(c("sparklyr", "apache.sedona"), repos = "https://cloud.r-project.org", Ncpus = parallel::detectCores()); stopifnot(all(c("sparklyr", "apache.sedona") %in% rownames(installed.packages())))'</span>
+</code></pre></div>
+<p>包编译失败时 <code>install.packages()</code> 只会给出警告，因此需要通过 <code>stopifnot()</code> 让 <code>R</code> 命令以失败退出，而不是报告成功。安装 R 预计会使每个节点的引导时间增加几分钟。</p>
+<h3 id="r">从 R 连接集群<a class="headerlink" href="#r" title="Permanent link">&para;</a></h3>
+<p>EMR 将 Spark 安装在 <code>/usr/lib/spark</code> 下。从 R 连接时，Spark driver 以 YARN client 模式运行在运行 R 的节点上。上面的 <code>spark.yarn.dist.jars</code> 设置只会把 jar 分发给 executor，并不会把 Sedona 加入 driver 的 classpath。<code>apache.sedona</code> 会自行把 jar 加入 driver：要么从 Maven Central 下载，要么使用 <code>SEDONA_JAR_FILES</code> 中列出的本地文件。请将 <code>SEDONA_JAR_FILES</code> 指向引导脚本已经下载到 <code>/jars</code> 的 jar 包：</p>
+<div class="highlight"><pre><span></span><code><span class="nf">library</span><span class="p">(</span><span class="n">sparklyr</span><span class="p">)</span>
+<span class="nf">library</span><span class="p">(</span><span class="n">apache.sedona</span><span class="p">)</span>
+
+<span class="nf">Sys.setenv</span><span class="p">(</span>
+<span class="w">  </span><span class="s">"SEDONA_JAR_FILES"</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">paste</span><span class="p">(</span>
+<span class="w">    </span><span class="s">"/jars/sedona-spark-shaded-3.5_2.12-1.9.1.jar"</span><span class="p">,</span>
+<span class="w">    </span><span class="s">"/jars/geotools-wrapper-1.9.1-33.5.jar"</span><span class="p">,</span>
+<span class="w">    </span><span class="n">sep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">":"</span>
+<span class="w">  </span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">sc</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">spark_connect</span><span class="p">(</span><span class="n">master</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"yarn"</span><span class="p">,</span><span class="w"> </span><span class="n">spark_home</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"/usr/lib/spark"</span><span class="p">)</span>
+</code></pre></div>
+<p>上面的 Jupyter 示例不需要这一步，因为 EMR 以 cluster 部署模式运行 Livy，driver 运行在能收到这些 jar 的 YARN 容器中。</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code>SEDONA_JAR_FILES</code> 是一个以 <code>:</code> 分隔的 jar 列表，设置它只会替换 Sedona 的 Maven 坐标。<code>apache.sedona</code> 仍会通过 <code>--packages</code> 请求 <code>org.datasyslab:geotools-wrapper:1.9.1-33.5</code>，因此无论如何 driver 都需要能访问 Maven Central，或者 Ivy 缓存中已有该 jar。在 <code>SEDONA_JAR_FILES</code> 中列出 GeoTools wrapper 的 jar 并无害处。如果不设置 <code>SEDONA_JAR_FILES</code>，<code>apache.sedona</code> 还会请求 <code>org.apache.sedona:sedona-spark-shaded-&lt;spark 版本&gt;_&lt;scala 版本&gt;:1.9.1</code>。Ivy 会按用户缓存下载的 jar，因此只有首次连接需要下载，但在网络较慢时，首次连接可能超过 <code>sparklyr.connect.timeout</code> 的默认值。</p>
+</div>
+<h3 id="r_1">验证 R 端安装<a class="headerlink" href="#r_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nf">sdf_sql</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span><span class="w"> </span><span class="s">"SELECT ST_Point(0.0, 0.0) AS geom"</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w"> </span><span class="nf">collect</span><span class="p">()</span>
+</code></pre></div>
+<p>关于 R 接口的更多功能，请参阅 <a href="https://sedona.apache.org/latest/api/rdocs/">Sedona R 文档</a>。</p>
 
 
 
@@ -5763,7 +5899,7 @@ sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年8月30日 05:22:11 UTC">2026年8月30日 05:22:11</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年9月12日 07:47:18 UTC">2026年9月12日 07:47:18</span>
   </span>
 
     

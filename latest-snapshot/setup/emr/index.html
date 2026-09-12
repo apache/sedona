@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1268,6 +1267,56 @@
       
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#use-sedona-in-r" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Sedona in R
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Use Sedona in R">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#extend-the-initialization-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extend the initialization script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connect-to-the-cluster-from-r" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connect to the cluster from R
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-the-r-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify the R installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -5647,6 +5696,56 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#use-sedona-in-r" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Sedona in R
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Use Sedona in R">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#extend-the-initialization-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extend the initialization script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connect-to-the-cluster-from-r" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connect to the cluster from R
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-the-r-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify the R installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -5743,6 +5842,43 @@ sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </
 <div class="highlight"><pre><span></span><code><span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"SELECT ST_Point(0, 0)"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>Note that: you don't need to run the <code>SedonaRegistrator.registerAll(spark)</code> or <code>SedonaContext.create(spark)</code> because <code>org.apache.sedona.sql.SedonaSqlExtensions</code> in the config will take care of that.</p>
+<h2 id="use-sedona-in-r">Use Sedona in R<a class="headerlink" href="#use-sedona-in-r" title="Permanent link">&para;</a></h2>
+<p>The <a href="https://cran.r-project.org/package=apache.sedona"><code>apache.sedona</code></a> R package is a <a href="https://spark.rstudio.com"><code>sparklyr</code></a> extension. Attaching it before <code>spark_connect()</code> is enough to register Sedona's serializers, UDTs and UDFs, so there is no R equivalent of <code>SedonaContext.create()</code> to call by hand.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code>apache.sedona</code> 1.9.1 release on CRAN supports Spark 3.x only. Every EMR 7.x release ships Spark 3.5, so any of them works.</p>
+</div>
+<h3 id="extend-the-initialization-script">Extend the initialization script<a class="headerlink" href="#extend-the-initialization-script" title="Permanent link">&para;</a></h3>
+<p>Add the following to the bootstrap script above. Like the rest of the script, it runs on every node in the cluster. Spark SQL queries from R only need the R packages on the node you run R from; worker nodes need them only if you run R code on executors with <code>spark_apply()</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Install R and the Sedona R interface. libcurl-devel is needed to build the R curl package that sparklyr depends on.</span>
+sudo<span class="w"> </span>yum<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>R<span class="w"> </span>libcurl-devel
+sudo<span class="w"> </span>R<span class="w"> </span>-e<span class="w"> </span><span class="s1">'install.packages(c("sparklyr", "apache.sedona"), repos = "https://cloud.r-project.org", Ncpus = parallel::detectCores()); stopifnot(all(c("sparklyr", "apache.sedona") %in% rownames(installed.packages())))'</span>
+</code></pre></div>
+<p><code>install.packages()</code> only warns when a package fails to build, so the <code>stopifnot()</code> call is what makes the <code>R</code> command fail instead of reporting success. Expect the R installation to add several minutes to the bootstrap of each node.</p>
+<h3 id="connect-to-the-cluster-from-r">Connect to the cluster from R<a class="headerlink" href="#connect-to-the-cluster-from-r" title="Permanent link">&para;</a></h3>
+<p>EMR installs Spark under <code>/usr/lib/spark</code>. When you connect from R, the Spark driver runs in YARN client mode on the node where R runs. The <code>spark.yarn.dist.jars</code> setting above only ships jars to the executors, so it does not put Sedona on the driver's classpath. <code>apache.sedona</code> adds the jars to the driver itself, either by downloading them from Maven Central or from the local files listed in <code>SEDONA_JAR_FILES</code>. Point <code>SEDONA_JAR_FILES</code> at the jars the bootstrap script already downloaded into <code>/jars</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nf">library</span><span class="p">(</span><span class="n">sparklyr</span><span class="p">)</span>
+<span class="nf">library</span><span class="p">(</span><span class="n">apache.sedona</span><span class="p">)</span>
+
+<span class="nf">Sys.setenv</span><span class="p">(</span>
+<span class="w">  </span><span class="s">"SEDONA_JAR_FILES"</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">paste</span><span class="p">(</span>
+<span class="w">    </span><span class="s">"/jars/sedona-spark-shaded-3.5_2.12-1.9.1.jar"</span><span class="p">,</span>
+<span class="w">    </span><span class="s">"/jars/geotools-wrapper-1.9.1-33.5.jar"</span><span class="p">,</span>
+<span class="w">    </span><span class="n">sep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">":"</span>
+<span class="w">  </span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">sc</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">spark_connect</span><span class="p">(</span><span class="n">master</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"yarn"</span><span class="p">,</span><span class="w"> </span><span class="n">spark_home</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"/usr/lib/spark"</span><span class="p">)</span>
+</code></pre></div>
+<p>The Jupyter example above does not need this step because EMR runs Livy in cluster deploy mode, where the driver runs on a YARN container that receives the jars.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code>SEDONA_JAR_FILES</code> holds a <code>:</code>-separated list of jars, and setting it only replaces the Sedona Maven coordinate. <code>apache.sedona</code> still requests <code>org.datasyslab:geotools-wrapper:1.9.1-33.5</code> through <code>--packages</code>, so the driver needs access to Maven Central, or that jar already in its Ivy cache, either way. Listing the GeoTools wrapper jar in <code>SEDONA_JAR_FILES</code> is harmless. If you leave <code>SEDONA_JAR_FILES</code> unset, <code>apache.sedona</code> also requests <code>org.apache.sedona:sedona-spark-shaded-&lt;spark version&gt;_&lt;scala version&gt;:1.9.1</code>. Ivy caches the downloaded jars per user, so only the first connection downloads them, but on a slow network that first connection can exceed the default <code>sparklyr.connect.timeout</code>.</p>
+</div>
+<h3 id="verify-the-r-installation">Verify the R installation<a class="headerlink" href="#verify-the-r-installation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nf">sdf_sql</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span><span class="w"> </span><span class="s">"SELECT ST_Point(0.0, 0.0) AS geom"</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w"> </span><span class="nf">collect</span><span class="p">()</span>
+</code></pre></div>
+<p>For more on what the R interface offers, see the <a href="https://sedona.apache.org/latest/api/rdocs/">Sedona R documentation</a>.</p>
 
 
 
@@ -5763,7 +5899,7 @@ sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="August 30, 2026 05:22:11 UTC">August 30, 2026 05:22:11</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 12, 2026 07:47:18 UTC">September 12, 2026 07:47:18</span>
   </span>
 
     
