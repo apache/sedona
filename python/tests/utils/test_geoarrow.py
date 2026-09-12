@@ -62,6 +62,14 @@ class TestGeoArrow(TestBase):
             assert field.metadata[b"ARROW:extension:name"] == b"geoarrow.wkb"
             assert field.metadata[b"ARROW:extension:metadata"] == b"{}"
 
+    def test_to_geoarrow_with_unaliased_geometry_expression(self):
+        geo_df = TestGeoArrow.spark.sql("SELECT ST_Point(1.0, 2.0)")
+
+        geo_table = dataframe_to_arrow(geo_df)
+
+        assert geo_table.column_names == ["st_point(1.0, 2.0)"]
+        assert geo_table.num_rows == 1
+
     def test_to_geoarrow_with_geometry_with_srid(self):
         schema = StructType().add("wkt", StringType())
         wkt_df = TestGeoArrow.spark.createDataFrame(zip(TEST_WKT), schema)

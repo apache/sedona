@@ -24,6 +24,7 @@ from typing import TYPE_CHECKING, Callable, List
 from sedona.spark.sql.st_functions import ST_AsEWKB
 from pyspark.sql import SparkSession
 from pyspark.sql import DataFrame
+from pyspark.sql.functions import col
 from pyspark.sql.types import StructType, StructField, DataType, ArrayType, MapType
 
 from sedona.spark.sql.types import GeometryType
@@ -59,8 +60,8 @@ def dataframe_to_arrow(df, crs=None):
     if not any(col_is_geometry):
         return dataframe_to_arrow_raw(df)
 
-    df_columns = list(df)
     df_column_names = df.schema.fieldNames()
+    df_columns = [col("`" + name.replace("`", "``") + "`") for name in df_column_names]
     for i, is_geom in enumerate(col_is_geometry):
         if is_geom:
             df_columns[i] = ST_AsEWKB(df_columns[i]).alias(df_column_names[i])
