@@ -212,6 +212,37 @@ class GeoPackageReaderTest extends TestBaseScala with Matchers {
         metadataDf.select("last_change").collect()
       }
     }
+
+    it("should read NULL date and datetime values as null") {
+      // A NULL in a DATE or DATETIME column used to surface as a NullPointerException
+      // from DataTypesTransformations and abort the whole scan.
+      val df = sparkSession.read
+        .format("geopackage")
+        .option("tableName", "test_features")
+        .load(resourceFolder + "geopackage/test_null_datetime.gpkg")
+
+      df.schema.fields.find(_.name == "event_date").get.dataType shouldEqual DateType
+      df.schema.fields.find(_.name == "event_time").get.dataType shouldEqual TimestampType
+
+      val rows = df
+        .select("fid", "event_date", "event_time")
+        .collect()
+        .map { row =>
+          val date = Option(row.getAs[Date]("event_date")).map(_.toLocalDate.toString).orNull
+          val time = Option(row.getAs[Timestamp]("event_time")).map(_.toInstant.toString).orNull
+          (row.getInt(0), date, time)
+        }
+        .sortBy(_._1)
+
+      rows shouldEqual Array(
+        (1, "2024-01-15", "2024-01-15T10:30:00Z"),
+        (2, null, null),
+        (3, "2024-03-01", null),
+        (4, null, "2024-03-01T00:00:00Z"))
+
+      df.filter("event_date IS NULL").count() shouldEqual 2
+      df.filter("event_time IS NULL").count() shouldEqual 2
+    }
   }
 
   describe("GeoPackage Raster Data Test") {
