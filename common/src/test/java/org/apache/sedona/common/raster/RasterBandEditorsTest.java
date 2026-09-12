@@ -165,6 +165,48 @@ public class RasterBandEditorsTest extends RasterTestBase {
   }
 
   @Test
+  public void testSetBandNoDataValueWithReplacePreservesOtherBands() throws FactoryException {
+    double[][] originalBands = {{1, 5, 3, 4}, {11, 5, 13, 14}, {21, 22, 5, 24}};
+    double[][] replacedBands = {{1, 99, 3, 4}, {11, 5, 99, 14}, {21, 22, 5, 99}};
+    double[] noDataValues = {5, 13, 24};
+    for (String dataType : new String[] {"b", "us", "s", "i", "f", "d"}) {
+      GridCoverage2D raster =
+          RasterConstructors.makeNonEmptyRaster(
+              3, dataType, 2, 2, 10, 20, 2, -3, 0.25, 0.5, 4326, originalBands);
+      for (int band = 1; band <= 3; band++) {
+        raster = RasterBandEditors.setBandNoDataValue(raster, band, noDataValues[band - 1]);
+      }
+
+      for (int targetBand = 1; targetBand <= 3; targetBand++) {
+        GridCoverage2D result =
+            RasterBandEditors.setBandNoDataValue(raster, targetBand, 99.0, true);
+        assertEquals(raster.getGridGeometry(), result.getGridGeometry());
+        assertEquals(
+            raster.getRenderedImage().getSampleModel().getDataType(),
+            result.getRenderedImage().getSampleModel().getDataType());
+        for (int band = 1; band <= 3; band++) {
+          String context = dataType + ", replacing band " + targetBand + ", checking band " + band;
+          assertArrayEquals(
+              context,
+              band == targetBand ? replacedBands[band - 1] : originalBands[band - 1],
+              MapAlgebra.bandAsArray(result, band),
+              0);
+          assertEquals(
+              context,
+              band == targetBand ? 99.0 : noDataValues[band - 1],
+              RasterBandAccessors.getBandNoDataValue(result, band),
+              0);
+          // Replacing pixels in the result must not mutate the input raster.
+          assertArrayEquals(
+              context, originalBands[band - 1], MapAlgebra.bandAsArray(raster, band), 0);
+          assertEquals(
+              noDataValues[band - 1], RasterBandAccessors.getBandNoDataValue(raster, band), 0);
+        }
+      }
+    }
+  }
+
+  @Test
   public void testSetBandNoDataValueWithEmptyRaster() throws FactoryException {
     GridCoverage2D emptyRaster =
         RasterConstructors.makeEmptyRaster(1, 20, 20, 0, 0, 8, 8, 0.1, 0.1, 4326);
