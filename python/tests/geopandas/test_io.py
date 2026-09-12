@@ -16,6 +16,7 @@
 # under the License.
 
 import os
+import sqlite3
 import tempfile
 import pytest
 import shapely
@@ -41,6 +42,182 @@ from shapely.geometry import (
 from packaging.version import parse as parse_version
 
 TEST_DATA_DIR = os.path.join("..", "spark", "common", "src", "test", "resources")
+
+
+@pytest.fixture
+def layer_catalog(tmp_path):
+    """An empty vector layer, attributes and tiles, with no readable geometries."""
+    path = tmp_path / "layers.gpkg"
+    with sqlite3.connect(path) as conn:
+        conn.executescript("""
+            CREATE TABLE gpkg_contents (
+                table_name TEXT, data_type TEXT, identifier TEXT, description TEXT,
+                last_change DATETIME DEFAULT '2026-01-01T00:00:00Z',
+                min_x DOUBLE, min_y DOUBLE,
+                max_x DOUBLE, max_y DOUBLE, srs_id INTEGER);
+            CREATE TABLE gpkg_geometry_columns (
+                table_name TEXT, column_name TEXT, geometry_type_name TEXT,
+                srs_id INTEGER, z INTEGER, m INTEGER);
+            CREATE TABLE "empty ' points" (fid INTEGER, geom BLOB);
+            CREATE TABLE notes (text TEXT);
+            CREATE TABLE imagery (tile_data BLOB);
+            CREATE TABLE unregistered (text TEXT);
+            INSERT INTO gpkg_contents (table_name, data_type) VALUES
+                ('notes', 'attributes'), ('imagery', 'tiles'),
+                ('empty '' points', 'features');
+            INSERT INTO gpkg_geometry_columns VALUES
+                ('empty '' points', 'geom', 'POINT', 0, 0, 0);
+            """)
+    return path
+
+
+class TestListLayers(TestGeopandasBase):
+    @pytest.mark.parametrize("z", [0, 1, 2])
+    @pytest.mark.parametrize("m", [0, 1, 2])
+    def test_declared_core_types_and_dimensions(self, layer_catalog, z, m):
+        self.spark
+        cases = [
+            ("GEOMETRY", "Unknown", "Unknown"),
+            ("POINT", "Point", "Point Z"),
+            ("LINESTRING", "LineString", "LineString Z"),
+            ("POLYGON", "Polygon", "Polygon Z"),
+            ("MULTIPOINT", "MultiPoint", "MultiPoint Z"),
+            ("MULTILINESTRING", "MultiLineString", "MultiLineString Z"),
+            ("MULTIPOLYGON", "MultiPolygon", "MultiPolygon Z"),
+            ("GEOMETRYCOLLECTION", "GeometryCollection", "GeometryCollection Z"),
+        ]
+        with sqlite3.connect(layer_catalog) as conn:
+            conn.execute("DELETE FROM gpkg_contents")
+            conn.execute("DELETE FROM gpkg_geometry_columns")
+            for declared, _, _ in cases:
+                conn.execute(f'CREATE TABLE "{declared}" (fid INTEGER, geom BLOB)')
+                # Unreadable geometry bytes prove enumeration never decodes features.
+                conn.execute(f"INSERT INTO \"{declared}\" VALUES (1, X'00')")
+                conn.execute(
+                    "INSERT INTO gpkg_contents (table_name, data_type) VALUES (?, 'features')",
+                    (declared,),
+                )
+                conn.execute(
+                    "INSERT INTO gpkg_geometry_columns VALUES (?, 'geom', ?, 0, ?, ?)",
+                    (declared, declared, z, m),
+                )
+        expected = pd.DataFrame(
+            [(name, xy if z == 0 else xyz) for name, xy, xyz in sorted(cases)],
+            columns=["name", "geometry_type"],
+        )
+        pd.testing.assert_frame_equal(sgpd.list_layers(layer_catalog), expected)
+
+    def test_lists_empty_layers_and_attributes_not_tiles(self, layer_catalog):
+        self.spark
+        expected = pd.DataFrame(
+            {"name": ["empty ' points", "notes"], "geometry_type": ["Point", None]}
+        )
+        pd.testing.assert_frame_equal(sgpd.list_layers(layer_catalog), expected)
+        pd.testing.assert_frame_equal(sgpd.list_layers(str(layer_catalog)), expected)
+
+    def test_geometry_metadata_is_opt_in(self, layer_catalog):
+        reader = self.spark.read.format("geopackage").option("showMetadata", "true")
+        original = reader.load(str(layer_catalog))
+        assert original.columns == [
+            "table_name",
+            "data_type",
+            "identifier",
+            "description",
+            "last_change",
+            "min_x",
+            "min_y",
+            "max_x",
+            "max_y",
+            "srs_id",
+        ]
+        assert original.count() == 3
+        enriched = reader.option("includeGeometryType", "true").load(str(layer_catalog))
+        assert enriched.columns == original.columns + ["geometry_type"]
+        assert enriched.count() == 3
+        assert enriched.schema["geometry_type"].nullable
+        rows = enriched.select(
+            "table_name", "geometry_type", "_metadata.file_name"
+        ).collect()
+        assert {r.table_name: r.geometry_type for r in rows} == {
+            "empty ' points": "Point",
+            "notes": None,
+            "imagery": None,
+        }
+        assert all(r.file_name == "layers.gpkg" for r in rows)
+
+    @pytest.mark.parametrize("data_type", ["attributes", "tiles", None])
+    def test_catalog_without_geometry_columns(self, layer_catalog, data_type):
+        self.spark
+        with sqlite3.connect(layer_catalog) as conn:
+            conn.execute("DELETE FROM gpkg_contents")
+            conn.execute("DROP TABLE gpkg_geometry_columns")
+            if data_type:
+                conn.execute(
+                    "INSERT INTO gpkg_contents (table_name, data_type) VALUES ('notes', ?)",
+                    (data_type,),
+                )
+        expected = pd.DataFrame(
+            [("notes", None)] if data_type == "attributes" else [],
+            columns=["name", "geometry_type"],
+        )
+        pd.testing.assert_frame_equal(sgpd.list_layers(layer_catalog), expected)
+
+    @pytest.mark.parametrize(
+        "change",
+        [
+            "DROP TABLE gpkg_geometry_columns",
+            "DELETE FROM gpkg_geometry_columns",
+            "UPDATE gpkg_geometry_columns SET z = 3",
+            "UPDATE gpkg_geometry_columns SET m = -1",
+            "UPDATE gpkg_geometry_columns SET z = NULL",
+            "UPDATE gpkg_geometry_columns SET geometry_type_name = NULL",
+            "UPDATE gpkg_geometry_columns SET geometry_type_name = 'INVALID'",
+            "INSERT INTO gpkg_geometry_columns SELECT * FROM gpkg_geometry_columns",
+        ],
+    )
+    def test_invalid_feature_metadata_fails(self, layer_catalog, change):
+        self.spark
+        with sqlite3.connect(layer_catalog) as conn:
+            conn.execute(change)
+        with pytest.raises(Exception, match="Invalid GeoPackage feature metadata"):
+            sgpd.list_layers(layer_catalog)
+
+    def test_rejects_multiple_files(self, layer_catalog):
+        import shutil
+
+        self.spark
+        shutil.copyfile(layer_catalog, layer_catalog.with_name("second.gpkg"))
+        with pytest.raises(Exception, match="exactly one GeoPackage file"):
+            sgpd.list_layers(str(layer_catalog.parent / "*.gpkg"))
+
+    def test_geometry_type_option_requires_metadata(self, layer_catalog):
+        with pytest.raises(
+            Exception, match="includeGeometryType requires showMetadata"
+        ):
+            self.spark.read.format("geopackage").option("tableName", "notes").option(
+                "includeGeometryType", "true"
+            ).load(str(layer_catalog))
+
+    @pytest.mark.parametrize("filename", [b"file.gpkg", None, 1, ["file.gpkg"]])
+    def test_rejects_non_path_inputs(self, filename):
+        with pytest.raises(TypeError, match="string or path-like"):
+            sgpd.list_layers(filename)
+
+    def test_rejects_other_formats(self):
+        with pytest.raises(ValueError, match="GeoPackage"):
+            sgpd.list_layers("data.geojson")
+
+    def test_missing_file_fails(self, tmp_path):
+        self.spark
+        with pytest.raises(Exception, match="PATH_NOT_FOUND|does not exist"):
+            sgpd.list_layers(tmp_path / "missing.gpkg")
+
+    def test_invalid_file_fails(self, tmp_path):
+        self.spark
+        path = tmp_path / "invalid.gpkg"
+        path.write_bytes(b"not a SQLite database")
+        with pytest.raises(Exception, match="not a database"):
+            sgpd.list_layers(path)
 
 
 @pytest.mark.skipif(

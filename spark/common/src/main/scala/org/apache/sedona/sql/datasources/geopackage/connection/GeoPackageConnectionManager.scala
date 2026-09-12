@@ -24,6 +24,7 @@ import org.apache.sedona.sql.datasources.geopackage.model.TableType.TableType
 import java.sql.{Connection, DriverManager, ResultSet, Statement}
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
+import scala.util.control.NonFatal
 
 object GeoPackageConnectionManager {
 
@@ -43,6 +44,84 @@ object GeoPackageConnectionManager {
     stmt.executeQuery(s"SELECT * FROM ${tableName}")
   }
 
+  /**
+   * Read declared layer types without opening any feature or tile tables. The caller owns the
+   * returned cursor, statement and connection (see closeCursor).
+   */
+  def getMetadataCursor(path: String): ResultSet = {
+    val conn = DriverManager.getConnection("jdbc:sqlite:" + path)
+    try {
+      val statement = conn.createStatement()
+      val tables = statement.executeQuery(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'gpkg_geometry_columns'")
+      val hasGeometryColumns =
+        try tables.next()
+        finally tables.close()
+
+      // gpkg_geometry_columns is optional when there are no feature layers.
+      if (!hasGeometryColumns) {
+        val features = statement.executeQuery(
+          "SELECT 1 FROM gpkg_contents WHERE data_type = 'features' LIMIT 1")
+        try {
+          require(
+            !features.next(),
+            "Invalid GeoPackage feature metadata: missing gpkg_geometry_columns")
+        } finally features.close()
+        return statement.executeQuery("SELECT *, NULL AS geometry_type FROM gpkg_contents")
+      }
+
+      val types = Seq(
+        "GEOMETRY" -> "Unknown",
+        "POINT" -> "Point",
+        "LINESTRING" -> "LineString",
+        "POLYGON" -> "Polygon",
+        "MULTIPOINT" -> "MultiPoint",
+        "MULTILINESTRING" -> "MultiLineString",
+        "MULTIPOLYGON" -> "MultiPolygon",
+        "GEOMETRYCOLLECTION" -> "GeometryCollection")
+      val typeNames = types.map { case (name, _) => s"'$name'" }.mkString(", ")
+      val join = "FROM gpkg_contents c LEFT JOIN gpkg_geometry_columns g " +
+        "ON c.table_name = g.table_name AND c.data_type = 'features'"
+      val invalid =
+        statement.executeQuery(s"""SELECT c.table_name $join WHERE c.data_type = 'features'
+           |GROUP BY c.table_name
+           |HAVING COUNT(g.table_name) != 1 OR
+           |SUM(CASE WHEN g.geometry_type_name IN ($typeNames)
+           |AND g.column_name IS NOT NULL AND g.z IN (0, 1, 2) AND g.m IN (0, 1, 2)
+           |THEN 0 ELSE 1 END) > 0 LIMIT 1""".stripMargin)
+      try {
+        if (invalid.next()) {
+          throw new IllegalArgumentException(
+            s"Invalid GeoPackage feature metadata for layer '${invalid.getString(1)}'")
+        }
+      } finally invalid.close()
+
+      val typeCases =
+        types.map { case (name, label) => s"WHEN '$name' THEN '$label'" }.mkString(" ")
+      // Z includes layers permitting optional Z; M is not represented in the label.
+      // Generic GEOMETRY remains Unknown regardless of its dimension flags.
+      statement.executeQuery(s"""SELECT c.*, (CASE g.geometry_type_name $typeCases END) ||
+           |CASE WHEN g.z > 0 AND g.geometry_type_name != 'GEOMETRY' THEN ' Z' ELSE '' END
+           |AS geometry_type $join""".stripMargin)
+    } catch {
+      case NonFatal(error) =>
+        conn.close()
+        throw error
+    }
+  }
+
+  def closeCursor(rs: ResultSet): Unit = {
+    if (!rs.isClosed) {
+      val statement = rs.getStatement
+      val connection = statement.getConnection
+      try rs.close()
+      finally {
+        try statement.close()
+        finally connection.close()
+      }
+    }
+  }
+
   def getSchema(file: String, tableName: String): Seq[GeoPackageField] = {
     val statement = createStatement(file)
 
@@ -57,9 +136,12 @@ object GeoPackageConnectionManager {
         fields += GeoPackageField(columnName, columnType, true)
       }
 
-      fields.toSeq
+      try fields.toSeq
+      finally rs.close()
     } finally {
-      closeStatement(statement)
+      val connection = statement.getConnection
+      try closeStatement(statement)
+      finally connection.close()
     }
   }
 

@@ -19,6 +19,7 @@
 package org.apache.sedona.sql
 
 import io.minio.{MakeBucketArgs, MinioClient, PutObjectArgs}
+import org.apache.sedona.sql.datasources.geopackage.connection.{FileSystemUtils, GeoPackageConnectionManager}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions.expr
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
@@ -57,6 +58,39 @@ class GeoPackageReaderTest extends TestBaseScala with Matchers {
       StructField("datetime", TimestampType, true)))
 
   describe("Reading GeoPackage metadata") {
+    it("should close metadata cursors and their JDBC resources") {
+      val cursor = GeoPackageConnectionManager.getMetadataCursor(path)
+      val statement = cursor.getStatement
+      val connection = statement.getConnection
+      try {
+        while (cursor.next()) {}
+      } finally GeoPackageConnectionManager.closeCursor(cursor)
+      cursor.isClosed shouldBe true
+      statement.isClosed shouldBe true
+      connection.isClosed shouldBe true
+      GeoPackageConnectionManager.closeCursor(cursor)
+    }
+
+    it("should stage files without leaving checksum sidecars") {
+      // Use a real Hadoop filesystem that takes the staging path without an S3 service.
+      val conf = new org.apache.hadoop.conf.Configuration()
+      conf.set("fs.viewfs.impl", "org.apache.hadoop.fs.viewfs.ViewFileSystem")
+      conf.setBoolean("fs.viewfs.impl.disable.cache", true)
+      val original = new java.io.File(path)
+      conf.set("fs.viewfs.mounttable.default.link./layers", original.getParentFile.toURI.toString)
+      val source = new org.apache.hadoop.fs.Path("viewfs:///layers/" + original.getName)
+      val (staged, copied) = FileSystemUtils.copyToLocal(conf, source)
+      try {
+        copied shouldBe true
+        staged.length() shouldEqual new java.io.File(path).length()
+        new java.io.File(staged.getParentFile, s".${staged.getName}.crc").exists() shouldBe false
+      } finally {
+        staged.delete()
+      }
+      staged.exists() shouldBe false
+      new java.io.File(path).exists() shouldBe true
+    }
+
     it("should read GeoPackage metadata") {
       val df = sparkSession.read
         .format("geopackage")
@@ -66,6 +100,36 @@ class GeoPackageReaderTest extends TestBaseScala with Matchers {
       df.where("data_type = 'tiles'").show(false)
 
       df.count shouldEqual 34
+      df.columns.length shouldEqual 10
+    }
+
+    it("should include declared geometry types only when requested") {
+      val df = sparkSession.read
+        .format("geopackage")
+        .option("showMetadata", "true")
+        .option("includeGeometryType", "true")
+        .load(path)
+
+      df.columns.length shouldEqual 11
+      df.count shouldEqual 34
+      df.schema("geometry_type") shouldEqual StructField("geometry_type", StringType)
+      df.where("table_name = 'point1'")
+        .select("geometry_type", "_metadata.file_name")
+        .head() shouldEqual Row("Point", "example.gpkg")
+      df.where("table_name = 'geometry1'").select("geometry_type").head() shouldEqual Row(
+        "Unknown")
+      df.where("data_type = 'tiles' AND geometry_type IS NOT NULL").count() shouldEqual 0
+    }
+
+    it("should reject multiple files when including geometry types") {
+      val df = sparkSession.read
+        .format("geopackage")
+        .option("showMetadata", "true")
+        .option("includeGeometryType", "true")
+        .load(resourceFolder + "geopackage/*.gpkg")
+
+      val error = intercept[IllegalArgumentException](df.collect())
+      error.getMessage should include("exactly one GeoPackage file")
     }
   }
 
@@ -340,6 +404,15 @@ class GeoPackageReaderTest extends TestBaseScala with Matchers {
         .format("geopackage")
         .option("tableName", "point1")
         .load(inputPath)
+
+      val layers = sparkSessionMinio.read
+        .format("geopackage")
+        .option("showMetadata", "true")
+        .option("includeGeometryType", "true")
+        .load(inputPath)
+      layers.count shouldEqual 34
+      layers.where("table_name = 'point1'").select("geometry_type").head() shouldEqual Row(
+        "Point")
 
       df.count shouldEqual 4
 

@@ -22,6 +22,7 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 
 import java.io.File
+import scala.util.control.NonFatal
 
 object FileSystemUtils {
 
@@ -33,7 +34,13 @@ object FileSystemUtils {
     val fs = file.getFileSystem(options)
     val tempFile = File.createTempFile(java.util.UUID.randomUUID.toString, ".gpkg")
 
-    fs.copyToLocalFile(file, new Path(tempFile.getAbsolutePath))
+    // SQLite needs only the staged file, not a LocalFileSystem checksum sidecar.
+    try fs.copyToLocalFile(false, file, new Path(tempFile.getAbsolutePath), true)
+    catch {
+      case NonFatal(error) =>
+        tempFile.delete()
+        throw error
+    }
 
     (tempFile, true)
   }

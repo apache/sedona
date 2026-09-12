@@ -54,6 +54,10 @@ class GeoPackageDataSource extends FileDataSourceV2 with DataSourceRegister {
     }
 
     val showMetadata = options.getBoolean("showMetadata", false)
+    val includeGeometryType = options.getBoolean("includeGeometryType", false)
+    require(
+      !includeGeometryType || showMetadata,
+      "includeGeometryType requires showMetadata=true")
     val maybeTableName = options.get("tableName")
 
     if (!showMetadata && maybeTableName == null) {
@@ -66,7 +70,7 @@ class GeoPackageDataSource extends FileDataSourceV2 with DataSourceRegister {
       maybeTableName
     }
 
-    GeoPackageOptions(tableName = tableName, showMetadata = showMetadata)
+    GeoPackageOptions(tableName, showMetadata, includeGeometryType)
   }
 
   override def shortName(): String = "geopackage"
