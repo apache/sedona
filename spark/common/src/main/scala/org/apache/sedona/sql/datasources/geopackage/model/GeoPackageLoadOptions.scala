@@ -23,7 +23,10 @@ import org.apache.spark.sql.execution.datasources.PartitionedFile
 import java.io.File
 import scala.collection.mutable
 
-case class GeoPackageOptions(tableName: String, showMetadata: Boolean)
+case class GeoPackageOptions(
+    tableName: String,
+    showMetadata: Boolean,
+    includeGeometryType: Boolean = false)
 
 case class GeoPackageLoadOptions(tableName: String)
 
@@ -32,4 +35,5 @@ case class GeoPackageReadOptions(
     tempFile: File,
     partitionOptions: PartitionOptions,
     partitionedFiles: mutable.HashSet[PartitionedFile],
-    currentFile: PartitionedFile)
+    currentFile: PartitionedFile,
+    includeGeometryType: Boolean = false)

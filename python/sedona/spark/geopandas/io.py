@@ -18,6 +18,7 @@
 import os
 from typing import Union
 import warnings
+import pandas as pd
 import pyspark.pandas as ps
 from sedona.spark.geopandas import GeoDataFrame
 from pyspark.pandas.utils import default_session, scol_for
@@ -26,6 +27,70 @@ from pyspark.pandas.frame import InternalFrame
 from pyspark.pandas.utils import validate_mode, log_advice
 from pandas.api.types import is_integer_dtype
 from sedona.spark.sql.types import GeometryType
+
+
+def list_layers(filename: Union[str, os.PathLike]) -> pd.DataFrame:
+    """
+    List vector layers and nonspatial tables in a GeoPackage.
+
+    .. versionadded:: 2.0.0
+
+    Parameters
+    ----------
+    filename : str or path-like
+        Path to one GeoPackage (``.gpkg``) file, including Hadoop-supported
+        paths such as ``s3a://bucket/data.gpkg``. Bytes and file-like objects
+        are not supported. A glob must resolve to exactly one file.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Columns ``name`` and ``geometry_type``, sorted by name. Registered
+        nonspatial tables have ``None`` as their geometry type. Raster tile
+        tables are excluded.
+
+    Notes
+    -----
+    Unlike GeoPandas, this currently supports GeoPackage only. It uses
+    Sedona's Spark reader, not Pyogrio. Only layer metadata is collected to
+    the driver; no feature geometries are read. The reader copies remote
+    GeoPackages in full to executor-local temporary storage, so remote
+    I/O and temporary disk space scale with the file size.
+
+    Types describe declared metadata, including empty layers. Concrete
+    types permitting Z use a `` Z`` suffix; M is not represented.
+    Generic geometry layers report ``Unknown``. Only core GeoPackage
+    geometry types are supported.
+
+    Examples
+    --------
+    >>> layers = list_layers("city.gpkg")
+    >>> layers.columns.tolist()
+    ['name', 'geometry_type']
+    """
+    if not isinstance(filename, (str, os.PathLike)):
+        raise TypeError("filename must be a string or path-like object")
+    filename = os.fspath(filename)
+    if not isinstance(filename, str):
+        raise TypeError(
+            "filename must be a string or path-like object returning a string"
+        )
+    if not filename.lower().endswith(".gpkg"):
+        raise ValueError("list_layers currently supports GeoPackage (.gpkg) files only")
+
+    metadata = (
+        default_session()
+        .read.format("geopackage")
+        .option("showMetadata", "true")
+        .option("includeGeometryType", "true")
+        .load(filename)
+    )
+    layers = (
+        metadata.where("data_type IN ('features', 'attributes')")
+        .selectExpr("table_name AS name", "geometry_type")
+        .toPandas()
+    )
+    return layers.sort_values("name").reset_index(drop=True)
 
 
 def _to_file(
