@@ -26,7 +26,7 @@ from sedona.spark.geopandas.array import points_from_xy
 
 from sedona.spark.geopandas.tools import clip, overlay, sjoin
 
-from sedona.spark.geopandas.io import read_file, read_parquet
+from sedona.spark.geopandas.io import list_layers, read_file, read_parquet
 
 # This used to default to False, but Spark 4.0.0 changed it to True
 # We also want also it to default to True for Sedona, so we set it here

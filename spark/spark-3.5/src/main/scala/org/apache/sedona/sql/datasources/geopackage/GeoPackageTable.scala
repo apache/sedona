@@ -53,7 +53,8 @@ case class GeoPackageTable(
 
   override def inferSchema(files: Seq[FileStatus]): Option[StructType] = {
     if (loadOptions.showMetadata) {
-      return MetadataSchema.schema
+      return if (loadOptions.includeGeometryType) MetadataSchema.withGeometryType
+      else MetadataSchema.schema
     }
 
     val serializableConf = new SerializableConfiguration(

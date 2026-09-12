@@ -37,4 +37,7 @@ object MetadataSchema {
     Some(StructType(fields))
   }
 
+  def withGeometryType: Option[StructType] =
+    schema.map(_.add(StructField("geometry_type", StringType)))
+
 }
