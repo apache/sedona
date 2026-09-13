@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -947,8 +946,22 @@
 
             <span class="n">pd_series</span> <span class="o">=</span> <span class="n">pd_series</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
 
-            <span class="c1"># Initialize the parent class PySpark Series with the pandas Series.</span>
-            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">pd_series</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="ow">not</span> <span class="n">pd_series</span><span class="o">.</span><span class="n">empty</span>
+                <span class="ow">and</span> <span class="n">pd_series</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">BaseGeometry</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">pd_series</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="c1"># Spark 3.5 infers object UDTs from the first value. WKB lets</span>
+                <span class="c1"># leading missing values retain geometry type without reordering.</span>
+                <span class="n">wkb_series</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">(</span><span class="n">pd_series</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">pd_series</span><span class="o">.</span><span class="n">notna</span><span class="p">(),</span> <span class="kc">None</span><span class="p">))</span>
+                    <span class="o">.</span><span class="n">to_wkb</span><span class="p">(</span><span class="n">include_srid</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">pd_series</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">ps_series</span> <span class="o">=</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">wkb_series</span><span class="p">)</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">stc</span><span class="o">.</span><span class="n">ST_GeomFromWKB</span><span class="p">)</span>
+                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">ps_series</span><span class="o">.</span><span class="n">_anchor</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">ps_series</span><span class="o">.</span><span class="n">_col_label</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">pd_series</span><span class="p">)</span>
 
         <span class="c1"># Ensure we're storing geometry types.</span>
         <span class="k">if</span> <span class="p">(</span>
