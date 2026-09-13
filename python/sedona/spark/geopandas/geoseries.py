@@ -737,8 +737,22 @@ class GeoSeries(GeoFrame, pspd.Series):
 
             pd_series = pd_series.astype(object)
 
-            # Initialize the parent class PySpark Series with the pandas Series.
-            super().__init__(data=pd_series)
+            if (
+                not pd_series.empty
+                and pd_series.isna().iloc[0]
+                and any(isinstance(value, BaseGeometry) for value in pd_series)
+            ):
+                # Spark 3.5 infers object UDTs from the first value. WKB lets
+                # leading missing values retain geometry type without reordering.
+                wkb_series = (
+                    gpd.GeoSeries(pd_series.where(pd_series.notna(), None))
+                    .to_wkb(include_srid=True)
+                    .rename(pd_series.name)
+                )
+                ps_series = pspd.Series(wkb_series).spark.transform(stc.ST_GeomFromWKB)
+                super().__init__(data=ps_series._anchor, index=ps_series._col_label)
+            else:
+                super().__init__(data=pd_series)
 
         # Ensure we're storing geometry types.
         if (
