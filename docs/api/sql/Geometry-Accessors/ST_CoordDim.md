@@ -19,7 +19,7 @@
 
 # ST_CoordDim
 
-Introduction: Returns the coordinate dimensions of the geometry. It is an alias of `ST_NDims`.
+Introduction: Returns the coordinate dimensions of the geometry. It is an alias of `ST_NDims`. Empty geometries return 2.
 
 ![ST_CoordDim](../../../image/ST_CoordDim/ST_CoordDim.svg "ST_CoordDim")
 
@@ -45,6 +45,18 @@ Spark SQL Example with x, y coordinate:
 
 ```sql
 SELECT ST_CoordDim(ST_GeomFromWKT('POINT(3 7)'))
+```
+
+Output:
+
+```
+2
+```
+
+Spark SQL Example with an empty geometry:
+
+```sql
+SELECT ST_CoordDim(ST_GeomFromWKT('LINESTRING EMPTY'))
 ```
 
 Output:

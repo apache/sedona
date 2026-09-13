@@ -1048,6 +1048,10 @@ public class Functions {
   public static int nDims(Geometry geometry) {
     int count_dimension = 0;
     Coordinate geom = geometry.getCoordinate();
+    if (geom == null) {
+      // Empty geometries have no coordinate to inspect; report them as 2D like PostGIS does.
+      return 2;
+    }
     Double x_cord = geom.getX();
     Double y_cord = geom.getY();
     Double z_cord = geom.getZ();
@@ -1300,6 +1304,10 @@ public class Functions {
 
   public static int zmFlag(Geometry geom) {
     Coordinate coords = geom.getCoordinate();
+    if (coords == null) {
+      // Empty geometries have no coordinate to inspect; report them as 2D like PostGIS does.
+      return 0;
+    }
     boolean hasZ = !Double.isNaN(coords.getZ());
     boolean hasM = !Double.isNaN(coords.getM());
     if (hasM && hasZ) {

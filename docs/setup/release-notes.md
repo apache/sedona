@@ -69,6 +69,10 @@
 
 ### Bug Fixes
 
+#### Sedona SQL
+
+* [<a href='https://github.com/apache/sedona/issues/3359'>GH-3359</a>] - Return 2D results from `ST_NDims`, `ST_CoordDim` and `ST_Zmflag` for empty geometries instead of throwing
+
 #### GeoPandas API
 
 * [<a href='https://github.com/apache/sedona/issues/3269'>GH-3269</a>] - Warn when `geom_equals` or `geom_equals_exact` compares geometry operands with mismatched CRSs

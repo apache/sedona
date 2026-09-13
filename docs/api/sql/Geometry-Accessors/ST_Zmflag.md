@@ -21,7 +21,7 @@
 
 Introduction: Returns a code indicating the Z and M coordinate dimensions present in the input geometry.
 
-Values are: 0 = 2D, 1 = 3D-M, 2 = 3D-Z, 3 = 4D.
+Values are: 0 = 2D, 1 = 3D-M, 2 = 3D-Z, 3 = 4D. Empty geometries return 0.
 
 ![ST_Zmflag](../../../image/ST_Zmflag/ST_Zmflag.svg "ST_Zmflag")
 
@@ -57,4 +57,18 @@ Output:
 
 ```
 3
+```
+
+SQL Example
+
+```sql
+SELECT ST_Zmflag(
+        ST_GeomFromWKT('POLYGON EMPTY')
+)
+```
+
+Output:
+
+```
+0
 ```
