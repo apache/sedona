@@ -1124,6 +1124,16 @@ class functionTestScala
       assert(test.take(1)(0).get(0).asInstanceOf[Int] == 4)
     }
 
+    it("Passed ST_NDims and ST_CoordDim with empty geometries") {
+      Seq("POINT EMPTY", "LINESTRING EMPTY", "POLYGON EMPTY", "GEOMETRYCOLLECTION EMPTY")
+        .foreach { wkt =>
+          val test = sparkSession.sql(
+            s"SELECT ST_NDims(ST_GeomFromWKT('$wkt')), ST_CoordDim(ST_GeomFromWKT('$wkt'))")
+          assert(test.first().getInt(0) == 2)
+          assert(test.first().getInt(1) == 2)
+        }
+    }
+
     it("Passed ST_GeometryType") {
       var test = sparkSession.sql(
         "SELECT ST_GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
@@ -1504,6 +1514,15 @@ class functionTestScala
         .first()
         .get(0)
       assert(actual == 3)
+    }
+
+    it("Passed ST_Zmflag with empty geometries") {
+      Seq("POINT EMPTY", "LINESTRING EMPTY", "POLYGON EMPTY", "GEOMETRYCOLLECTION EMPTY")
+        .foreach { wkt =>
+          val actual =
+            sparkSession.sql(s"SELECT ST_Zmflag(ST_GeomFromWKT('$wkt'))").first().get(0)
+          assert(actual == 0)
+        }
     }
 
     it("Should pass ST_StartPoint function") {

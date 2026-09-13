@@ -2820,6 +2820,34 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void nDims() throws ParseException {
+    assertEquals(2, Functions.nDims(Constructors.geomFromWKT("POINT (1 2)", 0)));
+    assertEquals(3, Functions.nDims(Constructors.geomFromWKT("LINESTRING (1 2 3, 4 5 6)", 0)));
+    assertEquals(
+        3,
+        Functions.nDims(Constructors.geomFromWKT("POLYGON M ((1 2 3, 3 4 3, 5 6 3, 1 2 3))", 0)));
+    assertEquals(4, Functions.nDims(Constructors.geomFromWKT("POINT ZM (1 2 3 4)", 0)));
+  }
+
+  @Test
+  public void nDimsEmptyGeometries() throws ParseException {
+    String[] emptyWkts = {
+      "POINT EMPTY",
+      "LINESTRING EMPTY",
+      "POLYGON EMPTY",
+      "MULTIPOINT EMPTY",
+      "MULTILINESTRING EMPTY",
+      "MULTIPOLYGON EMPTY",
+      "GEOMETRYCOLLECTION EMPTY"
+    };
+    for (String wkt : emptyWkts) {
+      assertEquals(wkt, 2, Functions.nDims(Constructors.geomFromWKT(wkt, 0)));
+    }
+    assertEquals(2, Functions.nDims(GEOMETRY_FACTORY.createPoint()));
+    assertEquals(2, Functions.nDims(GEOMETRY_FACTORY.createGeometryCollection()));
+  }
+
+  @Test
   public void force3DObject2D() {
     int expectedDims = 3;
     LineString line = GEOMETRY_FACTORY.createLineString(coordArray(0, 1, 1, 0, 2, 0));
@@ -4850,6 +4878,24 @@ public class FunctionsTest extends TestBase {
             "MULTIPOLYGON ZM (((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1)), ((15 5 3 1, 20 10 6 2, 10 10 7 3, 15 5 3 1)))",
             0);
     assertEquals(_4D, Functions.zmFlag(geom));
+  }
+
+  @Test
+  public void testZmFlagEmptyGeometries() throws ParseException {
+    String[] emptyWkts = {
+      "POINT EMPTY",
+      "LINESTRING EMPTY",
+      "POLYGON EMPTY",
+      "MULTIPOINT EMPTY",
+      "MULTILINESTRING EMPTY",
+      "MULTIPOLYGON EMPTY",
+      "GEOMETRYCOLLECTION EMPTY"
+    };
+    for (String wkt : emptyWkts) {
+      assertEquals(wkt, 0, Functions.zmFlag(Constructors.geomFromWKT(wkt, 0)));
+    }
+    assertEquals(0, Functions.zmFlag(GEOMETRY_FACTORY.createPoint()));
+    assertEquals(0, Functions.zmFlag(GEOMETRY_FACTORY.createGeometryCollection()));
   }
 
   @Test

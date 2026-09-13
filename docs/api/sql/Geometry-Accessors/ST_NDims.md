@@ -19,7 +19,7 @@
 
 # ST_NDims
 
-Introduction: Returns the coordinate dimension of the geometry.
+Introduction: Returns the coordinate dimension of the geometry. Empty geometries return 2.
 
 ![ST_NDims](../../../image/ST_NDims/ST_NDims.svg "ST_NDims")
 
@@ -45,6 +45,18 @@ Spark SQL example with x,y coordinate:
 
 ```sql
 SELECT ST_NDims(ST_GeomFromText('POINT(1 1)'))
+```
+
+Output:
+
+```
+2
+```
+
+Spark SQL example with an empty geometry:
+
+```sql
+SELECT ST_NDims(ST_GeomFromText('POINT EMPTY'))
 ```
 
 Output:
