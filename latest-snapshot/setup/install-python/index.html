@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1017,6 +1016,17 @@
     <span class="md-ellipsis">
       
         Install sedona
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optional-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional dependencies
       
     </span>
   </a>
@@ -5626,6 +5636,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#optional-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional dependencies
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#prepare-sedona-spark-jar" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5696,13 +5717,8 @@
  under the License.
  -->
 
-<p>Apache Sedona extends pyspark functions which depends on libraries:</p>
-<ul>
-<li>pyspark</li>
-<li>shapely</li>
-<li>attrs</li>
-</ul>
-<p>You need to install necessary packages if your system does not have them installed. Sedona now uses <a href="https://docs.astral.sh/uv/">uv</a> for Python dependency management. See the dependency definitions in our <a href="https://github.com/apache/sedona/blob/master/python/pyproject.toml">pyproject.toml</a>.</p>
+<p>The base <code>apache-sedona</code> package installs <code>shapely</code> and <code>attrs</code>. Using Sedona with Spark also requires PySpark, which is often preinstalled on managed Spark platforms.</p>
+<p>Use <code>pip</code> to install the published package and any extras you need. Sedona uses <a href="https://docs.astral.sh/uv/">uv</a> to manage dependencies when developing the project. Package dependencies and version constraints are defined in <a href="https://github.com/apache/sedona/blob/master/python/pyproject.toml">python/pyproject.toml</a>.</p>
 <h3 id="install-sedona">Install sedona<a class="headerlink" href="#install-sedona" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Installing from PyPI repositories. You can find the latest Sedona Python on <a href="https://pypi.org/project/apache-sedona/">PyPI</a>. <a href="../release-notes/#known-issue">There is a known issue in Sedona v1.0.1 and earlier versions</a>.</li>
@@ -5712,7 +5728,7 @@
 <ul>
 <li>Since Sedona v1.1.0, pyspark is an optional dependency of Sedona Python because spark comes pre-installed on many spark platforms. To install pyspark along with Sedona Python in one go, use the <code>spark</code> extra:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>apache-sedona<span class="o">[</span>spark<span class="o">]</span>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"apache-sedona[spark]"</span>
 </code></pre></div>
 <ul>
 <li>Installing from Sedona Python source</li>
@@ -5721,6 +5737,63 @@
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>python
 python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>.
 </code></pre></div>
+<h3 id="optional-dependencies">Optional dependencies<a class="headerlink" href="#optional-dependencies" title="Permanent link">&para;</a></h3>
+<p>An extra installs additional packages for a particular use case. Choose the extras you need:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Package or extra</th>
+<th style="text-align: left;">Additional packages</th>
+<th style="text-align: left;">Use case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>apache-sedona</code></td>
+<td style="text-align: left;"><code>shapely</code>, <code>attrs</code></td>
+<td style="text-align: left;">Base package; use with an existing Spark installation.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>spark</code></td>
+<td style="text-align: left;"><code>pyspark</code></td>
+<td style="text-align: left;">Install PySpark when it is not already available.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>pydeck-map</code></td>
+<td style="text-align: left;"><code>geopandas</code>, <code>pydeck</code></td>
+<td style="text-align: left;">Create maps with <code>SedonaPyDeck</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>kepler-map</code></td>
+<td style="text-align: left;"><code>geopandas</code>, <code>keplergl</code></td>
+<td style="text-align: left;">Create maps with <code>SedonaKepler</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>flink</code></td>
+<td style="text-align: left;"><code>apache-flink</code></td>
+<td style="text-align: left;">Use Sedona with PyFlink.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>db</code></td>
+<td style="text-align: left;"><code>sedonadb[geopandas]</code></td>
+<td style="text-align: left;">Install SedonaDB with GeoPandas support; requested only on Python 3.9 or later.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>all</code></td>
+<td style="text-align: left;"><code>pyspark</code>, <code>geopandas</code>, <code>pydeck</code>, <code>keplergl</code>, <code>rasterio</code></td>
+<td style="text-align: left;">Install Spark, mapping, and Python raster dependencies together.</td>
+</tr>
+</tbody>
+</table>
+<p>For example, to install the <code>all</code> extra:</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"apache-sedona[all]"</span>
+</code></pre></div>
+<p>Despite its name, <code>all</code> does not include the <code>flink</code> or <code>db</code> extra. Extras also do not install the Sedona JVM jars described below.</p>
+<p>The <code>rasterio</code> package supports Python-side raster objects. SQL readers for existing raster files do not require it.</p>
+<p>On a managed Spark platform such as EMR, keep the platform's PySpark installation. To add both mapping libraries without requesting PySpark, combine the mapping extras:</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"apache-sedona[pydeck-map,kepler-map]"</span>
+</code></pre></div>
+<p>GeoPandas brings in <code>pandas</code> as a dependency. PyArrow is also needed for Arrow-based conversions and pandas-on-Spark APIs; the <code>spark</code> and <code>all</code> extras do not explicitly request it. Install versions of <code>pandas</code> and <code>pyarrow</code> compatible with your Spark version when using these APIs. See <a href="../../tutorial/geopandas-shapely/">working with GeoPandas and Shapely</a> for conversion examples.</p>
 <h3 id="prepare-sedona-spark-jar">Prepare sedona-spark jar<a class="headerlink" href="#prepare-sedona-spark-jar" title="Permanent link">&para;</a></h3>
 <p>Sedona Python needs one additional jar file called <code>sedona-spark-shaded</code> or <code>sedona-spark</code> to work properly. Please make sure you use the correct version for Spark and Scala.</p>
 <p>Please use Spark major.minor version number in artifact names.</p>
@@ -5799,7 +5872,7 @@ python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </s
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="August 30, 2026 05:22:11 UTC">August 30, 2026 05:22:11</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 13, 2026 06:23:42 UTC">September 13, 2026 06:23:42</span>
   </span>
 
     
