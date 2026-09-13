@@ -17,13 +17,9 @@
  under the License.
  -->
 
-Apache Sedona 扩展了 PySpark 函数，依赖以下库：
+基础包 `apache-sedona` 会安装 `shapely` 和 `attrs`。在 Spark 上使用 Sedona 还需要 PySpark，托管 Spark 平台通常已预装该依赖。
 
-* pyspark
-* shapely
-* attrs
-
-如果您的系统尚未安装这些包，请先安装。Sedona 现使用 [uv](https://docs.astral.sh/uv/) 管理 Python 依赖，详细依赖定义见 [pyproject.toml](https://github.com/apache/sedona/blob/master/python/pyproject.toml)。
+使用 `pip` 安装已发布的包及所需的附加依赖。Sedona 项目开发使用 [uv](https://docs.astral.sh/uv/) 管理依赖。包依赖及版本约束见 [python/pyproject.toml](https://github.com/apache/sedona/blob/master/python/pyproject.toml)。
 
 ### 安装 sedona
 
@@ -36,7 +32,7 @@ pip install apache-sedona
 * 自 Sedona v1.1.0 起，pyspark 已成为 Sedona Python 的可选依赖，因为许多 Spark 平台都已预装 Spark。如需在安装 Sedona Python 时一并安装 pyspark，请使用 `spark` 附加项：
 
 ```bash
-pip install apache-sedona[spark]
+pip install "apache-sedona[spark]"
 ```
 
 * 从 Sedona Python 源码安装
@@ -47,6 +43,38 @@ pip install apache-sedona[spark]
 cd python
 python3 -m pip install .
 ```
+
+### 可选依赖 { #optional-dependencies }
+
+附加依赖（extra）会为特定用途安装额外的包，请按需选择：
+
+| 包或附加依赖 | 安装的额外包 | 用途 |
+| :--- | :--- | :--- |
+| `apache-sedona` | `shapely`、`attrs` | 基础包，可配合现有 Spark 环境使用。 |
+| `spark` | `pyspark` | 在尚未安装 PySpark 时安装。 |
+| `pydeck-map` | `geopandas`、`pydeck` | 使用 `SedonaPyDeck` 创建地图。 |
+| `kepler-map` | `geopandas`、`keplergl` | 使用 `SedonaKepler` 创建地图。 |
+| `flink` | `apache-flink` | 在 PyFlink 上使用 Sedona。 |
+| `db` | `sedonadb[geopandas]` | 安装支持 GeoPandas 的 SedonaDB；仅在 Python 3.9 及以上版本请求安装。 |
+| `all` | `pyspark`、`geopandas`、`pydeck`、`keplergl`、`rasterio` | 一并安装 Spark、地图和 Python 栅格相关依赖。 |
+
+例如，安装 `all` 附加依赖：
+
+```bash
+pip install "apache-sedona[all]"
+```
+
+虽然名为 `all`，它并不包含 `flink` 或 `db` 附加依赖。附加依赖也不会安装下文所述的 Sedona JVM jar 文件。
+
+`rasterio` 用于支持 Python 端的栅格对象。使用 SQL 读取现有栅格文件不需要它。
+
+在 EMR 等托管 Spark 平台上，请保留平台提供的 PySpark。若要安装两个地图包而不请求安装 PySpark，可以组合使用地图附加依赖：
+
+```bash
+pip install "apache-sedona[pydeck-map,kepler-map]"
+```
+
+GeoPandas 会通过依赖关系安装 `pandas`。基于 Arrow 的转换和 pandas-on-Spark API 还需要 PyArrow；`spark` 和 `all` 附加依赖不会显式请求安装它。使用这些 API 时，请安装与 Spark 版本兼容的 `pandas` 和 `pyarrow`。转换示例见[使用 GeoPandas 和 Shapely](../tutorial/geopandas-shapely.md)。
 
 ### 准备 sedona-spark jar
 

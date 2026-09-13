@@ -26,6 +26,8 @@
 
 ## 准备初始化脚本
 
+EMR 已提供 PySpark。以下脚本还会安装用于 GeoPandas 转换和地图可视化的包。参见[可选 Python 依赖](install-python.md#optional-dependencies)，了解哪些附加依赖提供这些包，以及如何避免请求安装另一份 PySpark。
+
 在您的 S3 存储桶中添加一个内容如下的脚本：
 
 ```bash

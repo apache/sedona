@@ -26,6 +26,8 @@ This tutorial is tested on EMR on EC2 with EMR Studio (notebooks). EMR on EC2 us
 
 ## Prepare initialization script
 
+EMR already provides PySpark. The script below also installs packages for GeoPandas conversion and map visualization. See [optional Python dependencies](install-python.md#optional-dependencies) for the extras that provide these packages and how to avoid requesting another PySpark installation.
+
 In your S3 bucket, add a script that has the following content:
 
 ```bash

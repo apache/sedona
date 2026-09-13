@@ -17,13 +17,9 @@
  under the License.
  -->
 
-Apache Sedona extends pyspark functions which depends on libraries:
+The base `apache-sedona` package installs `shapely` and `attrs`. Using Sedona with Spark also requires PySpark, which is often preinstalled on managed Spark platforms.
 
-* pyspark
-* shapely
-* attrs
-
-You need to install necessary packages if your system does not have them installed. Sedona now uses [uv](https://docs.astral.sh/uv/) for Python dependency management. See the dependency definitions in our [pyproject.toml](https://github.com/apache/sedona/blob/master/python/pyproject.toml).
+Use `pip` to install the published package and any extras you need. Sedona uses [uv](https://docs.astral.sh/uv/) to manage dependencies when developing the project. Package dependencies and version constraints are defined in [python/pyproject.toml](https://github.com/apache/sedona/blob/master/python/pyproject.toml).
 
 ### Install sedona
 
@@ -36,7 +32,7 @@ pip install apache-sedona
 * Since Sedona v1.1.0, pyspark is an optional dependency of Sedona Python because spark comes pre-installed on many spark platforms. To install pyspark along with Sedona Python in one go, use the `spark` extra:
 
 ```bash
-pip install apache-sedona[spark]
+pip install "apache-sedona[spark]"
 ```
 
 * Installing from Sedona Python source
@@ -47,6 +43,38 @@ Clone Sedona GitHub source code and run the following command
 cd python
 python3 -m pip install .
 ```
+
+### Optional dependencies
+
+An extra installs additional packages for a particular use case. Choose the extras you need:
+
+| Package or extra | Additional packages | Use case |
+| :--- | :--- | :--- |
+| `apache-sedona` | `shapely`, `attrs` | Base package; use with an existing Spark installation. |
+| `spark` | `pyspark` | Install PySpark when it is not already available. |
+| `pydeck-map` | `geopandas`, `pydeck` | Create maps with `SedonaPyDeck`. |
+| `kepler-map` | `geopandas`, `keplergl` | Create maps with `SedonaKepler`. |
+| `flink` | `apache-flink` | Use Sedona with PyFlink. |
+| `db` | `sedonadb[geopandas]` | Install SedonaDB with GeoPandas support; requested only on Python 3.9 or later. |
+| `all` | `pyspark`, `geopandas`, `pydeck`, `keplergl`, `rasterio` | Install Spark, mapping, and Python raster dependencies together. |
+
+For example, to install the `all` extra:
+
+```bash
+pip install "apache-sedona[all]"
+```
+
+Despite its name, `all` does not include the `flink` or `db` extra. Extras also do not install the Sedona JVM jars described below.
+
+The `rasterio` package supports Python-side raster objects. SQL readers for existing raster files do not require it.
+
+On a managed Spark platform such as EMR, keep the platform's PySpark installation. To add both mapping libraries without requesting PySpark, combine the mapping extras:
+
+```bash
+pip install "apache-sedona[pydeck-map,kepler-map]"
+```
+
+GeoPandas brings in `pandas` as a dependency. PyArrow is also needed for Arrow-based conversions and pandas-on-Spark APIs; the `spark` and `all` extras do not explicitly request it. Install versions of `pandas` and `pyarrow` compatible with your Spark version when using these APIs. See [working with GeoPandas and Shapely](../tutorial/geopandas-shapely.md) for conversion examples.
 
 ### Prepare sedona-spark jar
 
