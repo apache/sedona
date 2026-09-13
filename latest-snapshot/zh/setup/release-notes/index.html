@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5102,7 +5101,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#sedona-sql" class="md-nav__link">
+  <a href="#sedona-sql_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Sedona-sql
@@ -7598,7 +7597,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#sedona-sql" class="md-nav__link">
+  <a href="#sedona-sql_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Sedona-sql
@@ -9752,7 +9751,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#sedona-sql" class="md-nav__link">
+  <a href="#sedona-sql_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Sedona-sql
@@ -11653,7 +11652,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#sedona-sql" class="md-nav__link">
+  <a href="#sedona-sql_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Sedona-sql
@@ -14089,7 +14088,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#sedona-sql" class="md-nav__link">
+  <a href="#sedona-sql_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Sedona-sql
@@ -14224,6 +14223,10 @@
 <li>[<a href='https://github.com/apache/sedona/issues/3344'>GH-3344</a>] - Expose <code>SpatialIndex.valid_query_predicates</code></li>
 </ul>
 <h3 id="bug-fixes">Bug Fixes<a class="headerlink" href="#bug-fixes" title="Permanent link">&para;</a></h3>
+<h4 id="sedona-sql">Sedona SQL<a class="headerlink" href="#sedona-sql" title="Permanent link">&para;</a></h4>
+<ul>
+<li>[<a href='https://github.com/apache/sedona/issues/3359'>GH-3359</a>] - Return 2D results from <code>ST_NDims</code>, <code>ST_CoordDim</code> and <code>ST_Zmflag</code> for empty geometries instead of throwing</li>
+</ul>
 <h4 id="geopandas-api_1">GeoPandas API<a class="headerlink" href="#geopandas-api_1" title="Permanent link">&para;</a></h4>
 <ul>
 <li>[<a href='https://github.com/apache/sedona/issues/3269'>GH-3269</a>] - Warn when <code>geom_equals</code> or <code>geom_equals_exact</code> compares geometry operands with mismatched CRSs</li>
@@ -16564,7 +16567,7 @@
 <ul>
 <li>PR <a href="https://github.com/apache/sedona/pull/488">488</a>: JoinQuery.SpatialJoinQuery/DistanceJoinQuery now returns <code>&lt;Geometry, List&gt;</code> instead of <code>&lt;Geometry, HashSet&gt;</code> because we can no longer use HashSet in Sedona for duplicates removal. All original duplicates in both input RDDs will be preserved in the output.</li>
 </ul>
-<h3 id="sedona-sql">Sedona-sql<a class="headerlink" href="#sedona-sql" title="Permanent link">&para;</a></h3>
+<h3 id="sedona-sql_1">Sedona-sql<a class="headerlink" href="#sedona-sql_1" title="Permanent link">&para;</a></h3>
 <p>Bug fix:</p>
 <ul>
 <li><a href="https://issues.apache.org/jira/browse/SEDONA-8">SEDONA-8</a> (<mark>API change</mark>): ST_Transform slow due to lock contention.</li>
@@ -16617,7 +16620,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 11, 2026 06:13:23 UTC">September 11, 2026 06:13:23</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 13, 2026 07:20:02 UTC">September 13, 2026 07:20:02</span>
   </span>
 
     
