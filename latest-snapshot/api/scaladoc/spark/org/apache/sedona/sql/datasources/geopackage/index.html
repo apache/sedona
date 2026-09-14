@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.sedona.sql.datasources.geopackage</title>
@@ -230,7 +229,31 @@
       </span>
       
       
-    </li><li name="org.apache.sedona.sql.datasources.osm" visbl="pub" class="indented6 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="class" href="GeoPackageDataSource.html" title=""></a>
+                        <a href="GeoPackageDataSource.html" title="">GeoPackageDataSource</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="class" href="GeoPackagePartitionReader.html" title=""></a>
+                        <a href="GeoPackagePartitionReader.html" title="">GeoPackagePartitionReader</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="class" href="GeoPackagePartitionReaderFactory.html" title=""></a>
+                        <a href="GeoPackagePartitionReaderFactory.html" title="">GeoPackagePartitionReaderFactory</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="class" href="GeoPackageScan.html" title=""></a>
+                        <a href="GeoPackageScan.html" title="">GeoPackageScan</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="class" href="GeoPackageScanBuilder.html" title=""></a>
+                        <a href="GeoPackageScanBuilder.html" title="">GeoPackageScanBuilder</a>
+                      </li><li class="current-entities indented6">
+                        <a class="object" href="GeoPackageTable$.html" title=""></a>
+                        <a class="class" href="GeoPackageTable.html" title=""></a>
+                        <a href="GeoPackageTable.html" title="">GeoPackageTable</a>
+                      </li><li name="org.apache.sedona.sql.datasources.osm" visbl="pub" class="indented6 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="osm"></a><a id="osm:osm"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/sedona/sql/datasources/osm/index.html" title="Permalink">
@@ -309,17 +332,161 @@
           <div id="comment" class="fullcommenttop"></div>
         
 
-      
+      <div id="mbrsel">
+        <div class="toggle"></div>
+        <div id="memberfilter">
+          <i class="material-icons arrow"></i>
+          <span class="input">
+            <input id="mbrsel-input" placeholder="Filter all members" type="text" accesskey="/" />
+          </span>
+          <i class="clear material-icons"></i>
+        </div>
+        <div id="filterby">
+          <div id="order">
+            <span class="filtertype">Ordering</span>
+            <ol>
+              
+              <li class="alpha in"><span>Alphabetic</span></li>
+              
+            </ol>
+          </div>
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+            </div>
+        </div>
+      </div>
 
       <div id="template">
         <div id="allMembers">
         
 
-        
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="org.apache.sedona.sql.datasources.geopackage.GeoPackageDataSource" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GeoPackageDataSourceextendsFileDataSourceV2withDataSourceRegister"></a><a id="GeoPackageDataSource:GeoPackageDataSource"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/sedona/sql/datasources/geopackage/GeoPackageDataSource.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="GeoPackageDataSource.html"><span class="name">GeoPackageDataSource</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.sql.execution.datasources.v2.FileDataSourceV2">FileDataSourceV2</span> with <span class="extype" name="org.apache.spark.sql.sources.DataSourceRegister">DataSourceRegister</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.datasources.geopackage.GeoPackagePartitionReader" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GeoPackagePartitionReaderextendsPartitionReader[org.apache.spark.sql.catalyst.InternalRow]withProductwithSerializable"></a><a id="GeoPackagePartitionReader:GeoPackagePartitionReader"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/sedona/sql/datasources/geopackage/GeoPackagePartitionReader.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="GeoPackagePartitionReader.html"><span class="name">GeoPackagePartitionReader</span></a><span class="params">(<span name="rs">rs: <span class="extype" name="java.sql.ResultSet">ResultSet</span></span>, <span name="options">options: <a href="model/GeoPackageReadOptions.html" class="extype" name="org.apache.sedona.sql.datasources.geopackage.model.GeoPackageReadOptions">GeoPackageReadOptions</a></span>, <span name="broadcastedConf">broadcastedConf: <span class="extype" name="org.apache.spark.broadcast.Broadcast">Broadcast</span>[<span class="extype" name="org.apache.spark.util.SerializableConfiguration">SerializableConfiguration</span>]</span>, <span name="currentTempFile">currentTempFile: <span class="extype" name="java.io.File">File</span></span>, <span name="copying">copying: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.connector.read.PartitionReader">PartitionReader</span>[<span class="extype" name="org.apache.spark.sql.catalyst.InternalRow">InternalRow</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.datasources.geopackage.GeoPackagePartitionReaderFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GeoPackagePartitionReaderFactoryextendsPartitionReaderFactorywithProductwithSerializable"></a><a id="GeoPackagePartitionReaderFactory:GeoPackagePartitionReaderFactory"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/sedona/sql/datasources/geopackage/GeoPackagePartitionReaderFactory.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="GeoPackagePartitionReaderFactory.html"><span class="name">GeoPackagePartitionReaderFactory</span></a><span class="params">(<span name="sparkSession">sparkSession: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>, <span name="broadcastedConf">broadcastedConf: <span class="extype" name="org.apache.spark.broadcast.Broadcast">Broadcast</span>[<span class="extype" name="org.apache.spark.util.SerializableConfiguration">SerializableConfiguration</span>]</span>, <span name="loadOptions">loadOptions: <a href="model/GeoPackageOptions.html" class="extype" name="org.apache.sedona.sql.datasources.geopackage.model.GeoPackageOptions">GeoPackageOptions</a></span>, <span name="dataSchema">dataSchema: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>, <span name="metadataSchema">metadataSchema: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.connector.read.PartitionReaderFactory">PartitionReaderFactory</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.datasources.geopackage.GeoPackageScan" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GeoPackageScanextendsFileScanwithProductwithSerializable"></a><a id="GeoPackageScan:GeoPackageScan"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/sedona/sql/datasources/geopackage/GeoPackageScan.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="GeoPackageScan.html"><span class="name">GeoPackageScan</span></a><span class="params">(<span name="dataSchema">dataSchema: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>, <span name="sparkSession">sparkSession: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>, <span name="fileIndex">fileIndex: <span class="extype" name="org.apache.spark.sql.execution.datasources.PartitioningAwareFileIndex">PartitioningAwareFileIndex</span></span>, <span name="readDataSchema">readDataSchema: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>, <span name="readPartitionSchema">readPartitionSchema: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>, <span name="metadataSchema">metadataSchema: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>, <span name="options">options: <span class="extype" name="org.apache.spark.sql.util.CaseInsensitiveStringMap">CaseInsensitiveStringMap</span></span>, <span name="loadOptions">loadOptions: <a href="model/GeoPackageOptions.html" class="extype" name="org.apache.sedona.sql.datasources.geopackage.model.GeoPackageOptions">GeoPackageOptions</a></span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.execution.datasources.v2.FileScan">FileScan</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.datasources.geopackage.GeoPackageScanBuilder" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GeoPackageScanBuilderextendsFileScanBuilder"></a><a id="GeoPackageScanBuilder:GeoPackageScanBuilder"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/sedona/sql/datasources/geopackage/GeoPackageScanBuilder.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="GeoPackageScanBuilder.html"><span class="name">GeoPackageScanBuilder</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.sql.execution.datasources.v2.FileScanBuilder">FileScanBuilder</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.datasources.geopackage.GeoPackageTable" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GeoPackageTableextendsFileTablewithSupportsMetadataColumnswithProductwithSerializable"></a><a id="GeoPackageTable:GeoPackageTable"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/sedona/sql/datasources/geopackage/GeoPackageTable.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="GeoPackageTable.html"><span class="name">GeoPackageTable</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="sparkSession">sparkSession: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>, <span name="options">options: <span class="extype" name="org.apache.spark.sql.util.CaseInsensitiveStringMap">CaseInsensitiveStringMap</span></span>, <span name="paths">paths: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="userSpecifiedSchema">userSpecifiedSchema: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span>]</span>, <span name="fallbackFileFormat">fallbackFileFormat: <span class="extype" name="scala.Predef.Class">Class</span>[_ &lt;: <span class="extype" name="org.apache.spark.sql.execution.datasources.FileFormat">FileFormat</span>]</span>, <span name="loadOptions">loadOptions: <a href="model/GeoPackageOptions.html" class="extype" name="org.apache.sedona.sql.datasources.geopackage.model.GeoPackageOptions">GeoPackageOptions</a></span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.execution.datasources.v2.FileTable">FileTable</span> with <span class="extype" name="org.apache.spark.sql.connector.catalog.SupportsMetadataColumns">SupportsMetadataColumns</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li></ol>
+            </div>
 
         
 
-        
+        <div class="values members">
+              <h3>Value Members</h3>
+              <ol>
+                <li name="org.apache.sedona.sql.datasources.geopackage.GeoPackageTable" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GeoPackageTable"></a><a id="GeoPackageTable:GeoPackageTable"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/sedona/sql/datasources/geopackage/GeoPackageTable$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="GeoPackageTable$.html"><span class="name">GeoPackageTable</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li>
+              </ol>
+            </div>
 
         
 
