@@ -99,9 +99,15 @@ case class GeoPackagePartitionReader(
   }
 
   override def close(): Unit = {
-    rs.close()
-    if (copying) {
-      options.tempFile.delete()
+    try {
+      // Only the opt-in metadata path closes JDBC owners here.
+      // Legacy reader cleanup, including file transitions, is unchanged.
+      if (options.includeGeometryType) GeoPackageConnectionManager.closeCursor(rs)
+      else rs.close()
+    } finally {
+      if (copying) {
+        options.tempFile.delete()
+      }
     }
   }
 }

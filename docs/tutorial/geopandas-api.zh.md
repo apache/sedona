@@ -305,6 +305,7 @@ Apache Sedona 的 GeoPandas API 已实现最常用的 GeoSeries 与 GeoDataFrame
 
 - `read_parquet()` —— 读取 GeoParquet 文件
 - `read_file()` —— 读取多种地理空间格式
+- `list_layers()` —— 列出 GeoPackage 中的矢量图层和非空间表
 - `to_parquet()` —— 写出为 Parquet 格式
 
 ### 空间操作

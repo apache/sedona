@@ -49,6 +49,9 @@ class GeoPackageScanBuilder(
   }
 
   override def build(): Scan = {
+    require(
+      !loadOptions.includeGeometryType || fileIndex.inputFiles.length == 1,
+      "includeGeometryType requires exactly one GeoPackage file")
     val fileIndexAdjusted =
       if (loadOptions.showMetadata)
         new InMemoryFileIndex(
