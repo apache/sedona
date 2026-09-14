@@ -305,6 +305,7 @@ The GeoPandas API for Apache Sedona implements the most commonly used GeoSeries 
 
 - `read_parquet()` - Read GeoParquet files
 - `read_file()` - Read various geospatial formats
+- `list_layers()` - List vector layers and nonspatial tables in a GeoPackage
 - `to_parquet()` - Write to Parquet format
 
 ### Spatial Operations

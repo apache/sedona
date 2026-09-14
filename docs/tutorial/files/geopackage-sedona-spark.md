@@ -118,8 +118,9 @@ layers.select("table_name", "data_type", "geometry_type").show()
 This reads `gpkg_contents` and `gpkg_geometry_columns`, not feature or tile rows.
 Empty feature layers are included. Core geometry types use names such as `Point`,
 `MultiPolygon`, and `GeometryCollection`. Concrete types allowing Z, including
-optional Z, have a ` Z` suffix. M is not represented in the label. Generic
-`GEOMETRY` layers report `Unknown`; non-feature tables have a null geometry type.
+optional Z, have a ` Z` suffix. M is not represented in the label, matching
+GeoPandas with Pyogrio. Generic `GEOMETRY` layers report `Unknown`; non-feature
+tables have a null geometry type.
 Unsupported geometry extension types or invalid feature metadata cause an error.
 A file containing only attributes or tiles does not need `gpkg_geometry_columns`.
 
@@ -136,10 +137,11 @@ layers = sgpd.list_layers("/tmp/my_file.gpkg")
 # Columns: name, geometry_type; sorted by name.
 ```
 
-`list_layers` includes registered vector layers and nonspatial attribute tables,
-but excludes raster tiles. It accepts string or path-like `.gpkg` paths, including
-Hadoop-supported URLs such as `s3a://bucket/city.gpkg`. Other formats, bytes, and
-file-like objects are not supported. No Pyogrio installation is required.
+`list_layers` includes registered vector layers and nonspatial tables, including
+legacy `aspatial` tables, but excludes raster tiles. It accepts string or path-like
+`.gpkg` paths, including Hadoop-supported URLs such as `s3a://bucket/city.gpkg`.
+Other formats, bytes, and file-like objects are not supported. No Pyogrio
+installation is required.
 
 Only the small layer catalog is collected to the driver. For remote paths, the
 reader first copies the **entire GeoPackage** to executor-local temporary storage.

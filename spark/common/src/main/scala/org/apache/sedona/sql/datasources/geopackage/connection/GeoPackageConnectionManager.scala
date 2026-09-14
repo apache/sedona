@@ -83,7 +83,10 @@ object GeoPackageConnectionManager {
       val join = "FROM gpkg_contents c LEFT JOIN gpkg_geometry_columns g " +
         "ON c.table_name = g.table_name AND c.data_type = 'features'"
       val invalid =
-        statement.executeQuery(s"""SELECT c.table_name $join WHERE c.data_type = 'features'
+        statement.executeQuery(
+          s"""SELECT c.table_name, COUNT(g.table_name) AS geometry_metadata_rows,
+           |g.geometry_type_name, g.column_name, g.z, g.m
+           |$join WHERE c.data_type = 'features'
            |GROUP BY c.table_name
            |HAVING COUNT(g.table_name) != 1 OR
            |SUM(CASE WHEN g.geometry_type_name IN ($typeNames)
@@ -91,8 +94,17 @@ object GeoPackageConnectionManager {
            |THEN 0 ELSE 1 END) > 0 LIMIT 1""".stripMargin)
       try {
         if (invalid.next()) {
+          val count = invalid.getInt("geometry_metadata_rows")
+          // A grouped row's field values are unambiguous only for a single metadata match.
+          val details = if (count != 1) {
+            s"expected 1 geometry metadata row, found $count"
+          } else {
+            Seq("geometry_type_name", "column_name", "z", "m")
+              .map(name => s"$name=${invalid.getString(name)}")
+              .mkString(", ")
+          }
           throw new IllegalArgumentException(
-            s"Invalid GeoPackage feature metadata for layer '${invalid.getString(1)}'")
+            s"Invalid GeoPackage feature metadata for layer '${invalid.getString(1)}': $details")
         }
       } finally invalid.close()
 

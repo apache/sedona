@@ -46,8 +46,8 @@ def list_layers(filename: Union[str, os.PathLike]) -> pd.DataFrame:
     -------
     pandas.DataFrame
         Columns ``name`` and ``geometry_type``, sorted by name. Registered
-        nonspatial tables have ``None`` as their geometry type. Raster tile
-        tables are excluded.
+        nonspatial tables, including legacy ``aspatial`` tables, have ``None``
+        as their geometry type. Raster tile tables are excluded.
 
     Notes
     -----
@@ -58,7 +58,8 @@ def list_layers(filename: Union[str, os.PathLike]) -> pd.DataFrame:
     I/O and temporary disk space scale with the file size.
 
     Types describe declared metadata, including empty layers. Concrete
-    types permitting Z use a `` Z`` suffix; M is not represented.
+    types permitting Z use a `` Z`` suffix; M is not represented, matching
+    GeoPandas with Pyogrio.
     Generic geometry layers report ``Unknown``. Only core GeoPackage
     geometry types are supported.
 
@@ -86,7 +87,7 @@ def list_layers(filename: Union[str, os.PathLike]) -> pd.DataFrame:
         .load(filename)
     )
     layers = (
-        metadata.where("data_type IN ('features', 'attributes')")
+        metadata.where("data_type IN ('features', 'attributes', 'aspatial')")
         .selectExpr("table_name AS name", "geometry_type")
         .toPandas()
     )

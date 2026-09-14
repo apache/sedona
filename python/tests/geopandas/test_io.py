@@ -72,10 +72,14 @@ def layer_catalog(tmp_path):
 
 
 class TestListLayers(TestGeopandasBase):
+    @pytest.fixture(autouse=True)
+    def initialize_sedona(self):
+        # list_layers uses default_session(), so register Sedona before each test.
+        self.spark
+
     @pytest.mark.parametrize("z", [0, 1, 2])
     @pytest.mark.parametrize("m", [0, 1, 2])
     def test_declared_core_types_and_dimensions(self, layer_catalog, z, m):
-        self.spark
         cases = [
             ("GEOMETRY", "Unknown", "Unknown"),
             ("POINT", "Point", "Point Z"),
@@ -107,8 +111,15 @@ class TestListLayers(TestGeopandasBase):
         )
         pd.testing.assert_frame_equal(sgpd.list_layers(layer_catalog), expected)
 
-    def test_lists_empty_layers_and_attributes_not_tiles(self, layer_catalog):
-        self.spark
+    @pytest.mark.parametrize("data_type", ["attributes", "aspatial"])
+    def test_lists_empty_layers_and_attributes_not_tiles(
+        self, layer_catalog, data_type
+    ):
+        with sqlite3.connect(layer_catalog) as conn:
+            conn.execute(
+                "UPDATE gpkg_contents SET data_type = ? WHERE table_name = 'notes'",
+                (data_type,),
+            )
         expected = pd.DataFrame(
             {"name": ["empty ' points", "notes"], "geometry_type": ["Point", None]}
         )
@@ -145,9 +156,8 @@ class TestListLayers(TestGeopandasBase):
         }
         assert all(r.file_name == "layers.gpkg" for r in rows)
 
-    @pytest.mark.parametrize("data_type", ["attributes", "tiles", None])
+    @pytest.mark.parametrize("data_type", ["attributes", "aspatial", "tiles", None])
     def test_catalog_without_geometry_columns(self, layer_catalog, data_type):
-        self.spark
         with sqlite3.connect(layer_catalog) as conn:
             conn.execute("DELETE FROM gpkg_contents")
             conn.execute("DROP TABLE gpkg_geometry_columns")
@@ -157,35 +167,62 @@ class TestListLayers(TestGeopandasBase):
                     (data_type,),
                 )
         expected = pd.DataFrame(
-            [("notes", None)] if data_type == "attributes" else [],
+            [("notes", None)] if data_type in ("attributes", "aspatial") else [],
             columns=["name", "geometry_type"],
         )
         pd.testing.assert_frame_equal(sgpd.list_layers(layer_catalog), expected)
 
     @pytest.mark.parametrize(
-        "change",
+        "change, details",
         [
-            "DROP TABLE gpkg_geometry_columns",
-            "DELETE FROM gpkg_geometry_columns",
-            "UPDATE gpkg_geometry_columns SET z = 3",
-            "UPDATE gpkg_geometry_columns SET m = -1",
-            "UPDATE gpkg_geometry_columns SET z = NULL",
-            "UPDATE gpkg_geometry_columns SET geometry_type_name = NULL",
-            "UPDATE gpkg_geometry_columns SET geometry_type_name = 'INVALID'",
-            "INSERT INTO gpkg_geometry_columns SELECT * FROM gpkg_geometry_columns",
+            ("DROP TABLE gpkg_geometry_columns", ("missing gpkg_geometry_columns",)),
+            ("DELETE FROM gpkg_geometry_columns", ("found 0",)),
+            ("UPDATE gpkg_geometry_columns SET z = 3", ("z=3",)),
+            ("UPDATE gpkg_geometry_columns SET m = -1", ("m=-1",)),
+            ("UPDATE gpkg_geometry_columns SET z = NULL", ("z=null",)),
+            (
+                "UPDATE gpkg_geometry_columns SET column_name = NULL",
+                ("column_name=null",),
+            ),
+            (
+                "UPDATE gpkg_geometry_columns SET geometry_type_name = NULL",
+                ("geometry_type_name=null",),
+            ),
+            (
+                "UPDATE gpkg_geometry_columns SET geometry_type_name = 'INVALID'",
+                ("geometry_type_name=INVALID", "column_name=geom", "z=0", "m=0"),
+            ),
+            (
+                "INSERT INTO gpkg_geometry_columns SELECT * FROM gpkg_geometry_columns",
+                ("found 2",),
+            ),
+            (
+                "INSERT INTO gpkg_geometry_columns "
+                "SELECT table_name, column_name, 'POLYGON', srs_id, z, m "
+                "FROM gpkg_geometry_columns",
+                ("found 2",),
+            ),
+            (
+                "INSERT INTO gpkg_geometry_columns "
+                "SELECT table_name, column_name, 'INVALID', srs_id, 3, m "
+                "FROM gpkg_geometry_columns",
+                ("found 2",),
+            ),
         ],
     )
-    def test_invalid_feature_metadata_fails(self, layer_catalog, change):
-        self.spark
+    def test_invalid_feature_metadata_fails(self, layer_catalog, change, details):
         with sqlite3.connect(layer_catalog) as conn:
             conn.execute(change)
-        with pytest.raises(Exception, match="Invalid GeoPackage feature metadata"):
+        with pytest.raises(
+            Exception, match="Invalid GeoPackage feature metadata"
+        ) as exc:
             sgpd.list_layers(layer_catalog)
+        for detail in details:
+            assert detail in str(exc.value)
 
     def test_rejects_multiple_files(self, layer_catalog):
         import shutil
 
-        self.spark
         shutil.copyfile(layer_catalog, layer_catalog.with_name("second.gpkg"))
         with pytest.raises(Exception, match="exactly one GeoPackage file"):
             sgpd.list_layers(str(layer_catalog.parent / "*.gpkg"))
@@ -208,12 +245,10 @@ class TestListLayers(TestGeopandasBase):
             sgpd.list_layers("data.geojson")
 
     def test_missing_file_fails(self, tmp_path):
-        self.spark
         with pytest.raises(Exception, match="PATH_NOT_FOUND|does not exist"):
             sgpd.list_layers(tmp_path / "missing.gpkg")
 
     def test_invalid_file_fails(self, tmp_path):
-        self.spark
         path = tmp_path / "invalid.gpkg"
         path.write_bytes(b"not a SQLite database")
         with pytest.raises(Exception, match="not a database"):
