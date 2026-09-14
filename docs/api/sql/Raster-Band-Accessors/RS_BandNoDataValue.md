@@ -24,6 +24,9 @@ Introduction: Returns the no data value of the given band of the given raster. I
 !!!Note
     If the given band does not lie in the raster, RS_BandNoDataValue throws an IllegalArgumentException
 
+!!!Note
+    `NaN` is a valid no data value for floating point bands, and RS_BandNoDataValue returns `NaN` (not null) for a band that declares it. GDAL writes `GDAL_NODATA=nan` for such rasters and `RS_FromGeoTiff` keeps it. Functions that exclude no data pixels, such as `RS_Count`, `RS_SummaryStats` and `RS_ZonalStats`, treat every `NaN` pixel as no data in that case.
+
 Format: `RS_BandNoDataValue (raster: Raster, band: Integer = 1)`
 
 Return type: `Double`

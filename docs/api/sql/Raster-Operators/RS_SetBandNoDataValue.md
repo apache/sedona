@@ -62,3 +62,22 @@ Output:
 ```
 -999
 ```
+
+SQL Example
+
+`NaN` can be used as the no data value of a floating point band. Every `NaN` pixel then counts as no data. Setting `NaN` on an integer band throws an `IllegalArgumentException`.
+
+```sql
+SELECT RS_BandNoDataValue(
+        RS_SetBandNoDataValue(
+            RS_MakeEmptyRaster(1, 'F', 20, 20, 2, 22, 1),
+            double('NaN')
+            )
+        )
+```
+
+Output:
+
+```
+NaN
+```

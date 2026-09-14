@@ -19,6 +19,7 @@
 package org.apache.sedona.common.raster;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 
 import java.io.IOException;
@@ -157,5 +158,37 @@ public class GeometryFunctionsTest extends RasterTestBase {
     assertEquals(245, env.getMaxX(), 1e-9);
     assertEquals(-256, env.getMinY(), 1e-9);
     assertEquals(4, env.getMaxY(), 1e-9);
+  }
+
+  @Test
+  public void testMinConvexHullAllNoData() throws FactoryException, TransformException {
+    GridCoverage2D raster =
+        RasterConstructors.makeNonEmptyRaster(
+            2,
+            "f",
+            2,
+            2,
+            0,
+            0,
+            1,
+            -1,
+            0,
+            0,
+            4326,
+            new double[][] {
+              {Double.NaN, Double.NaN, Double.NaN, Double.NaN}, {Double.NaN, 1, Double.NaN, 2}
+            });
+    raster = RasterBandEditors.setBandNoDataValue(raster, 1, Double.NaN);
+    raster = RasterBandEditors.setBandNoDataValue(raster, 2, Double.NaN);
+
+    // Band 1 has no valid pixel: no hull rather than a polygon built from integer sentinels
+    assertNull(GeometryFunctions.minConvexHull(raster, 1));
+    // Band 2 and "all bands" still find the two valid pixels in the right column
+    assertEquals(
+        "POLYGON ((1 0, 2 0, 2 -2, 1 -2, 1 0))",
+        Functions.asWKT(GeometryFunctions.minConvexHull(raster, 2)));
+    assertEquals(
+        "POLYGON ((1 0, 2 0, 2 -2, 1 -2, 1 0))",
+        Functions.asWKT(GeometryFunctions.minConvexHull(raster)));
   }
 }

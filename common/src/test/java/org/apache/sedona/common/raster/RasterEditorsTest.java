@@ -21,6 +21,7 @@ package org.apache.sedona.common.raster;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import java.awt.image.DataBuffer;
 import java.io.IOException;
@@ -4420,6 +4421,126 @@ public class RasterEditorsTest extends RasterTestBase {
       String wkt1 = RasterAccessors.crs(result, "wkt1");
       Assert.assertNotNull("setCrs should produce a valid CRS for +proj=" + code, wkt1);
       Assert.assertTrue("WKT1 should contain PROJCS for +proj=" + code, wkt1.contains("PROJCS"));
+    }
+  }
+
+  @Test
+  public void testResampleBilinearKeepsNaNNoData() throws FactoryException, TransformException {
+    double[] values = {Double.NaN, 1, 2, 3, 4, Double.NaN, 6, 7, 8, 9, 10, 11, 12, 13, 14, 7.5};
+    GridCoverage2D raster =
+        RasterBandEditors.setBandNoDataValue(
+            RasterConstructors.makeNonEmptyRaster(
+                1, "f", 4, 4, 0, 4, 1, -1, 0, 0, 4326, new double[][] {values}),
+            1,
+            Double.NaN);
+
+    for (String algorithm : new String[] {"bilinear", "bicubic"}) {
+      GridCoverage2D resampled = RasterEditors.resample(raster, 8, 8, 0, 4, false, algorithm);
+      assertTrue(Double.isNaN(RasterBandAccessors.getBandNoDataValue(resampled, 1)));
+      double[] pixels = MapAlgebra.bandAsArray(resampled, 1);
+      // The nodata cell at (1, 1) covers output cells (2..3, 2..3) and must stay nodata
+      for (int y = 2; y <= 3; y++) {
+        for (int x = 2; x <= 3; x++) {
+          assertTrue(algorithm + " " + x + "," + y, Double.isNaN(pixels[y * 8 + x]));
+        }
+      }
+      // Interior cells away from nodata are interpolated, not NaN
+      assertFalse(Double.isNaN(pixels[5 * 8 + 5]));
+      assertFalse(Double.isNaN(pixels[6 * 8 + 6]));
+    }
+  }
+
+  @Test
+  public void testResampleBilinearKeepsIntegerValues() throws FactoryException, TransformException {
+    double[] values = {-9, 1, 2, 3, 4, -9, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+    GridCoverage2D raster =
+        RasterBandEditors.setBandNoDataValue(
+            RasterConstructors.makeNonEmptyRaster(
+                1, "i", 4, 4, 0, 4, 1, -1, 0, 0, 4326, new double[][] {values}),
+            1,
+            -9.0);
+
+    GridCoverage2D resampled = RasterEditors.resample(raster, 8, 8, 0, 4, false, "bilinear");
+    assertEquals(-9.0, RasterBandAccessors.getBandNoDataValue(resampled, 1), 0);
+    double[] pixels = MapAlgebra.bandAsArray(resampled, 1);
+    // Nodata cells (0, 0) and (1, 1) are restored on their 2x2 output blocks
+    assertEquals(-9.0, pixels[0], 0);
+    assertEquals(-9.0, pixels[1 * 8 + 1], 0);
+    assertEquals(-9.0, pixels[2 * 8 + 2], 0);
+    assertEquals(-9.0, pixels[3 * 8 + 3], 0);
+    // Valid pixels keep interpolated values instead of collapsing to 0. Row 0 and column 0 are
+    // the half-pixel border GeoTools fills with the background value, so only the interior is
+    // checked.
+    for (int y = 1; y < 8; y++) {
+      for (int x = 1; x < 8; x++) {
+        boolean noDataBlock = (x <= 1 && y <= 1) || (x >= 2 && x <= 3 && y >= 2 && y <= 3);
+        if (!noDataBlock) {
+          assertTrue(x + "," + y + " = " + pixels[y * 8 + x], pixels[y * 8 + x] > 0);
+        }
+      }
+    }
+  }
+
+  @Test
+  public void testSetPixelTypeWithNaNNoData() throws FactoryException {
+    GridCoverage2D raster =
+        RasterBandEditors.setBandNoDataValue(
+            RasterConstructors.makeNonEmptyRaster(
+                1, "f", 2, 2, 0, 0, 1, -1, 0, 0, 4326, new double[][] {{1, Double.NaN, 3, 4}}),
+            1,
+            Double.NaN);
+
+    // Widening keeps the NaN nodata value and the NaN pixel
+    GridCoverage2D asDouble = RasterEditors.setPixelType(raster, "D");
+    assertEquals(
+        DataBuffer.TYPE_DOUBLE, asDouble.getRenderedImage().getSampleModel().getDataType());
+    assertTrue(Double.isNaN(RasterBandAccessors.getBandNoDataValue(asDouble, 1)));
+    assertEquals(3, RasterBandAccessors.getCount(asDouble, 1, true));
+
+    // NaN cannot be represented in an integral pixel type, so the conversion is refused rather
+    // than silently declaring 0 as the nodata value
+    for (String pixelType : new String[] {"B", "S", "US", "I"}) {
+      IllegalArgumentException e =
+          assertThrows(
+              IllegalArgumentException.class, () -> RasterEditors.setPixelType(raster, pixelType));
+      assertTrue(e.getMessage(), e.getMessage().contains("NaN nodata value"));
+    }
+  }
+
+  @Test
+  public void testResampleBicubicFillsNoDataHoles() throws FactoryException, TransformException {
+    // A 5x5 constant raster with a 3x3 NaN nodata hole in the middle: the center of the hole has
+    // no valid neighbor, so a single filling pass would leave a NaN that bicubic interpolation
+    // (a 4x4 kernel) spreads into pixels the nearest-neighbor mask cannot restore.
+    double[] values = new double[25];
+    Arrays.fill(values, 7);
+    for (int y = 1; y <= 3; y++) {
+      for (int x = 1; x <= 3; x++) {
+        values[y * 5 + x] = Double.NaN;
+      }
+    }
+    GridCoverage2D raster =
+        RasterBandEditors.setBandNoDataValue(
+            RasterConstructors.makeNonEmptyRaster(
+                1, "f", 5, 5, 0, 5, 1, -1, 0, 0, 4326, new double[][] {values}),
+            1,
+            Double.NaN);
+
+    GridCoverage2D resampled = RasterEditors.resample(raster, 10, 10, 0, 5, false, "bicubic");
+    assertTrue(Double.isNaN(RasterBandAccessors.getBandNoDataValue(resampled, 1)));
+    double[] pixels = MapAlgebra.bandAsArray(resampled, 1);
+    for (int y = 1; y < 10; y++) {
+      for (int x = 1; x < 10; x++) {
+        boolean inHole = x >= 2 && x <= 7 && y >= 2 && y <= 7;
+        double pixel = pixels[y * 10 + x];
+        if (inHole) {
+          assertTrue(x + "," + y + " should be nodata", Double.isNaN(pixel));
+        } else {
+          // Row 0 and column 0 are the half-pixel border GeoTools fills with the background
+          assertFalse(x + "," + y + " = " + pixel, Double.isNaN(pixel));
+          assertEquals(7.0, pixel, 1e-6);
+        }
+      }
     }
   }
 }

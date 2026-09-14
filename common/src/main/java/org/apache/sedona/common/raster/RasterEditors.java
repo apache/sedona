@@ -88,12 +88,20 @@ public class RasterEditors {
     for (int band = 0; band < numBands; band++) {
       double[] samples = originalData.getSamples(0, 0, width, height, band, (double[]) null);
       modifiedRaster.setSamples(0, 0, width, height, band, samples);
-      if (!Double.isNaN(RasterUtils.getNoDataValue(sampleDimensions[band]))) {
+      if (RasterUtils.hasNoDataValue(sampleDimensions[band])) {
+        double noDataValue = RasterUtils.getNoDataValue(sampleDimensions[band]);
+        if (Double.isNaN(noDataValue) && RasterUtils.isDataTypeIntegral(newDataType)) {
+          // The cast below would silently turn NaN into 0 and make every 0 pixel nodata.
+          throw new IllegalArgumentException(
+              String.format(
+                  "Band %d has a NaN nodata value, which cannot be represented in pixel type "
+                      + "'%s'; replace it first with RS_SetBandNoDataValue(raster, %d, value, "
+                      + "true)",
+                  band + 1, dataType, band + 1));
+        }
         sampleDimensions[band] =
             RasterUtils.createSampleDimensionWithNoDataValue(
-                sampleDimensions[band],
-                castRasterDataType(
-                    RasterUtils.getNoDataValue(sampleDimensions[band]), newDataType));
+                sampleDimensions[band], castRasterDataType(noDataValue, newDataType));
       }
     }
 
@@ -483,8 +491,11 @@ public class RasterEditors {
               useScale,
               "NearestNeighbor");
 
-      // Replace noDataValues with mean of neighbors and resample
-      raster = RasterUtils.replaceNoDataValues(raster);
+      // Replace noDataValues with the median of their neighbors before resampling, filling the
+      // holes as deep as the interpolation kernel reads (bicubic reads two pixels around each
+      // sample) so no sentinel leaks into pixels the mask cannot restore.
+      raster =
+          RasterUtils.replaceNoDataValues(raster, algorithm.equalsIgnoreCase("Bicubic") ? 2 : 1);
       newRaster =
           (GridCoverage2D)
               Operations.DEFAULT.resample(raster, null, gridGeometry, resamplingAlgorithm);
@@ -645,15 +656,14 @@ public class RasterEditors {
     if (minValue == null || maxValue == null) {
       for (int bandIndex = 0; bandIndex < numBands; bandIndex++) {
         double[] bandValues = bandAsArray(rasterGeom, bandIndex + 1);
-        double bandNoDataValue =
-            RasterUtils.getNoDataValue(rasterGeom.getSampleDimension(bandIndex));
+        Double bandNoDataValue = RasterBandAccessors.getBandNoDataValue(rasterGeom, bandIndex + 1);
 
         if (noDataValue == null) {
           noDataValue = maxLim;
         }
 
         for (double val : bandValues) {
-          if (val != bandNoDataValue) {
+          if (!RasterUtils.isNoData(val, bandNoDataValue)) {
             if (normalizeAcrossBands) {
               globalMin = Math.min(globalMin, val);
               globalMax = Math.max(globalMax, val);
@@ -672,7 +682,7 @@ public class RasterEditors {
     // Normalize each band
     for (int bandIndex = 0; bandIndex < numBands; bandIndex++) {
       double[] bandValues = bandAsArray(rasterGeom, bandIndex + 1);
-      double bandNoDataValue = RasterUtils.getNoDataValue(rasterGeom.getSampleDimension(bandIndex));
+      Double bandNoDataValue = RasterBandAccessors.getBandNoDataValue(rasterGeom, bandIndex + 1);
       double currentMin =
           normalizeAcrossBands ? globalMin : (minValue != null ? minValue : minValues[bandIndex]);
       double currentMax =
@@ -682,7 +692,7 @@ public class RasterEditors {
         Arrays.fill(bandValues, minLim);
       } else {
         for (int i = 0; i < bandValues.length; i++) {
-          if (bandValues[i] != bandNoDataValue) {
+          if (!RasterUtils.isNoData(bandValues[i], bandNoDataValue)) {
             double normalizedValue =
                 minLim
                     + ((bandValues[i] - currentMin) * (maxLim - safetyTrigger - minLim))

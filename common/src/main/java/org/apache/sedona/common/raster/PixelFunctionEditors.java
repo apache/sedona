@@ -75,7 +75,7 @@ public class PixelFunctionEditors {
     for (int j = rowY; j < rowY + height; j++) {
       for (int i = colX; i < colX + width; i++) {
         double[] pixel = rasterCopied.getPixel(i, j, (double[]) null);
-        if (keepNoData && noDataValue != null && noDataValue == pixel[band - 1]) {
+        if (keepNoData && RasterUtils.isNoData(pixel[band - 1], noDataValue)) {
           iterator++;
           continue;
         } else {
@@ -191,7 +191,7 @@ public class PixelFunctionEditors {
         double pixelNew =
             rasterizedGeomData.getPixel(geometryX + i, geometryY + j, (double[]) null)[0];
         // skipping 0 from the rasterized geometry as
-        if (pixelNew == 0 || keepNoData && noDataValue != null && noDataValue == pixel[band - 1]) {
+        if (pixelNew == 0 || (keepNoData && RasterUtils.isNoData(pixel[band - 1], noDataValue))) {
           continue;
         } else {
           pixel[band - 1] = pixelNew;

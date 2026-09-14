@@ -2381,6 +2381,63 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(0, result, 1e-9)
     }
 
+    it("Passed RS_BandNoDataValue - NaN noDataValue for raster from geotiff") {
+      val fixture = resourceFolder + "raster_geotiff_nodata/nan_nodata.tif"
+      var df = sparkSession.read.format("binaryFile").load(fixture)
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      assert(df.selectExpr("RS_BandNoDataValue(raster)").first().getDouble(0).isNaN)
+      assert(df.selectExpr("RS_BandNoDataValue(raster, 1)").first().getDouble(0).isNaN)
+      assertEquals(14L, df.selectExpr("RS_Count(raster, 1, true)").first().getLong(0))
+      assertEquals(16L, df.selectExpr("RS_Count(raster, 1, false)").first().getLong(0))
+      assertEquals(
+        107.5 / 14,
+        df.selectExpr("RS_SummaryStats(raster, 'mean', 1, true)").first().getDouble(0),
+        1e-9)
+      assert(
+        df.selectExpr("RS_SummaryStats(raster, 'mean', 1, false)")
+          .first()
+          .getDouble(0)
+          .isNaN)
+
+      // NaN nodata pixels can be replaced by a numeric nodata value
+      val replaced = df.selectExpr("RS_SetBandNoDataValue(raster, 1, -9999, true) as raster")
+      assertEquals(
+        -9999.0,
+        replaced.selectExpr("RS_BandNoDataValue(raster)").first().getDouble(0),
+        0)
+      assertEquals(14L, replaced.selectExpr("RS_Count(raster, 1, true)").first().getLong(0))
+      assertEquals(
+        -9999.0,
+        replaced.selectExpr("RS_BandAsArray(raster, 1)[0]").first().getDouble(0),
+        0)
+
+      // RS_Value reports a nodata pixel as null, for a NaN nodata value too
+      assertNull(df.selectExpr("RS_Value(raster, ST_Point(0.5, 3.5), 1)").first().get(0))
+      assertEquals(
+        1.0,
+        df.selectExpr("RS_Value(raster, ST_Point(1.5, 3.5), 1)").first().getDouble(0),
+        0)
+    }
+
+    it("Passed RS_SetBandNoDataValue - NaN noDataValue") {
+      val df = sparkSession.sql("SELECT RS_MakeEmptyRaster(1, 'F', 2, 2, 0, 0, 1) as raster")
+      assert(
+        df.selectExpr("RS_BandNoDataValue(RS_SetBandNoDataValue(raster, 1, double('NaN')))")
+          .first()
+          .getDouble(0)
+          .isNaN)
+      assert(
+        df.selectExpr("RS_BandNoDataValue(RS_SetBandNoDataValue(raster, cast('NaN' as double)))")
+          .first()
+          .getDouble(0)
+          .isNaN)
+      assertNull(
+        df.selectExpr(
+          "RS_BandNoDataValue(RS_SetBandNoDataValue(RS_SetBandNoDataValue(raster, 1, double('NaN')), 1, null))")
+          .first()
+          .get(0))
+    }
+
     it("Passed RS_BandPixelType from raster") {
       var df = sparkSession.read
         .format("binaryFile")

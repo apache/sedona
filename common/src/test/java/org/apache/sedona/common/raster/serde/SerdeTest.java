@@ -458,4 +458,61 @@ public class SerdeTest extends RasterTestBase {
       return new int[] {cmStart, cmEnd};
     }
   }
+
+  @Test
+  public void testUnmarkedNaNKeepsNaNNoData() {
+    // JVM round trip of a band whose nodata value is NaN: NaN on the wire, NaN category kept.
+    org.geotools.coverage.GridSampleDimension dim =
+        RasterUtils.createSampleDimensionWithNoDataValue("band", Double.NaN);
+    org.geotools.coverage.GridSampleDimension reconciled =
+        GridSampleDimensionSerializer.reconcileNoDataValue(
+            new GridSampleDimensionSerializer.DeclaredSampleDimension(dim, Double.NaN),
+            org.geotools.api.coverage.SampleDimensionType.REAL_32BITS);
+    Assert.assertSame(dim, reconciled);
+  }
+
+  @Test
+  public void testMarkedNaNClearsNaNNoData() {
+    // with_bands(nodata=float("nan")) means "no nodata value", even over a NaN nodata source.
+    org.geotools.coverage.GridSampleDimension dim =
+        RasterUtils.createSampleDimensionWithNoDataValue("band", Double.NaN);
+    org.geotools.coverage.GridSampleDimension reconciled =
+        GridSampleDimensionSerializer.reconcileNoDataValue(
+            new GridSampleDimensionSerializer.DeclaredSampleDimension(
+                dim, Double.NaN, GridSampleDimensionSerializer.NO_DATA_VALUE_OVERRIDE),
+            org.geotools.api.coverage.SampleDimensionType.REAL_32BITS);
+    Assert.assertFalse(RasterUtils.hasNoDataValue(reconciled));
+  }
+
+  @Test
+  public void testInheritedNaNNoDataSurvivesFloatingPointSampleTypeOverride() {
+    // with_bands() without nodata but with a new floating point dtype inherits the NaN nodata
+    // value even though retyping rebuilt the categories.
+    org.geotools.coverage.GridSampleDimension dim =
+        RasterUtils.createSampleDimensionWithNoDataValue("band", Double.NaN);
+    org.geotools.coverage.GridSampleDimension reconciled =
+        GridSampleDimensionSerializer.reconcileNoDataValue(
+            new GridSampleDimensionSerializer.DeclaredSampleDimension(
+                dim, Double.NaN, GridSampleDimensionSerializer.SAMPLE_TYPE_OVERRIDE),
+            org.geotools.api.coverage.SampleDimensionType.REAL_64BITS);
+    Assert.assertTrue(RasterUtils.hasNoDataValue(reconciled));
+    Assert.assertTrue(Double.isNaN(RasterUtils.getNoDataValue(reconciled)));
+  }
+
+  @Test
+  public void testInheritedNaNNoDataRejectsIntegralSampleTypeOverride() {
+    org.geotools.coverage.GridSampleDimension dim =
+        RasterUtils.createSampleDimensionWithNoDataValue("band", Double.NaN);
+
+    IllegalArgumentException error =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () ->
+                GridSampleDimensionSerializer.reconcileNoDataValue(
+                    new GridSampleDimensionSerializer.DeclaredSampleDimension(
+                        dim, Double.NaN, GridSampleDimensionSerializer.SAMPLE_TYPE_OVERRIDE),
+                    org.geotools.api.coverage.SampleDimensionType.UNSIGNED_8BITS));
+    Assert.assertTrue(error.getMessage().contains("Inherited NaN nodata"));
+    Assert.assertTrue(error.getMessage().contains("nodata="));
+  }
 }
