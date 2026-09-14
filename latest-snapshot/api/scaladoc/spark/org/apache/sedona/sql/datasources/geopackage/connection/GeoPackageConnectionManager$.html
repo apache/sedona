@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.sedona.sql.datasources.geopackage.connection.GeoPackageConnectionManager</title>
@@ -365,6 +364,22 @@
                 <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="org.apache.sedona.sql.datasources.geopackage.connection.GeoPackageConnectionManager#closeCursor" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="closeCursor(rs:java.sql.ResultSet):Unit"></a><a id="closeCursor(ResultSet):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/sedona/sql/datasources/geopackage/connection/GeoPackageConnectionManager$.html#closeCursor(rs:java.sql.ResultSet):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">closeCursor</span><span class="params">(<span name="rs">rs: <span class="extype" name="java.sql.ResultSet">ResultSet</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      
     </li><li name="org.apache.sedona.sql.datasources.geopackage.connection.GeoPackageConnectionManager#closeStatement" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="closeStatement(st:java.sql.Statement):Unit"></a><a id="closeStatement(Statement):Unit"></a>
       <span class="permalink">
@@ -482,6 +497,24 @@
                 <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="org.apache.sedona.sql.datasources.geopackage.connection.GeoPackageConnectionManager#getMetadataCursor" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getMetadataCursor(path:String):java.sql.ResultSet"></a><a id="getMetadataCursor(String):ResultSet"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/sedona/sql/datasources/geopackage/connection/GeoPackageConnectionManager$.html#getMetadataCursor(path:String):java.sql.ResultSet" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getMetadataCursor</span><span class="params">(<span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="java.sql.ResultSet">ResultSet</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Read declared layer types without opening any feature or tile tables.</p><div class="fullcomment"><div class="comment cmt"><p>Read declared layer types without opening any feature or tile tables. The caller owns the
+returned cursor, statement and connection (see closeCursor).
+</p></div></div>
     </li><li name="org.apache.sedona.sql.datasources.geopackage.connection.GeoPackageConnectionManager#getSchema" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="getSchema(file:String,tableName:String):Seq[org.apache.sedona.sql.datasources.geopackage.model.GeoPackageField]"></a><a id="getSchema(String,String):Seq[GeoPackageField]"></a>
       <span class="permalink">

@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.io &mdash; Apache Sedona Python Documentation</title>
@@ -228,6 +227,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pyspark.pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ps</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoDataFrame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">default_session</span><span class="p">,</span> <span class="n">scol_for</span>
@@ -236,6 +236,71 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate_mode</span><span class="p">,</span> <span class="n">log_advice</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pandas.api.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_integer_dtype</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
+
+
+<div class="viewcode-block" id="list_layers"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.io.html#sedona.spark.geopandas.io.list_layers">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">list_layers</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    List vector layers and nonspatial tables in a GeoPackage.</span>
+
+<span class="sd">    .. versionadded:: 2.0.0</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename : str or path-like</span>
+<span class="sd">        Path to one GeoPackage (``.gpkg``) file, including Hadoop-supported</span>
+<span class="sd">        paths such as ``s3a://bucket/data.gpkg``. Bytes and file-like objects</span>
+<span class="sd">        are not supported. A glob must resolve to exactly one file.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pandas.DataFrame</span>
+<span class="sd">        Columns ``name`` and ``geometry_type``, sorted by name. Registered</span>
+<span class="sd">        nonspatial tables, including legacy ``aspatial`` tables, have ``None``</span>
+<span class="sd">        as their geometry type. Raster tile tables are excluded.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Unlike GeoPandas, this currently supports GeoPackage only. It uses</span>
+<span class="sd">    Sedona's Spark reader, not Pyogrio. Only layer metadata is collected to</span>
+<span class="sd">    the driver; no feature geometries are read. The reader copies remote</span>
+<span class="sd">    GeoPackages in full to executor-local temporary storage, so remote</span>
+<span class="sd">    I/O and temporary disk space scale with the file size.</span>
+
+<span class="sd">    Types describe declared metadata, including empty layers. Concrete</span>
+<span class="sd">    types permitting Z use a `` Z`` suffix; M is not represented, matching</span>
+<span class="sd">    GeoPandas with Pyogrio.</span>
+<span class="sd">    Generic geometry layers report ``Unknown``. Only core GeoPackage</span>
+<span class="sd">    geometry types are supported.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; layers = list_layers("city.gpkg")</span>
+<span class="sd">    &gt;&gt;&gt; layers.columns.tolist()</span>
+<span class="sd">    ['name', 'geometry_type']</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"filename must be a string or path-like object"</span><span class="p">)</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">fspath</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s2">"filename must be a string or path-like object returning a string"</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">filename</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">".gpkg"</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"list_layers currently supports GeoPackage (.gpkg) files only"</span><span class="p">)</span>
+
+    <span class="n">metadata</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">default_session</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geopackage"</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"showMetadata"</span><span class="p">,</span> <span class="s2">"true"</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"includeGeometryType"</span><span class="p">,</span> <span class="s2">"true"</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">layers</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">metadata</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s2">"data_type IN ('features', 'attributes', 'aspatial')"</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"table_name AS name"</span><span class="p">,</span> <span class="s2">"geometry_type"</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">toPandas</span><span class="p">()</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">layers</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">"name"</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_to_file</span><span class="p">(</span>

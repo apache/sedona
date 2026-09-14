@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.sedona.sql.datasources.geopackage.model.GeoPackageReadOptions</title>
@@ -257,7 +256,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">GeoPackageReadOptions</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="tempFile">tempFile: <span class="extype" name="java.io.File">File</span></span>, <span name="partitionOptions">partitionOptions: <a href="PartitionOptions.html" class="extype" name="org.apache.sedona.sql.datasources.geopackage.model.PartitionOptions">PartitionOptions</a></span>, <span name="partitionedFiles">partitionedFiles: <span class="extype" name="scala.collection.mutable.HashSet">HashSet</span>[<span class="extype" name="org.apache.spark.sql.execution.datasources.PartitionedFile">PartitionedFile</span>]</span>, <span name="currentFile">currentFile: <span class="extype" name="org.apache.spark.sql.execution.datasources.PartitionedFile">PartitionedFile</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">GeoPackageReadOptions</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="tempFile">tempFile: <span class="extype" name="java.io.File">File</span></span>, <span name="partitionOptions">partitionOptions: <a href="PartitionOptions.html" class="extype" name="org.apache.sedona.sql.datasources.geopackage.model.PartitionOptions">PartitionOptions</a></span>, <span name="partitionedFiles">partitionedFiles: <span class="extype" name="scala.collection.mutable.HashSet">HashSet</span>[<span class="extype" name="org.apache.spark.sql.execution.datasources.PartitionedFile">PartitionedFile</span>]</span>, <span name="currentFile">currentFile: <span class="extype" name="org.apache.spark.sql.execution.datasources.PartitionedFile">PartitionedFile</span></span>, <span name="includeGeometryType">includeGeometryType: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
 
@@ -313,9 +312,9 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="org.apache.sedona.sql.datasources.geopackage.model.GeoPackageReadOptions#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(tableName:String,tempFile:java.io.File,partitionOptions:org.apache.sedona.sql.datasources.geopackage.model.PartitionOptions,partitionedFiles:scala.collection.mutable.HashSet[org.apache.spark.sql.execution.datasources.PartitionedFile],currentFile:org.apache.spark.sql.execution.datasources.PartitionedFile):org.apache.sedona.sql.datasources.geopackage.model.GeoPackageReadOptions"></a><a id="&lt;init&gt;:GeoPackageReadOptions"></a>
+      <a id="&lt;init&gt;(tableName:String,tempFile:java.io.File,partitionOptions:org.apache.sedona.sql.datasources.geopackage.model.PartitionOptions,partitionedFiles:scala.collection.mutable.HashSet[org.apache.spark.sql.execution.datasources.PartitionedFile],currentFile:org.apache.spark.sql.execution.datasources.PartitionedFile,includeGeometryType:Boolean):org.apache.sedona.sql.datasources.geopackage.model.GeoPackageReadOptions"></a><a id="&lt;init&gt;:GeoPackageReadOptions"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/sedona/sql/datasources/geopackage/model/GeoPackageReadOptions.html#&lt;init&gt;(tableName:String,tempFile:java.io.File,partitionOptions:org.apache.sedona.sql.datasources.geopackage.model.PartitionOptions,partitionedFiles:scala.collection.mutable.HashSet[org.apache.spark.sql.execution.datasources.PartitionedFile],currentFile:org.apache.spark.sql.execution.datasources.PartitionedFile):org.apache.sedona.sql.datasources.geopackage.model.GeoPackageReadOptions" title="Permalink">
+      <a href="../../../../../../../org/apache/sedona/sql/datasources/geopackage/model/GeoPackageReadOptions.html#&lt;init&gt;(tableName:String,tempFile:java.io.File,partitionOptions:org.apache.sedona.sql.datasources.geopackage.model.PartitionOptions,partitionedFiles:scala.collection.mutable.HashSet[org.apache.spark.sql.execution.datasources.PartitionedFile],currentFile:org.apache.spark.sql.execution.datasources.PartitionedFile,includeGeometryType:Boolean):org.apache.sedona.sql.datasources.geopackage.model.GeoPackageReadOptions" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -324,7 +323,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">GeoPackageReadOptions</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="tempFile">tempFile: <span class="extype" name="java.io.File">File</span></span>, <span name="partitionOptions">partitionOptions: <a href="PartitionOptions.html" class="extype" name="org.apache.sedona.sql.datasources.geopackage.model.PartitionOptions">PartitionOptions</a></span>, <span name="partitionedFiles">partitionedFiles: <span class="extype" name="scala.collection.mutable.HashSet">HashSet</span>[<span class="extype" name="org.apache.spark.sql.execution.datasources.PartitionedFile">PartitionedFile</span>]</span>, <span name="currentFile">currentFile: <span class="extype" name="org.apache.spark.sql.execution.datasources.PartitionedFile">PartitionedFile</span></span>)</span>
+        <span class="name">GeoPackageReadOptions</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="tempFile">tempFile: <span class="extype" name="java.io.File">File</span></span>, <span name="partitionOptions">partitionOptions: <a href="PartitionOptions.html" class="extype" name="org.apache.sedona.sql.datasources.geopackage.model.PartitionOptions">PartitionOptions</a></span>, <span name="partitionedFiles">partitionedFiles: <span class="extype" name="scala.collection.mutable.HashSet">HashSet</span>[<span class="extype" name="org.apache.spark.sql.execution.datasources.PartitionedFile">PartitionedFile</span>]</span>, <span name="currentFile">currentFile: <span class="extype" name="org.apache.spark.sql.execution.datasources.PartitionedFile">PartitionedFile</span></span>, <span name="includeGeometryType">includeGeometryType: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span>
       </span>
       
       
@@ -481,6 +480,22 @@
                 <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="org.apache.sedona.sql.datasources.geopackage.model.GeoPackageReadOptions#includeGeometryType" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="includeGeometryType:Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/sedona/sql/datasources/geopackage/model/GeoPackageReadOptions.html#includeGeometryType:Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">includeGeometryType</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">

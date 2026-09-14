@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1702,6 +1701,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Reading a GeoPackage file with Sedona and Spark">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#listing-layers-and-declared-geometry-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Listing layers and declared geometry types
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -5662,6 +5678,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Reading a GeoPackage file with Sedona and Spark">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#listing-layers-and-declared-geometry-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Listing layers and declared geometry types
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -5822,6 +5855,43 @@
 |  my_layer| features|  my_layer|           |2025-02-25 06:28:...|  0.0|  0.0|  7.0|  6.0| 99999|
 +----------+---------+----------+-----------+--------------------+-----+-----+-----+-----+------+
 </code></pre></div>
+<h3 id="listing-layers-and-declared-geometry-types">Listing layers and declared geometry types<a class="headerlink" href="#listing-layers-and-declared-geometry-types" title="Permanent link">&para;</a></h3>
+<p>Since Sedona 2.0.0, <code>includeGeometryType=true</code> adds a nullable <code>geometry_type</code>
+column to <code>showMetadata=true</code>. The default metadata schema is unchanged.</p>
+<div class="highlight"><pre><span></span><code><span class="n">layers</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geopackage"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"showMetadata"</span><span class="p">,</span> <span class="s2">"true"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"includeGeometryType"</span><span class="p">,</span> <span class="s2">"true"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/tmp/my_file.gpkg"</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">layers</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"table_name"</span><span class="p">,</span> <span class="s2">"data_type"</span><span class="p">,</span> <span class="s2">"geometry_type"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<p>This reads <code>gpkg_contents</code> and <code>gpkg_geometry_columns</code>, not feature or tile rows.
+Empty feature layers are included. Core geometry types use names such as <code>Point</code>,
+<code>MultiPolygon</code>, and <code>GeometryCollection</code>. Concrete types allowing Z, including
+optional Z, have a <code>Z</code> suffix. M is not represented in the label, matching
+GeoPandas with Pyogrio. Generic <code>GEOMETRY</code> layers report <code>Unknown</code>; non-feature
+tables have a null geometry type.
+Unsupported geometry extension types or invalid feature metadata cause an error.
+A file containing only attributes or tiles does not need <code>gpkg_geometry_columns</code>.</p>
+<p><code>includeGeometryType</code> requires <code>showMetadata=true</code> and exactly one resolved file.
+A directory or glob resolving to multiple files is rejected. Without this option,
+the existing metadata mode still reads the first file only.</p>
+<p>The GeoPandas API provides the same information as a local pandas DataFrame:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sgpd</span>
+
+<span class="n">layers</span> <span class="o">=</span> <span class="n">sgpd</span><span class="o">.</span><span class="n">list_layers</span><span class="p">(</span><span class="s2">"/tmp/my_file.gpkg"</span><span class="p">)</span>
+<span class="c1"># Columns: name, geometry_type; sorted by name.</span>
+</code></pre></div>
+<p><code>list_layers</code> includes registered vector layers and nonspatial tables, including
+legacy <code>aspatial</code> tables, but excludes raster tiles. It accepts string or path-like
+<code>.gpkg</code> paths, including Hadoop-supported URLs such as <code>s3a://bucket/city.gpkg</code>.
+Other formats, bytes, and file-like objects are not supported. No Pyogrio
+installation is required.</p>
+<p>Only the small layer catalog is collected to the driver. For remote paths, the
+reader first copies the <strong>entire GeoPackage</strong> to executor-local temporary storage.
+Network I/O and temporary disk requirements therefore scale with the file size,
+even though no geometries are decoded.</p>
 <h2 id="reading-many-geopackage-files-with-sedona-and-spark">Reading many GeoPackage files with Sedona and Spark<a class="headerlink" href="#reading-many-geopackage-files-with-sedona-and-spark" title="Permanent link">&para;</a></h2>
 <p>You can also read many GeoPackage files with Sedona.  Suppose you have the following GeoPackage files:</p>
 <div class="highlight"><pre><span></span><code>gpkgs/
@@ -5912,7 +5982,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="March 28, 2025 04:58:42 UTC">March 28, 2025 04:58:42</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 14, 2026 02:31:51 UTC">September 14, 2026 02:31:51</span>
   </span>
 
     
