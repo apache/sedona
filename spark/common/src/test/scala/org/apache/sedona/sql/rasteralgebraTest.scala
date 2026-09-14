@@ -2399,6 +2399,23 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
           .getDouble(0)
           .isNaN)
 
+      // NaN nodata survives a GeoTIFF round trip
+      assert(
+        df.selectExpr("RS_BandNoDataValue(RS_FromGeoTiff(RS_AsGeoTiff(raster)))")
+          .first()
+          .getDouble(0)
+          .isNaN)
+      assertEquals(
+        14L,
+        df.selectExpr("RS_Count(RS_FromGeoTiff(RS_AsGeoTiff(raster)), 1, true)")
+          .first()
+          .getLong(0))
+      assert(
+        df.selectExpr("RS_BandNoDataValue(RS_FromGeoTiff(RS_AsCOG(raster)))")
+          .first()
+          .getDouble(0)
+          .isNaN)
+
       // NaN nodata pixels can be replaced by a numeric nodata value
       val replaced = df.selectExpr("RS_SetBandNoDataValue(raster, 1, -9999, true) as raster")
       assertEquals(

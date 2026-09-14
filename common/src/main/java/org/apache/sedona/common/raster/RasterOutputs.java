@@ -47,53 +47,24 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
 import org.geotools.gce.arcgrid.ArcGridWriteParams;
 import org.geotools.gce.arcgrid.ArcGridWriter;
-import org.geotools.gce.geotiff.GeoTiffFormat;
 import org.geotools.gce.geotiff.GeoTiffWriteParams;
-import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 
 public class RasterOutputs {
   public static byte[] asGeoTiff(
       GridCoverage2D raster, String compressionType, double compressionQuality) {
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    GridCoverageWriter writer;
-    try {
-      writer = new GeoTiffWriter(out);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-    ParameterValueGroup defaultParams = writer.getFormat().getWriteParameters();
-    // GeoTiffWriter writes a default GDAL_NODATA of 0 for coverages that have no no-data
-    // value, so a cleared (or never set) no-data value would come back as 0 when the
-    // written bytes are read again. Only opt out in that case: forcing the flag on when a
-    // no-data value is present would override an explicit -Dgeotiff.writenodata=false.
-    boolean hasNoDataValue = false;
-    for (int band = 1; band <= raster.getNumSampleDimensions(); band++) {
-      if (RasterBandAccessors.getBandNoDataValue(raster, band) != null) {
-        hasNoDataValue = true;
-        break;
-      }
-    }
-    if (!hasNoDataValue) {
-      defaultParams.parameter(GeoTiffFormat.WRITE_NODATA.getName().toString()).setValue(false);
-    }
+    GeoTiffWriteParams params = new GeoTiffWriteParams();
     if (compressionType != null && compressionQuality >= 0 && compressionQuality <= 1) {
-      GeoTiffWriteParams params = new GeoTiffWriteParams();
       params.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
       // Available compression types: None, PackBits, Deflate, Huffman, LZW and JPEG
       params.setCompressionType(compressionType);
       // Should be a value between 0 and 1
       // 0 means max compression, 1 means no compression
       params.setCompressionQuality((float) compressionQuality);
-      defaultParams
-          .parameter(AbstractGridFormat.GEOTOOLS_WRITE_PARAMS.getName().toString())
-          .setValue(params);
     }
-    GeneralParameterValue[] wps = defaultParams.values().toArray(new GeneralParameterValue[0]);
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
     try {
-      writer.write(raster, wps);
-      writer.dispose();
-      out.close();
+      GeoTiffWriters.write(raster, params, out);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
