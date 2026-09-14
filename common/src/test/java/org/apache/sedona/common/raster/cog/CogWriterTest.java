@@ -43,6 +43,7 @@ import javax.media.jai.ImageLayout;
 import javax.media.jai.PlanarImage;
 import javax.media.jai.TiledImage;
 import org.apache.sedona.common.raster.MapAlgebra;
+import org.apache.sedona.common.raster.RasterBandAccessors;
 import org.apache.sedona.common.raster.RasterConstructors;
 import org.apache.sedona.common.raster.RasterOutputs;
 import org.apache.sedona.common.utils.RasterUtils;
@@ -973,5 +974,17 @@ public class CogWriterTest {
 
     GridCoverage2D readBack = RasterConstructors.fromGeoTiff(cogBytes);
     assertEquals(256, readBack.getRenderedImage().getWidth());
+  }
+
+  @Test
+  public void testCogPreservesNaNNoData() throws IOException {
+    GridCoverage2D raster =
+        rasterFromGeoTiff(resourceFolder + "raster_geotiff_nodata/nan_nodata.tif");
+    byte[] cogBytes = RasterOutputs.asCloudOptimizedGeoTiff(raster, CogOptions.defaults());
+    GridCoverage2D readBack = RasterConstructors.fromGeoTiff(cogBytes);
+    Double noDataValue = RasterBandAccessors.getBandNoDataValue(readBack, 1);
+    assertNotNull(noDataValue);
+    assertTrue(Double.isNaN(noDataValue));
+    assertEquals(14, RasterBandAccessors.getCount(readBack, 1, true));
   }
 }

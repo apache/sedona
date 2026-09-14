@@ -30,19 +30,15 @@ import javax.media.jai.Interpolation;
 import javax.media.jai.InterpolationBicubic;
 import javax.media.jai.InterpolationBilinear;
 import javax.media.jai.InterpolationNearest;
+import org.apache.sedona.common.raster.GeoTiffWriters;
 import org.apache.sedona.common.utils.RasterUtils;
-import org.geotools.api.coverage.grid.GridCoverageWriter;
-import org.geotools.api.parameter.GeneralParameterValue;
-import org.geotools.api.parameter.ParameterValueGroup;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.api.referencing.datum.PixelInCell;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
-import org.geotools.coverage.grid.io.AbstractGridFormat;
 import org.geotools.coverage.processing.Operations;
 import org.geotools.gce.geotiff.GeoTiffWriteParams;
-import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 
 /**
@@ -288,32 +284,20 @@ public class CogWriter {
     raster = alignTileLayoutForByteBands(raster, tileSize);
 
     try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-      GridCoverageWriter writer = new GeoTiffWriter(out);
-      try {
-        ParameterValueGroup defaultParams = writer.getFormat().getWriteParameters();
-        GeoTiffWriteParams params = new GeoTiffWriteParams();
+      GeoTiffWriteParams params = new GeoTiffWriteParams();
 
-        // Set tiling — must use the 2-arg overload from GeoToolsWriteParams
-        // which delegates to the inner write param. The 4-arg ImageWriteParam.setTiling()
-        // writes to the wrong fields (parent vs inner param).
-        params.setTilingMode(ImageWriteParam.MODE_EXPLICIT);
-        params.setTiling(tileSize, tileSize);
+      // Set tiling — must use the 2-arg overload from GeoToolsWriteParams
+      // which delegates to the inner write param. The 4-arg ImageWriteParam.setTiling()
+      // writes to the wrong fields (parent vs inner param).
+      params.setTilingMode(ImageWriteParam.MODE_EXPLICIT);
+      params.setTiling(tileSize, tileSize);
 
-        // Set compression
-        params.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-        params.setCompressionType(compressionType);
-        params.setCompressionQuality((float) compressionQuality);
+      // Set compression
+      params.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+      params.setCompressionType(compressionType);
+      params.setCompressionQuality((float) compressionQuality);
 
-        defaultParams
-            .parameter(AbstractGridFormat.GEOTOOLS_WRITE_PARAMS.getName().toString())
-            .setValue(params);
-
-        GeneralParameterValue[] wps = defaultParams.values().toArray(new GeneralParameterValue[0]);
-
-        writer.write(raster, wps);
-      } finally {
-        writer.dispose();
-      }
+      GeoTiffWriters.write(raster, params, out);
       return out.toByteArray();
     }
   }

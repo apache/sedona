@@ -25,6 +25,8 @@ Possible values for `compressionType`: `None`, `PackBits`, `Deflate`, `Huffman`,
 
 Possible values for `imageQuality`: any decimal number between 0 and 1. 0 means the lowest quality and 1 means the highest quality.
 
+The no data value of band 1, if any, is written to the `GDAL_NODATA` tag of the GeoTIFF; a `NaN` no data value is written as well. Rasters without a no data value are written without the tag.
+
 Format:
 
 `RS_AsGeoTiff(raster: Raster)`
