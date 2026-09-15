@@ -403,6 +403,93 @@ class GeoFrame(metaclass=ABCMeta):
             "is_valid_coverage", self, gap_width=gap_width
         )
 
+    def simplify_coverage(self, tolerance, *, simplify_boundary=True):
+        """Simplify an edge-matched polygonal coverage using distributed joins.
+
+        Shared boundary vertices are removed consistently from every incident
+        polygon. The operation evaluates Spark jobs eagerly until no further
+        edits are accepted, and returns a reusable, unnamed GeoSeries.
+
+        .. versionadded:: 2.0.0
+
+        Parameters
+        ----------
+        tolerance : float
+            Finite, non-negative scalar. A vertex is eligible when the area
+            of its triangle with its two neighbours is at most
+            ``tolerance ** 2``. Tolerance has the units of the coordinates;
+            it is not a bound on displacement. Zero can remove collinear
+            vertices. Per-row tolerances are not supported.
+        simplify_boundary : bool, default True
+            Whether the exterior boundary of the coverage can change. If
+            False, simplify only edges shared by two rings.
+
+        Returns
+        -------
+        GeoSeries
+            Simplified polygons with the original index levels, CRS and
+            embedded SRIDs. Missing and empty polygon rows are preserved.
+
+        Notes
+        -----
+        Requires Spark Classic and a checkpoint directory configured with
+        ``spark.sparkContext.setCheckpointDir(path)``. On a cluster, the path
+        must use storage accessible to all executors, such as HDFS. Local
+        filesystem paths are appropriate only for local Spark execution.
+        Intermediate checkpoints are released after their successors are
+        materialized. The final checkpoint must remain available while the
+        result or any derived DataFrame is in use. Its files follow Spark's
+        checkpoint cleanup policy; this method does not delete the configured
+        directory or require a public ``close()`` call.
+
+        Input must be a valid, finite, edge-matched 2D Polygon/MultiPolygon
+        coverage. Non-polygonal values, Z/M coordinates, invalid polygons and
+        repeated vertices within a ring (apart from closure) are rejected.
+        Empty interior rings are also rejected; empty polygons and empty
+        MultiPolygon members are preserved.
+        Full coverage validity is a precondition, not checked by this method;
+        use :meth:`is_valid_coverage` separately when needed.
+
+        The conservative algorithm uses current-segment safety checks and
+        disjoint edit regions, with at most one vertex removed per ring per
+        round. It can retain more vertices than GeoPandas/GEOS and never
+        deletes rings, holes or polygon parts. Results are not guaranteed to
+        match GeoPandas/GEOS vertex selection.
+
+        Geometry rows stay distributed, but reconstruction builds arrays per
+        ring and input geometry. Inputs above 100,000 coordinates per geometry
+        are rejected. This is an admission limit, not a memory guarantee:
+        long rings can exhaust executor memory even below that limit. Dense
+        spatial matches and many synchronization rounds can also be costly.
+
+        Examples
+        --------
+        >>> from sedona.spark import SedonaContext
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon
+        >>> import tempfile
+        >>> spark = SedonaContext.create(
+        ...     SedonaContext.builder().master("local[2]").getOrCreate()
+        ... )
+        >>> spark.sparkContext.setCheckpointDir(tempfile.mkdtemp())
+        >>> polygons = GeoSeries([
+        ...     Polygon([(0, 0), (0.5, 0), (1, 0), (1, 1), (0, 1)])
+        ... ])
+        >>> polygons.simplify_coverage(0).count_coordinates().to_list()
+        [5]
+
+        See Also
+        --------
+        simplify : simplify each geometry independently
+        is_valid_coverage : check edge matching and coverage validity
+        """
+        return _delegate_to_geometry_column(
+            "simplify_coverage",
+            self,
+            tolerance=tolerance,
+            simplify_boundary=simplify_boundary,
+        )
+
     def invalid_coverage_edges(self, *, gap_width=0.0):
         """Return edges causing invalid polygonal coverage for each geometry.
 
