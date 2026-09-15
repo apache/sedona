@@ -200,6 +200,17 @@ def _to_file(
     if spark_fmt == "geoparquet":
         writer = spark_df.write.format("geoparquet")
 
+        # A CRS assigned on the frame lives in column metadata, not necessarily in
+        # the geometry SRIDs the writer derives CRS from, so pass it through explicitly.
+        if "geoparquet.crs" not in kwargs and df._geometry_column_name in df:
+            from sedona.spark.geopandas._crs import read_crs_metadata
+
+            has_crs_metadata, frame_crs = read_crs_metadata(
+                df.geometry._internal.data_fields[0]
+            )
+            if has_crs_metadata and frame_crs is not None:
+                writer = writer.option("geoparquet.crs", frame_crs.to_json())
+
     elif spark_fmt == "geojson":
         writer = spark_df.write.format("geojson")
 

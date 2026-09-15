@@ -426,6 +426,18 @@ class TestIO(TestGeopandasBase):
         gpd_df = gpd.read_parquet(temp_file_path)
         self.check_sgpd_df_equals_gpd_df(sgpd_df, gpd_df)
 
+    def test_to_parquet_writes_crs_of_spark_backed_frame(self):
+        # The CRS is assigned on the frame while the geometries themselves carry SRID 0
+        spark_df = self.spark.sql(
+            "SELECT id, ST_Point(CAST(id AS DOUBLE), 1.0) AS geometry FROM range(4)"
+        )
+        sgpd_df = GeoDataFrame(spark_df, geometry="geometry", crs="EPSG:4326")
+
+        temp_file_path = self._get_next_temp_file_path("parquet")
+        sgpd_df.to_parquet(temp_file_path)
+
+        assert gpd.read_parquet(temp_file_path).crs == "EPSG:4326"
+
     @pytest.mark.parametrize(
         "write_func",
         [
