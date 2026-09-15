@@ -100,6 +100,40 @@ class TestSimplifyCoverage(TestGeopandasBase):
                 0.1, simplify_boundary="False"
             )
 
+    def test_empty_multipart_members_and_srid_survive_public_wrapper(self):
+        rows = self.spark.createDataFrame(
+            [
+                (
+                    7,
+                    "SRID=3857;MULTIPOLYGON (EMPTY, ((0 0, 1 0, 2 0, 2 2, 0 2, 0 0)), EMPTY)",
+                )
+            ],
+            "id long, ewkt string",
+        ).selectExpr("id", "ST_GeomFromEWKT(ewkt) geometry")
+        assert (
+            rows.selectExpr("ST_NumGeometries(geometry) members").first().members == 3
+        )
+        source = GeoSeries(rows.pandas_api(index_col="id")["geometry"])
+
+        result = source.simplify_coverage(0)
+        internal = result._internal.resolved_copy
+        geometry = (
+            internal.spark_frame.select(
+                internal.data_spark_columns[0].alias("geometry")
+            )
+            .selectExpr(
+                "ST_NumGeometries(geometry) members",
+                "ST_SRID(geometry) srid",
+                "ST_NPoints(geometry) points",
+            )
+            .first()
+        )
+
+        assert geometry.members == 3
+        assert geometry.srid == 3857
+        assert geometry.points == 5
+        assert result.crs.to_epsg() == 3857
+
     @pytest.mark.parametrize("tolerance", [-1, float("inf"), float("nan")])
     def test_rejects_invalid_tolerance(self, tolerance):
         _ = self.spark
