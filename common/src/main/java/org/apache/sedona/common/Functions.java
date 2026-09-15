@@ -1477,9 +1477,6 @@ public class Functions {
     if (Double.isNaN(tolerance)) {
       return null;
     }
-    if (tolerance < 0.0) {
-      throw new IllegalArgumentException("Tolerance must be positive");
-    }
     // JTS requires a positive tolerance. A zero value requests the same
     // geometry-dependent default used by GEOS and the one-argument overload.
     if (tolerance == 0.0) {

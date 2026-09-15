@@ -28,7 +28,7 @@ import org.apache.spark.sql.catalyst.util._
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.io.geojson.GeoJSONUtils.geometryToGeoJson
 import org.apache.spark.sql.types._
-import org.locationtech.jts.io.WKTWriter
+import org.datasyslab.jts.io.WKTWriter
 
 import java.io.Writer
 
