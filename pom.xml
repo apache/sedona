@@ -72,7 +72,7 @@
         <geotools.version>33.1</geotools.version>
         <hadoop.version>3.2.4</hadoop.version>
         <jackson.version>2.13.4</jackson.version>
-        <jts.version>1.20.0</jts.version>
+        <jts.version>1.21.0-datasyslab-1</jts.version>
         <jts2geojson.version>0.16.1</jts2geojson.version>
         <spatial4j.version>0.8</spatial4j.version>
 
@@ -153,7 +153,7 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.locationtech.jts</groupId>
+                <groupId>org.datasyslab</groupId>
                 <artifactId>jts-core</artifactId>
                 <version>${jts.version}</version>
             </dependency>
@@ -211,6 +211,10 @@
                 <scope>${geotools.scope}</scope>
                 <exclusions>
                     <exclusion>
+                        <groupId>org.locationtech.jts</groupId>
+                        <artifactId>jts-core</artifactId>
+                    </exclusion>
+                    <exclusion>
                         <groupId>com.fasterxml.jackson.core</groupId>
                         <artifactId>*</artifactId>
                     </exclusion>
@@ -228,6 +232,10 @@
                 <scope>${geotools.scope}</scope>
                 <exclusions>
                     <exclusion>
+                        <groupId>org.locationtech.jts</groupId>
+                        <artifactId>jts-core</artifactId>
+                    </exclusion>
+                    <exclusion>
                         <groupId>com.fasterxml.jackson.core</groupId>
                         <artifactId>*</artifactId>
                     </exclusion>
@@ -240,6 +248,10 @@
                 <scope>${geotools.scope}</scope>
                 <exclusions>
                     <exclusion>
+                        <groupId>org.locationtech.jts</groupId>
+                        <artifactId>jts-core</artifactId>
+                    </exclusion>
+                    <exclusion>
                         <groupId>com.fasterxml.jackson.core</groupId>
                         <artifactId>*</artifactId>
                     </exclusion>
@@ -251,30 +263,58 @@
                 <artifactId>gt-geotiff</artifactId>
                 <version>${geotools.version}</version>
                 <scope>${geotools.scope}</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.locationtech.jts</groupId>
+                        <artifactId>jts-core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-process-feature</artifactId>
                 <version>${geotools.version}</version>
                 <scope>${geotools.scope}</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.locationtech.jts</groupId>
+                        <artifactId>jts-core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-arcgrid</artifactId>
                 <version>${geotools.version}</version>
                 <scope>${geotools.scope}</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.locationtech.jts</groupId>
+                        <artifactId>jts-core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-coverage</artifactId>
                 <version>${geotools.version}</version>
                 <scope>${geotools.scope}</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.locationtech.jts</groupId>
+                        <artifactId>jts-core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>it.geosolutions.jaiext.jiffle</groupId>
                 <artifactId>jt-jiffle-language</artifactId>
                 <version>${jt-jiffle.version}</version>
                 <exclusions>
+                    <exclusion>
+                        <groupId>org.locationtech.jts</groupId>
+                        <artifactId>jts-core</artifactId>
+                    </exclusion>
                     <exclusion>
                         <groupId>javax.media</groupId>
                         <artifactId>*</artifactId>

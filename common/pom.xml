@@ -70,7 +70,7 @@
             <artifactId>gt-process-feature</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.locationtech.jts</groupId>
+            <groupId>org.datasyslab</groupId>
             <artifactId>jts-core</artifactId>
         </dependency>
         <dependency>
