@@ -387,7 +387,9 @@ v2.0.0. It removes shared vertices consistently across adjacent polygons.
 The input must be a valid, finite, edge-matched 2D Polygon/MultiPolygon
 coverage. Nulls and empty polygons are preserved; non-polygonal geometries,
 Z/M coordinates, invalid polygons and repeated nonclosing ring vertices are
-rejected. Full coverage validity is a precondition, not an automatic check.
+rejected. Empty interior rings are rejected, while empty polygons and empty
+MultiPolygon members are preserved. Full coverage validity is a precondition,
+not an automatic check.
 The result is an unnamed GeoSeries preserving every index level and CRS.
 
 Unlike most geometry methods, this operation runs Spark jobs eagerly until

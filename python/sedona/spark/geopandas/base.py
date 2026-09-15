@@ -445,6 +445,8 @@ class GeoFrame(metaclass=ABCMeta):
         Input must be a valid, finite, edge-matched 2D Polygon/MultiPolygon
         coverage. Non-polygonal values, Z/M coordinates, invalid polygons and
         repeated vertices within a ring (apart from closure) are rejected.
+        Empty interior rings are also rejected; empty polygons and empty
+        MultiPolygon members are preserved.
         Full coverage validity is a precondition, not checked by this method;
         use :meth:`is_valid_coverage` separately when needed.
 
