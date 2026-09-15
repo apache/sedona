@@ -63,6 +63,14 @@ Please refer to [Sedona Maven Central coordinates](maven-coordinates.md) to sele
 
 Please use jars with Spark major.minor versions in the filename, such as `sedona-spark-shaded-3.5_2.12-{{ sedona.current_version }}`.
 
+### JTS dependency for Spark 4.1
+
+Sedona requires `org.datasyslab:jts-core:1.21.0-datasyslab-1`. The artifact keeps the `org.locationtech.jts` Java package names, so application imports do not change.
+
+Spark 4.1 distributions include `jts-core-1.20.0.jar`. Before starting any driver or executor, remove that jar from every Spark installation and put the `org.datasyslab:jts-core:1.21.0-datasyslab-1` jar in the same `SPARK_HOME/jars` directory. Do not keep both JTS jars because they provide the same Java classes.
+
+Sedona excludes Spark's JTS Maven dependency when you build an application. That exclusion only affects dependencies resolved by the build. It cannot remove the JTS jar from a prebuilt Spark installation, so cluster images and Spark installations must be updated separately on both drivers and executors.
+
     * Local mode: test Sedona without setting up a cluster
     ```
     ./bin/spark-shell --jars /path/to/sedona-spark-shaded-3.5_2.12-{{ sedona.current_version }}.jar,/path/to/geotools-wrapper-{{ sedona.current_geotools }}.jar
