@@ -1406,6 +1406,53 @@ class GeoSeries(GeoFrame, pspd.Series):
             source_internal,
         )
 
+    def simplify_coverage(self, tolerance, *, simplify_boundary=True) -> "GeoSeries":
+        from sedona.spark.geopandas._coverage import simplify_coverage
+
+        tolerance = _normalize_numeric_scalar(
+            tolerance, "'tolerance' must be a numeric scalar"
+        )
+        if tolerance < 0 or not np.isfinite(tolerance):
+            raise ValueError("'tolerance' must be finite and non-negative")
+        if not isinstance(simplify_boundary, (bool, np.bool_)):
+            raise TypeError("'simplify_boundary' must be a boolean")
+
+        source_internal = self._internal.resolved_copy
+        source_frame = source_internal.spark_frame
+        index_names = [
+            f"__coverage_index_{level}__"
+            for level in range(len(source_internal.index_spark_columns))
+        ]
+        source = source_frame.select(
+            source_internal.data_spark_columns[0].alias(
+                "geom", metadata=source_internal.data_fields[0].metadata
+            ),
+            *[
+                column.alias(name)
+                for column, name in zip(
+                    source_internal.index_spark_columns, index_names
+                )
+            ],
+            scol_for(source_frame, NATURAL_ORDER_COLUMN_NAME),
+            # Index labels and natural-order values can both be duplicated or
+            # null after alignment. The helper snapshots this physical ID
+            # before branching, so every original row has a stable identity.
+            F.monotonically_increasing_id().alias("id"),
+        )
+        result = simplify_coverage(source, tolerance, bool(simplify_boundary))
+        result = result.orderBy(
+            scol_for(result, NATURAL_ORDER_COLUMN_NAME).asc_nulls_last(),
+            scol_for(result, "id"),
+        )
+        return self._result_preserving_index(
+            scol_for(result, "geom"),
+            result,
+            [scol_for(result, name) for name in index_names],
+            source_internal.index_fields,
+            source_internal.index_names,
+            returns_geom=True,
+        )
+
     def invalid_coverage_edges(self, *, gap_width=0.0) -> "GeoSeries":
         gap_width = _normalize_numeric_scalar(
             gap_width, "'gap_width' must be a numeric scalar"
