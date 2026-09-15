@@ -450,6 +450,45 @@ public class GeometryDimensionSerdeTest {
   }
 
   @Test
+  public void mixedDeclaredLayoutsRequireGeometryCollections() throws ParseException {
+    for (String[] wkts :
+        new String[][] {
+          {"POINT (1 2)", "POINT Z EMPTY"},
+          {"LINESTRING (0 0, 1 1)", "LINESTRING Z EMPTY"},
+          {"POLYGON ((0 0, 4 0, 0 4, 0 0))", "POLYGON Z EMPTY"}
+        }) {
+      Geometry xy = roundTrip(new WKTReader().read(wkts[0]));
+      Geometry z =
+          roundTrip(
+              Constructors.geomFromWKB(new WKBWriter(3).write(new WKTReader().read(wkts[1]))));
+      assertMixedLayoutsRequireCollection(xy, z);
+    }
+    ByteBuffer point = ByteBuffer.allocate(29).order(ByteOrder.LITTLE_ENDIAN);
+    point.put((byte) 1).putInt(1001).putDouble(1).putDouble(2).putDouble(Double.NaN);
+    assertMixedLayoutsRequireCollection(
+        roundTrip(new WKTReader().read("POINT (3 4)")),
+        roundTrip(Constructors.geomFromWKB(point.array())));
+  }
+
+  private static void assertMixedLayoutsRequireCollection(Geometry xy, Geometry z) {
+    for (Geometry[] members : new Geometry[][] {{xy, z}, {z, xy}}) {
+      Geometry multipart = Functions.createMultiGeometry(members);
+      IllegalArgumentException error =
+          assertThrows(
+              IllegalArgumentException.class, () -> GeometrySerializer.serialize(multipart));
+      assertTrue(error.getMessage().contains("heterogeneous dimensional layouts"));
+      Geometry collection = roundTrip(FACTORY.createGeometryCollection(members));
+      assertEquals(2, collection.getNumGeometries());
+      for (int i = 0; i < members.length; i++) {
+        assertEquals(members[i].isEmpty(), collection.getGeometryN(i).isEmpty());
+        assertEquals(
+            members[i] == xy ? CoordinateType.XY : CoordinateType.XYZ,
+            coordinateType(GeometrySerializer.serialize(collection.getGeometryN(i))));
+      }
+    }
+  }
+
+  @Test
   public void rejectsRecoverablyHeterogeneousMultipartLayouts() {
     LineString xy =
         FACTORY.createLineString(new Coordinate[] {new CoordinateXY(0, 0), new CoordinateXY(1, 1)});
