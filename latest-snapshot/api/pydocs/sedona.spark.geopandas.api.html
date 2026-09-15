@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -5031,7 +5030,7 @@ for details</p>
 <p>Simplifies individual geometries independently, without considering
 the topology of a potential polygonal coverage. If you would like to treat
 the <code class="docutils literal notranslate"><span class="pre">GeoSeries</span></code> as a coverage and simplify its edges, while preserving the
-coverage topology, see <code class="xref py py-meth docutils literal notranslate"><span class="pre">simplify_coverage()</span></code>.</p>
+coverage topology, see <a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.simplify_coverage" title="sedona.spark.geopandas.GeoSeries.simplify_coverage"><code class="xref py py-meth docutils literal notranslate"><span class="pre">simplify_coverage()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -5053,7 +5052,7 @@ simplified differently.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">simplify_coverage</span></code></dt><dd><p>simplify geometries using coverage simplification</p>
+<dt><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.simplify_coverage" title="sedona.spark.geopandas.GeoSeries.simplify_coverage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">simplify_coverage</span></code></a></dt><dd><p>simplify geometries using coverage simplification</p>
 </dd>
 </dl>
 </div>
@@ -5074,6 +5073,90 @@ simplified differently.</p>
 <span class="go">1              LINESTRING (0 0, 0 20)</span>
 <span class="go">dtype: geometry</span>
 </pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.simplify_coverage">
+<span class="sig-name descname"><span class="pre">simplify_coverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tolerance</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simplify_boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.geoseries.GeoSeries"><span class="pre">GeoSeries</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.simplify_coverage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.simplify_coverage" title="Permalink to this definition"></a></dt>
+<dd><p>Simplify an edge-matched polygonal coverage using distributed joins.</p>
+<p>Shared boundary vertices are removed consistently from every incident
+polygon. The operation evaluates Spark jobs eagerly until no further
+edits are accepted, and returns a reusable, unnamed GeoSeries.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.0.0.</span></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tolerance</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Finite, non-negative scalar. A vertex is eligible when the area
+of its triangle with its two neighbours is at most
+<code class="docutils literal notranslate"><span class="pre">tolerance</span> <span class="pre">**</span> <span class="pre">2</span></code>. Tolerance has the units of the coordinates;
+it is not a bound on displacement. Zero can remove collinear
+vertices. Per-row tolerances are not supported.</p></li>
+<li><p><strong>simplify_boundary</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default True</em>) – Whether the exterior boundary of the coverage can change. If
+False, simplify only edges shared by two rings.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Simplified polygons with the original index levels, CRS and
+embedded SRIDs. Missing and empty polygon rows are preserved.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries">GeoSeries</a></p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Requires Spark Classic and a checkpoint directory configured with
+<code class="docutils literal notranslate"><span class="pre">spark.sparkContext.setCheckpointDir(path)</span></code>. On a cluster, the path
+must use storage accessible to all executors, such as HDFS. Local
+filesystem paths are appropriate only for local Spark execution.
+Intermediate checkpoints are released after their successors are
+materialized. The final checkpoint must remain available while the
+result or any derived DataFrame is in use. Its files follow Spark’s
+checkpoint cleanup policy; this method does not delete the configured
+directory or require a public <code class="docutils literal notranslate"><span class="pre">close()</span></code> call.</p>
+<p>Input must be a valid, finite, edge-matched 2D Polygon/MultiPolygon
+coverage. Non-polygonal values, Z/M coordinates, invalid polygons and
+repeated vertices within a ring (apart from closure) are rejected.
+Empty interior rings are also rejected; empty polygons and empty
+MultiPolygon members are preserved.
+Full coverage validity is a precondition, not checked by this method;
+use <a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.is_valid_coverage" title="sedona.spark.geopandas.GeoSeries.is_valid_coverage"><code class="xref py py-meth docutils literal notranslate"><span class="pre">is_valid_coverage()</span></code></a> separately when needed.</p>
+<p>The conservative algorithm uses current-segment safety checks and
+disjoint edit regions, with at most one vertex removed per ring per
+round. It can retain more vertices than GeoPandas/GEOS and never
+deletes rings, holes or polygon parts. Results are not guaranteed to
+match GeoPandas/GEOS vertex selection.</p>
+<p>Geometry rows stay distributed, but reconstruction builds arrays per
+ring and input geometry. Inputs above 100,000 coordinates per geometry
+are rejected. This is an admission limit, not a memory guarantee:
+long rings can exhaust executor memory even below that limit. Dense
+spatial matches and many synchronization rounds can also be costly.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaContext</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Polygon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span><span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">"local[2]"</span><span class="p">)</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span><span class="o">.</span><span class="n">sparkContext</span><span class="o">.</span><span class="n">setCheckpointDir</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">polygons</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">([</span>
+<span class="gp">... </span>    <span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>
+<span class="gp">... </span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">polygons</span><span class="o">.</span><span class="n">simplify_coverage</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">count_coordinates</span><span class="p">()</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+<span class="go">[5]</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.simplify" title="sedona.spark.geopandas.GeoSeries.simplify"><code class="xref py py-obj docutils literal notranslate"><span class="pre">simplify</span></code></a></dt><dd><p>simplify each geometry independently</p>
+</dd>
+<dt><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.is_valid_coverage" title="sedona.spark.geopandas.GeoSeries.is_valid_coverage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_valid_coverage</span></code></a></dt><dd><p>check edge matching and coverage validity</p>
+</dd>
+</dl>
 </div>
 </dd></dl>
 

@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -1615,6 +1614,53 @@
             <span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">validation_rows</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">index_names</span><span class="p">],</span>
             <span class="n">source_internal</span><span class="p">,</span>
         <span class="p">)</span>
+
+<div class="viewcode-block" id="GeoSeries.simplify_coverage"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.simplify_coverage">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">simplify_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">simplify_boundary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"GeoSeries"</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._coverage</span><span class="w"> </span><span class="kn">import</span> <span class="n">simplify_coverage</span>
+
+        <span class="n">tolerance</span> <span class="o">=</span> <span class="n">_normalize_numeric_scalar</span><span class="p">(</span>
+            <span class="n">tolerance</span><span class="p">,</span> <span class="s2">"'tolerance' must be a numeric scalar"</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">tolerance</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">tolerance</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"'tolerance' must be finite and non-negative"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">simplify_boundary</span><span class="p">,</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"'simplify_boundary' must be a boolean"</span><span class="p">)</span>
+
+        <span class="n">source_internal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">resolved_copy</span>
+        <span class="n">source_frame</span> <span class="o">=</span> <span class="n">source_internal</span><span class="o">.</span><span class="n">spark_frame</span>
+        <span class="n">index_names</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sa">f</span><span class="s2">"__coverage_index_</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s2">__"</span>
+            <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">source_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">))</span>
+        <span class="p">]</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">source_frame</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="n">source_internal</span><span class="o">.</span><span class="n">data_spark_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span>
+                <span class="s2">"geom"</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">source_internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">metadata</span>
+            <span class="p">),</span>
+            <span class="o">*</span><span class="p">[</span>
+                <span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">column</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="n">source_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">,</span> <span class="n">index_names</span>
+                <span class="p">)</span>
+            <span class="p">],</span>
+            <span class="n">scol_for</span><span class="p">(</span><span class="n">source_frame</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">),</span>
+            <span class="c1"># Index labels and natural-order values can both be duplicated or</span>
+            <span class="c1"># null after alignment. The helper snapshots this physical ID</span>
+            <span class="c1"># before branching, so every original row has a stable identity.</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">monotonically_increasing_id</span><span class="p">()</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"id"</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">simplify_coverage</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">,</span> <span class="nb">bool</span><span class="p">(</span><span class="n">simplify_boundary</span><span class="p">))</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span>
+            <span class="n">scol_for</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span><span class="o">.</span><span class="n">asc_nulls_last</span><span class="p">(),</span>
+            <span class="n">scol_for</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s2">"id"</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result_preserving_index</span><span class="p">(</span>
+            <span class="n">scol_for</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s2">"geom"</span><span class="p">),</span>
+            <span class="n">result</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">index_names</span><span class="p">],</span>
+            <span class="n">source_internal</span><span class="o">.</span><span class="n">index_fields</span><span class="p">,</span>
+            <span class="n">source_internal</span><span class="o">.</span><span class="n">index_names</span><span class="p">,</span>
+            <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeoSeries.invalid_coverage_edges"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.invalid_coverage_edges">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">invalid_coverage_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">gap_width</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"GeoSeries"</span><span class="p">:</span>
         <span class="n">gap_width</span> <span class="o">=</span> <span class="n">_normalize_numeric_scalar</span><span class="p">(</span>

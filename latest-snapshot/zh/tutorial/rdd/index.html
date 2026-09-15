@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6895,7 +6894,7 @@ Polygon,LineString
 <h3 id="spatialrdd_2">保存 SpatialRDD（已分区，未建索引）<a class="headerlink" href="#spatialrdd_2" title="Permanent link">&para;</a></h3>
 <p>经过空间分区的 RDD 可以保存到永久存储，但 Spark 无法保留原 RDD 的分区 ID。这会导致 join 查询结果错误，相关解决方案仍在开发中，敬请关注！</p>
 <h3 id="spatialrdd_3">重新加载已保存的 SpatialRDD<a class="headerlink" href="#spatialrdd_3" title="Permanent link">&para;</a></h3>
-<p>您可以轻松重新加载保存为==分布式 object file==的 SpatialRDD：</p>
+<p>您可以轻松重新加载保存为<mark>分布式 object file</mark>的 SpatialRDD：</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="19:3"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Scala</label><label for="__tabbed_19_2">Java</label><label for="__tabbed_19_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">

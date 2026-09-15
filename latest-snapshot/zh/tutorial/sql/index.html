@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6691,7 +6690,7 @@
 </div>
 </div>
 <h2 id="sedona">创建 Sedona 配置<a class="headerlink" href="#sedona" title="Permanent link">&para;</a></h2>
-<p>在程序起始处使用以下代码创建 Sedona 配置。如果您已经有了由 AWS EMR / Databricks / Microsoft Fabric 创建的 SparkSession（通常名为 <code>spark</code>），请==跳过此步骤==。</p>
+<p>在程序起始处使用以下代码创建 Sedona 配置。如果您已经有了由 AWS EMR / Databricks / Microsoft Fabric 创建的 SparkSession（通常名为 <code>spark</code>），请<mark>跳过此步骤</mark>。</p>
 <p>可以在 builder 中追加额外的 Spark 运行时配置，例如 <code>SedonaContext.builder().config("spark.sql.autoBroadcastJoinThreshold", "10485760")</code>。</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Scala</label><label for="__tabbed_3_2">Java</label><label for="__tabbed_3_3">Python</label></div>
 <div class="tabbed-content">

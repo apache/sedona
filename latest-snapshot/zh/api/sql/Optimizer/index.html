@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5995,7 +5994,7 @@ RangeJoin polygonshape#20: geometry, pointshape#43: geometry, false
 <h2 id="distance-join">距离连接（Distance join）<a class="headerlink" href="#distance-join" title="Permanent link">&para;</a></h2>
 <p>简介：从 A 与 B 中查找彼此之间的距离小于或等于某个阈值的几何对象配对。支持平面欧氏距离计算器 <code>ST_Distance</code>、<code>ST_HausdorffDistance</code>、<code>ST_FrechetDistance</code>，以及基于米制的大地测量距离计算器 <code>ST_DistanceSpheroid</code> 与 <code>ST_DistanceSphere</code>。</p>
 <p>平面欧氏距离的 Spark SQL 示例：</p>
-<p><em>仅考虑==完全位于某个距离之内==</em></p>
+<p><em>仅考虑<mark>完全位于某个距离之内</mark></em></p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">pointdf1</span><span class="p">,</span><span class="w"> </span><span class="n">pointdf2</span>
 <span class="k">WHERE</span><span class="w"> </span><span class="n">ST_Distance</span><span class="p">(</span><span class="n">pointdf1</span><span class="p">.</span><span class="n">pointshape1</span><span class="p">,</span><span class="n">pointdf2</span><span class="p">.</span><span class="n">pointshape2</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">2</span>
@@ -6008,7 +6007,7 @@ RangeJoin polygonshape#20: geometry, pointshape#43: geometry, false
 <span class="k">FROM</span><span class="w"> </span><span class="n">pointDf</span><span class="p">,</span><span class="w"> </span><span class="n">polygonDF</span>
 <span class="k">WHERE</span><span class="w"> </span><span class="n">ST_FrechetDistance</span><span class="p">(</span><span class="n">pointDf</span><span class="p">.</span><span class="n">pointshape</span><span class="p">,</span><span class="w"> </span><span class="n">polygonDf</span><span class="p">.</span><span class="n">polygonshape</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">2</span>
 </code></pre></div>
-<p><em>考虑==与某个距离范围相交==</em></p>
+<p><em>考虑<mark>与某个距离范围相交</mark></em></p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">pointdf1</span><span class="p">,</span><span class="w"> </span><span class="n">pointdf2</span>
 <span class="k">WHERE</span><span class="w"> </span><span class="n">ST_Distance</span><span class="p">(</span><span class="n">pointdf1</span><span class="p">.</span><span class="n">pointshape1</span><span class="p">,</span><span class="n">pointdf2</span><span class="p">.</span><span class="n">pointshape2</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">2</span>
@@ -6051,7 +6050,7 @@ DistanceJoin pointshape1#12: geometry, pointshape2#33: geometry, 2.0, true
 <h2 id="spatial-left-join">空间左连接（Spatial Left Join）<a class="headerlink" href="#spatial-left-join" title="Permanent link">&para;</a></h2>
 <p>简介：以范围连接或距离连接的空间性能来执行左连接。
 这样既可以找到 A 与 B 中满足连接条件的几何对象配对，同时还能保留 A 中那些在 B 中找不到任何匹配几何的记录。</p>
-<p>范围连接与距离连接==不支持==如下所示的 LEFT JOIN：</p>
+<p>范围连接与距离连接<mark>不支持</mark>如下所示的 LEFT JOIN：</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">a</span>
 <span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">ST_INTERSECTS</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">geometry</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">geometry</span><span class="p">)</span>
 </code></pre></div>
