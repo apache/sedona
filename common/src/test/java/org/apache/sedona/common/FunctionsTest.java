@@ -1011,7 +1011,7 @@ public class FunctionsTest extends TestBase {
     actual =
         Functions.asWKT(Functions.reducePrecision(Functions.orientedEnvelope(irregularPolygon), 2));
     expected = "POLYGON ((5 0, 0.29 -1.18, -0.71 2.82, 4 4, 5 0))";
-    assertEquals(expected, actual);
+    assertGeometryEquals(expected, actual);
 
     Geometry point = Constructors.geomFromWKT("POINT (1 2)", 0);
     actual = Functions.asWKT(Functions.orientedEnvelope(point));
@@ -1039,14 +1039,14 @@ public class FunctionsTest extends TestBase {
     Geometry multiPoint = Constructors.geomFromWKT("MULTIPOINT ((0 0), (-1 -1), (3 2))", 0);
     actual = Functions.asWKT(Functions.reducePrecision(Functions.orientedEnvelope(multiPoint), 2));
     expected = "POLYGON ((-1 -1, -1.12 -0.84, 2.88 2.16, 3 2, -1 -1))";
-    assertEquals(expected, actual);
+    assertGeometryEquals(expected, actual);
 
     Geometry linestring = Constructors.geomFromWKT("LINESTRING (55 75, 125 150)", 0);
     Geometry pointGeom = Constructors.geomFromWKT("POINT (20 80)", 0);
     Geometry collection = linestring.union(pointGeom);
     actual = Functions.asWKT(Functions.reducePrecision(Functions.orientedEnvelope(collection), 2));
     expected = "POLYGON ((125 150, 138.08 130.38, 33.08 60.38, 20 80, 125 150))";
-    assertEquals(expected, actual);
+    assertGeometryEquals(expected, actual);
   }
 
   @Test
@@ -2930,7 +2930,7 @@ public class FunctionsTest extends TestBase {
     String actual = Functions.asWKT(forcedPoly);
     String expected =
         "POLYGON ((0 10, 10 10, 10 5.333333333333333, 5 7, 3 5, 5 3, 10 4.666666666666667, 10 0, 0 0, 0 10))";
-    assertEquals(expected, actual);
+    assertGeometryEquals(expected, actual);
 
     geom = Constructors.geomFromWKT("POINT ZM(1 2 2 5)", 0);
     actual = Functions.asWKT(Functions.force2D(geom));
@@ -3640,7 +3640,7 @@ public class FunctionsTest extends TestBase {
     String actual = Functions.asWKT(Functions.reducePrecision(Functions.buffer(polygon, 15), 4));
     String expected =
         "POLYGON ((47.0736 35.2882, 44.2597 36.1418, 41.6664 37.528, 39.3934 39.3934, 37.528 41.6664, 36.1418 44.2597, 35.2882 47.0736, 35 50, 35 150, 35.2882 152.9264, 36.1418 155.7403, 37.528 158.3336, 39.3934 160.6066, 41.6664 162.472, 44.2597 163.8582, 47.0736 164.7118, 50 165, 150 165, 152.9264 164.7118, 155.7403 163.8582, 158.3336 162.472, 160.6066 160.6066, 162.472 158.3336, 163.8582 155.7403, 164.7118 152.9264, 165 150, 165 50, 164.7118 47.0736, 163.8582 44.2597, 162.472 41.6664, 160.6066 39.3934, 158.3336 37.528, 155.7403 36.1418, 152.9264 35.2882, 150 35, 50 35, 47.0736 35.2882))";
-    assertEquals(expected, actual);
+    assertGeometryEquals(expected, actual);
 
     LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 50, 70, 100, 100));
     actual =
@@ -3648,7 +3648,7 @@ public class FunctionsTest extends TestBase {
             Functions.reducePrecision(Functions.buffer(lineString, 10, false, "side=left"), 4));
     expected =
         "POLYGON ((50 70, 0 0, -8.1373 5.8124, 41.8627 75.8124, 43.2167 77.3476, 44.855 78.5749, 94.855 108.5749, 100 100, 50 70))";
-    assertEquals(expected, actual);
+    assertGeometryEquals(expected, actual);
 
     lineString = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 50, 70, 70, -3));
     actual =
@@ -3656,7 +3656,7 @@ public class FunctionsTest extends TestBase {
             Functions.reducePrecision(Functions.buffer(lineString, 10, false, "endcap=square"), 4));
     expected =
         "POLYGON ((43.2156 77.3465, 44.8523 78.5733, 46.7044 79.4413, 48.6944 79.9144, 50.739 79.9727, 52.7527 79.6137, 54.6512 78.8525, 56.3552 77.7209, 57.7932 76.2663, 58.9052 74.5495, 59.6446 72.6424, 79.6446 -0.3576, 82.2869 -10.0022, 62.9978 -15.2869, 45.9128 47.0733, 8.1373 -5.8124, 2.325 -13.9497, -13.9497 -2.325, 41.8627 75.8124, 43.2156 77.3465))";
-    assertEquals(expected, actual);
+    assertGeometryEquals(expected, actual);
 
     Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(100, 90));
     actual =
@@ -3664,7 +3664,7 @@ public class FunctionsTest extends TestBase {
             Functions.reducePrecision(Functions.buffer(point, 10, false, "quad_segs=2"), 4));
     expected =
         "POLYGON ((107.0711 82.9289, 100 80, 92.9289 82.9289, 90 90, 92.9289 97.0711, 100 100, 107.0711 97.0711, 110 90, 107.0711 82.9289))";
-    assertEquals(expected, actual);
+    assertGeometryEquals(expected, actual);
 
     // Using reducePrecision in the following tests modified the geometries coordinates the
     // coordinates causing the comparison to fail,
@@ -5230,16 +5230,21 @@ public class FunctionsTest extends TestBase {
 
     geom = Constructors.geomFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 0))", 3857);
     actual = Functions.maximumInscribedCircle(geom, 2.0);
-    expected =
-        new InscribedCircle(
-            Constructors.geomFromWKT("POINT (0.75 0.5)", 3857),
-            Constructors.geomFromWKT("POINT (0.625 0.625)", 3857),
-            0.1767766952966369);
-    assertEquals(expected, actual);
+    double triangleRadius = 1.0 - 1.0 / Math.sqrt(2.0);
+    assertEquals(1.0 - triangleRadius, actual.center.getCoordinate().x, 1e-15);
+    assertEquals(triangleRadius, actual.center.getCoordinate().y, 1e-15);
+    assertEquals(1.0 - triangleRadius, actual.nearest.getCoordinate().x, 1e-15);
+    assertEquals(0.0, actual.nearest.getCoordinate().y, 1e-15);
+    assertEquals(triangleRadius, actual.radius, 1e-15);
     assertEquals(3857, actual.center.getSRID());
     assertEquals(3857, actual.nearest.getSRID());
     assertEquals(
         Functions.maximumInscribedCircle(geom), Functions.maximumInscribedCircle(geom, 0.0));
+    Geometry triangle = geom;
+    IllegalArgumentException error =
+        assertThrows(
+            IllegalArgumentException.class, () -> Functions.maximumInscribedCircle(triangle, -1.0));
+    assertEquals("Tolerance must be positive", error.getMessage());
 
     geom = Constructors.geomFromWKT("POLYGON ((0 0, 0 0, 0 0, 0 0))", 3857);
     actual = Functions.maximumInscribedCircle(geom);
@@ -5253,10 +5258,16 @@ public class FunctionsTest extends TestBase {
     assertEquals(expected, Functions.maximumInscribedCircle(geom, 2.0));
 
     Geometry finalGeom = geom;
-    IllegalArgumentException error =
+    error =
         assertThrows(
             IllegalArgumentException.class,
             () -> Functions.maximumInscribedCircle(finalGeom, -1.0));
+    assertEquals("Tolerance must be positive", error.getMessage());
+
+    Geometry points = Constructors.geomFromWKT("MULTIPOINT ((0 0), (1 1))", 3857);
+    error =
+        assertThrows(
+            IllegalArgumentException.class, () -> Functions.maximumInscribedCircle(points, -1.0));
     assertEquals("Tolerance must be positive", error.getMessage());
   }
 
