@@ -3492,6 +3492,7 @@ class functionTestScala
         (generatedPointDimensions(direct), generatedPointDimensions(materialized)))
       assertTrue(direct.equalsExact(materialized))
     } finally {
+      sparkSession.catalog.dropTempView("materialized_xy_polygon")
       polygons.unpersist()
     }
   }
