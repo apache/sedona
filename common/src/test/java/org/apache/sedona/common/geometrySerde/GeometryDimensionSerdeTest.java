@@ -19,6 +19,7 @@
 package org.apache.sedona.common.geometrySerde;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
@@ -49,6 +50,29 @@ import org.locationtech.jts.io.WKTReader;
 
 public class GeometryDimensionSerdeTest {
   private static final GeometryFactory FACTORY = new GeometryFactory();
+  private static final WkbLayout[] WKB_LAYOUTS = {
+    new WkbLayout(CoordinateType.XY, 2, 0, 0, 0),
+    new WkbLayout(CoordinateType.XYZ, 3, 0, 1000, 0x80000000),
+    new WkbLayout(CoordinateType.XYM, 3, 1, 2000, 0x40000000),
+    new WkbLayout(CoordinateType.XYZM, 4, 1, 3000, 0xc0000000)
+  };
+
+  private static final class WkbLayout {
+    final CoordinateType coordinateType;
+    final int dimension;
+    final int measures;
+    final int isoOffset;
+    final int ewkbFlags;
+
+    WkbLayout(
+        CoordinateType coordinateType, int dimension, int measures, int isoOffset, int ewkbFlags) {
+      this.coordinateType = coordinateType;
+      this.dimension = dimension;
+      this.measures = measures;
+      this.isoOffset = isoOffset;
+      this.ewkbFlags = ewkbFlags;
+    }
+  }
 
   @Test
   public void nestedCollectionsAndEmptyMultipartMembersSurviveFactoryCopies()
@@ -85,7 +109,7 @@ public class GeometryDimensionSerdeTest {
     assertEquals(0, nested.getSRID());
     assertEquals(4326, changed.getSRID());
     assertEquals(4326, changed.getFactory().getSRID());
-    assertEquals("metadata", changed.getUserData());
+    assertNull(changed.getUserData());
     Geometry output = roundTrip(changed);
     assertEquals(2, output.getNumGeometries());
     Geometry children = output.getGeometryN(0);
@@ -113,10 +137,10 @@ public class GeometryDimensionSerdeTest {
   @Test
   public void isoAndEwkbLayoutsSurviveCopiesAndWireBuffers() throws ParseException {
     for (boolean iso : new boolean[] {false, true}) {
-      for (int layout = 0; layout < 4; layout++) {
-        int dimension = 2 + (layout == 3 ? 2 : layout == 0 ? 0 : 1);
-        int measures = layout >= 2 ? 1 : 0;
-        CoordinateType expected = CoordinateType.values()[layout];
+      for (WkbLayout layout : WKB_LAYOUTS) {
+        int dimension = layout.dimension;
+        int measures = layout.measures;
+        CoordinateType expected = layout.coordinateType;
         for (int primitive = 1; primitive <= 3; primitive++) {
           for (boolean empty : new boolean[] {false, true}) {
             // Populated lines/polygons are covered elsewhere; this also exercises all-NaN Z/M.
@@ -124,12 +148,7 @@ public class GeometryDimensionSerdeTest {
             ByteBuffer wkb = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN);
             wkb.put((byte) 1);
             int type =
-                iso
-                    ? primitive + 1000 * layout
-                    : primitive
-                        | (layout == 1 || layout == 3 ? 0x80000000 : 0)
-                        | (measures == 1 ? 0x40000000 : 0)
-                        | 0x20000000;
+                iso ? primitive + layout.isoOffset : primitive | layout.ewkbFlags | 0x20000000;
             wkb.putInt(type);
             if (!iso) wkb.putInt(4326);
             if (primitive == 1) {
@@ -187,6 +206,94 @@ public class GeometryDimensionSerdeTest {
             GeometrySerializer.serialize(
                 source.getFactory().createGeometry(FACTORY.createPoint(new Coordinate(1, 2))))));
     assertThrows(ParseException.class, () -> Constructors.geomFromWKB(new byte[] {1, 1}));
+  }
+
+  @Test
+  public void derivedCoordinatesFromBinaryGeometryFactoriesRemainXy() throws ParseException {
+    Geometry polygon = new WKTReader().read("POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))");
+    for (Geometry input :
+        new Geometry[] {
+          roundTrip(polygon), Constructors.geomFromWKB(new WKBWriter().write(polygon))
+        }) {
+      GeometryFactory factory = input.getFactory();
+      Geometry points = factory.createMultiPointFromCoords(new Coordinate[] {new Coordinate(3, 4)});
+      assertEquals(CoordinateType.XY, coordinateType(GeometrySerializer.serialize(points)));
+      assertEquals(3, points.getCoordinate().x, 0);
+      assertEquals(4, points.getCoordinate().y, 0);
+      CoordinateSequence coordinates = factory.getCoordinateSequenceFactory().create(2, 3);
+      coordinates.setOrdinate(0, 0, 1);
+      coordinates.setOrdinate(0, 1, 2);
+      coordinates.setOrdinate(1, 0, 3);
+      coordinates.setOrdinate(1, 1, 4);
+      assertEquals(
+          CoordinateType.XY,
+          coordinateType(GeometrySerializer.serialize(factory.createLineString(coordinates))));
+      Geometry generated = Functions.generatePoints(input, 3, 100);
+      assertEquals(3, generated.getNumGeometries());
+      assertTrue(input.covers(generated));
+      assertEquals(CoordinateType.XY, coordinateType(GeometrySerializer.serialize(generated)));
+    }
+  }
+
+  @Test
+  public void wkbResultsUseOrdinaryAllocationForEveryGeometryType() throws ParseException {
+    for (String wkt :
+        new String[] {
+          "POINT EMPTY",
+          "LINESTRING EMPTY",
+          "POLYGON EMPTY",
+          "POLYGON ((0 0, 4 0, 0 4, 0 0), (1 1, 2 1, 1 2, 1 1))",
+          "MULTIPOINT (EMPTY, (1 2))",
+          "MULTILINESTRING (EMPTY, (0 0, 1 1))",
+          "MULTIPOLYGON (EMPTY, ((0 0, 4 0, 0 4, 0 0)))",
+          "GEOMETRYCOLLECTION (POINT EMPTY, GEOMETRYCOLLECTION (POLYGON EMPTY))"
+        }) {
+      Geometry geometry =
+          Constructors.geomFromWKB(new WKBWriter().write(new WKTReader().read(wkt)));
+      geometry.apply(
+          (org.locationtech.jts.geom.GeometryComponentFilter)
+              component -> {
+                Geometry points =
+                    component
+                        .getFactory()
+                        .createMultiPointFromCoords(new Coordinate[] {new Coordinate(3, 4)});
+                assertEquals(
+                    wkt, CoordinateType.XY, coordinateType(GeometrySerializer.serialize(points)));
+              });
+    }
+  }
+
+  @Test
+  public void wkbReaderPreservesMemberSridsAndDefaultSrid() throws ParseException {
+    ByteBuffer bytes = ByteBuffer.allocate(9 + 2 * 25).order(ByteOrder.LITTLE_ENDIAN);
+    bytes.put((byte) 1).putInt(7).putInt(2);
+    bytes.put((byte) 1).putInt(0x20000001).putInt(4326).putDouble(1).putDouble(2);
+    bytes.put((byte) 1).putInt(0x20000001).putInt(3857).putDouble(3).putDouble(4);
+    Geometry collection = GeometryWkbReader.read(bytes.array(), 27700);
+    assertEquals(27700, collection.getSRID());
+    assertEquals(4326, collection.getGeometryN(0).getSRID());
+    assertEquals(3857, collection.getGeometryN(1).getSRID());
+    assertEquals(1, collection.getGeometryN(0).getCoordinate().x, 0);
+    assertEquals(4, collection.getGeometryN(1).getCoordinate().y, 0);
+  }
+
+  @Test
+  public void factoryCopiesAndSetSridUseTheSameUserDataPolicy() throws ParseException {
+    Geometry point = new WKTReader().read("POINT (1 2)");
+    for (Geometry input : new Geometry[] {point, roundTrip(point)}) {
+      input.setUserData("child metadata");
+      Geometry collection = input.getFactory().createGeometryCollection(new Geometry[] {input});
+      collection.setUserData("parent metadata");
+      for (Geometry copy :
+          new Geometry[] {
+            collection.getFactory().createGeometry(collection), Functions.setSRID(collection, 4326)
+          }) {
+        assertNull(copy.getUserData());
+        assertNull(copy.getGeometryN(0).getUserData());
+      }
+      assertEquals("parent metadata", collection.getUserData());
+      assertEquals("child metadata", input.getUserData());
+    }
   }
 
   @Test

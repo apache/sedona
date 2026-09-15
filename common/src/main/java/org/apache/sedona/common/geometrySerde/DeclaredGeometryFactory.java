@@ -78,7 +78,6 @@ public final class DeclaredGeometryFactory extends GeometryFactory {
     } else {
       return super.createGeometry(geometry);
     }
-    copy.setUserData(geometry.getUserData());
     return copy;
   }
 }

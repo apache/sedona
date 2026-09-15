@@ -477,9 +477,8 @@ public class GeometrySerializer {
     // Measures are explicit CoordinateSequence metadata. A Z dimension is not always explicit:
     // JTS's default sequence factory represents ordinary XY coordinates as dimension 3 with NaN Z.
     // Trusted binary layouts and XYZM are unambiguous. Unmarked XYZ is recoverable only when at
-    // least one Z value is non-NaN. An
-    // ambiguous sequence does not constrain a multipart geometry whose other members establish the
-    // shared layout.
+    // least one Z value is non-NaN. An ambiguous sequence does not constrain a multipart geometry
+    // whose other members establish the shared layout.
     CoordinateType coordinateType = null;
     if (measures > 0) {
       coordinateType = spatialDimensions > 2 ? CoordinateType.XYZM : CoordinateType.XYM;

@@ -24,7 +24,7 @@ import org.locationtech.jts.geom.CoordinateSequence;
 import org.locationtech.jts.geom.CoordinateSequenceFactory;
 import org.locationtech.jts.geom.impl.CoordinateArraySequenceFactory;
 
-/** Retains declared layouts on explicit allocation and preserves provenance on copies. */
+/** Preserves binary layout declarations on copies without marking ordinary JTS allocations. */
 final class DeclaredCoordinateSequenceFactory implements CoordinateSequenceFactory, Serializable {
   private static final long serialVersionUID = 1L;
   static final DeclaredCoordinateSequenceFactory INSTANCE = new DeclaredCoordinateSequenceFactory();
@@ -47,11 +47,11 @@ final class DeclaredCoordinateSequenceFactory implements CoordinateSequenceFacto
 
   @Override
   public CoordinateSequence create(int size, int dimension) {
-    return create(size, dimension, 0);
+    return CoordinateArraySequenceFactory.instance().create(size, dimension);
   }
 
   @Override
   public CoordinateSequence create(int size, int dimension, int measures) {
-    return new DeclaredCoordinateSequence(size, dimension, measures);
+    return CoordinateArraySequenceFactory.instance().create(size, dimension, measures);
   }
 }

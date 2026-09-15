@@ -19,9 +19,7 @@
 package org.apache.sedona.common.geometrySerde;
 
 import org.datasyslab.jts.io.WKBReader;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
 
 /**
@@ -31,7 +29,88 @@ public final class GeometryWkbReader {
   private GeometryWkbReader() {}
 
   public static Geometry read(byte[] bytes) throws ParseException {
-    GeometryFactory factory = new DeclaredGeometryFactory(new PrecisionModel(), 0);
-    return new WKBReader(factory).read(bytes);
+    return read(bytes, 0);
+  }
+
+  public static Geometry read(byte[] bytes, int defaultSrid) throws ParseException {
+    return new WKBReader(new ReaderGeometryFactory(defaultSrid)).read(bytes);
+  }
+
+  /**
+   * WKBReader allocates sequences from this factory using dimensions from binary headers. Geometry
+   * construction delegates to a regular factory so that subsequent JTS operations do not mistake
+   * sized allocations for binary declarations. This also avoids copying the parsed coordinates or
+   * changing SRIDs assigned by WKBReader to individual collection members.
+   */
+  private static final class ReaderGeometryFactory extends GeometryFactory {
+    private static final long serialVersionUID = 1L;
+    private final GeometryFactory resultFactory;
+
+    private ReaderGeometryFactory(int srid) {
+      super(new PrecisionModel(), srid, new ReaderCoordinateSequenceFactory());
+      resultFactory = new DeclaredGeometryFactory(getPrecisionModel(), srid);
+    }
+
+    @Override
+    public Point createPoint(CoordinateSequence coordinates) {
+      return resultFactory.createPoint(coordinates);
+    }
+
+    @Override
+    public LineString createLineString(CoordinateSequence coordinates) {
+      return resultFactory.createLineString(coordinates);
+    }
+
+    @Override
+    public LinearRing createLinearRing(CoordinateSequence coordinates) {
+      return resultFactory.createLinearRing(coordinates);
+    }
+
+    @Override
+    public Polygon createPolygon(LinearRing shell, LinearRing[] holes) {
+      return resultFactory.createPolygon(shell, holes);
+    }
+
+    @Override
+    public MultiPoint createMultiPoint(Point[] points) {
+      return resultFactory.createMultiPoint(points);
+    }
+
+    @Override
+    public MultiLineString createMultiLineString(LineString[] lines) {
+      return resultFactory.createMultiLineString(lines);
+    }
+
+    @Override
+    public MultiPolygon createMultiPolygon(Polygon[] polygons) {
+      return resultFactory.createMultiPolygon(polygons);
+    }
+
+    @Override
+    public GeometryCollection createGeometryCollection(Geometry[] geometries) {
+      return resultFactory.createGeometryCollection(geometries);
+    }
+  }
+
+  private static final class ReaderCoordinateSequenceFactory implements CoordinateSequenceFactory {
+    @Override
+    public CoordinateSequence create(Coordinate[] coordinates) {
+      return DeclaredCoordinateSequenceFactory.INSTANCE.create(coordinates);
+    }
+
+    @Override
+    public CoordinateSequence create(CoordinateSequence sequence) {
+      return DeclaredCoordinateSequenceFactory.INSTANCE.create(sequence);
+    }
+
+    @Override
+    public CoordinateSequence create(int size, int dimension) {
+      return create(size, dimension, 0);
+    }
+
+    @Override
+    public CoordinateSequence create(int size, int dimension, int measures) {
+      return new DeclaredCoordinateSequence(size, dimension, measures);
+    }
   }
 }

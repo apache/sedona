@@ -29,7 +29,6 @@ import org.apache.sedona.common.geometryObjects.Box3D;
 import org.apache.sedona.common.geometrySerde.GeometryWkbReader;
 import org.apache.sedona.common.utils.FormatUtils;
 import org.apache.sedona.common.utils.GeoHashDecoder;
-import org.datasyslab.jts.io.WKBReader;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;

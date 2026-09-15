@@ -1099,13 +1099,15 @@ public class Functions {
     if (geometry == null) {
       return null;
     }
-    GeometryFactory factory =
-        new GeometryFactory(
-            geometry.getPrecisionModel(),
-            srid,
-            geometry.getFactory().getCoordinateSequenceFactory());
+    GeometryFactory factory;
     if (geometry.getFactory() instanceof DeclaredGeometryFactory) {
       factory = new DeclaredGeometryFactory(geometry.getPrecisionModel(), srid);
+    } else {
+      factory =
+          new GeometryFactory(
+              geometry.getPrecisionModel(),
+              srid,
+              geometry.getFactory().getCoordinateSequenceFactory());
     }
     Geometry newGeom = factory.createGeometry(geometry);
     // Workaround for JTS bug: GeometryEditor.editPolygon returns the original
