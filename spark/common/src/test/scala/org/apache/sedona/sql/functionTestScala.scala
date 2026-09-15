@@ -29,7 +29,7 @@ import org.apache.spark.sql.{DataFrame, Row}
 import org.geotools.referencing.CRS
 import org.junit.Assert.{assertEquals, assertFalse, assertTrue}
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
-import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory, Polygon}
+import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory, Point, Polygon}
 import org.locationtech.jts.io.WKTWriter
 import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.distance3d.Distance3DOp
@@ -3455,6 +3455,45 @@ class functionTestScala
     val expected =
       "MULTIPOINT ((53.82582 2.57803), (13.55212 2.44117), (59.12854 3.70611), (61.37698 7.14985), (10.49657 4.40622))"
     assertEquals(expected, actual)
+  }
+
+  it("Should keep ST_GeneratePoints output XY for WKB and materialized polygon inputs") {
+    val polygonWkb =
+      "010300000001000000050000000000000000000000000000000000000000000000000024400000000000000000000000000000244000000000000024400000000000000000000000000000244000000000000000000000000000000000"
+
+    def generatedPointDimensions(points: Geometry): Seq[Int] = {
+      assertEquals(8, points.getNumGeometries)
+      (0 until points.getNumGeometries).map { index =>
+        val point = points.getGeometryN(index).asInstanceOf[Point]
+        assertTrue(point.getX >= 0 && point.getX <= 10)
+        assertTrue(point.getY >= 0 && point.getY <= 10)
+        point.getCoordinateSequence.getDimension
+      }
+    }
+
+    val direct = sparkSession
+      .sql(s"SELECT ST_GeneratePoints(ST_GeomFromWKB(unhex('$polygonWkb')), 8, 42) AS points")
+      .first()
+      .getAs[Geometry]("points")
+
+    val polygons = sparkSession
+      .sql(s"SELECT ST_GeomFromWKB(unhex('$polygonWkb')) AS polygon")
+      .repartition(2)
+      .cache()
+    try {
+      polygons.collect()
+      polygons.createOrReplaceTempView("materialized_xy_polygon")
+      val materialized = sparkSession
+        .sql("SELECT ST_GeneratePoints(polygon, 8, 42) AS points FROM materialized_xy_polygon")
+        .first()
+        .getAs[Geometry]("points")
+      assertEquals(
+        (Seq.fill(8)(2), Seq.fill(8)(2)),
+        (generatedPointDimensions(direct), generatedPointDimensions(materialized)))
+      assertTrue(direct.equalsExact(materialized))
+    } finally {
+      polygons.unpersist()
+    }
   }
 
   it("should pass ST_NRings") {
