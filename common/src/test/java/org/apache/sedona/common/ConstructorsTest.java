@@ -20,10 +20,12 @@ package org.apache.sedona.common;
 
 import static org.junit.Assert.*;
 
+import java.util.EnumSet;
 import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.junit.Test;
 import org.locationtech.jts.geom.*;
+import org.locationtech.jts.io.Ordinate;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBWriter;
 
@@ -109,15 +111,38 @@ public class ConstructorsTest {
   @Test
   public void geomFromWKBPreservesDeclaredDimensionForEmptyGeometry() throws ParseException {
     GeometryFactory factory = new GeometryFactory();
+    int[][] layouts = {{2, 0}, {3, 0}, {3, 1}, {4, 1}};
 
-    Geometry result =
-        Constructors.geomFromWKB(new WKBWriter(3).write(factory.createPoint((Coordinate) null)));
-    assertTrue(result instanceof Point);
-    assertEquals(3, ((Point) result).getCoordinateSequence().getDimension());
+    for (int[] layout : layouts) {
+      int dimension = layout[0];
+      int measures = layout[1];
+      EnumSet<Ordinate> ordinates = EnumSet.of(Ordinate.X, Ordinate.Y);
+      if (dimension - measures > 2) {
+        ordinates.add(Ordinate.Z);
+      }
+      if (measures > 0) {
+        ordinates.add(Ordinate.M);
+      }
+      WKBWriter writer = new WKBWriter(dimension);
+      writer.setOutputOrdinates(ordinates);
 
-    result = Constructors.geomFromWKB(new WKBWriter(3).write(factory.createPolygon()));
-    assertTrue(result instanceof Polygon);
-    assertEquals(3, ((Polygon) result).getExteriorRing().getCoordinateSequence().getDimension());
+      CoordinateSequence pointSequence =
+          factory.getCoordinateSequenceFactory().create(0, dimension, measures);
+      Geometry result = Constructors.geomFromWKB(writer.write(factory.createPoint(pointSequence)));
+      assertTrue(result instanceof Point);
+      assertEquals(dimension, ((Point) result).getCoordinateSequence().getDimension());
+      assertEquals(measures, ((Point) result).getCoordinateSequence().getMeasures());
+
+      CoordinateSequence ringSequence =
+          factory.getCoordinateSequenceFactory().create(0, dimension, measures);
+      Polygon polygon = factory.createPolygon(factory.createLinearRing(ringSequence));
+      result = Constructors.geomFromWKB(writer.write(polygon));
+      assertTrue(result instanceof Polygon);
+      CoordinateSequence resultSequence =
+          ((Polygon) result).getExteriorRing().getCoordinateSequence();
+      assertEquals(dimension, resultSequence.getDimension());
+      assertEquals(measures, resultSequence.getMeasures());
+    }
   }
 
   @Test
