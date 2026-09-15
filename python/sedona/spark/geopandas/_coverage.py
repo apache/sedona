@@ -110,15 +110,16 @@ def _extract(frame: DataFrame) -> DataFrame:
         )
         .withColumn("_points", F.expr("ST_DumpPoints(_line)"))
     )
-    # Filtering closing coordinates after expansion can retain source arrays
-    # in Spark's plan and be expensive even within the input admission limit.
+    # Trim before expansion so Generate does not carry and copy the full ring
+    # array for every vertex when Spark inlines a post-expansion size filter.
     points = rings.select(
         "id",
         "part",
         "ring",
-        (F.size("_points") - 1).alias("_n"),
-        F.posexplode("_points").alias("pos", "_point"),
-    ).where(F.col("pos") < F.col("_n"))
+        F.posexplode(F.slice("_points", 1, F.size("_points") - 1)).alias(
+            "pos", "_point"
+        ),
+    )
     points = points.withColumn("_x", F.expr("ST_X(_point)")).withColumn(
         "_y", F.expr("ST_Y(_point)")
     )

@@ -57,6 +57,63 @@ def _source(spark):
     ).selectExpr("label", "ST_GeomFromWKT(wkt) geom", "id")
 
 
+def test_extraction_does_not_repeat_ring_arrays(spark):
+    from sedona.spark.geopandas._coverage import _extract
+
+    extracted = _extract(_source(spark))
+    nodes = [extracted._jdf.queryExecution().optimizedPlan()]
+    generators = 0
+    while nodes:
+        node = nodes.pop()
+        if node.nodeName() == "Generate":
+            generators += 1
+            carried = node.requiredChildOutput()
+            # Carrying the full array through Generate copies it once per
+            # vertex at a codegen boundary, even if a later projection drops it.
+            assert all(
+                carried.apply(i).dataType().typeName() != "array"
+                for i in range(carried.size())
+            ), node.toString()
+        children = node.children()
+        nodes.extend(children.apply(i) for i in range(children.size()))
+    assert generators > 0
+
+
+def test_extraction_preserves_parts_rings_positions_and_signed_zero(spark):
+    from sedona.spark.geopandas._coverage import _extract
+
+    source = spark.createDataFrame(
+        [
+            (
+                7,
+                "MULTIPOLYGON (EMPTY, ((-0 0, 4 0, 4 4, 0 4, -0 0), (1 1, 1 2, 2 1, 1 1)), ((8 0, 9 0, 8 1, 8 0)))",
+            ),
+            (8, "POLYGON EMPTY"),
+            (9, None),
+        ],
+        "id long, wkt string",
+    ).selectExpr("id", "ST_GeomFromWKT(wkt) geom")
+
+    rows = _extract(source).orderBy("id", "part", "ring", "pos").collect()
+
+    expected = [
+        (7, 1, 0, 0, 0.0, 0.0),
+        (7, 1, 0, 1, 4.0, 0.0),
+        (7, 1, 0, 2, 4.0, 4.0),
+        (7, 1, 0, 3, 0.0, 4.0),
+        (7, 1, 1, 0, 1.0, 1.0),
+        (7, 1, 1, 1, 1.0, 2.0),
+        (7, 1, 1, 2, 2.0, 1.0),
+        (7, 2, 0, 0, 8.0, 0.0),
+        (7, 2, 0, 1, 9.0, 0.0),
+        (7, 2, 0, 2, 8.0, 1.0),
+    ]
+    assert [
+        (row.id, row.part, row.ring, row.pos, row.x, row.y) for row in rows
+    ] == expected
+    assert rows[0].vid == "[0.0,0.0]"
+
+
 def test_shared_boundary_output_survives_intermediate_cleanup(spark, tmp_path):
     from sedona.spark.geopandas._coverage import simplify_coverage
 

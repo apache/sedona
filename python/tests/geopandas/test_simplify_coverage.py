@@ -35,6 +35,30 @@ from tests.geopandas.test_geopandas_base import TestGeopandasBase
 
 
 class TestSimplifyCoverage(TestGeopandasBase):
+    def test_long_ring_with_locked_boundary(self):
+        rows = self.spark.range(1).selectExpr(
+            "id",
+            "ST_MakePolygon(ST_MakeLine(transform(sequence(0, 10000), i -> "
+            "CASE WHEN i = 10000 THEN ST_Point(1D, 0D) ELSE "
+            "ST_Point(cos(2*pi()*i/10000), sin(2*pi()*i/10000)) END))) geometry",
+        )
+        original = rows.selectExpr("ST_AsBinary(geometry) wkb").first().wkb
+        source = GeoSeries(rows.pandas_api(index_col="id")["geometry"])
+
+        result = source.simplify_coverage(0, simplify_boundary=False)
+        internal = result._internal.resolved_copy
+        output = (
+            internal.spark_frame.select(
+                internal.data_spark_columns[0].alias("geometry")
+            )
+            .selectExpr("ST_NPoints(geometry) points", "ST_AsBinary(geometry) wkb")
+            .collect()
+        )
+
+        assert len(output) == 1
+        assert output[0].points == 10001
+        assert output[0].wkb == original
+
     @pytest.mark.parametrize("tolerance", [0, np.float64(0), Decimal("0")])
     def test_zero_tolerance_removes_collinear_vertices(self, tolerance):
         _ = self.spark
