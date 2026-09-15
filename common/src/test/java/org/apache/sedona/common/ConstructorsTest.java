@@ -107,6 +107,20 @@ public class ConstructorsTest {
   }
 
   @Test
+  public void geomFromWKBPreservesDeclaredDimensionForEmptyGeometry() throws ParseException {
+    GeometryFactory factory = new GeometryFactory();
+
+    Geometry result =
+        Constructors.geomFromWKB(new WKBWriter(3).write(factory.createPoint((Coordinate) null)));
+    assertTrue(result instanceof Point);
+    assertEquals(3, ((Point) result).getCoordinateSequence().getDimension());
+
+    result = Constructors.geomFromWKB(new WKBWriter(3).write(factory.createPolygon()));
+    assertTrue(result instanceof Polygon);
+    assertEquals(3, ((Polygon) result).getExteriorRing().getCoordinateSequence().getDimension());
+  }
+
+  @Test
   public void mLineFromWKT() throws ParseException {
     assertNull(Constructors.mLineFromText(null, 0));
     assertNull(Constructors.mLineFromText("POINT (1 1)", 0));

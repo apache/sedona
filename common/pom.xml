@@ -70,8 +70,12 @@
             <artifactId>gt-process-feature</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.datasyslab</groupId>
+            <groupId>org.locationtech.jts</groupId>
             <artifactId>jts-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.datasyslab</groupId>
+            <artifactId>jts-io-patch</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wololo</groupId>

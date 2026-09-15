@@ -21,7 +21,7 @@ package org.apache.sedona.python.wrapper.translation
 import org.apache.sedona.common.geometryObjects.Circle
 import org.apache.sedona.python.wrapper.SerializationException
 import org.locationtech.jts.geom.Geometry
-import org.locationtech.jts.io.WKBReader
+import org.datasyslab.jts.io.WKBReader
 
 import java.nio.ByteBuffer
 

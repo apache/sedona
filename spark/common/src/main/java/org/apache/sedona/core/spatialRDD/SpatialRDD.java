@@ -45,6 +45,7 @@ import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.sql.types.StructType;
 import org.apache.spark.storage.StorageLevel;
 import org.apache.spark.util.random.SamplingUtils;
+import org.datasyslab.jts.io.WKTWriter;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
@@ -54,7 +55,6 @@ import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.index.SpatialIndex;
 import org.locationtech.jts.index.strtree.STRtree;
 import org.locationtech.jts.io.WKBWriter;
-import org.locationtech.jts.io.WKTWriter;
 import org.wololo.geojson.Feature;
 import scala.Tuple2;
 

@@ -23,13 +23,13 @@ import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
 import java.nio.ByteOrder;
 import java.util.*;
 import org.apache.sedona.common.Functions;
+import org.datasyslab.jts.io.WKTWriter;
 import org.locationtech.jts.algorithm.Angle;
 import org.locationtech.jts.algorithm.distance.DiscreteFrechetDistance;
 import org.locationtech.jts.algorithm.distance.DiscreteHausdorffDistance;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.WKBWriter;
-import org.locationtech.jts.io.WKTWriter;
 import org.locationtech.jts.operation.polygonize.Polygonizer;
 import org.locationtech.jts.operation.union.UnaryUnionOp;
 import org.locationtech.spatial4j.context.jts.JtsSpatialContext;
@@ -186,12 +186,7 @@ public class GeomUtils {
   }
 
   private static String writeWKT(Geometry geometry) {
-    // JTS 1.20 omits the separator between a dimensional marker and EMPTY for nested empty
-    // geometries (for example, "MULTILINESTRING ZEMPTY"), which its own WKTReader rejects.
-    String wkt = new WKTWriter(4).write(geometry);
-    return wkt.replace("ZMEMPTY", "ZM EMPTY")
-        .replace("ZEMPTY", "Z EMPTY")
-        .replace("MEMPTY", "M EMPTY");
+    return new WKTWriter(4).write(geometry);
   }
 
   public static String getHexEWKB(Geometry geometry, int endian) {

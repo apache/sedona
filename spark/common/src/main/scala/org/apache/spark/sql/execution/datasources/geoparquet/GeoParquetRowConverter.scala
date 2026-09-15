@@ -33,7 +33,7 @@ import org.apache.spark.sql.execution.datasources.geoparquet.internal._
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
-import org.locationtech.jts.io.WKBReader
+import org.datasyslab.jts.io.WKBReader
 
 import java.math.{BigDecimal, BigInteger}
 import java.time.{ZoneId, ZoneOffset}

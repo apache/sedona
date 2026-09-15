@@ -88,12 +88,6 @@
                 <artifactId>spark-sql_${scala.compat.version}</artifactId>
                 <version>${spark.version}</version>
                 <scope>provided</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.locationtech.jts</groupId>
-                        <artifactId>jts-core</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>io.graphframes</groupId>
