@@ -74,6 +74,10 @@
             <artifactId>jts-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.datasyslab</groupId>
+            <artifactId>jts-io-patch</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wololo</groupId>
             <artifactId>jts2geojson</artifactId>
         </dependency>

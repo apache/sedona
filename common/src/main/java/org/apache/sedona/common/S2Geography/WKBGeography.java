@@ -130,7 +130,7 @@ public class WKBGeography extends Geography {
         result = jtsGeometry;
         if (result == null) {
           try {
-            org.locationtech.jts.io.WKBReader reader = new org.locationtech.jts.io.WKBReader();
+            org.datasyslab.jts.io.WKBReader reader = new org.datasyslab.jts.io.WKBReader();
             result = reader.read(wkbBytes);
             result.setSRID(getSRID());
           } catch (ParseException e) {
