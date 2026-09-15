@@ -18,10 +18,9 @@
  */
 package org.apache.sedona.sql.datasources.geopackage.transform
 
+import org.apache.sedona.common.geometrySerde.GeometryWkbReader
 import org.apache.sedona.sql.datasources.geopackage.errors.GeopackageException
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.locationtech.jts.geom.{GeometryFactory, PrecisionModel}
-import org.datasyslab.jts.io.WKBReader
 
 import java.nio.{ByteBuffer, ByteOrder}
 
@@ -56,8 +55,7 @@ object GeometryReader {
     val wkb = new Array[Byte](reader.remaining())
     reader.get(wkb)
 
-    val wkbReader = new WKBReader(new GeometryFactory(new PrecisionModel(), srid))
-    val geom = wkbReader.read(wkb)
+    val geom = GeometryWkbReader.read(wkb, srid)
 
     // that needs rewriting
     GeometryUDT.serialize(geom)

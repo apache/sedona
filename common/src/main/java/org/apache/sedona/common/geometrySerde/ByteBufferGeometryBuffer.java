@@ -25,7 +25,6 @@ import org.locationtech.jts.geom.CoordinateSequence;
 import org.locationtech.jts.geom.CoordinateXY;
 import org.locationtech.jts.geom.CoordinateXYM;
 import org.locationtech.jts.geom.CoordinateXYZM;
-import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 
 class ByteBufferGeometryBuffer implements GeometryBuffer {
   private CoordinateType coordinateType = CoordinateType.XY;
@@ -126,20 +125,20 @@ class ByteBufferGeometryBuffer implements GeometryBuffer {
     switch (coordinateType) {
       case XY:
         coordinates[0] = new CoordinateXY(x, y);
-        return new CoordinateArraySequence(coordinates, 2, 0);
+        return new DeclaredCoordinateSequence(coordinates, 2, 0);
       case XYZ:
         z = byteBuffer.getDouble(offset + 16);
         coordinates[0] = new Coordinate(x, y, z);
-        return new CoordinateArraySequence(coordinates, 3, 0);
+        return new DeclaredCoordinateSequence(coordinates, 3, 0);
       case XYM:
         m = byteBuffer.getDouble(offset + 16);
         coordinates[0] = new CoordinateXYM(x, y, m);
-        return new CoordinateArraySequence(coordinates, 3, 1);
+        return new DeclaredCoordinateSequence(coordinates, 3, 1);
       case XYZM:
         z = byteBuffer.getDouble(offset + 16);
         m = byteBuffer.getDouble(offset + 24);
         coordinates[0] = new CoordinateXYZM(x, y, z, m);
-        return new CoordinateArraySequence(coordinates, 4, 1);
+        return new DeclaredCoordinateSequence(coordinates, 4, 1);
       default:
         throw new IllegalStateException("coordinateType was not configured properly");
     }
@@ -240,7 +239,7 @@ class ByteBufferGeometryBuffer implements GeometryBuffer {
       default:
         throw new IllegalStateException("coordinateType was not configured properly");
     }
-    return new CoordinateArraySequence(coordinates, dimension, measures);
+    return new DeclaredCoordinateSequence(coordinates, dimension, measures);
   }
 
   @Override

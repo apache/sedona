@@ -26,9 +26,9 @@ import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.common.enums.GeometryType;
 import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.geometryObjects.Box3D;
+import org.apache.sedona.common.geometrySerde.GeometryWkbReader;
 import org.apache.sedona.common.utils.FormatUtils;
 import org.apache.sedona.common.utils.GeoHashDecoder;
-import org.datasyslab.jts.io.WKBReader;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
@@ -74,7 +74,7 @@ public class Constructors {
   }
 
   public static Geometry geomFromWKB(byte[] wkb, int SRID) throws ParseException {
-    Geometry geom = new WKBReader().read(wkb);
+    Geometry geom = GeometryWkbReader.read(wkb);
     if (geom.getFactory().getSRID() != geom.getSRID() || (SRID >= 0 && geom.getSRID() != SRID)) {
       // Make sure that the geometry and the geometry factory have the correct SRID
       if (SRID < 0) {

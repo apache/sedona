@@ -41,6 +41,32 @@ class GeometryUdtTestScala extends TestBaseScala with BeforeAndAfter {
   }
 
   describe("GeometryUDT Test") {
+    it("Should preserve declared Z through WKB and the geometry UDT") {
+      val wkts =
+        Seq("POINT Z EMPTY", "LINESTRING Z EMPTY", "POLYGON Z EMPTY", "POINT Z (1 2 NaN)")
+      wkts.foreach { wkt =>
+        val wkb = new org.locationtech.jts.io.WKBWriter(3)
+          .write(new WKTReader().read(wkt.replace("NaN", "9")))
+        if (wkt.contains("NaN")) {
+          java.nio.ByteBuffer.wrap(wkb).putDouble(21, Double.NaN)
+        }
+        val hex = org.locationtech.jts.io.WKBWriter.toHex(wkb)
+        val geometry = sparkSession
+          .sql(s"SELECT ST_SetSRID(ST_GeomFromWKB(unhex('$hex')), 4326)")
+          .collect()(0)
+          .getAs[Geometry](0)
+        val sequence = geometry match {
+          case point: org.locationtech.jts.geom.Point => point.getCoordinateSequence
+          case line: org.locationtech.jts.geom.LineString => line.getCoordinateSequence
+          case polygon: org.locationtech.jts.geom.Polygon =>
+            polygon.getExteriorRing.getCoordinateSequence
+        }
+        assert(sequence.getDimension == 3, wkt)
+        assert(sequence.getMeasures == 0, wkt)
+        assert(geometry.getSRID == 4326)
+      }
+    }
+
     it("Should write dataframe with geometry in Parquet format") {
       tempFolder.create()
 
