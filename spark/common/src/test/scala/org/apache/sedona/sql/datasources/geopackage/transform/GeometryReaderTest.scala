@@ -44,7 +44,7 @@ class GeometryReaderTest extends AnyFunSuite {
         .put('G'.toByte)
         .put('P'.toByte)
         .put(0.toByte)
-        .put(1.toByte)
+        .put(0x11.toByte)
         .putInt(4326)
         .put(wkb)
         .array()
