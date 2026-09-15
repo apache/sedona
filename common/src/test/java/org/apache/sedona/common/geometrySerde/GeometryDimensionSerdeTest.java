@@ -22,6 +22,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import org.apache.sedona.common.Constructors;
+import org.apache.sedona.common.Functions;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateSequence;
@@ -40,10 +44,186 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.WKTReader;
 
 public class GeometryDimensionSerdeTest {
   private static final GeometryFactory FACTORY = new GeometryFactory();
+
+  @Test
+  public void nestedCollectionsAndEmptyMultipartMembersSurviveFactoryCopies()
+      throws ParseException {
+    Geometry empty =
+        Constructors.geomFromWKB(new WKBWriter(3).write(new WKTReader().read("POINT Z EMPTY")));
+    GeometryFactory factory = empty.getFactory();
+    Geometry[] parts =
+        new Geometry[] {
+          factory.createMultiPoint(
+              new Point[] {(Point) empty, factory.createPoint(new Coordinate(1, 2, 3))}),
+          factory.createMultiLineString(
+              new LineString[] {
+                (LineString)
+                    Constructors.geomFromWKB(
+                        new WKBWriter(3).write(new WKTReader().read("LINESTRING Z EMPTY"))),
+                factory.createLineString(
+                    new Coordinate[] {new Coordinate(1, 2, 3), new Coordinate(4, 5, 6)})
+              }),
+          factory.createMultiPolygon(
+              new Polygon[] {
+                (Polygon)
+                    Constructors.geomFromWKB(
+                        new WKBWriter(3).write(new WKTReader().read("POLYGON Z EMPTY")))
+              })
+        };
+    GeometryCollection nested =
+        factory.createGeometryCollection(
+            new Geometry[] {
+              factory.createGeometryCollection(parts), FACTORY.createPoint(new CoordinateXY(7, 8))
+            });
+    nested.setUserData("metadata");
+    Geometry changed = Functions.setSRID(nested, 4326);
+    assertEquals(0, nested.getSRID());
+    assertEquals(4326, changed.getSRID());
+    assertEquals(4326, changed.getFactory().getSRID());
+    assertEquals("metadata", changed.getUserData());
+    Geometry output = roundTrip(changed);
+    assertEquals(2, output.getNumGeometries());
+    Geometry children = output.getGeometryN(0);
+    for (int i = 0; i < parts.length; i++) {
+      Geometry part = children.getGeometryN(i);
+      assertEquals(parts[i].getNumGeometries(), part.getNumGeometries());
+      assertTrue(part.getGeometryN(0).isEmpty());
+      assertEquals(CoordinateType.XYZ, coordinateType(GeometrySerializer.serialize(part)));
+    }
+    assertEquals(
+        CoordinateType.XY, coordinateType(GeometrySerializer.serialize(output.getGeometryN(1))));
+  }
+
+  @Test
+  public void hexWkbReaderPreservesEmptyZAndInputData() throws ParseException {
+    byte[] bytes = new WKBWriter(3, true).write(new WKTReader().read("POLYGON Z EMPTY"));
+    org.apache.sedona.common.utils.FormatUtils reader =
+        new org.apache.sedona.common.utils.FormatUtils(
+            org.apache.sedona.common.enums.FileDataSplitter.WKB, true);
+    Geometry geometry = reader.readWkb(WKBWriter.toHex(bytes) + "\tmetadata");
+    assertEquals("metadata", geometry.getUserData());
+    assertEquals(CoordinateType.XYZ, coordinateType(GeometrySerializer.serialize(geometry)));
+  }
+
+  @Test
+  public void isoAndEwkbLayoutsSurviveCopiesAndWireBuffers() throws ParseException {
+    for (boolean iso : new boolean[] {false, true}) {
+      for (int layout = 0; layout < 4; layout++) {
+        int dimension = 2 + (layout == 3 ? 2 : layout == 0 ? 0 : 1);
+        int measures = layout >= 2 ? 1 : 0;
+        CoordinateType expected = CoordinateType.values()[layout];
+        for (int primitive = 1; primitive <= 3; primitive++) {
+          for (boolean empty : new boolean[] {false, true}) {
+            // Populated lines/polygons are covered elsewhere; this also exercises all-NaN Z/M.
+            if (!empty && primitive != 1) continue;
+            ByteBuffer wkb = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN);
+            wkb.put((byte) 1);
+            int type =
+                iso
+                    ? primitive + 1000 * layout
+                    : primitive
+                        | (layout == 1 || layout == 3 ? 0x80000000 : 0)
+                        | (measures == 1 ? 0x40000000 : 0)
+                        | 0x20000000;
+            wkb.putInt(type);
+            if (!iso) wkb.putInt(4326);
+            if (primitive == 1) {
+              wkb.putDouble(empty ? Double.NaN : 1).putDouble(empty ? Double.NaN : 2);
+              for (int ordinate = 2; ordinate < dimension; ordinate++) wkb.putDouble(Double.NaN);
+            } else {
+              wkb.putInt(0);
+            }
+            Geometry geometry =
+                Constructors.geomFromWKB(java.util.Arrays.copyOf(wkb.array(), wkb.position()));
+            assertEquals(iso ? 0 : 4326, geometry.getSRID());
+            geometry.setUserData("retained");
+            assertEquals("retained", geometry.copy().getUserData());
+            for (String buffer : new String[] {"bytebuffer", "unsafe"}) {
+              Geometry decoded =
+                  GeometrySerializer.deserialize(
+                      GeometryBufferFactory.wrap(buffer, GeometrySerializer.serialize(geometry)));
+              for (Geometry copy :
+                  new Geometry[] {
+                    geometry.copy(),
+                    geometry.reverse(),
+                    geometry.getFactory().createGeometry(geometry),
+                    decoded,
+                    decoded.copy(),
+                    decoded.reverse(),
+                    Functions.setSRID(decoded, 3857)
+                  }) {
+                byte[] bytes = GeometrySerializer.serialize(copy);
+                assertEquals(expected, coordinateType(bytes));
+                Geometry output = GeometrySerializer.deserialize(bytes);
+                CoordinateSequence sequence =
+                    output instanceof Point
+                        ? ((Point) output).getCoordinateSequence()
+                        : output instanceof LineString
+                            ? ((LineString) output).getCoordinateSequence()
+                            : ((Polygon) output).getExteriorRing().getCoordinateSequence();
+                assertSequenceLayout(sequence, dimension, measures);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  @Test
+  public void declaredFactoryDoesNotPromoteOrdinaryCoordinates() throws ParseException {
+    Geometry source =
+        Constructors.geomFromWKB(new WKBWriter(3).write(new WKTReader().read("POINT Z EMPTY")));
+    Geometry ordinary = source.getFactory().createPoint(new Coordinate(1, 2));
+    assertEquals(CoordinateType.XY, coordinateType(GeometrySerializer.serialize(ordinary)));
+    assertEquals(
+        CoordinateType.XY,
+        coordinateType(
+            GeometrySerializer.serialize(
+                source.getFactory().createGeometry(FACTORY.createPoint(new Coordinate(1, 2))))));
+    assertThrows(ParseException.class, () -> Constructors.geomFromWKB(new byte[] {1, 1}));
+  }
+
+  @Test
+  public void declaredWkbZSurvivesEmptyAndNaNCoordinates() throws ParseException {
+    for (String wkt :
+        new String[] {
+          "POINT Z EMPTY",
+          "LINESTRING Z EMPTY",
+          "POLYGON Z EMPTY",
+          "POINT Z (1 2 NaN)",
+          "LINESTRING Z (1 2 NaN, 3 4 NaN)"
+        }) {
+      byte[] wkb = new WKBWriter(3).write(new WKTReader().read(wkt.replace("NaN", "9")));
+      // WKBWriter infers populated Z from values; supply explicit NaN Z ordinates in the bytes.
+      if (wkt.contains("NaN")) {
+        ByteBuffer ordinates = ByteBuffer.wrap(wkb).order(ByteOrder.BIG_ENDIAN);
+        int start = wkt.startsWith("POINT") ? 5 : 9;
+        for (int offset = start + 16; offset < wkb.length; offset += 24) {
+          ordinates.putDouble(offset, Double.NaN);
+        }
+      }
+      Geometry input = Constructors.geomFromWKB(wkb);
+      assertEquals(wkt, CoordinateType.XYZ, coordinateType(GeometrySerializer.serialize(input)));
+      for (String buffer : new String[] {"bytebuffer", "unsafe"}) {
+        Geometry decoded =
+            GeometrySerializer.deserialize(
+                GeometryBufferFactory.wrap(buffer, GeometrySerializer.serialize(input)));
+        for (Geometry transformed :
+            new Geometry[] {
+              decoded, decoded.copy(), decoded.reverse(), Functions.setSRID(decoded, 4326)
+            }) {
+          assertEquals(
+              wkt, CoordinateType.XYZ, coordinateType(GeometrySerializer.serialize(transformed)));
+        }
+      }
+    }
+  }
 
   @Test
   public void leadingNaNDoesNotDropLaterOrdinates() {

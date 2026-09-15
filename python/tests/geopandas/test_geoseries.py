@@ -748,6 +748,41 @@ class TestGeoSeries(TestGeopandasBase):
             check_index_type=False,
         )
 
+    @pytest.mark.parametrize(
+        "wkt",
+        [
+            "POINT Z EMPTY",
+            "LINESTRING Z EMPTY",
+            "POLYGON Z EMPTY",
+            "POINT Z (1 2 NaN)",
+            "POINT Z (1 2 3)",
+            "POINT (1 2)",
+        ],
+    )
+    def test_constructor_leading_null_preserves_declared_dimensions(self, wkt):
+        import shapely
+
+        if not hasattr(shapely, "geos_version") or shapely.geos_version < (3, 12, 0):
+            pytest.skip("Declared NaN Z requires GEOS 3.12 or newer")
+        _ = self.spark
+        geometry = shapely.from_wkt(wkt)
+        local = gpd.GeoSeries(
+            [None, geometry, None, Point(4, 5)],
+            index=pd.Index([9, 2, 9, 1], name="row"),
+            name="shape",
+        )
+        result = GeoSeries(local).to_geopandas()
+        pd.testing.assert_index_equal(result.index, local.index)
+        assert result.name == local.name
+        assert result.iloc[0] is None and result.iloc[2] is None
+        assert shapely.get_coordinate_dimension(
+            result.iloc[1]
+        ) == shapely.get_coordinate_dimension(geometry)
+        assert result.iloc[1].is_empty == geometry.is_empty
+        assert result.iloc[3].equals(Point(4, 5))
+        if not geometry.is_empty:
+            assert result.iloc[1].x == geometry.x and result.iloc[1].y == geometry.y
+
     def test_constructor_leading_null_preserves_embedded_srid(self):
         from shapely import wkb
         from sedona.spark.sql.types import GeometryType

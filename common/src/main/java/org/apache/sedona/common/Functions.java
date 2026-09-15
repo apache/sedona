@@ -34,6 +34,7 @@ import org.apache.sedona.common.approximate.StraightSkeleton;
 import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.geometryObjects.Box3D;
 import org.apache.sedona.common.geometryObjects.Circle;
+import org.apache.sedona.common.geometrySerde.DeclaredGeometryFactory;
 import org.apache.sedona.common.jts2geojson.GeoJSONWriter;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.subDivide.GeometrySubDivider;
@@ -1103,6 +1104,9 @@ public class Functions {
             geometry.getPrecisionModel(),
             srid,
             geometry.getFactory().getCoordinateSequenceFactory());
+    if (geometry.getFactory() instanceof DeclaredGeometryFactory) {
+      factory = new DeclaredGeometryFactory(geometry.getPrecisionModel(), srid);
+    }
     Geometry newGeom = factory.createGeometry(geometry);
     // Workaround for JTS bug: GeometryEditor.editPolygon returns the original
     // empty polygon without copying it to the new factory, so the SRID is not
