@@ -80,6 +80,8 @@ GeoPandas brings in `pandas` as a dependency. PyArrow is also needed for Arrow-b
 
 Sedona Python needs one additional jar file called `sedona-spark-shaded` or `sedona-spark` to work properly. Please make sure you use the correct version for Spark and Scala.
 
+Sedona 2.0 with PySpark 4.1 also requires replacing Spark's bundled JTS jar before starting the driver and executors. Follow the [Spark 4.1 JTS setup](install-scala.md#jts-dependency-for-spark-41).
+
 Please use Spark major.minor version number in artifact names.
 
 You can get it using one of the following methods:

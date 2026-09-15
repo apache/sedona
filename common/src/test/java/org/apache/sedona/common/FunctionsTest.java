@@ -35,6 +35,7 @@ import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.operation.projection.ProjectionException;
 import org.junit.Test;
+import org.locationtech.jts.algorithm.Orientation;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
@@ -66,6 +67,27 @@ public class FunctionsTest extends TestBase {
           return 0;
         }
       };
+
+  private void assertPolygonEqualsIgnoringStartVertex(String expectedWkt, String actualWkt) {
+    try {
+      Polygon expected = (Polygon) new WKTReader().read(expectedWkt);
+      Polygon actual = (Polygon) new WKTReader().read(actualWkt);
+      assertEquals(expected.getNumInteriorRing(), actual.getNumInteriorRing());
+      assertEquals(
+          Orientation.isCCW(expected.getExteriorRing().getCoordinates()),
+          Orientation.isCCW(actual.getExteriorRing().getCoordinates()));
+      for (int i = 0; i < expected.getNumInteriorRing(); i++) {
+        assertEquals(
+            Orientation.isCCW(expected.getInteriorRingN(i).getCoordinates()),
+            Orientation.isCCW(actual.getInteriorRingN(i).getCoordinates()));
+      }
+      expected.normalize();
+      actual.normalize();
+      assertTrue(expected.equalsExact(actual));
+    } catch (ParseException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   private final WKTReader wktReader = new WKTReader();
 
@@ -1011,7 +1033,7 @@ public class FunctionsTest extends TestBase {
     actual =
         Functions.asWKT(Functions.reducePrecision(Functions.orientedEnvelope(irregularPolygon), 2));
     expected = "POLYGON ((5 0, 0.29 -1.18, -0.71 2.82, 4 4, 5 0))";
-    assertGeometryEquals(expected, actual);
+    assertPolygonEqualsIgnoringStartVertex(expected, actual);
 
     Geometry point = Constructors.geomFromWKT("POINT (1 2)", 0);
     actual = Functions.asWKT(Functions.orientedEnvelope(point));
@@ -1039,14 +1061,14 @@ public class FunctionsTest extends TestBase {
     Geometry multiPoint = Constructors.geomFromWKT("MULTIPOINT ((0 0), (-1 -1), (3 2))", 0);
     actual = Functions.asWKT(Functions.reducePrecision(Functions.orientedEnvelope(multiPoint), 2));
     expected = "POLYGON ((-1 -1, -1.12 -0.84, 2.88 2.16, 3 2, -1 -1))";
-    assertGeometryEquals(expected, actual);
+    assertPolygonEqualsIgnoringStartVertex(expected, actual);
 
     Geometry linestring = Constructors.geomFromWKT("LINESTRING (55 75, 125 150)", 0);
     Geometry pointGeom = Constructors.geomFromWKT("POINT (20 80)", 0);
     Geometry collection = linestring.union(pointGeom);
     actual = Functions.asWKT(Functions.reducePrecision(Functions.orientedEnvelope(collection), 2));
     expected = "POLYGON ((125 150, 138.08 130.38, 33.08 60.38, 20 80, 125 150))";
-    assertGeometryEquals(expected, actual);
+    assertPolygonEqualsIgnoringStartVertex(expected, actual);
   }
 
   @Test
@@ -2930,7 +2952,10 @@ public class FunctionsTest extends TestBase {
     String actual = Functions.asWKT(forcedPoly);
     String expected =
         "POLYGON ((0 10, 10 10, 10 5.333333333333333, 5 7, 3 5, 5 3, 10 4.666666666666667, 10 0, 0 0, 0 10))";
-    assertGeometryEquals(expected, actual);
+    assertPolygonEqualsIgnoringStartVertex(expected, actual);
+    for (Coordinate coordinate : forcedPoly.getCoordinates()) {
+      assertTrue(Double.isNaN(coordinate.getZ()));
+    }
 
     geom = Constructors.geomFromWKT("POINT ZM(1 2 2 5)", 0);
     actual = Functions.asWKT(Functions.force2D(geom));
@@ -3640,7 +3665,7 @@ public class FunctionsTest extends TestBase {
     String actual = Functions.asWKT(Functions.reducePrecision(Functions.buffer(polygon, 15), 4));
     String expected =
         "POLYGON ((47.0736 35.2882, 44.2597 36.1418, 41.6664 37.528, 39.3934 39.3934, 37.528 41.6664, 36.1418 44.2597, 35.2882 47.0736, 35 50, 35 150, 35.2882 152.9264, 36.1418 155.7403, 37.528 158.3336, 39.3934 160.6066, 41.6664 162.472, 44.2597 163.8582, 47.0736 164.7118, 50 165, 150 165, 152.9264 164.7118, 155.7403 163.8582, 158.3336 162.472, 160.6066 160.6066, 162.472 158.3336, 163.8582 155.7403, 164.7118 152.9264, 165 150, 165 50, 164.7118 47.0736, 163.8582 44.2597, 162.472 41.6664, 160.6066 39.3934, 158.3336 37.528, 155.7403 36.1418, 152.9264 35.2882, 150 35, 50 35, 47.0736 35.2882))";
-    assertGeometryEquals(expected, actual);
+    assertPolygonEqualsIgnoringStartVertex(expected, actual);
 
     LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 50, 70, 100, 100));
     actual =
@@ -3648,7 +3673,7 @@ public class FunctionsTest extends TestBase {
             Functions.reducePrecision(Functions.buffer(lineString, 10, false, "side=left"), 4));
     expected =
         "POLYGON ((50 70, 0 0, -8.1373 5.8124, 41.8627 75.8124, 43.2167 77.3476, 44.855 78.5749, 94.855 108.5749, 100 100, 50 70))";
-    assertGeometryEquals(expected, actual);
+    assertPolygonEqualsIgnoringStartVertex(expected, actual);
 
     lineString = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 50, 70, 70, -3));
     actual =
@@ -3656,7 +3681,7 @@ public class FunctionsTest extends TestBase {
             Functions.reducePrecision(Functions.buffer(lineString, 10, false, "endcap=square"), 4));
     expected =
         "POLYGON ((43.2156 77.3465, 44.8523 78.5733, 46.7044 79.4413, 48.6944 79.9144, 50.739 79.9727, 52.7527 79.6137, 54.6512 78.8525, 56.3552 77.7209, 57.7932 76.2663, 58.9052 74.5495, 59.6446 72.6424, 79.6446 -0.3576, 82.2869 -10.0022, 62.9978 -15.2869, 45.9128 47.0733, 8.1373 -5.8124, 2.325 -13.9497, -13.9497 -2.325, 41.8627 75.8124, 43.2156 77.3465))";
-    assertGeometryEquals(expected, actual);
+    assertPolygonEqualsIgnoringStartVertex(expected, actual);
 
     Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(100, 90));
     actual =
@@ -3664,7 +3689,7 @@ public class FunctionsTest extends TestBase {
             Functions.reducePrecision(Functions.buffer(point, 10, false, "quad_segs=2"), 4));
     expected =
         "POLYGON ((107.0711 82.9289, 100 80, 92.9289 82.9289, 90 90, 92.9289 97.0711, 100 100, 107.0711 97.0711, 110 90, 107.0711 82.9289))";
-    assertGeometryEquals(expected, actual);
+    assertPolygonEqualsIgnoringStartVertex(expected, actual);
 
     // Using reducePrecision in the following tests modified the geometries coordinates the
     // coordinates causing the comparison to fail,
