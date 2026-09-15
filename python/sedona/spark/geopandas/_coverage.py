@@ -273,6 +273,23 @@ def _rebuild(occ: DataFrame, original: DataFrame) -> DataFrame:
             "transform(filter(_rings, r -> r.ring > 0), r -> r._line))"
         ).alias("_polygon"),
     )
+    # Empty members have no coordinate occurrences. Restore them at their
+    # original positions rather than dropping them while assembling the parts.
+    original_parts = original.select(
+        "id",
+        F.expr("ST_SRID(geom)").alias("_srid"),
+        F.posexplode(F.expr("ST_Dump(geom)")).alias("part", "_original_polygon"),
+    )
+    parts = original_parts.join(parts, ["id", "part"], "left").select(
+        "id",
+        "part",
+        # ST_SetSRID copies geometry through GeometryEditor, which removes
+        # empty collection members. Set each polygon's SRID before collecting.
+        F.expr(
+            "ST_SetSRID(CASE WHEN ST_IsEmpty(_original_polygon) "
+            "THEN _original_polygon ELSE _polygon END, _srid)"
+        ).alias("_polygon"),
+    )
     polygons = parts.groupBy("id").agg(
         F.array_sort(
             F.collect_list(F.struct("part", "_polygon")),
@@ -284,11 +301,9 @@ def _rebuild(occ: DataFrame, original: DataFrame) -> DataFrame:
     )
     result = F.expr(
         "CASE WHEN _original IS NULL OR ST_IsEmpty(_original) THEN _original "
-        "ELSE ST_SetSRID("
-        "CASE WHEN ST_GeometryType(_original) = 'ST_Polygon' "
+        "ELSE CASE WHEN ST_GeometryType(_original) = 'ST_Polygon' "
         "THEN element_at(_parts, 1)._polygon "
-        "ELSE ST_Collect(transform(_parts, p -> p._polygon)) END, "
-        "ST_SRID(_original)) END"
+        "ELSE ST_Collect(transform(_parts, p -> p._polygon)) END END"
     )
     rebuilt = assembled.select("id", result.alias("geom"))
     joined = original.alias("original").join(rebuilt.alias("rebuilt"), "id", "left")
@@ -315,6 +330,8 @@ def simplify_coverage(
 
     Each input geometry is limited to 100000 coordinates. The baseline can
     still be costly on long rings, dense spatial matches, or many rounds.
+    Empty interior rings are rejected because the polygon constructor removes
+    them. Empty polygon rows and empty multipart members are preserved.
     """
     if is_remote():
         raise NotImplementedError("coverage simplification requires Spark Classic")
@@ -365,6 +382,29 @@ def simplify_coverage(
         if (stats.max_vertices or 0) > 100000:
             raise ValueError(
                 "input exceeds the per-geometry limit of 100000 coordinates"
+            )
+        # Geometry-level dimension predicates inspect only the first
+        # coordinate. A NaN first ordinate can hide later Z/M coordinates.
+        # Inspect individual points only after the per-geometry size check.
+        if (
+            original.where("exists(ST_DumpPoints(geom), p -> ST_HasZ(p) OR ST_HasM(p))")
+            .limit(1)
+            .count()
+        ):
+            raise ValueError(
+                "coverage simplification requires valid 2D Polygon/MultiPolygon rows"
+            )
+        if (
+            original.where(
+                "exists(ST_Dump(geom), p -> CASE WHEN ST_NumInteriorRings(p) = 0 "
+                "THEN false ELSE exists(sequence(0, ST_NumInteriorRings(p) - 1), "
+                "i -> ST_IsEmpty(ST_InteriorRingN(p, i))) END)"
+            )
+            .limit(1)
+            .count()
+        ):
+            raise ValueError(
+                "coverage simplification does not support empty interior rings"
             )
         if not stats.vertices:
             return checkpoints.keep(original)

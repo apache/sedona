@@ -224,3 +224,78 @@ def test_rounded_area_never_admits_noncollinear_edit(spark, wkt, x, y):
     # The exact triangle area is 0.5, greater than tolerance squared (0.25).
     # A rounded determinant can incorrectly make that area zero.
     assert candidates.where((F.col("x") == x) & (F.col("y") == y)).count() == 0
+
+
+@pytest.mark.parametrize("dimension", ["Z", "M"])
+@pytest.mark.parametrize("multipart", [False, True])
+def test_rejects_dimensions_hidden_by_first_nan_ordinate(
+    spark, tmp_path, dimension, multipart
+):
+    from sedona.spark.geopandas._coverage import simplify_coverage
+
+    spark.sparkContext.setCheckpointDir(str(tmp_path))
+    wkt = f"POLYGON {dimension} ((0 0 NaN, 2 0 1, 2 2 1, 0 2 1, 0 0 NaN))"
+    if multipart:
+        wkt = (
+            f"MULTIPOLYGON {dimension} (((0 0 NaN, 2 0 NaN, 2 2 NaN, 0 2 NaN, 0 0 NaN)), "
+            "((4 0 1, 6 0 1, 6 2 1, 4 2 1, 4 0 1)))"
+        )
+    source = spark.createDataFrame(
+        [(0, wkt)],
+        "id long, wkt string",
+    ).selectExpr("id", "ST_GeomFromWKT(wkt) geom")
+    assert source.selectExpr("ST_IsValid(geom) valid").first().valid
+    with pytest.raises(ValueError, match="valid 2D"):
+        simplify_coverage(source, 0.0, False)
+    assert not list(tmp_path.glob("*/rdd-*"))
+
+
+@pytest.mark.parametrize(
+    "wkt",
+    [
+        "MULTIPOLYGON (EMPTY, ((0 0, 1 0, 2 0, 2 2, 0 2, 0 0)))",
+        "MULTIPOLYGON (((0 0, 1 0, 2 0, 2 2, 0 2, 0 0)), EMPTY)",
+        "MULTIPOLYGON (EMPTY, ((0 0, 1 0, 2 0, 2 2, 0 2, 0 0)), EMPTY)",
+    ],
+)
+@pytest.mark.parametrize("srid", [0, 4326])
+def test_preserves_empty_parts_when_other_rings_change(spark, tmp_path, wkt, srid):
+    from sedona.spark.geopandas._coverage import simplify_coverage
+
+    spark.sparkContext.setCheckpointDir(str(tmp_path))
+    source = spark.createDataFrame([(0, wkt)], "id long, wkt string").selectExpr(
+        "id", f"ST_GeomFromEWKT(concat('SRID={srid};', wkt)) geom"
+    )
+    assert source.selectExpr("ST_IsValid(geom) valid").first().valid
+    result = simplify_coverage(source, 0.0, True)
+    # Each fixture has exactly one eligible collinear shell coordinate (1, 0).
+    expected = spark.createDataFrame(
+        [(wkt.replace("0 0, 1 0, ", "0 0, "),)], "wkt string"
+    )
+    expected_text = (
+        expected.selectExpr("ST_AsText(ST_GeomFromWKT(wkt)) wkt").first().wkt
+    )
+    assert result.selectExpr("ST_AsText(geom) wkt").first().wkt == expected_text
+    assert result.selectExpr("ST_SRID(geom) srid").first().srid == srid
+    assert len(list(tmp_path.glob("*/rdd-*"))) == 1
+
+
+@pytest.mark.parametrize(
+    "wkt",
+    [
+        "POLYGON ((0 0, 1 0, 4 0, 4 4, 0 4, 0 0), EMPTY)",
+        "POLYGON ((0 0, 1 0, 4 0, 4 4, 0 4, 0 0), EMPTY, (1 1, 1 2, 2 2, 2 1, 1 1), EMPTY)",
+        "MULTIPOLYGON (EMPTY, ((0 0, 1 0, 4 0, 4 4, 0 4, 0 0), EMPTY))",
+    ],
+)
+def test_rejects_empty_interior_rings(spark, tmp_path, wkt):
+    from sedona.spark.geopandas._coverage import simplify_coverage
+
+    spark.sparkContext.setCheckpointDir(str(tmp_path))
+    source = spark.createDataFrame([(0, wkt)], "id long, wkt string").selectExpr(
+        "id", "ST_GeomFromWKT(wkt) geom"
+    )
+    assert source.selectExpr("ST_IsValid(geom) valid").first().valid
+    with pytest.raises(ValueError, match="empty interior rings"):
+        simplify_coverage(source, 0.0, True)
+    assert not list(tmp_path.glob("*/rdd-*"))
