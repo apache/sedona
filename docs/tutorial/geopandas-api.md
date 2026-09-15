@@ -348,6 +348,8 @@ The GeoPandas API for Apache Sedona implements the most commonly used GeoSeries 
   coverages
 - `invalid_coverage_edges()` - Return per-row invalid coverage edges,
   optionally detecting narrow gaps
+- `simplify_coverage()` - Simplify matching polygon boundaries together using
+  distributed spatial joins and reliable checkpoints
 - `sample_points()` - Sample polygons by area and lines by length with native
   distributed expressions
 - `GeoSeries.explode()` and `GeoDataFrame.explode()` - Expand multipart
@@ -379,6 +381,46 @@ geometries remain missing. `is_valid_coverage()` performs a distributed
 reduction and returns one Python `bool`. Dense or highly overlapping coverages,
 and larger `gap_width` values, can increase each target's candidate array and
 executor memory use. `gap_width` must be finite and non-negative.
+
+`simplify_coverage(tolerance, simplify_boundary=True)` is available since
+v2.0.0. It removes shared vertices consistently across adjacent polygons.
+The input must be a valid, finite, edge-matched 2D Polygon/MultiPolygon
+coverage. Nulls and empty polygons are preserved; non-polygonal geometries,
+Z/M coordinates, invalid polygons and repeated nonclosing ring vertices are
+rejected. Empty interior rings are rejected, while empty polygons and empty
+MultiPolygon members are preserved. Full coverage validity is a precondition,
+not an automatic check.
+The result is an unnamed GeoSeries preserving every index level and CRS.
+
+Unlike most geometry methods, this operation runs Spark jobs eagerly until
+its conservative simplification rules accept no more edits. It requires
+Spark Classic and a checkpoint directory accessible to every executor:
+
+```python
+# Use a writable shared filesystem on a cluster; a local directory works
+# only in local Spark mode.
+spark.sparkContext.setCheckpointDir("hdfs:///user/me/coverage-checkpoints")
+simplified = coverage.simplify_coverage(0.1, simplify_boundary=False)
+```
+
+Intermediate checkpoints are cleaned after their successors are materialized.
+The final checkpoint must remain available while the result or its derived
+DataFrames are used. Its files follow Spark's checkpoint cleanup policy; the
+method does not delete the configured directory or require a `close()` call.
+
+Tolerance is a finite, non-negative scalar: a vertex's local triangle area
+must not exceed `tolerance ** 2`. It is not a maximum displacement bound.
+Zero can remove collinear vertices. Setting `simplify_boundary=False` locks
+the exterior coverage boundary. The algorithm can retain more vertices than
+GeoPandas/GEOS and never deletes rings, holes or parts; exact vertex-selection
+parity is not promised.
+
+Geometry stays distributed, but long rings, dense spatial matches and many
+synchronization rounds can be expensive. Reconstruction uses arrays per ring
+and original geometry. The 100,000-coordinate admission limit per geometry
+is not a memory guarantee: long rings can exhaust executor memory below that
+limit. No geometry arrays for the full coverage or whole neighborhoods are
+collected.
 
 `hilbert_distance()` keeps its per-row ordering keys distributed and uses only
 native Spark expressions. When `total_bounds` is omitted, one distributed

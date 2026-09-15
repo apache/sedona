@@ -344,6 +344,7 @@ Apache Sedona 的 GeoPandas API 已实现最常用的 GeoSeries 与 GeoDataFrame
 - `make_valid()` —— 几何校验与修复
 - `is_valid_coverage()` —— 校验多边形覆盖的内部是否互不重叠、共享边界是否完全匹配
 - `invalid_coverage_edges()` —— 按输入行返回导致覆盖无效的边，并可选择检测狭窄间隙
+- `simplify_coverage()` —— 使用分布式空间连接和可靠检查点，一致地简化多边形共享边界
 - `sample_points()` —— 使用原生分布式表达式按面积对多边形采样、按长度对线采样
 - `GeoSeries.explode()` 与 `GeoDataFrame.explode()` —— 将多部件几何展开为多行，
   其中 GeoDataFrame 方法会保留对应的属性列
@@ -370,6 +371,36 @@ invalid_edges = with_gap.invalid_coverage_edges(gap_width=0.2)
 几何保持缺失。`is_valid_coverage()` 通过分布式归约返回一个 Python `bool`。
 在高密度或大量重叠的覆盖中，或 `gap_width` 较大时，每个目标的候选数组和
 executor 内存开销都会增加。`gap_width` 必须是有限的非负数。
+
+自 v2.0.0 起，`simplify_coverage(tolerance, simplify_boundary=True)` 可以
+一致地删除相邻多边形的共享顶点。输入必须是有效、坐标有限、边界完全匹配的
+二维 Polygon/MultiPolygon 覆盖。缺失值和空多边形会保留；非多边形、Z/M
+坐标、无效多边形以及环内非闭合位置的重复顶点会被拒绝。空的内环也会被拒绝，
+但空多边形和 MultiPolygon 中的空部件会被保留。完整覆盖的有效性是
+使用前提，并不会自动检查。结果是无名称的 GeoSeries，保留所有索引级别和 CRS。
+
+与多数几何方法不同，该操作会立即执行 Spark 作业，直到保守简化规则不再接受
+任何修改。它需要 Spark Classic，以及所有 executor 都能访问的检查点目录：
+
+```python
+# 集群上使用可写的共享文件系统；本地目录仅适用于 Spark 本地模式。
+spark.sparkContext.setCheckpointDir("hdfs:///user/me/coverage-checkpoints")
+simplified = coverage.simplify_coverage(0.1, simplify_boundary=False)
+```
+
+后续检查点物化完成后，中间检查点会被清理。在使用结果或其派生 DataFrame
+期间，最终检查点必须保持可用。其文件遵循 Spark 的检查点清理策略；该方法
+不会删除配置的根目录，也不要求用户调用 `close()`。
+
+容差必须是有限的非负标量：候选顶点的局部三角形面积不得超过
+`tolerance ** 2`。这不是最大位移上限。零容差仍可删除共线顶点；
+`simplify_boundary=False` 会固定覆盖的外部边界。该算法可能比 GeoPandas/GEOS
+保留更多顶点，且不会删除环、孔洞或多边形部件；不保证选择完全相同的顶点。
+
+几何数据保持分布式执行，但长环、密集空间匹配和大量同步轮次的开销可能很高。
+重建过程按环和原始几何构造数组。每个几何最多 100,000 个坐标的准入限制不是
+内存安全保证：低于此限制的长环仍可能耗尽 executor 内存。实现不会把完整覆盖
+或整个邻域收集成几何数组。
 
 `hilbert_distance()` 使用原生 Spark 表达式，并让逐行排序键保持分布式执行。
 未提供 `total_bounds` 时，该方法会通过一次分布式聚合计算所有包围盒中点的
