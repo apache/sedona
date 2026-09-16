@@ -228,7 +228,7 @@ Apache Sedona 针对每个受支持的 Spark 版本提供了不同的包。
 
 Sedona Snowflake 没有 unshaded 版本。
 
-### netCDF-Java 5.4.2
+### netCDF-Java 5.10.0
 
 仅当您希望使用 `RS_FromNetCDF` 读取 HDF/NetCDF 文件时才需要此依赖。注意该 JAR 并未发布到 Maven Central，需要在 pom.xml 或 build.sbt 中加入对应仓库，或在 Spark 配置 `spark.jars.repositories` / `spark-submit --repositories` 中指定其 URL。
 
@@ -256,7 +256,7 @@ Sedona Snowflake 没有 unshaded 版本。
 		<dependency>
 		    <groupId>edu.ucar</groupId>
 		    <artifactId>cdm-core</artifactId>
-		    <version>5.4.2</version>
+		    <version>5.10.0</version>
 		</dependency>
 		```
 
