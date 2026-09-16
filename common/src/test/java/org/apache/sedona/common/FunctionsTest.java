@@ -37,6 +37,8 @@ import org.geotools.referencing.operation.projection.ProjectionException;
 import org.junit.Test;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.impl.CoordinateArraySequenceFactory;
+import org.locationtech.jts.geom.impl.PackedCoordinateSequenceFactory;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 import org.locationtech.jts.io.ParseException;
@@ -4673,6 +4675,113 @@ public class FunctionsTest extends TestBase {
       Geometry result = Functions.setSRID(geom, 4236);
       assertEquals("SRID should be set for " + wkt, 4236, result.getSRID());
       assertTrue("Result should be empty for " + wkt, result.isEmpty());
+    }
+  }
+
+  @Test
+  public void setSRIDPreservesNestedEmptyComponentsAndCopiesStructure() {
+    GeometryFactory sourceFactory =
+        new GeometryFactory(new PrecisionModel(), 100, CoordinateArraySequenceFactory.instance());
+    Point emptyPoint =
+        sourceFactory.createPoint(sourceFactory.getCoordinateSequenceFactory().create(0, 3, 0));
+    Polygon emptyPolygon =
+        sourceFactory.createPolygon(
+            sourceFactory.createLinearRing(
+                sourceFactory.getCoordinateSequenceFactory().create(0, 4, 1)));
+    Point populatedPoint = sourceFactory.createPoint(new Coordinate(1, 2));
+    GeometryCollection nested =
+        sourceFactory.createGeometryCollection(new Geometry[] {emptyPolygon, populatedPoint});
+    GeometryCollection source =
+        sourceFactory.createGeometryCollection(new Geometry[] {emptyPoint, nested});
+    source.setSRID(100);
+    emptyPoint.setSRID(101);
+    nested.setSRID(102);
+    emptyPolygon.setSRID(103);
+    populatedPoint.setSRID(104);
+    source.setUserData("root metadata");
+    emptyPoint.setUserData("child metadata");
+    nested.setUserData("nested metadata");
+
+    GeometryCollection result = (GeometryCollection) Functions.setSRID(source, 4326);
+
+    assertEquals(2, result.getNumGeometries());
+    assertEquals(2, result.getGeometryN(1).getNumGeometries());
+    assertGeometryTreeUsesFactory(result, result.getFactory(), 4326);
+    assertNull(result.getUserData());
+    assertNull(result.getGeometryN(0).getUserData());
+    assertNull(result.getGeometryN(1).getUserData());
+    assertEquals(3, ((Point) result.getGeometryN(0)).getCoordinateSequence().getDimension());
+    assertEquals(
+        4,
+        ((Polygon) result.getGeometryN(1).getGeometryN(0))
+            .getExteriorRing()
+            .getCoordinateSequence()
+            .getDimension());
+    assertEquals(
+        1,
+        ((Polygon) result.getGeometryN(1).getGeometryN(0))
+            .getExteriorRing()
+            .getCoordinateSequence()
+            .getMeasures());
+    assertNotSame(source, result);
+    assertNotSame(source.getGeometryN(0), result.getGeometryN(0));
+    Point resultPoint = (Point) result.getGeometryN(1).getGeometryN(1);
+    resultPoint.getCoordinateSequence().setOrdinate(0, 0, 9);
+    assertEquals(1, populatedPoint.getX(), 0);
+    assertEquals(100, source.getSRID());
+    assertEquals(101, emptyPoint.getSRID());
+    assertEquals(102, nested.getSRID());
+    assertEquals(103, emptyPolygon.getSRID());
+    assertEquals(104, populatedPoint.getSRID());
+    assertEquals("root metadata", source.getUserData());
+    assertEquals("child metadata", emptyPoint.getUserData());
+    assertEquals("nested metadata", nested.getUserData());
+  }
+
+  @Test
+  public void setSRIDPreservesPackedCoordinateSequenceFactoryAndEmptyLayouts() {
+    GeometryFactory sourceFactory =
+        new GeometryFactory(
+            new PrecisionModel(), 7, PackedCoordinateSequenceFactory.DOUBLE_FACTORY);
+    Point emptyXym =
+        sourceFactory.createPoint(sourceFactory.getCoordinateSequenceFactory().create(0, 3, 1));
+    LinearRing emptyXyzmShell =
+        sourceFactory.createLinearRing(
+            sourceFactory.getCoordinateSequenceFactory().create(0, 4, 1));
+    GeometryCollection source =
+        sourceFactory.createGeometryCollection(
+            new Geometry[] {emptyXym, sourceFactory.createPolygon(emptyXyzmShell)});
+
+    GeometryCollection result = (GeometryCollection) Functions.setSRID(source, 3857);
+
+    assertSame(
+        PackedCoordinateSequenceFactory.DOUBLE_FACTORY,
+        result.getFactory().getCoordinateSequenceFactory());
+    CoordinateSequence pointSequence = ((Point) result.getGeometryN(0)).getCoordinateSequence();
+    CoordinateSequence shellSequence =
+        ((Polygon) result.getGeometryN(1)).getExteriorRing().getCoordinateSequence();
+    assertEquals(3, pointSequence.getDimension());
+    assertEquals(1, pointSequence.getMeasures());
+    assertEquals(4, shellSequence.getDimension());
+    assertEquals(1, shellSequence.getMeasures());
+    assertGeometryTreeUsesFactory(result, result.getFactory(), 3857);
+    assertEquals(7, source.getFactory().getSRID());
+  }
+
+  private static void assertGeometryTreeUsesFactory(
+      Geometry geometry, GeometryFactory factory, int srid) {
+    assertSame(factory, geometry.getFactory());
+    assertEquals(srid, geometry.getSRID());
+    assertEquals(srid, geometry.getFactory().getSRID());
+    for (int i = 0; i < geometry.getNumGeometries(); i++) {
+      Geometry child = geometry.getGeometryN(i);
+      if (child != geometry) assertGeometryTreeUsesFactory(child, factory, srid);
+    }
+    if (geometry instanceof Polygon) {
+      Polygon polygon = (Polygon) geometry;
+      assertGeometryTreeUsesFactory(polygon.getExteriorRing(), factory, srid);
+      for (int i = 0; i < polygon.getNumInteriorRing(); i++)
+        assertGeometryTreeUsesFactory(polygon.getInteriorRingN(i), factory, srid);
     }
   }
 
