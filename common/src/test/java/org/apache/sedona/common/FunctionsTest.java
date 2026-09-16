@@ -4745,23 +4745,41 @@ public class FunctionsTest extends TestBase {
             new PrecisionModel(), 7, PackedCoordinateSequenceFactory.DOUBLE_FACTORY);
     Point emptyXym =
         sourceFactory.createPoint(sourceFactory.getCoordinateSequenceFactory().create(0, 3, 1));
+    LineString emptyXyz =
+        sourceFactory.createLineString(
+            sourceFactory.getCoordinateSequenceFactory().create(0, 3, 0));
     LinearRing emptyXyzmShell =
         sourceFactory.createLinearRing(
             sourceFactory.getCoordinateSequenceFactory().create(0, 4, 1));
     GeometryCollection source =
         sourceFactory.createGeometryCollection(
-            new Geometry[] {emptyXym, sourceFactory.createPolygon(emptyXyzmShell)});
+            new Geometry[] {
+              sourceFactory.createMultiPoint(new Point[] {emptyXym}),
+              sourceFactory.createMultiLineString(new LineString[] {emptyXyz}),
+              sourceFactory.createMultiPolygon(
+                  new Polygon[] {sourceFactory.createPolygon(emptyXyzmShell)})
+            });
 
     GeometryCollection result = (GeometryCollection) Functions.setSRID(source, 3857);
 
     assertSame(
         PackedCoordinateSequenceFactory.DOUBLE_FACTORY,
         result.getFactory().getCoordinateSequenceFactory());
-    CoordinateSequence pointSequence = ((Point) result.getGeometryN(0)).getCoordinateSequence();
+    assertEquals(1, result.getGeometryN(0).getNumGeometries());
+    assertEquals(1, result.getGeometryN(1).getNumGeometries());
+    assertEquals(1, result.getGeometryN(2).getNumGeometries());
+    CoordinateSequence pointSequence =
+        ((Point) result.getGeometryN(0).getGeometryN(0)).getCoordinateSequence();
+    CoordinateSequence lineSequence =
+        ((LineString) result.getGeometryN(1).getGeometryN(0)).getCoordinateSequence();
     CoordinateSequence shellSequence =
-        ((Polygon) result.getGeometryN(1)).getExteriorRing().getCoordinateSequence();
+        ((Polygon) result.getGeometryN(2).getGeometryN(0))
+            .getExteriorRing()
+            .getCoordinateSequence();
     assertEquals(3, pointSequence.getDimension());
     assertEquals(1, pointSequence.getMeasures());
+    assertEquals(3, lineSequence.getDimension());
+    assertEquals(0, lineSequence.getMeasures());
     assertEquals(4, shellSequence.getDimension());
     assertEquals(1, shellSequence.getMeasures());
     assertGeometryTreeUsesFactory(result, result.getFactory(), 3857);
