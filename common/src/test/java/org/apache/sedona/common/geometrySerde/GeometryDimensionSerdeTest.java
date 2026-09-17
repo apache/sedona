@@ -19,6 +19,7 @@
 package org.apache.sedona.common.geometrySerde;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
@@ -27,6 +28,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.Functions;
+import org.datasyslab.jts.geom.util.GeometryCopier;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateSequence;
@@ -170,12 +172,13 @@ public class GeometryDimensionSerdeTest {
                   new Geometry[] {
                     geometry.copy(),
                     geometry.reverse(),
-                    geometry.getFactory().createGeometry(geometry),
+                    GeometryCopier.copy(geometry, geometry.getFactory()),
                     decoded,
                     decoded.copy(),
                     decoded.reverse(),
                     Functions.setSRID(decoded, 3857)
                   }) {
+                assertNotSame(geometry, copy);
                 byte[] bytes = GeometrySerializer.serialize(copy);
                 assertEquals(expected, coordinateType(bytes));
                 Geometry output = GeometrySerializer.deserialize(bytes);

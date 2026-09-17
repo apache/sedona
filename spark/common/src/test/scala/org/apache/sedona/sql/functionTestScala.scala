@@ -1036,6 +1036,27 @@ class functionTestScala
       assert(df.first().get(0).asInstanceOf[Polygon].getSRID == 3021)
     }
 
+    it("ST_SetSRID preserves empty polygon holes") {
+      val polygonWithEmptyHole =
+        "01030000000200000005000000000000000000000000000000000000000000000000002440000000000000000000000000000024400000000000002440000000000000000000000000000024400000000000000000000000000000000000000000"
+      val result = sparkSession
+        .sql(s"""
+            |WITH source AS (
+            |  SELECT ST_GeomFromWKB(unhex('$polygonWithEmptyHole')) AS polygon
+            |)
+            |SELECT
+            |  ST_NumInteriorRings(polygon),
+            |  ST_NumInteriorRings(ST_SetSRID(polygon, 4326)),
+            |  ST_SRID(ST_SetSRID(polygon, 4326))
+            |FROM source
+            |""".stripMargin)
+        .first()
+
+      assertEquals(1, result.getInt(0))
+      assertEquals(1, result.getInt(1))
+      assertEquals(4326, result.getInt(2))
+    }
+
     it("Passed ST_AsHEXEWKB") {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT(1 2)') as point")
       var actual = baseDf.selectExpr("ST_AsHEXEWKB(point)").first().get(0)
