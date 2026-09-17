@@ -228,7 +228,7 @@ The optional GeoTools library is required if you want to use raster operators. V
 
 Sedona Snowflake does not have an unshaded version.
 
-### netCDF-Java 5.4.2
+### netCDF-Java 5.10.0
 
 This is required only if you want to read HDF/NetCDF files using `RS_FromNetCDF`. Note that this JAR is not in Maven Central so you will need to add this repository to your pom.xml or build.sbt, or specify the URL in Spark Config `spark.jars.repositories` or spark-submit `--repositories` option.
 
@@ -256,7 +256,7 @@ Under BSD 3-clause (compatible with Apache 2.0 license)
 		<dependency>
 		    <groupId>edu.ucar</groupId>
 		    <artifactId>cdm-core</artifactId>
-		    <version>5.4.2</version>
+		    <version>5.10.0</version>
 		</dependency>
 		```
 
