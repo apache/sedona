@@ -34,11 +34,11 @@ import org.apache.sedona.common.approximate.StraightSkeleton;
 import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.geometryObjects.Box3D;
 import org.apache.sedona.common.geometryObjects.Circle;
-import org.apache.sedona.common.geometryObjects.StructurePreservingGeometryFactory;
 import org.apache.sedona.common.jts2geojson.GeoJSONWriter;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.subDivide.GeometrySubDivider;
 import org.apache.sedona.common.utils.*;
+import org.datasyslab.jts.geom.util.GeometryCopier;
 import org.locationtech.jts.algorithm.Angle;
 import org.locationtech.jts.algorithm.MinimumAreaRectangle;
 import org.locationtech.jts.algorithm.MinimumBoundingCircle;
@@ -1100,11 +1100,11 @@ public class Functions {
       return null;
     }
     GeometryFactory factory =
-        new StructurePreservingGeometryFactory(
+        new GeometryFactory(
             geometry.getPrecisionModel(),
             srid,
             geometry.getFactory().getCoordinateSequenceFactory());
-    return factory.createGeometry(geometry);
+    return GeometryCopier.copy(geometry, factory);
   }
 
   public static int getSRID(Geometry geometry) {

@@ -18,7 +18,6 @@
  */
 package org.apache.sedona.common.geometrySerde;
 
-import org.apache.sedona.common.geometryObjects.StructurePreservingGeometryFactory;
 import org.datasyslab.jts.io.WKBReader;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
@@ -35,7 +34,7 @@ public final class GeometryWkbReader {
 
   public static Geometry read(byte[] bytes, int defaultSrid) throws ParseException {
     GeometryFactory factory =
-        new StructurePreservingGeometryFactory(
+        new GeometryFactory(
             new PrecisionModel(), defaultSrid, DeclaredCoordinateSequenceFactory.INSTANCE);
     // Only allocations made from WKB headers declare a layout. Later JTS operations use the
     // geometry factory's ordinary allocation behavior.

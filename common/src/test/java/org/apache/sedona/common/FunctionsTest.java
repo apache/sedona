@@ -4679,6 +4679,41 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void setSRIDPreservesEmptyPolygonHoles() throws ParseException {
+    Polygon source =
+        (Polygon) Constructors.geomFromWKT("POLYGON ((0 0, 10 0, 10 10, 0 0), EMPTY)", 100);
+
+    Polygon result = (Polygon) Functions.setSRID(source, 4326);
+
+    assertEquals(1, result.getNumInteriorRing());
+    assertTrue(result.getInteriorRingN(0).isEmpty());
+    assertEquals(source.getExteriorRing(), result.getExteriorRing());
+    assertNotSame(source.getInteriorRingN(0), result.getInteriorRingN(0));
+    assertGeometryTreeUsesFactory(result, result.getFactory(), 4326);
+    assertEquals(100, source.getSRID());
+    assertEquals(1, source.getNumInteriorRing());
+  }
+
+  @Test
+  public void setSRIDCopiesEmptyPolygonWithoutMutatingInput() throws ParseException {
+    Polygon source = (Polygon) Constructors.geomFromWKT("POLYGON EMPTY", 100);
+    source.setUserData("source metadata");
+    source.getExteriorRing().setUserData("shell metadata");
+
+    Polygon result = (Polygon) Functions.setSRID(source, 4326);
+
+    assertEquals(100, source.getSRID());
+    assertNotSame(source, result);
+    assertNotSame(source.getExteriorRing(), result.getExteriorRing());
+    assertTrue(result.isEmpty());
+    assertGeometryTreeUsesFactory(result, result.getFactory(), 4326);
+    assertNull(result.getUserData());
+    assertNull(result.getExteriorRing().getUserData());
+    assertEquals("source metadata", source.getUserData());
+    assertEquals("shell metadata", source.getExteriorRing().getUserData());
+  }
+
+  @Test
   public void setSRIDPreservesNestedEmptyComponentsAndCopiesStructure() {
     GeometryFactory sourceFactory =
         new GeometryFactory(new PrecisionModel(), 100, CoordinateArraySequenceFactory.instance());
