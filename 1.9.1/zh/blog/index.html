@@ -5577,6 +5577,53 @@
     <div class="md-post__meta md-meta">
       <ul class="md-meta__list">
         <li class="md-meta__item">
+          <time datetime="2026-09-18 00:00:00+00:00">2026年9月18日星期五</time></li>
+        
+        
+          
+          <li class="md-meta__item">
+            
+              需要 7 分钟阅读时间
+            
+          </li>
+        
+        
+      </ul>
+      
+    </div>
+  </header>
+  <div class="md-post__content md-typeset">
+    <h2 id="order-by-is-an-index-does-it-have-to-be"><a class="toclink" href="2026/09/18/order-by-is-an-index-does-it-have-to-be/">ORDER BY Is an Index. Does It Have to Be?</a></h2>
+<p><em>SedonaDB, GeoParquet, and a story that started at VLDB 2016, now in Rust.</em></p>
+<p>Parquet has stored a minimum and a maximum for every column in every row group <a href="https://github.com/apache/parquet-format/commit/2c4ada8e988c1c0018332e420764c09bab16bf9c">since September 2013</a>. PostgreSQL 9.5 <a href="https://www.postgresql.org/docs/release/9.5.0/">added BRIN in January 2016</a>: one small summary per range of blocks, cheap to update, useful when the data is clustered. In the same year the original creators of Apache Sedona, Jia Yu and Mohamed Sarwat, published <a href="https://jiayuasu.github.io/files/paper/hippo_vldb2016_fullpaper.pdf">Hippo</a> at VLDB, the top database conference: a sparse index 25 to 30 times smaller than a B+-tree, built for data that is not sorted.</p>
+<p>Ten years later, data skipping is how every lakehouse engine reads a file, and the question from 2016 is still open. Below: 3.82 million Washington buildings in one GeoParquet file, written three ways. Sorted by geometry, sorted by another column, and shuffled.</p>
+<p><img alt="The title over three maps of Washington State made of building centroids, one color per row group; sorted by geometry the map is 77 solid patches, sorted by name it is confetti, shuffled it blends into one color" src="orderby-index-cover.png" /></p>
+
+    
+      <nav class="md-post__action">
+        <a href="2026/09/18/order-by-is-an-index-does-it-have-to-be/">
+          继续阅读
+        </a>
+      </nav>
+    
+    
+  </div>
+</article>
+      
+        <article class="md-post md-post--excerpt">
+  <header class="md-post__header">
+    
+      <nav class="md-post__authors md-typeset">
+        
+          <span class="md-author">
+            <img src="../../assets/authors/jia.jpeg" alt="Jia Yu">
+          </span>
+        
+      </nav>
+    
+    <div class="md-post__meta md-meta">
+      <ul class="md-meta__list">
+        <li class="md-meta__item">
           <time datetime="2026-09-11 00:00:00+00:00">2026年9月11日星期五</time></li>
         
         
@@ -5962,51 +6009,6 @@
     
       <nav class="md-post__action">
         <a href="2026/07/17/join-the-sky-to-the-ground-spatial-joins-over-stac-catalogs/">
-          继续阅读
-        </a>
-      </nav>
-    
-    
-  </div>
-</article>
-      
-        <article class="md-post md-post--excerpt">
-  <header class="md-post__header">
-    
-      <nav class="md-post__authors md-typeset">
-        
-          <span class="md-author">
-            <img src="../../assets/authors/jia.jpeg" alt="Jia Yu">
-          </span>
-        
-      </nav>
-    
-    <div class="md-post__meta md-meta">
-      <ul class="md-meta__list">
-        <li class="md-meta__item">
-          <time datetime="2026-07-10 00:00:00+00:00">2026年7月10日星期五</time></li>
-        
-        
-          
-          <li class="md-meta__item">
-            
-              需要 4 分钟阅读时间
-            
-          </li>
-        
-        
-      </ul>
-      
-    </div>
-  </header>
-  <div class="md-post__content md-typeset">
-    <h2 id="open-huge-geotiffs-without-the-2-gb-wall"><a class="toclink" href="2026/07/10/open-huge-geotiffs-without-the-2-gb-wall/">Open Huge GeoTIFFs Without the 2 GB Wall</a></h2>
-<p>The hardest part of working with big rasters often isn't the analysis. It's just getting the file open.</p>
-<p><img alt="Apache Sedona 1.9.0 tiles a 3.5 GB AlphaEarth GeoTIFF into 64 DataFrame rows instead of one oversized record" src="raster-tiling-reader-cover.svg" /></p>
-
-    
-      <nav class="md-post__action">
-        <a href="2026/07/10/open-huge-geotiffs-without-the-2-gb-wall/">
           继续阅读
         </a>
       </nav>
