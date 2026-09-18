@@ -93,14 +93,14 @@ sd.sql(f"""
 """)
 ```
 
-The orange bars are this query. In the file sorted by name, Seattle drops from 54 row groups to 8, from 253 MB to 43 MB, and from 105 ms to 62 ms. Leavenworth drops from 41 to 3, Olympia from 32 to 3, Spokane from 24 to 3, Tacoma from 52 to 10, and the 5 by 8 km window from 54 to 8. The file was never sorted by geometry, and the filter on one column added 1.3 MB to a 591 MB file. In the file sorted by geometry the filter still cuts the reads, from 2 to 5 row groups down to 1 or 2. A bounding box around a piece of the curve covers more ground than the piece itself, while the filter tests only the cells the query touches. In the shuffled file the filter skips nothing. Each row group of 50,000 random buildings holds 7,652 of the 21,493 cells, and 16 buildings from the downtown Seattle cell alone. A sparse index, Hippo included, can only skip a block that does not contain the value, and a shuffle puts every value in every block.
+The row stores the cell of the centroid, so a shape that crosses a cell boundary can be missed at the edge of a query; the limits below return to this. The orange bars are this query. In the file sorted by name, Seattle drops from 54 row groups to 8, from 253 MB to 43 MB, and from 105 ms to 62 ms. Leavenworth drops from 41 to 3, Olympia from 32 to 3, Spokane from 24 to 3, Tacoma from 52 to 10, and the 5 by 8 km window from 54 to 8. The file was never sorted by geometry, and the filter on one column added 1.3 MB to a 591 MB file. In the file sorted by geometry the filter still cuts the reads, from 2 to 5 row groups down to 1 or 2. A bounding box around a piece of the curve covers more ground than the piece itself, while the filter tests only the cells the query touches. In the shuffled file the filter skips nothing. Each row group of 50,000 random buildings holds 7,652 of the 21,493 cells, and 16 buildings from the downtown Seattle cell alone. A sparse index, Hippo included, can only skip a block that does not contain the value, and a shuffle puts every value in every block.
 
 ## What we left open
 
 The cell column is a shortcut, and it has four limits.
 
 - **Skew.** The cells are a grid of equal-sized squares, S2 level 12, about 5 km² each. The 21,493 cells with a Washington building hold between 1 and 13,267 of them, median 15. Hippo's histogram used buckets of equal count, so every bucket held the same number of rows.
-- **Mixed sizes.** Each row stores one cell, the cell of its centroid. That fits most buildings, and it already leaks: the 55 km window below misses three buildings that reach into it from a cell outside it. A lake or a coastline spans hundreds of cells, and one cell per row cannot describe it.
+- **Shape boundaries.** Each row stores one cell, the cell of its centroid. A shape that crosses a cell boundary can slip past the filter at the edge of a query: the 55 km window below returns 929,211 buildings without the filter and 929,208 with it. A lake or a coastline spans hundreds of cells, and one cell per row cannot describe it at all.
 - **Wide queries.** A query much wider than a cell becomes a long `IN` list, and the gain shrinks. On the file sorted by name, a 30 by 30 km window over Seattle lists 223 cells and reads 32 row groups instead of 56. A 55 by 55 km window lists 684 cells and reads 47 instead of 62, in the same time: 113 ms against 112.
 - **Tuning.** The level is a guess. Level 12 fits these buildings and these windows. Other data and other queries need another level, and finding it takes trial runs.
 
@@ -108,6 +108,6 @@ Hippo's design, moved to two dimensions, handles all four with one structure: a 
 
 ## The point
 
-Sort by geometry when you can: one `sort_by`, and the statistics already in the file read 4 row groups instead of 77. When the data arrives sorted by something else, the usual case, a cell column and a Bloom filter recover most of the difference without a rewrite, for small objects and small queries. Skew, mixed sizes, wide queries and the level itself are the question from 2016, still open, and the file format has room for the answer in its footer.
+Sort by geometry when you can: one `sort_by`, and the statistics already in the file read 4 row groups instead of 77. When the data arrives sorted by something else, the usual case, a cell column and a Bloom filter recover most of the difference without a rewrite, for small objects and small queries. Skew, shape boundaries, wide queries and the level itself are the question from 2016, still open, and the file format has room for the answer in its footer.
 
 *Buildings, cities and counties from Overture Maps. Measurements on SedonaDB 0.4.1.*
