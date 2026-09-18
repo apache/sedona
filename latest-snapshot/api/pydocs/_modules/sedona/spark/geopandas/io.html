@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.io &mdash; Apache Sedona Python Documentation</title>
@@ -393,7 +392,11 @@
 
         <span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
 
-    <span class="n">spark_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span>
+    <span class="c1"># The frame is resolved once so that the columns written and the column names used</span>
+    <span class="c1"># for the options below are the same: renames live in the internal fields and only</span>
+    <span class="c1"># reach the Spark frame when it is resolved.</span>
+    <span class="n">internal</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">resolved_copy</span>
+    <span class="n">spark_df</span> <span class="o">=</span> <span class="n">internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># Determine if index attribute(s) should be saved to file</span>
@@ -409,6 +412,24 @@
 
     <span class="k">if</span> <span class="n">spark_fmt</span> <span class="o">==</span> <span class="s2">"geoparquet"</span><span class="p">:</span>
         <span class="n">writer</span> <span class="o">=</span> <span class="n">spark_df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geoparquet"</span><span class="p">)</span>
+
+        <span class="c1"># A CRS assigned on a frame lives in column metadata, not necessarily in the</span>
+        <span class="c1"># geometry SRIDs the writer derives CRS from, so pass it through explicitly.</span>
+        <span class="c1"># geoparquet.crs would apply to every geometry column, so each column gets its</span>
+        <span class="c1"># own option and anything the caller set is left alone.</span>
+        <span class="k">if</span> <span class="s2">"geoparquet.crs"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._crs</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_crs_metadata</span>
+
+            <span class="k">for</span> <span class="n">column_name</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                <span class="n">internal</span><span class="o">.</span><span class="n">data_spark_column_names</span><span class="p">,</span> <span class="n">internal</span><span class="o">.</span><span class="n">data_fields</span>
+            <span class="p">):</span>
+                <span class="n">option</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"geoparquet.crs.</span><span class="si">{</span><span class="n">column_name</span><span class="si">}</span><span class="s2">"</span>
+                <span class="k">if</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">spark_type</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">):</span>
+                    <span class="k">continue</span>
+
+                <span class="n">has_crs_metadata</span><span class="p">,</span> <span class="n">column_crs</span> <span class="o">=</span> <span class="n">read_crs_metadata</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">has_crs_metadata</span> <span class="ow">and</span> <span class="n">column_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">writer</span> <span class="o">=</span> <span class="n">writer</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">column_crs</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
 
     <span class="k">elif</span> <span class="n">spark_fmt</span> <span class="o">==</span> <span class="s2">"geojson"</span><span class="p">:</span>
         <span class="n">writer</span> <span class="o">=</span> <span class="n">spark_df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geojson"</span><span class="p">)</span>
