@@ -6833,6 +6833,13 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/2026/08/21/find-the-middle-of-the-mississippi/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/blog/2026/09/18/order-by-is-an-index-does-it-have-to-be/</loc>
+        <lastmod>2026-09-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/blog/2026/09/18/order-by-is-an-index-does-it-have-to-be/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/2026/09/18/order-by-is-an-index-does-it-have-to-be/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/blog/2026/07/24/openstreetmap-meet-sedona-raw-osmpbf-to-spatial-sql/</loc>
         <lastmod>2026-09-18</lastmod>
         <changefreq>daily</changefreq>
@@ -13782,6 +13789,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/2026/08/21/find-the-middle-of-the-mississippi/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/2026/08/21/find-the-middle-of-the-mississippi/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/blog/2026/09/18/order-by-is-an-index-does-it-have-to-be/</loc>
+        <lastmod>2026-09-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/2026/09/18/order-by-is-an-index-does-it-have-to-be/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/2026/09/18/order-by-is-an-index-does-it-have-to-be/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/zh/blog/2026/07/24/openstreetmap-meet-sedona-raw-osmpbf-to-spatial-sql/</loc>
