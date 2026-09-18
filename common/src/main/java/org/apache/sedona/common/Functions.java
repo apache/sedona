@@ -38,6 +38,7 @@ import org.apache.sedona.common.jts2geojson.GeoJSONWriter;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.subDivide.GeometrySubDivider;
 import org.apache.sedona.common.utils.*;
+import org.datasyslab.jts.geom.util.GeometryCopier;
 import org.locationtech.jts.algorithm.Angle;
 import org.locationtech.jts.algorithm.MinimumAreaRectangle;
 import org.locationtech.jts.algorithm.MinimumBoundingCircle;
@@ -1103,12 +1104,7 @@ public class Functions {
             geometry.getPrecisionModel(),
             srid,
             geometry.getFactory().getCoordinateSequenceFactory());
-    Geometry newGeom = factory.createGeometry(geometry);
-    // Workaround for JTS bug: GeometryEditor.editPolygon returns the original
-    // empty polygon without copying it to the new factory, so the SRID is not
-    // updated for POLYGON EMPTY (and similar empty geometry types).
-    newGeom.setSRID(srid);
-    return newGeom;
+    return GeometryCopier.copy(geometry, factory);
   }
 
   public static int getSRID(Geometry geometry) {

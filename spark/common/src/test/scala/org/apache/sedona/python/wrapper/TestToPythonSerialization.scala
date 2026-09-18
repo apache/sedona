@@ -25,11 +25,12 @@ import org.apache.sedona.python.wrapper.utils.implicits._
 import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.api.java.JavaPairRDD
 import org.locationtech.jts.geom.{Geometry, GeometryFactory}
-import org.locationtech.jts.io.WKTReader
+import org.locationtech.jts.io.{Ordinate, WKBWriter, WKTReader}
 import org.scalatest.matchers.must.Matchers.contain
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 import java.io.{FileInputStream, InputStream}
+import java.util.EnumSet
 import scala.io.Source
 import scala.jdk.CollectionConverters._
 
@@ -95,6 +96,28 @@ class TestToPythonSerialization extends TestBaseScala {
         .flatMap(samplePoint => pythonGeometrySerializer.serialize(samplePoint)))
 
   describe("Sedona Python Wrapper Test") {
+    it("retains the declared layout of inbound empty WKB") {
+      Seq((3, 0), (3, 1), (4, 1)).foreach { case (dimension, measures) =>
+        val sequence = geometryFactory.getCoordinateSequenceFactory.create(0, dimension, measures)
+        val empty = geometryFactory.createPolygon(geometryFactory.createLinearRing(sequence))
+        val writer = new WKBWriter(dimension)
+        val ordinates = EnumSet.of(Ordinate.X, Ordinate.Y)
+        if (dimension - measures > 2) ordinates.add(Ordinate.Z)
+        if (measures > 0) ordinates.add(Ordinate.M)
+        writer.setOutputOrdinates(ordinates)
+
+        val parsed = pythonGeometrySerializer.deserialize(0, writer.write(empty), 0)
+        val result = org.apache.sedona.common.geometrySerde.GeometrySerializer.deserialize(
+          org.apache.sedona.common.geometrySerde.GeometrySerializer.serialize(parsed))
+        val resultSequence = result
+          .asInstanceOf[org.locationtech.jts.geom.Polygon]
+          .getExteriorRing
+          .getCoordinateSequence
+        resultSequence.getDimension shouldBe dimension
+        resultSequence.getMeasures shouldBe measures
+      }
+    }
+
     it("Test Serialize To Python JavaRDD[Geometry]") {
       val convertedToPythonRDD =
         GeometryRddConverter(pointSpatialRDD, pythonGeometrySerializer).translateToPython

@@ -44,6 +44,12 @@ the first non-null input supplies the output SRID; later inputs are not required
 SRID. In contrast, [`ST_Collect_Agg`](../Aggregate-Functions/ST_Collect_Agg.md) rejects a group
 containing mixed Geography SRIDs.
 
+For `Geometry` inputs, a multipart result must have a consistent coordinate layout (XY, XYZ,
+XYM, or XYZM). Starting in 2.0.0, dimensions declared in WKB are retained even for empty geometries
+or NaN Z values. Combining WKB-declared XY and XYZ components, such as an XY point and
+`POINT Z EMPTY`, raises a heterogeneous-layout error during serialization. To preserve each member's layout in a
+`GeometryCollection`, apply `ST_ForceCollection` to each input before collecting it.
+
 SQL Example
 
 ```sql
