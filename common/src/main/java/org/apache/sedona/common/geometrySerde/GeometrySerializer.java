@@ -18,6 +18,8 @@
  */
 package org.apache.sedona.common.geometrySerde;
 
+import org.datasyslab.jts.geom.impl.DeclaredCoordinateSequence;
+import org.datasyslab.jts.geom.impl.DeclaredCoordinateSequenceFactory;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateSequence;
 import org.locationtech.jts.geom.Geometry;
@@ -502,7 +504,7 @@ public class GeometrySerializer {
   }
 
   private static GeometryFactory createGeometryFactory(int srid) {
-    return new GeometryFactory(PRECISION_MODEL, srid, DeclaredCoordinateSequenceFactory.INSTANCE);
+    return new GeometryFactory(PRECISION_MODEL, srid, DeclaredCoordinateSequenceFactory.instance());
   }
 
   private static Polygon createEmptyPolygon(
