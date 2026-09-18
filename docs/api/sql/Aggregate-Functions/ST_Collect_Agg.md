@@ -41,6 +41,12 @@ All non-null `Geography` values in a group must have the same SRID; a group cont
 SRIDs is rejected. In contrast, scalar [`ST_Collect`](../Geometry-Editors/ST_Collect.md) uses the
 first non-null Geography input's SRID for the output.
 
+For `Geometry` inputs, a multipart result must have a consistent coordinate layout (XY, XYZ,
+XYM, or XYZM). Starting in 2.0.0, dimensions declared in WKB are retained even for empty geometries
+or NaN Z values. Combining WKB-declared XY and XYZ components, such as an XY point and
+`POINT Z EMPTY`, raises a heterogeneous-layout error during serialization. To preserve each member's layout in a
+`GeometryCollection`, apply `ST_ForceCollection` to each input before collecting it.
+
 SQL Example
 
 ```sql
