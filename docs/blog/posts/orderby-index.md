@@ -13,7 +13,7 @@ slug: order-by-is-an-index-does-it-have-to-be
 
 # ORDER BY Is an Index. Does It Have to Be?
 
-*The SedonaDB answer for GeoParquet, with love from Rust.*
+*SedonaDB, GeoParquet, and a story that started at VLDB 2016, now in Rust.*
 
 Parquet has stored a minimum and a maximum for every column in every row group [since September 2013](https://github.com/apache/parquet-format/commit/2c4ada8e988c1c0018332e420764c09bab16bf9c). PostgreSQL 9.5 [added BRIN in January 2016](https://www.postgresql.org/docs/release/9.5.0/): one small summary per range of blocks, cheap to update, useful when the data is clustered. In the same year the original creators of Apache Sedona, Jia Yu and Mohamed Sarwat, published [Hippo](https://jiayuasu.github.io/files/paper/hippo_vldb2016_fullpaper.pdf) at VLDB, the top database conference. Hippo is a sparse index 25 to 30 times smaller than a B+-tree, with a goal the min/max family never had: skip data that is not sorted. Ten years later, data skipping is how every lakehouse engine reads a file, and the question from 2016 is still open. Below: 3.82 million Washington buildings in one GeoParquet file, written three ways. Sorted by geometry, sorted by another column, and shuffled.
 
