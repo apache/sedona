@@ -21,6 +21,8 @@
 
 Introduction: This function returns the input geometry encoded to a text representation in HEXEWKB format. The HEXEWKB encoding can use either little-endian (NDR) or big-endian (XDR) byte ordering. If no encoding is explicitly specified, the function defaults to using the little-endian (NDR) format.
 
+Since v2.0.0, Z and M dimensions read from WKB are preserved in the output, including empty points, lines, and polygons and coordinates whose Z or M values are all NaN. Collections with no members have no stored coordinate layout and are written as XY.
+
 Format: `ST_AsHEXEWKB(geom: Geometry, endian: String = NDR)`
 
 Return type: `String`

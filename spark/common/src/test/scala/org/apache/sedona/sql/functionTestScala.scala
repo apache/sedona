@@ -29,7 +29,7 @@ import org.apache.spark.sql.{DataFrame, Row}
 import org.geotools.referencing.CRS
 import org.junit.Assert.{assertEquals, assertFalse, assertTrue}
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
-import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory, Polygon}
+import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory, Point, Polygon}
 import org.locationtech.jts.io.WKTWriter
 import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.distance3d.Distance3DOp
@@ -1036,6 +1036,27 @@ class functionTestScala
       assert(df.first().get(0).asInstanceOf[Polygon].getSRID == 3021)
     }
 
+    it("ST_SetSRID preserves empty polygon holes") {
+      val polygonWithEmptyHole =
+        "01030000000200000005000000000000000000000000000000000000000000000000002440000000000000000000000000000024400000000000002440000000000000000000000000000024400000000000000000000000000000000000000000"
+      val result = sparkSession
+        .sql(s"""
+            |WITH source AS (
+            |  SELECT ST_GeomFromWKB(unhex('$polygonWithEmptyHole')) AS polygon
+            |)
+            |SELECT
+            |  ST_NumInteriorRings(polygon),
+            |  ST_NumInteriorRings(ST_SetSRID(polygon, 4326)),
+            |  ST_SRID(ST_SetSRID(polygon, 4326))
+            |FROM source
+            |""".stripMargin)
+        .first()
+
+      assertEquals(1, result.getInt(0))
+      assertEquals(1, result.getInt(1))
+      assertEquals(4326, result.getInt(2))
+    }
+
     it("Passed ST_AsHEXEWKB") {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT(1 2)') as point")
       var actual = baseDf.selectExpr("ST_AsHEXEWKB(point)").first().get(0)
@@ -1052,6 +1073,76 @@ class functionTestScala
         sparkSession.sql("SELECT ST_AsEWKB(ST_SetSrid(ST_GeomFromWKT('POINT EMPTY'), 3021))")
       val s = "0101000020cd0b0000000000000000f87f000000000000f87f"
       assert(Hex.encodeHexString(df.first().get(0).asInstanceOf[Array[Byte]]) == s)
+    }
+
+    it("WKB output preserves declared point layouts after a shuffle") {
+      val nan = "000000000000F87F"
+      val xy = "000000000000F03F0000000000000040"
+      val layouts = Seq(
+        ("0101000000", 2, 0),
+        ("0101000080", 3, 0),
+        ("0101000040", 3, 1),
+        ("01010000C0", 4, 1))
+      val cases = for {
+        (header, dimension, measures) <- layouts
+        empty <- Seq(false, true)
+      } yield (
+        header + (if (empty) nan * 2 else xy) + nan * (dimension - 2),
+        dimension,
+        measures,
+        empty)
+      val geometries = cases.zipWithIndex
+        .map { case ((wkb, _, _, _), id) => (id, wkb) }
+        .toDF("id", "wkb")
+        .selectExpr("id", "ST_SetSRID(ST_GeomFromWKB(unhex(wkb)), 4326) AS geom")
+        .repartition(2)
+        .cache()
+      try {
+        assertEquals(cases.size.toLong, geometries.count())
+        val rows = geometries
+          .selectExpr(
+            "id",
+            "ST_AsBinary(geom)",
+            "ST_AsEWKB(geom)",
+            "ST_AsHEXEWKB(geom)",
+            "ST_AsHEXEWKB(geom, 'XDR')")
+          .collect()
+        rows.foreach { row =>
+          val (_, dimension, measures, empty) = cases(row.getInt(0))
+          val outputs = Seq(
+            row.getAs[Array[Byte]](1) -> 0,
+            row.getAs[Array[Byte]](2) -> 4326,
+            Hex.decodeHex(row.getString(3).toCharArray) -> 4326,
+            Hex.decodeHex(row.getString(4).toCharArray) -> 4326)
+          outputs.foreach { case (bytes, srid) =>
+            val point =
+              org.apache.sedona.common.Constructors.geomFromWKB(bytes).asInstanceOf[Point]
+            assertEquals(dimension, point.getCoordinateSequence.getDimension)
+            assertEquals(measures, point.getCoordinateSequence.getMeasures)
+            assertEquals(empty, point.isEmpty)
+            assertEquals(srid, point.getSRID)
+            assertEquals(5 + dimension * 8 + (if (srid == 0) 0 else 4), bytes.length)
+            if (!empty) {
+              assertEquals(1.0, point.getX, 0.0)
+              assertEquals(2.0, point.getY, 0.0)
+              (2 until dimension).foreach { ordinate =>
+                assertTrue(point.getCoordinateSequence.getOrdinate(0, ordinate).isNaN)
+              }
+            }
+          }
+          assertEquals(1, outputs(2)._1(0).toInt)
+          assertEquals(0, outputs(3)._1(0).toInt)
+        }
+      } finally {
+        geometries.unpersist()
+      }
+    }
+
+    it("WKB output functions return null for null geometry") {
+      val row = sparkSession
+        .sql("SELECT ST_AsBinary(NULL), ST_AsEWKB(NULL), ST_AsHEXEWKB(NULL)")
+        .first()
+      (0 until 3).foreach(index => assertTrue(row.isNullAt(index)))
     }
 
     it("Passed ST_Simplify") {
@@ -3455,6 +3546,46 @@ class functionTestScala
     val expected =
       "MULTIPOINT ((53.82582 2.57803), (13.55212 2.44117), (59.12854 3.70611), (61.37698 7.14985), (10.49657 4.40622))"
     assertEquals(expected, actual)
+  }
+
+  it("Should keep ST_GeneratePoints output XY for WKB and materialized polygon inputs") {
+    val polygonWkb =
+      "010300000001000000050000000000000000000000000000000000000000000000000024400000000000000000000000000000244000000000000024400000000000000000000000000000244000000000000000000000000000000000"
+
+    def generatedPointDimensions(points: Geometry): Seq[Int] = {
+      assertEquals(8, points.getNumGeometries)
+      (0 until points.getNumGeometries).map { index =>
+        val point = points.getGeometryN(index).asInstanceOf[Point]
+        assertTrue(point.getX >= 0 && point.getX <= 10)
+        assertTrue(point.getY >= 0 && point.getY <= 10)
+        point.getCoordinateSequence.getDimension
+      }
+    }
+
+    val direct = sparkSession
+      .sql(s"SELECT ST_GeneratePoints(ST_GeomFromWKB(unhex('$polygonWkb')), 8, 42) AS points")
+      .first()
+      .getAs[Geometry]("points")
+
+    val polygons = sparkSession
+      .sql(s"SELECT ST_GeomFromWKB(unhex('$polygonWkb')) AS polygon")
+      .repartition(2)
+      .cache()
+    try {
+      polygons.collect()
+      polygons.createOrReplaceTempView("materialized_xy_polygon")
+      val materialized = sparkSession
+        .sql("SELECT ST_GeneratePoints(polygon, 8, 42) AS points FROM materialized_xy_polygon")
+        .first()
+        .getAs[Geometry]("points")
+      assertEquals(
+        (Seq.fill(8)(2), Seq.fill(8)(2)),
+        (generatedPointDimensions(direct), generatedPointDimensions(materialized)))
+      assertTrue(direct.equalsExact(materialized))
+    } finally {
+      sparkSession.catalog.dropTempView("materialized_xy_polygon")
+      polygons.unpersist()
+    }
   }
 
   it("should pass ST_NRings") {

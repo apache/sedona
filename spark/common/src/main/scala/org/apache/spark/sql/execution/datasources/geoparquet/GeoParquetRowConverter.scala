@@ -220,8 +220,7 @@ private[geoparquet] class GeoParquetRowConverter(
         if (parquetType.isPrimitive) {
           new ParquetPrimitiveConverter(updater) {
             override def addBinary(value: Binary): Unit = {
-              val wkbReader = new WKBReader()
-              val geom = wkbReader.read(value.getBytes)
+              val geom = WKBReader.forDeclaredDimensions().read(value.getBytes)
               geom.setSRID(srid)
               this.updater.set(GeometryUDT.serialize(geom))
             }
@@ -233,9 +232,8 @@ private[geoparquet] class GeoParquetRowConverter(
               ArrayType(ByteType, containsNull = false),
               updater) {
               override def end(): Unit = {
-                val wkbReader = new WKBReader()
                 val byteArray = currentArray.map(_.asInstanceOf[Byte]).toArray
-                val geom = wkbReader.read(byteArray)
+                val geom = WKBReader.forDeclaredDimensions().read(byteArray)
                 geom.setSRID(srid)
                 this.updater.set(GeometryUDT.serialize(geom))
               }
