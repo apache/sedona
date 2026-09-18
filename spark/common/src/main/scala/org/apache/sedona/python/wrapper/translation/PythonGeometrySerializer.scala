@@ -19,8 +19,8 @@
 package org.apache.sedona.python.wrapper.translation
 
 import org.apache.sedona.common.geometryObjects.Circle
-import org.apache.sedona.common.geometrySerde.GeometryWkbReader
 import org.apache.sedona.python.wrapper.SerializationException
+import org.datasyslab.jts.io.WKBReader
 import org.locationtech.jts.geom.Geometry
 
 import java.nio.ByteBuffer
@@ -48,11 +48,11 @@ private[python] class PythonGeometrySerializer extends Serializable {
 
   def deserialize(isCircle: Int, values: Array[Byte], offset: Int): Geometry = {
     if (isCircle == 1) {
-      val geom = GeometryWkbReader.read(values.slice(offset + 8, values.length))
+      val geom = WKBReader.forDeclaredDimensions().read(values.slice(offset + 8, values.length))
       val radius = ByteBuffer.wrap(values.slice(offset, offset + 8)).getDouble()
       new Circle(geom, radius)
     } else if (isCircle == 0) {
-      GeometryWkbReader.read(values.slice(offset, values.length))
+      WKBReader.forDeclaredDimensions().read(values.slice(offset, values.length))
     } else {
       throw SerializationException("Can not deserialize object")
     }

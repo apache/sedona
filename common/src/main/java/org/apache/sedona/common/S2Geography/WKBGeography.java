@@ -28,7 +28,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.sedona.common.geometrySerde.GeometryWkbReader;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
@@ -131,7 +130,7 @@ public class WKBGeography extends Geography {
         result = jtsGeometry;
         if (result == null) {
           try {
-            result = GeometryWkbReader.read(wkbBytes);
+            result = org.datasyslab.jts.io.WKBReader.forDeclaredDimensions().read(wkbBytes);
             result.setSRID(getSRID());
           } catch (ParseException e) {
             throw new RuntimeException("Failed to parse WKB to JTS Geometry", e);

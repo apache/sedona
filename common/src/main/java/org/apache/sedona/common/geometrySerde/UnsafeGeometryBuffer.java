@@ -19,6 +19,7 @@
 package org.apache.sedona.common.geometrySerde;
 
 import java.lang.reflect.Field;
+import org.datasyslab.jts.geom.impl.DeclaredCoordinateSequence;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateSequence;
 import org.locationtech.jts.geom.CoordinateXY;

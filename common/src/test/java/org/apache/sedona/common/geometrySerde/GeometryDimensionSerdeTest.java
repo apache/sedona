@@ -29,6 +29,7 @@ import java.nio.ByteOrder;
 import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.Functions;
 import org.datasyslab.jts.geom.util.GeometryCopier;
+import org.datasyslab.jts.io.WKBReader;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateSequence;
@@ -272,7 +273,7 @@ public class GeometryDimensionSerdeTest {
     bytes.put((byte) 1).putInt(7).putInt(2);
     bytes.put((byte) 1).putInt(0x20000001).putInt(4326).putDouble(1).putDouble(2);
     bytes.put((byte) 1).putInt(0x20000001).putInt(3857).putDouble(3).putDouble(4);
-    Geometry collection = GeometryWkbReader.read(bytes.array(), 27700);
+    Geometry collection = WKBReader.forDeclaredDimensions(27700).read(bytes.array());
     assertEquals(27700, collection.getSRID());
     assertEquals(4326, collection.getGeometryN(0).getSRID());
     assertEquals(3857, collection.getGeometryN(1).getSRID());
