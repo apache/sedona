@@ -39,6 +39,7 @@ import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
 import org.locationtech.jts.io.WKBWriter;
+import org.locationtech.jts.io.WKTReader;
 
 public class WkbOutputTest {
   private static final GeometryFactory FACTORY = new GeometryFactory();
@@ -76,6 +77,72 @@ public class WkbOutputTest {
       assertEquals(9, output.getCoordinateSequence().getM(0), 0);
       if (layout == XYZM) assertEquals(3, output.getCoordinateSequence().getZ(0), 0);
       else assertTrue(Double.isNaN(output.getCoordinateSequence().getZ(0)));
+    }
+  }
+
+  @Test
+  public void measuredWktRetainsMInEveryOutputFormat() throws ParseException {
+    String[] inputs = {
+      "POINT M (1 2 9)", "POINT ZM (1 2 3 9)", "LINESTRING M (1 2 9, 4 5 6)", "POINT M EMPTY"
+    };
+    Layout[] layouts = {XYM, XYZM, XYM, XYM};
+    for (int i = 0; i < inputs.length; i++) {
+      Geometry source = new WKTReader().read(inputs[i]);
+      source.setSRID(4326);
+      CoordinateSequence expected = coordinateSequence(source);
+      for (Geometry geometry : new Geometry[] {source, roundTrip(source)}) {
+        byte[][] outputs = outputVariants(geometry);
+        for (int format = 0; format < outputs.length; format++) {
+          int srid = format == 0 ? 0 : 4326;
+          int type = source instanceof Point ? 1 : 2;
+          assertHeader(
+              outputs[format], type | layouts[i].flags | (srid == 0 ? 0 : 0x20000000), srid);
+          Geometry output = Constructors.geomFromWKB(outputs[format]);
+          assertEquals(source.isEmpty(), output.isEmpty());
+          CoordinateSequence actual = coordinateSequence(output);
+          assertSequence(actual, layouts[i]);
+          assertEquals(expected.size(), actual.size());
+          for (int point = 0; point < expected.size(); point++) {
+            for (int ordinate = 0; ordinate < layouts[i].dimension; ordinate++) {
+              assertEquals(
+                  expected.getOrdinate(point, ordinate), actual.getOrdinate(point, ordinate), 0);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  @Test
+  public void multipartOutputUsesSharedLayoutForEmptyMembers() throws ParseException {
+    String[] inputs = {
+      "MULTIPOINT Z (EMPTY, (1 2 3))",
+      "MULTILINESTRING Z (EMPTY, (0 0 1, 1 1 2))",
+      "MULTIPOLYGON Z (EMPTY, ((0 0 1, 1 0 2, 1 1 3, 0 0 1)))"
+    };
+    for (int i = 0; i < inputs.length; i++) {
+      Geometry source = new WKTReader().read(inputs[i]);
+      source.setSRID(4326);
+      byte[][] outputs = outputVariants(source);
+      for (int format = 0; format < outputs.length; format++) {
+        int srid = format == 0 ? 0 : 4326;
+        assertHeader(outputs[format], (4 + i) | XYZ.flags | (srid == 0 ? 0 : 0x20000000), srid);
+        Geometry output = roundTrip(Constructors.geomFromWKB(outputs[format]));
+        assertEquals(srid, output.getSRID());
+        assertEquals(2, output.getNumGeometries());
+        assertTrue(output.getGeometryN(0).isEmpty());
+        assertSequence(coordinateSequence(output.getGeometryN(0)), XYZ);
+        CoordinateSequence expected = coordinateSequence(source.getGeometryN(1));
+        CoordinateSequence actual = coordinateSequence(output.getGeometryN(1));
+        assertSequence(actual, XYZ);
+        assertEquals(expected.size(), actual.size());
+        for (int point = 0; point < expected.size(); point++) {
+          for (int ordinate = 0; ordinate < 3; ordinate++) {
+            assertEquals(
+                expected.getOrdinate(point, ordinate), actual.getOrdinate(point, ordinate), 0);
+          }
+        }
+      }
     }
   }
 
@@ -149,12 +216,7 @@ public class WkbOutputTest {
     Geometry output = Constructors.geomFromWKB(bytes);
     assertEquals(srid, output.getSRID());
     assertEquals(empty, output.isEmpty());
-    CoordinateSequence sequence =
-        output instanceof Point
-            ? ((Point) output).getCoordinateSequence()
-            : output instanceof LineString
-                ? ((LineString) output).getCoordinateSequence()
-                : ((Polygon) output).getExteriorRing().getCoordinateSequence();
+    CoordinateSequence sequence = coordinateSequence(output);
     assertSequence(sequence, layout);
     if (!empty) {
       assertEquals(1, sequence.getX(0), 0);
@@ -176,6 +238,21 @@ public class WkbOutputTest {
   private static void assertSequence(CoordinateSequence sequence, Layout layout) {
     assertEquals(layout.dimension, sequence.getDimension());
     assertEquals(layout.measures, sequence.getMeasures());
+  }
+
+  private static CoordinateSequence coordinateSequence(Geometry geometry) {
+    if (geometry instanceof Point) return ((Point) geometry).getCoordinateSequence();
+    if (geometry instanceof LineString) return ((LineString) geometry).getCoordinateSequence();
+    return ((Polygon) geometry).getExteriorRing().getCoordinateSequence();
+  }
+
+  private static byte[][] outputVariants(Geometry geometry) {
+    return new byte[][] {
+      GeomUtils.getWKB(geometry),
+      GeomUtils.getEWKB(geometry),
+      WKBReader.hexToBytes(GeomUtils.getHexEWKB(geometry, ByteOrderValues.LITTLE_ENDIAN)),
+      WKBReader.hexToBytes(GeomUtils.getHexEWKB(geometry, ByteOrderValues.BIG_ENDIAN))
+    };
   }
 
   private static Geometry readPrimitive(int primitive, Layout layout, boolean empty)

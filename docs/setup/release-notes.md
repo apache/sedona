@@ -21,6 +21,9 @@
 
 ### Breaking Changes
 
+* **WKB output**: `ST_AsBinary`, `ST_AsEWKB`, and `ST_AsHEXEWKB` now retain M for measured
+  geometries in Spark, Flink, and Snowflake, including geometries read from WKT. Earlier
+  versions dropped M, so these inputs now produce XYM or XYZM instead of XY or XYZ.
 * **Flink**: The minimum supported Flink version is now 1.19 (previously 1.12). Flink 1.12 - 1.18
   are no longer supported, as the Apache Flink community itself no longer supports those
   versions. Flink 2.2 is now supported alongside 1.19+.
