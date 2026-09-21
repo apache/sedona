@@ -28,6 +28,61 @@ class TestStCollect extends TestBaseScala with GeometrySample with GivenWhenThen
   import sparkSession.implicits._
 
   describe("st collect workflow") {
+    it("should require a collection for mixed XY and declared empty or NaN Z members") {
+      val cases = Seq(
+        ("POINT (1 2)", "POINT Z EMPTY"),
+        ("LINESTRING (0 0, 1 1)", "LINESTRING Z EMPTY"),
+        ("POLYGON ((0 0, 4 0, 0 4, 0 0))", "POLYGON Z EMPTY"),
+        ("POINT (1 2)", "POINT Z (3 4 NaN)"))
+      cases.foreach { case (xyWkt, zWkt) =>
+        val zBytes = new org.locationtech.jts.io.WKBWriter(3)
+          .write(wktReader.read(zWkt.replace("NaN", "9")))
+        if (zWkt.contains("NaN")) java.nio.ByteBuffer.wrap(zBytes).putDouble(21, Double.NaN)
+        val zHex = org.locationtech.jts.io.WKBWriter.toHex(zBytes)
+        val inputs = Seq((xyWkt, zHex))
+          .toDF("xyWkt", "zHex")
+          .selectExpr("ST_GeomFromWKT(xyWkt) AS xy", "ST_GeomFromWKB(unhex(zHex)) AS z")
+          .repartition(1)
+          .cache()
+        try {
+          assert(inputs.count() == 1)
+          val rows = inputs.selectExpr("xy AS geom").union(inputs.selectExpr("z AS geom"))
+          val queries =
+            Seq(inputs.selectExpr("ST_Collect(xy, z)"), rows.selectExpr("ST_Collect_Agg(geom)"))
+          queries.foreach { query =>
+            val error = intercept[Exception] { query.collect() }
+            val causes = Iterator.iterate(error: Throwable)(_.getCause).takeWhile(_ != null).toSeq
+            assert(
+              causes.exists(cause =>
+                Option(cause.getMessage)
+                  .exists(_.contains("heterogeneous dimensional layouts"))),
+              error.toString)
+          }
+          val collections = Seq(
+            inputs.selectExpr("ST_Collect(ST_ForceCollection(xy), ST_ForceCollection(z))"),
+            rows.selectExpr("ST_Collect_Agg(ST_ForceCollection(geom))"))
+          collections.foreach { query =>
+            val geometry = query.collect()(0).getAs[org.locationtech.jts.geom.Geometry](0)
+            assert(geometry.getGeometryType == "GeometryCollection")
+            val dimensions = (0 until geometry.getNumGeometries).map { i =>
+              val member = geometry.getGeometryN(i).getGeometryN(0)
+              member match {
+                case point: org.locationtech.jts.geom.Point =>
+                  point.getCoordinateSequence.getDimension
+                case line: org.locationtech.jts.geom.LineString =>
+                  line.getCoordinateSequence.getDimension
+                case polygon: org.locationtech.jts.geom.Polygon =>
+                  polygon.getExteriorRing.getCoordinateSequence.getDimension
+              }
+            }
+            assert(dimensions.sorted == Seq(2, 3))
+          }
+        } finally {
+          inputs.unpersist()
+        }
+      }
+    }
+
     it("should return null when passed geometry is also null") {
       Given("data frame with empty geometries")
       val emptyGeometryDataFrame = Seq((1, null), (2, null), (3, null)).toDF("id", "geom")
