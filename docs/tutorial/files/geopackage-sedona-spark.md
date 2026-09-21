@@ -79,6 +79,8 @@ Here are the contents of the DataFrame:
 
 The geometry column can contain many different geometric objects like points, polygons, and many more.
 
+Since Sedona 2.0.0, reads preserve declared Z/M dimensions even for empty points, lines, and polygons or NaN ordinates. If collecting mixed layouts raises a heterogeneous-layout error, see [ST_Collect](../../api/sql/Geometry-Editors/ST_Collect.md).
+
 You can also see the metadata of the GeoPackage file:
 
 ```python

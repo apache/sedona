@@ -25,6 +25,7 @@ import com.google.common.geometry.S2LatLng;
 import com.google.common.geometry.S2Point;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import org.apache.sedona.common.geography.Constructors;
 import org.apache.sedona.common.geography.Functions;
@@ -35,6 +36,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ByteOrderValues;
+import org.locationtech.jts.io.Ordinate;
 import org.locationtech.jts.io.ParseException;
 
 public class WKBGeographyTest {
@@ -64,6 +66,35 @@ public class WKBGeographyTest {
     assertEquals(30.0, ((Point) jts).getX(), EPS);
     assertEquals(10.0, ((Point) jts).getY(), EPS);
     assertEquals(4326, jts.getSRID());
+  }
+
+  @Test
+  public void fromWKB_emptyJtsGeometryRetainsDeclaredLayout() {
+    GeometryFactory factory = new GeometryFactory();
+    int[][] layouts = {{3, 0}, {3, 1}, {4, 1}};
+    for (int[] layout : layouts) {
+      int dimension = layout[0];
+      int measures = layout[1];
+      EnumSet<Ordinate> ordinates = EnumSet.of(Ordinate.X, Ordinate.Y);
+      if (dimension - measures > 2) ordinates.add(Ordinate.Z);
+      if (measures > 0) ordinates.add(Ordinate.M);
+      org.locationtech.jts.io.WKBWriter writer = new org.locationtech.jts.io.WKBWriter(dimension);
+      writer.setOutputOrdinates(ordinates);
+      Geometry empty =
+          factory.createPolygon(
+              factory.createLinearRing(
+                  factory.getCoordinateSequenceFactory().create(0, dimension, measures)));
+
+      Geometry parsed = WKBGeography.fromWKB(writer.write(empty), 4326).getJTSGeometry();
+      Geometry result =
+          org.apache.sedona.common.geometrySerde.GeometrySerializer.deserialize(
+              org.apache.sedona.common.geometrySerde.GeometrySerializer.serialize(parsed));
+      org.locationtech.jts.geom.CoordinateSequence sequence =
+          ((org.locationtech.jts.geom.Polygon) result).getExteriorRing().getCoordinateSequence();
+      assertEquals(dimension, sequence.getDimension());
+      assertEquals(measures, sequence.getMeasures());
+      assertEquals(4326, result.getSRID());
+    }
   }
 
   @Test
