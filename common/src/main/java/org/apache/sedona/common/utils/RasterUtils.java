@@ -745,9 +745,9 @@ public class RasterUtils {
 
   /**
    * Verifies that {@code noDataValue} can be stored in the pixel type named by {@code pixelType}
-   * without silent coercion, returning it unchanged when it can. Delegates to {@link
-   * #assertRepresentable(double, String, String)} with the argument name {@code "noDataValue"} so
-   * the nodata path keeps its existing error messages.
+   * without silent coercion, returning it unchanged when it can. NaN is supported as a nodata value
+   * on floating-point bands. Other values are checked by {@link #assertRepresentable(double,
+   * String, String, boolean)} with the argument name {@code "noDataValue"}.
    *
    * @param noDataValue the candidate nodata / background value
    * @param pixelType a Sedona pixel type string accepted by {@link #getDataTypeCode(String)} (for
@@ -757,6 +757,9 @@ public class RasterUtils {
    *     type
    */
   public static double assertNoDataValueRepresentable(double noDataValue, String pixelType) {
+    if (Double.isNaN(noDataValue) && !isDataTypeIntegral(getDataTypeCode(pixelType))) {
+      return noDataValue;
+    }
     // A nodata value is a sentinel: it must be stored without any coercion (an exact 32-bit float
     // round-trip, and no negative-zero collapse on integer bands) so the stored background always
     // matches the recorded nodata metadata.
@@ -832,15 +835,12 @@ public class RasterUtils {
         description = "signed 32-bit";
         break;
       case DataBuffer.TYPE_FLOAT:
-        // NaN and infinite values cannot be used on a float/double band: NaN is the codebase's
-        // internal "no nodata" sentinel, so it cannot be stored as a distinct nodata value and
-        // would be silently dropped; an infinite value is not a valid GeoTools category bound and
-        // crashes deep in GeoTools with "Range [Infinity .. Infinity] is not valid". Reject both
-        // up front with a clear error (fail loud) rather than dropping them or crashing later.
+        // NaN nodata is handled by assertNoDataValueRepresentable. Burn values must remain finite,
+        // and infinity cannot be used as a GeoTools nodata category bound.
         if (!Double.isFinite(value)) {
           throw new IllegalArgumentException(
               String.format(
-                  "%s %s is not supported for pixel type '%s' (NaN and infinite values are not supported); use a finite value",
+                  "%s %s is not supported for pixel type '%s'; use a finite value",
                   argName, value, pixelType));
         }
         // A nodata sentinel must round-trip exactly through the band's 32-bit float storage —
@@ -862,7 +862,7 @@ public class RasterUtils {
         if (!Double.isFinite(value)) {
           throw new IllegalArgumentException(
               String.format(
-                  "%s %s is not supported for pixel type '%s' (NaN and infinite values are not supported); use a finite value",
+                  "%s %s is not supported for pixel type '%s'; use a finite value",
                   argName, value, pixelType));
         }
         return value;
