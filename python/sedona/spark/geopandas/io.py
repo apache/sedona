@@ -183,7 +183,11 @@ def _to_file(
 
         crs = CRS.from_user_input(crs)
 
-    spark_df = df._internal.spark_frame.drop(NATURAL_ORDER_COLUMN_NAME)
+    # The frame is resolved once so that the columns written and the column names used
+    # for the options below are the same: renames live in the internal fields and only
+    # reach the Spark frame when it is resolved.
+    internal = df._internal.resolved_copy
+    spark_df = internal.spark_frame.drop(NATURAL_ORDER_COLUMN_NAME)
 
     if index is None:
         # Determine if index attribute(s) should be saved to file
@@ -199,6 +203,24 @@ def _to_file(
 
     if spark_fmt == "geoparquet":
         writer = spark_df.write.format("geoparquet")
+
+        # A CRS assigned on a frame lives in column metadata, not necessarily in the
+        # geometry SRIDs the writer derives CRS from, so pass it through explicitly.
+        # geoparquet.crs would apply to every geometry column, so each column gets its
+        # own option and anything the caller set is left alone.
+        if "geoparquet.crs" not in kwargs:
+            from sedona.spark.geopandas._crs import read_crs_metadata
+
+            for column_name, field in zip(
+                internal.data_spark_column_names, internal.data_fields
+            ):
+                option = f"geoparquet.crs.{column_name}"
+                if option in kwargs or not isinstance(field.spark_type, GeometryType):
+                    continue
+
+                has_crs_metadata, column_crs = read_crs_metadata(field)
+                if has_crs_metadata and column_crs is not None:
+                    writer = writer.option(option, column_crs.to_json())
 
     elif spark_fmt == "geojson":
         writer = spark_df.write.format("geojson")

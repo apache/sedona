@@ -25,6 +25,8 @@ Since the netCDF format has many variants, the reader might not work for your te
 
 This API has been tested for netCDF classic (NetCDF 1, 2, 5) and netCDF4/HDF5 files.
 
+Compressed netCDF4/HDF5 variables are supported for the deflate (zlib), shuffle, fletcher32, and zstd HDF5 filters. Reading zstd-compressed variables requires `com.github.luben:zstd-jni`, which Spark already includes. Files that use other filters, such as bzip2 or blosc, fail with `Unknown filter`. You can rewrite those files without compression first, for example with `nccopy -F none input.nc output.nc`.
+
 This API requires the name of the record variable. It is assumed that a variable of the given name exists, and its last 2 dimensions are 'lat' and 'lon' dimensions *respectively*.
 
 If this assumption does not hold true for your case, you can choose to pass the lonDimensionName and latDimensionName explicitly.
