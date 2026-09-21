@@ -1525,6 +1525,24 @@ public class RasterConstructorsTest extends RasterTestBase {
   }
 
   @Test
+  public void testNetCdfZstdCompressed() throws FactoryException, IOException {
+    byte[] bytes =
+        Files.readAllBytes(
+            new File(resourceFolder + "raster/netcdf_variants/test_zstd.nc4").toPath());
+    GridCoverage2D raster = RasterConstructors.fromNetCDF(bytes, "temp");
+
+    double[] expectedMetadata = {-105.25, 40.75, 5, 4, 0.5, -0.5, 0, 0, 0, 1};
+    double[] actualMetadata = RasterAccessors.metadata(raster);
+    for (int i = 0; i < expectedMetadata.length; i++) {
+      assertEquals(expectedMetadata[i], actualMetadata[i], 1e-9);
+    }
+    double[] values = MapAlgebra.bandAsArray(raster, 1);
+    for (int i = 0; i < values.length; i++) {
+      assertEquals(10.0 + 1.5 * i, values[i], 1e-9);
+    }
+  }
+
+  @Test
   public void testRecordInfo() throws IOException {
     String actualRecordInfo = RasterConstructors.getRecordInfo(testNc);
     String expectedRecordInfo =

@@ -68,7 +68,8 @@
         <maven.deploy.skip>${skip.deploy.common.modules}</maven.deploy.skip>
         <maven.compiler.plugin.version>3.10.1</maven.compiler.plugin.version>
 
-        <cdm.version>5.4.2</cdm.version>
+        <cdm.version>5.10.0</cdm.version>
+        <zstd-jni.version>1.5.5-4</zstd-jni.version>
         <geotools.version>33.1</geotools.version>
         <hadoop.version>3.2.4</hadoop.version>
         <jackson.version>2.13.4</jackson.version>
@@ -362,6 +363,13 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
+            </dependency>
+            <!-- Decodes Zstandard-compressed NetCDF4/HDF5 variables. Provided because Spark ships it. -->
+            <dependency>
+                <groupId>com.github.luben</groupId>
+                <artifactId>zstd-jni</artifactId>
+                <version>${zstd-jni.version}</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.uber</groupId>

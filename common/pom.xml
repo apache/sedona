@@ -116,6 +116,10 @@
             <groupId>edu.ucar</groupId>
             <artifactId>cdm-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.github.luben</groupId>
+            <artifactId>zstd-jni</artifactId>
+        </dependency>
         <!-- For shading a janino package that works with Spark for jiffle. We don't add this to
              dependencyManagement in parent pom.xml because we don't want to mess up with the
              janino versions required by Spark. -->
