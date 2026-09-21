@@ -88,6 +88,8 @@ Here are the results:
 +---+---------------------+
 ```
 
+Since Sedona 2.0.0, reads preserve declared Z/M dimensions even for empty points, lines, and polygons or NaN ordinates. If collecting mixed layouts raises a heterogeneous-layout error, see [ST_Collect](../../api/sql/Geometry-Editors/ST_Collect.md).
+
 Here's how Sedona executes this query under the hood:
 
 1. It fetches the schema from the footer of a GeoParquet file, so no schema inference is needed.

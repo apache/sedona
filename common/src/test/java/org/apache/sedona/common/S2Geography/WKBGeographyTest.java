@@ -76,9 +76,8 @@ public class WKBGeographyTest {
       int dimension = layout[0];
       int measures = layout[1];
       EnumSet<Ordinate> ordinates = EnumSet.of(Ordinate.X, Ordinate.Y);
-      if (dimension == 4) ordinates.add(Ordinate.Z);
-      if (measures == 0) ordinates.add(Ordinate.Z);
-      if (measures == 1) ordinates.add(Ordinate.M);
+      if (dimension - measures > 2) ordinates.add(Ordinate.Z);
+      if (measures > 0) ordinates.add(Ordinate.M);
       org.locationtech.jts.io.WKBWriter writer = new org.locationtech.jts.io.WKBWriter(dimension);
       writer.setOutputOrdinates(ordinates);
       Geometry empty =
