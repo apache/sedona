@@ -93,7 +93,9 @@ def _apply_shapely_series_udf(
     def apply(series: pd.Series) -> pd.Series:
         applied = series.apply(
             lambda x: (
-                fn(geometry_serde.deserialize(x)[0]) if deserialize_geom else fn(x)
+                fn(geometry_serde.deserialize(x)[0])
+                if deserialize_geom and x is not None
+                else fn(x)
             )
         )
 

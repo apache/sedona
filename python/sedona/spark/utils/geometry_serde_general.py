@@ -34,6 +34,7 @@ from shapely.geometry import (
 )
 from shapely.geometry.base import BaseGeometry
 from shapely.wkb import dumps as wkb_dumps
+from shapely.wkb import loads as wkb_loads
 from shapely.wkt import loads as wkt_loads
 
 try:
@@ -535,14 +536,24 @@ def serialize_multi_polygon(geom: MultiPolygon) -> bytes:
 
 def deserialize_multi_polygon(geom_buffer: GeometryBuffer) -> MultiPolygon:
     num_polygons = geom_buffer.read_int()
-    polygons = []
-    for k in range(0, num_polygons):
-        polygon = geom_buffer.read_polygon()
-        if not polygon.is_empty:
-            polygons.append(polygon)
+    polygons = [geom_buffer.read_polygon() for _ in range(num_polygons)]
     if not polygons:
-        return wkt_loads("MULTIPOLYGON EMPTY")
-    return MultiPolygon(polygons)
+        return geom_buffer.read_empty("MULTIPOLYGON")
+    if not any(polygon.is_empty for polygon in polygons):
+        return MultiPolygon(polygons)
+
+    # MultiPolygon's constructor discards empty members. WKB retains their
+    # positions, using the shared coordinate layout from the internal format.
+    z_flag = 0x80000000 if geom_buffer.coord_type == CoordinateType.XYZ else 0
+    header = struct.pack("<BII", 1, GeometryTypeID.MULTIPOLYGON | z_flag, num_polygons)
+    empty_polygon = struct.pack("<BII", 1, GeometryTypeID.POLYGON | z_flag, 0)
+    return wkb_loads(
+        header
+        + b"".join(
+            empty_polygon if polygon.is_empty else wkb_dumps(polygon)
+            for polygon in polygons
+        )
+    )
 
 
 def serialize_geometry_collection(geom: GeometryCollection) -> bytearray:

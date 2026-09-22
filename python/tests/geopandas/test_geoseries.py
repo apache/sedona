@@ -8415,6 +8415,53 @@ class TestGeoSeriesTransform(TestGeopandasBase):
         self.check_sgpd_equals_gpd(frame_result, expected)
         assert frame_result.crs == expected.crs
 
+    def test_transform_preserves_per_row_srids(self):
+        frame = self.spark.createDataFrame(
+            [(0, "SRID=4326;POINT (1 2)"), (1, "SRID=3857;POINT (3 4)")],
+            "id long, ewkt string",
+        ).selectExpr("id", "ST_GeomFromEWKT(ewkt) AS geometry")
+        source = GeoSeries(frame.pandas_api(index_col="id")["geometry"])
+
+        result = source.transform(lambda coords: coords + [2, -1])
+        rows = (
+            result._internal.spark_frame.select(
+                result._internal.index_spark_columns[0].alias("id"),
+                stf.ST_SRID(result.spark.column).alias("srid"),
+                stf.ST_AsText(result.spark.column).alias("wkt"),
+            )
+            .orderBy("id")
+            .collect()
+        )
+        assert [(row.id, row.srid, row.wkt) for row in rows] == [
+            (0, 4326, "POINT (3 1)"),
+            (1, 3857, "POINT (5 3)"),
+        ]
+
+    @pytest.mark.parametrize("srid", [0, 4326])
+    def test_transform_preserves_empty_multipolygon_members(self, srid):
+        frame = self.spark.createDataFrame(
+            [(0, f"SRID={srid};MULTIPOLYGON (EMPTY, ((0 0, 1 0, 1 1, 0 0)), EMPTY)")],
+            "id long, ewkt string",
+        ).selectExpr("id", "ST_GeomFromEWKT(ewkt) AS geometry")
+        source = GeoSeries(frame.pandas_api(index_col="id")["geometry"])
+
+        result = source.transform(lambda coords: coords + [2, -1])
+        row = result._internal.spark_frame.select(
+            stf.ST_SRID(result.spark.column).alias("srid"),
+            result.spark.column.alias("geometry"),
+        ).first()
+        assert row.srid == srid
+        assert row.geometry.geom_type == "MultiPolygon"
+        assert len(row.geometry.geoms) == 3
+        assert row.geometry.geoms[0].is_empty
+        assert row.geometry.geoms[2].is_empty
+        assert list(row.geometry.geoms[1].exterior.coords) == [
+            (2, -1),
+            (3, -1),
+            (3, 0),
+            (2, -1),
+        ]
+
     @pytest.mark.parametrize("include_z", [False, True])
     def test_transform_dimensions(self, include_z):
         _ = self.spark

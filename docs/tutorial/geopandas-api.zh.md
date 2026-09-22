@@ -315,6 +315,7 @@ Apache Sedona 的 GeoPandas API 已实现最常用的 GeoSeries 与 GeoDataFrame
 - `clip()` —— 使用标量、矩形或分布式掩膜裁剪几何
 - `overlay()` —— 支持全部五种 GeoPandas 模式的分布式数据框叠加
 - `buffer()` —— 几何缓冲
+- `transform()` —— 在 executor 上分批执行坐标数组回调
 - `distance()` —— 距离计算
 - `intersects()`、`contains()`、`within()` —— 空间谓词
 - `geom_equals_identical()` —— 对所有已存储坐标维度执行精确的结构相等性比较
@@ -338,6 +339,7 @@ Apache Sedona 的 GeoPandas API 已实现最常用的 GeoSeries 与 GeoDataFrame
 ### 空间运算
 
 - `buffer()` —— 几何缓冲
+- `transform()` —— 在 executor 上分批执行坐标数组回调
 - `distance()` —— 距离计算
 - `intersects()`、`contains()`、`within()` —— 空间谓词
 - `intersection()` —— 几何相交
@@ -401,6 +403,19 @@ simplified = coverage.simplify_coverage(0.1, simplify_boundary=False)
 重建过程按环和原始几何构造数组。每个几何最多 100,000 个坐标的准入限制不是
 内存安全保证：低于此限制的长环仍可能耗尽 executor 内存。实现不会把完整覆盖
 或整个邻域收集成几何数组。
+
+`transform(transformation, include_z=False)` 自 v2.0.0 起可用，要求 driver
+和 worker 均安装 Spark >=3.5 和 Shapely >=2.0。该方法在 executor 上以批次为单位，
+惰性地将可序列化的回调应用于 NumPy 坐标数组，并保留索引、CRS 元数据、逐行 SRID、
+缺失值和空几何。GeoDataFrame 调用会转换活动几何列，并返回 GeoSeries。
+
+与本地 GeoPandas 不同，回调每次只能看到一个 Spark 批次，而非整个 GeoSeries。
+请使用确定性的逐坐标回调，例如 `lambda coords: coords + [1, 2]`。
+`lambda coords: coords - coords.mean(axis=0)` 会分别对每个批次做中心化，
+因此结果可能随分区方式或批次大小而变化。若需要全局统计量，请先通过分布式聚合
+单独计算，再将结果作为常量传入回调。Spark 可能多次执行回调，因此结果不能依赖
+可变状态；Sedona 无法自动检测这些批次依赖。回调错误会在 Spark 实际计算结果时
+抛出。`transform()` 保留输入 CRS；需要感知 CRS 的重投影时，请使用 `to_crs()`。
 
 `hilbert_distance()` 使用原生 Spark 表达式，并让逐行排序键保持分布式执行。
 未提供 `total_bounds` 时，该方法会通过一次分布式聚合计算所有包围盒中点的

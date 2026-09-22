@@ -209,3 +209,60 @@ def test_general_empty_serializer_still_rejects_m(geometry_type, type_id, dimens
 
     with pytest.raises(ValueError, match="requires geomserde_speedup"):
         geometry_serde_general.serialize(geometry)
+
+
+@pytest.mark.parametrize("dimension", ["", " Z"])
+@pytest.mark.parametrize("members", ["leading", "trailing", "both", "all", "none"])
+def test_general_multipolygon_roundtrip_keeps_empty_members(dimension, members):
+    ring = "0 0, 1 0, 1 1, 0 0" if not dimension else "0 0 2, 1 0 2, 1 1 2, 0 0 2"
+    polygon = f"(({ring}))"
+    parts = {
+        "leading": f"EMPTY, {polygon}",
+        "trailing": f"{polygon}, EMPTY",
+        "both": f"EMPTY, {polygon}, EMPTY",
+        "all": "EMPTY, EMPTY",
+        "none": polygon,
+    }
+    geometry = wkt_loads(f"MULTIPOLYGON{dimension} ({parts[members]})")
+    if members == "all" and shapely.__version__ < "2":
+        pytest.skip("Shapely 1.x hides all-empty members from the serializer")
+    if members == "all":
+        _require_empty_layout(geometry, 2 if dimension else 1)
+
+    buffer = geometry_serde_general.serialize(geometry)
+    actual, offset = geometry_serde_general.deserialize(buffer + b"trailing bytes")
+
+    assert offset == len(buffer)
+    # Some GEOS versions construct XY empty members even inside a Z
+    # MultiPolygon. The internal format stores one shared coordinate layout,
+    # so those empty members are normalized to that layout on reconstruction.
+    z_flag = 0x80000000 if dimension else 0
+    expected_wkb = struct.pack("<BII", 1, 6 | z_flag, len(geometry.geoms))
+    expected_wkb += b"".join(
+        struct.pack("<BII", 1, 3 | z_flag, 0) if part.is_empty else part.wkb
+        for part in geometry.geoms
+    )
+    assert actual.wkb == expected_wkb
+
+
+@pytest.mark.parametrize("coord_type", [1, 2])
+@pytest.mark.parametrize("empty_ring_count", [0, 1])
+def test_general_multipolygon_all_empty_stored_members(coord_type, empty_ring_count):
+    # The wire format shares a layout across all members. Preserve that layout
+    # even when no coordinates are available to infer it from.
+    structure = [2]
+    for _ in range(2):
+        structure.append(empty_ring_count)
+        if empty_ring_count:
+            structure.append(0)
+    buffer = struct.pack("BBBBi", 0x60 | (coord_type << 1), 0, 0, 0, 0)
+    buffer += struct.pack(f"{len(structure)}i", *structure)
+    z_flag = 0x80000000 if coord_type == 2 else 0
+    polygon_type = 3 | z_flag
+    expected_wkb = struct.pack("<BII", 1, 6 | z_flag, 2)
+    expected_wkb += struct.pack("<BII", 1, polygon_type, 0) * 2
+
+    actual, offset = geometry_serde_general.deserialize(buffer + b"trailing bytes")
+
+    assert offset == len(buffer)
+    assert actual.wkb == expected_wkb
