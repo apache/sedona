@@ -2040,8 +2040,71 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("affine_transform", self, matrix)
 
-    # def transform(self, transformation, include_z=False):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    def transform(self, transformation, include_z=False):
+        """Apply a function to geometry coordinates in distributed batches.
+
+        .. versionadded:: 2.0.0
+
+        Parameters
+        ----------
+        transformation : callable
+            A function that transforms an (N, 2) or (N, 3) NumPy array of
+            float64 coordinates into an array of the same shape and dtype.
+            The function must preserve coordinate order and must be serializable
+            for execution on Spark workers.
+        include_z : bool, default False
+            If False, discard the third dimension. If True, include the third
+            dimension in the coordinates passed to the function. Coordinates of
+            2D geometries have NaN in the third column.
+
+        Returns
+        -------
+        GeoSeries
+            Transformed geometries with the original index and CRS. Null and
+            empty geometries are preserved.
+
+        Notes
+        -----
+        Requires Spark 3.5 or newer and Shapely 2.0 or newer, including on the
+        workers. Execution is lazy; exceptions raised by the callback or invalid
+        returned arrays surface when Spark evaluates the result.
+
+        Unlike local GeoPandas, the callback receives coordinates from one
+        Spark batch at a time, not from the entire GeoSeries. Batch sizes and
+        boundaries are unspecified, and Spark may execute the function multiple
+        times. Use deterministic, coordinate-wise transformations whose results
+        do not depend on batching or mutable state. For example,
+        ``lambda coords: coords + [1, 2]`` is independent of batching, while
+        ``lambda coords: coords - coords.mean(axis=0)`` centers each batch
+        separately. Compute global statistics first and pass the resulting
+        constants to the callback when a transformation needs them.
+
+        This restriction is a caller responsibility; arbitrary Python callbacks
+        cannot be checked for dependence on batch boundaries. The result keeps
+        the input CRS; use ``to_crs`` for CRS-aware reprojection.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point, Polygon
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> s = GeoSeries([Point(0, 0)])
+        >>> s.transform(lambda coords: coords + 1)
+        0    POINT (1 1)
+        dtype: geometry
+
+        >>> s = GeoSeries([Polygon([(0, 0), (1, 1), (0, 1)])])
+        >>> s.transform(lambda coords: coords * [2, 3])
+        0    POLYGON ((0 0, 2 3, 0 3, 0 0))
+        dtype: geometry
+
+        >>> s = GeoSeries([Point(0, 0, 0)])
+        >>> s.transform(lambda coords: coords + 1, include_z=True)
+        0    POINT Z (1 1 1)
+        dtype: geometry
+        """
+        return _delegate_to_geometry_column(
+            "transform", self, transformation, include_z=include_z
+        )
 
     def rotate(self, angle, origin="center", use_radians=False):
         """Return a ``GeoSeries`` with rotated geometries.

@@ -62,6 +62,7 @@
 
 #### GeoPandas API
 
+* [<a href='https://github.com/apache/sedona/issues/3388'>GH-3388</a>] - Add distributed coordinate `transform` for GeoSeries and GeoDataFrame with batch-local callbacks
 * [<a href='https://github.com/apache/sedona/issues/2068'>GH-2068</a>] - Implement the `limit` parameter for `GeoSeries.fillna`
 * [<a href='https://github.com/apache/sedona/issues/3257'>GH-3257</a>] - Implement distributed GeoSeries and GeoDataFrame Hilbert-distance spatial ordering
 * [<a href='https://github.com/apache/sedona/issues/3260'>GH-3260</a>] - Implement distributed GeoSeries and GeoDataFrame identical-geometry equality

@@ -1577,8 +1577,32 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
         self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
-    def test_transform(self):
-        pass
+    @pytest.mark.skipif(
+        parse_version(pyspark.__version__) < parse_version("3.5.0")
+        or parse_version(gpd.__version__) < parse_version("1.0.0"),
+        reason="transform parity requires Spark>=3.5 and GeoPandas>=1.0",
+    )
+    @pytest.mark.parametrize("include_z", [False, True])
+    def test_transform(self, include_z):
+        geometries = [
+            self.points[2],
+            self.linestrings[2],
+            self.polygons[2],
+            self.multipoints[2],
+            self.multilinestrings[2],
+            self.multipolygons[1],
+            self.geomcollection[1],
+            Point(1, 2, 3),
+            LineString([(0, 0, 1), (2, 1, 4)]),
+            None,
+            Polygon(),
+        ]
+        transformation = lambda coords: coords * 2 + 1
+        expected = gpd.GeoSeries(geometries).transform(
+            transformation, include_z=include_z
+        )
+        actual = GeoSeries(geometries).transform(transformation, include_z=include_z)
+        self.check_sgpd_equals_gpd(actual, expected)
 
     @pytest.mark.parametrize("angle", [0, 45, 90, 180])
     @pytest.mark.parametrize(

@@ -51,6 +51,7 @@ from pyspark.sql.types import (
     TimestampType,
 )
 from sedona.spark.sql.types import GeometryType
+from sedona.spark.sql.functions import sedona_vectorized_udf, SedonaUDFType
 
 from sedona.spark.sql import st_aggregates as sta
 from sedona.spark.sql import st_constructors as stc
@@ -2728,8 +2729,30 @@ class GeoSeries(GeoFrame, pspd.Series):
         return self._query_geometry_column(spark_expr, returns_geom=True)
 
     def transform(self, transformation, include_z=False):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+        if not callable(transformation):
+            raise TypeError("'transformation' must be callable")
+        if parse_version(pyspark.__version__) < parse_version("3.5.0"):
+            raise NotImplementedError("transform requires Spark 3.5 or newer")
+        if parse_version(shapely.__version__) < parse_version("2.0.0"):
+            raise ImportError("transform requires Shapely 2.0 or newer")
+
+        @sedona_vectorized_udf(
+            return_type=GeometryType(), udf_type=SedonaUDFType.GEO_SERIES
+        )
+        def transform_batch(batch: gpd.GeoSeries) -> gpd.GeoSeries:
+            return gpd.GeoSeries(
+                shapely.transform(
+                    np.asarray(batch.array), transformation, include_z=include_z
+                ),
+                index=batch.index,
+            )
+
+        # GeometryUDT's Python serializer does not retain SRIDs. Restore them
+        # from the input column without resolving CRS metadata on the driver.
+        transformed = stf.ST_SetSRID(
+            transform_batch(self.spark.column), stf.ST_SRID(self.spark.column)
+        )
+        return self._query_geometry_column(transformed, returns_geom=True)
 
     def rotate(self, angle, origin="center", use_radians=False) -> "GeoSeries":
         import math
