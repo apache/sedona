@@ -601,20 +601,84 @@ public class RasterConstructorsTest extends RasterTestBase {
   }
 
   @Test
-  public void testAsRasterRejectsNonFiniteNoDataValue() throws FactoryException, ParseException {
-    // NaN and +/-Infinity are rejected as a nodata value on float ('F') and double ('D') bands.
-    // NaN is the codebase's internal "no nodata" sentinel, so it would be silently dropped rather
-    // than recorded (leaving the NaN-filled background reading back as data); an infinite value is
-    // not a valid GeoTools category bound and previously crashed deep in GeoTools with
-    // "Range [Infinity .. Infinity] is not valid". Both are now rejected up front with a clear
-    // error that names the offending value and pixel type.
+  public void testAsRasterAcceptsNaNNoDataValue() throws FactoryException, ParseException {
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "D", 3, 3, 0, 3, 1, -1, 0, 0, 0);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((0 0, 3 0, 3 3, 0 3, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))", 0);
+
+    for (String pixelType : new String[] {"F", "D"}) {
+      for (boolean useGeometryExtent : new boolean[] {true, false}) {
+        GridCoverage2D result =
+            RasterConstructors.asRaster(
+                geom, raster, pixelType, false, 1d, Double.NaN, useGeometryExtent);
+        assertNaNNoDataBackground(result);
+      }
+    }
+  }
+
+  @Test
+  public void testAsRasterInheritsNaNNoDataValue() throws FactoryException, ParseException {
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "D", 3, 3, 0, 3, 1, -1, 0, 0, 0);
+    GridCoverage2D reference = RasterBandEditors.setBandNoDataValue(raster, 1, Double.NaN);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((0 0, 3 0, 3 3, 0 3, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))", 0);
+
+    for (String pixelType : new String[] {"F", "D"}) {
+      assertNaNNoDataBackground(RasterConstructors.asRaster(geom, reference, pixelType));
+    }
+    for (String pixelType : new String[] {"B", "US", "S", "I"}) {
+      Assert.assertThrows(
+          IllegalArgumentException.class,
+          () -> RasterConstructors.asRaster(geom, reference, pixelType));
+    }
+  }
+
+  private static void assertNaNNoDataBackground(GridCoverage2D raster) {
+    assertArrayEquals(
+        new double[] {1, 1, 1, 1, Double.NaN, 1, 1, 1, 1}, MapAlgebra.bandAsArray(raster, 1), 0d);
+    assertEquals(Double.valueOf(Double.NaN), RasterBandAccessors.getBandNoDataValue(raster, 1));
+    assertEquals(8L, RasterBandAccessors.getCount(raster, 1, true));
+  }
+
+  @Test
+  public void testAsRasterRejectsInfiniteNoDataValue() throws FactoryException, ParseException {
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "D", 3, 3, 0, 3, 1, -1, 0, 0, 0);
+    Geometry geom = Constructors.geomFromWKT("POLYGON ((0 0, 3 0, 3 3, 0 3, 0 0))", 0);
+    for (String pixelType : new String[] {"F", "D"}) {
+      for (double noData : new double[] {Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY}) {
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterConstructors.asRaster(geom, raster, pixelType, false, 1d, noData, false));
+      }
+    }
+  }
+
+  @Test
+  public void testAsRasterRejectsNonFiniteBurnValue() throws FactoryException, ParseException {
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "D", 3, 3, 0, 3, 1, -1, 0, 0, 0);
+    Geometry geom = Constructors.geomFromWKT("POLYGON ((0 0, 3 0, 3 3, 0 3, 0 0))", 0);
+    for (String pixelType : new String[] {"F", "D"}) {
+      for (double value :
+          new double[] {Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY}) {
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterConstructors.asRaster(geom, raster, pixelType, false, value, 0d, false));
+      }
+    }
+  }
+
+  @Test
+  public void testAsRasterRejectsNonFiniteNoDataValueOnIntegerBand()
+      throws FactoryException, ParseException {
     GridCoverage2D raster =
         RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
     Geometry geom =
         Constructors.geomFromWKT(
             "POLYGON ((100.5 499.5, 113.5 499.5, 113.5 488.5, 100.5 488.5, 100.5 499.5))", 0);
 
-    for (String pixelType : new String[] {"F", "D"}) {
+    for (String pixelType : new String[] {"B", "US", "S", "I"}) {
       for (double nonFinite :
           new double[] {Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY}) {
         IllegalArgumentException error =
