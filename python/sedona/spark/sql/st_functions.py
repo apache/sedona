@@ -1709,7 +1709,8 @@ def ST_MakeValid(
     May reorder coordinates or reverse polygon ring orientation, including for
     already-valid inputs. Apply :func:`ST_ForcePolygonCCW` or
     :func:`ST_ForcePolygonCW` to the result to enforce a specific ring orientation.
-    These functions do not restore the original vertex order or starting vertex.
+    These functions are not guaranteed to restore the original vertex order or
+    starting vertex.
 
     :param geometry: Geometry column that contains the invalid geometry.
     :type geometry: ColumnOrName
