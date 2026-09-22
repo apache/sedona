@@ -8437,10 +8437,30 @@ class TestGeoSeriesTransform(TestGeopandasBase):
             (1, 3857, "POINT (5 3)"),
         ]
 
+    @pytest.mark.parametrize(
+        "geometry_wkt,expected_wkt",
+        [
+            (
+                "MULTIPOINT (EMPTY, (1 2), EMPTY)",
+                "MULTIPOINT (EMPTY, (3 1), EMPTY)",
+            ),
+            (
+                "MULTILINESTRING (EMPTY, (0 0, 1 1), EMPTY)",
+                "MULTILINESTRING (EMPTY, (2 -1, 3 0), EMPTY)",
+            ),
+            (
+                "MULTIPOLYGON (EMPTY, ((0 0, 1 0, 1 1, 0 0)), EMPTY)",
+                "MULTIPOLYGON (EMPTY, ((2 -1, 3 -1, 3 0, 2 -1)), EMPTY)",
+            ),
+        ],
+        ids=["multipoint", "multilinestring", "multipolygon"],
+    )
     @pytest.mark.parametrize("srid", [0, 4326])
-    def test_transform_preserves_empty_multipolygon_members(self, srid):
+    def test_transform_preserves_empty_multipart_members(
+        self, srid, geometry_wkt, expected_wkt
+    ):
         frame = self.spark.createDataFrame(
-            [(0, f"SRID={srid};MULTIPOLYGON (EMPTY, ((0 0, 1 0, 1 1, 0 0)), EMPTY)")],
+            [(0, f"SRID={srid};{geometry_wkt}")],
             "id long, ewkt string",
         ).selectExpr("id", "ST_GeomFromEWKT(ewkt) AS geometry")
         source = GeoSeries(frame.pandas_api(index_col="id")["geometry"])
@@ -8451,16 +8471,10 @@ class TestGeoSeriesTransform(TestGeopandasBase):
             result.spark.column.alias("geometry"),
         ).first()
         assert row.srid == srid
-        assert row.geometry.geom_type == "MultiPolygon"
         assert len(row.geometry.geoms) == 3
         assert row.geometry.geoms[0].is_empty
         assert row.geometry.geoms[2].is_empty
-        assert list(row.geometry.geoms[1].exterior.coords) == [
-            (2, -1),
-            (3, -1),
-            (3, 0),
-            (2, -1),
-        ]
+        assert row.geometry.wkb == wkt.loads(expected_wkt).wkb
 
     @pytest.mark.parametrize("include_z", [False, True])
     def test_transform_dimensions(self, include_z):

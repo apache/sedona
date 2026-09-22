@@ -16,6 +16,7 @@
 # under the License.
 
 import struct
+import math
 
 import pytest
 import shapely
@@ -211,19 +212,29 @@ def test_general_empty_serializer_still_rejects_m(geometry_type, type_id, dimens
         geometry_serde_general.serialize(geometry)
 
 
+@pytest.mark.parametrize(
+    "geometry_type,type_id",
+    [("MULTIPOINT", 4), ("MULTILINESTRING", 5), ("MULTIPOLYGON", 6)],
+)
 @pytest.mark.parametrize("dimension", ["", " Z"])
 @pytest.mark.parametrize("members", ["leading", "trailing", "both", "all", "none"])
-def test_general_multipolygon_roundtrip_keeps_empty_members(dimension, members):
+def test_general_multipart_roundtrip_keeps_empty_members(
+    geometry_type, type_id, dimension, members
+):
     ring = "0 0, 1 0, 1 1, 0 0" if not dimension else "0 0 2, 1 0 2, 1 1 2, 0 0 2"
-    polygon = f"(({ring}))"
+    nonempty_member = {
+        4: "(0 0)" if not dimension else "(0 0 2)",
+        5: f"({ring})",
+        6: f"(({ring}))",
+    }[type_id]
     parts = {
-        "leading": f"EMPTY, {polygon}",
-        "trailing": f"{polygon}, EMPTY",
-        "both": f"EMPTY, {polygon}, EMPTY",
+        "leading": f"EMPTY, {nonempty_member}",
+        "trailing": f"{nonempty_member}, EMPTY",
+        "both": f"EMPTY, {nonempty_member}, EMPTY",
         "all": "EMPTY, EMPTY",
-        "none": polygon,
+        "none": nonempty_member,
     }
-    geometry = wkt_loads(f"MULTIPOLYGON{dimension} ({parts[members]})")
+    geometry = wkt_loads(f"{geometry_type}{dimension} ({parts[members]})")
     if members == "all" and shapely.__version__ < "2":
         pytest.skip("Shapely 1.x hides all-empty members from the serializer")
     if members == "all":
@@ -234,13 +245,20 @@ def test_general_multipolygon_roundtrip_keeps_empty_members(dimension, members):
 
     assert offset == len(buffer)
     # Some GEOS versions construct XY empty members even inside a Z
-    # MultiPolygon. The internal format stores one shared coordinate layout,
+    # multipart geometry. The internal format stores one shared coordinate layout,
     # so those empty members are normalized to that layout on reconstruction.
     z_flag = 0x80000000 if dimension else 0
-    expected_wkb = struct.pack("<BII", 1, 6 | z_flag, len(geometry.geoms))
+    expected_wkb = struct.pack("<BII", 1, type_id | z_flag, len(geometry.geoms))
+    empty_wkb = struct.pack("<BI", 1, (type_id - 3) | z_flag)
+    empty_wkb += (
+        struct.pack(
+            "<" + "d" * (3 if dimension else 2), *([math.nan] * (3 if dimension else 2))
+        )
+        if type_id == 4
+        else struct.pack("<I", 0)
+    )
     expected_wkb += b"".join(
-        struct.pack("<BII", 1, 3 | z_flag, 0) if part.is_empty else part.wkb
-        for part in geometry.geoms
+        empty_wkb if part.is_empty else part.wkb for part in geometry.geoms
     )
     assert actual.wkb == expected_wkb
 
@@ -263,6 +281,60 @@ def test_general_multipolygon_all_empty_stored_members(coord_type, empty_ring_co
     expected_wkb += struct.pack("<BII", 1, polygon_type, 0) * 2
 
     actual, offset = geometry_serde_general.deserialize(buffer + b"trailing bytes")
+
+    assert offset == len(buffer)
+    assert actual.wkb == expected_wkb
+
+
+@pytest.mark.parametrize("type_id", [4, 5, 6])
+@pytest.mark.parametrize("coord_type", [1, 2])
+@pytest.mark.parametrize("num_members", [0, 2])
+def test_general_multipart_stored_empty_members(type_id, coord_type, num_members):
+    dimension = coord_type + 1
+    num_coords = num_members if type_id == 4 else 0
+    buffer = struct.pack(
+        "BBBBi", (type_id << 4) | (coord_type << 1), 0, 0, 0, num_coords
+    )
+    if type_id == 4:
+        buffer += struct.pack(
+            "d" * (dimension * num_members), *([math.nan] * (dimension * num_members))
+        )
+    else:
+        buffer += struct.pack(
+            "i" * (num_members + 1), num_members, *([0] * num_members)
+        )
+    z_flag = 0x80000000 if coord_type == 2 else 0
+    empty_wkb = struct.pack("<BI", 1, (type_id - 3) | z_flag)
+    empty_wkb += (
+        struct.pack("<" + "d" * dimension, *([math.nan] * dimension))
+        if type_id == 4
+        else struct.pack("<I", 0)
+    )
+    # GEOS canonicalizes zero-member multipart geometries to XY, even when
+    # loading WKB with an explicit Z flag.
+    collection_z_flag = z_flag if num_members else 0
+    expected_wkb = (
+        struct.pack("<BII", 1, type_id | collection_z_flag, num_members)
+        + empty_wkb * num_members
+    )
+
+    actual, offset = geometry_serde_general.deserialize(buffer + b"trailing bytes")
+
+    assert offset == len(buffer)
+    assert actual.wkb == expected_wkb
+
+
+@pytest.mark.parametrize("coordinates", [(math.nan, 1.0), (math.nan, 1.0, 2.0)])
+def test_general_multipoint_preserves_partially_nan_point(coordinates):
+    coord_type = len(coordinates) - 1
+    buffer = struct.pack("BBBBi", 0x40 | (coord_type << 1), 0, 0, 0, 1)
+    buffer += struct.pack("d" * len(coordinates), *coordinates)
+    z_flag = 0x80000000 if coord_type == 2 else 0
+    expected_wkb = struct.pack("<BII", 1, 4 | z_flag, 1)
+    expected_wkb += struct.pack("<BI", 1, 1 | z_flag)
+    expected_wkb += struct.pack("<" + "d" * len(coordinates), *coordinates)
+
+    actual, offset = geometry_serde_general.deserialize(buffer)
 
     assert offset == len(buffer)
     assert actual.wkb == expected_wkb
