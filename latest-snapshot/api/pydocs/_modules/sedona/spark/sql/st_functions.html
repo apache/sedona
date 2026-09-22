@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.st_functions &mdash; Apache Sedona Python Documentation</title>
@@ -1916,9 +1915,17 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Convert an invalid geometry in a geometry column into a valid geometry.</span>
 
+<span class="sd">    May reorder coordinates or reverse polygon ring orientation, including for</span>
+<span class="sd">    already-valid inputs. Apply :func:`ST_ForcePolygonCCW` or</span>
+<span class="sd">    :func:`ST_ForcePolygonCW` to the result to enforce a specific ring orientation.</span>
+<span class="sd">    These functions are not guaranteed to restore the original vertex order or</span>
+<span class="sd">    starting vertex.</span>
+
 <span class="sd">    :param geometry: Geometry column that contains the invalid geometry.</span>
 <span class="sd">    :type geometry: ColumnOrName</span>
-<span class="sd">    :param keep_collapsed: If True then collapsed geometries are converted to empty geometries, otherwise they will be converted to valid geometries of a lower dimension, if None then the default value of False is used, defaults to None</span>
+<span class="sd">    :param keep_collapsed: If True, preserve collapsed geometries as valid geometries</span>
+<span class="sd">        of a lower dimension. If False, convert them to empty geometries. If None,</span>
+<span class="sd">        use the default value of False.</span>
 <span class="sd">    :type keep_collapsed: Optional[Union[ColumnOrName, bool]], optional</span>
 <span class="sd">    :return: Geometry column that contains valid versions of the original geometry.</span>
 <span class="sd">    :rtype: Column</span>
