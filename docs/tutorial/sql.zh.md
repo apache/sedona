@@ -141,7 +141,7 @@ SedonaSQL 详细 API 说明请参阅 [SedonaSQL API](../api/sql/Overview.md)。�
 
 ## 参数化查询（Python）
 
-在 Spark 3.4 及更高版本中，`sedona.sql` 支持 [SparkSession.sql](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.SparkSession.sql.html) 提供的命名参数。请通过 `args` 绑定值，而不要用 f-string 或字符串拼接将值插入 SQL。可以将 DataFrame 作为关键字参数传入，并通过 `{占位符}` 引用；Spark 会自动管理临时视图。
+`sedona.sql` 支持 [SparkSession.sql](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.SparkSession.sql.html) 提供的命名参数。请通过 `args` 绑定值，而不要用 f-string 或字符串拼接将值插入 SQL。可以将 DataFrame 作为关键字参数传入，并通过 `{占位符}` 引用；Spark 会自动管理临时视图。
 
 ```python
 points = sedona.sql("""

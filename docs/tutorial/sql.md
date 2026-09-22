@@ -141,7 +141,7 @@ You can also register everything by passing `--conf spark.sql.extensions=org.apa
 
 ## Parameterized queries (Python)
 
-With Spark 3.4 or later, `sedona.sql` supports the named parameters provided by [SparkSession.sql](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.SparkSession.sql.html). Bind values through `args` instead of inserting them into SQL strings with f-strings or concatenation. Pass a DataFrame as a keyword argument to reference it through a `{placeholder}`; Spark manages the temporary view for you.
+`sedona.sql` supports the named parameters provided by [SparkSession.sql](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.SparkSession.sql.html). Bind values through `args` instead of inserting them into SQL strings with f-strings or concatenation. Pass a DataFrame as a keyword argument to reference it through a `{placeholder}`; Spark manages the temporary view for you.
 
 ```python
 points = sedona.sql("""
