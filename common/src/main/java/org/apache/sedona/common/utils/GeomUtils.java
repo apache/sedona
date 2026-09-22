@@ -190,25 +190,31 @@ public class GeomUtils {
   }
 
   public static String getHexEWKB(Geometry geometry, int endian) {
-    WKBWriter writer =
-        new WKBWriter(GeomUtils.getDimension(geometry), endian, geometry.getSRID() != 0);
-    return WKBWriter.toHex(writer.write(geometry));
+    return WKBWriter.toHex(
+        createDimensionPreservingWKBWriter(endian, geometry.getSRID() != 0).write(geometry));
   }
 
   public static byte[] getEWKB(Geometry geometry) {
     if (geometry == null) {
       return null;
     }
-    WKBWriter writer = createWKBWriter(GeomUtils.getDimension(geometry), geometry.getSRID() != 0);
-    return writer.write(geometry);
+    return createDimensionPreservingWKBWriter(NATIVE_WKB_BYTE_ORDER, geometry.getSRID() != 0)
+        .write(geometry);
   }
 
   public static byte[] getWKB(Geometry geometry) {
     if (geometry == null) {
       return null;
     }
-    WKBWriter writer = createWKBWriter(GeomUtils.getDimension(geometry), false);
-    return writer.write(geometry);
+    return createDimensionPreservingWKBWriter(NATIVE_WKB_BYTE_ORDER, false).write(geometry);
+  }
+
+  private static org.datasyslab.jts.io.WKBWriter createDimensionPreservingWKBWriter(
+      int byteOrder, boolean includeSRID) {
+    org.datasyslab.jts.io.WKBWriter writer =
+        new org.datasyslab.jts.io.WKBWriter(4, byteOrder, includeSRID);
+    writer.setPreserveCoordinateDimensions(true);
+    return writer;
   }
 
   private static final int NATIVE_WKB_BYTE_ORDER =

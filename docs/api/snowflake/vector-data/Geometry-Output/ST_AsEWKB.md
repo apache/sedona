@@ -25,6 +25,8 @@ The format originated in PostGIS but is supported by many GIS tools.
 If the geometry is lacking SRID a WKB format is produced.
 [See ST_SetSRID](../Spatial-Reference-System/ST_SetSRID.md)
 
+Since v2.0.0, measured geometries retain M in the output, including those read from WKT; earlier versions dropped M. Z/M layouts declared in WKB are preserved for empty points, lines, and polygons and for NaN ordinates. Collections with no members have no stored coordinate layout and are written as XY.
+
 Format: `ST_AsEWKB (A:geometry)`
 
 Return type: `Binary`

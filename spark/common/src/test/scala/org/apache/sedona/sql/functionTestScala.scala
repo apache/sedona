@@ -1075,6 +1075,76 @@ class functionTestScala
       assert(Hex.encodeHexString(df.first().get(0).asInstanceOf[Array[Byte]]) == s)
     }
 
+    it("WKB output preserves declared point layouts after a shuffle") {
+      val nan = "000000000000F87F"
+      val xy = "000000000000F03F0000000000000040"
+      val layouts = Seq(
+        ("0101000000", 2, 0),
+        ("0101000080", 3, 0),
+        ("0101000040", 3, 1),
+        ("01010000C0", 4, 1))
+      val cases = for {
+        (header, dimension, measures) <- layouts
+        empty <- Seq(false, true)
+      } yield (
+        header + (if (empty) nan * 2 else xy) + nan * (dimension - 2),
+        dimension,
+        measures,
+        empty)
+      val geometries = cases.zipWithIndex
+        .map { case ((wkb, _, _, _), id) => (id, wkb) }
+        .toDF("id", "wkb")
+        .selectExpr("id", "ST_SetSRID(ST_GeomFromWKB(unhex(wkb)), 4326) AS geom")
+        .repartition(2)
+        .cache()
+      try {
+        assertEquals(cases.size.toLong, geometries.count())
+        val rows = geometries
+          .selectExpr(
+            "id",
+            "ST_AsBinary(geom)",
+            "ST_AsEWKB(geom)",
+            "ST_AsHEXEWKB(geom)",
+            "ST_AsHEXEWKB(geom, 'XDR')")
+          .collect()
+        rows.foreach { row =>
+          val (_, dimension, measures, empty) = cases(row.getInt(0))
+          val outputs = Seq(
+            row.getAs[Array[Byte]](1) -> 0,
+            row.getAs[Array[Byte]](2) -> 4326,
+            Hex.decodeHex(row.getString(3).toCharArray) -> 4326,
+            Hex.decodeHex(row.getString(4).toCharArray) -> 4326)
+          outputs.foreach { case (bytes, srid) =>
+            val point =
+              org.apache.sedona.common.Constructors.geomFromWKB(bytes).asInstanceOf[Point]
+            assertEquals(dimension, point.getCoordinateSequence.getDimension)
+            assertEquals(measures, point.getCoordinateSequence.getMeasures)
+            assertEquals(empty, point.isEmpty)
+            assertEquals(srid, point.getSRID)
+            assertEquals(5 + dimension * 8 + (if (srid == 0) 0 else 4), bytes.length)
+            if (!empty) {
+              assertEquals(1.0, point.getX, 0.0)
+              assertEquals(2.0, point.getY, 0.0)
+              (2 until dimension).foreach { ordinate =>
+                assertTrue(point.getCoordinateSequence.getOrdinate(0, ordinate).isNaN)
+              }
+            }
+          }
+          assertEquals(1, outputs(2)._1(0).toInt)
+          assertEquals(0, outputs(3)._1(0).toInt)
+        }
+      } finally {
+        geometries.unpersist()
+      }
+    }
+
+    it("WKB output functions return null for null geometry") {
+      val row = sparkSession
+        .sql("SELECT ST_AsBinary(NULL), ST_AsEWKB(NULL), ST_AsHEXEWKB(NULL)")
+        .first()
+      (0 until 3).foreach(index => assertTrue(row.isNullAt(index)))
+    }
+
     it("Passed ST_Simplify") {
       val baseDf = sparkSession.sql("SELECT ST_Buffer(ST_GeomFromWKT('POINT (0 2)'), 10) AS geom")
       val actualPoints = baseDf.selectExpr("ST_NPoints(ST_Simplify(geom, 1))").first().get(0)

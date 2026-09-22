@@ -21,6 +21,8 @@
 
 Introduction: Return the Well-Known Binary representation of a geometry
 
+Since v2.0.0, measured geometries retain M in the output, including those read from WKT; earlier versions dropped M. Z/M layouts declared in WKB are preserved for empty points, lines, and polygons and for NaN ordinates. Collections with no members have no stored coordinate layout and are written as XY. The output does not include the SRID.
+
 Format: `ST_AsBinary (A: Geometry)`
 
 Return type: `Binary`
