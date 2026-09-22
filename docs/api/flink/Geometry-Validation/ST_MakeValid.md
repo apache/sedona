@@ -21,8 +21,13 @@
 
 Introduction: Given an invalid geometry, create a valid representation of the geometry.
 
-Collapsed geometries are either converted to empty (keepCollapsed=true) or a valid geometry of lower dimension (keepCollapsed=false).
+Collapsed geometries are either converted to empty (keepCollapsed=false) or a valid geometry of lower dimension (keepCollapsed=true).
 Default is keepCollapsed=false.
+
+!!! note "Vertex order and ring orientation"
+    `ST_MakeValid` may reorder coordinates or reverse polygon ring orientation, including for already-valid inputs.
+    To enforce a specific orientation after repair, use [ST_ForcePolygonCCW](../Geometry-Editors/ST_ForcePolygonCCW.md) or [ST_ForcePolygonCW](../Geometry-Editors/ST_ForcePolygonCW.md), for example `ST_ForcePolygonCCW(ST_MakeValid(geom))`.
+    These functions enforce ring orientation; they do not restore the original vertex order or starting vertex.
 
 ![ST_MakeValid](../../../image/ST_MakeValid/ST_MakeValid.svg "ST_MakeValid")
 
