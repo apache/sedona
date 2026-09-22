@@ -385,6 +385,7 @@ hooks:
   - docs-overrides/hooks/i18n_blog_passthrough.py
   - docs-overrides/hooks/i18n_sitemaps.py
   - docs-overrides/hooks/blog_star_cta.py
+  - docs-overrides/hooks/custom_404.py
 extra_css:
   - assets/stylesheets/extra.min.css
 extra_javascript:
