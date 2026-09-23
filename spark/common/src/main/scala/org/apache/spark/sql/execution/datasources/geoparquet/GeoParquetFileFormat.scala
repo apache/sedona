@@ -38,7 +38,7 @@ import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeProjectio
 import org.apache.spark.sql.catalyst.parser.LegacyTypeStringParser
 import org.apache.spark.sql.catalyst.util.DateTimeUtils
 import org.apache.spark.sql.execution.datasources.{FileFormat, OutputWriter, OutputWriterFactory, PartitionedFile, RecordReaderIterator}
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.sources.{DataSourceRegister, Filter}
 import org.apache.spark.sql.types._
 import org.apache.spark.util.SerializableConfiguration
@@ -452,11 +452,10 @@ object GeoParquetFileFormat extends Logging {
       }
       .toOption
 
-    schemaOpt.map(schema =>
-      replaceGeometryColumnWithGeometryUDT(schema, keyValueMetaData, parameters))
+    schemaOpt.map(schema => replaceGeometryColumnType(schema, keyValueMetaData, parameters))
   }
 
-  private def replaceGeometryColumnWithGeometryUDT(
+  private def replaceGeometryColumnType(
       schema: StructType,
       keyValueMetaData: java.util.Map[String, String],
       parameters: Map[String, String]): StructType = {
@@ -465,7 +464,8 @@ object GeoParquetFileFormat extends Logging {
     val fields = schema.fields.map { field =>
       field.dataType match {
         case _: BinaryType if geoParquetMetaData.columns.contains(field.name) =>
-          field.copy(dataType = GeometryUDT())
+          field.copy(dataType = SpatialTypeSupport.geometryType(
+            GeoParquetMetaData.extractSridFromCrs(geoParquetMetaData.columns(field.name).crs)))
         case _ => field
       }
     }

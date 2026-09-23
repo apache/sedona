@@ -23,7 +23,7 @@ import org.apache.sedona.common.Functions.asGeoJson
 import org.apache.sedona.common.enums.FileDataSplitter
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
 
@@ -54,13 +54,17 @@ object GeoJSONUtils {
     }
   }
 
-  def geoJsonToGeometry(geoJson: String): Array[Byte] = {
+  def geoJsonToGeometry(
+      geoJson: String,
+      dataType: DataType = SpatialTypeSupport.geometryType): Any = {
     val geometry = geomFromText(geoJson, FileDataSplitter.GEOJSON)
-    GeometryUDT.serialize(geometry)
+    SpatialTypeSupport.serializeGeometry(geometry, dataType)
   }
 
-  def geometryToGeoJson(geometryBinary: Array[Byte]): String = {
-    val geometry = GeometryUDT.deserialize(geometryBinary)
+  def geometryToGeoJson(
+      geometryBinary: Any,
+      dataType: DataType = SpatialTypeSupport.geometryType): String = {
+    val geometry = SpatialTypeSupport.deserializeGeometry(geometryBinary, dataType)
     asGeoJson(geometry)
   }
 
@@ -68,7 +72,8 @@ object GeoJSONUtils {
       row: InternalRow,
       index: Int,
       elementType: DataType,
-      toGeometry: Boolean): ArrayData = {
+      toGeometry: Boolean,
+      outputElementType: Option[DataType] = None): ArrayData = {
     val arrayData = row.getArray(index)
     if (arrayData == null || arrayData.numElements() == 0)
       return new GenericArrayData(Seq.empty[Any])
@@ -79,7 +84,10 @@ object GeoJSONUtils {
           if (!arrayData.isNullAt(i)) {
             val innerRow = arrayData.getStruct(i, structType.fields.length)
             if (toGeometry) {
-              convertGeoJsonToGeometry(innerRow, structType)
+              convertGeoJsonToGeometry(
+                innerRow,
+                structType,
+                outputElementType.map(_.asInstanceOf[StructType]).orNull)
             } else {
               convertGeometryToGeoJson(innerRow, structType)
             }
@@ -96,9 +104,10 @@ object GeoJSONUtils {
     val newValues = new Array[Any](schema.fields.length)
 
     schema.fields.zipWithIndex.foreach {
-      case (StructField("geometry", _: GeometryUDT, _, _), index) =>
-        val geometryBinary = row.getBinary(index)
-        newValues(index) = UTF8String.fromString(geometryToGeoJson(geometryBinary))
+      case (StructField("geometry", dt, _, _), index) if SpatialTypeSupport.isGeometry(dt) =>
+        newValues(index) =
+          if (row.isNullAt(index)) null
+          else UTF8String.fromString(geometryToGeoJson(row.get(index, dt), dt))
       case (StructField(_, structType: StructType, _, _), index) =>
         val nestedRow = row.getStruct(index, structType.fields.length)
         newValues(index) = convertGeometryToGeoJson(nestedRow, structType)
@@ -114,7 +123,10 @@ object GeoJSONUtils {
   private def hasGeometryField(st: StructType): Boolean =
     st.fields.exists(_.name == "geometry")
 
-  def convertGeoJsonToGeometry(row: InternalRow, schema: StructType): InternalRow = {
+  def convertGeoJsonToGeometry(
+      row: InternalRow,
+      schema: StructType,
+      outputSchema: StructType = null): InternalRow = {
     val newValues = new Array[Any](schema.fields.length)
 
     // This struct is the geometry level if it has a geometry field at this level
@@ -126,7 +138,12 @@ object GeoJSONUtils {
       case (StructField("geometry", StringType, _, _), index) if geometryLevel =>
         newValues(index) =
           if (row.isNullAt(index)) null
-          else geoJsonToGeometry(row.getString(index))
+          else
+            geoJsonToGeometry(
+              row.getString(index),
+              Option(outputSchema)
+                .map(_(index).dataType)
+                .getOrElse(SpatialTypeSupport.geometryType))
 
       // If we've reached the geometry level, do NOT recurse further
       case (sf @ StructField(_, _: StructType, _, _), index) if geometryLevel =>
@@ -145,13 +162,22 @@ object GeoJSONUtils {
           if (row.isNullAt(index)) null
           else {
             val nestedRow = row.getStruct(index, structType.fields.length)
-            convertGeoJsonToGeometry(nestedRow, structType)
+            convertGeoJsonToGeometry(
+              nestedRow,
+              structType,
+              Option(outputSchema).map(_(index).dataType.asInstanceOf[StructType]).orNull)
           }
 
       case (StructField(_, arrayType: ArrayType, _, _), index) =>
         newValues(index) =
           if (row.isNullAt(index)) null
-          else handleArray(row, index, arrayType.elementType, toGeometry = true)
+          else
+            handleArray(
+              row,
+              index,
+              arrayType.elementType,
+              toGeometry = true,
+              Option(outputSchema).map(_(index).dataType.asInstanceOf[ArrayType].elementType))
 
       // Primitives
       case (_, index) =>

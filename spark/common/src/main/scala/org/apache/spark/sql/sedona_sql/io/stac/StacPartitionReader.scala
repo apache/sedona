@@ -122,9 +122,13 @@ class StacPartitionReader(
             parser,
             schema)
 
+        val geometrySchema = GeoJSONUtils.updateGeometrySchema(
+          schema,
+          org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport.geometryType)
         rows.map(row => {
-          val geometryConvertedRow = GeoJSONUtils.convertGeoJsonToGeometry(row, alteredSchema)
-          val propertiesPromotedRow = promotePropertiesToTop(geometryConvertedRow, alteredSchema)
+          val geometryConvertedRow =
+            GeoJSONUtils.convertGeoJsonToGeometry(row, alteredSchema, geometrySchema)
+          val propertiesPromotedRow = promotePropertiesToTop(geometryConvertedRow, geometrySchema)
           propertiesPromotedRow
         })
       } else {

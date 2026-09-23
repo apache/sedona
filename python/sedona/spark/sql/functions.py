@@ -21,7 +21,14 @@ from enum import Enum
 
 import pandas as pd
 
-from sedona.spark.sql.types import GeometryType
+from sedona.spark.sql.types import (
+    GeometryType,
+    GeographyType,
+    USES_NATIVE_SPATIAL_TYPES,
+    to_shapely,
+    to_spark_geometry,
+    to_spark_geography,
+)
 from sedona.spark.utils import geometry_serde
 from pyspark.sql.udf import UserDefinedFunction
 from pyspark.sql.types import DataType
@@ -71,6 +78,28 @@ def sedona_vectorized_udf(
 
             if issubclass(param.annotation, gpd.GeoSeries):
                 deserialize_geom = True
+
+        if USES_NATIVE_SPATIAL_TYPES:
+            from pyspark.sql.functions import pandas_udf, PandasUDFType
+
+            if udf_type not in (SedonaUDFType.SHAPELY_SCALAR, SedonaUDFType.GEO_SERIES):
+                raise InvalidSedonaUDFType(f"Invalid UDF type: {udf_type}")
+
+            def apply_native(series):
+                values = series.map(to_shapely) if deserialize_geom else series
+                if udf_type == SedonaUDFType.GEO_SERIES:
+                    output = fn(gpd.GeoSeries(values) if deserialize_geom else values)
+                else:
+                    output = values.map(fn)
+                # An all-null GeoSeries retains its geometry extension dtype after
+                # map(). Native Spark values require an ordinary object Series.
+                if isinstance(return_type, GeometryType):
+                    return pd.Series(output, dtype=object).map(to_spark_geometry)
+                if isinstance(return_type, GeographyType):
+                    return pd.Series(output, dtype=object).map(to_spark_geography)
+                return output
+
+            return pandas_udf(apply_native, return_type, PandasUDFType.SCALAR)
 
         if udf_type == SedonaUDFType.SHAPELY_SCALAR:
             return _apply_shapely_series_udf(

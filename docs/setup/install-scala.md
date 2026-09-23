@@ -24,6 +24,8 @@ There are two ways to use a Scala or Java library with Apache Spark. You can use
 * Spark interactive Scala or SQL shell: easy to start, good for new learners to try simple functions
 * Self-contained Scala / Java project: a steep learning curve of package management, but good for large projects
 
+For Spark 4.2, see the [native spatial types migration guide](spark-4.2.md) for schema and function changes.
+
 ## Spark Scala shell
 
 ### Download Sedona jar automatically

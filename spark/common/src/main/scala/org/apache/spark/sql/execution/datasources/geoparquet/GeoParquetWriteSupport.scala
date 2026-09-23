@@ -32,7 +32,7 @@ import org.apache.spark.sql.catalyst.util.DateTimeUtils
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData.{GEOPARQUET_COVERING_KEY, GEOPARQUET_COVERING_MODE_AUTO, GEOPARQUET_COVERING_MODE_KEY, GEOPARQUET_COVERING_MODE_LEGACY, GEOPARQUET_CRS_KEY, GEOPARQUET_VERSION_KEY, VERSION, createCoveringColumnMetadata}
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetWriteSupport.GeometryColumnInfo
 import org.apache.spark.sql.execution.datasources.geoparquet.internal.{DataSourceUtils, LegacyBehaviorPolicy, PortableSQLConf}
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.types._
 import org.json4s.JValue
 import org.json4s.jackson.JsonMethods.parse
@@ -131,7 +131,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
     }
 
     schema.zipWithIndex.foreach { case (field, ordinal) =>
-      if (field.dataType == GeometryUDT) {
+      if (SpatialTypeSupport.isGeometry(field.dataType)) {
         geometryColumnInfoMap.getOrElseUpdate(ordinal, new GeometryColumnInfo())
       }
     }
@@ -207,7 +207,8 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       }
       .toArray[ValueWriter]
 
-    val messageType = new internal.SparkToParquetSchemaConverter(configuration).convert(schema)
+    val messageType = new internal.SparkToParquetSchemaConverter(configuration)
+      .convert(GeoParquetSchemaConverter.physicalSchema(schema))
     val sparkSqlParquetRowMetadata = GeoParquetWriteSupport.getSparkSqlParquetRowMetadata(schema)
     val metadata = Map(
       DataSourceUtils.SPARK_VERSION_METADATA_KEY -> SPARK_VERSION_SHORT,
@@ -377,7 +378,8 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
 
   private def makeGeneratedCoveringWriter(geometryOrdinal: Int): ValueWriter = {
     (row: SpecializedGetters, _: Int) =>
-      val geom = GeometryUDT.deserialize(row.getBinary(geometryOrdinal))
+      val geom =
+        SpatialTypeSupport.readGeometry(row, geometryOrdinal, schema(geometryOrdinal).dataType)
       val envelope = geom.getEnvelopeInternal
       consumeGroup {
         consumeField("xmin", 0) {
@@ -475,7 +477,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
 
       case t: MapType => makeMapWriter(t)
 
-      case GeometryUDT =>
+      case dt if SpatialTypeSupport.isGeometry(dt) =>
         val geometryColumnInfo = rootOrdinal match {
           case Some(ordinal) =>
             geometryColumnInfoMap.getOrElseUpdate(ordinal, new GeometryColumnInfo())
@@ -489,8 +491,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
         val wkbWriter = new WKBWriter(3, byteOrder, false)
         wkbWriter.setPreserveCoordinateDimensions(true)
         (row: SpecializedGetters, ordinal: Int) => {
-          val serializedGeometry = row.getBinary(ordinal)
-          val geom = GeometryUDT.deserialize(serializedGeometry)
+          val geom = SpatialTypeSupport.readGeometry(row, ordinal, dataType)
           val wkb = wkbWriter.write(geom)
           recordConsumer.addBinary(Binary.fromReusedByteArray(wkb))
           if (geometryColumnInfo != null) {
@@ -801,8 +802,8 @@ object GeoParquetWriteSupport {
   private def getSparkSqlParquetRowMetadata(schema: StructType): String = {
     val fields = schema.fields.map { field =>
       field.dataType match {
-        case _: GeometryUDT =>
-          // Don't write the GeometryUDT type to the Parquet metadata. Write the type as binary for maximum
+        case dt if SpatialTypeSupport.isGeometry(dt) =>
+          // Don't write the spatial type to the Parquet metadata. Write the type as binary for maximum
           // compatibility.
           field.copy(dataType = BinaryType)
         case _ => field

@@ -39,7 +39,7 @@ import org.apache.sedona.sql.datasources.shapefile.ShapefilePartitionReader.logg
 import org.apache.sedona.sql.datasources.shapefile.ShapefilePartitionReader.openStream
 import org.apache.sedona.sql.datasources.shapefile.ShapefilePartitionReader.tryOpenStream
 import org.apache.sedona.sql.datasources.shapefile.ShapefileUtils.baseSchema
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.types.StructType
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.PrecisionModel
@@ -120,11 +120,12 @@ class ShapefilePartitionReader(
       reader
     }
 
-  private val geometryField = readDataSchema.filter(_.dataType.isInstanceOf[GeometryUDT]) match {
-    case Seq(geoField) => Some(geoField)
-    case Seq() => None
-    case _ => throw new IllegalArgumentException("Only one geometry field is allowed")
-  }
+  private val geometryField =
+    readDataSchema.filter(field => SpatialTypeSupport.isGeometry(field.dataType)) match {
+      case Seq(geoField) => Some(geoField)
+      case Seq() => None
+      case _ => throw new IllegalArgumentException("Only one geometry field is allowed")
+    }
 
   private val shpSchema: StructType = {
     val dbfFields = dbfReader
@@ -233,7 +234,9 @@ class ShapefilePartitionReader(
           Seq.fill(fieldValueConverters.length)(null)
       }
 
-      val serializedGeom = geometry.map(GeometryUDT.serialize).orNull
+      val serializedGeom = geometry
+        .map(geom => SpatialTypeSupport.serializeGeometry(geom, shpSchema.head.dataType))
+        .orNull
       val shpRow = if (options.keyFieldName.isDefined) {
         InternalRow.fromSeq(serializedGeom +: key.getIndex +: attrValues.toSeq)
       } else {

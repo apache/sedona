@@ -147,3 +147,30 @@ export PYTHONPATH=$SPARK_HOME/python
 ```
 
 You can then play with [Sedona Python Jupyter notebook](../tutorial/jupyter-notebook.md).
+
+### Spatial values on Spark 4.2 and later
+
+Spark 4.2 requires Python 3.10 or later. Sedona uses Spark's native `GeometryType` and `GeographyType` on Spark 4.2+. On older Spark versions, Sedona continues to use its existing UDTs and Shapely geometry values.
+
+On Spark 4.2+, `collect()` returns `pyspark.sql.types.Geometry` or `Geography` values containing WKB and an SRID. Convert explicitly at the Python boundary:
+
+```python
+import shapely
+from shapely.geometry import Point
+from pyspark.sql.types import StructField, StructType
+from sedona.spark import GeometryType, to_spark_geometry, to_shapely
+
+point = shapely.set_srid(Point(1, 2), 4326)
+schema = StructType([StructField("geom", GeometryType(4326), nullable=True)])
+df = sedona.createDataFrame([(to_spark_geometry(point),), (None,)], schema)
+point_again = to_shapely(df.first().geom)
+assert shapely.get_srid(point_again) == 4326
+```
+
+The conversion helpers require Shapely 2 or later for native spatial values. Shapely 2.1+ is required to preserve measured (M/ZM) geometries. They preserve nulls and embedded SRIDs. `to_spark_geography` accepts a Shapely geometry or Sedona `Geography` wrapper; an unset Shapely SRID (0) defaults to 4326 on Spark 4.2+. `to_shapely` accepts either native spatial value. Sedona's distributed GeoPandas constructors and `to_geopandas()` handle these conversions internally. Spatial visualization helpers require GeoPandas 1.0 or later on Spark 4.2+.
+
+Unlike the old UDT constructor, the native `GeometryType` and `GeographyType` constructors require an SRID, for example `GeometryType(4326)`, or `"ANY"` for a column whose rows may have different SRIDs. Sedona's internal default schemas use `"ANY"`. Choose a fixed SRID when the column has one known CRS, and check the target file format's support for mixed-SRID types before persisting an `"ANY"` column. Setting an SRID labels coordinates; it does not reproject them.
+
+`ST_AsBinary`, `ST_GeomFromWKB`, `ST_GeogFromWKB`, `ST_SRID`, and `ST_SetSRID` use Spark's native implementations on Spark 4.2+, including through Sedona's Python wrappers. Native `ST_GeogFromWKB` defaults to SRID 4326; the Python wrapper's optional SRID argument applies native `ST_SetSRID` to the parsed geography. Native Spark validates geographic SRIDs, so explicitly requesting SRID 0 is an error. Older Spark keeps Sedona's existing behavior.
+
+`sedona_vectorized_udf` uses Spark's standard pandas UDF protocol for native spatial types on Spark 4.2+. Annotated Shapely scalar and GeoSeries callbacks keep receiving Shapely values; older Spark continues to use Sedona's existing serializer.

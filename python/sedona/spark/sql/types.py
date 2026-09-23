@@ -15,6 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import pyspark
+
 from pyspark.sql.types import (
     BinaryType,
     DoubleType,
@@ -92,6 +94,118 @@ class GeographyType(UserDefinedType):
     @classmethod
     def scalaUDT(cls):
         return "org.apache.spark.sql.sedona_sql.UDT.GeographyUDT"
+
+
+class LegacyGeometryType(GeometryType):
+    """Sedona's binary geometry UDT, including when Spark uses native spatial types."""
+
+
+class LegacyGeographyType(GeographyType):
+    """Persisted geography UDT: big-endian SRID followed by WKB, as on the JVM."""
+
+    def serialize(self, obj):
+        import struct
+        import shapely
+
+        geometry = obj.geometry
+        return struct.pack(">i", int(shapely.get_srid(geometry))) + shapely.to_wkb(
+            geometry, flavor="iso", include_srid=False
+        )
+
+    def deserialize(self, datum):
+        import struct
+        import shapely
+
+        srid = struct.unpack(">i", datum[:4])[0]
+        return Geography(shapely.set_srid(shapely.from_wkb(bytes(datum[4:])), srid))
+
+
+# Spark 4.1 exposes preliminary spatial types, but native Sedona integration
+# starts with Spark 4.2. Keep the existing UDTs on every older runtime.
+USES_NATIVE_SPATIAL_TYPES = tuple(
+    int(part) for part in pyspark.__version__.split(".")[:2]
+) >= (4, 2)
+
+if USES_NATIVE_SPATIAL_TYPES:
+    from pyspark.sql.types import GeographyType, GeometryType
+
+
+def geometry_type():
+    """Default spatial schema; native schemas allow a different SRID in each row."""
+    return GeometryType("ANY") if USES_NATIVE_SPATIAL_TYPES else GeometryType()
+
+
+def geography_type():
+    """Default geography schema for the installed Spark runtime."""
+    return GeographyType("ANY") if USES_NATIVE_SPATIAL_TYPES else GeographyType()
+
+
+def to_spark_geometry(geometry):
+    """Convert a Shapely geometry to Spark's spatial value, preserving its SRID.
+
+    Spark 4.2+ returns a native ``pyspark.sql.types.Geometry``. Older Spark
+    versions accept Shapely directly through Sedona's UDT and return it unchanged.
+    ``None`` is preserved. Native conversion requires Shapely 2 or later.
+    """
+    if geometry is None or not USES_NATIVE_SPATIAL_TYPES:
+        return geometry
+    import shapely
+    from pyspark.sql.types import Geometry
+
+    if isinstance(geometry, Geometry):
+        return geometry
+    return Geometry(
+        shapely.to_wkb(geometry, flavor="iso", include_srid=False),
+        int(shapely.get_srid(geometry)),
+    )
+
+
+def to_spark_geography(geometry):
+    """Convert a Shapely geometry (or Sedona Geography) to a Spark geography.
+
+    On Spark 4.2+, an unset Shapely SRID (0) defaults to WGS84 (4326), matching
+    Spark's native geography constructor. Other embedded SRIDs are preserved.
+    Older Spark returns Sedona's Geography wrapper. ``None`` is preserved.
+    """
+    if geometry is None:
+        return None
+    if isinstance(geometry, Geography):
+        if not USES_NATIVE_SPATIAL_TYPES:
+            return geometry
+        geometry = geometry.geometry
+    if not USES_NATIVE_SPATIAL_TYPES:
+        return Geography(geometry)
+    import shapely
+    from pyspark.sql.types import Geography as NativeGeography
+
+    if isinstance(geometry, NativeGeography):
+        return geometry
+    srid = int(shapely.get_srid(geometry)) or 4326
+    # Validate geographic SRIDs using Spark's own supported CRS mapping.
+    GeographyType(srid)
+    return NativeGeography(
+        shapely.to_wkb(geometry, flavor="iso", include_srid=False), srid
+    )
+
+
+def to_shapely(value):
+    """Convert a collected native geometry/geography to Shapely, preserving SRID.
+
+    Shapely values from legacy Sedona UDTs and ``None`` pass through unchanged.
+    Sedona Geography wrappers are unwrapped. Native conversion requires Shapely 2+.
+    """
+    if value is None:
+        return None
+    if isinstance(value, Geography):
+        return value.geometry
+    if USES_NATIVE_SPATIAL_TYPES:
+        from pyspark.sql.types import Geography as NativeGeography, Geometry
+
+        if isinstance(value, (Geometry, NativeGeography)):
+            import shapely
+
+            return shapely.set_srid(shapely.from_wkb(bytes(value.wkb)), value.srid)
+    return value
 
 
 class Box2DType(UserDefinedType):

@@ -25,7 +25,7 @@ import org.apache.parquet.schema.OriginalType._
 import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName._
 import org.apache.parquet.schema.Type.Repetition._
 import org.apache.spark.sql.execution.datasources.geoparquet.internal.{PortableSQLConf, ParquetSchemaConverter, SparkToParquetSchemaConverter}
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.types._
 
 /**
@@ -216,7 +216,8 @@ class GeoParquetToSparkSchemaConverter(
       case BINARY =>
         originalType match {
           case UTF8 | ENUM | JSON => StringType
-          case null if isGeometryField(field.getName) => GeometryUDT()
+          case null if isGeometryField(field.getName) =>
+            SpatialTypeSupport.geometryType(getSrid(field.getName))
           case null if assumeBinaryIsString => StringType
           case null => BinaryType
           case BSON => BinaryType
@@ -617,6 +618,9 @@ class SparkToGeoParquetSchemaConverter(
           }
           .named(field.name)
 
+      case dt if SpatialTypeSupport.isGeometry(dt) =>
+        convertField(field.copy(dataType = BinaryType))
+
       case udt: UserDefinedType[_] =>
         convertField(field.copy(dataType = udt.sqlType))
 
@@ -628,6 +632,21 @@ class SparkToGeoParquetSchemaConverter(
 }
 
 private[sql] object GeoParquetSchemaConverter {
+  // GeoParquet stores geometry as WKB binary, regardless of Spark's spatial representation.
+  def physicalSchema(schema: StructType): StructType = {
+    def physicalType(dataType: DataType): DataType = dataType match {
+      case dt if SpatialTypeSupport.isGeometry(dt) => BinaryType
+      case StructType(fields) =>
+        StructType(fields.map(f => f.copy(dataType = physicalType(f.dataType))))
+      case ArrayType(elementType, containsNull) =>
+        ArrayType(physicalType(elementType), containsNull)
+      case MapType(keyType, valueType, containsNull) =>
+        MapType(physicalType(keyType), physicalType(valueType), containsNull)
+      case other => other
+    }
+    physicalType(schema).asInstanceOf[StructType]
+  }
+
   def checkFieldName(name: String): Unit = {
     // ,;{}()\n\t= and space are special characters in Parquet schema
     ParquetSchemaConverter.checkConversionRequirement(

@@ -32,6 +32,7 @@ nav:
           - Install Sedona in your local Spark cluster:
               - Install Sedona Scala/Java: setup/install-scala.md
               - Install Sedona Python: setup/install-python.md
+              - Spark 4.2 migration: setup/spark-4.2.md
               - Install Sedona R: api/rdocs
               - Install Sedona-Zeppelin: setup/zeppelin.md
               - Set up Spark cluster manually: setup/cluster.md

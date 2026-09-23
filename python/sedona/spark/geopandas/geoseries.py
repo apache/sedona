@@ -50,7 +50,11 @@ from pyspark.sql.types import (
     StructType,
     TimestampType,
 )
-from sedona.spark.sql.types import GeometryType
+from sedona.spark.sql.types import (
+    GeometryType,
+    geometry_type,
+    USES_NATIVE_SPATIAL_TYPES,
+)
 
 from sedona.spark.sql import st_aggregates as sta
 from sedona.spark.sql import st_constructors as stc
@@ -715,7 +719,7 @@ class GeoSeries(GeoFrame, pspd.Series):
                 dtype=dtype,
                 name=name,
                 copy=copy,
-                fastpath=fastpath,
+                **({} if USES_NATIVE_SPATIAL_TYPES else {"fastpath": fastpath}),
             )
         else:
             if isinstance(data, pd.Series):
@@ -737,7 +741,14 @@ class GeoSeries(GeoFrame, pspd.Series):
 
             pd_series = pd_series.astype(object)
 
-            if (
+            if USES_NATIVE_SPATIAL_TYPES:
+                from sedona.spark.geopandas._native import from_pandas
+
+                ps_series = first_series(from_pandas(pd_series.to_frame()))
+                if pd_series.name is None:
+                    ps_series = ps_series.rename(None)
+                super().__init__(data=ps_series._anchor, index=ps_series._col_label)
+            elif (
                 not pd_series.empty
                 and pd_series.isna().iloc[0]
                 and any(isinstance(value, BaseGeometry) for value in pd_series)
@@ -756,7 +767,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         # Ensure we're storing geometry types.
         if (
-            self.spark.data_type != GeometryType()
+            not isinstance(self.spark.data_type, GeometryType)
             and self.spark.data_type != NullType()
         ):
             raise TypeError(
@@ -1131,7 +1142,12 @@ class GeoSeries(GeoFrame, pspd.Series):
         """
         Same as `to_geopandas()`, without issuing the advice log for internal usage.
         """
-        pd_series = self._to_internal_pandas()
+        if USES_NATIVE_SPATIAL_TYPES:
+            from sedona.spark.geopandas._native import to_pandas
+
+            pd_series = to_pandas(self._internal).iloc[:, 0].rename(self.name)
+        else:
+            pd_series = self._to_internal_pandas()
         return gpd.GeoSeries(
             pd_series.array,
             index=pd_series.index,
@@ -1299,7 +1315,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             scol_for(source_sdf, NATURAL_ORDER_COLUMN_NAME),
         )
 
-        empty_neighbors = F.array().cast(ArrayType(GeometryType(), containsNull=False))
+        empty_neighbors = F.array().cast(ArrayType(geometry_type(), containsNull=False))
         geometry = scol_for(geometry_source, geometry_name)
         nonempty_source = geometry_source.where(
             F.coalesce(

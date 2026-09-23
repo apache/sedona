@@ -27,7 +27,12 @@ from pyspark.sql import DataFrame
 from pyspark.sql.functions import col
 from pyspark.sql.types import StructType, StructField, DataType, ArrayType, MapType
 
-from sedona.spark.sql.types import GeometryType
+from sedona.spark.sql.types import (
+    GeometryType,
+    geometry_type,
+    USES_NATIVE_SPATIAL_TYPES,
+    to_spark_geometry,
+)
 from pyspark.sql.pandas.types import (
     from_arrow_type,
 )
@@ -105,6 +110,9 @@ def dataframe_to_arrow(df, crs=None):
 def dataframe_to_arrow_raw(df):
     """Backport of toArrow() (available in Spark 4.0)"""
     from pyspark.sql.dataframe import DataFrame
+
+    if USES_NATIVE_SPATIAL_TYPES:
+        return df.toArrow()
 
     assert isinstance(df, DataFrame)
 
@@ -196,7 +204,7 @@ def unique_srid_from_ewkb(obj):
         return None
 
     # Output shouldn't have mixed endian here
-    endian = pc.binary_slice(obj, 0, 1).unique()
+    endian = pc.binary_slice(obj, 0, 1).unique().drop_null()
     if len(endian) != 1:
         return None
 
@@ -303,7 +311,7 @@ def infer_schema(gdf: "gpd.GeoDataFrame") -> StructType:
         spark_schema.append(StructField(field.name, spark_type, True))
 
     for index, geom_field in geom_fields:
-        spark_schema.insert(index, StructField(geom_field, GeometryType(), True))
+        spark_schema.insert(index, StructField(geom_field, geometry_type(), True))
 
     return StructType(spark_schema)
 
@@ -314,6 +322,18 @@ def create_spatial_dataframe(spark: SparkSession, gdf: "gpd.GeoDataFrame") -> Da
     from pyspark.sql.pandas.types import (
         to_arrow_type,
     )
+
+    if USES_NATIVE_SPATIAL_TYPES:
+        import pandas as pd
+
+        schema = infer_schema(gdf)
+        # Native Arrow conversion expects Spark Geometry values, not Shapely or
+        # legacy Sedona UDT bytes. Use Spark's public path for Classic/Connect.
+        local = pd.DataFrame(gdf).copy()
+        for field in schema.fields:
+            if isinstance(field.dataType, GeometryType):
+                local[field.name] = local[field.name].map(to_spark_geometry)
+        return spark.createDataFrame(local, schema)
 
     def reader_func(temp_filename):
         return spark._jvm.PythonSQLUtils.readArrowStreamFromFile(temp_filename)

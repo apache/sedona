@@ -70,7 +70,7 @@ from sedona.spark.geopandas.base import GeoFrame
 from sedona.spark.sql import st_aggregates as sta
 from sedona.spark.sql import st_constructors as stc
 from sedona.spark.sql import st_functions as stf
-from sedona.spark.sql.types import GeometryType
+from sedona.spark.sql.types import GeometryType, USES_NATIVE_SPATIAL_TYPES
 
 from pandas.api.extensions import register_extension_dtype
 from geopandas.geodataframe import crs_mismatch_error
@@ -794,13 +794,18 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 pd_df = pd_df.copy()
             pd_df[geom_type_cols] = pd_df[geom_type_cols].astype(object)
 
-            # Initialize the parent class pyspark DataFrame with the pandas DataFrame.
-            super().__init__(
-                data=pd_df,
-                index=index,
-                dtype=dtype,
-                copy=copy,
-            )
+            if USES_NATIVE_SPATIAL_TYPES:
+                from sedona.spark.geopandas._native import from_pandas
+
+                super().__init__(from_pandas(pd_df))
+            else:
+                # Initialize the parent class with the pandas DataFrame.
+                super().__init__(
+                    data=pd_df,
+                    index=index,
+                    dtype=dtype,
+                    copy=copy,
+                )
 
         # Set geometry column name
         if isinstance(data, (GeoDataFrame, gpd.GeoDataFrame)):
@@ -1274,6 +1279,19 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         return self._to_geopandas()
 
     def _to_geopandas(self) -> gpd.GeoDataFrame:
+        if USES_NATIVE_SPATIAL_TYPES:
+            from sedona.spark.geopandas._native import to_pandas
+
+            pd_df = to_pandas(self._internal)
+            result = gpd.GeoDataFrame(
+                pd_df,
+                geometry=self._geometry_column_name,
+                crs=self.crs if self._geometry_column_name is not None else None,
+            )
+            if self._geometry_column_name is None:
+                result._geometry_column_name = None
+            return result
+
         pd_df = self._internal.to_pandas_frame
 
         for col_name in pd_df.columns:

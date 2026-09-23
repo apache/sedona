@@ -21,37 +21,41 @@ package org.apache.spark.sql.sedona_sql.expressions
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.Column
 import org.apache.spark.sql.functions.{call_udf, col, udaf}
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 
 object st_aggregates {
   def ST_Envelope_Aggr(geometry: Column): Column = {
-    val aggrFunc = udaf(new ST_Envelope_Aggr)
-    aggrFunc(geometry)
+    if (SpatialTypeSupport.usesNativeTypes) {
+      call_udf("ST_Envelope_Aggr", geometry)
+    } else {
+      val aggrFunc = udaf(new ST_Envelope_Aggr)
+      aggrFunc(geometry)
+    }
   }
 
-  def ST_Envelope_Aggr(geometry: String): Column = {
-    val aggrFunc = udaf(new ST_Envelope_Aggr)
-    aggrFunc(col(geometry))
-  }
+  def ST_Envelope_Aggr(geometry: String): Column = ST_Envelope_Aggr(col(geometry))
 
   def ST_Intersection_Aggr(geometry: Column): Column = {
-    val aggrFunc = udaf(new ST_Intersection_Aggr)
-    aggrFunc(geometry)
+    if (SpatialTypeSupport.usesNativeTypes) {
+      call_udf("ST_Intersection_Aggr", geometry)
+    } else {
+      val aggrFunc = udaf(new ST_Intersection_Aggr)
+      aggrFunc(geometry)
+    }
   }
 
-  def ST_Intersection_Aggr(geometry: String): Column = {
-    val aggrFunc = udaf(new ST_Intersection_Aggr)
-    aggrFunc(col(geometry))
-  }
+  def ST_Intersection_Aggr(geometry: String): Column = ST_Intersection_Aggr(col(geometry))
 
   def ST_Union_Aggr(geometry: Column): Column = {
-    val aggrFunc = udaf(new ST_Union_Aggr)
-    aggrFunc(geometry)
+    if (SpatialTypeSupport.usesNativeTypes) {
+      call_udf("ST_Union_Aggr", geometry)
+    } else {
+      val aggrFunc = udaf(new ST_Union_Aggr)
+      aggrFunc(geometry)
+    }
   }
 
-  def ST_Union_Aggr(geometry: String): Column = {
-    val aggrFunc = udaf(new ST_Union_Aggr)
-    aggrFunc(col(geometry))
-  }
+  def ST_Union_Aggr(geometry: String): Column = ST_Union_Aggr(col(geometry))
 
   def ST_Collect_Agg(geometry: Column): Column = {
     call_udf("ST_Collect_Agg", geometry)
@@ -62,24 +66,26 @@ object st_aggregates {
   }
 
   def ST_Extent(geometry: Column): Column = {
-    val aggrFunc = udaf(new ST_Extent)
-    aggrFunc(geometry)
+    if (SpatialTypeSupport.usesNativeTypes) {
+      call_udf("ST_Extent", geometry)
+    } else {
+      val aggrFunc = udaf(new ST_Extent)
+      aggrFunc(geometry)
+    }
   }
 
-  def ST_Extent(geometry: String): Column = {
-    val aggrFunc = udaf(new ST_Extent)
-    aggrFunc(col(geometry))
-  }
+  def ST_Extent(geometry: String): Column = ST_Extent(col(geometry))
 
   def ST_3DExtent(geometry: Column): Column = {
-    val aggrFunc = udaf(new ST_3DExtent)
-    aggrFunc(geometry)
+    if (SpatialTypeSupport.usesNativeTypes) {
+      call_udf("ST_3DExtent", geometry)
+    } else {
+      val aggrFunc = udaf(new ST_3DExtent)
+      aggrFunc(geometry)
+    }
   }
 
-  def ST_3DExtent(geometry: String): Column = {
-    val aggrFunc = udaf(new ST_3DExtent)
-    aggrFunc(col(geometry))
-  }
+  def ST_3DExtent(geometry: String): Column = ST_3DExtent(col(geometry))
 
   // Aliases for *_Aggr functions with *_Agg suffix
   def ST_Envelope_Agg(geometry: Column): Column = ST_Envelope_Aggr(geometry)
