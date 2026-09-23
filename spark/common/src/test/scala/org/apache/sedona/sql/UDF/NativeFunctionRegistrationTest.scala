@@ -35,25 +35,45 @@ class NativeFunctionRegistrationTest extends AnyFunSpec with BeforeAndAfterAll {
   private val version = SPARK_VERSION.split("\\.").take(2).map(_.toInt)
   private val usesNativeTypes = version(0) > 4 || (version(0) == 4 && version(1) >= 2)
   private val pointWkb = "0101000000000000000000F03F0000000000000040"
-  private lazy val spark = SparkSession
-    .builder()
-    .master("local[1]")
-    .appName("NativeFunctionRegistrationTest")
-    .config("spark.ui.enabled", "false")
-    .config("spark.sql.geospatial.enabled", "true")
-    .getOrCreate()
+  private var fixture: NativeFunctionRegistrationTest.SessionFixture = _
+  private def spark: SparkSession = fixture.spark
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
+    fixture = new NativeFunctionRegistrationTest.SessionFixture(
+      SparkSession.getActiveSession.orElse(SparkSession.getDefaultSession))
     UdtRegistrator.registerAll()
   }
 
   override protected def afterAll(): Unit = {
-    try spark.stop()
-    finally super.afterAll()
+    try {
+      if (fixture != null) fixture.close()
+    } finally super.afterAll()
   }
 
   describe("Sedona function ownership") {
+    it("isolates a borrowed session without stopping its context or leaking registrations") {
+      val borrowed = spark.newSession()
+      val existingBuiltin = FunctionRegistry.builtin.listFunction().head
+      val originalInfo = FunctionRegistry.builtin.lookupFunction(existingBuiltin).get
+      val originalBuilder = FunctionRegistry.builtin.lookupFunctionBuilder(existingBuiltin).get
+      val nested = new NativeFunctionRegistrationTest.SessionFixture(Some(borrowed))
+      try {
+        assert(nested.spark ne borrowed)
+        assert(nested.spark.sparkContext eq borrowed.sparkContext)
+        nested.spark.conf.set("sedona.registration.fixture", "isolated")
+        nested.spark.udf.register("sedona_fixture_marker", () => 1)
+        FunctionRegistry.builtin.dropFunction(existingBuiltin)
+      } finally nested.close()
+      assert(!borrowed.sparkContext.isStopped)
+      assert(borrowed.conf.getOption("sedona.registration.fixture").isEmpty)
+      assert(!borrowed.catalog.functionExists("sedona_fixture_marker"))
+      assert(FunctionRegistry.builtin.lookupFunction(existingBuiltin).get eq originalInfo)
+      assert(
+        FunctionRegistry.builtin.lookupFunctionBuilder(existingBuiltin).get eq originalBuilder)
+      assert(borrowed.range(1).count() == 1)
+    }
+
     it("preserves Spark 4.2 native functions across repeated registration and dropping") {
       assume(usesNativeTypes, "Spark 4.2 native spatial types are not available")
       val registry = spark.sessionState.functionRegistry
@@ -225,6 +245,42 @@ class NativeFunctionRegistrationTest extends AnyFunSpec with BeforeAndAfterAll {
         assert(
           !spark.sessionState.functionRegistry.functionExists(FunctionIdentifier(name)),
           name)
+      }
+    }
+  }
+}
+
+private[UDF] object NativeFunctionRegistrationTest {
+
+  /** Registration tests may reuse the context created while other suites are discovered. */
+  final class SessionFixture(existingSession: Option[SparkSession]) extends AutoCloseable {
+    private val originalBuiltin = FunctionRegistry.builtin.listFunction().map { identifier =>
+      (
+        identifier,
+        FunctionRegistry.builtin.lookupFunction(identifier).get,
+        FunctionRegistry.builtin.lookupFunctionBuilder(identifier).get)
+    }
+    private val borrowed = existingSession.filterNot(_.sparkContext.isStopped)
+    val spark: SparkSession = borrowed.map(_.newSession()).getOrElse {
+      SparkSession
+        .builder()
+        .master("local[1]")
+        .appName("NativeFunctionRegistrationTest")
+        .config("spark.ui.enabled", "false")
+        .config("spark.sql.geospatial.enabled", "true")
+        .getOrCreate()
+    }
+    spark.conf.set("spark.sql.geospatial.enabled", "true")
+
+    override def close(): Unit = {
+      try {
+        // Catalog.registerAll/dropAll also mutate the process-wide builtin registry.
+        FunctionRegistry.builtin.clear()
+        originalBuiltin.foreach { case (identifier, info, builder) =>
+          FunctionRegistry.builtin.registerFunction(identifier, info, builder)
+        }
+      } finally {
+        if (borrowed.isEmpty) spark.stop()
       }
     }
   }

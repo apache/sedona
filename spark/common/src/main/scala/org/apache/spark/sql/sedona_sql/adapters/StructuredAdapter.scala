@@ -28,7 +28,7 @@ import org.apache.spark.sql.types.{DataType, StructType}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.sedona_sql.DataFrameShims
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
-import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.geom.{Geometry, GeometryFactory}
 import org.slf4j.{Logger, LoggerFactory}
 
 /**
@@ -39,6 +39,11 @@ import org.slf4j.{Logger, LoggerFactory}
  */
 object StructuredAdapter {
   val logger: Logger = LoggerFactory.getLogger(getClass)
+
+  // SpatialRDD requires a geometry for each row. An empty carrier preserves a null
+  // geometry's original row in user data without contributing to spatial indexes.
+  private def geometryOrEmpty(geometry: Geometry): Geometry =
+    if (geometry == null) new GeometryFactory().createGeometryCollection() else geometry
 
   /**
    * Convert RDD[Row] to SpatialRDD. It puts Row as user data of Geometry.
@@ -53,7 +58,8 @@ object StructuredAdapter {
     } else spatialRDD.schema = rdd.first().schema
     spatialRDD.rawSpatialRDD = rdd
       .map(row => {
-        val geom = SpatialTypeSupport.fromExternalGeometry(row.getAs[Any](geometryFieldName))
+        val geom = geometryOrEmpty(
+          SpatialTypeSupport.fromExternalGeometry(row.getAs[Any](geometryFieldName)))
         geom.setUserData(row.copy())
         geom
       })
@@ -111,7 +117,7 @@ object StructuredAdapter {
     val geometryType = schema(ordinal).dataType
     spatialRDD.rawSpatialRDD = rdd
       .map(row => {
-        val geom = SpatialTypeSupport.readGeometry(row, ordinal, geometryType)
+        val geom = geometryOrEmpty(SpatialTypeSupport.readGeometry(row, ordinal, geometryType))
         geom.setUserData(row.copy())
         geom
       })

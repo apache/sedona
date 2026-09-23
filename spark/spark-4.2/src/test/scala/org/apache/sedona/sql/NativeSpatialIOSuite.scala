@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql
 
+import java.nio.{ByteBuffer, ByteOrder}
 import java.nio.file.Files
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types.GeometryType
@@ -83,6 +84,78 @@ class NativeSpatialIOSuite extends FunSuite with BeforeAndAfterAll {
       }
     }
   }
+  Seq(false, true).foreach { allEmpty =>
+    test(
+      s"GeoParquet preserves native XYZ and projects M with matching metadata (allEmpty=$allEmpty)") {
+      def isoWkb(kind: Int, coordinates: Double*): Array[Byte] = {
+        val line = kind % 1000 == 2
+        val dimension = if (kind / 1000 == 3) 4 else if (kind / 1000 == 0) 2 else 3
+        val buffer = ByteBuffer
+          .allocate(5 + (if (line) 4 else 0) + coordinates.size * 8)
+          .order(ByteOrder.LITTLE_ENDIAN)
+        buffer.put(1.toByte).putInt(kind)
+        if (line) buffer.putInt(coordinates.size / dimension)
+        coordinates.foreach(buffer.putDouble)
+        buffer.array()
+      }
+      val samples = Seq(
+        isoWkb(1, 10, 20) -> isoWkb(1, 10, 20),
+        isoWkb(1001, 10, 20, 30) -> isoWkb(1001, 10, 20, 30),
+        isoWkb(1001, Double.NaN, Double.NaN, Double.NaN) ->
+          isoWkb(1001, Double.NaN, Double.NaN, Double.NaN),
+        isoWkb(1002) -> isoWkb(1002),
+        isoWkb(1002, 1, 2, 3, 3, 4, 5) ->
+          isoWkb(1002, 1, 2, 3, 3, 4, 5),
+        isoWkb(2001, 10, 20, 99) -> isoWkb(1, 10, 20),
+        isoWkb(3001, 10, 20, 30, 99) -> isoWkb(1001, 10, 20, 30),
+        isoWkb(3002) -> isoWkb(1002))
+      val reader = org.datasyslab.jts.io.WKBReader.forDeclaredDimensions()
+      val selected = samples.filter { case (input, _) => !allEmpty || reader.read(input).isEmpty }
+      val directory = Files.createTempDirectory("sedona-native-dimensions").toFile
+      try {
+        val query = selected.zipWithIndex
+          .map { case ((input, _), id) =>
+            val hex = org.locationtech.jts.io.WKBWriter.toHex(input)
+            s"SELECT $id AS id, ST_GeomFromWKB(unhex('$hex'), 4326) AS geometry"
+          }
+          .mkString(" UNION ALL ")
+        val path = new java.io.File(directory, "data").getAbsolutePath
+        spark.sql(query).coalesce(1).write.format("geoparquet").save(path)
+        val raw = spark.read.parquet(path).orderBy("id").collect()
+        val restored = spark.read.format("geoparquet").load(path)
+        assert(restored.schema("geometry").dataType == GeometryType(4326))
+        val geometries = restored.orderBy("id").selectExpr("ST_AsBinary(geometry)").collect()
+        selected.zipWithIndex.foreach { case ((_, expected), id) =>
+          Seq(raw(id).getAs[Array[Byte]](1), geometries(id).getAs[Array[Byte]](0)).foreach {
+            actual =>
+              assert(
+                org.apache.sedona.common.utils.GeometryEquality
+                  .equalsIdentical(reader.read(actual), reader.read(expected)),
+                s"coordinate layout or ordinates changed for row $id")
+          }
+        }
+        val file = new java.io.File(path).listFiles().find(_.getName.endsWith(".parquet")).get
+        val parquetReader = org.apache.parquet.hadoop.ParquetFileReader.open(
+          org.apache.parquet.hadoop.util.HadoopInputFile.fromPath(
+            new org.apache.hadoop.fs.Path(file.toURI),
+            new org.apache.hadoop.conf.Configuration()))
+        val metadata =
+          try {
+            org.json4s.jackson.parseJson(
+              parquetReader.getFooter.getFileMetaData.getKeyValueMetaData.get("geo")) \
+              "columns" \ "geometry"
+          } finally parquetReader.close()
+        implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
+        val expectedTypes =
+          if (allEmpty) Set("Point Z", "LineString Z")
+          else Set("Point", "Point Z", "LineString Z")
+        assert((metadata \ "geometry_types").extract[Seq[String]].toSet == expectedTypes)
+        if (allEmpty) assert((metadata \ "bbox") == org.json4s.JNothing)
+        else assert((metadata \ "bbox").extract[Seq[Double]] == Seq(1, 2, 10, 20))
+      } finally { org.apache.commons.io.FileUtils.deleteDirectory(directory) }
+    }
+  }
+
   test("Spider exposes native geometry values") {
     val result = spark.read.format("spider").option("N", "4").option("numPartitions", "1").load()
     assert(result.schema("geometry").dataType.isInstanceOf[GeometryType])

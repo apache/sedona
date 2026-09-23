@@ -65,6 +65,29 @@ class NativeGeometryBoundarySuite extends AnyFunSuite with BeforeAndAfterAll {
 
   override def afterAll(): Unit = if (spark != null) spark.stop()
 
+  test("StructuredAdapter preserves null geometry rows through native conversion and indexing") {
+    val original = spark.sql(
+      "SELECT 1 AS id, ST_Point(0D, 0D) AS geom UNION ALL SELECT 2, NULL UNION ALL SELECT 3, ST_Point(2D, 2D)")
+    for (externalRows <- Seq(false, true)) {
+      val spatial =
+        if (externalRows) StructuredAdapter.toSpatialRdd(original.rdd, "geom")
+        else StructuredAdapter.toSpatialRdd(original, "geom")
+      assert(spatial.rawSpatialRDD.count() == 3)
+      spatial.buildIndex(org.apache.sedona.core.enums.IndexType.RTREE, false)
+      assert(spatial.indexedRawRDD.count() > 0)
+      val restored =
+        if (externalRows)
+          spark.createDataFrame(StructuredAdapter.toRowRdd(spatial), original.schema)
+        else StructuredAdapter.toDf(spatial, spark)
+      assert(restored.schema == original.schema)
+      val rows = restored.selectExpr("id", "ST_AsText(geom)").orderBy("id").collect()
+      assert(rows.map(_.getInt(0)).toSeq == Seq(1, 2, 3))
+      assert(rows(0).getString(1) == "POINT (0 0)")
+      assert(rows(1).isNullAt(1))
+      assert(rows(2).getString(1) == "POINT (2 2)")
+    }
+  }
+
   private def point(srid: Int, label: String): Geometry = {
     val geometry = new WKTReader().read("POINT (1 2)")
     geometry.setSRID(srid)

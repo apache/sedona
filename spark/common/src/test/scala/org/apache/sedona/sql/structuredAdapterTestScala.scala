@@ -25,11 +25,39 @@ import org.apache.spark.sql.functions.spark_partition_id
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.sedona_sql.adapters.StructuredAdapter
 import org.junit.Assert.assertEquals
+import org.locationtech.jts.geom.Geometry
 import org.scalatest.GivenWhenThen
 
 class structuredAdapterTestScala extends TestBaseScala with GivenWhenThen {
 
   describe("Structured Adapter") {
+    Seq(false, true).foreach { externalRows =>
+      it(
+        s"Should preserve null geometry rows through conversion and indexing (external=$externalRows)") {
+        val original = sparkSession.sql(
+          "SELECT 1 AS id, ST_Point(0D, 0D) AS geom UNION ALL SELECT 2, NULL UNION ALL SELECT 3, ST_Point(2D, 2D)")
+        val spatial =
+          if (externalRows) StructuredAdapter.toSpatialRdd(original.rdd, "geom")
+          else StructuredAdapter.toSpatialRdd(original, "geom")
+
+        assert(spatial.rawSpatialRDD.count() == 3)
+        spatial.buildIndex(IndexType.RTREE, false)
+        assert(spatial.indexedRawRDD.count() > 0)
+
+        val restored =
+          if (externalRows)
+            sparkSession.createDataFrame(StructuredAdapter.toRowRdd(spatial), original.schema)
+          else StructuredAdapter.toDf(spatial, sparkSession)
+        val rows = restored.orderBy("id").collect()
+        assert(rows.length == 3)
+        assert(rows(1).getInt(0) == 2 && rows(1).isNullAt(1))
+        assert(rows(0).getInt(0) == 1 && rows(2).getInt(0) == 3)
+        assertGeometryEquals(
+          original.orderBy("id").head().getAs[Geometry](1),
+          rows(0).getAs[Geometry](1))
+      }
+    }
+
     it("Should convert DataFrame to SpatialRDD and back") {
       val seq = generateTestData()
       val geom1 = seq.head._3

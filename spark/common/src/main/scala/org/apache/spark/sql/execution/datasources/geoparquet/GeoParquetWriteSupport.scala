@@ -24,7 +24,6 @@ import org.apache.parquet.hadoop.api.WriteSupport.FinalizedWriteContext
 import org.apache.parquet.hadoop.api.WriteSupport.WriteContext
 import org.apache.parquet.io.api.Binary
 import org.apache.parquet.io.api.RecordConsumer
-import org.apache.sedona.common.utils.GeomUtils
 import org.apache.spark.SPARK_VERSION_SHORT
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
@@ -38,6 +37,8 @@ import org.apache.spark.sql.types._
 import org.json4s.JValue
 import org.json4s.jackson.JsonMethods.parse
 import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.io.ByteOrderValues
+import org.datasyslab.jts.io.WKBWriter
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -246,12 +247,9 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       val columns = geometryColumnInfoMap.map { case (ordinal, columnInfo) =>
         val columnName = schema.fields(ordinal).name
         val geometryTypes = columnInfo.seenGeometryTypes.toSeq
-        // Omit bbox from column metadata when no geometries were observed (e.g. an empty
-        // Spark partition produces a zero-row file). Per the GeoParquet 1.1 spec, bbox is
-        // optional and represents the extent of the geometries in the file; emitting
-        // [0, 0, 0, 0] for an empty file falsely advertises data at Null Island and breaks
-        // bbox-based file pruning in downstream readers.
-        val bbox = if (geometryTypes.nonEmpty) {
+        // Empty geometries still contribute geometry_types but have no spatial extent.
+        // Omit bbox when the file contains only empty/null geometries or no rows.
+        val bbox = if (!columnInfo.bbox.isEmpty) {
           Some(
             Seq(
               columnInfo.bbox.minX,
@@ -485,12 +483,22 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
             geometryColumnInfoMap.getOrElseUpdate(ordinal, new GeometryColumnInfo())
           case None => null
         }
+        val byteOrder = if (ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN) {
+          ByteOrderValues.BIG_ENDIAN
+        } else ByteOrderValues.LITTLE_ENDIAN
+        // Preserve declared Z even for empty geometries, but keep GeoParquet output limited
+        // to XY/XYZ: the configured XYZ ordinates continue to exclude M.
+        val wkbWriter = new WKBWriter(3, byteOrder, false)
+        wkbWriter.setPreserveCoordinateDimensions(true)
         (row: SpecializedGetters, ordinal: Int) => {
           val geom = SpatialTypeSupport.readGeometry(row, ordinal, dataType)
-          val wkbWriter = GeomUtils.createWKBWriter(GeomUtils.getDimension(geom))
-          recordConsumer.addBinary(Binary.fromReusedByteArray(wkbWriter.write(geom)))
+          val wkb = wkbWriter.write(geom)
+          recordConsumer.addBinary(Binary.fromReusedByteArray(wkb))
           if (geometryColumnInfo != null) {
-            geometryColumnInfo.update(geom)
+            // The writer resolves each geometry's actual layout, including collection members.
+            // Derive metadata from its EWKB type header rather than the first coordinate.
+            val typeCode = ByteBuffer.wrap(wkb, 1, 4).order(ByteOrder.nativeOrder()).getInt
+            geometryColumnInfo.update(geom, (typeCode & 0x80000000) != 0)
           }
         }
 
@@ -755,13 +763,9 @@ object GeoParquetWriteSupport {
       else Some(_srid)
     }
 
-    def update(geom: Geometry): Unit = {
+    def update(geom: Geometry, hasZ: Boolean): Unit = {
       bbox.update(geom)
-      // In case of 3D geometries, a " Z" suffix gets added (e.g. ["Point Z"]).
-      val hasZ = {
-        val coordinate = geom.getCoordinate
-        if (coordinate != null) !coordinate.getZ.isNaN else false
-      }
+      // Match the dimensionality encoded in WKB, including typed empty geometries.
       val geometryType = if (!hasZ) geom.getGeometryType else geom.getGeometryType + " Z"
       seenGeometryTypes.add(geometryType)
 
@@ -782,12 +786,16 @@ object GeoParquetWriteSupport {
       var minY: Double = Double.PositiveInfinity,
       var maxX: Double = Double.NegativeInfinity,
       var maxY: Double = Double.NegativeInfinity) {
+    def isEmpty: Boolean = minX > maxX || minY > maxY
+
     def update(geom: Geometry): Unit = {
       val env = geom.getEnvelopeInternal
-      minX = math.min(minX, env.getMinX)
-      minY = math.min(minY, env.getMinY)
-      maxX = math.max(maxX, env.getMaxX)
-      maxY = math.max(maxY, env.getMaxY)
+      if (!env.isNull) {
+        minX = math.min(minX, env.getMinX)
+        minY = math.min(minY, env.getMinY)
+        maxX = math.max(maxX, env.getMaxX)
+        maxY = math.max(maxY, env.getMaxY)
+      }
     }
   }
 
