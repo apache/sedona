@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -3218,15 +3217,10 @@
         <span class="k">return</span> <span class="n">geom</span></div>
 
 <div class="viewcode-block" id="GeoSeries.crosses"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.crosses">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">crosses</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
-        <span class="c1"># Sedona does not support GeometryCollection (errors), so we return NULL for now to avoid error.</span>
         <span class="n">other_series</span><span class="p">,</span> <span class="n">extended</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_series_of_val</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
         <span class="n">align</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">extended</span> <span class="k">else</span> <span class="n">align</span>
 
-        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span>
-            <span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_GeometryType</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">))</span> <span class="o">==</span> <span class="s2">"ST_GeometryCollection"</span><span class="p">)</span>
-            <span class="o">|</span> <span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_GeometryType</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">))</span> <span class="o">==</span> <span class="s2">"ST_GeometryCollection"</span><span class="p">),</span>
-            <span class="kc">None</span><span class="p">,</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">stp</span><span class="o">.</span><span class="n">ST_Crosses</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">)))</span>
+        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stp</span><span class="o">.</span><span class="n">ST_Crosses</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">))</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_row_wise_operation</span><span class="p">(</span>
             <span class="n">spark_expr</span><span class="p">,</span>
             <span class="n">other_series</span><span class="p">,</span>
