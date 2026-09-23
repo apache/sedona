@@ -1706,9 +1706,17 @@ def ST_MakeValid(
 ) -> Column:
     """Convert an invalid geometry in a geometry column into a valid geometry.
 
+    May reorder coordinates or reverse polygon ring orientation, including for
+    already-valid inputs. Apply :func:`ST_ForcePolygonCCW` or
+    :func:`ST_ForcePolygonCW` to the result to enforce a specific ring orientation.
+    These functions are not guaranteed to restore the original vertex order or
+    starting vertex.
+
     :param geometry: Geometry column that contains the invalid geometry.
     :type geometry: ColumnOrName
-    :param keep_collapsed: If True then collapsed geometries are converted to empty geometries, otherwise they will be converted to valid geometries of a lower dimension, if None then the default value of False is used, defaults to None
+    :param keep_collapsed: If True, preserve collapsed geometries as valid geometries
+        of a lower dimension. If False, convert them to empty geometries. If None,
+        use the default value of False.
     :type keep_collapsed: Optional[Union[ColumnOrName, bool]], optional
     :return: Geometry column that contains valid versions of the original geometry.
     :rtype: Column
