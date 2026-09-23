@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.utils.geometry_serde_general &mdash; Apache Sedona Python Documentation</title>
@@ -244,6 +243,7 @@
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseGeometry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.wkb</span><span class="w"> </span><span class="kn">import</span> <span class="n">dumps</span> <span class="k">as</span> <span class="n">wkb_dumps</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.wkb</span><span class="w"> </span><span class="kn">import</span> <span class="n">loads</span> <span class="k">as</span> <span class="n">wkb_loads</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.wkt</span><span class="w"> </span><span class="kn">import</span> <span class="n">loads</span> <span class="k">as</span> <span class="n">wkt_loads</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -599,13 +599,18 @@
     <span class="k">if</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">num_coords</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">wkt_loads</span><span class="p">(</span><span class="s2">"MULTIPOINT EMPTY"</span><span class="p">)</span>
     <span class="n">coords</span> <span class="o">=</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">read_coordinates</span><span class="p">(</span><span class="n">geom_buffer</span><span class="o">.</span><span class="n">num_coords</span><span class="p">)</span>
-    <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">coord</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-            <span class="c1"># Shapely does not allow creating MultiPoint with empty components</span>
-            <span class="k">pass</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">coord</span><span class="p">))</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span>
+            <span class="n">geom_buffer</span><span class="o">.</span><span class="n">read_empty</span><span class="p">(</span><span class="s2">"POINT"</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">coord</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">coord</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">else</span> <span class="n">Point</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">coords</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">point</span><span class="o">.</span><span class="n">is_empty</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">points</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_multipart_with_empty_members</span><span class="p">(</span>
+            <span class="n">GeometryTypeID</span><span class="o">.</span><span class="n">MULTIPOINT</span><span class="p">,</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">coord_type</span><span class="p">,</span> <span class="n">points</span>
+        <span class="p">)</span>
     <span class="k">return</span> <span class="n">MultiPoint</span><span class="p">(</span><span class="n">points</span><span class="p">)</span></div>
 
 
@@ -654,13 +659,13 @@
 
 <div class="viewcode-block" id="deserialize_multi_linestring"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.deserialize_multi_linestring">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">deserialize_multi_linestring</span><span class="p">(</span><span class="n">geom_buffer</span><span class="p">:</span> <span class="n">GeometryBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiLineString</span><span class="p">:</span>
     <span class="n">num_linestrings</span> <span class="o">=</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">read_int</span><span class="p">()</span>
-    <span class="n">linestrings</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_linestrings</span><span class="p">):</span>
-        <span class="n">linestring</span> <span class="o">=</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">read_linestring</span><span class="p">()</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">linestring</span><span class="o">.</span><span class="n">is_empty</span><span class="p">:</span>
-            <span class="n">linestrings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">linestring</span><span class="p">)</span>
+    <span class="n">linestrings</span> <span class="o">=</span> <span class="p">[</span><span class="n">geom_buffer</span><span class="o">.</span><span class="n">read_linestring</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_linestrings</span><span class="p">)]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">linestrings</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">wkt_loads</span><span class="p">(</span><span class="s2">"MULTILINESTRING EMPTY"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">linestring</span><span class="o">.</span><span class="n">is_empty</span> <span class="k">for</span> <span class="n">linestring</span> <span class="ow">in</span> <span class="n">linestrings</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_multipart_with_empty_members</span><span class="p">(</span>
+            <span class="n">GeometryTypeID</span><span class="o">.</span><span class="n">MULTILINESTRING</span><span class="p">,</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">coord_type</span><span class="p">,</span> <span class="n">linestrings</span>
+        <span class="p">)</span>
     <span class="k">return</span> <span class="n">MultiLineString</span><span class="p">(</span><span class="n">linestrings</span><span class="p">)</span></div>
 
 
@@ -745,14 +750,36 @@
 
 <div class="viewcode-block" id="deserialize_multi_polygon"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.deserialize_multi_polygon">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">deserialize_multi_polygon</span><span class="p">(</span><span class="n">geom_buffer</span><span class="p">:</span> <span class="n">GeometryBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiPolygon</span><span class="p">:</span>
     <span class="n">num_polygons</span> <span class="o">=</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">read_int</span><span class="p">()</span>
-    <span class="n">polygons</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_polygons</span><span class="p">):</span>
-        <span class="n">polygon</span> <span class="o">=</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">read_polygon</span><span class="p">()</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">polygon</span><span class="o">.</span><span class="n">is_empty</span><span class="p">:</span>
-            <span class="n">polygons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">polygon</span><span class="p">)</span>
+    <span class="n">polygons</span> <span class="o">=</span> <span class="p">[</span><span class="n">geom_buffer</span><span class="o">.</span><span class="n">read_polygon</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_polygons</span><span class="p">)]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">polygons</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">wkt_loads</span><span class="p">(</span><span class="s2">"MULTIPOLYGON EMPTY"</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">MultiPolygon</span><span class="p">(</span><span class="n">polygons</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">read_empty</span><span class="p">(</span><span class="s2">"MULTIPOLYGON"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">polygon</span><span class="o">.</span><span class="n">is_empty</span> <span class="k">for</span> <span class="n">polygon</span> <span class="ow">in</span> <span class="n">polygons</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">MultiPolygon</span><span class="p">(</span><span class="n">polygons</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_multipart_with_empty_members</span><span class="p">(</span>
+        <span class="n">GeometryTypeID</span><span class="o">.</span><span class="n">MULTIPOLYGON</span><span class="p">,</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">coord_type</span><span class="p">,</span> <span class="n">polygons</span>
+    <span class="p">)</span></div>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_multipart_with_empty_members</span><span class="p">(</span><span class="n">geometry_type</span><span class="p">,</span> <span class="n">coord_type</span><span class="p">,</span> <span class="n">members</span><span class="p">):</span>
+    <span class="c1"># Multipart constructors reject or discard empty members. WKB retains their</span>
+    <span class="c1"># positions, using the shared coordinate layout from the internal format.</span>
+    <span class="n">z_flag</span> <span class="o">=</span> <span class="mh">0x80000000</span> <span class="k">if</span> <span class="n">coord_type</span> <span class="o">==</span> <span class="n">CoordinateType</span><span class="o">.</span><span class="n">XYZ</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">"&lt;BII"</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">geometry_type</span> <span class="o">|</span> <span class="n">z_flag</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">members</span><span class="p">))</span>
+    <span class="c1"># OGC multipart type IDs are three greater than their member type IDs.</span>
+    <span class="n">empty_member</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">"&lt;BI"</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">geometry_type</span> <span class="o">-</span> <span class="mi">3</span><span class="p">)</span> <span class="o">|</span> <span class="n">z_flag</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">geometry_type</span> <span class="o">==</span> <span class="n">GeometryTypeID</span><span class="o">.</span><span class="n">MULTIPOINT</span><span class="p">:</span>
+        <span class="c1"># Older GEOS versions cannot write empty Points as WKB.</span>
+        <span class="n">dimension</span> <span class="o">=</span> <span class="n">CoordinateType</span><span class="o">.</span><span class="n">components_per_coord</span><span class="p">(</span><span class="n">coord_type</span><span class="p">)</span>
+        <span class="n">empty_member</span> <span class="o">+=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">"&lt;"</span> <span class="o">+</span> <span class="s2">"d"</span> <span class="o">*</span> <span class="n">dimension</span><span class="p">,</span> <span class="o">*</span><span class="p">([</span><span class="n">math</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span> <span class="o">*</span> <span class="n">dimension</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">empty_member</span> <span class="o">+=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">"&lt;I"</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">wkb_loads</span><span class="p">(</span>
+        <span class="n">header</span>
+        <span class="o">+</span> <span class="sa">b</span><span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">empty_member</span> <span class="k">if</span> <span class="n">member</span><span class="o">.</span><span class="n">is_empty</span> <span class="k">else</span> <span class="n">wkb_dumps</span><span class="p">(</span><span class="n">member</span><span class="p">)</span> <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">members</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
 
 
 <div class="viewcode-block" id="serialize_geometry_collection"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.serialize_geometry_collection">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">serialize_geometry_collection</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">GeometryCollection</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytearray</span><span class="p">:</span>
