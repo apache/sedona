@@ -21,7 +21,7 @@ package org.apache.spark.sql.sedona_sql.types
 import java.nio.{ByteBuffer, ByteOrder}
 
 import org.apache.sedona.common.{Constructors, Functions}
-import org.apache.sedona.common.S2Geography.{Geography, GeographyWKBSerializer, WKBGeography}
+import org.apache.sedona.common.S2Geography.{Geography, GeographyWKBSerializer}
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.execution.aggregate.ScalaAggregator
@@ -30,7 +30,6 @@ import org.apache.spark.sql.catalyst.expressions.{Expression, Generator, Generic
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.aggregate.{ImperativeAggregate, TypedImperativeAggregate}
 import org.apache.spark.sql.catalyst.util.{ArrayBasedMapData, ArrayData, GenericArrayData, MapData}
-import org.apache.spark.sql.catalyst.util.{Geometry => NativeGeometry, Geography => NativeGeography}
 import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, GeographyUDT}
 import org.apache.spark.sql.sedona_sql.expressions.SerdeAware
 import org.apache.spark.sql.types._
@@ -141,27 +140,25 @@ object SpatialTypeSupport {
 
   def geometry(value: Any): Geometry = {
     if (value == null) return null
-    val native = NativeGeometry.fromValue(value.asInstanceOf[BinaryView])
-    Constructors.geomFromWKB(native.toWkb(ByteOrder.LITTLE_ENDIAN), native.srid())
+    NativeSpatialReader.geometry(value.asInstanceOf[BinaryView])
   }
 
   def geography(value: Any): Geography = {
     if (value == null) return null
-    val native = NativeGeography.fromValue(value.asInstanceOf[BinaryView])
-    WKBGeography.fromWKB(native.toWkb(ByteOrder.LITTLE_ENDIAN), native.srid())
+    NativeSpatialReader.geography(value.asInstanceOf[BinaryView])
   }
 
   def serializeGeometry(value: Geometry): Any = {
     if (value == null) return null
     GeometryType(value.getSRID) // Validate the native type's SRID contract.
-    NativeGeometry.fromWkb(isoWkb(value), value.getSRID).getValue
+    NativeSpatialWriter.serialize(value, value.getSRID, geography = false)
   }
 
   def serializeGeography(value: Geography): Any = {
     if (value == null) return null
     GeographyType(value.getSRID)
     val geom = org.apache.sedona.common.geography.Constructors.geogToGeometry(value)
-    NativeGeography.fromWkb(isoWkb(geom), value.getSRID).getValue
+    NativeSpatialWriter.serialize(geom, value.getSRID, geography = true)
   }
 
   private def convertContainers(
