@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -5925,7 +5924,68 @@ of one GeoSeries <code class="docutils literal notranslate"><span class="pre">to
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.transform">
 <span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transformation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.transform" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Apply a function to geometry coordinates in distributed batches.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 2.0.0.</span></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>transformation</strong> (<em>callable</em>) – A function that transforms an (N, 2) or (N, 3) NumPy array of
+float64 coordinates into an array of the same shape and dtype.
+The function must preserve coordinate order and must be serializable
+for execution on Spark workers.</p></li>
+<li><p><strong>include_z</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default False</em>) – If False, discard the third dimension. If True, include the third
+dimension in the coordinates passed to the function. Coordinates of
+2D geometries have NaN in the third column.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Transformed geometries with the original index and CRS. Null and
+empty geometries are preserved.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries">GeoSeries</a></p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Requires Spark 3.5 or newer and Shapely 2.0 or newer, including on the
+workers. Execution is lazy; exceptions raised by the callback or invalid
+returned arrays surface when Spark evaluates the result.</p>
+<p>Unlike local GeoPandas, the callback receives coordinates from one
+Spark batch at a time, not from the entire GeoSeries. Batch sizes and
+boundaries are unspecified, and Spark may execute the function multiple
+times. Use deterministic, coordinate-wise transformations whose results
+do not depend on batching or mutable state. For example,
+<code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">coords:</span> <span class="pre">coords</span> <span class="pre">+</span> <span class="pre">[1,</span> <span class="pre">2]</span></code> is independent of batching, while
+<code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">coords:</span> <span class="pre">coords</span> <span class="pre">-</span> <span class="pre">coords.mean(axis=0)</span></code> centers each batch
+separately. Compute global statistics first and pass the resulting
+constants to the callback when a transformation needs them.</p>
+<p>This restriction is a caller responsibility; arbitrary Python callbacks
+cannot be checked for dependence on batch boundaries. The result keeps
+the input CRS; use <code class="docutils literal notranslate"><span class="pre">to_crs</span></code> for CRS-aware reprojection.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span><span class="p">,</span> <span class="n">Polygon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">([</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="k">lambda</span> <span class="n">coords</span><span class="p">:</span> <span class="n">coords</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+<span class="go">0    POINT (1 1)</span>
+<span class="go">dtype: geometry</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">([</span><span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="k">lambda</span> <span class="n">coords</span><span class="p">:</span> <span class="n">coords</span> <span class="o">*</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="go">0    POLYGON ((0 0, 2 3, 0 3, 0 0))</span>
+<span class="go">dtype: geometry</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">([</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="k">lambda</span> <span class="n">coords</span><span class="p">:</span> <span class="n">coords</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">include_z</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">0    POINT Z (1 1 1)</span>
+<span class="go">dtype: geometry</span>
+</pre></div>
+</div>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.translate">

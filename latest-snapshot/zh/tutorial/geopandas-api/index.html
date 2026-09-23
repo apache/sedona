@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6607,6 +6606,7 @@
 <li><code>clip()</code> —— 使用标量、矩形或分布式掩膜裁剪几何</li>
 <li><code>overlay()</code> —— 支持全部五种 GeoPandas 模式的分布式数据框叠加</li>
 <li><code>buffer()</code> —— 几何缓冲</li>
+<li><code>transform()</code> —— 在 executor 上分批执行坐标数组回调</li>
 <li><code>distance()</code> —— 距离计算</li>
 <li><code>intersects()</code>、<code>contains()</code>、<code>within()</code> —— 空间谓词</li>
 <li><code>geom_equals_identical()</code> —— 对所有已存储坐标维度执行精确的结构相等性比较</li>
@@ -6630,6 +6630,7 @@
 <h3 id="_15">空间运算<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>buffer()</code> —— 几何缓冲</li>
+<li><code>transform()</code> —— 在 executor 上分批执行坐标数组回调</li>
 <li><code>distance()</code> —— 距离计算</li>
 <li><code>intersects()</code>、<code>contains()</code>、<code>within()</code> —— 空间谓词</li>
 <li><code>intersection()</code> —— 几何相交</li>
@@ -6684,6 +6685,17 @@ executor 内存开销都会增加。<code>gap_width</code> 必须是有限的非
 重建过程按环和原始几何构造数组。每个几何最多 100,000 个坐标的准入限制不是
 内存安全保证：低于此限制的长环仍可能耗尽 executor 内存。实现不会把完整覆盖
 或整个邻域收集成几何数组。</p>
+<p><code>transform(transformation, include_z=False)</code> 自 v2.0.0 起可用，要求 driver
+和 worker 均安装 Spark &gt;=3.5 和 Shapely &gt;=2.0。该方法在 executor 上以批次为单位，
+惰性地将可序列化的回调应用于 NumPy 坐标数组，并保留索引、CRS 元数据、逐行 SRID、
+缺失值和空几何。GeoDataFrame 调用会转换活动几何列，并返回 GeoSeries。</p>
+<p>与本地 GeoPandas 不同，回调每次只能看到一个 Spark 批次，而非整个 GeoSeries。
+请使用确定性的逐坐标回调，例如 <code>lambda coords: coords + [1, 2]</code>。
+<code>lambda coords: coords - coords.mean(axis=0)</code> 会分别对每个批次做中心化，
+因此结果可能随分区方式或批次大小而变化。若需要全局统计量，请先通过分布式聚合
+单独计算，再将结果作为常量传入回调。Spark 可能多次执行回调，因此结果不能依赖
+可变状态；Sedona 无法自动检测这些批次依赖。回调错误会在 Spark 实际计算结果时
+抛出。<code>transform()</code> 保留输入 CRS；需要感知 CRS 的重投影时，请使用 <code>to_crs()</code>。</p>
 <p><code>hilbert_distance()</code> 使用原生 Spark 表达式，并让逐行排序键保持分布式执行。
 未提供 <code>total_bounds</code> 时，该方法会通过一次分布式聚合计算所有包围盒中点的
 范围，只有这个有界摘要会返回 driver。由于 Spark 没有无符号整数类型，
@@ -6826,7 +6838,7 @@ MultiIndex 在内的输入行索引会被新的分布式索引替代。除 <code
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年9月15日 06:01:16 UTC">2026年9月15日 06:01:16</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年9月23日 21:50:25 UTC">2026年9月23日 21:50:25</span>
   </span>
 
     

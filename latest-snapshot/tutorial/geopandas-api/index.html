@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6607,6 +6606,7 @@ matching geometries should also be cut to the mask:</p>
 <li><code>clip()</code> - Clip geometries with scalar, rectangular, or distributed masks</li>
 <li><code>overlay()</code> - Distributed frame overlay with all five GeoPandas modes</li>
 <li><code>buffer()</code> - Geometric buffering</li>
+<li><code>transform()</code> - Apply coordinate-array callbacks in distributed executor batches</li>
 <li><code>distance()</code> - Distance calculations</li>
 <li><code>intersects()</code>, <code>contains()</code>, <code>within()</code> - Spatial predicates</li>
 <li><code>geom_equals_identical()</code> - Exact structural equality across every stored
@@ -6632,6 +6632,7 @@ matching geometries should also be cut to the mask:</p>
 <h3 id="spatial-operations_1">Spatial Operations<a class="headerlink" href="#spatial-operations_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>buffer()</code> - Geometric buffering</li>
+<li><code>transform()</code> - Apply coordinate-array callbacks in distributed executor batches</li>
 <li><code>distance()</code> - Distance calculations</li>
 <li><code>intersects()</code>, <code>contains()</code>, <code>within()</code> - Spatial predicates</li>
 <li><code>intersection()</code> - Geometric intersection</li>
@@ -6704,6 +6705,23 @@ and original geometry. The 100,000-coordinate admission limit per geometry
 is not a memory guarantee: long rings can exhaust executor memory below that
 limit. No geometry arrays for the full coverage or whole neighborhoods are
 collected.</p>
+<p><code>transform(transformation, include_z=False)</code> is available since v2.0.0 and
+requires Spark &gt;=3.5 and Shapely &gt;=2.0 on the driver and workers. It lazily
+applies a serializable callback to NumPy coordinate arrays in executor batches,
+preserving the index, CRS metadata, per-row SRIDs, nulls, and empty geometries.
+Calling it on a GeoDataFrame transforms the active geometry column and returns
+a GeoSeries.</p>
+<p>Unlike local GeoPandas, the callback sees one Spark batch at a time rather than
+the entire GeoSeries. Use deterministic, coordinate-wise callbacks such as
+<code>lambda coords: coords + [1, 2]</code>. A callback such as
+<code>lambda coords: coords - coords.mean(axis=0)</code> centers each batch separately,
+so its result can change with partitioning or batch size. Compute any required
+global statistics separately with a distributed aggregation and pass the
+resulting constants to the callback. Spark may execute callbacks more than
+once; results must not depend on mutable state. Sedona cannot detect such
+batch dependencies automatically. Callback errors surface when Spark evaluates
+the result. Use <code>to_crs()</code> for CRS-aware reprojection, since <code>transform()</code> keeps
+the input CRS.</p>
 <p><code>hilbert_distance()</code> keeps its per-row ordering keys distributed and uses only
 native Spark expressions. When <code>total_bounds</code> is omitted, one distributed
 aggregation derives the extent of all envelope midpoints; only that bounded
@@ -6860,7 +6878,7 @@ collecting them into a MultiPoint.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 15, 2026 06:01:16 UTC">September 15, 2026 06:01:16</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 23, 2026 21:50:25 UTC">September 23, 2026 21:50:25</span>
   </span>
 
     
