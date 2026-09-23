@@ -284,8 +284,7 @@ def _rebuild(occ: DataFrame, original: DataFrame) -> DataFrame:
     parts = original_parts.join(parts, ["id", "part"], "left").select(
         "id",
         "part",
-        # ST_SetSRID copies geometry through GeometryEditor, which removes
-        # empty collection members. Set each polygon's SRID before collecting.
+        # Restore each reconstructed polygon's SRID before collecting the parts.
         F.expr(
             "ST_SetSRID(CASE WHEN ST_IsEmpty(_original_polygon) "
             "THEN _original_polygon ELSE _polygon END, _srid)"

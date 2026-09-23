@@ -25,6 +25,7 @@ import numpy as np
 import pytest
 import pandas as pd
 import geopandas as gpd
+import pyspark
 import pyspark.pandas as ps
 import sedona.spark.geopandas as sgpd
 from pyspark import TaskContext
@@ -5220,9 +5221,6 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         with pytest.raises(TypeError, match="local ordered sequence"):
             source.affine_transform(ps.Series([1, 0, 0, 1, 0, 0]))
 
-    def test_transform(self):
-        pass
-
     def test_rotate(self):
         geoms = [
             Point(1, 1),
@@ -8364,3 +8362,220 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         assert "BatchEvalPython" not in plan
         assert "ArrowEvalPython" not in plan
         assert "PythonUDF" not in plan
+
+
+@pytest.mark.skipif(
+    parse_version(pyspark.__version__) < parse_version("3.5.0")
+    or parse_version(shapely.__version__) < parse_version("2.0.0"),
+    reason="Coordinate transform requires Spark>=3.5 and Shapely>=2.0",
+)
+class TestGeoSeriesTransform(TestGeopandasBase):
+    def test_transform_documented_examples(self):
+        _ = self.spark
+        source = GeoSeries([Point(0, 0)])
+        self.check_sgpd_equals_gpd(
+            source.transform(lambda coords: coords + 1),
+            gpd.GeoSeries([Point(1, 1)]),
+        )
+        polygon = GeoSeries([Polygon([(0, 0), (1, 1), (0, 1)])])
+        self.check_sgpd_equals_gpd(
+            polygon.transform(lambda coords: coords * [2, 3]),
+            gpd.GeoSeries([Polygon([(0, 0), (2, 3), (0, 3)])]),
+        )
+
+    def test_transform_preserves_multiindex_crs_and_delegates(self):
+        _ = self.spark
+        index = pd.MultiIndex.from_tuples(
+            [("a", 2), ("a", 2), ("b", 1), ("b", 3)],
+            names=["group", "feature"],
+        )
+        geometries = [Point(1, 2), None, Polygon(), LineString([(0, 0), (2, 1)])]
+        source = GeoSeries(geometries, index=index, crs="EPSG:3857", name="shape")
+        expected = gpd.GeoSeries(
+            [Point(3, 1), None, Polygon(), LineString([(2, -1), (4, 0)])],
+            index=index,
+            crs="EPSG:3857",
+        )
+        result = source.transform(lambda coords: coords + [2, -1])
+        self.check_sgpd_equals_gpd(result, expected)
+        assert result.crs == expected.crs
+        srids = result._internal.spark_frame.select(
+            stf.ST_SRID(result.spark.column).alias("srid")
+        ).collect()
+        assert {row.srid for row in srids if row.srid is not None} == {3857}
+        frame = GeoDataFrame(
+            gpd.GeoDataFrame(
+                {"shape": geometries, "value": 9},
+                geometry="shape",
+                index=index,
+                crs="EPSG:3857",
+            )
+        )
+        frame_result = frame.transform(lambda coords: coords + [2, -1])
+        self.check_sgpd_equals_gpd(frame_result, expected)
+        assert frame_result.crs == expected.crs
+
+    def test_transform_preserves_per_row_srids(self):
+        frame = self.spark.createDataFrame(
+            [(0, "SRID=4326;POINT (1 2)"), (1, "SRID=3857;POINT (3 4)")],
+            "id long, ewkt string",
+        ).selectExpr("id", "ST_GeomFromEWKT(ewkt) AS geometry")
+        source = GeoSeries(frame.pandas_api(index_col="id")["geometry"])
+
+        result = source.transform(lambda coords: coords + [2, -1])
+        rows = (
+            result._internal.spark_frame.select(
+                result._internal.index_spark_columns[0].alias("id"),
+                stf.ST_SRID(result.spark.column).alias("srid"),
+                stf.ST_AsText(result.spark.column).alias("wkt"),
+            )
+            .orderBy("id")
+            .collect()
+        )
+        assert [(row.id, row.srid, row.wkt) for row in rows] == [
+            (0, 4326, "POINT (3 1)"),
+            (1, 3857, "POINT (5 3)"),
+        ]
+
+    @pytest.mark.parametrize(
+        "geometry_wkt,expected_wkt",
+        [
+            (
+                "MULTIPOINT (EMPTY, (1 2), EMPTY)",
+                "MULTIPOINT (EMPTY, (3 1), EMPTY)",
+            ),
+            (
+                "MULTILINESTRING (EMPTY, (0 0, 1 1), EMPTY)",
+                "MULTILINESTRING (EMPTY, (2 -1, 3 0), EMPTY)",
+            ),
+            (
+                "MULTIPOLYGON (EMPTY, ((0 0, 1 0, 1 1, 0 0)), EMPTY)",
+                "MULTIPOLYGON (EMPTY, ((2 -1, 3 -1, 3 0, 2 -1)), EMPTY)",
+            ),
+        ],
+        ids=["multipoint", "multilinestring", "multipolygon"],
+    )
+    @pytest.mark.parametrize("srid", [0, 4326])
+    def test_transform_preserves_empty_multipart_members(
+        self, srid, geometry_wkt, expected_wkt
+    ):
+        frame = self.spark.createDataFrame(
+            [(0, f"SRID={srid};{geometry_wkt}")],
+            "id long, ewkt string",
+        ).selectExpr("id", "ST_GeomFromEWKT(ewkt) AS geometry")
+        source = GeoSeries(frame.pandas_api(index_col="id")["geometry"])
+
+        result = source.transform(lambda coords: coords + [2, -1])
+        row = result._internal.spark_frame.select(
+            stf.ST_SRID(result.spark.column).alias("srid"),
+            result.spark.column.alias("geometry"),
+        ).first()
+        assert row.srid == srid
+        assert len(row.geometry.geoms) == 3
+        assert row.geometry.geoms[0].is_empty
+        assert row.geometry.geoms[2].is_empty
+        assert row.geometry.wkb == wkt.loads(expected_wkt).wkb
+
+    @pytest.mark.parametrize("include_z", [False, True])
+    def test_transform_dimensions(self, include_z):
+        _ = self.spark
+        source = GeoSeries([Point(1, 2, 3), Point(1, 2), None, Point()])
+
+        def offset(coords):
+            assert isinstance(coords, np.ndarray)
+            assert coords.dtype == np.float64
+            assert coords.shape[1] == (3 if include_z else 2)
+            return coords + 1
+
+        result = source.transform(offset, include_z=include_z).to_geopandas()
+        assert tuple(result.iloc[0].coords[0]) == ((2, 3, 4) if include_z else (2, 3))
+        assert tuple(result.iloc[1].coords[0]) == (2, 3)
+        assert result.iloc[2] is None
+        assert result.iloc[3].is_empty
+        assert result.iloc[3].geom_type == "Point"
+
+    @pytest.mark.parametrize(
+        "geometries",
+        [[], [None, None], [Point(), LineString(), Polygon(), GeometryCollection()]],
+    )
+    def test_transform_empty_and_null_inputs(self, geometries):
+        from geopandas.testing import assert_geoseries_equal
+
+        _ = self.spark
+        source = GeoSeries(geometries, crs="EPSG:4326")
+        result = source.transform(lambda coords: coords + 1)
+        assert_geoseries_equal(
+            result.to_geopandas(),
+            gpd.GeoSeries(geometries, crs="EPSG:4326"),
+            check_index_type=False,
+        )
+
+    @pytest.mark.parametrize("partitions,batch_size", [(1, 1), (1, 2), (3, 2)])
+    def test_transform_coordinatewise_callbacks_are_batch_independent(
+        self, partitions, batch_size
+    ):
+        spark = self.spark
+        frame = (
+            spark.range(6)
+            .selectExpr("id", "ST_Point(CAST(id AS DOUBLE), 2D) AS geometry")
+            .repartition(partitions)
+        )
+        source = GeoSeries(frame.pandas_api(index_col="id")["geometry"])
+
+        def nonlinear(coords):
+            # The callback must run on workers, including schema construction.
+            assert TaskContext.get() is not None
+            return np.column_stack((coords[:, 0] ** 2, coords[:, 1] + coords[:, 0]))
+
+        key = "spark.sql.execution.arrow.maxRecordsPerBatch"
+        original = spark.conf.get(key)
+        try:
+            spark.conf.set(key, str(batch_size))
+            result = source.transform(nonlinear).to_geopandas().sort_index()
+        finally:
+            spark.conf.set(key, original)
+        assert [tuple(geom.coords[0]) for geom in result] == [
+            (0, 2),
+            (1, 3),
+            (4, 4),
+            (9, 5),
+            (16, 6),
+            (25, 7),
+        ]
+        assert result.index.tolist() == list(range(6))
+
+    def test_transform_callback_errors_are_deferred(self):
+        _ = self.spark
+        source = GeoSeries([Point(0, 0)])
+
+        def fail(coords):
+            raise ValueError("coordinate callback failed")
+
+        result = source.transform(fail)
+        with pytest.raises(Exception, match="coordinate callback failed"):
+            result.to_geopandas()
+
+    def test_transform_rejects_changed_coordinate_count(self):
+        _ = self.spark
+        source = GeoSeries([LineString([(0, 0), (1, 1)])])
+        result = source.transform(lambda coords: coords[:-1])
+        with pytest.raises(Exception, match="unexpected shape"):
+            result.to_geopandas()
+
+    def test_transform_rejects_noncallable(self):
+        _ = self.spark
+        source = GeoSeries([Point(0, 0)])
+        with pytest.raises(TypeError, match="callable"):
+            source.transform(None)
+
+    def test_transform_requires_supported_runtime(self, monkeypatch):
+        _ = self.spark
+        source = GeoSeries([Point(0, 0)])
+        with monkeypatch.context() as patched:
+            patched.setattr(pyspark, "__version__", "3.4.4")
+            with pytest.raises(NotImplementedError, match="Spark 3.5"):
+                source.transform(lambda coords: coords)
+        with monkeypatch.context() as patched:
+            patched.setattr(shapely, "__version__", "1.8.5")
+            with pytest.raises(ImportError, match="Shapely 2.0"):
+                source.transform(lambda coords: coords)

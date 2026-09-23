@@ -17,6 +17,7 @@
 
 
 from sedona.spark.sql.types import GeometryType
+from sedona.spark.utils import geometry_serde
 from sedona.spark.sql.functions import sedona_vectorized_udf, SedonaUDFType
 from tests import chicago_crimes_input_location
 from tests.test_base import TestBase
@@ -26,9 +27,11 @@ import geopandas as gpd
 import pytest
 import pyspark
 import pandas as pd
+import pyarrow as pa
 from pyspark.sql.functions import pandas_udf
 from pyspark.sql.types import IntegerType, FloatType
 from shapely.geometry import Point
+from shapely.affinity import translate
 from shapely.wkt import loads
 
 
@@ -86,6 +89,45 @@ def squared_udf(s: pd.Series) -> pd.Series:
 
 
 buffer_distanced_udf = f.udf(non_vectorized_buffer_udf, GeometryType())
+
+
+@pytest.mark.parametrize("udf_type", list(SedonaUDFType))
+@pytest.mark.parametrize("geometries", [[Point(1, 2), None, Point()], [None], []])
+def test_vectorized_udf_preserves_null_geometries(geometries, udf_type):
+    @sedona_vectorized_udf(
+        udf_type=SedonaUDFType.GEO_SERIES, return_type=GeometryType()
+    )
+    def translate_batch(series: gpd.GeoSeries) -> gpd.GeoSeries:
+        return series.translate(xoff=3, yoff=4)
+
+    @sedona_vectorized_udf(return_type=GeometryType())
+    def translate_geometry(geom: b.BaseGeometry) -> b.BaseGeometry:
+        return translate(geom, xoff=3, yoff=4) if geom is not None else None
+
+    udf = (
+        translate_batch if udf_type == SedonaUDFType.GEO_SERIES else translate_geometry
+    )
+    encoded = pd.Series([geometry_serde.serialize(geom) for geom in geometries])
+    result = udf.func(encoded)
+    arrow_result = pa.Array.from_pandas(result, type=pa.binary())
+    assert arrow_result.to_pylist() == list(result)
+    expected = gpd.GeoSeries(geometries).translate(xoff=3, yoff=4)
+
+    assert len(result) == len(geometries)
+    for actual, geometry in zip(result, expected):
+        if geometry is None:
+            assert actual is None
+        else:
+            assert geometry_serde.deserialize(actual)[0].equals_exact(geometry, 0)
+
+
+def test_shapely_scalar_udf_passes_null_to_callback():
+    @sedona_vectorized_udf(return_type=GeometryType())
+    def replace_null(geom: b.BaseGeometry) -> b.BaseGeometry:
+        return Point(9, 10) if geom is None else geom
+
+    result = replace_null.func(pd.Series([None]))
+    assert geometry_serde.deserialize(result.iloc[0])[0].equals_exact(Point(9, 10), 0)
 
 
 class TestSedonaArrowUDF(TestBase):

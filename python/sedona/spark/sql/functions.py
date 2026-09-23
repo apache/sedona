@@ -93,7 +93,9 @@ def _apply_shapely_series_udf(
     def apply(series: pd.Series) -> pd.Series:
         applied = series.apply(
             lambda x: (
-                fn(geometry_serde.deserialize(x)[0]) if deserialize_geom else fn(x)
+                fn(geometry_serde.deserialize(x)[0])
+                if deserialize_geom and x is not None
+                else fn(x)
             )
         )
 
@@ -117,12 +119,23 @@ def _apply_geo_series_udf(
         series_data = series
         if deserialize_geom:
             series_data = gpd.GeoSeries(
-                series.apply(lambda x: geometry_serde.deserialize(x)[0])
+                series.apply(
+                    lambda x: (
+                        geometry_serde.deserialize(x)[0] if x is not None else None
+                    )
+                )
             )
 
-        return fn(series_data).apply(
-            lambda x: geometry_serde.serialize(x) if serialize_geom else x
-        )
+        result = fn(series_data)
+        if serialize_geom:
+            # GeoSeries.apply retains geometry dtype for empty or all-null
+            # results, which Arrow cannot convert to the binary storage type.
+            return pd.Series(
+                [geometry_serde.serialize(geom) for geom in result],
+                index=result.index,
+                dtype=object,
+            )
+        return result
 
     return UserDefinedFunction(
         apply, return_type, "SedonaPandasArrowUDF", evalType=SEDONA_SCALAR_EVAL_TYPE

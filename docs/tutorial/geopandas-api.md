@@ -315,6 +315,7 @@ The GeoPandas API for Apache Sedona implements the most commonly used GeoSeries 
 - `clip()` - Clip geometries with scalar, rectangular, or distributed masks
 - `overlay()` - Distributed frame overlay with all five GeoPandas modes
 - `buffer()` - Geometric buffering
+- `transform()` - Apply coordinate-array callbacks in distributed executor batches
 - `distance()` - Distance calculations
 - `intersects()`, `contains()`, `within()` - Spatial predicates
 - `geom_equals_identical()` - Exact structural equality across every stored
@@ -340,6 +341,7 @@ The GeoPandas API for Apache Sedona implements the most commonly used GeoSeries 
 ### Spatial Operations
 
 - `buffer()` - Geometric buffering
+- `transform()` - Apply coordinate-array callbacks in distributed executor batches
 - `distance()` - Distance calculations
 - `intersects()`, `contains()`, `within()` - Spatial predicates
 - `intersection()` - Geometric intersection
@@ -421,6 +423,25 @@ and original geometry. The 100,000-coordinate admission limit per geometry
 is not a memory guarantee: long rings can exhaust executor memory below that
 limit. No geometry arrays for the full coverage or whole neighborhoods are
 collected.
+
+`transform(transformation, include_z=False)` is available since v2.0.0 and
+requires Spark >=3.5 and Shapely >=2.0 on the driver and workers. It lazily
+applies a serializable callback to NumPy coordinate arrays in executor batches,
+preserving the index, CRS metadata, per-row SRIDs, nulls, and empty geometries.
+Calling it on a GeoDataFrame transforms the active geometry column and returns
+a GeoSeries.
+
+Unlike local GeoPandas, the callback sees one Spark batch at a time rather than
+the entire GeoSeries. Use deterministic, coordinate-wise callbacks such as
+`lambda coords: coords + [1, 2]`. A callback such as
+`lambda coords: coords - coords.mean(axis=0)` centers each batch separately,
+so its result can change with partitioning or batch size. Compute any required
+global statistics separately with a distributed aggregation and pass the
+resulting constants to the callback. Spark may execute callbacks more than
+once; results must not depend on mutable state. Sedona cannot detect such
+batch dependencies automatically. Callback errors surface when Spark evaluates
+the result. Use `to_crs()` for CRS-aware reprojection, since `transform()` keeps
+the input CRS.
 
 `hilbert_distance()` keeps its per-row ordering keys distributed and uses only
 native Spark expressions. When `total_bounds` is omitted, one distributed

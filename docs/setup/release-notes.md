@@ -71,6 +71,7 @@
 * [<a href='https://github.com/apache/sedona/issues/3344'>GH-3344</a>] - Expose `SpatialIndex.valid_query_predicates`
 * [<a href='https://github.com/apache/sedona/issues/3357'>GH-3357</a>] - Implement `list_layers` for GeoPackage using the native Spark reader
 * [<a href='https://github.com/apache/sedona/issues/3370'>GH-3370</a>] - Add distributed `simplify_coverage` for GeoSeries and GeoDataFrame, using reliable Spark checkpoints
+* [<a href='https://github.com/apache/sedona/issues/3388'>GH-3388</a>] - Add distributed coordinate `transform` for GeoSeries and GeoDataFrame with batch-local callbacks
 
 ### Bug Fixes
 
