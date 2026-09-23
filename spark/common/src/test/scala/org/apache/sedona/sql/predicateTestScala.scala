@@ -291,6 +291,29 @@ class predicateTestScala extends TestBaseScala {
       assert(!notCrosses.take(1)(0).get(0).asInstanceOf[Boolean])
     }
 
+    it("Passed ST_Crosses with GeometryCollections") {
+      val cases = Seq(
+        ("GEOMETRYCOLLECTION (POINT (1 1))", "LINESTRING (1 1, 1 2)", false),
+        (
+          "GEOMETRYCOLLECTION (POINT (10 10), LINESTRING (0 2, 2 0))",
+          "LINESTRING (0 0, 2 2)",
+          true),
+        ("GEOMETRYCOLLECTION EMPTY", "LINESTRING (0 0, 2 2)", false))
+      cases.foreach { case (left, right, expected) =>
+        val result = sparkSession
+          .sql(s"SELECT ST_GeomFromWKT('$left') AS a, ST_GeomFromWKT('$right') AS b")
+          .selectExpr("ST_Crosses(a, b)", "ST_Crosses(b, a)")
+          .first()
+        assert(result.getBoolean(0) == expected)
+        assert(result.getBoolean(1) == expected)
+      }
+      val nullResult = sparkSession
+        .sql("SELECT ST_GeomFromWKT('GEOMETRYCOLLECTION (POINT (1 1))') AS geom")
+        .selectExpr("ST_Crosses(geom, NULL)", "ST_Crosses(NULL, geom)")
+        .first()
+      assert(nullResult.isNullAt(0) && nullResult.isNullAt(1))
+    }
+
     it("Passed ST_Relate") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('LINESTRING (1 1, 5 5)') AS g1, ST_GeomFromWKT('POLYGON ((3 3, 3 7, 7 7, 7 3, 3 3))') as g2, '1010F0212' as im")

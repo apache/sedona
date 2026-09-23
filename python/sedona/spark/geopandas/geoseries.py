@@ -2985,15 +2985,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         return geom
 
     def crosses(self, other, align=None) -> pspd.Series:
-        # Sedona does not support GeometryCollection (errors), so we return NULL for now to avoid error.
         other_series, extended = self._make_series_of_val(other)
         align = False if extended else align
 
-        spark_expr = F.when(
-            (stf.ST_GeometryType(F.col("L")) == "ST_GeometryCollection")
-            | (stf.ST_GeometryType(F.col("R")) == "ST_GeometryCollection"),
-            None,
-        ).otherwise(stp.ST_Crosses(F.col("L"), F.col("R")))
+        spark_expr = stp.ST_Crosses(F.col("L"), F.col("R"))
         result = self._row_wise_operation(
             spark_expr,
             other_series,

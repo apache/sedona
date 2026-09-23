@@ -25,6 +25,8 @@ import org.apache.sedona.common.utils.GeometryEquality;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.operation.distance3d.Distance3DOp;
 import org.locationtech.jts.operation.relate.RelateOp;
+import org.locationtech.jts.operation.relateng.RelateNG;
+import org.locationtech.jts.operation.relateng.RelatePredicate;
 
 public class Predicates {
   public static boolean contains(Geometry leftGeometry, Geometry rightGeometry) {
@@ -141,7 +143,7 @@ public class Predicates {
   }
 
   public static boolean crosses(Geometry leftGeometry, Geometry rightGeometry) {
-    return leftGeometry.crosses(rightGeometry);
+    return RelateNG.relate(leftGeometry, rightGeometry, RelatePredicate.crosses());
   }
 
   public static boolean overlaps(Geometry leftGeometry, Geometry rightGeometry) {

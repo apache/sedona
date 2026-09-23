@@ -1922,9 +1922,6 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
     def test_crosses(self):
         for geom, geom2 in self.pairs:
-            if self.contains_any_geom_collection(geom, geom2):
-                continue
-
             # We explicitly specify align=True to quite warnings in geopandas, despite it being the default
             gpd_result = gpd.GeoSeries(geom).crosses(gpd.GeoSeries(geom2), align=True)
             sgpd_result = GeoSeries(geom).crosses(GeoSeries(geom2), align=True)

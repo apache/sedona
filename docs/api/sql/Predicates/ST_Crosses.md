@@ -21,6 +21,8 @@
 
 Introduction: Return true if A crosses B
 
+GeometryCollection inputs are supported and evaluated as the union of their members, including mixed and nested collections. Empty geometries return `false`.
+
 ![ST_Crosses returning true](../../../image/ST_Crosses/ST_Crosses_true.svg "ST_Crosses returning true")
 ![ST_Crosses returning false](../../../image/ST_Crosses/ST_Crosses_false.svg "ST_Crosses returning false")
 

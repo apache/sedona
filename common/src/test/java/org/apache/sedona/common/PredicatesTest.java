@@ -41,6 +41,58 @@ public class PredicatesTest extends TestBase {
   private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
 
   @Test
+  public void testCrossesGeometryCollections() throws ParseException {
+    // The original report: a collection containing a line endpoint does not cross the line.
+    assertCrosses("LINESTRING (1 1, 1 2)", "GEOMETRYCOLLECTION (POINT (1 1))", false);
+    assertCrosses("LINESTRING (0 0, 2 2)", "GEOMETRYCOLLECTION (POINT (1 1), POINT (3 3))", true);
+    assertCrosses(
+        "LINESTRING (0 0, 2 2)", "GEOMETRYCOLLECTION (POINT (10 10), LINESTRING (0 2, 2 0))", true);
+    assertCrosses(
+        "GEOMETRYCOLLECTION (LINESTRING (0 0, 2 2))",
+        "GEOMETRYCOLLECTION (LINESTRING (0 2, 2 0))",
+        true);
+    assertCrosses("LINESTRING (0 0, 2 2)", "GEOMETRYCOLLECTION (LINESTRING (3 3, 4 4))", false);
+    assertCrosses("LINESTRING (0 0, 2 2)", "GEOMETRYCOLLECTION (LINESTRING (1 1, 3 3))", false);
+  }
+
+  @Test
+  public void testCrossesNestedGeometryCollections() throws ParseException {
+    assertCrosses(
+        "LINESTRING (0 0, 2 2)",
+        "GEOMETRYCOLLECTION (POINT EMPTY, GEOMETRYCOLLECTION (LINESTRING (0 2, 2 0)))",
+        true);
+  }
+
+  @Test
+  public void testCrossesGeometryCollectionUnion() throws ParseException {
+    String polygon = "POLYGON ((1 1, 4 1, 4 4, 1 4, 1 1))";
+    assertCrosses("LINESTRING (0 0, 2 2)", polygon, true);
+    // The line crosses the polygon, but the entire collection has an area intersection.
+    // Evaluating components separately and OR-ing their results would incorrectly return true.
+    assertCrosses(
+        "GEOMETRYCOLLECTION (LINESTRING (0 0, 2 2), "
+            + "POLYGON ((-1 -1, 3 -1, 3 3, -1 3, -1 -1)))",
+        polygon,
+        false);
+  }
+
+  @Test
+  public void testCrossesEmptyGeometryCollections() throws ParseException {
+    assertCrosses("GEOMETRYCOLLECTION EMPTY", "LINESTRING (0 0, 2 2)", false);
+    assertCrosses(
+        "GEOMETRYCOLLECTION (POINT EMPTY, LINESTRING EMPTY)", "LINESTRING (0 0, 2 2)", false);
+    assertCrosses("GEOMETRYCOLLECTION EMPTY", "GEOMETRYCOLLECTION EMPTY", false);
+  }
+
+  private static void assertCrosses(String leftWkt, String rightWkt, boolean expected)
+      throws ParseException {
+    Geometry left = geomFromEWKT(leftWkt);
+    Geometry right = geomFromEWKT(rightWkt);
+    assertEquals(leftWkt + " crosses " + rightWkt, expected, Predicates.crosses(left, right));
+    assertEquals(rightWkt + " crosses " + leftWkt, expected, Predicates.crosses(right, left));
+  }
+
+  @Test
   public void testBoxIntersects() {
     Box2D a = new Box2D(0.0, 0.0, 5.0, 5.0);
 
