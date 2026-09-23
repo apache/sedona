@@ -67,6 +67,10 @@ somewhere/
 
 Sedona writes many Parquet files in parallel because that's much faster than writing a single file.
 
+GeoParquet writes preserve the declared XY or XYZ coordinate layout of empty `Point`, `LineString`, and `Polygon` geometries. XYZ geometries also retain their Z dimension when Z ordinates are `NaN`.
+
+[GeoParquet 1.1](https://geoparquet.org/releases/v1.1.0/#wkb) does not support M coordinates. Sedona discards M when writing GeoParquet: XYM becomes XY, and XYZM becomes XYZ. If you need the M values, store them separately before writing.
+
 ## Read GeoParquet files into Sedona DataFrame with Spark
 
 Let's read the GeoParquet files into a Sedona DataFrame:
@@ -88,7 +92,7 @@ Here are the results:
 +---+---------------------+
 ```
 
-Since Sedona 2.0.0, reads preserve declared Z/M dimensions even for empty points, lines, and polygons or NaN ordinates. If collecting mixed layouts raises a heterogeneous-layout error, see [ST_Collect](../../api/sql/Geometry-Editors/ST_Collect.md).
+Since Sedona 2.0.0, reads preserve declared Z/M dimensions even for empty points, lines, and polygons or NaN ordinates. This includes measured WKB inputs, although M coordinates are outside the GeoParquet 1.1 specification. If collecting mixed layouts raises a heterogeneous-layout error, see [ST_Collect](../../api/sql/Geometry-Editors/ST_Collect.md).
 
 Here's how Sedona executes this query under the hood:
 
