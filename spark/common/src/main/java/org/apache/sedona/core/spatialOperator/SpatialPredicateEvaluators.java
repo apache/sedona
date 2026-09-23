@@ -19,6 +19,7 @@
 package org.apache.sedona.core.spatialOperator;
 
 import java.io.Serializable;
+import org.apache.sedona.common.Predicates;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
 
@@ -104,11 +105,11 @@ public class SpatialPredicateEvaluators {
 
   public interface CrossesEvaluator extends SpatialPredicateEvaluator {
     default boolean eval(Geometry left, Geometry right) {
-      return left.crosses(right);
+      return Predicates.crosses(left, right);
     }
 
     default boolean eval(PreparedGeometry left, Geometry right) {
-      return left.crosses(right);
+      return Predicates.crosses(left.getGeometry(), right);
     }
   }
 

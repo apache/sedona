@@ -6094,6 +6094,30 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = s.to_geoframe().difference(s2.to_geoframe())
         self.check_sgpd_equals_gpd(result, expected)
 
+    def test_crosses_geometry_collections(self):
+        geometries = [
+            wkt.loads("GEOMETRYCOLLECTION (POINT (1 1), POINT (3 3))"),
+            wkt.loads("GEOMETRYCOLLECTION (POINT (10 10), LINESTRING (0 2, 2 0))"),
+            wkt.loads(
+                "GEOMETRYCOLLECTION (GEOMETRYCOLLECTION (LINESTRING (0 2, 2 0)))"
+            ),
+            wkt.loads("GEOMETRYCOLLECTION (LINESTRING (1 1, 3 3))"),
+            wkt.loads("GEOMETRYCOLLECTION (POINT (0 0))"),
+            GeometryCollection(),
+            None,
+        ]
+        line = LineString([(0, 0), (2, 2)])
+        local = gpd.GeoSeries(geometries)
+        expected = local.crosses(line)
+        assert expected.tolist() == [True, True, True, False, False, False, False]
+
+        series = GeoSeries(geometries)
+        self.check_pd_series_equal(series.crosses(line), expected)
+        self.check_pd_series_equal(series.to_geoframe().crosses(line), expected)
+
+        lines = GeoSeries([line] * len(geometries))
+        self.check_pd_series_equal(lines.crosses(series, align=False), expected)
+
     def test_crosses(self):
         s = GeoSeries(
             [
@@ -6130,9 +6154,6 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = s.to_geoframe().crosses(s2, align=False)
         self.check_pd_series_equal(df_result, expected)
 
-        # The underlying ST_Crosses expression returns NULL for GeometryCollection
-        # (https://github.com/apache/sedona/issues/2417), which the GeoSeries
-        # predicate normalizes to False to match GeoPandas' boolean contract.
         # Ensure M-dimension doesn't break things.
         s = GeoSeries(
             [
