@@ -21,7 +21,7 @@ package org.apache.spark.sql.sedona_sql.io.stac
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.connector.catalog.{SupportsRead, Table, TableCapability}
 import org.apache.spark.sql.connector.read.ScanBuilder
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.sedona_sql.io.geojson.GeoJSONUtils
 import org.apache.spark.sql.sedona_sql.io.stac.StacUtils.{inferStacSchema, updatePropertiesPromotedSchema}
 import org.apache.spark.sql.types._
@@ -67,7 +67,8 @@ class StacTable(
   override def schema(): StructType = {
     // Check if the schema is already cached
     val fullSchema = schemaCache.computeIfAbsent(opts, _ => inferStacSchema(opts))
-    val updatedGeometrySchema = GeoJSONUtils.updateGeometrySchema(fullSchema, GeometryUDT())
+    val updatedGeometrySchema =
+      GeoJSONUtils.updateGeometrySchema(fullSchema, SpatialTypeSupport.geometryType)
     updatePropertiesPromotedSchema(updatedGeometrySchema)
   }
 

@@ -24,6 +24,7 @@ import java.sql.{Date, Timestamp}
 import org.apache.spark.api.java.JavaPairRDD
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
@@ -141,9 +142,12 @@ object Adapter {
       sparkSession: SparkSession): DataFrame = {
     val rowRdd = spatialRDD.rawSpatialRDD.rdd.map[Row](geom => {
       val stringRow = extractUserData(geom)
-      Row.fromSeq(stringRow)
+      Row.fromSeq(stringRow.map {
+        case geometry: Geometry => SpatialTypeSupport.externalGeometry(geometry)
+        case value => value
+      })
     })
-    var cols: Seq[StructField] = Seq(StructField("geometry", GeometryUDT()))
+    var cols: Seq[StructField] = Seq(StructField("geometry", SpatialTypeSupport.geometryType))
     if (fieldNames != null && fieldNames.nonEmpty) {
       cols = cols ++ fieldNames.map(f => StructField(f, StringType))
     }
@@ -193,12 +197,15 @@ object Adapter {
         row = f,
         leftFieldnames = leftFieldnames,
         rightFieldnames = rightFieldNames)
-      Row.fromSeq(stringRow)
+      Row.fromSeq(stringRow.map {
+        case geometry: Geometry => SpatialTypeSupport.externalGeometry(geometry)
+        case value => value
+      })
     })
-    var cols: Seq[StructField] = Seq(StructField("leftgeometry", GeometryUDT()))
+    var cols: Seq[StructField] = Seq(StructField("leftgeometry", SpatialTypeSupport.geometryType))
     if (leftFieldnames != null && leftFieldnames.nonEmpty)
       cols = cols ++ leftFieldnames.map(fName => StructField(fName, StringType))
-    cols = cols ++ Seq(StructField("rightgeometry", GeometryUDT()))
+    cols = cols ++ Seq(StructField("rightgeometry", SpatialTypeSupport.geometryType))
     if (rightFieldNames != null && rightFieldNames.nonEmpty)
       cols = cols ++ rightFieldNames.map(fName => StructField(fName, StringType))
     val schema = StructType(cols)
@@ -292,7 +299,7 @@ object Adapter {
 
   private def toRdd(dataFrame: DataFrame, geometryColId: Int): RDD[Geometry] = {
     dataFrame.rdd.map[Geometry](f => {
-      var geometry = f.get(geometryColId).asInstanceOf[Geometry]
+      val geometry = SpatialTypeSupport.fromExternalGeometry(f.get(geometryColId))
       var fieldSize = f.size
       var userData: String = null
       if (fieldSize > 1) {
@@ -333,7 +340,10 @@ object Adapter {
     val parsedRow = stringRow.zipWithIndex.map { case (value, idx) =>
       val desiredDataType = schema(idx).dataType
       // Don't convert geometry data, only user data
-      if (desiredDataType == GeometryUDT) value else parseString(value.toString, desiredDataType)
+      if (desiredDataType.isInstanceOf[GeometryUDT]) value
+      else if (SpatialTypeSupport.isGeometry(desiredDataType)) {
+        SpatialTypeSupport.externalGeometry(value.asInstanceOf[Geometry])
+      } else parseString(value.toString, desiredDataType)
     }
 
     Row.fromSeq(parsedRow)

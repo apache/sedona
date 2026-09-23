@@ -20,9 +20,10 @@ package org.apache.sedona.stats.clustering
 
 import org.apache.sedona.util.DfUtils.getGeometryColumnName
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.sql.sedona_sql.expressions.st_functions.{ST_Distance, ST_DistanceSpheroid}
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
+import org.apache.spark.sql.sedona_sql.expressions.st_functions.{ST_AsBinary, ST_Distance, ST_DistanceSpheroid, ST_SRID}
 import org.apache.spark.sql.{Column, DataFrame}
+import org.apache.spark.sql.types.{ArrayType, DataType, MapType, StructType}
 import org.graphframes.GraphFrame
 
 object DBSCAN {
@@ -78,13 +79,17 @@ object DBSCAN {
       if (useSpheroid) ST_DistanceSpheroid else ST_Distance
 
     val hasIdColumn = dataframe.columns.contains("id")
-    val idDataframe = if (hasIdColumn) {
-      dataframe
-        .withColumnRenamed("id", ID_COLUMN)
-        .withColumn("id", sha2(to_json(struct("*")), 256))
-    } else {
-      dataframe.withColumn("id", sha2(to_json(struct("*")), 256))
-    }
+    val originalDataframe =
+      if (hasIdColumn) dataframe.withColumnRenamed("id", ID_COLUMN) else dataframe
+    val hashInput = if (SpatialTypeSupport.usesNativeTypes) {
+      // Spark's JSON encoder cannot serialize native spatial values, including nested ones.
+      // Include both WKB and SRID so distinct reference systems retain distinct row IDs.
+      struct(originalDataframe.schema.fields.map { field =>
+        val value = col(s"`${field.name.replace("`", "``")}`")
+        hashableColumn(value, field.dataType).as(field.name)
+      }: _*)
+    } else struct("*")
+    val idDataframe = originalDataframe.withColumn("id", sha2(to_json(hashInput), 256))
 
     val isCorePointsDF = idDataframe
       .alias("left")
@@ -109,9 +114,21 @@ object DBSCAN {
       .join(corePointsDF.alias("right"), col("left.dst") === col(s"right.id"))
       .select(col("left.src"), col(s"right.id").alias("dst"))
 
-    val connectedComponentsDF = GraphFrame(corePointsDF, coreEdgesDf).connectedComponents
+    // GraphFrames caches its vertex rows, while Spark's columnar cache cannot store native
+    // spatial types. Component computation only needs vertex IDs; restore the other columns
+    // after it finishes, preserving the original column order for the union below.
+    val vertices =
+      if (SpatialTypeSupport.usesNativeTypes) corePointsDF.select("id") else corePointsDF
+    val components = GraphFrame(vertices, coreEdgesDf).connectedComponents
       .setUseLabelsAsComponents(false)
       .run
+    val connectedComponentsDF = if (SpatialTypeSupport.usesNativeTypes) {
+      corePointsDF
+        .join(components, Seq("id"))
+        .select(
+          (corePointsDF.columns.map(name => col(s"`${name.replace("`", "``")}`")) :+
+            col("component")): _*)
+    } else components
 
     val borderComponentsDF = borderPointsDF
       .select(struct("*").alias("leftContent"), explode(col("neighbors")).alias("neighbor"))
@@ -145,6 +162,31 @@ object DBSCAN {
 
   }
 
+  private def hashableColumn(value: Column, dataType: DataType): Column = {
+    if (SpatialTypeSupport.isNativeSpatial(dataType)) {
+      when(value.isNull, lit(null))
+        .otherwise(struct(ST_AsBinary(value).as("wkb"), ST_SRID(value).as("srid")))
+    } else
+      dataType match {
+        case StructType(fields) =>
+          when(value.isNull, lit(null)).otherwise(struct(fields.map { field =>
+            hashableColumn(value.getField(field.name), field.dataType).as(field.name)
+          }: _*))
+        case ArrayType(elementType, _) =>
+          transform(value, element => hashableColumn(element, elementType))
+        case MapType(keyType, valueType, _) =>
+          // An entry array lets JSON encode spatial map keys as well as values without
+          // coercing binary keys to strings.
+          transform(
+            map_entries(value),
+            entry =>
+              struct(
+                hashableColumn(entry.getField("key"), keyType).as("key"),
+                hashableColumn(entry.getField("value"), valueType).as("value")))
+        case _ => value
+      }
+  }
+
   private def validateInputs(
       geo_df: DataFrame,
       epsilon: Double,
@@ -154,7 +196,8 @@ object DBSCAN {
     require(minPts > 0, "minPts must be greater than 0")
     require(geo_df.columns.contains(geometry), "geometry column not found in dataframe")
     require(
-      geo_df.schema.fields(geo_df.schema.fieldIndex(geometry)).dataType == GeometryUDT,
+      SpatialTypeSupport.isGeometry(
+        geo_df.schema.fields(geo_df.schema.fieldIndex(geometry)).dataType),
       "geometry column must be of type GeometryType")
   }
 }

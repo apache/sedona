@@ -62,6 +62,12 @@ jobs:
       fail-fast: true
       matrix:
         include:
+          # Spark 4.2 has a native spatial value contract; run its dedicated suites.
+          - spark: 4.2.0
+            scala: 2.13.18
+            jdk: '17'
+            skipLibPostalTests: 'true'
+            nativeSpatialTests: 'true'
           - spark: 4.1.1
             scala: 2.13.17
             jdk: '17'
@@ -143,6 +149,7 @@ jobs:
           SKIP_TESTS: ${{ matrix.skipTests }}
           SEDONA_SKIP_LIBPOSTAL_TESTS: ${{ matrix.skipLibPostalTests }}
           FLINK_VERSION: ${{ matrix.flinkVersion }}
+          NATIVE_SPATIAL_TESTS: ${{ matrix.nativeSpatialTests }}
         run: |
           SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
 
@@ -156,7 +163,24 @@ jobs:
               FLINK_ARGS="-Dflink.version=${FLINK_VERSION}"
           fi
 
-          mvn -q clean install -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} ${FLINK_ARGS} ${SKIP_TESTS}
+          if [[ "${NATIVE_SPATIAL_TESTS}" == "true" ]]; then
+              # Legacy suites assert JTS/UDT return values. Exercise the native contract separately.
+              mvn -q clean install -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} -Dmaven.test.skip=true
+              mvn -q -pl spark/common test -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} \
+                  -Dsuites=org.apache.sedona.sql.UDF.NativeFunctionRegistrationTest \
+                  -Dtest=NativeFunctionRegistrationTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
+              mvn -q -pl spark/spark-4.2 test -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION}
+              pip install "pyspark[connect]==${SPARK_VERSION}" "shapely>=2.1,<3" "geopandas>=1" geoarrow-types pytest attrs
+              export PYTHONPATH="${PWD}/python"
+              export PYSPARK_PYTHON="$(command -v python)"
+              export SPARK_LOCAL_IP=127.0.0.1
+              native_jars=("${PWD}"/spark-shaded/target/sedona-spark-shaded-4.2_2.13-*.jar)
+              export SEDONA_PYTHON_EXTRA_JARS="${native_jars[0]}"
+              python -m pytest python/tests/sql/test_native_spatial_types.py python/tests/utils/test_geoarrow.py -q
+              SEDONA_NATIVE_TEST_CONNECT=1 python -m pytest python/tests/sql/test_native_spatial_types.py -q
+          else
+              mvn -q clean install -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} ${FLINK_ARGS} ${SKIP_TESTS}
+          fi
       - run: mkdir staging
       - run: cp spark-shaded/target/sedona-*.jar staging
       - run: |

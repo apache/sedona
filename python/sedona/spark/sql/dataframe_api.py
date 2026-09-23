@@ -65,6 +65,31 @@ def call_sedona_function(
     ):
         args = [args]
 
+    # Native Spark 4.2 functions own these names. Use Spark's public builder
+    # for both Classic and Connect, without requiring JVM Sedona registration.
+    from sedona.spark.sql.types import USES_NATIVE_SPATIAL_TYPES
+
+    if USES_NATIVE_SPATIAL_TYPES and function_name in {
+        "ST_AsBinary",
+        "ST_GeomFromWKB",
+        "ST_GeogFromWKB",
+        "ST_SRID",
+        "ST_SetSRID",
+    }:
+        columns = [
+            (
+                arg
+                if isinstance(arg, (Column, ConnectColumn))
+                else f.col(arg) if isinstance(arg, str) else f.lit(arg)
+            )
+            for arg in args
+        ]
+        if function_name == "ST_GeogFromWKB" and len(columns) == 2:
+            return f.call_function(
+                "ST_SetSRID", f.call_function(function_name, columns[0]), columns[1]
+            )
+        return f.call_function(function_name, *columns)
+
     # in spark-connect environments use connect API
     if is_remote():
         return call_sedona_function_connect(function_name, args)

@@ -27,6 +27,9 @@ import org.apache.spark.sql.expressions.{Aggregator, UserDefinedFunction}
 import org.apache.spark.sql.sedona_sql.expressions.{ST_Envelope_Aggr, ST_Intersection_Aggr, ST_Union_Aggr}
 import org.locationtech.jts.geom.Geometry
 
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
+
+import java.util.Locale
 import scala.reflect.ClassTag
 import scala.util.Try
 
@@ -37,6 +40,25 @@ abstract class AbstractCatalog {
   val expressions: Seq[FunctionDescription]
 
   val aggregateExpressions: Seq[Aggregator[Geometry, _, _]]
+
+  private val sparkNativeFunctions =
+    Set("st_asbinary", "st_geomfromwkb", "st_geogfromwkb", "st_srid", "st_setsrid")
+
+  private def registeredExpressions: Seq[FunctionDescription] =
+    if (SpatialTypeSupport.usesNativeTypes) {
+      expressions.filterNot { case (identifier, _, _) =>
+        sparkNativeFunctions.contains(identifier.funcName.toLowerCase(Locale.ROOT))
+      }
+    } else {
+      expressions
+    }
+
+  private def registryIdentifier(identifier: FunctionIdentifier): FunctionIdentifier =
+    if (SpatialTypeSupport.usesNativeTypes) {
+      FunctionIdentifier(identifier.funcName, Some("builtin"), Some("system"))
+    } else {
+      identifier
+    }
 
   protected def function[T <: Expression: ClassTag](defaultArgs: Any*): FunctionDescription = {
     val classTag = implicitly[ClassTag[T]]
@@ -85,7 +107,8 @@ abstract class AbstractCatalog {
 
   def registerAll(sparkSession: SparkSession): Unit = {
     val registry = sparkSession.sessionState.functionRegistry
-    expressions.foreach { case (functionIdentifier, expressionInfo, functionBuilder) =>
+    registeredExpressions.foreach { case (identifier, expressionInfo, functionBuilder) =>
+      val functionIdentifier = registryIdentifier(identifier)
       val shouldRegister = registry.lookupFunction(functionIdentifier) match {
         case Some(existingInfo) =>
           // Skip if Sedona already registered this function (e.g., SedonaContext.create called
@@ -97,11 +120,9 @@ abstract class AbstractCatalog {
         case None => true
       }
       if (shouldRegister) {
-        registry.registerFunction(functionIdentifier, expressionInfo, functionBuilder)
-        FunctionRegistry.builtin.registerFunction(
-          functionIdentifier,
-          expressionInfo,
-          functionBuilder)
+        val builder = SpatialTypeSupport.adaptFunction(functionBuilder)
+        registry.registerFunction(functionIdentifier, expressionInfo, builder)
+        FunctionRegistry.builtin.registerFunction(functionIdentifier, expressionInfo, builder)
       }
     }
     aggregateExpressions.foreach { f =>
@@ -146,7 +167,7 @@ abstract class AbstractCatalog {
       sparkSession: SparkSession,
       functionName: String,
       aggregator: Aggregator[Geometry, _, _]): Unit = {
-    val functionIdentifier = FunctionIdentifier(functionName)
+    val functionIdentifier = registryIdentifier(FunctionIdentifier(functionName))
     val registry = sparkSession.sessionState.functionRegistry
     val udaf = functions.udaf(aggregator)
     // A session created before this JVM's first SedonaContext.create cloned
@@ -156,34 +177,41 @@ abstract class AbstractCatalog {
     // invocation, a real entry builds an expression.
     val isInvocable = registry.functionExists(functionIdentifier) &&
       Try(registry.lookupFunction(functionIdentifier, Seq(Literal(null)))).isSuccess
+    val builtinBuilder: FunctionBuilder = builtinAggregateBuilder match {
+      case Some(build) => children => build(udaf, children)
+      case None =>
+        _ =>
+          throw new UnsupportedOperationException(
+            s"Aggregate function $functionName cannot be used as a regular function")
+    }
+    val builder = SpatialTypeSupport.adaptFunction(builtinBuilder)
+    val info = new ExpressionInfo(aggregator.getClass.getCanonicalName, null, functionName)
     if (!isInvocable) {
-      sparkSession.udf.register(functionName, udaf)
+      if (SpatialTypeSupport.usesNativeTypes) {
+        // Register in the same builtin namespace as scalar extensions. A temporary UDAF would
+        // otherwise live in system.session and bypass the native spatial type adapter.
+        registry.registerFunction(functionIdentifier, info, builder)
+      } else {
+        sparkSession.udf.register(functionName, udaf)
+      }
     }
     if (!FunctionRegistry.builtin.functionExists(functionIdentifier)) {
-      val builtinBuilder: FunctionBuilder = builtinAggregateBuilder match {
-        case Some(build) => children => build(udaf, children)
-        case None =>
-          _ =>
-            throw new UnsupportedOperationException(
-              s"Aggregate function $functionName cannot be used as a regular function")
-      }
-      FunctionRegistry.builtin.registerFunction(
-        functionIdentifier,
-        new ExpressionInfo(aggregator.getClass.getCanonicalName, null, functionName),
-        builtinBuilder)
+      FunctionRegistry.builtin.registerFunction(functionIdentifier, info, builder)
     }
   }
 
   def dropAll(sparkSession: SparkSession): Unit = {
-    expressions.foreach { case (functionIdentifier, _, _) =>
-      sparkSession.sessionState.functionRegistry.dropFunction(functionIdentifier)
+    registeredExpressions.foreach { case (functionIdentifier, _, _) =>
+      sparkSession.sessionState.functionRegistry.dropFunction(
+        registryIdentifier(functionIdentifier))
     }
     aggregateExpressions.foreach(f =>
       sparkSession.sessionState.functionRegistry.dropFunction(
-        FunctionIdentifier(f.getClass.getSimpleName)))
+        registryIdentifier(FunctionIdentifier(f.getClass.getSimpleName))))
     // Drop aliases for *_Aggr functions
     Seq("ST_Envelope_Agg", "ST_Intersection_Agg", "ST_Union_Agg").foreach { aliasName =>
-      sparkSession.sessionState.functionRegistry.dropFunction(FunctionIdentifier(aliasName))
+      sparkSession.sessionState.functionRegistry.dropFunction(
+        registryIdentifier(FunctionIdentifier(aliasName)))
     }
   }
 }

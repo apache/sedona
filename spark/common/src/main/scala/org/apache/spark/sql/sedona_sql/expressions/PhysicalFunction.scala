@@ -26,6 +26,7 @@ import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 
 import org.apache.spark.sql.sedona_sql.DataFrameShims
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 
 import scala.reflect.ClassTag
 
@@ -51,12 +52,13 @@ trait PhysicalFunction
 
   protected final lazy val geometryColumnName = getInputName(0, "geometry")
 
-  protected def getInputName(i: Int, fieldName: String): String = children(i) match {
-    case ref: AttributeReference => ref.name
-    case _ =>
-      throw new IllegalArgumentException(
-        f"$fieldName argument must be a named reference to an existing column")
-  }
+  protected def getInputName(i: Int, fieldName: String): String =
+    SpatialTypeSupport.unwrapGeometryInput(children(i)) match {
+      case ref: AttributeReference => ref.name
+      case _ =>
+        throw new IllegalArgumentException(
+          f"$fieldName argument must be a named reference to an existing column")
+    }
 
   protected def getScalarValue[T](i: Int, name: String)(implicit ct: ClassTag[T]): T = {
     children(i) match {

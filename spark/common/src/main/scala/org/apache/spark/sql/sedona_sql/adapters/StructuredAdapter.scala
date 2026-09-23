@@ -20,7 +20,6 @@ package org.apache.spark.sql.sedona_sql.adapters
 
 import org.apache.sedona.core.spatialPartitioning.GenericUniquePartitioner
 import org.apache.sedona.core.spatialRDD.SpatialRDD
-import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.sedona.util.DfUtils
 import org.apache.spark.api.java.JavaPairRDD
 import org.apache.spark.rdd.RDD
@@ -28,6 +27,7 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.types.{DataType, StructType}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.sedona_sql.DataFrameShims
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.locationtech.jts.geom.Geometry
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -53,7 +53,7 @@ object StructuredAdapter {
     } else spatialRDD.schema = rdd.first().schema
     spatialRDD.rawSpatialRDD = rdd
       .map(row => {
-        val geom = row.getAs[Geometry](geometryFieldName)
+        val geom = SpatialTypeSupport.fromExternalGeometry(row.getAs[Any](geometryFieldName))
         geom.setUserData(row.copy())
         geom
       })
@@ -108,9 +108,10 @@ object StructuredAdapter {
     val spatialRDD = new SpatialRDD[Geometry]
     spatialRDD.schema = schema
     val ordinal = spatialRDD.schema.fieldIndex(geometryFieldName)
+    val geometryType = schema(ordinal).dataType
     spatialRDD.rawSpatialRDD = rdd
       .map(row => {
-        val geom = GeometrySerializer.deserialize(row.getBinary(ordinal))
+        val geom = SpatialTypeSupport.readGeometry(row, ordinal, geometryType)
         geom.setUserData(row.copy())
         geom
       })

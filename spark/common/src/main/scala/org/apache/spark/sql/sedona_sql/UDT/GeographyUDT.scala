@@ -19,6 +19,7 @@
 package org.apache.spark.sql.sedona_sql.UDT
 
 import org.apache.spark.sql.types._
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.json4s.JsonDSL._
 import org.json4s.JsonAST.JValue
 import org.apache.sedona.common.S2Geography.{GeographyWKBSerializer, Geography}
@@ -26,7 +27,9 @@ import org.apache.sedona.common.S2Geography.{GeographyWKBSerializer, Geography}
 class GeographyUDT extends UserDefinedType[Geography] {
   override def sqlType: DataType = BinaryType
 
-  override def pyUDT: String = "sedona.spark.sql.types.GeographyType"
+  override def pyUDT: String =
+    if (SpatialTypeSupport.usesNativeTypes) "sedona.spark.sql.types.LegacyGeographyType"
+    else "sedona.spark.sql.types.GeographyType"
 
   override def userClass: Class[Geography] = classOf[Geography]
 

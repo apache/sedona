@@ -21,6 +21,7 @@ package org.apache.spark.sql.sedona_sql.UDT
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.types._
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.json4s.JsonDSL._
 import org.json4s.JsonAST.JValue
 import org.locationtech.jts.geom.Geometry
@@ -28,7 +29,9 @@ import org.locationtech.jts.geom.Geometry
 class GeometryUDT extends UserDefinedType[Geometry] {
   override def sqlType: DataType = BinaryType
 
-  override def pyUDT: String = "sedona.spark.sql.types.GeometryType"
+  override def pyUDT: String =
+    if (SpatialTypeSupport.usesNativeTypes) "sedona.spark.sql.types.LegacyGeometryType"
+    else "sedona.spark.sql.types.GeometryType"
 
   override def userClass: Class[Geometry] = classOf[Geometry]
 

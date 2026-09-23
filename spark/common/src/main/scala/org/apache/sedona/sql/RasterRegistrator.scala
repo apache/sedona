@@ -22,18 +22,26 @@ import org.apache.sedona.sql.UDF.RasterUdafCatalog
 import org.apache.sedona.sql.utils.GeoToolsCoverageAvailability.{gridClassName, isGeoToolsAvailable}
 import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.sedona_sql.UDT.RasterUdtRegistratorWrapper
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.{SparkSession, functions}
 import org.slf4j.{Logger, LoggerFactory}
 
 object RasterRegistrator {
   val logger: Logger = LoggerFactory.getLogger(getClass)
 
+  private def functionIdentifier(name: String): FunctionIdentifier =
+    if (SpatialTypeSupport.usesNativeTypes) {
+      FunctionIdentifier(name, Some("session"), Some("system"))
+    } else {
+      FunctionIdentifier(name)
+    }
+
   def registerAll(sparkSession: SparkSession): Unit = {
     if (isGeoToolsAvailable) {
       RasterUdtRegistratorWrapper.registerAll(gridClassName)
       val functionName = RasterUdafCatalog.rasterAggregateExpression.getClass.getSimpleName
-      val functionIdentifier = FunctionIdentifier(functionName)
-      if (!sparkSession.sessionState.functionRegistry.functionExists(functionIdentifier)) {
+      val identifier = functionIdentifier(functionName)
+      if (!sparkSession.sessionState.functionRegistry.functionExists(identifier)) {
         sparkSession.udf.register(
           functionName,
           functions.udaf(RasterUdafCatalog.rasterAggregateExpression))
@@ -44,7 +52,7 @@ object RasterRegistrator {
   def dropAll(sparkSession: SparkSession): Unit = {
     if (isGeoToolsAvailable) {
       sparkSession.sessionState.functionRegistry.dropFunction(
-        FunctionIdentifier(RasterUdafCatalog.rasterAggregateExpression.getClass.getSimpleName))
+        functionIdentifier(RasterUdafCatalog.rasterAggregateExpression.getClass.getSimpleName))
     }
   }
 }

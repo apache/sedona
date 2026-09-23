@@ -73,7 +73,7 @@ class GeoParquetReadSupport(
 
     val parquetRequestedSchema = ParquetReadSupport.getRequestedSchema(
       context.getFileSchema,
-      catalystRequestedSchema,
+      GeoParquetSchemaConverter.physicalSchema(catalystRequestedSchema),
       conf,
       enableVectorizedReader)
     new ReadContext(parquetRequestedSchema, Map.empty[String, String].asJava)

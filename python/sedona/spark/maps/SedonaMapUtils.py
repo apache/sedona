@@ -17,7 +17,7 @@
 
 import json
 
-from sedona.spark.sql.types import GeometryType
+from sedona.spark.sql.types import GeometryType, USES_NATIVE_SPATIAL_TYPES
 from sedona.spark.geoarrow.geoarrow import dataframe_to_arrow
 
 
@@ -56,6 +56,10 @@ class SedonaMapUtils:
             data_pyarrow = dataframe_to_arrow(df)
             geo_df = gpd.GeoDataFrame.from_arrow(data_pyarrow)
         else:
+            if USES_NATIVE_SPATIAL_TYPES:
+                raise ImportError(
+                    "Spark 4.2 spatial visualization requires GeoPandas 1.0 or later"
+                )
             geo_df = gpd.GeoDataFrame(df.toPandas(), geometry=geometry_col)
         if geometry_col != "geometry" and rename is True:
             geo_df.rename_geometry("geometry", inplace=True)
@@ -77,7 +81,7 @@ class SedonaMapUtils:
     def __get_geometry_col__(cls, df):
         schema = df.schema
         for field in schema.fields:
-            if field.dataType == GeometryType():
+            if isinstance(field.dataType, GeometryType):
                 return field.name
 
     @classmethod

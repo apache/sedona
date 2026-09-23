@@ -19,14 +19,14 @@
 package org.apache.sedona.sql.datasources.geopackage.transform
 
 import org.apache.sedona.sql.datasources.geopackage.errors.GeopackageException
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.datasyslab.jts.io.WKBReader
 
 import java.nio.{ByteBuffer, ByteOrder}
 
 object GeometryReader {
 
-  def extractWKB(gpkgGeom: Array[Byte]): Array[Byte] = {
+  def extractWKB(gpkgGeom: Array[Byte]): Any = {
     val reader = ByteBuffer.wrap(gpkgGeom)
 
     val magic = new Array[Byte](2)
@@ -57,8 +57,7 @@ object GeometryReader {
 
     val geom = WKBReader.forDeclaredDimensions(srid).read(wkb)
 
-    // that needs rewriting
-    GeometryUDT.serialize(geom)
+    SpatialTypeSupport.serializeGeometry(geom)
   }
 
   def skipEnvelope(value: Any, buffer: ByteBuffer): Any = {
