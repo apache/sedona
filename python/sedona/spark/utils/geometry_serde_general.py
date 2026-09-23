@@ -34,6 +34,7 @@ from shapely.geometry import (
 )
 from shapely.geometry.base import BaseGeometry
 from shapely.wkb import dumps as wkb_dumps
+from shapely.wkb import loads as wkb_loads
 from shapely.wkt import loads as wkt_loads
 
 try:
@@ -389,13 +390,18 @@ def deserialize_multi_point(geom_buffer: GeometryBuffer) -> MultiPoint:
     if geom_buffer.num_coords == 0:
         return wkt_loads("MULTIPOINT EMPTY")
     coords = geom_buffer.read_coordinates(geom_buffer.num_coords)
-    points = []
-    for coord in coords:
-        if math.isnan(coord[0]):
-            # Shapely does not allow creating MultiPoint with empty components
-            pass
-        else:
-            points.append(Point(coord))
+    points = [
+        (
+            geom_buffer.read_empty("POINT")
+            if math.isnan(coord[0]) and math.isnan(coord[1])
+            else Point(coord)
+        )
+        for coord in coords
+    ]
+    if any(point.is_empty for point in points):
+        return _multipart_with_empty_members(
+            GeometryTypeID.MULTIPOINT, geom_buffer.coord_type, points
+        )
     return MultiPoint(points)
 
 
@@ -444,13 +450,13 @@ def serialize_multi_linestring(geom: MultiLineString) -> bytes:
 
 def deserialize_multi_linestring(geom_buffer: GeometryBuffer) -> MultiLineString:
     num_linestrings = geom_buffer.read_int()
-    linestrings = []
-    for k in range(0, num_linestrings):
-        linestring = geom_buffer.read_linestring()
-        if not linestring.is_empty:
-            linestrings.append(linestring)
+    linestrings = [geom_buffer.read_linestring() for _ in range(num_linestrings)]
     if not linestrings:
         return wkt_loads("MULTILINESTRING EMPTY")
+    if any(linestring.is_empty for linestring in linestrings):
+        return _multipart_with_empty_members(
+            GeometryTypeID.MULTILINESTRING, geom_buffer.coord_type, linestrings
+        )
     return MultiLineString(linestrings)
 
 
@@ -535,14 +541,36 @@ def serialize_multi_polygon(geom: MultiPolygon) -> bytes:
 
 def deserialize_multi_polygon(geom_buffer: GeometryBuffer) -> MultiPolygon:
     num_polygons = geom_buffer.read_int()
-    polygons = []
-    for k in range(0, num_polygons):
-        polygon = geom_buffer.read_polygon()
-        if not polygon.is_empty:
-            polygons.append(polygon)
+    polygons = [geom_buffer.read_polygon() for _ in range(num_polygons)]
     if not polygons:
-        return wkt_loads("MULTIPOLYGON EMPTY")
-    return MultiPolygon(polygons)
+        return geom_buffer.read_empty("MULTIPOLYGON")
+    if not any(polygon.is_empty for polygon in polygons):
+        return MultiPolygon(polygons)
+
+    return _multipart_with_empty_members(
+        GeometryTypeID.MULTIPOLYGON, geom_buffer.coord_type, polygons
+    )
+
+
+def _multipart_with_empty_members(geometry_type, coord_type, members):
+    # Multipart constructors reject or discard empty members. WKB retains their
+    # positions, using the shared coordinate layout from the internal format.
+    z_flag = 0x80000000 if coord_type == CoordinateType.XYZ else 0
+    header = struct.pack("<BII", 1, geometry_type | z_flag, len(members))
+    # OGC multipart type IDs are three greater than their member type IDs.
+    empty_member = struct.pack("<BI", 1, (geometry_type - 3) | z_flag)
+    if geometry_type == GeometryTypeID.MULTIPOINT:
+        # Older GEOS versions cannot write empty Points as WKB.
+        dimension = CoordinateType.components_per_coord(coord_type)
+        empty_member += struct.pack("<" + "d" * dimension, *([math.nan] * dimension))
+    else:
+        empty_member += struct.pack("<I", 0)
+    return wkb_loads(
+        header
+        + b"".join(
+            empty_member if member.is_empty else wkb_dumps(member) for member in members
+        )
+    )
 
 
 def serialize_geometry_collection(geom: GeometryCollection) -> bytearray:

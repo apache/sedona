@@ -74,6 +74,10 @@
 
 ### Bug Fixes
 
+#### Python
+
+* [<a href='https://github.com/apache/sedona/issues/3393'>GH-3393</a>] - Preserve empty multipart geometry members during Python deserialization, including empty MultiPoint members with newer GEOS versions
+
 #### Sedona SQL
 
 * [<a href='https://github.com/apache/sedona/issues/3359'>GH-3359</a>] - Return 2D results from `ST_NDims`, `ST_CoordDim` and `ST_Zmflag` for empty geometries instead of throwing
