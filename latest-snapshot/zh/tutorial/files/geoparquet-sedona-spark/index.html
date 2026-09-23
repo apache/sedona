@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5924,6 +5923,8 @@
   part-00011-1c13be9e-6d4c-401e-89d8-739000ad3aba-c000.snappy.parquet
 </code></pre></div>
 <p>Sedona 会并行写出多个 Parquet 文件，比写单一文件快得多。</p>
+<p>写出 GeoParquet 时，Sedona 会保留空 <code>Point</code>、<code>LineString</code> 和 <code>Polygon</code> 几何对象声明的 XY 或 XYZ 坐标布局。即使 Z 坐标值为 <code>NaN</code>，XYZ 几何对象也会保留 Z 维度。</p>
+<p><a href="https://geoparquet.org/releases/v1.1.0/#wkb">GeoParquet 1.1</a> 不支持 M 坐标。Sedona 在写出 GeoParquet 时会丢弃 M：XYM 转换为 XY，XYZM 转换为 XYZ。如果需要保留 M 值，请在写出前将其单独存储。</p>
 <h2 id="spark-geoparquet-sedona-dataframe">使用 Spark 将 GeoParquet 读入 Sedona DataFrame<a class="headerlink" href="#spark-geoparquet-sedona-dataframe" title="Permanent link">&para;</a></h2>
 <p>将 GeoParquet 文件读入 Sedona DataFrame：</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geoparquet"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/tmp/somewhere"</span><span class="p">)</span>
@@ -5938,6 +5939,7 @@
 |c  |LINESTRING (1 3, 3 1)|
 +---+---------------------+
 </code></pre></div>
+<p>自 Sedona 2.0.0 起，读取时会保留声明的 Z/M 维度，即使点、线或多边形为空，或坐标值为 <code>NaN</code>。这也适用于包含 M 坐标的 WKB 输入，但此类输入不符合 GeoParquet 1.1 规范。如果收集不同坐标布局的几何对象时出现布局不一致的错误，请参阅 <a href="../../../api/sql/Geometry-Editors/ST_Collect/">ST_Collect</a>。</p>
 <p>Sedona 在底层执行该查询的过程大致如下：</p>
 <ol>
 <li>从 GeoParquet 文件尾部读取 schema，因此无需 schema 推断。</li>
@@ -6160,7 +6162,7 @@ ORDER BY geohash
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年7月28日 06:05:16 UTC">2026年7月28日 06:05:16</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年9月23日 05:13:18 UTC">2026年9月23日 05:13:18</span>
   </span>
 
     
