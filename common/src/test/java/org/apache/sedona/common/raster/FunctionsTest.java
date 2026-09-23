@@ -237,14 +237,25 @@ public class FunctionsTest extends RasterTestBase {
   }
 
   @Test
-  public void testPixelAsPointOutOfBounds() throws FactoryException {
+  public void testPixelAsPointOutOfBounds() throws FactoryException, TransformException {
+    // Out of the grid the coordinate extrapolates along the geotransform rather
+    // than raising, matching getPixelAsCentroid and getPixelAsPolygon. The
+    // anchor is the sibling itself: the point is the upper-left corner of the
+    // footprint getPixelAsPolygon already returns for the same coordinate, so
+    // the three cannot drift apart again without this failing.
     GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(2, 5, 10, 123, -230, 8);
-    Exception e =
-        assertThrows(
-            IndexOutOfBoundsException.class,
-            () -> PixelFunctions.getPixelAsPoint(emptyRaster, 6, 1));
-    String expectedMessage = "Specified pixel coordinates (6, 1) do not lie in the raster";
-    assertEquals(expectedMessage, e.getMessage());
+    Geometry actualPoint = PixelFunctions.getPixelAsPoint(emptyRaster, 6, 1);
+    Coordinate actual = actualPoint.getCoordinate();
+
+    Coordinate polygonCorner =
+        PixelFunctions.getPixelAsPolygon(emptyRaster, 6, 1).getCoordinates()[0];
+    assertEquals(polygonCorner.x, actual.x, 1e-9);
+    assertEquals(polygonCorner.y, actual.y, 1e-9);
+
+    // One column past the 5-pixel width, so the x advances one pixel beyond the
+    // right edge while the y stays on the top row.
+    assertEquals(163, actual.x, 1e-9);
+    assertEquals(-230, actual.y, 1e-9);
   }
 
   @Test
