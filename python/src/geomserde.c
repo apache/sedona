@@ -282,14 +282,13 @@ static SedonaErrorCode sedona_deserialize_multipoint(
   SedonaErrorCode err = SEDONA_SUCCESS;
   for (int k = 0; k < num_points; k++) {
     GEOSGeometry *point = NULL;
-    if (cs_info->dims == 2) {
+    int is_empty =
+        isnan(geom_buf->buf_coord[0]) && isnan(geom_buf->buf_coord[1]);
+    if (cs_info->dims == 2 && !is_empty) {
       /* fast path for 2D points. We can get rid of constructing a coordinate
        * sequence object explicitly */
       double x = *geom_buf->buf_coord++;
       double y = *geom_buf->buf_coord++;
-      /* x and y will be NaN when serialized point was an empty point. GEOS
-       * will treat point with Nan ordinates as an empty point so we don't need
-       * to handle NaN specially. */
       point = dyn_GEOSGeom_createPointFromXY_r(handle, x, y);
       if (point == NULL) {
         err = SEDONA_GEOS_ERROR;
@@ -297,10 +296,15 @@ static SedonaErrorCode sedona_deserialize_multipoint(
       }
     } else {
       GEOSCoordSequence *coord_seq = NULL;
-      cs_info->num_coords = 1;
+      /* NaN ordinates do not create an empty Point on every GEOS version.
+       * A zero-length coordinate sequence preserves the stored empty layout. */
+      cs_info->num_coords = is_empty ? 0 : 1;
       err = geom_buf_read_coords(geom_buf, handle, cs_info, &coord_seq);
       if (err != SEDONA_SUCCESS) {
         goto handle_error;
+      }
+      if (is_empty) {
+        geom_buf->buf_coord += cs_info->dims;
       }
       point = dyn_GEOSGeom_createPoint_r(handle, coord_seq);
       if (point == NULL) {
