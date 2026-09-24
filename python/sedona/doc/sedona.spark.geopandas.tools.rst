@@ -5,3 +5,8 @@ sedona.spark.geopandas.tools
    :members:
    :show-inheritance:
    :undoc-members:
+
+.. automodule:: sedona.spark.geopandas.tools.sjoin_nearest
+   :members:
+   :show-inheritance:
+   :undoc-members:

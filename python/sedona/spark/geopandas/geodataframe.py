@@ -2994,6 +2994,37 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             make_valid=make_valid,
         )
 
+    def sjoin_nearest(
+        self,
+        right,
+        how="inner",
+        max_distance=None,
+        lsuffix="left",
+        rsuffix="right",
+        distance_col=None,
+        exclusive=False,
+    ):
+        """Join points to their nearest neighbors using Sedona KNN semantics.
+
+        Supports inner joins, default suffixes, ``exclusive=False``, an optional
+        positive ``max_distance`` result filter, and a new ``distance_col``.
+        Ties follow ``spark.sedona.join.knn.includeTieBreakers``; all GeoPandas
+        equidistant rows are not guaranteed. See
+        :func:`sedona.spark.geopandas.sjoin_nearest` for the full restrictions.
+        """
+        from sedona.spark.geopandas.tools.sjoin_nearest import sjoin_nearest
+
+        return sjoin_nearest(
+            self,
+            right,
+            how=how,
+            max_distance=max_distance,
+            lsuffix=lsuffix,
+            rsuffix=rsuffix,
+            distance_col=distance_col,
+            exclusive=exclusive,
+        )
+
     def sjoin(
         self,
         other,

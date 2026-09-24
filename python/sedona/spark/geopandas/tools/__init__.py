@@ -19,10 +19,12 @@ from .clip import clip
 from .collect import collect
 from .overlay import overlay
 from .sjoin import sjoin
+from .sjoin_nearest import sjoin_nearest
 
 __all__ = [
     "clip",
     "collect",
     "overlay",
     "sjoin",
+    "sjoin_nearest",
 ]
