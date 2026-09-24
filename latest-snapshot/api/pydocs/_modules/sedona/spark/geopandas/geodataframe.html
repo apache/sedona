@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geodataframe &mdash; Apache Sedona Python Documentation</title>
@@ -3202,6 +3201,37 @@
             <span class="n">how</span><span class="o">=</span><span class="n">how</span><span class="p">,</span>
             <span class="n">keep_geom_type</span><span class="o">=</span><span class="n">keep_geom_type</span><span class="p">,</span>
             <span class="n">make_valid</span><span class="o">=</span><span class="n">make_valid</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeoDataFrame.sjoin_nearest"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.sjoin_nearest">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">sjoin_nearest</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">right</span><span class="p">,</span>
+        <span class="n">how</span><span class="o">=</span><span class="s2">"inner"</span><span class="p">,</span>
+        <span class="n">max_distance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">lsuffix</span><span class="o">=</span><span class="s2">"left"</span><span class="p">,</span>
+        <span class="n">rsuffix</span><span class="o">=</span><span class="s2">"right"</span><span class="p">,</span>
+        <span class="n">distance_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">exclusive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Join points to their nearest neighbors using Sedona KNN semantics.</span>
+
+<span class="sd">        Supports inner joins, default suffixes, ``exclusive=False``, an optional</span>
+<span class="sd">        positive ``max_distance`` result filter, and a new ``distance_col``.</span>
+<span class="sd">        Ties follow ``spark.sedona.join.knn.includeTieBreakers``; all GeoPandas</span>
+<span class="sd">        equidistant rows are not guaranteed. See</span>
+<span class="sd">        :func:`sedona.spark.geopandas.sjoin_nearest` for the full restrictions.</span>
+<span class="sd">        """</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas.tools.sjoin_nearest</span><span class="w"> </span><span class="kn">import</span> <span class="n">sjoin_nearest</span>
+
+        <span class="k">return</span> <span class="n">sjoin_nearest</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">right</span><span class="p">,</span>
+            <span class="n">how</span><span class="o">=</span><span class="n">how</span><span class="p">,</span>
+            <span class="n">max_distance</span><span class="o">=</span><span class="n">max_distance</span><span class="p">,</span>
+            <span class="n">lsuffix</span><span class="o">=</span><span class="n">lsuffix</span><span class="p">,</span>
+            <span class="n">rsuffix</span><span class="o">=</span><span class="n">rsuffix</span><span class="p">,</span>
+            <span class="n">distance_col</span><span class="o">=</span><span class="n">distance_col</span><span class="p">,</span>
+            <span class="n">exclusive</span><span class="o">=</span><span class="n">exclusive</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeoDataFrame.sjoin"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.sjoin">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">sjoin</span><span class="p">(</span>

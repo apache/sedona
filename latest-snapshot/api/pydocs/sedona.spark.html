@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -469,6 +468,7 @@
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.set_crs"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.set_crs()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.set_geometry"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.set_geometry()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.sjoin"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.sjoin()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.sjoin_nearest"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.sjoin_nearest()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_arrow"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_arrow()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_crs"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_crs()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_feather"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_feather()</span></code></a></li>
@@ -503,6 +503,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="sedona.spark.geopandas.tools.html">sedona.spark.geopandas.tools</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="sedona.spark.geopandas.tools.html#sedona.spark.geopandas.tools.sjoin.sjoin"><code class="docutils literal notranslate"><span class="pre">sjoin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.geopandas.tools.html#sedona.spark.geopandas.tools.sjoin_nearest.sjoin_nearest"><code class="docutils literal notranslate"><span class="pre">sjoin_nearest()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -1436,7 +1437,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.SedonaContext.SedonaContext.builder">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">builder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">&lt;pyspark.sql.session.SparkSession.Builder</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7fb53f912090&gt;</span></span></span><a class="reference internal" href="_modules/sedona/spark/SedonaContext.html#SedonaContext.builder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.SedonaContext.SedonaContext.builder" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">builder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">&lt;pyspark.sql.session.SparkSession.Builder</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f983552c890&gt;</span></span></span><a class="reference internal" href="_modules/sedona/spark/SedonaContext.html#SedonaContext.builder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.SedonaContext.SedonaContext.builder" title="Permalink to this definition"></a></dt>
 <dd><p>This method adds the basic Sedona configuration to the SparkSession builder.
 Usually the user does not need to call this method directly, as it is configured when a cluster is created.
 This method is needed when the user wants to manually configure Sedona

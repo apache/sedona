@@ -1,0 +1,502 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>sedona.spark.geopandas.tools.sjoin_nearest &mdash; Apache Sedona Python Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/custom.css" />
+
+  
+      <script src="../../../../../_static/jquery.js"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+      <script src="../../../../../_static/doctools.js"></script>
+      <script src="../../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+     
+    <!-- Google Fonts for Apache Sedona styling -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Additional meta tags for better rendering -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1565c0">
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #ff5722" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            Apache Sedona Python
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../sedona.flink.html">sedona.flink package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.flink.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.flink.html#module-sedona.flink.context">sedona.flink.context module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.flink.html#sedona.flink.context.SedonaContext"><code class="docutils literal notranslate"><span class="pre">SedonaContext</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.flink.html#sedona.flink.context.SedonaContext.create"><code class="docutils literal notranslate"><span class="pre">SedonaContext.create()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.flink.html#module-sedona.flink">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../sedona.spark.html">sedona.spark package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.spark.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.core.html">sedona.spark.core package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.core.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.core.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.core.html#module-sedona.spark.core.utils">sedona.spark.core.utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.core.html#module-sedona.spark.core">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.geoarrow.html">sedona.spark.geoarrow package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geoarrow.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geoarrow.html#module-sedona.spark.geoarrow.geoarrow">sedona.spark.geoarrow.geoarrow module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geoarrow.html#module-sedona.spark.geoarrow">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.geopandas.html">sedona.spark.geopandas package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html">sedona.spark.geopandas core</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.io.html">sedona.spark.geopandas.io</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.tools.html">sedona.spark.geopandas.tools</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.maps.html">sedona.spark.maps package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.maps.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.maps.html#module-sedona.spark.maps.SedonaKepler">sedona.spark.maps.SedonaKepler module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.maps.html#module-sedona.spark.maps.SedonaMapUtils">sedona.spark.maps.SedonaMapUtils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.maps.html#module-sedona.spark.maps.SedonaPyDeck">sedona.spark.maps.SedonaPyDeck module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.maps.html#module-sedona.spark.maps">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.raster.html">sedona.spark.raster package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#module-sedona.spark.raster.awt_raster">sedona.spark.raster.awt_raster module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#module-sedona.spark.raster.data_buffer">sedona.spark.raster.data_buffer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#module-sedona.spark.raster.meta">sedona.spark.raster.meta module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#module-sedona.spark.raster.raster_serde">sedona.spark.raster.raster_serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#module-sedona.spark.raster.sample_model">sedona.spark.raster.sample_model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#module-sedona.spark.raster.sedona_raster">sedona.spark.raster.sedona_raster module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#module-sedona.spark.raster">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.raster_utils.html">sedona.spark.raster_utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster_utils.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster_utils.html#module-sedona.spark.raster_utils.SedonaUtils">sedona.spark.raster_utils.SedonaUtils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster_utils.html#module-sedona.spark.raster_utils">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.register.html">sedona.spark.register package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.register.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.register.html#module-sedona.spark.register.geo_registrator">sedona.spark.register.geo_registrator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.register.html#module-sedona.spark.register.java_libs">sedona.spark.register.java_libs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.register.html#module-sedona.spark.register">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.sql.html">sedona.spark.sql package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#sedona-spark-sql-connect-module">sedona.spark.sql.connect module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.dataframe_api">sedona.spark.sql.dataframe_api module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.exceptions">sedona.spark.sql.exceptions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.functions">sedona.spark.sql.functions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.st_aggregates">sedona.spark.sql.st_aggregates module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.st_constructors">sedona.spark.sql.st_constructors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.st_functions">sedona.spark.sql.st_functions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.st_predicates">sedona.spark.sql.st_predicates module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.types">sedona.spark.sql.types module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.stac.html">sedona.spark.stac package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stac.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stac.html#module-sedona.spark.stac.client">sedona.spark.stac.client module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stac.html#module-sedona.spark.stac.collection_client">sedona.spark.stac.collection_client module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stac.html#module-sedona.spark.stac">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.stats.html">sedona.spark.stats package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stats.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stats.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stats.html#module-sedona.spark.stats.weighting">sedona.spark.stats.weighting module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stats.html#module-sedona.spark.stats">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.utils.html">sedona.spark.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.abstract_parser">sedona.spark.utils.abstract_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.adapter">sedona.spark.utils.adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.binary_parser">sedona.spark.utils.binary_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.decorators">sedona.spark.utils.decorators module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.geometry_adapter">sedona.spark.utils.geometry_adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.geometry_serde">sedona.spark.utils.geometry_serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.geometry_serde_general">sedona.spark.utils.geometry_serde_general module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.geomserde_speedup">sedona.spark.utils.geomserde_speedup module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.jvm">sedona.spark.utils.jvm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.meta">sedona.spark.utils.meta module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.prep">sedona.spark.utils.prep module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.serde">sedona.spark.utils.serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.spatial_rdd_parser">sedona.spark.utils.spatial_rdd_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.structured_adapter">sedona.spark.utils.structured_adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.types">sedona.spark.utils.types module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.spark.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.spark.html#module-sedona.spark.SedonaContext">sedona.spark.SedonaContext module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext"><code class="docutils literal notranslate"><span class="pre">SedonaContext</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.__init__"><code class="docutils literal notranslate"><span class="pre">SedonaContext.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.builder"><code class="docutils literal notranslate"><span class="pre">SedonaContext.builder()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.create"><code class="docutils literal notranslate"><span class="pre">SedonaContext.create()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.spark.html#module-sedona.spark">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #ff5722" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">Apache Sedona Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">sedona.spark.geopandas.tools.sjoin_nearest</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    <div class="sedona-content-wrapper">
+        
+           <div itemprop="articleBody">
+             
+  <h1>Source code for sedona.spark.geopandas.tools.sjoin_nearest</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Licensed to the Apache Software Foundation (ASF) under one</span>
+<span class="c1"># or more contributor license agreements.  See the NOTICE file</span>
+<span class="c1"># distributed with this work for additional information</span>
+<span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
+<span class="c1"># to you under the Apache License, Version 2.0 (the</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
+<span class="c1"># with the License.  You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing,</span>
+<span class="c1"># software distributed under the License is distributed on an</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># KIND, either express or implied.  See the License for the</span>
+<span class="c1"># specific language governing permissions and limitations</span>
+<span class="c1"># under the License.</span>
+
+<span class="sd">"""Point nearest joins using Sedona's existing KNN execution strategies."""</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numbers</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyspark.pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ps</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.internal</span><span class="w"> </span><span class="kn">import</span> <span class="n">InternalField</span><span class="p">,</span> <span class="n">InternalFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">scol_for</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">functions</span> <span class="k">as</span> <span class="n">F</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoDataFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._crs</span><span class="w"> </span><span class="kn">import</span> <span class="n">warn_crs_mismatch</span><span class="p">,</span> <span class="n">with_crs_metadata</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">st_functions</span> <span class="k">as</span> <span class="n">stf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_prepare_side</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Project physical aliases and check point inputs without collecting geometries."""</span>
+    <span class="n">internal</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">_internal</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">_active_geometry_position</span><span class="p">()</span>
+    <span class="n">geometry_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">position</span><span class="si">}</span><span class="s2">"</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+        <span class="nb">zip</span><span class="p">(</span><span class="n">internal</span><span class="o">.</span><span class="n">data_spark_columns</span><span class="p">,</span> <span class="n">internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">)</span>
+    <span class="p">):</span>
+        <span class="c1"># Resolve source CRS before filtering: an empty result cannot infer it from SRIDs.</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">spark_type</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">)</span> <span class="ow">or</span> <span class="n">i</span> <span class="o">==</span> <span class="n">position</span><span class="p">:</span>
+            <span class="n">field</span> <span class="o">=</span> <span class="n">with_crs_metadata</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="n">internal</span><span class="o">.</span><span class="n">column_labels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+        <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">metadata</span><span class="p">))</span>
+    <span class="n">projected</span> <span class="o">=</span> <span class="n">internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+        <span class="n">internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_index"</span><span class="p">),</span> <span class="o">*</span><span class="n">columns</span>
+    <span class="p">)</span>
+    <span class="n">geometry</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">geometry_name</span><span class="p">)</span>
+    <span class="n">usable</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">isNotNull</span><span class="p">()</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_IsEmpty</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+    <span class="n">stats</span> <span class="o">=</span> <span class="n">projected</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">usable</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"has_points"</span><span class="p">),</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">max</span><span class="p">(</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">usable</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_GeometryType</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">"ST_Point"</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">otherwise</span><span class="p">(</span>
+                <span class="mi">0</span>
+            <span class="p">)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"nonpoint"</span><span class="p">),</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">stats</span><span class="o">.</span><span class="n">nonpoint</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">"sjoin_nearest currently supports only Point geometries"</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">projected</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">usable</span><span class="p">),</span> <span class="n">geometry_name</span><span class="p">,</span> <span class="nb">bool</span><span class="p">(</span><span class="n">stats</span><span class="o">.</span><span class="n">has_points</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="sjoin_nearest"><a class="viewcode-back" href="../../../../../sedona.spark.geopandas.tools.html#sedona.spark.geopandas.tools.sjoin_nearest.sjoin_nearest">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">sjoin_nearest</span><span class="p">(</span>
+    <span class="n">left_df</span><span class="p">,</span>
+    <span class="n">right_df</span><span class="p">,</span>
+    <span class="n">how</span><span class="o">=</span><span class="s2">"inner"</span><span class="p">,</span>
+    <span class="n">max_distance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">lsuffix</span><span class="o">=</span><span class="s2">"left"</span><span class="p">,</span>
+    <span class="n">rsuffix</span><span class="o">=</span><span class="s2">"right"</span><span class="p">,</span>
+    <span class="n">distance_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">exclusive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Join each left point to its nearest right point using planar distance.</span>
+
+<span class="sd">    This initial implementation supports point inputs, ``how='inner'``,</span>
+<span class="sd">    ``exclusive=False``, default suffixes, unique string column names and</span>
+<span class="sd">    single-level indexes (including duplicate index values). Null and empty</span>
+<span class="sd">    geometries do not match. The left geometry, CRS and index are retained.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    left_df, right_df : GeoDataFrame</span>
+<span class="sd">        Distributed point frames to join.</span>
+<span class="sd">    how : str, default 'inner'</span>
+<span class="sd">        Only inner joins are supported.</span>
+<span class="sd">    max_distance : float, optional</span>
+<span class="sd">        Positive finite distance in CRS units. Filters nearest results; it</span>
+<span class="sd">        does not reduce the KNN search radius.</span>
+<span class="sd">    lsuffix, rsuffix : str, default 'left', 'right'</span>
+<span class="sd">        Only the default suffixes are supported for overlapping columns.</span>
+<span class="sd">    distance_col : str, optional</span>
+<span class="sd">        New output column for the distance. Must not replace an input column.</span>
+<span class="sd">    exclusive : bool, default False</span>
+<span class="sd">        Only False is supported; equal points can match at distance zero.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    GeoDataFrame</span>
+<span class="sd">        Nearest matches, with no guaranteed row order.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Ties follow ``spark.sedona.join.knn.includeTieBreakers`` (default False).</span>
+<span class="sd">    False chooses one nearest candidate with unspecified tie selection. True</span>
+<span class="sd">    includes ties, but Sedona may omit distinct rows with identical candidate</span>
+<span class="sd">    geometries. Unlike GeoPandas, all equidistant rows are not guaranteed.</span>
+<span class="sd">    This function does not change that session setting.</span>
+
+<span class="sd">    Distances are planar and ignore Z. Use a projected CRS for meaningful</span>
+<span class="sd">    distance units. Scalar validation summaries are evaluated eagerly on</span>
+<span class="sd">    Spark; input geometry rows remain distributed.</span>
+<span class="sd">    """</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">frame</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"left_df"</span><span class="p">,</span> <span class="n">left_df</span><span class="p">),</span> <span class="p">(</span><span class="s2">"right_df"</span><span class="p">,</span> <span class="n">right_df</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">GeoDataFrame</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' should be a GeoDataFrame"</span><span class="p">)</span>
+        <span class="n">internal</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">_internal</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"sjoin_nearest requires a single-level index"</span><span class="p">)</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">internal</span><span class="o">.</span><span class="n">column_labels</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">label</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"sjoin_nearest requires flat string columns"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">labels</span><span class="p">))</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"sjoin_nearest requires unique columns"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">_active_geometry_position</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' has no active geometry column"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">how</span> <span class="o">!=</span> <span class="s2">"inner"</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"sjoin_nearest currently supports only how='inner'"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">exclusive</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">"sjoin_nearest currently supports only exclusive=False"</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">lsuffix</span> <span class="o">!=</span> <span class="s2">"left"</span> <span class="ow">or</span> <span class="n">rsuffix</span> <span class="o">!=</span> <span class="s2">"right"</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">"sjoin_nearest currently supports only default suffixes"</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">max_distance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">max_distance</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+        <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">max_distance</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Real</span><span class="p">)</span>
+        <span class="ow">or</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">max_distance</span><span class="p">)</span>
+        <span class="ow">or</span> <span class="n">max_distance</span> <span class="o">&lt;=</span> <span class="mi">0</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"max_distance must be a positive finite number"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">distance_col</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
+        <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">distance_col</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="ow">or</span> <span class="n">distance_col</span> <span class="ow">in</span> <span class="n">left_df</span><span class="o">.</span><span class="n">columns</span>
+        <span class="ow">or</span> <span class="n">distance_col</span> <span class="ow">in</span> <span class="n">right_df</span><span class="o">.</span><span class="n">columns</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"distance_col must be a new string column name"</span><span class="p">)</span>
+
+    <span class="n">left_labels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">left_df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+    <span class="n">right_labels</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">label</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">right_df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">label</span> <span class="o">!=</span> <span class="n">right_df</span><span class="o">.</span><span class="n">active_geometry_name</span>
+    <span class="p">]</span>
+    <span class="n">right_index_name</span> <span class="o">=</span> <span class="n">right_df</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">right_index_label</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">right_index_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">right_index_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"index_right"</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">right_index_label</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">"sjoin_nearest requires a string or unnamed right index"</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">right_index_label</span> <span class="ow">in</span> <span class="n">right_labels</span> <span class="ow">or</span> <span class="p">(</span>
+        <span class="n">right_index_name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">right_index_label</span> <span class="ow">in</span> <span class="n">left_labels</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">right_index_label</span><span class="si">}</span><span class="s2">' conflicts with a join column"</span><span class="p">)</span>
+    <span class="n">right_labels</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">right_index_label</span><span class="p">)</span>
+    <span class="n">left_index_name</span> <span class="o">=</span> <span class="n">left_df</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">left_index_label</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">left_index_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">left_index_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"index_left"</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">left_index_label</span> <span class="ow">in</span> <span class="n">left_labels</span> <span class="ow">or</span> <span class="p">(</span>
+        <span class="n">left_index_name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">left_index_label</span> <span class="ow">in</span> <span class="n">right_labels</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">left_index_label</span><span class="si">}</span><span class="s2">' conflicts with a join column"</span><span class="p">)</span>
+    <span class="n">overlap</span> <span class="o">=</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">left_labels</span><span class="p">)</span> <span class="o">|</span> <span class="p">{</span><span class="n">left_index_label</span><span class="p">})</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">right_labels</span><span class="p">)</span>
+    <span class="n">result_index_name</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">left_index_label</span><span class="si">}</span><span class="s2">_left"</span><span class="p">,)</span>
+        <span class="k">if</span> <span class="n">left_index_label</span> <span class="ow">in</span> <span class="n">overlap</span> <span class="ow">and</span> <span class="n">left_index_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="n">left_index_name</span>
+    <span class="p">)</span>
+    <span class="n">left_output</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span>
+            <span class="n">label</span> <span class="o">+</span> <span class="s2">"_left"</span>
+            <span class="k">if</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">overlap</span> <span class="ow">and</span> <span class="n">label</span> <span class="o">!=</span> <span class="n">left_df</span><span class="o">.</span><span class="n">active_geometry_name</span>
+            <span class="k">else</span> <span class="n">label</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">left_labels</span>
+    <span class="p">]</span>
+    <span class="n">right_output</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">label</span> <span class="o">+</span> <span class="s2">"_right"</span> <span class="k">if</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">overlap</span> <span class="k">else</span> <span class="n">label</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">right_labels</span>
+    <span class="p">]</span>
+    <span class="n">output_labels</span> <span class="o">=</span> <span class="n">left_output</span> <span class="o">+</span> <span class="n">right_output</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">output_labels</span><span class="p">))</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_labels</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"sjoin_nearest suffixes create duplicate output columns"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">distance_col</span> <span class="ow">in</span> <span class="n">output_labels</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"distance_col conflicts with a join output column"</span><span class="p">)</span>
+
+    <span class="n">left_crs</span><span class="p">,</span> <span class="n">right_crs</span> <span class="o">=</span> <span class="n">left_df</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">right_df</span><span class="o">.</span><span class="n">crs</span>
+    <span class="n">warn_crs_mismatch</span><span class="p">(</span><span class="n">left_crs</span><span class="p">,</span> <span class="n">right_crs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">crs</span><span class="o">.</span><span class="n">is_geographic</span> <span class="k">for</span> <span class="n">crs</span> <span class="ow">in</span> <span class="p">(</span><span class="n">left_crs</span><span class="p">,</span> <span class="n">right_crs</span><span class="p">)):</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">"sjoin_nearest uses planar distances in a geographic CRS; "</span>
+            <span class="s2">"use to_crs() to project the geometries before joining."</span><span class="p">,</span>
+            <span class="ne">UserWarning</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="n">left</span><span class="p">,</span> <span class="n">left_geometry</span><span class="p">,</span> <span class="n">left_has_points</span> <span class="o">=</span> <span class="n">_prepare_side</span><span class="p">(</span><span class="n">left_df</span><span class="p">,</span> <span class="s2">"__nearest_l"</span><span class="p">)</span>
+    <span class="n">right</span><span class="p">,</span> <span class="n">right_geometry</span><span class="p">,</span> <span class="n">right_has_points</span> <span class="o">=</span> <span class="n">_prepare_side</span><span class="p">(</span><span class="n">right_df</span><span class="p">,</span> <span class="s2">"__nearest_r"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">left_has_points</span> <span class="ow">and</span> <span class="n">right_has_points</span><span class="p">:</span>
+        <span class="n">joined</span> <span class="o">=</span> <span class="n">left</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">right</span><span class="p">,</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">expr</span><span class="p">(</span><span class="sa">f</span><span class="s2">"ST_KNN(</span><span class="si">{</span><span class="n">left_geometry</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">right_geometry</span><span class="si">}</span><span class="s2">, 1, false)"</span><span class="p">),</span>
+            <span class="s2">"inner"</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Existing KNN partitioning needs a non-empty extent on both sides.</span>
+        <span class="c1"># A false join builds the correct empty schema without invoking KNN.</span>
+        <span class="n">joined</span> <span class="o">=</span> <span class="n">left</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">right</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">False</span><span class="p">),</span> <span class="s2">"inner"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">distance_col</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">max_distance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">distance</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_Distance</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_geometry</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_geometry</span><span class="p">))</span>
+        <span class="n">joined</span> <span class="o">=</span> <span class="n">joined</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"__nearest_distance"</span><span class="p">,</span> <span class="n">distance</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">max_distance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># A non-deterministic guard keeps this filter above the join.</span>
+            <span class="c1"># Partition IDs are always nonnegative. Without the guard Spark</span>
+            <span class="c1"># pushes the bound into the join: Sedona may choose a distance</span>
+            <span class="c1"># join instead of KNN, or discard it in a broadcast KNN plan.</span>
+            <span class="c1"># Extra-condition loss is tracked in GH-3398.</span>
+            <span class="n">joined</span> <span class="o">=</span> <span class="n">joined</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">spark_partition_id</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"__nearest_distance"</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">float</span><span class="p">(</span><span class="n">max_distance</span><span class="p">),</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="n">output_names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"__nearest_l_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">left_labels</span><span class="p">))]</span>
+    <span class="n">output_names</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">"__nearest_r_index"</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span>
+        <span class="sa">f</span><span class="s2">"__nearest_r_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">right_df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">label</span> <span class="o">!=</span> <span class="n">right_df</span><span class="o">.</span><span class="n">active_geometry_name</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="n">distance_col</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">output_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"__nearest_distance"</span><span class="p">)</span>
+        <span class="n">output_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">distance_col</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">joined</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"__nearest_l_index"</span><span class="p">,</span> <span class="o">*</span><span class="n">output_names</span><span class="p">)</span>
+    <span class="n">internal</span> <span class="o">=</span> <span class="n">InternalFrame</span><span class="p">(</span>
+        <span class="n">spark_frame</span><span class="o">=</span><span class="n">result</span><span class="p">,</span>
+        <span class="n">index_spark_columns</span><span class="o">=</span><span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s2">"__nearest_l_index"</span><span class="p">)],</span>
+        <span class="n">index_names</span><span class="o">=</span><span class="p">[</span><span class="n">result_index_name</span><span class="p">],</span>
+        <span class="n">column_labels</span><span class="o">=</span><span class="p">[(</span><span class="n">label</span><span class="p">,)</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">output_labels</span><span class="p">],</span>
+        <span class="n">data_spark_columns</span><span class="o">=</span><span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">output_names</span><span class="p">],</span>
+        <span class="n">data_fields</span><span class="o">=</span><span class="p">[</span>
+            <span class="n">InternalField</span><span class="o">.</span><span class="n">from_struct_field</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">output_names</span>
+        <span class="p">],</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">ps</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">internal</span><span class="p">),</span> <span class="n">geometry</span><span class="o">=</span><span class="n">left_df</span><span class="o">.</span><span class="n">active_geometry_name</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+    </div>
+
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Apache Software Foundation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

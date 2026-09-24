@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1680,6 +1679,17 @@
     <span class="md-ellipsis">
       
         Spatial Joins
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nearest-point-joins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Nearest point joins
       
     </span>
   </a>
@@ -6136,6 +6146,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#nearest-point-joins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Nearest point joins
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#coordinate-reference-system-operations" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6542,6 +6563,33 @@ matching geometries should also be cut to the mask:</p>
 <span class="n">intersects_result</span> <span class="o">=</span> <span class="n">left_df</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">right_df</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s2">"intersects"</span><span class="p">)</span>
 <span class="n">contains_result</span> <span class="o">=</span> <span class="n">left_df</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">right_df</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s2">"contains"</span><span class="p">)</span>
 </code></pre></div>
+<h3 id="nearest-point-joins">Nearest point joins<a class="headerlink" href="#nearest-point-joins" title="Permanent link">&para;</a></h3>
+<p><code>GeoDataFrame.sjoin_nearest</code>, <code>sedona.spark.geopandas.sjoin_nearest</code>, and
+<code>sedona.spark.geopandas.tools.sjoin_nearest</code> use Sedona's distributed KNN join.
+This initial implementation supports <strong>point inputs and inner joins</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">nearest</span> <span class="o">=</span> <span class="n">left_points</span><span class="o">.</span><span class="n">sjoin_nearest</span><span class="p">(</span>
+    <span class="n">right_points</span><span class="p">,</span>
+    <span class="n">distance_col</span><span class="o">=</span><span class="s2">"distance"</span><span class="p">,</span>
+    <span class="n">max_distance</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>The result retains the left geometry, CRS and index, the right index, and both
+frames' attributes. Overlapping attributes receive <code>_left</code> and <code>_right</code>
+suffixes. Null and empty geometries do not match. Distances are planar, use
+CRS units, and ignore Z; use a projected CRS for meaningful distance units.
+The optional positive finite <code>max_distance</code> filters nearest results after the
+search, rather than reducing the search radius. <code>distance_col</code> must be a new
+column. Output row order is unspecified.</p>
+<p><strong>Ties follow Sedona configuration, not GeoPandas' all-ties guarantee.</strong>
+<code>spark.sedona.join.knn.includeTieBreakers</code> defaults to <code>false</code>, choosing one
+nearest candidate with unspecified tie selection. Setting it to <code>true</code>
+includes equidistant candidates, but distinct rows with identical candidate
+geometries can still be omitted. This API does not change the session setting.</p>
+<p>Only <code>how="inner"</code>, <code>exclusive=False</code>, default suffixes, unique flat string
+columns and single-level indexes are supported. Duplicate index values are
+allowed. Unsupported options, non-point non-empty geometries and ambiguous
+output column names raise explicit errors. Input validation evaluates scalar
+summaries on Spark; geometry rows remain distributed.</p>
 <h3 id="coordinate-reference-system-operations">Coordinate Reference System Operations<a class="headerlink" href="#coordinate-reference-system-operations" title="Permanent link">&para;</a></h3>
 <p>Transform geometries between different coordinate reference systems:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># GeoParquet normally preserves CRS metadata. Assign it only when absent.</span>
@@ -6879,7 +6927,7 @@ collecting them into a MultiPoint.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 23, 2026 21:50:25 UTC">September 23, 2026 21:50:25</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 24, 2026 16:05:31 UTC">September 24, 2026 16:05:31</span>
   </span>
 
     

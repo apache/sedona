@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -271,6 +270,47 @@ and values in specified columns match.</p></li>
 <p class="rubric">Notes</p>
 <p>Every operation in GeoPandas is planar, i.e. the potential third
 dimension is not taken into account.</p>
+</dd></dl>
+
+<span class="target" id="module-sedona.spark.geopandas.tools.sjoin_nearest"></span><p>Point nearest joins using Sedona’s existing KNN execution strategies.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="sedona.spark.geopandas.tools.sjoin_nearest.sjoin_nearest">
+<span class="sig-prename descclassname"><span class="pre">sedona.spark.geopandas.tools.sjoin_nearest.</span></span><span class="sig-name descname"><span class="pre">sjoin_nearest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">how</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'inner'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lsuffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'left'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsuffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'right'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclusive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/geopandas/tools/sjoin_nearest.html#sjoin_nearest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.tools.sjoin_nearest.sjoin_nearest" title="Permalink to this definition"></a></dt>
+<dd><p>Join each left point to its nearest right point using planar distance.</p>
+<p>This initial implementation supports point inputs, <code class="docutils literal notranslate"><span class="pre">how='inner'</span></code>,
+<code class="docutils literal notranslate"><span class="pre">exclusive=False</span></code>, default suffixes, unique string column names and
+single-level indexes (including duplicate index values). Null and empty
+geometries do not match. The left geometry, CRS and index are retained.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>left_df</strong> (<a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame" title="sedona.spark.geopandas.GeoDataFrame"><em>GeoDataFrame</em></a>) – Distributed point frames to join.</p></li>
+<li><p><strong>right_df</strong> (<a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame" title="sedona.spark.geopandas.GeoDataFrame"><em>GeoDataFrame</em></a>) – Distributed point frames to join.</p></li>
+<li><p><strong>how</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>default 'inner'</em>) – Only inner joins are supported.</p></li>
+<li><p><strong>max_distance</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Positive finite distance in CRS units. Filters nearest results; it
+does not reduce the KNN search radius.</p></li>
+<li><p><strong>lsuffix</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>default 'left'</em><em>, </em><em>'right'</em>) – Only the default suffixes are supported for overlapping columns.</p></li>
+<li><p><strong>rsuffix</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>default 'left'</em><em>, </em><em>'right'</em>) – Only the default suffixes are supported for overlapping columns.</p></li>
+<li><p><strong>distance_col</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – New output column for the distance. Must not replace an input column.</p></li>
+<li><p><strong>exclusive</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default False</em>) – Only False is supported; equal points can match at distance zero.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Nearest matches, with no guaranteed row order.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame" title="sedona.spark.geopandas.GeoDataFrame">GeoDataFrame</a></p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Ties follow <code class="docutils literal notranslate"><span class="pre">spark.sedona.join.knn.includeTieBreakers</span></code> (default False).
+False chooses one nearest candidate with unspecified tie selection. True
+includes ties, but Sedona may omit distinct rows with identical candidate
+geometries. Unlike GeoPandas, all equidistant rows are not guaranteed.
+This function does not change that session setting.</p>
+<p>Distances are planar and ignore Z. Use a projected CRS for meaningful
+distance units. Scalar validation summaries are evaluated eagerly on
+Spark; input geometry rows remain distributed.</p>
 </dd></dl>
 
 </section>
