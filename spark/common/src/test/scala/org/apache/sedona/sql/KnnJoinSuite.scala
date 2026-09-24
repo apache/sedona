@@ -486,6 +486,68 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
 
       assert(knnJoined.count() > 0)
     }
+
+    it("keeps non-KNN predicates on broadcast and nested AND plans") {
+      withConf(
+        Map(
+          "spark.sql.adaptive.enabled" -> "false",
+          "spark.sql.autoBroadcastJoinThreshold" -> "-1",
+          "spark.sedona.join.autoBroadcastJoinThreshold" -> "-1",
+          "spark.sedona.join.knn.includeTieBreakers" -> "false")) {
+        import sparkSession.implicits._
+        val queries = Seq((1, 0.0, 0.0, 10), (2, 10.0, 10.0, 10))
+          .toDF("id", "x", "y", "score")
+          .selectExpr("id", "ST_Point(x, y) AS g", "score")
+        val objects = Seq((101, 1.0, 1.0, 20), (102, 11.0, 11.0, 20))
+          .toDF("id", "x", "y", "score")
+          .selectExpr("id", "ST_Point(x, y) AS g", "score")
+        queries.createOrReplaceTempView("knn_pred_queries")
+        objects.createOrReplaceTempView("knn_pred_objects")
+
+        def pairs(sql: String): Seq[(Int, Int)] =
+          sparkSession
+            .sql(sql)
+            .collect()
+            .map(row => (row.getInt(0), row.getInt(1)))
+            .sorted
+            .toSeq
+
+        val neighbors =
+          pairs(
+            "SELECT q.id, o.id FROM knn_pred_queries q JOIN knn_pred_objects o " +
+              "ON ST_KNN(q.g, o.g, 1, false)")
+        neighbors should be(Seq((1, 101), (2, 102)))
+
+        val filtered =
+          "SELECT q.id, o.id FROM knn_pred_queries q JOIN knn_pred_objects o " +
+            "ON ST_KNN(q.g, o.g, 1, false) AND q.score > o.score"
+        pairs(filtered) should be(Seq.empty)
+
+        val broadcastQueries = sparkSession.sql(
+          "SELECT /*+ BROADCAST(q) */ q.id, o.id FROM knn_pred_queries q JOIN knn_pred_objects o " +
+            "ON ST_KNN(q.g, o.g, 1, false) AND q.score > o.score")
+        broadcastQueries.queryExecution.executedPlan.toString should include(
+          "BroadcastQuerySideKNNJoin")
+        broadcastQueries
+          .collect()
+          .map(row => (row.getInt(0), row.getInt(1)))
+          .sorted
+          .toSeq should be(Seq.empty)
+
+        val broadcastObjects = sparkSession.sql(
+          "SELECT /*+ BROADCAST(o) */ q.id, o.id FROM knn_pred_queries q JOIN knn_pred_objects o " +
+            "ON ST_KNN(q.g, o.g, 1, false) AND q.score > o.score")
+        broadcastObjects.queryExecution.executedPlan.toString should include(
+          "BroadcastObjectSideKNNJoin")
+        broadcastObjects
+          .collect()
+          .map(row => (row.getInt(0), row.getInt(1)))
+          .sorted
+          .toSeq should be(Seq.empty)
+
+        pairs(filtered + " AND q.id < o.id") should be(Seq.empty)
+      }
+    }
   }
 
   private def withOptimizationMode(mode: String)(body: => Unit): Unit = {
