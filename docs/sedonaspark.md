@@ -79,6 +79,7 @@ SedonaSpark extends Apache Spark with a rich set of out-of-the-box distributed S
 * **Blazing fast**: SedonaSpark executes computations in parallel on many nodes in a cluster so that large computations can run fast.
 * Supports **various file formats**, including GeoJSON, Shapefile, GeoParquet, STAC, JDBC, OSM PBF, CSV, and PostGIS.
 * Exposes several **language APIs,** including SQL, Python, Java, Scala, and R.
+* Provides a [GeoPandas-style API](tutorial/geopandas-api.md) on Spark. See the [API coverage reference](api/geopandas-coverage.md) for availability and limitations.
 * **Scalable**: Horizontally scale to tens, hundreds, or thousands of nodes depending on the size of your data.  You can process massive spatial datasets with SedonaSpark.
 * **Portable**: Easy to run in a custom environment, locally or in the cloud with AWS EMR, Microsoft Fabric, or Google DataProc.
 * **Extensible**: You can extend SedonaSpark with your custom logic that suits your specific geospatial data analysis needs.

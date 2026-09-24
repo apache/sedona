@@ -107,7 +107,7 @@ Some of the key features of Apache Sedona include:
 * Support for a wide range of geospatial data formats, including [GeoJSON](https://en.wikipedia.org/wiki/GeoJSON), [WKT](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry), and [ESRI](https://www.esri.com) [Shapefile](https://en.wikipedia.org/wiki/Shapefile).
 * Scalable distributed processing of large vector and raster datasets.
 * Tools for spatial indexing, spatial querying, and spatial join operations.
-* Integration with popular geospatial Python tools such as [GeoPandas](https://geopandas.org).
+* GeoPandas API on Apache Spark: **91.4% API availability** (160/175 catalogued APIs, including partial implementations) in the 2.0.0 development version. See the [coverage reference](docs/api/geopandas-coverage.md) for the GeoPandas 1.1.4 baseline and limitations.
 * Integration with popular big data tools, such as Spark, [Hadoop](https://hadoop.apache.org/), [Hive](https://hive.apache.org/), and Flink for data storage and querying.
 * A user-friendly API for working with geospatial data in the [SQL](https://en.wikipedia.org/wiki/SQL), [Python](https://www.python.org/), [Scala](https://www.scala-lang.org/) and [Java](https://www.java.com) languages.
 * Flexible deployment options, including standalone, local, and cluster modes.

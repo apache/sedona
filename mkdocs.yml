@@ -102,6 +102,7 @@ nav:
               - DataFrame/SQL: api/viz/sql.md
               - RDD: api/viz/java-api.md
           - Sedona R: api/rdocs
+          - GeoPandas API coverage: api/geopandas-coverage.md
           - Sedona Python: api/pydocs
       - Release notes: setup/release-notes.md
 
