@@ -5525,6 +5525,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#the-serialization-tax-and-how-sedona-stopped-paying-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Serialization Tax, and How Sedona Stopped Paying It
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#order-by-is-an-index-does-it-have-to-be" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5623,17 +5634,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#join-the-sky-to-the-ground-spatial-joins-over-stac-catalogs" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Join the Sky to the Ground: Spatial Joins over STAC Catalogs
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -5648,6 +5648,52 @@
       <header class="md-typeset">
         <h1 id="september-2026">September 2026<a class="headerlink" href="#september-2026" title="Permanent link">&para;</a></h1>
       </header>
+      
+        <article class="md-post md-post--excerpt">
+  <header class="md-post__header">
+    
+      <nav class="md-post__authors md-typeset">
+        
+          <span class="md-author">
+            <img src="../../../assets/authors/jia.jpeg" alt="Jia Yu">
+          </span>
+        
+      </nav>
+    
+    <div class="md-post__meta md-meta">
+      <ul class="md-meta__list">
+        <li class="md-meta__item">
+          <time datetime="2026-09-25 00:00:00+00:00">Friday, September 25, 2026</time></li>
+        
+        
+          
+          <li class="md-meta__item">
+            
+              6 min read
+            
+          </li>
+        
+        
+      </ul>
+      
+    </div>
+  </header>
+  <div class="md-post__content md-typeset">
+    <h2 id="the-serialization-tax-and-how-sedona-stopped-paying-it"><a class="toclink" href="../../2026/09/25/the-serialization-tax-and-how-sedona-stopped-paying-it/">The Serialization Tax, and How Sedona Stopped Paying It</a></h2>
+<p>Transform a building footprint to a projected coordinate system, buffer it by ten meters, then calculate its area. Three spatial operations, written as one SQL expression. There is also work hidden between those operations: converting each intermediate geometry to bytes, only for the next function to turn it back into an object.</p>
+<p>Apache Sedona avoids those conversions by passing objects directly between functions that support it. The mechanism is small, and its effect depends on the workload. The measurements below show where it matters, where other work dominates, and what interrupts it.</p>
+<p><img alt="Two evaluation paths for geometry and raster functions: the naive path encodes and decodes intermediate results; Sedona passes the objects directly to the next function" src="../../serialization-tax-cover.png" /></p>
+
+    
+      <nav class="md-post__action">
+        <a href="../../2026/09/25/the-serialization-tax-and-how-sedona-stopped-paying-it/">
+          Continue reading
+        </a>
+      </nav>
+    
+    
+  </div>
+</article>
       
         <article class="md-post md-post--excerpt">
   <header class="md-post__header">
@@ -6050,51 +6096,6 @@
     
       <nav class="md-post__action">
         <a href="../../2026/07/24/openstreetmap-meet-sedona-raw-osmpbf-to-spatial-sql/">
-          Continue reading
-        </a>
-      </nav>
-    
-    
-  </div>
-</article>
-      
-        <article class="md-post md-post--excerpt">
-  <header class="md-post__header">
-    
-      <nav class="md-post__authors md-typeset">
-        
-          <span class="md-author">
-            <img src="../../../assets/authors/jia.jpeg" alt="Jia Yu">
-          </span>
-        
-      </nav>
-    
-    <div class="md-post__meta md-meta">
-      <ul class="md-meta__list">
-        <li class="md-meta__item">
-          <time datetime="2026-07-17 00:00:00+00:00">Friday, July 17, 2026</time></li>
-        
-        
-          
-          <li class="md-meta__item">
-            
-              6 min read
-            
-          </li>
-        
-        
-      </ul>
-      
-    </div>
-  </header>
-  <div class="md-post__content md-typeset">
-    <h2 id="join-the-sky-to-the-ground-spatial-joins-over-stac-catalogs"><a class="toclink" href="../../2026/07/17/join-the-sky-to-the-ground-spatial-joins-over-stac-catalogs/">Join the Sky to the Ground: Spatial Joins over STAC Catalogs</a></h2>
-<p>You have the shapes. Somewhere in a petabyte of satellite imagery are exactly the scenes that cover them. The hard part was never the analysis — it was the plumbing in between.</p>
-<p><img alt="Apache Sedona's STAC reader turns a satellite imagery catalog into a Sedona DataFrame and spatially joins scene footprints to your vector areas of interest" src="../../stac-catalog-reader-cover.svg" /></p>
-
-    
-      <nav class="md-post__action">
-        <a href="../../2026/07/17/join-the-sky-to-the-ground-spatial-joins-over-stac-catalogs/">
           Continue reading
         </a>
       </nav>
