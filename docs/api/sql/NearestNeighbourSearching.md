@@ -68,6 +68,10 @@ CACHE TABLE knnResult;
 SELECT * FROM knnResult WHERE condition;
 ```
 
+Additional `ON` predicates that remain in the kNN join condition are evaluated on the neighbors selected by `ST_KNN`. If a predicate rejects a selected pair, the join does not choose another neighbor to replace it, so it may return fewer than `k` neighbors for a query geometry. Spark may push predicates that reference only one input below the join, as described above.
+
+Use only one `ST_KNN` predicate per join condition. When combining it with another spatial predicate, place `ST_KNN` before predicates such as `ST_Intersects` in the `ON` condition; otherwise, query planning may reject the join.
+
 ### Optimization Barrier
 
 Use the `barrier` function to prevent filter pushdown and control predicate evaluation order in complex spatial joins. This function creates an optimization barrier by evaluating boolean expressions at runtime.

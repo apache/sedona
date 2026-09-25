@@ -273,6 +273,15 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
       val joinConditionMatcher = OptimizableJoinCondition(left, right)
       val queryDetection: Option[JoinQueryDetection] = condition.flatMap {
         case joinConditionMatcher(predicate, extraCondition) =>
+          // ST_KNN must be implemented by the join, never evaluated as a per-pair filter.
+          if (extraCondition.exists(_.exists(_.isInstanceOf[ST_KNN]))) {
+            val message = if (predicate.isInstanceOf[ST_KNN]) {
+              "Only one ST_KNN predicate is supported per join condition"
+            } else {
+              "Place ST_KNN before other spatial predicates in the join condition"
+            }
+            throw new UnsupportedOperationException(message)
+          }
           predicate match {
             // ST_Contains / ST_Intersects / ST_Within / ST_Equals are InferredExpression (not
             // ST_Predicate) so they can't sit inside getJoinDetection; they're also the only
@@ -618,11 +627,6 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
                   Some(distance)))
 
             // ST_KNN
-            case _: ST_KNN if extraCondition.exists(_.exists(_.isInstanceOf[ST_KNN])) =>
-              // The physical join implements only the selected KNN predicate.
-              throw new UnsupportedOperationException(
-                "Only one ST_KNN predicate is supported per join condition")
-
             case ST_KNN(Seq(leftShape, rightShape, k)) =>
               Some(
                 JoinQueryDetection(

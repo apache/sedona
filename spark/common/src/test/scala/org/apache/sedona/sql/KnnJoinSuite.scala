@@ -501,7 +501,11 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
         Seq((1, 101), (4, 104))),
       ("KNN first", s"($knnPredicate AND $scorePredicate) AND $ceilingPredicate", Seq((1, 101))),
       ("KNN middle", s"$scorePredicate AND ($knnPredicate AND $ceilingPredicate)", Seq((1, 101))),
-      ("KNN last", s"($scorePredicate AND $ceilingPredicate) AND $knnPredicate", Seq((1, 101))))
+      ("KNN last", s"($scorePredicate AND $ceilingPredicate) AND $knnPredicate", Seq((1, 101))),
+      (
+        "spatial residual with KNN first",
+        s"$knnPredicate AND ST_DWithin(q.g, o.g, CAST(q.id AS DOUBLE))",
+        Seq((2, 102), (3, 103), (4, 104))))
 
     for {
       (strategy, hint, expectedPlan) <- residualJoinStrategies
@@ -543,6 +547,27 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
           }
           exception.getMessage should be(
             "Only one ST_KNN predicate is supported per join condition")
+        }
+      }
+    }
+
+    val spatialPredicatesBeforeKnn =
+      Seq("ST_Intersects(ST_Buffer(q.g, 2), o.g)", "ST_DWithin(q.g, o.g, 2)")
+    for {
+      (strategy, hint, _) <- residualJoinStrategies
+      spatialPredicate <- spatialPredicatesBeforeKnn
+    } {
+      it(s"KNN residuals reject KNN after $spatialPredicate during planning: $strategy") {
+        withKnnResidualInputs {
+          val exception = intercept[UnsupportedOperationException] {
+            sparkSession
+              .sql(s"SELECT $hint q.id, o.id FROM knn_pred_queries q JOIN knn_pred_objects o " +
+                s"ON $spatialPredicate AND $knnPredicate")
+              .queryExecution
+              .executedPlan
+          }
+          exception.getMessage should include(
+            "Place ST_KNN before other spatial predicates in the join condition")
         }
       }
     }
