@@ -71,6 +71,7 @@
         <cdm.version>5.10.0</cdm.version>
         <zstd-jni.version>1.5.5-4</zstd-jni.version>
         <geotools.version>33.1</geotools.version>
+        <imageio.ext.version>1.4.16</imageio.ext.version>
         <hadoop.version>3.2.4</hadoop.version>
         <jackson.version>2.13.4</jackson.version>
         <jts.version>1.20.0</jts.version>
@@ -257,6 +258,12 @@
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-geotiff</artifactId>
                 <version>${geotools.version}</version>
+                <scope>${geotools.scope}</scope>
+            </dependency>
+            <dependency>
+                <groupId>it.geosolutions.imageio-ext</groupId>
+                <artifactId>imageio-ext-tiff</artifactId>
+                <version>${imageio.ext.version}</version>
                 <scope>${geotools.scope}</scope>
             </dependency>
             <dependency>

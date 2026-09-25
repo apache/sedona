@@ -31,6 +31,7 @@ import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -83,6 +84,22 @@ public class RasterConstructorsTest extends RasterTestBase {
     assertEquals(
         10d, gridCoverage2D.getRenderedImage().getData().getPixel(5, 5, (double[]) null)[0], 0.1);
     assertEquals(4, gridCoverage2D.getNumSampleDimensions());
+  }
+
+  @Test
+  public void fromGeoTiffWith64BitHorizontalPredictor() throws IOException {
+    byte[] geotiff;
+    try (InputStream input =
+        RasterConstructorsTest.class.getResourceAsStream("/raster/ipcc_cdd_2040_rcp45_AT.tif")) {
+      assertNotNull(input);
+      geotiff = input.readAllBytes();
+    }
+
+    GridCoverage2D gridCoverage2D = RasterConstructors.fromGeoTiff(geotiff);
+
+    assertEquals(30, gridCoverage2D.getRenderedImage().getWidth());
+    assertEquals(10, gridCoverage2D.getRenderedImage().getHeight());
+    assertEquals(1, gridCoverage2D.getNumSampleDimensions());
   }
 
   @Test
