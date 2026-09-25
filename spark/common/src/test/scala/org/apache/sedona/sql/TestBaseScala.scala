@@ -20,6 +20,7 @@ package org.apache.sedona.sql
 
 import com.google.common.math.DoubleMath
 import io.minio.{MinioClient, PutObjectArgs}
+import org.apache.commons.compress.archivers.tar.{TarArchiveEntry, TarArchiveOutputStream}
 import org.apache.hadoop.fs.FileUtil
 import org.apache.hadoop.hdfs.{HdfsConfiguration, MiniDFSCluster}
 import org.apache.log4j.{Level, Logger}
@@ -33,6 +34,8 @@ import org.locationtech.jts.geom._
 import org.locationtech.jts.io.WKTReader
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 import org.testcontainers.containers.MinIOContainer
+import org.testcontainers.images.builder.{ImageFromDockerfile, Transferable}
+import org.testcontainers.utility.DockerImageName
 
 import java.io.{File, FileInputStream}
 import java.nio.file.Files
@@ -416,4 +419,34 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     sparkSession.sparkContext.hadoopConfiguration
       .set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
   }
+}
+
+object TestBaseScala {
+  // Build once per test JVM from the pinned upstream binary; MinIO's registry image is unavailable.
+  private lazy val minioImage: DockerImageName = {
+    val resource = getClass.getResourceAsStream("/minio/Dockerfile")
+    val content =
+      try resource.readAllBytes()
+      finally resource.close()
+    val dockerfile = new Transferable {
+      override def getSize: Long = content.length
+      override def getBytes: Array[Byte] = content
+
+      // Compile against Spark's commons-compress API. Testcontainers' precompiled implementation
+      // calls a newer overload that is absent from Spark 3.5's commons-compress version.
+      override def transferTo(output: TarArchiveOutputStream, path: String): Unit = {
+        val entry = new TarArchiveEntry(path)
+        entry.setMode(getFileMode)
+        entry.setSize(content.length)
+        output.putArchiveEntry(entry)
+        output.write(content)
+        output.closeArchiveEntry()
+      }
+    }
+    DockerImageName
+      .parse(new ImageFromDockerfile().withFileFromTransferable("Dockerfile", dockerfile).get())
+      .asCompatibleSubstituteFor("minio/minio")
+  }
+
+  def createMinioContainer(): MinIOContainer = new MinIOContainer(minioImage)
 }

@@ -21,8 +21,6 @@ package org.apache.sedona.sql
 import io.minio.{ListObjectsArgs, MakeBucketArgs, MinioClient}
 import org.apache.spark.sql.functions.col
 import org.scalatest.matchers.should.Matchers
-import org.testcontainers.containers.MinIOContainer
-import org.testcontainers.utility.DockerImageName
 
 import java.io.FileInputStream
 
@@ -111,10 +109,7 @@ class OsmReaderTest extends TestBaseScala with Matchers {
     }
 
     it("should be able to read from osm file on s3") {
-      val container = new MinIOContainer(
-        DockerImageName
-          .parse("quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z")
-          .asCompatibleSubstituteFor("minio/minio"))
+      val container = TestBaseScala.createMinioContainer()
 
       container.start()
 

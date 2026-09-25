@@ -26,8 +26,6 @@ import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types.{BinaryType, BooleanType, DateType, DoubleType, IntegerType, StringType, StructField, StructType, TimestampType}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
-import org.testcontainers.containers.MinIOContainer
-import org.testcontainers.utility.DockerImageName
 
 import java.io.FileInputStream
 import java.sql.{Date, Timestamp}
@@ -375,10 +373,7 @@ class GeoPackageReaderTest extends TestBaseScala with Matchers {
 
   describe("Reading from S3") {
     it("should be able to read files from S3") {
-      val container = new MinIOContainer(
-        DockerImageName
-          .parse("quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z")
-          .asCompatibleSubstituteFor("minio/minio"))
+      val container = TestBaseScala.createMinioContainer()
 
       container.start()
 
