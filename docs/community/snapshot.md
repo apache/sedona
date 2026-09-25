@@ -21,6 +21,18 @@
 
 This step is to publish Maven SNAPSHOTs to https://repository.apache.org
 
+!!!note
+    Snapshots are published automatically. The `Publish snapshot` GitHub Actions workflow (`.github/workflows/publish-snapshot.yml`) deploys the current `-SNAPSHOT` version for every supported Spark and Scala combination on each merge to `master` that changes the Java/Scala code. It can also be run by hand from the Actions tab. The manual steps below are still useful for a release manager checking their credential setup.
+
+To use a snapshot, add the ASF snapshot repository to your build, for example with Spark:
+
+```bash
+spark-submit \
+  --repositories https://repository.apache.org/content/repositories/snapshots \
+  --packages org.apache.sedona:sedona-spark-shaded-4.0_2.13:{{ sedona_create_release.current_snapshot }},org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }} \
+  ...
+```
+
 This is a good practice for a release manager to try out his/her credential setup.
 
 The detailed requirement is on [ASF Infra website](https://infra.apache.org/publishing-maven-artifacts.html)
