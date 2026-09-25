@@ -37,6 +37,7 @@
 [![R build](https://github.com/apache/sedona/actions/workflows/r.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/r.yml)
 [![Scala and Java build](https://github.com/apache/sedona/actions/workflows/java.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/java.yml)
 
+[![GeoPandas API coverage: 91.4% (including partial implementations)](https://img.shields.io/badge/GeoPandas_API_coverage-91.4%25-brightgreen)](docs/api/geopandas-coverage.md "GeoPandas 1.1.4 API availability in Sedona 2.0.0 development, including partial implementations")
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/m/apache/sedona)](https://github.com/apache/sedona/graphs/commit-activity)
 [![GitHub Issues marked as good first issue](https://img.shields.io/github/issues/apache/sedona/good%20first%20issue?color=%237057ff)](https://github.com/apache/sedona/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22good%20first%20issue%22)
 
@@ -107,7 +108,7 @@ Some of the key features of Apache Sedona include:
 * Support for a wide range of geospatial data formats, including [GeoJSON](https://en.wikipedia.org/wiki/GeoJSON), [WKT](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry), and [ESRI](https://www.esri.com) [Shapefile](https://en.wikipedia.org/wiki/Shapefile).
 * Scalable distributed processing of large vector and raster datasets.
 * Tools for spatial indexing, spatial querying, and spatial join operations.
-* Integration with popular geospatial Python tools such as [GeoPandas](https://geopandas.org).
+* GeoPandas API on Apache Spark. See the [coverage reference](docs/api/geopandas-coverage.md) for API availability and limitations in the 2.0.0 development version, compared with GeoPandas 1.1.4.
 * Integration with popular big data tools, such as Spark, [Hadoop](https://hadoop.apache.org/), [Hive](https://hive.apache.org/), and Flink for data storage and querying.
 * A user-friendly API for working with geospatial data in the [SQL](https://en.wikipedia.org/wiki/SQL), [Python](https://www.python.org/), [Scala](https://www.scala-lang.org/) and [Java](https://www.java.com) languages.
 * Flexible deployment options, including standalone, local, and cluster modes.

@@ -79,6 +79,7 @@ SedonaSpark 在 Apache Spark 之上扩展了一套丰富、开箱即用的分布
 * **极致性能**：SedonaSpark 在集群中的多个节点上并行执行计算，使大规模计算能够快速完成。
 * 支持**多种文件格式**，包括 GeoJSON、Shapefile、GeoParquet、STAC、JDBC、OSM PBF、CSV 和 PostGIS。
 * 提供多种**语言 API**，包括 SQL、Python、Java、Scala 和 R。
+* 在 Spark 上提供 [GeoPandas 风格的 API](tutorial/geopandas-api.md)。请参阅 [API 覆盖情况参考](api/geopandas-coverage.md)，了解可用功能和限制。
 * **可扩展**：可根据数据规模水平扩展到数十、数百乃至数千个节点，使用 SedonaSpark 处理海量空间数据集。
 * **可移植**：易于在自定义环境中运行，可在本地或云端（如 AWS EMR、Microsoft Fabric、Google DataProc）部署。
 * **可扩展定制**：可以使用自定义逻辑对 SedonaSpark 进行扩展，以满足特定的地理空间数据分析需求。

@@ -21,6 +21,8 @@
 
 The GeoPandas API for Apache Sedona provides a familiar GeoPandas interface that scales your geospatial analysis beyond single-node limitations. This API combines the intuitive GeoPandas DataFrame syntax with the distributed processing power of Apache Sedona on Apache Spark, enabling you to work with planetary-scale datasets using the same code patterns you already know.
 
+See the [API coverage reference](../api/geopandas-coverage.md) for supported methods, parameter limitations, and the coverage percentage.
+
 ## Overview
 
 ### What is the GeoPandas API for Apache Sedona?
