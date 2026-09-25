@@ -37,6 +37,7 @@
 [![R build](https://github.com/apache/sedona/actions/workflows/r.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/r.yml)
 [![Scala and Java build](https://github.com/apache/sedona/actions/workflows/java.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/java.yml)
 
+[![GeoPandas API coverage: 91.4% (including partial implementations)](https://img.shields.io/badge/GeoPandas_API_coverage-91.4%25-brightgreen)](docs/api/geopandas-coverage.md "GeoPandas 1.1.4 API availability in Sedona 2.0.0 development, including partial implementations")
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/m/apache/sedona)](https://github.com/apache/sedona/graphs/commit-activity)
 [![GitHub Issues marked as good first issue](https://img.shields.io/github/issues/apache/sedona/good%20first%20issue?color=%237057ff)](https://github.com/apache/sedona/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22good%20first%20issue%22)
 
