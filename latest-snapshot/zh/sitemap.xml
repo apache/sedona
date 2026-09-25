@@ -6896,6 +6896,13 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/2026/09/11/select-from-satellite-in-a-rust-database/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/blog/2026/09/25/the-serialization-tax-and-how-sedona-stopped-paying-it/</loc>
+        <lastmod>2026-09-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/blog/2026/09/25/the-serialization-tax-and-how-sedona-stopped-paying-it/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/2026/09/25/the-serialization-tax-and-how-sedona-stopped-paying-it/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/blog/2026/01/08/spatial-query-benchmarking-databricks/</loc>
         <lastmod>2026-09-25</lastmod>
         <changefreq>daily</changefreq>
@@ -13859,6 +13866,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/2026/09/11/select-from-satellite-in-a-rust-database/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/2026/09/11/select-from-satellite-in-a-rust-database/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/blog/2026/09/25/the-serialization-tax-and-how-sedona-stopped-paying-it/</loc>
+        <lastmod>2026-09-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/2026/09/25/the-serialization-tax-and-how-sedona-stopped-paying-it/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/2026/09/25/the-serialization-tax-and-how-sedona-stopped-paying-it/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/zh/blog/2026/01/08/spatial-query-benchmarking-databricks/</loc>
