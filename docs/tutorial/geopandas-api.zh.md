@@ -21,6 +21,8 @@
 
 Apache Sedona 上的 GeoPandas API 提供了与 GeoPandas 一致的接口，可以让您的地理空间分析突破单机的局限。该 API 把熟悉的 GeoPandas DataFrame 语法与 Apache Sedona 在 Apache Spark 上的分布式处理能力结合起来，让您能够使用同样的代码模式处理行星级（planetary-scale）的数据集。
 
+请参阅 [API 覆盖情况参考](../api/geopandas-coverage.md)，了解支持的方法、参数限制和 API 覆盖率。
+
 ## 概览
 
 ### 什么是 Apache Sedona 的 GeoPandas API？

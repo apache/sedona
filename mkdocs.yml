@@ -300,6 +300,7 @@ plugins:
             Raster DataFrame / SQL app: 栅格 DataFrame / SQL 应用
             Pure SQL environment: 纯 SQL 环境
             GeoPandas API on Sedona: Sedona 上的 GeoPandas API
+            GeoPandas API coverage: GeoPandas API 覆盖情况
             Spatial RDD app: 空间 RDD 应用
             Sedona R: Sedona R
             Work with GeoPandas and Shapely: 与 GeoPandas 和 Shapely 配合使用
