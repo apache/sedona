@@ -544,32 +544,6 @@ public class RasterUtils {
         .transform(gridCoord, null);
   }
 
-  /**
-   * * Returns the world coordinates of the given grid coordinate. The expected grid coordinates are
-   * 1 indexed. The function also enforces a range check to make sure given grid coordinates are
-   * actually inside the grid.
-   *
-   * @param raster
-   * @param colX
-   * @param rowY
-   * @return
-   * @throws IndexOutOfBoundsException
-   * @throws TransformException
-   */
-  public static Point2D getWorldCornerCoordinatesWithRangeCheck(
-      GridCoverage2D raster, int colX, int rowY)
-      throws IndexOutOfBoundsException, TransformException {
-    Point2D.Double gridCoordinates2D = new Position2D(colX - 1, rowY - 1);
-    if (!(raster.getGridGeometry().getGridRange2D().contains(gridCoordinates2D)))
-      throw new IndexOutOfBoundsException(
-          String.format(
-              "Specified pixel coordinates (%d, %d) do not lie in the raster", colX, rowY));
-    return raster
-        .getGridGeometry()
-        .getGridToCRS2D(PixelOrientation.UPPER_LEFT)
-        .transform(gridCoordinates2D, null);
-  }
-
   public static int[] getGridCoordinatesFromWorld(
       GridCoverage2D raster, double longitude, double latitude) throws TransformException {
     Point2D directPosition2D =
