@@ -618,6 +618,11 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
                   Some(distance)))
 
             // ST_KNN
+            case _: ST_KNN if extraCondition.exists(_.exists(_.isInstanceOf[ST_KNN])) =>
+              // The physical join implements only the selected KNN predicate.
+              throw new UnsupportedOperationException(
+                "Only one ST_KNN predicate is supported per join condition")
+
             case ST_KNN(Seq(leftShape, rightShape, k)) =>
               Some(
                 JoinQueryDetection(
@@ -627,7 +632,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
                   rightShape,
                   spatialPredicate = SpatialPredicate.KNN,
                   isGeography = false,
-                  condition,
+                  extraCondition,
                   Some(k)))
 
             case ST_KNN(Seq(leftShape, rightShape, k, useSpheroid)) =>
@@ -640,7 +645,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
                   rightShape,
                   spatialPredicate = SpatialPredicate.KNN,
                   isGeography = useSpheroidUnwrapped,
-                  condition,
+                  extraCondition,
                   Some(k)))
 
             case _ => None
@@ -841,7 +846,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
       spatialPredicate = null,
       isGeography,
       condition,
-      extractExtraKNNJoinCondition(condition)) :: Nil
+      extraCondition) :: Nil
   }
 
   private def planDistanceJoin(
@@ -903,16 +908,6 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
     }
   }
 
-  private def extractExtraKNNJoinCondition(condition: Expression): Option[Expression] = {
-    // A nested AND such as (ST_KNN AND p1) AND p2 does not have ST_KNN as a direct child.
-    // Flatten the conjuncts so every non-KNN predicate is kept.
-    val others = splitConjunctivePredicates(condition).filter {
-      case _: ST_KNN => false
-      case _ => true
-    }
-    others.reduceOption(And(_, _))
-  }
-
   private def planBroadcastJoin(
       left: LogicalPlan,
       right: LogicalPlan,
@@ -958,7 +953,6 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
           case None =>
             Nil
         }
-        val knnExtraCondition = extraCondition.flatMap(extractExtraKNNJoinCondition)
         if (querySide == broadcastSide.get) {
           // broadcast is on query side
           return BroadcastQuerySideKNNJoinExec(
@@ -973,7 +967,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
             spatialPredicate,
             isGeography,
             condition = null,
-            extraCondition = knnExtraCondition) :: Nil
+            extraCondition = extraCondition) :: Nil
         } else {
           // broadcast is on object side
           return BroadcastObjectSideKNNJoinExec(
@@ -988,7 +982,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
             spatialPredicate,
             isGeography,
             condition = null,
-            extraCondition = knnExtraCondition) :: Nil
+            extraCondition = extraCondition) :: Nil
         }
       }
     }

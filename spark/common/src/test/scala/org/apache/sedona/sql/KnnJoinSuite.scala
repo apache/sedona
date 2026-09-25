@@ -22,7 +22,7 @@ import org.apache.spark.sql.catalyst.expressions.Literal
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.st_constructors.ST_GeomFromText
-import org.apache.spark.sql.sedona_sql.strategy.join.KNNJoinExec
+import org.apache.spark.sql.sedona_sql.strategy.join.{BroadcastObjectSideKNNJoinExec, BroadcastQuerySideKNNJoinExec, KNNJoinExec}
 import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions.expr
@@ -487,65 +487,106 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
       assert(knnJoined.count() > 0)
     }
 
-    it("keeps non-KNN predicates on broadcast and nested AND plans") {
-      withConf(
-        Map(
-          "spark.sql.adaptive.enabled" -> "false",
-          "spark.sql.autoBroadcastJoinThreshold" -> "-1",
-          "spark.sedona.join.autoBroadcastJoinThreshold" -> "-1",
-          "spark.sedona.join.knn.includeTieBreakers" -> "false")) {
-        import sparkSession.implicits._
-        val queries = Seq((1, 0.0, 0.0, 10), (2, 10.0, 10.0, 10))
-          .toDF("id", "x", "y", "score")
-          .selectExpr("id", "ST_Point(x, y) AS g", "score")
-        val objects = Seq((101, 1.0, 1.0, 20), (102, 11.0, 11.0, 20))
-          .toDF("id", "x", "y", "score")
-          .selectExpr("id", "ST_Point(x, y) AS g", "score")
-        queries.createOrReplaceTempView("knn_pred_queries")
-        objects.createOrReplaceTempView("knn_pred_objects")
+    val residualJoinStrategies: Seq[(String, String, Class[_])] = Seq(
+      ("regular", "", classOf[KNNJoinExec]),
+      ("broadcast query", "/*+ BROADCAST(q) */", classOf[BroadcastQuerySideKNNJoinExec]),
+      ("broadcast object", "/*+ BROADCAST(o) */", classOf[BroadcastObjectSideKNNJoinExec]))
+    val knnPredicate = "ST_KNN(q.g, o.g, 1, false)"
+    val scorePredicate = "q.score > o.score"
+    val ceilingPredicate = "q.ceiling > o.floor"
+    val residualConditions = Seq(
+      (
+        "single residual with default distance metric",
+        s"ST_KNN(q.g, o.g, 1) AND $scorePredicate",
+        Seq((1, 101), (4, 104))),
+      ("KNN first", s"($knnPredicate AND $scorePredicate) AND $ceilingPredicate", Seq((1, 101))),
+      ("KNN middle", s"$scorePredicate AND ($knnPredicate AND $ceilingPredicate)", Seq((1, 101))),
+      ("KNN last", s"($scorePredicate AND $ceilingPredicate) AND $knnPredicate", Seq((1, 101))))
 
-        def pairs(sql: String): Seq[(Int, Int)] =
-          sparkSession
-            .sql(sql)
-            .collect()
-            .map(row => (row.getInt(0), row.getInt(1)))
-            .sorted
-            .toSeq
+    for {
+      (strategy, hint, expectedPlan) <- residualJoinStrategies
+      queriesFirst <- Seq(true, false)
+      (conditionName, condition, expected) <- residualConditions
+    } {
+      it(s"KNN residuals: $strategy, queriesFirst=$queriesFirst, $conditionName") {
+        withKnnResidualInputs {
+          val relations = if (queriesFirst) {
+            "knn_pred_queries q JOIN knn_pred_objects o"
+          } else {
+            "knn_pred_objects o JOIN knn_pred_queries q"
+          }
+          val joined = sparkSession.sql(s"SELECT $hint q.id, o.id FROM $relations ON $condition")
+          val plan = joined.queryExecution.executedPlan
+          assert(plan.find(_.getClass == expectedPlan).isDefined, plan.toString)
+          val pairs = joined.collect().map(row => (row.getInt(0), row.getInt(1))).sorted.toSeq
+          pairs should be(expected)
+        }
+      }
+    }
 
-        val neighbors =
-          pairs(
-            "SELECT q.id, o.id FROM knn_pred_queries q JOIN knn_pred_objects o " +
-              "ON ST_KNN(q.g, o.g, 1, false)")
-        neighbors should be(Seq((1, 101), (2, 102)))
+    val additionalKnnPredicates = Seq(
+      ("different k", s"ST_KNN(q.g, o.g, 2, false) AND $knnPredicate"),
+      ("reciprocal", s"$knnPredicate AND ST_KNN(o.g, q.g, 1, false)"),
+      ("nested in OR", s"$knnPredicate AND (ST_KNN(q.g, o.g, 2, false) OR $scorePredicate)"))
+    for {
+      (strategy, hint, _) <- residualJoinStrategies
+      (conditionName, condition) <- additionalKnnPredicates
+    } {
+      it(s"KNN residuals reject multiple predicates during planning: $strategy, $conditionName") {
+        withKnnResidualInputs {
+          val exception = intercept[UnsupportedOperationException] {
+            sparkSession
+              .sql(s"SELECT $hint q.id, o.id FROM knn_pred_queries q JOIN knn_pred_objects o " +
+                s"ON $condition")
+              .queryExecution
+              .executedPlan
+          }
+          exception.getMessage should be(
+            "Only one ST_KNN predicate is supported per join condition")
+        }
+      }
+    }
+  }
 
-        val filtered =
-          "SELECT q.id, o.id FROM knn_pred_queries q JOIN knn_pred_objects o " +
-            "ON ST_KNN(q.g, o.g, 1, false) AND q.score > o.score"
-        pairs(filtered) should be(Seq.empty)
-
-        val broadcastQueries = sparkSession.sql(
-          "SELECT /*+ BROADCAST(q) */ q.id, o.id FROM knn_pred_queries q JOIN knn_pred_objects o " +
-            "ON ST_KNN(q.g, o.g, 1, false) AND q.score > o.score")
-        broadcastQueries.queryExecution.executedPlan.toString should include(
-          "BroadcastQuerySideKNNJoin")
-        broadcastQueries
-          .collect()
-          .map(row => (row.getInt(0), row.getInt(1)))
-          .sorted
-          .toSeq should be(Seq.empty)
-
-        val broadcastObjects = sparkSession.sql(
-          "SELECT /*+ BROADCAST(o) */ q.id, o.id FROM knn_pred_queries q JOIN knn_pred_objects o " +
-            "ON ST_KNN(q.g, o.g, 1, false) AND q.score > o.score")
-        broadcastObjects.queryExecution.executedPlan.toString should include(
-          "BroadcastObjectSideKNNJoin")
-        broadcastObjects
-          .collect()
-          .map(row => (row.getInt(0), row.getInt(1)))
-          .sorted
-          .toSeq should be(Seq.empty)
-
-        pairs(filtered + " AND q.id < o.id") should be(Seq.empty)
+  private def withKnnResidualInputs(body: => Unit): Unit = {
+    withConf(
+      Map(
+        "spark.sql.adaptive.enabled" -> "false",
+        "spark.sql.autoBroadcastJoinThreshold" -> "-1",
+        "spark.sedona.join.autoBroadcastJoinThreshold" -> "-1",
+        "spark.sedona.join.knn.includeTieBreakers" -> "false")) {
+      try {
+        sparkSession
+          .sql("""
+            |SELECT id, ST_Point(x, x) AS g, score, ceiling
+            |FROM VALUES
+            |  (1, 0.0D, 30, 100),
+            |  (2, 10.0D, 10, 100),
+            |  (3, 20.0D, CAST(NULL AS INT), 100),
+            |  (4, 30.0D, 30, 0)
+            |AS q(id, x, score, ceiling)
+            |""".stripMargin)
+          .coalesce(1)
+          .createOrReplaceTempView("knn_pred_queries")
+        // Different column layouts expose incorrectly bound residual attributes. Query 2's
+        // nearest object fails its score predicate; the farther passing object must not replace it.
+        sparkSession
+          .sql("""
+            |SELECT 'object' AS label, score, ST_Point(x, x) AS g, id, floor
+            |FROM VALUES
+            |  (101, 1.0D, 20, 50),
+            |  (102, 11.0D, 20, 50),
+            |  (103, 21.0D, 20, 50),
+            |  (104, 31.0D, 20, 50),
+            |  (105, 12.0D, 0, 50)
+            |AS o(id, x, score, floor)
+            |""".stripMargin)
+          .coalesce(1)
+          .createOrReplaceTempView("knn_pred_objects")
+        body
+      } finally {
+        sparkSession.catalog.dropTempView("knn_pred_queries")
+        sparkSession.catalog.dropTempView("knn_pred_objects")
       }
     }
   }
