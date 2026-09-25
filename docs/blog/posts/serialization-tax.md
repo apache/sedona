@@ -13,28 +13,32 @@ slug: the-serialization-tax-and-how-sedona-stopped-paying-it
 
 # The Serialization Tax, and How Sedona Stopped Paying It
 
-Sedona keeps a geometry or a raster in a row as bytes. A spatial function wants an object: a geometry it can walk, a raster with its pixels. So every function decodes its input, computes, and encodes its output, and a query with three functions inside each other pays three times. Since Sedona 1.4.0 a nested function hands its object straight to the function around it, and the row is decoded once. Below, the trick, and what it is worth: from 3% to 80% of the query time, measured on 3.82 million Washington State buildings, 78,000 county polygons and 256 rasters.
+Transform a building footprint to a projected coordinate system, buffer it by ten meters, then calculate its area. Three spatial operations, written as one SQL expression. There is also work hidden between those operations: converting each intermediate geometry to bytes, only for the next function to turn it back into an object.
 
-![The title over two rows: on the naive path a building footprint and a raster pass through three functions with a mosaic of their bytes between every step, on Sedona's path the same objects pass straight from function to function](serialization-tax-cover.png)
+Apache Sedona's Spark SQL implementation avoids those intermediate conversions by passing objects directly between functions that support it. The mechanism is small, but its effect depends on the workload. The measurements below show where it matters, where other work dominates, and what can interrupt it.
+
+![Two evaluation paths for geometry and raster functions: the naive path encodes and decodes intermediate results; Sedona passes the objects directly to the next function](serialization-tax-cover.png)
 
 <!-- more -->
 
-## Rows are bytes, functions want objects
+## The work between the functions
 
-A row in Sedona is a flat buffer of bytes. A geometry column holds Sedona's compact binary encoding of the shape. A raster column holds the raster's metadata and all of its pixels. A function such as `ST_Buffer` cannot work on bytes, so it decodes them into a geometry object, buffers it, and encodes the result back into bytes for the row. `RS_Resample` does the same with a raster, and a raster's bytes are its pixels.
+In Spark, Sedona stores geometry values in rows using a binary representation. Spatial functions such as `ST_Buffer` operate on geometry objects. Reading a stored geometry therefore requires deserialization: decoding the bytes into an object. Returning a geometry to a row requires serialization: encoding the object as bytes again. For an in-memory raster, that serialized representation includes metadata and pixel values.
 
-One function, one round trip. Now nest three:
+Consider the building query:
 
 ```sql
 SELECT SUM(ST_Area(ST_Buffer(ST_Transform(geometry, 'EPSG:4326', 'EPSG:32610'), 10)))
 FROM buildings
 ```
 
-Evaluated the naive way, `ST_Transform` decodes the column and encodes its result. `ST_Buffer` decodes that and encodes again. `ST_Area` decodes a third time. Three decodes and two encodes for one number, and the two encodes in the middle exist only to be undone a moment later. A raster chain of the same shape encodes and decodes every pixel twice for nothing.
+If each function uses the row representation to return its result, `ST_Transform` decodes the input and encodes the transformed geometry. `ST_Buffer` decodes that geometry and encodes the buffer. `ST_Area` decodes it once more to calculate a number.
 
-## The trick: hand over the object
+That is three geometry decodes and two encodes per building. Only the first decode is needed to read the input. The two intermediate round trips do no spatial work; they are the serialization tax. In a raster chain, the same pattern can require repeatedly encoding and decoding large pixel arrays.
 
-Sedona's fix is a five-line trait, the Scala word for an interface:
+## Pass the object to the next function
+
+Sedona gives expressions a way to return their result before it is serialized. The interface is a Scala trait called `SerdeAware`:
 
 ```scala
 trait SerdeAware {
@@ -42,58 +46,82 @@ trait SerdeAware {
 }
 ```
 
-Every Sedona function implements it, because the base class all functions share does. When a function fetches an argument, it first checks whether the child expression is a Sedona expression. If it is, it asks for the object and skips the bytes:
+Many Sedona scalar functions inherit this interface through `InferredExpression`. When a function reads a geometry argument, it checks whether the child expression implements `SerdeAware`. If so, it requests the geometry object directly. Otherwise, it evaluates the child normally and decodes the result:
 
 ```scala
 def toGeometry(input: InternalRow): Geometry = {
   if (inputExpression.isInstanceOf[SerdeAware]) {
     inputExpression.asInstanceOf[SerdeAware].evalWithoutSerialization(input).asInstanceOf[Geometry]
   } else {
-    GeometrySerializer.deserialize(inputExpression.eval(input).asInstanceOf[Array[Byte]])
+    inputExpression.eval(input).asInstanceOf[Array[Byte]] match {
+      case binary: Array[Byte] => GeometrySerializer.deserialize(binary)
+      case _ => null
+    }
   }
 }
 ```
 
-The same check exists for rasters, geographies, and 2D and 3D boxes. `RS_MapAlgebra(RS_Resample(raster, ...), ...)` passes the resampled raster along without writing a pixel. In the query above, only the outermost result is ever encoded, and the column is decoded once. The test in the repository pins it down on a three-function tree: zero decodes and at most one encode. The change landed in March 2023 as [SEDONA-231](https://github.com/apache/sedona/pull/792) and shipped in Sedona 1.4.0, so every release since has had it.
+In the building query, `ST_Transform` decodes the stored geometry once. It passes its result to `ST_Buffer`, which passes its result to `ST_Area`. There are no intermediate geometry encodes or decodes, and the final result is a number. If the outermost function returns a geometry instead, Sedona serializes that final geometry for the row.
 
-## Measure it
+The same mechanism supports raster, geography, and box arguments. For example, `RS_MapAlgebra(RS_Resample(raster, ...), ...)` receives the resampled raster without an intermediate serialization of its pixels. This does not eliminate the pixel processing performed by either function.
 
-To see the tax, bring it back. Any expression that is not Sedona's, placed between two Sedona functions, makes the inner one encode and the outer one decode. `IF(length(id) >= 0, x, NULL)` is such a barrier: always true, never folded away by the optimizer, and it changes no value. Each query plan was checked to confirm the barriers survived.
+The geometry optimization shipped in Sedona 1.4.0 through [SEDONA-231](https://github.com/apache/sedona/pull/792); raster support followed in 1.4.1 through [SEDONA-270](https://github.com/apache/sedona/pull/810). It applies automatically where the participating expressions support this path.
 
-??? example "The three queries"
+## Put the round trips back and measure
+
+To compare the two evaluation paths, we ran the same spatial operations with and without expressions inserted between them. An `IF` expression does not implement `SerdeAware`, so it makes the inner function serialize its result and the outer function deserialize it.
+
+For these building records, `IF(length(id) >= 0, x, NULL)` returns `x`: their IDs are non-null strings. The condition remained in the optimized plans used for the measurements, and the aggregate results matched. That matters: a condition Spark optimizes away would no longer force the round trip.
+
+??? example "The nested query, the barriers, and a control"
 
     ```sql
     -- nested: one decode, no intermediate encode
-    SELECT SUM(ST_Area(ST_Buffer(ST_Transform(geometry, 'EPSG:4326', 'EPSG:32610'), 10))) FROM b;
+    SELECT SUM(ST_Area(ST_Buffer(ST_Transform(geometry, 'EPSG:4326', 'EPSG:32610'), 10)))
+    FROM buildings;
 
-    -- barriers between the functions: the naive path
+    -- barriers between spatial functions: force intermediate serialization
     SELECT SUM(ST_Area(IF(length(id) >= 0,
                   ST_Buffer(IF(length(id) >= 0,
                     ST_Transform(geometry, 'EPSG:4326', 'EPSG:32610'), NULL), 10), NULL)))
-    FROM b;
+    FROM buildings;
 
-    -- one barrier on top: the cost of the barrier itself
+    -- control: add a condition around the numeric result, preserving object passing
     SELECT SUM(IF(length(id) >= 0,
                   ST_Area(ST_Buffer(ST_Transform(geometry, 'EPSG:4326', 'EPSG:32610'), 10)), NULL))
-    FROM b;
+    FROM buildings;
     ```
 
-![Horizontal bars for five expressions, each with a blue nested bar and an orange barrier bar: 17.5 against 18.0 seconds for three heavy functions on buildings, 27.9 against 33.0 for five, 4.5 against 4.8 for three raster functions, 1.2 against 1.6 for four cheap functions on county polygons, and 0.7 against 1.2 for four cheap functions on buildings](serialization-tax-chart.svg)
+The tests used Sedona 1.9.1 on Spark 3.5.4, with `local[8]`, 14 GB of driver memory, and inputs repartitioned to 64 partitions and cached before timing. The datasets were 3.82 million buildings in Washington State, 39 Washington county geometries repeated 2,000 times to make 78,000 rows, and 256 generated rasters of 1024 by 1024 pixels. The buildings and county boundaries came from Overture Maps release `2026-08-19.0`. The chart reports the fastest of three runs for each query.
 
-The tax depends on how much work the functions do per byte. Three heavy functions on the buildings, a coordinate transform, a buffer and an area, take 17.5 s nested and 18.0 s with barriers, a 3% difference inside the noise between runs. A building has 8 vertices, and buffering it costs far more than encoding it. Five heavy functions take 27.9 s against 33.0 s, 19%, because the shapes in the middle of that chain are buffered and larger. Three raster functions on 256 rasters of 1024 by 1024 take 4.5 s against 4.8 s, 8%. Cheap functions show the other end. Four functions that only rewrite coordinates, `ST_NPoints(ST_Translate(ST_Reverse(ST_FlipCoordinates(geometry))))`, take 1.24 s against 1.63 s on 78,000 county polygons of 1,722 vertices each: 31%. On the buildings they take 0.69 s against 1.24 s: 80%. When the function is cheap, the round trip is most of the bill, and the hand-over removes it.
+![Query runtimes with direct nesting and with intermediate barriers: 17.48 and 17.96 seconds for three geometry functions; 27.87 and 33.04 for five; 4.47 and 4.81 for raster functions; 1.24 and 1.63 for coordinate operations on counties; 0.69 and 1.24 for the same operations on buildings](serialization-tax-chart.svg)
+
+*Percentages show the extra runtime of the barrier query relative to the nested query: `(barrier / nested - 1) × 100`. Function chains in the chart omit arguments for readability.*
+
+The largest relative difference came from inexpensive coordinate operations. Flipping coordinates, reversing their order, translating them, and counting points took **0.69 seconds with direct nesting and 1.24 seconds with barriers** on the buildings. The barrier version took about 80% longer; equivalently, the nested version used about 44% less time. Those percentages use different baselines, so 80% is not the share of query time saved.
+
+The executable expression for that chain is:
+
+```sql
+ST_NPoints(ST_Translate(ST_Reverse(ST_FlipCoordinates(geometry)), 1.0, 1.0))
+```
+
+On the replicated county geometries, the same chain took 1.24 seconds nested and 1.63 seconds with barriers, a 31% increase. These inputs averaged about 1,722 vertices per geometry, compared with about eight for the buildings.
+
+When the spatial work was more expensive, the relative difference was smaller. The transform-buffer-area query took 17.48 seconds nested and 17.96 seconds with barriers, a 3% gap smaller than the observed variation between runs. A five-function chain that also simplified the transformed geometry and took the buffered result's convex hull took 27.87 versus 33.04 seconds, a 19% increase. Resampling the rasters, applying map algebra, and calculating summary statistics took 4.47 versus 4.81 seconds, an 8% increase.
+
+These are end-to-end comparisons of two query plans. The barriers also add condition evaluation and can affect execution beyond serialization. The control query above took 20.09 seconds despite preserving direct object passing, and the equivalent raster control took 4.89 seconds. With only three runs per query, these results do not isolate serialization cost or establish a reliable gain for the small differences. They illustrate why avoiding intermediate conversions can matter most when the spatial operations themselves are inexpensive.
 
 ## Where the chain breaks
 
-The hand-over works only between Sedona functions that sit directly inside each other in one expression. Anything else in between is a barrier and brings the bytes back:
+Direct object passing depends on the expression tree Spark actually executes. A parent must use the object-aware argument path, and its child must implement `SerdeAware`. Serialization returns at boundaries such as:
 
-- a function that is not Sedona's, or a `CASE`, between two spatial functions;
-- a Python UDF, which moves the bytes to a Python worker and back;
-- an intermediate column written to a table, cached, or sent through a shuffle.
+- an intervening expression such as `IF` or `CASE` that remains after optimization and does not support object passing;
+- a Python UDF, which crosses the JVM/Python boundary;
+- a spatial intermediate result materialized in a table, a cache, or a shuffle.
 
-The DataFrame API is safe: three `withColumn` calls for the transform, the buffer and the area collapse into one projection, and the plan shows the same nested tree as the SQL, `ST_Area` directly over `ST_Buffer` directly over `ST_Transform`.
+Naming an intermediate column does not necessarily create such a boundary. In the tested DataFrame query, three `withColumn` calls followed by an aggregation collapsed into one projection: `ST_Area` directly over `ST_Buffer` directly over `ST_Transform`. Spark can combine those steps, so writing the query in several DataFrame calls can preserve the same optimization as nested SQL. Inspect the optimized plan when it matters; separate calls alone do not tell you whether an intermediate result is materialized.
 
-## The point
+## Keep intermediate results inside the expression
 
-Nest the geometry and raster functions, and Sedona passes the objects along. The row is decoded once, the intermediate shapes and rasters never become bytes, and the saving runs from a few percent on heavy functions to most of the query on cheap ones. It has worked this way since Sedona 1.4.0, in every function, with nothing to switch on.
-
-*Buildings from Overture Maps. Measurements on Apache Sedona 1.9.1 on Spark 3.5.4, one machine with 8 cores.*
+Compose compatible spatial functions in one expression and Sedona can keep intermediate geometries and rasters as objects. There is no setting to enable. The useful distinction is whether Spark can pass each result directly to the next function or must serialize it at a boundary. Avoid unnecessary boundaries, especially in chains of inexpensive operations where conversion can be a substantial part of the work.
