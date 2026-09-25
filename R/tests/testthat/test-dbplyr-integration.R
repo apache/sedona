@@ -113,7 +113,7 @@ test_that("ST_SimplifyPreserveTopology() works as expected", {
 test_that("ST_GeometryN() works as expected", {
   sdf <- sdf_len(sc, 1) %>%
     dplyr::mutate(pts = ST_GeomFromText("MULTIPOINT((1 2), (3 4), (5 6), (8 9))")) %>%
-    dplyr::transmute(pt = ST_GeometryN(pts, 2))
+    dplyr::transmute(pt = ST_GeometryN(pts, 3))
   df <- sdf %>% collect()
 
   expect_equal(nrow(df), 1)
@@ -130,7 +130,7 @@ test_that("ST_GeometryN() works as expected", {
 test_that("ST_InteriorRingN() works as expected", {
   sdf <- sdf_len(sc, 1) %>%
     dplyr::mutate(polygon = ST_GeomFromText("POLYGON((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1), (1 3, 2 3, 2 4, 1 4, 1 3), (3 3, 4 3, 4 4, 3 4, 3 3))")) %>%
-    dplyr::transmute(interior_ring = ST_InteriorRingN(polygon, 0))
+    dplyr::transmute(interior_ring = ST_InteriorRingN(polygon, 1))
   df <- sdf %>% collect()
 
   expect_equal(nrow(df), 1)

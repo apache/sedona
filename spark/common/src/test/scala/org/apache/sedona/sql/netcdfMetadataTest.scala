@@ -693,13 +693,13 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
         .selectExpr("RS_FromNetCDF(content, 'temp') as raster")
         .selectExpr(
           "RS_Metadata(raster) as metadata",
-          "RS_Value(raster, 0, 0, 1) as upperLeft",
-          "RS_Value(raster, 2, 0, 1) as upperRight",
-          "RS_Value(raster, 0, 2, 1) as lowerLeft",
-          "RS_Value(raster, 2, 2, 1) as lowerRight",
-          "RS_Value(raster, 1, 0, 1) as distinctMissing",
-          "RS_Value(raster, 1, 1, 1) as centerNoData",
-          "RS_Value(raster, 1, 2, 1) as validCollision",
+          "RS_Value(raster, 1, 1, 1) as upperLeft",
+          "RS_Value(raster, 3, 1, 1) as upperRight",
+          "RS_Value(raster, 1, 3, 1) as lowerLeft",
+          "RS_Value(raster, 3, 3, 1) as lowerRight",
+          "RS_Value(raster, 2, 1, 1) as distinctMissing",
+          "RS_Value(raster, 2, 2, 1) as centerNoData",
+          "RS_Value(raster, 2, 3, 1) as validCollision",
           "RS_Count(raster, 1) as validCount",
           "RS_BandNoDataValue(raster, 1) as noData")
         .first()
@@ -856,11 +856,11 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
           "RS_Width(raster) as width",
           "RS_Height(raster) as height",
           "RS_NumBands(raster) as numBands",
-          "RS_Value(raster, 0, 0, 1) as upperLeftBand1",
-          "RS_Value(raster, 0, 0, 2) as upperLeftBand2",
-          "RS_Value(raster, 3, 0, 1) as upperRightBand1",
-          "RS_Value(raster, 0, 2, 1) as lowerLeftBand1",
-          "RS_Value(raster, 3, 2, 1) as lowerRightBand1",
+          "RS_Value(raster, 1, 1, 1) as upperLeftBand1",
+          "RS_Value(raster, 1, 1, 2) as upperLeftBand2",
+          "RS_Value(raster, 4, 1, 1) as upperRightBand1",
+          "RS_Value(raster, 1, 3, 1) as lowerLeftBand1",
+          "RS_Value(raster, 4, 3, 1) as lowerRightBand1",
           "RS_Metadata(raster) as metadata")
         .first()
       assertEquals(4, row.getAs[Int]("width"))
@@ -889,9 +889,9 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
           "RS_Width(raster) as width",
           "RS_Height(raster) as height",
           "RS_NumBands(raster) as numBands",
-          "RS_Value(raster, 0, 0, 1) as upperLeftBand1",
-          "RS_Value(raster, 0, 0, 2) as upperLeftBand2",
-          "RS_Value(raster, 1, 2, 1) as lowerRightBand1")
+          "RS_Value(raster, 1, 1, 1) as upperLeftBand1",
+          "RS_Value(raster, 1, 1, 2) as upperLeftBand2",
+          "RS_Value(raster, 2, 3, 1) as lowerRightBand1")
         .first()
       assertEquals(2, row.getAs[Int]("width"))
       assertEquals(3, row.getAs[Int]("height"))

@@ -19,7 +19,10 @@
 
 # ST_GeometryN
 
-Introduction: Return the 0-based Nth geometry if the geometry is a GEOMETRYCOLLECTION, (MULTI)POINT, (MULTI)LINESTRING, MULTICURVE or (MULTI)POLYGON. Otherwise, return null
+Introduction: Return the 1-based Nth geometry if the geometry is a GEOMETRYCOLLECTION, (MULTI)POINT, (MULTI)LINESTRING, MULTICURVE or (MULTI)POLYGON. Otherwise, return null
+
+!!!Note
+    Since `v2.0.0`, `n` is 1-based, as in PostGIS: `n = 1` returns the first geometry, and `0` or a negative `n` returns null. Earlier versions read `n` 0-based.
 
 ![ST_GeometryN](../../../image/ST_GeometryN/ST_GeometryN.svg "ST_GeometryN")
 
@@ -32,7 +35,7 @@ Since: `v1.0.0`
 SQL Example
 
 ```sql
-SELECT ST_GeometryN(ST_GeomFromText('MULTIPOINT((1 2), (3 4), (5 6), (8 9))'), 1)
+SELECT ST_GeometryN(ST_GeomFromText('MULTIPOINT((1 2), (3 4), (5 6), (8 9))'), 2)
 ```
 
 Output:

@@ -869,9 +869,13 @@ public class Functions {
     return geometry.reverse();
   }
 
+  /**
+   * Returns the 1-based nth geometry of a collection (PostGIS semantics). A non-collection is its
+   * own first geometry; an index outside 1..N returns null.
+   */
   public static Geometry geometryN(Geometry geometry, int n) {
-    if (n < geometry.getNumGeometries()) {
-      Geometry subGeom = geometry.getGeometryN(n);
+    if (n >= 1 && n <= geometry.getNumGeometries()) {
+      Geometry subGeom = geometry.getGeometryN(n - 1);
       if (subGeom.getSRID() == geometry.getSRID()) {
         return subGeom;
       }
@@ -880,11 +884,15 @@ public class Functions {
     return null;
   }
 
+  /**
+   * Returns the 1-based nth interior ring of a polygon (PostGIS semantics). An index outside 1..N
+   * returns null.
+   */
   public static Geometry interiorRingN(Geometry geometry, int n) {
     if (geometry instanceof Polygon) {
       Polygon polygon = (Polygon) geometry;
-      if (n < polygon.getNumInteriorRing()) {
-        Geometry interiorRing = polygon.getInteriorRingN(n);
+      if (n >= 1 && n <= polygon.getNumInteriorRing()) {
+        Geometry interiorRing = polygon.getInteriorRingN(n - 1);
         if (interiorRing instanceof LinearRing) {
           interiorRing = polygon.getFactory().createLineString(interiorRing.getCoordinates());
         }

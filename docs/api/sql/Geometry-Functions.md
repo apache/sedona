@@ -74,11 +74,11 @@ These functions extract information and properties from geometry objects.
 | [ST_DumpPoints](Geometry-Accessors/ST_DumpPoints.md) | `Array<Geometry>` | Returns list of Points which geometry consists of. | v1.0.0 |
 | [ST_EndPoint](Geometry-Accessors/ST_EndPoint.md) | Geometry | Returns last point of given linestring. | v1.0.0 |
 | [ST_ExteriorRing](Geometry-Accessors/ST_ExteriorRing.md) | Geometry | Returns a line string representing the exterior ring of the POLYGON geometry. Return NULL if the geometry is not a polygon. | v1.0.0 |
-| [ST_GeometryN](Geometry-Accessors/ST_GeometryN.md) | Geometry | Return the 0-based Nth geometry if the geometry is a GEOMETRYCOLLECTION, (MULTI)POINT, (MULTI)LINESTRING, MULTICURVE or (MULTI)POLYGON. Otherwise, return null | v1.0.0 |
+| [ST_GeometryN](Geometry-Accessors/ST_GeometryN.md) | Geometry | Return the 1-based Nth geometry if the geometry is a GEOMETRYCOLLECTION, (MULTI)POINT, (MULTI)LINESTRING, MULTICURVE or (MULTI)POLYGON. Otherwise, return null | v1.0.0 |
 | [ST_GeometryType](Geometry-Accessors/ST_GeometryType.md) | String | Returns the type of the geometry as a string. EG: 'ST_Linestring', 'ST_Polygon' etc. | v1.0.0 |
 | [ST_HasM](Geometry-Accessors/ST_HasM.md) | Boolean | Checks for the presence of M coordinate values representing measures or linear references. Returns true if the input geometry includes an M coordinate, false otherwise. | v1.6.1 |
 | [ST_HasZ](Geometry-Accessors/ST_HasZ.md) | Boolean | Checks for the presence of Z coordinate values representing measures or linear references. Returns true if the input geometry includes an Z coordinate, false otherwise. | v1.6.1 |
-| [ST_InteriorRingN](Geometry-Accessors/ST_InteriorRingN.md) | Geometry | Returns the Nth interior linestring ring of the polygon geometry. Returns NULL if the geometry is not a polygon or the given N is out of range | v1.0.0 |
+| [ST_InteriorRingN](Geometry-Accessors/ST_InteriorRingN.md) | Geometry | Returns the Nth (1-based) interior linestring ring of the polygon geometry. Returns NULL if the geometry is not a polygon or the given N is out of range | v1.0.0 |
 | [ST_IsClosed](Geometry-Accessors/ST_IsClosed.md) | Boolean | RETURNS true if the LINESTRING start and end point are the same. | v1.0.0 |
 | [ST_IsCollection](Geometry-Accessors/ST_IsCollection.md) | Boolean | Returns `TRUE` if the geometry type of the input is a geometry collection type. Collection types are the following: | v1.5.0 |
 | [ST_IsEmpty](Geometry-Accessors/ST_IsEmpty.md) | Boolean | Test if a geometry is empty geometry | v1.2.1 |

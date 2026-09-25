@@ -877,18 +877,18 @@ def ST_GeometricMedian(
 
 @validate_argument_types
 def ST_GeometryN(multi_geometry: ColumnOrName, n: Union[ColumnOrName, int]) -> Column:
-    """Return the geometry at index n (0-th based) of a multi-geometry column.
+    """Return the geometry at index n (1-based) of a multi-geometry column.
 
     :param multi_geometry: Multi-geometry column to get from.
     :type multi_geometry: ColumnOrName
-    :param n: Index to select, given as an integer or integer column, 0-th based index, returns null if index is greater than maximum index.
+    :param n: Index to select, given as an integer or integer column, 1-based index, returns null if index is greater than maximum index.
     :type n: Union[ColumnOrName, int]
     :return: Geometry located at index n in multi_geometry as a geometry column.
     :rtype: Column
-    :raises ValueError: If
+    :raises ValueError: If n is an integer and less than 1.
     """
-    if isinstance(n, int) and n < 0:
-        raise ValueError(f"Index n for ST_GeometryN must by >= 0: {n} < 0")
+    if isinstance(n, int) and n < 1:
+        raise ValueError(f"Index n for ST_GeometryN must be >= 1: {n} < 1")
     return _call_st_function("ST_GeometryN", (multi_geometry, n))
 
 
@@ -1155,18 +1155,18 @@ def ST_BingTileToGeom(quad_keys: Union[ColumnOrName, list]) -> Column:
 
 @validate_argument_types
 def ST_InteriorRingN(polygon: ColumnOrName, n: Union[ColumnOrName, int]) -> Column:
-    """Return the index n (0-th based) interior ring of a polygon geometry column.
+    """Return the index n (1-based) interior ring of a polygon geometry column.
 
     :param polygon: Polygon geometry column to get an interior ring from.
     :type polygon: ColumnOrName
-    :param n: Index of interior ring to return as either an integer or integer column, 0-th based.
+    :param n: Index of interior ring to return as either an integer or integer column, 1-based.
     :type n: Union[ColumnOrName, int]
-    :raises ValueError: If n is an integer and less than 0.
+    :raises ValueError: If n is an integer and less than 1.
     :return: Interior ring at index n as a linestring geometry column or null if n is greater than maximum index
     :rtype: Column
     """
-    if isinstance(n, int) and n < 0:
-        raise ValueError(f"Index n for ST_InteriorRingN must by >= 0: {n} < 0")
+    if isinstance(n, int) and n < 1:
+        raise ValueError(f"Index n for ST_InteriorRingN must be >= 1: {n} < 1")
     return _call_st_function("ST_InteriorRingN", (polygon, n))
 
 
