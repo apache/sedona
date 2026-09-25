@@ -21,6 +21,18 @@
 
 本步骤用于将 Maven SNAPSHOT 发布到 https://repository.apache.org
 
+!!!note
+    SNAPSHOT 会自动发布。`Publish snapshot` GitHub Actions 工作流（`.github/workflows/publish-snapshot.yml`）会在每次修改 Java/Scala 代码的合并进入 `master` 时，为所有受支持的 Spark 与 Scala 组合部署当前的 `-SNAPSHOT` 版本，也可以在 Actions 页面手动运行。下面的手动步骤仍可供发布经理检验自己的凭据配置。
+
+使用 SNAPSHOT 时，需要在构建中加入 ASF snapshot 仓库，例如在 Spark 中：
+
+```bash
+spark-submit \
+  --repositories https://repository.apache.org/content/repositories/snapshots \
+  --packages org.apache.sedona:sedona-spark-shaded-4.0_2.13:{{ sedona_create_release.current_snapshot }},org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }} \
+  ...
+```
+
 对于发布经理（release manager）来说，这是检验自己凭据配置的良好实践。
 
 详细要求见 [ASF Infra 网站](https://infra.apache.org/publishing-maven-artifacts.html)。
