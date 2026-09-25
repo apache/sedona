@@ -1014,7 +1014,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     it("Passed RS_Value with raster and coordinates") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       val result =
-        df.selectExpr("RS_Value(RS_FromGeoTiff(content), 4, 4, 1)").first().getDouble(0)
+        df.selectExpr("RS_Value(RS_FromGeoTiff(content), 5, 5, 1)").first().getDouble(0)
       assert(result == 123d)
     }
 
@@ -1086,7 +1086,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     it("Passed RS_Values with raster and Grid Coordinates") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       val result = df
-        .selectExpr("RS_Values(RS_FromGeoTiff(content), array(1,2), array(3,2), 1)")
+        .selectExpr("RS_Values(RS_FromGeoTiff(content), array(2,3), array(4,3), 1)")
         .first()
         .getList[Double](0)
 
@@ -2920,7 +2920,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
       val expectedFirstVal = 60.95357131958008
       val actualFirstVal =
-        rasterDf.selectExpr("RS_Value(raster, 0, 0, 1) as raster").first().getDouble(0)
+        rasterDf.selectExpr("RS_Value(raster, 1, 1, 1) as raster").first().getDouble(0)
       assertEquals(expectedFirstVal, actualFirstVal, 1e-6)
     }
 
@@ -2937,7 +2937,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
       val expectedFirstVal = 60.95357131958008
       val actualFirstVal =
-        rasterDf.selectExpr("RS_Value(raster, 0, 0, 1) as raster").first().getDouble(0)
+        rasterDf.selectExpr("RS_Value(raster, 1, 1, 1) as raster").first().getDouble(0)
       assertEquals(expectedFirstVal, actualFirstVal, 1e-6)
     }
 

@@ -1329,7 +1329,7 @@ class dataFrameAPITestScala extends TestBaseScala {
 
     it("Passed ST_GeometryN") {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('MULTIPOINT ((0 0))') AS geom")
-      val df = baseDf.select(ST_GeometryN("geom", 0))
+      val df = baseDf.select(ST_GeometryN("geom", 1))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       val expectedResult = "POINT (0 0)"
       assert(actualResult == expectedResult)
@@ -1338,7 +1338,7 @@ class dataFrameAPITestScala extends TestBaseScala {
     it("Passed ST_InteriorRingN") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('POLYGON ((0 0, 3 0, 3 3, 0 0), (1 1, 2 2, 2 1, 1 1))') AS geom")
-      val df = baseDf.select(ST_InteriorRingN("geom", 0))
+      val df = baseDf.select(ST_InteriorRingN("geom", 1))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       val expectedResult = "LINESTRING (1 1, 2 2, 2 1, 1 1)"
       assert(actualResult == expectedResult)

@@ -187,8 +187,8 @@ WITH compared AS (
 )
 SELECT
     segment_id,
-    ST_Length(ST_GeometryN(shared, 0)) AS same_direction_length,
-    ST_Length(ST_GeometryN(shared, 1)) AS opposite_direction_length
+    ST_Length(ST_GeometryN(shared, 1)) AS same_direction_length,
+    ST_Length(ST_GeometryN(shared, 2)) AS opposite_direction_length
 FROM compared;
 ```
 

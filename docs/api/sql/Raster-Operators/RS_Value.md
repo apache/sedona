@@ -24,13 +24,16 @@ Introduction: Returns the value at the given point in the raster. If no band num
 !!!Note
     Since `v1.5.1`, if the coordinate reference system (CRS) of the input `point` geometry differs from that of the `raster`, then `point` will be transformed to match the CRS of the `raster`. If the `raster` or `point` doesn't have a CRS then it will default to `4326/WGS84`.
 
+!!!Note
+    Since `v2.0.0`, grid coordinates are 1-based, as in PostGIS `ST_Value`: `(1, 1)` is the upper-left pixel. Earlier versions read them 0-based.
+
 Format:
 
 `RS_Value (raster: Raster, point: Geometry)`
 
 `RS_Value (raster: Raster, point: Geometry, band: Integer)`
 
-`RS_Value (raster: Raster, colX: Integer, colY: Integer, band: Integer)`
+`RS_Value (raster: Raster, colX: Integer, rowY: Integer, band: Integer)`
 
 Return type: `Double`
 
@@ -47,7 +50,7 @@ SELECT RS_Value(raster, ST_Point(-13077301.685, 4002565.802)) FROM raster_table
 - For Grid Coordinates:
 
 ```sql
-SELECT RS_Value(raster, 3, 4, 1) FROM raster_table
+SELECT RS_Value(raster, 4, 5, 1) FROM raster_table
 ```
 
 Output:

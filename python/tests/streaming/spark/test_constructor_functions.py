@@ -319,7 +319,7 @@ SEDONA_LISTED_SQL_FUNCTIONS = [
         SuiteContainer.empty()
         .with_function_name("ST_GeometryN")
         .with_arguments(
-            ["ST_GeomFromText('MULTIPOINT((1 2), (3 4), (5 6), (8 9))')", "0"]
+            ["ST_GeomFromText('MULTIPOINT((1 2), (3 4), (5 6), (8 9))')", "1"]
         )
         .with_expected_result(1)
         .with_transform("ST_X")
@@ -330,7 +330,7 @@ SEDONA_LISTED_SQL_FUNCTIONS = [
         .with_arguments(
             [
                 "ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))')",
-                "0",
+                "1",
             ]
         )
         .with_expected_result(4.0)

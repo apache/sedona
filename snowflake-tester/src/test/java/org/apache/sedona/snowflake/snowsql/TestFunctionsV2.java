@@ -468,7 +468,7 @@ public class TestFunctionsV2 extends TestBase {
   public void test_ST_GeometryN() {
     registerUDFV2("ST_GeometryN", String.class, int.class);
     verifySqlSingleRes(
-        "select ST_AsText(sedona.ST_GeometryN(ST_GeometryFromWKT('MULTIPOINT((10 40), (40 30), (20 20), (30 10))'), 1))",
+        "select ST_AsText(sedona.ST_GeometryN(ST_GeometryFromWKT('MULTIPOINT((10 40), (40 30), (20 20), (30 10))'), 2))",
         "POINT(40 30)");
   }
 
@@ -515,7 +515,7 @@ public class TestFunctionsV2 extends TestBase {
   public void test_ST_InteriorRingN() {
     registerUDFV2("ST_InteriorRingN", String.class, int.class);
     verifySqlSingleRes(
-        "select ST_AsText(sedona.ST_InteriorRingN(ST_GeometryFromWKT('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1), (1 3, 2 3, 2 4, 1 4, 1 3), (3 3, 4 3, 4 4, 3 4, 3 3))'), 0))",
+        "select ST_AsText(sedona.ST_InteriorRingN(ST_GeometryFromWKT('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1), (1 3, 2 3, 2 4, 1 4, 1 3), (3 3, 4 3, 4 4, 3 4, 3 3))'), 1))",
         "LINESTRING(1 1,2 1,2 2,1 2,1 1)");
   }
 

@@ -105,7 +105,7 @@ def _extract(frame: DataFrame) -> DataFrame:
             "_line",
             F.expr(
                 "CASE WHEN ring = 0 THEN ST_ExteriorRing(_polygon) "
-                "ELSE ST_InteriorRingN(_polygon, ring - 1) END"
+                "ELSE ST_InteriorRingN(_polygon, ring) END"
             ),
         )
         .withColumn("_points", F.expr("ST_DumpPoints(_line)"))
@@ -397,7 +397,7 @@ def simplify_coverage(
         if (
             original.where(
                 "exists(ST_Dump(geom), p -> CASE WHEN ST_NumInteriorRings(p) = 0 "
-                "THEN false ELSE exists(sequence(0, ST_NumInteriorRings(p) - 1), "
+                "THEN false ELSE exists(sequence(1, ST_NumInteriorRings(p)), "
                 "i -> ST_IsEmpty(ST_InteriorRingN(p, i))) END)"
             )
             .limit(1)
