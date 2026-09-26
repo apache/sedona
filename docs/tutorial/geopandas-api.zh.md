@@ -21,6 +21,8 @@
 
 Apache Sedona 上的 GeoPandas API 提供了与 GeoPandas 一致的接口，可以让您的地理空间分析突破单机的局限。该 API 把熟悉的 GeoPandas DataFrame 语法与 Apache Sedona 在 Apache Spark 上的分布式处理能力结合起来，让您能够使用同样的代码模式处理行星级（planetary-scale）的数据集。
 
+请参阅 [API 覆盖情况参考](../api/geopandas-coverage.md)，了解支持的方法、参数限制和 API 覆盖率。
+
 ## 概览
 
 ### 什么是 Apache Sedona 的 GeoPandas API？
@@ -238,6 +240,35 @@ result = left_df.sjoin(right_df, predicate="dwithin", distance=50)
 intersects_result = left_df.sjoin(right_df, predicate="intersects")
 contains_result = left_df.sjoin(right_df, predicate="contains")
 ```
+
+### 最近邻点连接
+
+`GeoDataFrame.sjoin_nearest`、`sedona.spark.geopandas.sjoin_nearest` 和
+`sedona.spark.geopandas.tools.sjoin_nearest` 使用 Sedona 的分布式 KNN 连接。
+当前实现支持 **点数据的内连接**：
+
+```python
+nearest = left_points.sjoin_nearest(
+    right_points,
+    distance_col="distance",
+    max_distance=100,
+)
+```
+
+结果保留左侧几何、CRS 和索引，以及右侧索引和双方属性。重名属性使用
+`_left` 和 `_right` 后缀。缺失或空几何不参与匹配。距离按平面计算，使用 CRS
+单位并忽略 Z；请使用投影 CRS 获取有意义的距离单位。可选的 `max_distance`
+必须是有限正数，仅在最近邻搜索后过滤结果，不会缩小搜索范围。
+`distance_col` 必须是新列，输出行的顺序不保证。
+
+**等距候选遵循 Sedona 配置，不保证像 GeoPandas 一样返回所有等距行。**
+`spark.sedona.join.knn.includeTieBreakers` 默认为 `false`，在等距候选中选择
+一行，选择顺序不保证。设为 `true` 会返回等距候选，但候选几何完全相同的
+不同记录仍可能被省略。本 API 不会修改此会话配置。
+
+目前仅支持 `how="inner"`、`exclusive=False`、默认后缀、唯一的单层字符串列名
+和单层索引（允许重复索引值）。不支持的选项、非空的非点几何及歧义输出列名
+会明确报错。输入验证在 Spark 上计算标量汇总，几何数据始终保持分布式。
 
 ### 坐标参考系操作
 

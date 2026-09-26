@@ -21,6 +21,8 @@
 
 The GeoPandas API for Apache Sedona provides a familiar GeoPandas interface that scales your geospatial analysis beyond single-node limitations. This API combines the intuitive GeoPandas DataFrame syntax with the distributed processing power of Apache Sedona on Apache Spark, enabling you to work with planetary-scale datasets using the same code patterns you already know.
 
+See the [API coverage reference](../api/geopandas-coverage.md) for supported methods, parameter limitations, and the coverage percentage.
+
 ## Overview
 
 ### What is the GeoPandas API for Apache Sedona?
@@ -238,6 +240,40 @@ result = left_df.sjoin(right_df, predicate="dwithin", distance=50)
 intersects_result = left_df.sjoin(right_df, predicate="intersects")
 contains_result = left_df.sjoin(right_df, predicate="contains")
 ```
+
+### Nearest point joins
+
+`GeoDataFrame.sjoin_nearest`, `sedona.spark.geopandas.sjoin_nearest`, and
+`sedona.spark.geopandas.tools.sjoin_nearest` use Sedona's distributed KNN join.
+This initial implementation supports **point inputs and inner joins**:
+
+```python
+nearest = left_points.sjoin_nearest(
+    right_points,
+    distance_col="distance",
+    max_distance=100,
+)
+```
+
+The result retains the left geometry, CRS and index, the right index, and both
+frames' attributes. Overlapping attributes receive `_left` and `_right`
+suffixes. Null and empty geometries do not match. Distances are planar, use
+CRS units, and ignore Z; use a projected CRS for meaningful distance units.
+The optional positive finite `max_distance` filters nearest results after the
+search, rather than reducing the search radius. `distance_col` must be a new
+column. Output row order is unspecified.
+
+**Ties follow Sedona configuration, not GeoPandas' all-ties guarantee.**
+`spark.sedona.join.knn.includeTieBreakers` defaults to `false`, choosing one
+nearest candidate with unspecified tie selection. Setting it to `true`
+includes equidistant candidates, but distinct rows with identical candidate
+geometries can still be omitted. This API does not change the session setting.
+
+Only `how="inner"`, `exclusive=False`, default suffixes, unique flat string
+columns and single-level indexes are supported. Duplicate index values are
+allowed. Unsupported options, non-point non-empty geometries and ambiguous
+output column names raise explicit errors. Input validation evaluates scalar
+summaries on Spark; geometry rows remain distributed.
 
 ### Coordinate Reference System Operations
 
