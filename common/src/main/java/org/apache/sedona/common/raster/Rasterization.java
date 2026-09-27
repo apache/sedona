@@ -532,14 +532,17 @@ public class Rasterization {
     // on any side where the geometry’s edge exactly matches a pixel boundary.
     // This guarantees we include those neighboring pixels that the geometry merely touches.
     //
-    // We only expand sides that line up perfectly with grid lines (equal coordinates).
-    // The scaleX / scaleY values (which already encode pixel size and direction) ensure
+    // We only expand sides that line up with grid lines. The aligned values come from the
+    // BigDecimal round trip above, which can land a few ULPs away from a grid line computed in
+    // double arithmetic (e.g. upperLeftY + row * scaleY), so an exact == test misses geometries
+    // that sit on the line and drops the row or column they touch. isOnGridLine allows for that
+    // rounding. The scaleX / scaleY values (which already encode pixel size and direction) ensure
     // this expansion moves exactly one pixel outward in each direction.
     if (allTouched) {
-      alignedMinX -= (geomExtent.getMinX() == alignedMinX) ? scaleX : 0;
-      alignedMinY += (geomExtent.getMinY() == alignedMinY) ? scaleY : 0;
-      alignedMaxX += (geomExtent.getMaxX() == alignedMaxX) ? scaleX : 0;
-      alignedMaxY -= (geomExtent.getMaxY() == alignedMaxY) ? scaleY : 0;
+      alignedMinX -= isOnGridLine(geomExtent.getMinX(), alignedMinX, upperLeftX) ? scaleX : 0;
+      alignedMinY += isOnGridLine(geomExtent.getMinY(), alignedMinY, upperLeftY) ? scaleY : 0;
+      alignedMaxX += isOnGridLine(geomExtent.getMaxX(), alignedMaxX, upperLeftX) ? scaleX : 0;
+      alignedMaxY -= isOnGridLine(geomExtent.getMaxY(), alignedMaxY, upperLeftY) ? scaleY : 0;
     }
 
     // Clamp the aligned extent to the original raster extent
@@ -558,6 +561,24 @@ public class Rasterization {
             geomExtent.getCoordinateReferenceSystem());
 
     return alignedRasterExtent;
+  }
+
+  /**
+   * How many units in the last place a coordinate may differ from a snapped grid line and still
+   * count as lying on it. The BigDecimal snap and plain double arithmetic (upperLeft + i * scale)
+   * can each be a couple of ULPs off the exact grid line; this leaves headroom for both while
+   * staying far below any meaningful fraction of a pixel.
+   */
+  private static final int GRID_LINE_TOLERANCE_ULPS = 8;
+
+  /**
+   * Whether {@code coord} lies on {@code gridLine} up to floating-point rounding. The tolerance is
+   * scaled by the largest operand involved in computing the grid line, which for a line near zero
+   * is the raster origin rather than the small result.
+   */
+  private static boolean isOnGridLine(double coord, double gridLine, double upperLeft) {
+    double magnitude = Math.max(Math.abs(upperLeft), Math.max(Math.abs(coord), Math.abs(gridLine)));
+    return Math.abs(coord - gridLine) <= GRID_LINE_TOLERANCE_ULPS * Math.ulp(magnitude);
   }
 
   private static double toPixelIndex(double coord, double scale, double upperLeft, boolean isMin) {

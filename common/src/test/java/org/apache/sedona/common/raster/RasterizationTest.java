@@ -754,6 +754,72 @@ public class RasterizationTest extends RasterTestBase {
     }
   }
 
+  @Test
+  public void testAllTouchedPointOnRowBoundaryBurnsBothRows() throws FactoryException {
+    // The point sits on the row 0 / row 1 grid line, so under allTouched it touches both rows. The
+    // extent snap round-trips through BigDecimal and lands one ULP off that grid line
+    // (59.99916666666666 vs 59.99916666666667), so an exact == test did not widen the extent and
+    // row 1 was never considered.
+    double p = 1.0 / 3600.0;
+    double ulx = -180.0;
+    double uly = 60.0 - 2 * p;
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "D", 256, 256, ulx, uly, p, -p, 0, 0, 4326);
+    Geometry point = new GeometryFactory().createPoint(new Coordinate(ulx + 10.5 * p, uly - p));
+
+    assertBurnedPixels(
+        Rasterization.rasterize(point, raster, "D", 150, false, true), "[(10,0), (10,1)]");
+    ReferencedEnvelope extent =
+        Rasterization.rasterizeGeomExtent(point, raster, metadata(raster), true);
+    Assert.assertEquals(2, Math.round((extent.getMaxY() - extent.getMinY()) / p));
+    Assert.assertEquals(uly, extent.getMaxY(), p * 1e-6);
+  }
+
+  @Test
+  public void testAllTouchedPointJustInsideRowBurnsOnlyThatRow() throws FactoryException {
+    // Two ULPs above the row 0 / row 1 grid line: within rounding of the line, so the extent is
+    // widened to include row 1, but the point lies strictly inside row 0 and must burn only row 0.
+    // The widened extent is only the search window; each cell is still tested against the point.
+    double p = 1.0 / 3600.0;
+    double ulx = -180.0;
+    double uly = 60.0 - 2 * p;
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "D", 256, 256, ulx, uly, p, -p, 0, 0, 4326);
+    Geometry point =
+        new GeometryFactory().createPoint(new Coordinate(ulx + 10.5 * p, Math.nextUp(uly - p)));
+
+    assertBurnedPixels(Rasterization.rasterize(point, raster, "D", 150, false, true), "[(10,0)]");
+  }
+
+  @Test
+  public void testAllTouchedPointOnGridLinesAwayFromOriginBurnsEveryTouchedCell()
+      throws FactoryException {
+    // On this tile the row 35 / row 36 and the column 18 / column 19 grid lines both snap a few
+    // ULPs off through the BigDecimal round trip, so a point on either line, or on their crossing,
+    // lost the row or column on the far side of the line, in full-extent and cropped output alike.
+    double p = 1.0 / 3600.0;
+    double ulx = -180.0 + 152574 * p;
+    double uly = 90.0 - 262004 * p;
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "D", 64, 64, ulx, uly, p, -p, 0, 0, 4326);
+    GeometryFactory factory = new GeometryFactory();
+    Geometry onRowLine = factory.createPoint(new Coordinate(ulx + 10.5 * p, uly - 36 * p));
+    Geometry onColumnLine = factory.createPoint(new Coordinate(ulx + 19 * p, uly - 10.5 * p));
+    Geometry onCorner = factory.createPoint(new Coordinate(ulx + 19 * p, uly - 36 * p));
+
+    assertBurnedPixels(
+        Rasterization.rasterize(onRowLine, raster, "D", 150, false, true), "[(10,35), (10,36)]");
+    assertBurnedPixels(
+        Rasterization.rasterize(onColumnLine, raster, "D", 150, false, true), "[(18,10), (19,10)]");
+    assertBurnedPixels(
+        Rasterization.rasterize(onCorner, raster, "D", 150, false, true),
+        "[(18,35), (19,35), (18,36), (19,36)]");
+    // cropped to the geometry extent: the same contacts at crop-local offsets
+    assertBurnedPixels(
+        Rasterization.rasterize(onCorner, raster, "D", 150, true, true),
+        "[(0,0), (1,0), (0,1), (1,1)]");
+  }
+
   private static LineString line(
       GeometryFactory factory, double x0, double y0, double x1, double y1) {
     return factory.createLineString(
