@@ -36,6 +36,8 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.algorithm.CGAlgorithmsDD;
 import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.prep.PreparedGeometry;
+import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 
 public class Rasterization {
   protected static List<Object> rasterize(
@@ -133,8 +135,7 @@ public class Rasterization {
       RasterizationParams params,
       ReferencedEnvelope geomExtent,
       double value,
-      boolean allTouched)
-      throws FactoryException {
+      boolean allTouched) {
 
     // For instances where sub geometry is completely outside raster
     if (geomExtent == null) {
@@ -156,7 +157,7 @@ public class Rasterization {
         rasterizeLineString(geom, params, value, geomExtent);
         break;
       default:
-        rasterizePolygon(geom, params, geomExtent, value, allTouched);
+        rasterizePolygon(raster, metadata, geom, params, geomExtent, value, allTouched);
         break;
     }
   }
@@ -167,8 +168,7 @@ public class Rasterization {
       Geometry geom,
       RasterizationParams params,
       double value,
-      boolean allTouched)
-      throws FactoryException {
+      boolean allTouched) {
 
     for (int i = 0; i < geom.getNumGeometries(); i++) {
       Geometry subGeom = geom.getGeometryN(i);
@@ -177,40 +177,72 @@ public class Rasterization {
     }
   }
 
+  /** Folds a pixel index that overshot the grid by a rounding artifact back onto the edge pixel. */
+  private static int clampToGrid(int index, int size) {
+    return Math.max(0, Math.min(index, size - 1));
+  }
+
   private static void rasterizePoint(
       Geometry geom, RasterizationParams params, ReferencedEnvelope geomExtent, double value) {
 
-    int startX = (int) Math.round(((geomExtent.getMinX() - params.upperLeftX) / params.scaleX));
-    int startY = (int) Math.round(((geomExtent.getMinY() - params.upperLeftY) / params.scaleY));
-    int x = startX;
-    int y = startY;
+    // Traverse by integer grid index and derive each cell envelope from that index, rather than
+    // walking world coordinates by repeatedly adding scaleX/scaleY. Accumulation drifts when the
+    // pixel size has no exact double representation (e.g. 1/3600 degree for a 30m DEM): the running
+    // coordinate can fall a fraction of an ULP short of the extent maximum and take a whole extra
+    // step, and the separately incremented index it carries stops matching the cell being tested.
+    int width = params.writableRaster.getWidth();
+    int height = params.writableRaster.getHeight();
 
-    for (double worldY = geomExtent.getMaxY();
-        worldY > geomExtent.getMinY();
-        worldY += params.scaleY, y--) {
-      x = startX;
-      for (double worldX = geomExtent.getMinX();
-          worldX < geomExtent.getMaxX();
-          worldX += params.scaleX, x++) {
+    // An extent narrower than a pixel - which clipping leaves behind where a polygon only grazes
+    // the raster edge - can round to an empty range. Keep the single cell it falls in, so the
+    // caller still gets the "any touch" pixel rather than silently nothing.
+    int startCol =
+        clampToGrid(
+            (int) Math.round((geomExtent.getMinX() - params.upperLeftX) / params.scaleX), width);
+    int endCol =
+        Math.max(
+            startCol,
+            clampToGrid(
+                (int) Math.round((geomExtent.getMaxX() - params.upperLeftX) / params.scaleX) - 1,
+                width));
+    int startRow =
+        clampToGrid(
+            (int) Math.round((geomExtent.getMaxY() - params.upperLeftY) / params.scaleY), height);
+    int endRow =
+        Math.max(
+            startRow,
+            clampToGrid(
+                (int) Math.round((geomExtent.getMinY() - params.upperLeftY) / params.scaleY) - 1,
+                height));
 
-        // Make zero indexed
-        int yIndex = y - 1;
+    // Where the output grid sits within the reference raster's grid: zero unless the output was
+    // cropped to the geometry extent. Cell envelopes are built on the reference grid and only the
+    // write index is crop-local, so a cropped output resolves boundary contacts identically to a
+    // full-extent one.
+    int colOffset = (int) Math.round((params.upperLeftX - params.rasterUpperLeftX) / params.scaleX);
+    int rowOffset = (int) Math.round((params.upperLeftY - params.rasterUpperLeftY) / params.scaleY);
 
-        // Adjust for bottom-up rasters
-        // Reverse the y index
-        if (params.bottomUp) {
-          yIndex = params.writableRaster.getHeight() - 1 - yIndex;
-        }
+    PreparedGeometry preparedGeom = PreparedGeometryFactory.prepare(geom);
+    for (int row = startRow; row <= endRow; row++) {
+      // scaleY is always negative here, so row counts downwards from the geographic top
+      double cellMaxY = params.rasterUpperLeftY + (row + rowOffset) * params.scaleY;
+      double cellMinY = params.rasterUpperLeftY + (row + rowOffset + 1) * params.scaleY;
 
+      // Adjust for bottom-up rasters
+      // Reverse the y index
+      int yIndex = params.bottomUp ? height - 1 - row : row;
+
+      for (int col = startCol; col <= endCol; col++) {
         // Create envelope for this pixel
-        double cellMaxX = worldX + params.scaleX;
-        double cellMaxY = worldY + params.scaleY;
+        double cellMinX = params.rasterUpperLeftX + (col + colOffset) * params.scaleX;
+        double cellMaxX = params.rasterUpperLeftX + (col + colOffset + 1) * params.scaleX;
 
         boolean intersects =
-            geom.intersects(JTS.toGeometry(new Envelope(worldX, cellMaxX, worldY, cellMaxY)));
+            preparedGeom.intersects(
+                JTS.toGeometry(new Envelope(cellMinX, cellMaxX, cellMinY, cellMaxY)));
 
         if (intersects) {
-          params.writableRaster.setSample(x, yIndex, 0, value);
+          params.writableRaster.setSample(col, yIndex, 0, value);
         }
       }
     }
@@ -593,6 +625,8 @@ public class Rasterization {
         getRasterScaleY(metadata),
         upperLeftX,
         upperLeftY,
+        metadata[0],
+        getRasterUpperLeftY(metadata),
         bottomUp);
   }
 
@@ -618,6 +652,11 @@ public class Rasterization {
     double scaleY;
     double upperLeftX;
     double upperLeftY;
+    // Origin of the reference raster's grid. Equal to upperLeftX/Y unless the output is cropped to
+    // the geometry extent. Cell envelopes are built from this origin because it is the grid the
+    // geometry extent was snapped against, so cell edges and snapped extents agree bit for bit.
+    double rasterUpperLeftX;
+    double rasterUpperLeftY;
     boolean bottomUp;
 
     RasterizationParams(
@@ -627,6 +666,8 @@ public class Rasterization {
         double scaleY,
         double upperLeftX,
         double upperLeftY,
+        double rasterUpperLeftX,
+        double rasterUpperLeftY,
         boolean bottomUp) {
       this.writableRaster = writableRaster;
       this.pixelType = pixelType;
@@ -634,11 +675,15 @@ public class Rasterization {
       this.scaleY = scaleY;
       this.upperLeftX = upperLeftX;
       this.upperLeftY = upperLeftY;
+      this.rasterUpperLeftX = rasterUpperLeftX;
+      this.rasterUpperLeftY = rasterUpperLeftY;
       this.bottomUp = bottomUp;
     }
   }
 
-  public static void rasterizePolygon(
+  private static void rasterizePolygon(
+      GridCoverage2D raster,
+      double[] metadata,
       Geometry geom,
       RasterizationParams params,
       ReferencedEnvelope geomExtent,
@@ -653,25 +698,47 @@ public class Rasterization {
     Geometry clippedGeom =
         Functions.intersection(JTS.toGeometry((BoundingBox) geomExtent), Functions.buffer(geom, 0));
 
-    if (Objects.equals(clippedGeom.getGeometryType(), "MultiPolygon")) {
+    if (clippedGeom instanceof MultiPolygon) {
       for (int i = 0; i < clippedGeom.getNumGeometries(); i++) {
         Geometry subGeom = clippedGeom.getGeometryN(i);
-        rasterizePolygon(subGeom, params, geomExtent, value, allTouched);
+        rasterizePolygon(raster, metadata, subGeom, params, geomExtent, value, allTouched);
       }
-      return;
+    } else if (clippedGeom instanceof Polygon) {
+      Polygon polygon = (Polygon) clippedGeom;
+
+      // Compute scanline X-intercepts
+      Map<Double, TreeSet<Double>> scanlineIntersections =
+          computeScanlineIntersections(polygon, params, value, geomExtent, allTouched);
+
+      // Process intersections to get startXs and endXs for each scanline
+      Map<Integer, List<int[]>> scanlineFillRanges = computeFillRanges(scanlineIntersections);
+
+      // Burn values between startX and endX pairs
+      fillPolygon(scanlineFillRanges, params, value);
+    } else {
+      // Clipped geometry could be anything, such as a GeometryCollection, although such cases are
+      // rare. Delegate to rasterizeGeometry to handle all these cases.
+      //
+      // Points and lines left behind by the clip - where the polygon only grazes the raster - cover
+      // no pixel centre. Rasterizing them under centroid semantics would report coverage the source
+      // polygon does not have, so keep only the areal parts unless the caller asked for allTouched.
+      Geometry toRasterize = allTouched ? clippedGeom : arealComponents(clippedGeom);
+      if (!toRasterize.isEmpty()) {
+        rasterizeGeometry(raster, metadata, toRasterize, params, geomExtent, value, allTouched);
+      }
     }
+  }
 
-    Polygon polygon = (Polygon) clippedGeom;
-
-    // Compute scanline X-intercepts
-    Map<Double, TreeSet<Double>> scanlineIntersections =
-        computeScanlineIntersections(polygon, params, value, geomExtent, allTouched);
-
-    // Process intersections to get startXs and endXs for each scanline
-    Map<Integer, List<int[]>> scanlineFillRanges = computeFillRanges(scanlineIntersections);
-
-    // Burn values between startX and endX pairs
-    fillPolygon(scanlineFillRanges, params, value);
+  /** Keeps only the polygonal parts of a geometry, dropping any point or line components. */
+  private static Geometry arealComponents(Geometry geom) {
+    List<Geometry> polygons = new ArrayList<>();
+    for (int i = 0; i < geom.getNumGeometries(); i++) {
+      Geometry part = geom.getGeometryN(i);
+      if (part instanceof Polygon) {
+        polygons.add(part);
+      }
+    }
+    return geom.getFactory().buildGeometry(polygons);
   }
 
   /** Computes scanline intersections by iterating over polygon edges. */
@@ -818,13 +885,22 @@ public class Rasterization {
         y = params.writableRaster.getHeight() - 1 - y;
       }
 
+      int width = params.writableRaster.getWidth();
+
       for (int[] range : entry.getValue()) {
         if (range.length == 1) {
-          params.writableRaster.setSample(range[0], y, 0, value);
+          // A scanline with an odd number of intercepts leaves an unpaired one, burned as a single
+          // pixel. Vertical edges keep their x-intercept unfiltered, so an edge touching only at
+          // the extent maximum lands one past the grid. Discard it rather than folding it onto the
+          // edge pixel: unlike the point path there is no per-cell intersection test here, so
+          // folding would burn a pixel the polygon does not reach.
+          if (range[0] >= 0 && range[0] < width) {
+            params.writableRaster.setSample(range[0], y, 0, value);
+          }
           continue;
         }
-        int xStart = range[0];
-        int xEnd = range[1];
+        int xStart = clampToGrid(range[0], width);
+        int xEnd = clampToGrid(range[1], width);
 
         for (int x = xStart; x <= xEnd; x++) {
           params.writableRaster.setSample(x, y, 0, value);
