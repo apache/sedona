@@ -22,6 +22,7 @@ import static org.apache.sedona.common.raster.RasterAccessors.metadata;
 
 import java.awt.image.Raster;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.FunctionsGeoTools;
@@ -34,6 +35,7 @@ import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 
@@ -689,6 +691,100 @@ public class RasterizationTest extends RasterTestBase {
       0, 0, 0, 0, 0, 0,
     };
     Assert.assertArrayEquals(expected, band, 0d);
+  }
+
+  @Test
+  public void testLineClippedAtFarRasterEdgeKeepsEdgePixels() throws FactoryException {
+    // 1/3600 degree pixels have no exact double representation. On this tile origin the right edge
+    // converts to pixel x = 256.00000000004, one rounding error past the grid, so a segment that
+    // ends on or crosses it makes the traversal visit a column outside the raster, which burnCell
+    // skips; the bottom edge lands just inside, at y = 255.99999999998886. Either way the edge cell
+    // is visited before the walk leaves the grid, so no pixel inside the raster may be lost. The
+    // reference is the same geometry rasterized on a larger raster with the same origin (so every
+    // unclipped pixel coordinate is bit-for-bit identical), cropped back to the tile.
+    double p = 1.0 / 3600.0;
+    double ulx = -180.0 + 822 * p;
+    double uly = 60.0 - 546 * p;
+    GridCoverage2D tile =
+        RasterConstructors.makeEmptyRaster(1, "d", 256, 256, ulx, uly, p, -p, 0, 0, 4326);
+    GridCoverage2D larger =
+        RasterConstructors.makeEmptyRaster(1, "d", 272, 272, ulx, uly, p, -p, 0, 0, 4326);
+    double right = ulx + 256 * p;
+    double bottom = uly - 256 * p;
+    GeometryFactory factory = new GeometryFactory();
+
+    // Leaves through the right edge along row 100: columns 200..255.
+    LineString acrossRight =
+        line(factory, ulx + 200.5 * p, uly - 100.5 * p, right + 10 * p, uly - 100.5 * p);
+    assertBurnedCount(tile, acrossRight, 56, 255, 100);
+    // Leaves through the bottom edge along column 100: rows 200..255.
+    LineString acrossBottom =
+        line(factory, ulx + 100.5 * p, uly - 200.5 * p, ulx + 100.5 * p, bottom - 10 * p);
+    assertBurnedCount(tile, acrossBottom, 56, 100, 255);
+    // Ends exactly on the extent maximum: columns / rows 250..255.
+    LineString toRight = line(factory, ulx + 250.5 * p, uly - 100.5 * p, right, uly - 100.5 * p);
+    assertBurnedCount(tile, toRight, 6, 255, 100);
+    LineString toBottom = line(factory, ulx + 100.5 * p, uly - 250.5 * p, ulx + 100.5 * p, bottom);
+    assertBurnedCount(tile, toBottom, 6, 100, 255);
+
+    Geometry[] geometries = {
+      acrossRight,
+      acrossBottom,
+      toRight,
+      toBottom,
+      // oblique segments leaving through the right edge, the bottom edge and the corner
+      line(factory, ulx + 240.3 * p, uly - 180.6 * p, right + 7.1 * p, uly - 190.2 * p),
+      line(factory, ulx + 180.6 * p, uly - 240.3 * p, ulx + 190.2 * p, bottom - 7.1 * p),
+      line(factory, ulx + 240.3 * p, uly - 247.7 * p, right + 7.1 * p, bottom - 3.3 * p),
+      line(factory, ulx + 250.5 * p, uly - 252.5 * p, right, bottom),
+      // a polygon crossing both far edges; allTouched burns its ring through the same traversal
+      factory.createPolygon(
+          new Coordinate[] {
+            new Coordinate(ulx + 230.3 * p, uly - 240.6 * p),
+            new Coordinate(right + 9.2 * p, uly - 235.1 * p),
+            new Coordinate(ulx + 245.7 * p, bottom - 8.4 * p),
+            new Coordinate(ulx + 230.3 * p, uly - 240.6 * p)
+          })
+    };
+    for (Geometry geom : geometries) {
+      for (Geometry g : new Geometry[] {geom, geom.reverse()}) {
+        double[] expected = crop(burn(g, larger, true), 272, 256, 256);
+        Assert.assertArrayEquals(g.toText(), expected, burn(g, tile, true), 0d);
+      }
+    }
+  }
+
+  private static LineString line(
+      GeometryFactory factory, double x0, double y0, double x1, double y1) {
+    return factory.createLineString(
+        new Coordinate[] {new Coordinate(x0, y0), new Coordinate(x1, y1)});
+  }
+
+  private static double[] burn(Geometry geom, GridCoverage2D raster, boolean allTouched)
+      throws FactoryException {
+    return MapAlgebra.bandAsArray(
+        RasterConstructors.asRaster(geom, raster, "d", allTouched, 1d, 0d, false), 1);
+  }
+
+  private static double[] crop(double[] band, int bandWidth, int width, int height) {
+    double[] cropped = new double[width * height];
+    for (int y = 0; y < height; y++) {
+      System.arraycopy(band, y * bandWidth, cropped, y * width, width);
+    }
+    return cropped;
+  }
+
+  /** Asserts the burned pixel count of both directions of a line, and that an edge cell is set. */
+  private static void assertBurnedCount(
+      GridCoverage2D raster, LineString line, int expectedCount, int edgeX, int edgeY)
+      throws FactoryException {
+    int width = RasterAccessors.getWidth(raster);
+    for (Geometry g : new Geometry[] {line, line.reverse()}) {
+      double[] band = burn(g, raster, false);
+      Assert.assertEquals(
+          g.toText(), expectedCount, Arrays.stream(band).filter(v -> v != 0).count());
+      Assert.assertEquals(g.toText(), 1d, band[edgeY * width + edgeX], 0d);
+    }
   }
 
   private GridCoverage2D unitGrid6x6() throws FactoryException {
