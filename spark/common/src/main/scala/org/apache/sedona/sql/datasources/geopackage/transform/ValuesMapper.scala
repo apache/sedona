@@ -27,13 +27,14 @@ object ValuesMapper {
   def mapValues(metadata: PartitionOptions, rs: java.sql.ResultSet): Seq[Any] = {
     metadata.columns.map(column => {
       (column.dataType, metadata.tableType) match {
-        case (GeoPackageType.INTEGER | GeoPackageType.INT, _) => rs.getInt(column.name)
-        case (GeoPackageType.TINY_INT, _) => rs.getInt(column.name)
-        case (GeoPackageType.SMALLINT, _) => rs.getInt(column.name)
-        case (GeoPackageType.MEDIUMINT, _) => rs.getInt(column.name)
-        case (GeoPackageType.FLOAT, _) => rs.getFloat(column.name)
-        case (GeoPackageType.DOUBLE, _) => rs.getDouble(column.name)
-        case (GeoPackageType.REAL, _) => rs.getDouble(column.name)
+        case (GeoPackageType.INTEGER | GeoPackageType.INT, _) =>
+          nullIfWasNull(rs, rs.getInt(column.name))
+        case (GeoPackageType.TINY_INT, _) => nullIfWasNull(rs, rs.getInt(column.name))
+        case (GeoPackageType.SMALLINT, _) => nullIfWasNull(rs, rs.getInt(column.name))
+        case (GeoPackageType.MEDIUMINT, _) => nullIfWasNull(rs, rs.getInt(column.name))
+        case (GeoPackageType.FLOAT, _) => nullIfWasNull(rs, rs.getFloat(column.name))
+        case (GeoPackageType.DOUBLE, _) => nullIfWasNull(rs, rs.getDouble(column.name))
+        case (GeoPackageType.REAL, _) => nullIfWasNull(rs, rs.getDouble(column.name))
         case (startsWith: String, _) if startsWith.startsWith(GeoPackageType.TEXT) =>
           UTF8String.fromString(rs.getString(column.name))
         case (startsWith: String, TILES)
@@ -51,7 +52,7 @@ object ValuesMapper {
         case (startsWith: String, _) if startsWith.startsWith(GeoPackageType.BLOB) =>
           rs.getBytes(column.name)
         case (GeoPackageType.BOOLEAN, _) =>
-          rs.getBoolean(column.name)
+          nullIfWasNull(rs, rs.getBoolean(column.name))
         case (GeoPackageType.DATE, _) =>
           parseNullable(rs.getString(column.name))(DataTypesTransformations.getDays)
         case (GeoPackageType.DATETIME, _) =>
@@ -85,4 +86,12 @@ object ValuesMapper {
    */
   private def parseNullable[T](value: String)(parse: String => T): Any =
     if (value == null) null else parse(value)
+
+  /**
+   * JDBC primitive getters (getInt, getFloat, getDouble, getBoolean) return 0, 0.0 or false for a
+   * SQL NULL. Take the value such a getter just read and return null instead when the driver
+   * reports that the column was NULL.
+   */
+  private def nullIfWasNull(rs: java.sql.ResultSet, value: Any): Any =
+    if (rs.wasNull()) null else value
 }

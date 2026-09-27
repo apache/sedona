@@ -23,7 +23,7 @@ import org.apache.sedona.sql.datasources.geopackage.connection.{FileSystemUtils,
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions.expr
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.sql.types.{BinaryType, BooleanType, DateType, DoubleType, IntegerType, StringType, StructField, StructType, TimestampType}
+import org.apache.spark.sql.types.{BinaryType, BooleanType, DateType, DoubleType, FloatType, IntegerType, StringType, StructField, StructType, TimestampType}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.testcontainers.containers.MinIOContainer
@@ -307,6 +307,38 @@ class GeoPackageReaderTest extends TestBaseScala with Matchers {
 
       df.filter("event_date IS NULL").count() shouldEqual 2
       df.filter("event_time IS NULL").count() shouldEqual 2
+    }
+
+    it("should read NULL integer, real and boolean values as null") {
+      // JDBC primitive getters return 0, 0.0 and false for a SQL NULL, so NULL cells in these
+      // columns used to come back as real zeros and false.
+      val df = sparkSession.read
+        .format("geopackage")
+        .option("tableName", "test_features")
+        .load(resourceFolder + "geopackage/test_null_values.gpkg")
+
+      val columns = Seq(
+        "integer_value" -> IntegerType,
+        "smallint_value" -> IntegerType,
+        "mediumint_value" -> IntegerType,
+        "float_value" -> FloatType,
+        "real_value" -> DoubleType,
+        "boolean_value" -> BooleanType)
+
+      columns.foreach { case (name, dataType) =>
+        df.schema(name).dataType shouldEqual dataType
+      }
+
+      val rows = df.select("fid", columns.map(_._1): _*).collect().sortBy(_.getInt(0))
+
+      rows shouldEqual Array(
+        Row(1, 7, 3, 42, 1.5f, 2.25, true),
+        Row(2, null, null, null, null, null, null),
+        Row(3, 0, 0, 0, 0.0f, 0.0, false))
+
+      columns.foreach { case (name, _) =>
+        df.filter(s"$name IS NULL").count() shouldEqual 1
+      }
     }
   }
 
