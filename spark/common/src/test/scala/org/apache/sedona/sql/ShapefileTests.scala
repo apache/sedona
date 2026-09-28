@@ -28,6 +28,7 @@ import org.locationtech.jts.io.{WKTReader, WKTWriter}
 import org.scalatest.BeforeAndAfterAll
 
 import java.io.File
+import java.nio.ByteBuffer
 import java.nio.file.Files
 import java.util.{ArrayList => JList}
 import scala.collection.mutable
@@ -244,6 +245,29 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
           assert(row.getAs[Long]("field_1") == 2)
         }
       }
+    }
+
+    it("read shapefile whose .shx content lengths include the record header") {
+      // Some writers store each .shx content length as the .shp content length plus the 4-word
+      // record header, which violates the shapefile spec. Build such a .shx from a valid one.
+      FileUtils.cleanDirectory(new File(temporaryLocation))
+      val source = resourceFolder + "shapefiles/gis_osm_pois_free_1"
+      Seq("shp", "dbf", "prj", "cpg").foreach { ext =>
+        FileUtils.copyFile(
+          new File(s"$source/gis_osm_pois_free_1.$ext"),
+          new File(s"$temporaryLocation/gis_osm_pois_free_1.$ext"))
+      }
+      val shx =
+        ByteBuffer.wrap(Files.readAllBytes(new File(s"$source/gis_osm_pois_free_1.shx").toPath))
+      (100 until shx.limit() by 8).foreach { offset =>
+        shx.putInt(offset + 4, shx.getInt(offset + 4) + 4)
+      }
+      Files.write(new File(s"$temporaryLocation/gis_osm_pois_free_1.shx").toPath, shx.array())
+
+      val expected = sparkSession.read.format("shapefile").load(source).collect()
+      val actual = sparkSession.read.format("shapefile").load(temporaryLocation).collect()
+      assert(actual.length == 12873)
+      assert(actual.sameElements(expected))
     }
 
     it("read contains_null_geom") {

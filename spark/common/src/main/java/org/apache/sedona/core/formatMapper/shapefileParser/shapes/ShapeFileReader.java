@@ -26,7 +26,6 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
-import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeType;
 import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShpFileParser;
 
 public class ShapeFileReader extends RecordReader<ShapeKey, ShpRecord> {
@@ -84,21 +83,14 @@ public class ShapeFileReader extends RecordReader<ShapeKey, ShpRecord> {
       }
       // check offset, if current offset in inputStream not match with information in shx, move it
       long pos = indexes[indexId] * 2L;
-      if (shpInputStream.getPos() < pos) {
-        long skipBytes = pos - shpInputStream.getPos();
-        if (shpInputStream.skip(skipBytes) != skipBytes) {
-          throw new IOException("Failed to seek to the right place in .shp file");
-        }
+      if (shpInputStream.getPos() != pos) {
+        shpInputStream.seek(pos);
       }
-      int currentLength = indexes[indexId + 1] * 2 - 4;
       recordKey = new ShapeKey();
       recordKey.setIndex(parser.parseRecordHeadID());
-      if (currentLength >= 0) {
-        recordContent = parser.parseRecordPrimitiveContent(currentLength);
-      } else {
-        // Ignore this index entry
-        recordContent = new ShpRecord(new byte[0], ShapeType.NULL.getId());
-      }
+      // Take the content length from the .shp record header, not the .shx. Some writers store the
+      // .shx content length as the .shp content length plus the 4-word record header.
+      recordContent = parser.parseRecordPrimitiveContent();
       indexId += 2;
     } else {
       if (getProgress() >= 1) {
