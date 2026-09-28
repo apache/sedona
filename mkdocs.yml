@@ -258,6 +258,8 @@ plugins:
       archive_date_format: MMMM yyyy
       # Maximum number of authors to display in the post excerpt
       post_excerpt_max_authors: 5
+      # Generates dedicated, indexable pages for each author
+      authors_profiles: true
   - i18n:
       docs_structure: suffix
       fallback_to_default: true
