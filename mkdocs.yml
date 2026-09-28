@@ -105,6 +105,7 @@ nav:
           - GeoPandas API coverage: api/geopandas-coverage.md
           - Sedona Python: api/pydocs
       - Release notes: setup/release-notes.md
+      - Migrating to Sedona 2.0: setup/migration-2.0.md
 
   - SedonaFlink:
       - Home: sedonaflink.md
