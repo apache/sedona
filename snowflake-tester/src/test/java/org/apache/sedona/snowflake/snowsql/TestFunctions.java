@@ -722,12 +722,9 @@ public class TestFunctions extends TestBase {
     verifySqlSingleRes("select sedona.ST_AsText(sedona.ST_MakePoint(1, 2))", "POINT (1 2)");
     registerUDF("ST_MakePoint", double.class, double.class, double.class);
     verifySqlSingleRes("select sedona.ST_AsText(sedona.ST_MakePoint(1, 2, 3))", "POINT Z(1 2 3)");
-    // TODO: fix this when https://github.com/locationtech/jts/pull/734 gets merged.
-    // Sedona Snowflake uses WKB to serialize geometries, and JTS's WKBReader and Writer ignores M
-    // values.
     registerUDF("ST_MakePoint", double.class, double.class, double.class, double.class);
     verifySqlSingleRes(
-        "select sedona.ST_AsText(sedona.ST_MakePoint(1, 2, 3, 4))", "POINT Z(1 2 3)");
+        "select sedona.ST_AsText(sedona.ST_MakePoint(1, 2, 3, 4))", "POINT ZM(1 2 3 4)");
   }
 
   @Test
