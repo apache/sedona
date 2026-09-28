@@ -27,6 +27,13 @@ See [Migrating to Sedona 2.0](migration-2.0.md) for what to check when upgrading
   1-based, and the grid-coordinate forms of `RS_Value` and `RS_Values` read `(1, 1)` as the
   upper-left pixel. They were 0-based, so existing queries now address the next element or pixel;
   add 1 to the index. An index of `0` or below returns `NULL`.
+* **`RS_SetBandNoDataValue` replace form removed**: the 4-argument
+  `RS_SetBandNoDataValue(raster, bandIndex, noDataValue, replace)` form is replaced by
+  `RS_ReplaceBandNoDataValue(raster, bandIndex, noDataValue)`. Change
+  `RS_SetBandNoDataValue(raster, band, value, true)` to `RS_ReplaceBandNoDataValue(raster, band, value)`,
+  and drop a `false` fourth argument. The Java method
+  `RasterBandEditors.setBandNoDataValue(raster, band, value, replace)` is likewise replaced by
+  `RasterBandEditors.replaceBandNoDataValue(raster, band, value)`.
 
 * **WKB output**: `ST_AsBinary`, `ST_AsEWKB`, and `ST_AsHEXEWKB` now retain M for measured
   geometries in Spark, Flink, and Snowflake, including geometries read from WKT. Earlier

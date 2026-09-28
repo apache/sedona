@@ -26,11 +26,17 @@ import org.apache.spark.sql.sedona_sql.expressions.{InferrableFunction, Inferred
 
 private[apache] case class RS_SetBandNoDataValue(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction4(RasterBandEditors.setBandNoDataValue),
       // A null noDataValue removes the band's no-data value, so let it through instead of
       // null-propagating the whole expression.
       InferrableFunction.allowRightNull3(RasterBandEditors.setBandNoDataValue),
       InferrableFunction.allowRightNull(RasterBandEditors.setBandNoDataValue)) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class RS_ReplaceBandNoDataValue(inputExpressions: Seq[Expression])
+    extends InferredExpression(inferrableFunction3(RasterBandEditors.replaceBandNoDataValue)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

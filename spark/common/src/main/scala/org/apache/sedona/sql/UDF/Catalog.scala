@@ -405,6 +405,7 @@ object Catalog extends AbstractCatalog with Logging {
     function[RS_ReprojectMatch]("nearestneighbor"),
     function[RS_Resample](),
     function[RS_SetBandNoDataValue](),
+    function[RS_ReplaceBandNoDataValue](),
     function[RS_SetCRS](),
     function[RS_SetGeoReference](),
     function[RS_SetPixelType](),

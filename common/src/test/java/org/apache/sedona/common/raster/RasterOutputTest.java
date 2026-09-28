@@ -421,7 +421,7 @@ public class RasterOutputTest extends RasterTestBase {
             RasterConstructors.fromGeoTiff(RasterOutputs.asGeoTiff(noNoData)), 1));
 
     // A nodata value changed after reading wins over the value that was read from the file.
-    GridCoverage2D changed = RasterBandEditors.setBandNoDataValue(raster, 1, -9999.0, true);
+    GridCoverage2D changed = RasterBandEditors.replaceBandNoDataValue(raster, 1, -9999.0);
     GridCoverage2D changedRoundTrip =
         RasterConstructors.fromGeoTiff(RasterOutputs.asGeoTiff(changed));
     assertEquals(-9999.0, RasterBandAccessors.getBandNoDataValue(changedRoundTrip, 1), 0);
