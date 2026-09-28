@@ -20,13 +20,20 @@ package org.apache.sedona.common.raster;
 
 import static org.apache.sedona.common.raster.RasterAccessors.metadata;
 
+import java.awt.image.Raster;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.sedona.common.Constructors;
+import org.apache.sedona.common.FunctionsGeoTools;
 import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.junit.Assert;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 
@@ -293,6 +300,182 @@ public class RasterizationTest extends RasterTestBase {
     wktPoint = "POINT (5.25 2.25)";
     validateRasterizeGeomExtent(
         wktPoint, new double[] {5.0, 6.0, 2.0, 3.0}, testRaster, metadata, false);
+  }
+
+  @Test
+  public void testRasterizePolygonPartiallyTouchesRaster()
+      throws ParseException, FactoryException, TransformException {
+    // The metadata of an Alpha Earth image
+    GridCoverage2D testRaster =
+        RasterConstructors.makeEmptyRaster(1, 1024, 1024, 500000, 4976640, 10, 10, 0, 0, 32610);
+
+    // Grid aligned polygon completely contained within raster extent
+    String wktPolygon =
+        "POLYGON ((-123.000206 44.960125, -123.000208 44.960031, -122.999961 44.960028, -122.99996 44.960105, -123 44.960105, -123 44.960123, -123.000206 44.960125))";
+    Geometry geom = wktReader.read(wktPolygon);
+    geom = FunctionsGeoTools.transform(geom, "EPSG:4326", "EPSG:32610");
+
+    // The intersection of the polygon and the raster extent will be a GeometryCollection containing
+    // Polygons and LineStrings. We should handle this case gracefully rather than throwing an
+    // error.
+    List<Object> result = Rasterization.rasterize(geom, testRaster, "B", 10, true, true);
+    Assert.assertEquals(2, result.size());
+  }
+
+  private static final double DEM_PIXEL_SIZE = 1.0 / 3600.0;
+
+  /**
+   * A Copernicus GLO-30 style tile: 256x256, EPSG:4326, 1/3600 degree pixels. 1/3600 has no exact
+   * double representation, so a loop that walks the extent by repeatedly adding the pixel size can
+   * land a fraction of an ULP short of the extent maximum and run one iteration too many.
+   */
+  private static GridCoverage2D demLikeTile(double upperLeftX, double upperLeftY)
+      throws FactoryException {
+    return RasterConstructors.makeEmptyRaster(
+        1, "D", 256, 256, upperLeftX, upperLeftY, DEM_PIXEL_SIZE, -DEM_PIXEL_SIZE, 0, 0, 4326);
+  }
+
+  /** Asserts the exact set of burned pixels of a rasterized coverage, e.g. "[(1,1)]" or "[]". */
+  private void assertBurnedPixels(GridCoverage2D rasterized, String expected) {
+    assertBurnedPixels(rasterized.getRenderedImage().getData(), expected);
+  }
+
+  /** Asserts the exact set of burned pixels, e.g. "[(255,255)]" or "[]". */
+  private void assertBurnedPixels(List<Object> result, String expected) {
+    assertBurnedPixels((Raster) result.get(0), expected);
+  }
+
+  private void assertBurnedPixels(Raster burned, String expected) {
+    List<String> found = new ArrayList<>();
+    for (int y = 0; y < burned.getHeight(); y++) {
+      for (int x = 0; x < burned.getWidth(); x++) {
+        if (burned.getSampleDouble(x, y, 0) != 0) {
+          found.add("(" + x + "," + y + ")");
+        }
+      }
+    }
+    Assert.assertEquals("burned pixels", expected, found.toString());
+  }
+
+  /** Asserts that exactly one pixel, at (expectedX, expectedY), was burned. */
+  private void assertSingleBurnedPixel(List<Object> result, int expectedX, int expectedY) {
+    assertBurnedPixels(result, "[(" + expectedX + "," + expectedY + ")]");
+  }
+
+  @Test
+  public void testRasterizePointOnTileCornerDoesNotOverrunGrid() throws FactoryException {
+    GridCoverage2D testRaster = demLikeTile(-180.0, 60.0);
+    // A point a fraction of an ULP off the tile's bottom-right corner - the coordinate you get by
+    // stepping the grid one pixel at a time rather than multiplying out, as tiled data does. The
+    // column loop in rasterizePoint used to overrun to x == 256 and setSample wrote past the end of
+    // the 256x256 data buffer: ArrayIndexOutOfBoundsException: Index 65536 out of bounds for
+    // length 65536.
+    Geometry point =
+        new GeometryFactory()
+            .createPoint(
+                new Coordinate(
+                    -180.0 + 255 * DEM_PIXEL_SIZE + DEM_PIXEL_SIZE,
+                    60.0 - 255 * DEM_PIXEL_SIZE - DEM_PIXEL_SIZE));
+
+    assertSingleBurnedPixel(
+        Rasterization.rasterize(point, testRaster, "D", 150, false, true), 255, 255);
+  }
+
+  @Test
+  public void testRasterizePolygonGrazingTileCornerDoesNotOverrunGrid() throws FactoryException {
+    // Tile origin chosen so the corner longitude/latitude land on the unfavourable side of the
+    // rounding; most origins are unaffected, which is why the failure looked sporadic in the field.
+    double upperLeftX = -180.0 + 822 * DEM_PIXEL_SIZE;
+    double upperLeftY = 60.0 - 546 * DEM_PIXEL_SIZE;
+    GridCoverage2D testRaster = demLikeTile(upperLeftX, upperLeftY);
+    double rightEdge = upperLeftX + 256 * DEM_PIXEL_SIZE;
+    double bottomEdge = upperLeftY - 256 * DEM_PIXEL_SIZE;
+
+    // A zone far larger than the tile that touches it only at the bottom-right corner. The clip
+    // against the raster extent degenerates to a point, so rasterizePolygon delegates to
+    // rasterizePoint - the path RS_ZonalStatsAll hits when an admin zone merely grazes a tile.
+    Geometry zone =
+        new GeometryFactory()
+            .createPolygon(
+                new Coordinate[] {
+                  new Coordinate(rightEdge, bottomEdge),
+                  new Coordinate(rightEdge + 1.0, bottomEdge),
+                  new Coordinate(rightEdge + 1.0, bottomEdge - 1.0),
+                  new Coordinate(rightEdge, bottomEdge - 1.0),
+                  new Coordinate(rightEdge, bottomEdge)
+                });
+
+    assertSingleBurnedPixel(
+        Rasterization.rasterize(zone, testRaster, "D", 150, false, true), 255, 255);
+  }
+
+  @Test
+  public void testRasterizePolygonGrazingTileCornerBurnsNothingInCentroidMode()
+      throws FactoryException {
+    // Same corner contact as above, under centroid semantics. Clipping degenerates the zone to a
+    // point, but a point covers no pixel centre, so nothing should be burned - otherwise
+    // RS_ZonalStatsAll reports a pixel count for a zone that contains no pixel centroid.
+    double upperLeftX = -180.0 + 822 * DEM_PIXEL_SIZE;
+    double upperLeftY = 60.0 - 546 * DEM_PIXEL_SIZE;
+    GridCoverage2D testRaster = demLikeTile(upperLeftX, upperLeftY);
+    double rightEdge = upperLeftX + 256 * DEM_PIXEL_SIZE;
+    double bottomEdge = upperLeftY - 256 * DEM_PIXEL_SIZE;
+
+    Geometry zone =
+        new GeometryFactory()
+            .createPolygon(
+                new Coordinate[] {
+                  new Coordinate(rightEdge, bottomEdge),
+                  new Coordinate(rightEdge + 1.0, bottomEdge),
+                  new Coordinate(rightEdge + 1.0, bottomEdge - 1.0),
+                  new Coordinate(rightEdge, bottomEdge - 1.0),
+                  new Coordinate(rightEdge, bottomEdge)
+                });
+
+    assertBurnedPixels(Rasterization.rasterize(zone, testRaster, "D", 150, false, false), "[]");
+    Assert.assertEquals(
+        Double.valueOf(0), RasterBandAccessors.getZonalStatsAll(testRaster, zone)[0]);
+  }
+
+  @Test
+  public void testCroppedOutputResolvesBoundaryContactLikeFullExtent() throws FactoryException {
+    // Cell envelopes must be built on the reference raster's grid, not the cropped output's origin.
+    // The second point sits exactly on a row boundary and so touches two rows; deriving envelopes
+    // from the crop origin put those edges an ULP off and dropped one of them.
+    double p = DEM_PIXEL_SIZE;
+    double ulx = -180.0;
+    double uly = 60.0;
+    GridCoverage2D testRaster = demLikeTile(ulx, uly);
+    Geometry points =
+        new GeometryFactory()
+            .createMultiPointFromCoords(
+                new Coordinate[] {
+                  new Coordinate(ulx + 10.5 * p, uly - 10.5 * p),
+                  new Coordinate(ulx + 20.5 * p, uly - 20 * p)
+                });
+
+    assertBurnedPixels(
+        RasterConstructors.asRaster(points, testRaster, "D", true, 150, null),
+        "[(0,0), (10,9), (10,10)]");
+    // the same contacts, at full-raster offsets
+    assertBurnedPixels(
+        RasterConstructors.asRasterWithRasterExtent(points, testRaster, "D", true, 150, null),
+        "[(10,10), (20,19), (20,20)]");
+  }
+
+  @Test
+  public void testUnpairedInterceptPastGridIsDiscardedNotFolded() throws Exception {
+    // The bottom scanline of this triangle touches only at x == 2, on a 2px wide raster. The
+    // vertical edge leaves an unpaired intercept one past the grid; folding it onto the edge pixel
+    // would burn a pixel the polygon never reaches, so it has to be discarded.
+    GridCoverage2D testRaster =
+        RasterConstructors.makeEmptyRaster(1, "D", 2, 2, 0, 2, 1, -1, 0, 0, 0);
+    Geometry zone = wktReader.read("POLYGON ((1 1, 2 1, 2 0.5, 1 1))");
+
+    assertBurnedPixels(
+        RasterConstructors.asRasterWithRasterExtent(zone, testRaster, "D", false, 150, null), "[]");
+    Assert.assertEquals(
+        Double.valueOf(0), RasterBandAccessors.getZonalStatsAll(testRaster, zone)[0]);
   }
 
   @Test

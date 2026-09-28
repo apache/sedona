@@ -113,7 +113,7 @@ class OsmReaderTest extends TestBaseScala with Matchers {
     it("should be able to read from osm file on s3") {
       val container = new MinIOContainer(
         DockerImageName
-          .parse("quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z")
+          .parse("pgsty/minio:RELEASE.2026-08-04T00-00-00Z")
           .asCompatibleSubstituteFor("minio/minio"))
 
       container.start()
