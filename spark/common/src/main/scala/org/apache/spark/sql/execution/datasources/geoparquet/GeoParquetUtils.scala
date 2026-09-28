@@ -20,7 +20,7 @@ package org.apache.spark.sql.execution.datasources.geoparquet
 
 import org.apache.hadoop.fs.{FileStatus, Path}
 import org.apache.parquet.hadoop.ParquetFileWriter
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{AnalysisException, SparkSession}
 import org.apache.spark.sql.execution.datasources.geoparquet.internal.PortableSQLConf
 import org.apache.spark.sql.types.StructType
 
@@ -31,6 +31,14 @@ object GeoParquetUtils {
       sparkSession: SparkSession,
       parameters: Map[String, String],
       files: Seq[FileStatus]): Option[StructType] = {
+    if (files.isEmpty) {
+      // Spark removes the path from `parameters` before calling us, so a missing path (PySpark's
+      // load(None) calls load() with no paths) and a path without any files look the same here.
+      throw new GeoParquetNoInputFilesException(
+        "Unable to infer schema for GeoParquet: no input files found. Either no path was given " +
+          "(for example, load(None)) or the path contains no GeoParquet files. Pass a path to " +
+          "GeoParquet files, or specify the schema manually.")
+    }
     val conf = new PortableSQLConf(sparkSession.sessionState.conf)
     val parquetOptions = new internal.ParquetOptions(parameters, conf)
     val shouldMergeSchemas = parquetOptions.mergeSchema
@@ -127,3 +135,11 @@ object GeoParquetUtils {
     }
   }
 }
+
+/**
+ * Raised when there are no files to infer a GeoParquet schema from. It is an
+ * [[AnalysisException]] like the UNABLE_TO_INFER_SCHEMA error Spark raises in the same situation,
+ * so existing handlers keep working. Spark 4 only lets subclasses set the message directly.
+ */
+private[geoparquet] class GeoParquetNoInputFilesException(message: String)
+    extends AnalysisException(message)
