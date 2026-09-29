@@ -157,15 +157,17 @@ public class RasterizationTest extends RasterTestBase {
     validateRasterizeGeomExtent(
         wktLine, new double[] {5.0, 6.0, 2.0, 3.0}, testRaster, metadata, false);
 
-    // point tests
+    // point tests: a point burns exactly the one cell that contains it under GDAL's half-open
+    // rule, so its extent is that cell. On a grid corner that is the cell after both lines
+    // in pixel order: right of it and, on this north-up raster, below it.
     String wktPoint = "POINT (5.0 2.0)";
     validateRasterizeGeomExtent(
-        wktPoint, new double[] {4.0, 6.0, 1.0, 3.0}, testRaster, metadata, false);
+        wktPoint, new double[] {5.0, 6.0, 1.0, 2.0}, testRaster, metadata, false);
 
-    // intersecting 2 pixels
+    // on a vertical grid line: the cell to its right
     wktPoint = "POINT (5.0 2.5)";
     validateRasterizeGeomExtent(
-        wktPoint, new double[] {4.0, 6.0, 2.0, 3.0}, testRaster, metadata, false);
+        wktPoint, new double[] {5.0, 6.0, 2.0, 3.0}, testRaster, metadata, false);
 
     // within pixel
     wktPoint = "POINT (5.25 2.25)";
@@ -288,15 +290,17 @@ public class RasterizationTest extends RasterTestBase {
     validateRasterizeGeomExtent(
         wktLine, new double[] {5.0, 6.0, 2.0, 3.0}, testRaster, metadata, false);
 
-    // point tests
+    // point tests: a point burns exactly the one cell that contains it under GDAL's half-open
+    // rule, so its extent is that cell. On a grid corner that is the cell after both lines
+    // in pixel order: right of it and, on this bottom-up raster, above it.
     String wktPoint = "POINT (5.0 2.0)";
     validateRasterizeGeomExtent(
-        wktPoint, new double[] {4.0, 6.0, 1.0, 3.0}, testRaster, metadata, false);
+        wktPoint, new double[] {5.0, 6.0, 2.0, 3.0}, testRaster, metadata, false);
 
-    // intersecting 2 pixels
+    // on a vertical grid line: the cell to its right
     wktPoint = "POINT (5.0 2.5)";
     validateRasterizeGeomExtent(
-        wktPoint, new double[] {4.0, 6.0, 2.0, 3.0}, testRaster, metadata, false);
+        wktPoint, new double[] {5.0, 6.0, 2.0, 3.0}, testRaster, metadata, false);
 
     // within pixel
     wktPoint = "POINT (5.25 2.25)";
@@ -393,9 +397,10 @@ public class RasterizationTest extends RasterTestBase {
     double rightEdge = upperLeftX + 256 * DEM_PIXEL_SIZE;
     double bottomEdge = upperLeftY - 256 * DEM_PIXEL_SIZE;
 
-    // A zone far larger than the tile that touches it only at the bottom-right corner. The clip
-    // against the raster extent degenerates to a point, so rasterizePolygon delegates to
-    // rasterizePoint - the path RS_ZonalStatsAll hits when an admin zone merely grazes a tile.
+    // A zone far larger than the tile that touches it only at the bottom-right corner - the case
+    // RS_ZonalStatsAll hits when an admin zone merely grazes a tile. It used to overrun the grid.
+    // The zone covers no cell of the tile, so, as in GDAL (rasterio all_touched=True), it burns
+    // nothing even with allTouched.
     Geometry zone =
         new GeometryFactory()
             .createPolygon(
@@ -407,8 +412,9 @@ public class RasterizationTest extends RasterTestBase {
                   new Coordinate(rightEdge, bottomEdge)
                 });
 
-    assertSingleBurnedPixel(
-        Rasterization.rasterize(zone, testRaster, "D", 150, false, true), 255, 255);
+    assertBurnedPixels(Rasterization.rasterize(zone, testRaster, "D", 150, false, true), "[]");
+    Assert.assertEquals(
+        Double.valueOf(0), RasterBandAccessors.getZonalStatsAll(testRaster, zone, 1, true)[0]);
   }
 
   @Test
@@ -441,9 +447,11 @@ public class RasterizationTest extends RasterTestBase {
 
   @Test
   public void testCroppedOutputResolvesBoundaryContactLikeFullExtent() throws FactoryException {
-    // Cell envelopes must be built on the reference raster's grid, not the cropped output's origin.
-    // The second point sits exactly on a row boundary and so touches two rows; deriving envelopes
-    // from the crop origin put those edges an ULP off and dropped one of them.
+    // A point's cell must be resolved on the reference raster's grid, not the cropped output's
+    // origin, so a cropped output burns the same cell as a full-extent one. The second point sits
+    // on
+    // a row boundary; under GDAL's half-open rule it burns exactly one cell, (20,19) here, which is
+    // also what GDAL (rasterio all_touched=True) burns for these coordinates.
     double p = DEM_PIXEL_SIZE;
     double ulx = -180.0;
     double uly = 60.0;
@@ -457,12 +465,11 @@ public class RasterizationTest extends RasterTestBase {
                 });
 
     assertBurnedPixels(
-        RasterConstructors.asRaster(points, testRaster, "D", true, 150, null),
-        "[(0,0), (10,9), (10,10)]");
-    // the same contacts, at full-raster offsets
+        RasterConstructors.asRaster(points, testRaster, "D", true, 150, null), "[(0,0), (10,9)]");
+    // the same cells, at full-raster offsets
     assertBurnedPixels(
         RasterConstructors.asRasterWithRasterExtent(points, testRaster, "D", true, 150, null),
-        "[(10,10), (20,19), (20,20)]");
+        "[(10,10), (20,19)]");
   }
 
   @Test
@@ -830,6 +837,178 @@ public class RasterizationTest extends RasterTestBase {
       Assert.assertEquals(expectedEnvelope[1], envelope.getMaxX(), FP_TOLERANCE);
       Assert.assertEquals(expectedEnvelope[2], envelope.getMinY(), FP_TOLERANCE);
       Assert.assertEquals(expectedEnvelope[3], envelope.getMaxY(), FP_TOLERANCE);
+    }
+  }
+
+  // GDAL's half-open boundary rule (GH-3425). A cell contains its first edge in pixel order but not
+  // its last, so a geometry never burns a cell it touches only on its boundary. The expected cells
+  // are what GDAL 3.12 (rasterio.features.rasterize) burns on the same grids, identically with
+  // all_touched on and off.
+
+  /** An 8x8 grid of unit pixels over [0, 8] x [0, 8], north-up or bottom-up. */
+  private static GridCoverage2D unitGrid8x8(boolean bottomUp) throws FactoryException {
+    return bottomUp
+        ? RasterConstructors.makeEmptyRaster(1, "D", 8, 8, 0, 0, 1, 1, 0, 0, 0)
+        : RasterConstructors.makeEmptyRaster(1, "D", 8, 8, 0, 8, 1, -1, 0, 0, 0);
+  }
+
+  /** Asserts the burned pixels at full extent, with allTouched both off and on. */
+  private void assertBurnedLikeGdal(GridCoverage2D raster, String wkt, String expected)
+      throws ParseException, FactoryException {
+    Geometry geom = wktReader.read(wkt);
+    for (boolean allTouched : new boolean[] {false, true}) {
+      assertBurnedPixels(
+          RasterConstructors.asRasterWithRasterExtent(geom, raster, "D", allTouched, 150, null),
+          expected);
+    }
+  }
+
+  @Test
+  public void testPointBurnsTheHalfOpenCellContainingIt() throws ParseException, FactoryException {
+    GridCoverage2D northUp = unitGrid8x8(false);
+    // On a row line, a column line or a grid corner, only the cell after the line(s) in pixel
+    // order.
+    assertBurnedLikeGdal(northUp, "POINT (3.5 5)", "[(3,3)]");
+    assertBurnedLikeGdal(northUp, "POINT (3 4.5)", "[(3,3)]");
+    assertBurnedLikeGdal(northUp, "POINT (3 5)", "[(3,3)]");
+    // The raster's left and top edges belong to its cells; its right and bottom edges do not.
+    assertBurnedLikeGdal(northUp, "POINT (0 4.5)", "[(0,3)]");
+    assertBurnedLikeGdal(northUp, "POINT (3.5 8)", "[(3,0)]");
+    assertBurnedLikeGdal(northUp, "POINT (8 4.5)", "[]");
+    assertBurnedLikeGdal(northUp, "POINT (3.5 0)", "[]");
+    assertBurnedLikeGdal(northUp, "POINT (8 0)", "[]");
+
+    // Bottom-up, pixel order runs up the raster: a point on a horizontal grid line falls in the
+    // cell above it, and the top edge is the far edge.
+    GridCoverage2D bottomUp = unitGrid8x8(true);
+    assertBurnedLikeGdal(bottomUp, "POINT (3.5 3)", "[(3,3)]");
+    assertBurnedLikeGdal(bottomUp, "POINT (3 3)", "[(3,3)]");
+    assertBurnedLikeGdal(bottomUp, "POINT (3.5 0)", "[(3,0)]");
+    assertBurnedLikeGdal(bottomUp, "POINT (3.5 8)", "[]");
+    assertBurnedLikeGdal(bottomUp, "POINT (8 8)", "[]");
+
+    // Cropped to the geometry, the output is that single cell, or nothing on the far edge.
+    GridCoverage2D cropped =
+        RasterConstructors.asRaster(
+            wktReader.read("POINT (3 5)"), northUp, "D", true, 150, null, true);
+    Assert.assertEquals(1, RasterAccessors.getWidth(cropped));
+    Assert.assertEquals(1, RasterAccessors.getHeight(cropped));
+    Assert.assertEquals(3.0, RasterAccessors.getUpperLeftX(cropped), FP_TOLERANCE);
+    Assert.assertEquals(5.0, RasterAccessors.getUpperLeftY(cropped), FP_TOLERANCE);
+    Assert.assertNull(
+        RasterConstructors.asRaster(
+            wktReader.read("POINT (8 4.5)"), northUp, "D", true, 150, null, true));
+  }
+
+  @Test
+  public void testGridAlignedPolygonBurnsOnlyItsInterior() throws ParseException, FactoryException {
+    // Edges on grid lines touch the cells beyond them but overlap only the interior, so allTouched
+    // burns exactly the interior, along an inner corner and around a hole as well.
+    for (boolean bottomUp : new boolean[] {false, true}) {
+      GridCoverage2D raster = unitGrid8x8(bottomUp);
+      String box =
+          bottomUp ? "POLYGON ((2 2, 4 2, 4 4, 2 4, 2 2))" : "POLYGON ((2 6, 4 6, 4 4, 2 4, 2 6))";
+      String lShape =
+          bottomUp
+              ? "POLYGON ((2 2, 6 2, 6 4, 4 4, 4 6, 2 6, 2 2))"
+              : "POLYGON ((2 6, 6 6, 6 4, 4 4, 4 2, 2 2, 2 6))";
+      String boxWithHole =
+          bottomUp
+              ? "POLYGON ((1 1, 7 1, 7 7, 1 7, 1 1), (3 3, 5 3, 5 5, 3 5, 3 3))"
+              : "POLYGON ((1 7, 7 7, 7 1, 1 1, 1 7), (3 5, 5 5, 5 3, 3 3, 3 5))";
+      assertBurnedLikeGdal(raster, box, "[(2,2), (3,2), (2,3), (3,3)]");
+      assertBurnedLikeGdal(
+          raster,
+          lShape,
+          "[(2,2), (3,2), (4,2), (5,2), (2,3), (3,3), (4,3), (5,3), (2,4), (3,4), (2,5), (3,5)]");
+      assertBurnedLikeGdal(
+          raster,
+          boxWithHole,
+          "[(1,1), (2,1), (3,1), (4,1), (5,1), (6,1), (1,2), (2,2), (3,2), (4,2), (5,2), (6,2),"
+              + " (1,3), (2,3), (5,3), (6,3), (1,4), (2,4), (5,4), (6,4), (1,5), (2,5), (3,5),"
+              + " (4,5), (5,5), (6,5), (1,6), (2,6), (3,6), (4,6), (5,6), (6,6)]");
+    }
+  }
+
+  @Test
+  public void testPolygonTouchingRasterOnlyOnItsBoundaryCoversNothing()
+      throws ParseException, FactoryException, TransformException {
+    GridCoverage2D raster = unitGrid8x8(false);
+    String[] touching = {
+      "POLYGON ((-2 6, 0 6, 0 4, -2 4, -2 6))", // left edge
+      "POLYGON ((8 6, 10 6, 10 4, 8 4, 8 6))", // right edge
+      "POLYGON ((2 10, 4 10, 4 8, 2 8, 2 10))", // top edge
+      "POLYGON ((2 0, 4 0, 4 -2, 2 -2, 2 0))", // bottom edge
+      "POLYGON ((8 0, 10 0, 10 -2, 8 -2, 8 0))" // bottom-right corner
+    };
+    for (String wkt : touching) {
+      assertBurnedLikeGdal(raster, wkt, "[]");
+      Geometry zone = wktReader.read(wkt);
+      for (boolean allTouched : new boolean[] {false, true}) {
+        // No pixel is covered, so there is no extent to crop the output to.
+        Assert.assertNull(
+            RasterConstructors.asRaster(zone, raster, "D", allTouched, 150, null, true));
+        Assert.assertEquals(
+            Double.valueOf(0),
+            RasterBandAccessors.getZonalStatsAll(raster, zone, 1, allTouched)[0]);
+      }
+    }
+
+    Geometry rightEdge = wktReader.read(touching[1]);
+    // RS_SetValues leaves the raster unchanged.
+    GridCoverage2D updated = PixelFunctionEditors.setValues(raster, 1, rightEdge, 7, true);
+    Assert.assertArrayEquals(new double[64], MapAlgebra.bandAsArray(updated, 1), 0);
+    // RS_Clip keeps no pixel; cropping has nothing to crop to.
+    GridCoverage2D clipped = RasterBandEditors.clip(raster, 1, rightEdge, true, -1, false, false);
+    double[] allNoData = new double[64];
+    Arrays.fill(allNoData, -1);
+    Assert.assertArrayEquals(allNoData, MapAlgebra.bandAsArray(clipped, 1), 0);
+    Assert.assertNull(RasterBandEditors.clip(raster, 1, rightEdge, true, -1, true, true));
+    Assert.assertThrows(
+        IllegalArgumentException.class,
+        () -> RasterBandEditors.clip(raster, 1, rightEdge, true, -1, true, false));
+  }
+
+  @Test
+  public void testZoneOnTileBoundaryIsCountedOnceAcrossTiles()
+      throws ParseException, FactoryException {
+    // Two adjacent 8x8 unit tiles, A over x in [0, 8] and B over x in [8, 16], and one raster
+    // covering both. Every grid line belongs to exactly one cell, so per-tile counts of a zone that
+    // ends or starts on the A|B boundary add up to its count on the single raster.
+    GridCoverage2D tileA = RasterConstructors.makeEmptyRaster(1, "D", 8, 8, 0, 8, 1, -1, 0, 0, 0);
+    GridCoverage2D tileB = RasterConstructors.makeEmptyRaster(1, "D", 8, 8, 8, 8, 1, -1, 0, 0, 0);
+    GridCoverage2D mosaic = RasterConstructors.makeEmptyRaster(1, "D", 16, 8, 0, 8, 1, -1, 0, 0, 0);
+    for (String wkt :
+        new String[] {
+          "POLYGON ((5 2, 8 2, 8 5, 5 5, 5 2))", "POLYGON ((8 2, 11 2, 11 5, 8 5, 8 2))"
+        }) {
+      Geometry zone = wktReader.read(wkt);
+      for (boolean allTouched : new boolean[] {false, true}) {
+        double inA = RasterBandAccessors.getZonalStatsAll(tileA, zone, 1, allTouched)[0];
+        double inB = RasterBandAccessors.getZonalStatsAll(tileB, zone, 1, allTouched)[0];
+        double inMosaic = RasterBandAccessors.getZonalStatsAll(mosaic, zone, 1, allTouched)[0];
+        Assert.assertEquals(9, inMosaic, 0);
+        Assert.assertEquals(inMosaic, inA + inB, 0);
+      }
+    }
+  }
+
+  @Test
+  public void testCroppedMixedCollectionKeepsEveryMembersCells()
+      throws ParseException, FactoryException {
+    // The point lies on the collection envelope's last column line, so its half-open cell is past
+    // that envelope. The cropped window is the union of the members' windows, so the cropped
+    // output still burns the same cells as the full-extent one, which are GDAL's.
+    GridCoverage2D raster = unitGrid8x8(false);
+    String wkt = "GEOMETRYCOLLECTION (POLYGON ((1 7, 3 7, 3 5, 1 5, 1 7)), POINT (6 4.5))";
+    assertBurnedLikeGdal(raster, wkt, "[(1,1), (2,1), (1,2), (2,2), (6,3)]");
+    for (boolean allTouched : new boolean[] {false, true}) {
+      GridCoverage2D cropped =
+          RasterConstructors.asRaster(
+              wktReader.read(wkt), raster, "D", allTouched, 150, null, true);
+      Assert.assertEquals(1.0, RasterAccessors.getUpperLeftX(cropped), FP_TOLERANCE);
+      Assert.assertEquals(7.0, RasterAccessors.getUpperLeftY(cropped), FP_TOLERANCE);
+      assertBurnedPixels(cropped, "[(0,0), (1,0), (0,1), (1,1), (5,2)]");
     }
   }
 }

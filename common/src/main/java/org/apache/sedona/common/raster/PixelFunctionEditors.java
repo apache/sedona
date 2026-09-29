@@ -160,6 +160,11 @@ public class PixelFunctionEditors {
     // the background with it.
     rasterizedGeom =
         RasterConstructors.asRaster(geom, raster, bandDataType, allTouched, value, null);
+    WritableRaster rasterCopied = makeCopiedRaster(raster);
+    if (rasterizedGeom == null) {
+      // The geometry only touches the raster and covers none of its pixels, so nothing changes.
+      return RasterUtils.clone(rasterCopied, raster.getSampleDimensions(), raster, null, true);
+    }
 
     Raster rasterizedGeomData = RasterUtils.getRaster(rasterizedGeom.getRenderedImage());
     double colX = RasterAccessors.getUpperLeftX(rasterizedGeom),
@@ -168,7 +173,6 @@ public class PixelFunctionEditors {
         widthGeometryRaster = RasterAccessors.getWidth(rasterizedGeom);
     int heightOriginalRaster = RasterAccessors.getHeight(raster),
         widthOriginalRaster = RasterAccessors.getWidth(raster);
-    WritableRaster rasterCopied = makeCopiedRaster(raster);
 
     // Converting geometry to raster and then iterating through them
     int[] pixelLocation = RasterUtils.getGridCoordinatesFromWorld(raster, colX, rowY);

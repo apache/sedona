@@ -816,8 +816,10 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
           "RS_BandAsArray(RS_SetValues(raster, 1, ST_GeomFromWKT('POINT(2 -2)'), 25), 1)")
         .first()
         .getSeq(0)
-      expected = Seq(25.0, 25.0, 0.0, 0.0, 0.0, 25.0, 25.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+      // A point on a grid corner burns only the half-open cell after both grid lines, as in GDAL
+      // (rasterio), not the four cells that meet at the corner.
+      expected = Seq(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 25.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
       assert(expected.equals(actual))
 
       actual = inputDf
@@ -825,8 +827,9 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
           "RS_BandAsArray(RS_SetValues(raster, 1, ST_GeomFromWKT('MULTIPOINT((2 -2), (2 -1), (3 -3))'), 400), 1)")
         .first()
         .getSeq(0)
-      expected = Seq(400.0, 400.0, 0.0, 0.0, 0.0, 400.0, 400.0, 400.0, 0.0, 0.0, 0.0, 400.0,
-        400.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+      // One cell per point: (2 -2) and (3 -3) sit on grid corners and (2 -1) on the top edge.
+      expected = Seq(0.0, 400.0, 0.0, 0.0, 0.0, 0.0, 400.0, 0.0, 0.0, 0.0, 0.0, 0.0, 400.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
       assert(expected.equals(actual))
 
       actual = inputDf
@@ -1922,8 +1925,14 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       // polygon vertex also sits exactly on a pixel corner (coordinates are multiples of the
       // 0.25-degree pixel size), and cells the boundary merely touches at such a corner point are
       // not burned (GH-3120), which trims twelve pixels against the pre-GH-3120 count. The count is
-      // direction-independent: rasterizing the ring in reverse order yields the same 14655.
-      assertEquals(14655.0, actual)
+      // direction-independent: rasterizing the ring in reverse order yields the same count.
+      //
+      // The right edge (x = -155.25) and the bottom edge (y = 40.25) lie exactly on grid lines. They
+      // touch the column and row beyond them but overlap none of their area, so, as in GDAL, those
+      // 289 cells (190 + 100 - 1 shared corner) are not burned (GH-3425). GDAL (rasterio,
+      // all_touched=True) counts 14357 here; the remaining nine cells are near-corner cells along
+      // the steep left edge, a separate difference.
+      assertEquals(14366.0, actual)
 
       actual =
         df.selectExpr("RS_ZonalStats(raster, geom, 1, 'mean', false, false)").first().get(0)
