@@ -20,6 +20,7 @@ import random
 import numpy as np
 import rasterio.features
 from affine import Affine
+from shapely.affinity import affine_transform
 from shapely.geometry import Polygon
 from shapely.wkt import loads as wkt_loads
 
@@ -218,3 +219,74 @@ class TestRasterizeParity(TestBase):
             dtype="uint8",
         )
         assert np.array_equal(actual, expected)
+
+    def test_as_raster_half_open_cell_boundaries_match_gdal(self):
+        """Geometries lying exactly on grid lines (GH-3425). GDAL treats every
+        cell as half-open, with or without all_touched: a cell contains its
+        first edge in pixel order but not its last. A point on a grid line or
+        a grid corner burns exactly one cell, a point on the raster's far edge
+        burns none, a grid-aligned polygon burns only its interior, and a
+        polygon that only touches the raster burns nothing."""
+        grids = [
+            # width, height, ulx, uly, sx, sy
+            (8, 8, 0.0, 8.0, 1.0, -1.0),  # north-up
+            (8, 8, 0.0, 0.0, 1.0, 1.0),  # bottom-up
+            (8, 8, 100.25, 50.5, 0.25, -0.25),  # decimal pixel size
+        ]
+        # Geometries in pixel coordinates (column, row), mapped onto each grid.
+        pixel_wkts = [
+            "POINT (3.5 3)",  # on a row line
+            "POINT (3 3.5)",  # on a column line
+            "POINT (3 3)",  # on a grid corner
+            "POINT (0 3.5)",  # on the first column edge
+            "POINT (8 3.5)",  # on the last column edge
+            "POINT (3.5 0)",  # on the first row edge
+            "POINT (3.5 8)",  # on the last row edge
+            "POINT (8 8)",  # on the far corner
+            "MULTIPOINT ((3 3.5), (5.5 5.5))",
+            "POLYGON ((2 2, 4 2, 4 4, 2 4, 2 2))",
+            "POLYGON ((2 2, 6 2, 6 4, 4 4, 4 6, 2 6, 2 2))",
+            "POLYGON ((1 1, 7 1, 7 7, 1 7, 1 1), (3 3, 5 3, 5 5, 3 5, 3 3))",
+            "POLYGON ((-3 2, 2 2, 2 4, -3 4, -3 2))",  # past the first column edge
+            "POLYGON ((6 2, 11 2, 11 4, 6 4, 6 2))",  # past the last column edge
+            "POLYGON ((2 -3, 4 -3, 4 2, 2 2, 2 -3))",  # past the first row edge
+            "POLYGON ((2 6, 4 6, 4 11, 2 11, 2 6))",  # past the last row edge
+            "POLYGON ((-2 2, 0 2, 0 4, -2 4, -2 2))",  # touching the first column edge
+            "POLYGON ((8 2, 10 2, 10 4, 8 4, 8 2))",  # touching the last column edge
+            "POLYGON ((2 -2, 4 -2, 4 0, 2 0, 2 -2))",  # touching the first row edge
+            "POLYGON ((2 8, 4 8, 4 10, 2 10, 2 8))",  # touching the last row edge
+            "POLYGON ((8 8, 10 8, 10 10, 8 10, 8 8))",  # touching the far corner
+        ]
+        cases = []
+        for width, height, ulx, uly, sx, sy in grids:
+            for pixel_wkt in pixel_wkts:
+                geom = affine_transform(wkt_loads(pixel_wkt), [sx, 0, 0, sy, ulx, uly])
+                cases.append((len(cases), width, height, ulx, uly, sx, sy, geom.wkt))
+        df = self.spark.createDataFrame(
+            cases,
+            "id INT, width INT, height INT, ulx DOUBLE, uly DOUBLE, "
+            "sx DOUBLE, sy DOUBLE, wkt STRING",
+        )
+        for all_touched in (False, True):
+            rows = df.selectExpr(
+                "id",
+                "RS_BandAsArray(RS_AsRaster(ST_GeomFromWKT(wkt), "
+                "RS_MakeEmptyRaster(1, 'd', width, height, ulx, uly, sx, sy, 0, 0, 0), "
+                f"'d', {str(all_touched).lower()}, 1.0, 0.0, false), 1) as band",
+            ).collect()
+            bands = {row["id"]: row["band"] for row in rows}
+
+            for case_id, width, height, ulx, uly, sx, sy, wkt in cases:
+                actual = np.array(bands[case_id], dtype=float).reshape(height, width)
+                expected = rasterio.features.rasterize(
+                    [(wkt_loads(wkt), 1)],
+                    out_shape=(height, width),
+                    fill=0,
+                    transform=Affine(sx, 0, ulx, 0, sy, uly),
+                    all_touched=all_touched,
+                    dtype="uint8",
+                )
+                assert np.array_equal(actual, expected), (
+                    f"case {case_id} all_touched={all_touched}: grid {width}x{height}, "
+                    f"scale ({sx}, {sy}), origin ({ulx}, {uly}), {wkt}"
+                )
