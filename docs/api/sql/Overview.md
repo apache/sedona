@@ -65,7 +65,7 @@ var myDataFrame = sedona.sql("YOUR_SQL")
 	* Example: RS_Value (raster, point). Given a Raster and a Point geometry, return the pixel value at that location.
 	* Documentation: Functions are organized by category. See [Raster Accessors](Raster-Functions.md#raster-accessors), [Raster Operators](Raster-Functions.md#raster-operators), [Raster Band Accessors](Raster-Functions.md#raster-band-accessors), [Raster Output](Raster-Functions.md#raster-output), and other categories in the sidebar.
 * Aggregate function: Return the aggregated value on the given Raster column
-	* Example: RS_Union_Aggr (Raster column). Given a Raster column, combine all rasters into a single multiband raster.
+	* Example: RS_Stack_Aggr (Raster column). Given a Raster column, combine all rasters into a single multiband raster.
 	* Documentation: [Here](Raster-Functions.md#raster-aggregate-functions)
 * Predicate: Execute a logic judgement on the given columns and return true or false
 	* Example: RS_Intersects (raster, geometry). Check if a raster intersects a geometry. Return "True" if yes, else return "False".

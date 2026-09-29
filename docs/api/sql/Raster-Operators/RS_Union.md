@@ -19,51 +19,6 @@
 
 # RS_Union
 
-Introduction: Returns a combined multi-band raster from 2 or more input Rasters. The order of bands in the resultant raster will be in the order of the input rasters. For example if `RS_Union` is called on two 2-banded raster, raster1 and raster2, the first 2 bands of the resultant 4-banded raster will be from raster1 and the last 2 from raster 2.
-
-!!!note
-    If the provided input Rasters don't have same shape an IllegalArgumentException will be thrown.
-
-![RS_Union](../../../image/RS_Union/RS_Union.svg "RS_Union")
-
-Format:
-
-```sql
-RS_Union (raster1: Raster, raster2: Raster)
-```
-
-```sql
-RS_Union (raster1: Raster, raster2: Raster, raster3: Raster)
-```
-
-```sql
-RS_Union (raster1: Raster, raster2: Raster, raster3: Raster, raster4: Raster)
-```
-
-```sql
-RS_Union (raster1: Raster, raster2: Raster, raster3: Raster, raster4: Raster, raster5: Raster)
-```
-
-```sql
-RS_Union (raster1: Raster, raster2: Raster, raster3: Raster, raster4: Raster, raster5: Raster, raster6: Raster)
-```
-
-```sql
-RS_Union (raster1: Raster, raster2: Raster, raster3: Raster, raster4: Raster, raster5: Raster, raster6: Raster, raster7: Raster)
-```
-
-Return type: `Raster`
+Introduction: Deprecated alias of [RS_Stack](RS_Stack.md), which returns a combined multi-band raster from 2 or more input Rasters by stacking their bands. The function was renamed because it does not merge grids the way a raster union does; use `RS_Stack` in new code.
 
 Since: `v1.6.0`
-
-SQL Example
-
-```sql
-SELECT RS_Union(raster1, raster2, raster3, raster4) FROM rasters
-```
-
-Output:
-
-```
-GridCoverage2D["g...
-```

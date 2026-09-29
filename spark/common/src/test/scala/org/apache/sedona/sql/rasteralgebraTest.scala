@@ -642,7 +642,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         "RS_Metadata(raster) as metadata")
     }
 
-    it("Passed RS_Union") {
+    it("Passed RS_Stack") {
       val inputDf = Seq(
         (
           Seq(13, 80, 49, 15, 4, 46, 47, 94, 58, 37, 6, 22, 98, 26, 78, 66, 86, 79, 5, 65, 7, 12,
@@ -657,7 +657,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         "RS_AddBandFromArray(RS_MakeEmptyRaster(1, 4, 6, 1, -1, 1, 1, 0, 0, 0), band3, 1) as raster2",
         "RS_AddBandFromArray(RS_AddBandFromArray(RS_MakeEmptyRaster(2, 4, 6, 1, -1, 1, 1, 0, 0, 0), band1, 1), band3, 2) as raster3")
 
-      var actualDf = df.selectExpr("RS_Union(raster1, raster2) as actualRaster")
+      var actualDf = df.selectExpr("RS_Stack(raster1, raster2) as actualRaster")
 
       var actualNumBands = actualDf.selectExpr("RS_NumBands(actualRaster)").first().getInt(0)
       var expectedNumBands = 3
@@ -674,7 +674,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         df,
         "RS_Metadata(raster1) as metadata")
 
-      actualDf = df.selectExpr("RS_Union(raster1, raster2, raster3) as actualRaster")
+      actualDf = df.selectExpr("RS_Stack(raster1, raster2, raster3) as actualRaster")
 
       actualNumBands = actualDf.selectExpr("RS_NumBands(actualRaster)").first().getInt(0)
       expectedNumBands = 5
@@ -694,7 +694,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         "RS_Metadata(raster1) as metadata")
 
       actualDf = df.selectExpr(
-        "RS_Union(raster1, raster2, raster3, raster1, raster2, raster3, raster1) as actualRaster")
+        "RS_Stack(raster1, raster2, raster3, raster1, raster2, raster3, raster1) as actualRaster")
 
       actualNumBands = actualDf.selectExpr("RS_NumBands(actualRaster)").first().getInt(0)
       expectedNumBands = 12
@@ -712,6 +712,15 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         "RS_Metadata(actualRaster) as metadata",
         df,
         "RS_Metadata(raster1) as metadata")
+
+      // RS_Union is a deprecated alias of RS_Stack.
+      val aliasDf = df.selectExpr(
+        "RS_Stack(raster1, raster2) as stacked",
+        "RS_Union(raster1, raster2) as unioned")
+      assertEquals(3, aliasDf.selectExpr("RS_NumBands(unioned)").first().getInt(0))
+      assertEquals(
+        aliasDf.selectExpr("RS_BandAsArray(stacked, 3)").first().getSeq(0),
+        aliasDf.selectExpr("RS_BandAsArray(unioned, 3)").first().getSeq(0))
     }
 
     it("Passed RS_AddBand with empty raster") {
@@ -1728,7 +1737,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(expected, actual)
     }
 
-    it("Passed RS_Union_Aggr") {
+    it("Passed RS_Stack_Aggr") {
       var df = sparkSession.read
         .format("binaryFile")
         .load(resourceFolder + "raster/test1.tiff")
@@ -1747,7 +1756,15 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .load(resourceFolder + "raster/test1.tiff")
         .selectExpr("RS_FromGeoTiff(content) as raster")
 
-      df = df.selectExpr("RS_Union_aggr(raster, index) as rasters")
+      // RS_Union_Aggr is a deprecated alias of RS_Stack_Aggr.
+      val aliasBands = df
+        .selectExpr("RS_Union_Aggr(raster, index) as rasters")
+        .selectExpr("RS_NumBands(rasters)")
+        .first()
+        .get(0)
+      assertEquals(3, aliasBands)
+
+      df = df.selectExpr("RS_Stack_aggr(raster, index) as rasters")
 
       val actualBands = df.selectExpr("RS_NumBands(rasters)").first().get(0)
       val expectedBands = 3
@@ -1760,7 +1777,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertTrue(expectedMetadata.equals(actualMetadata))
     }
 
-    it("Passed multi-band RS_Union_Aggr") {
+    it("Passed multi-band RS_Stack_Aggr") {
       var df = sparkSession.read
         .format("binaryFile")
         .load(resourceFolder + "raster/test4.tiff")
@@ -1798,7 +1815,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       // Aggregate rasters based on their indexes to create two separate 2-banded rasters
       var aggregatedDF1 = df
         .groupBy("group")
-        .agg(expr("RS_Union_Aggr(raster, index) as multi_band_raster"))
+        .agg(expr("RS_Stack_Aggr(raster, index) as multi_band_raster"))
         .orderBy("group")
       aggregatedDF1 = aggregatedDF1.withColumn("meta", expr("RS_MetaData(multi_band_raster)"))
       aggregatedDF1 = aggregatedDF1
@@ -1807,7 +1824,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
       // Aggregate rasters based on their group to create one 4-banded raster
       var aggregatedDF2 =
-        aggregatedDF1.selectExpr("RS_Union_Aggr(multi_band_raster, group) as raster")
+        aggregatedDF1.selectExpr("RS_Stack_Aggr(multi_band_raster, group) as raster")
       aggregatedDF2 = aggregatedDF2.withColumn("meta", expr("RS_MetaData(raster)"))
       aggregatedDF2 = aggregatedDF2
         .withColumn("summary1", expr("RS_SummaryStatsALl(raster, 1)"))

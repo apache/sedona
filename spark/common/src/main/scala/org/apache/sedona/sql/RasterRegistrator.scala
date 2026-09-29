@@ -31,20 +31,22 @@ object RasterRegistrator {
   def registerAll(sparkSession: SparkSession): Unit = {
     if (isGeoToolsAvailable) {
       RasterUdtRegistratorWrapper.registerAll(gridClassName)
-      val functionName = RasterUdafCatalog.rasterAggregateExpression.getClass.getSimpleName
-      val functionIdentifier = FunctionIdentifier(functionName)
-      if (!sparkSession.sessionState.functionRegistry.functionExists(functionIdentifier)) {
-        sparkSession.udf.register(
-          functionName,
-          functions.udaf(RasterUdafCatalog.rasterAggregateExpression))
+      RasterUdafCatalog.rasterAggregateNames.foreach { functionName =>
+        val functionIdentifier = FunctionIdentifier(functionName)
+        if (!sparkSession.sessionState.functionRegistry.functionExists(functionIdentifier)) {
+          sparkSession.udf.register(
+            functionName,
+            functions.udaf(RasterUdafCatalog.rasterAggregateExpression))
+        }
       }
     }
   }
 
   def dropAll(sparkSession: SparkSession): Unit = {
     if (isGeoToolsAvailable) {
-      sparkSession.sessionState.functionRegistry.dropFunction(
-        FunctionIdentifier(RasterUdafCatalog.rasterAggregateExpression.getClass.getSimpleName))
+      RasterUdafCatalog.rasterAggregateNames.foreach { functionName =>
+        sparkSession.sessionState.functionRegistry.dropFunction(FunctionIdentifier(functionName))
+      }
     }
   }
 }

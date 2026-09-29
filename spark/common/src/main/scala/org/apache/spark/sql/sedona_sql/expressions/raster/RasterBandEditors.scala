@@ -46,14 +46,34 @@ private[apache] case class RS_AddBand(inputExpressions: Seq[Expression])
   }
 }
 
+/**
+ * Stacks the bands of 2 to 7 rasters, in argument order, into one raster.
+ */
+private[apache] case class RS_Stack(inputExpressions: Seq[Expression])
+    extends InferredExpression(RS_Stack.overloads: _*) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] object RS_Stack {
+
+  /** The overloads of RS_Stack, shared with its deprecated alias RS_Union. */
+  def overloads: Seq[InferrableFunction] = Seq(
+    inferrableFunction2(RasterBandEditors.rasterUnion),
+    inferrableFunction3(RasterBandEditors.rasterUnion),
+    inferrableFunction4(RasterBandEditors.rasterUnion),
+    inferrableFunction5(RasterBandEditors.rasterUnion),
+    inferrableFunction6(RasterBandEditors.rasterUnion),
+    inferrableFunction7(RasterBandEditors.rasterUnion))
+}
+
+/**
+ * Deprecated alias of [[RS_Stack]], kept for compatibility. The function stacks bands; it does
+ * not merge grids the way a raster union (PostGIS ST_Union) does.
+ */
 private[apache] case class RS_Union(inputExpressions: Seq[Expression])
-    extends InferredExpression(
-      inferrableFunction2(RasterBandEditors.rasterUnion),
-      inferrableFunction3(RasterBandEditors.rasterUnion),
-      inferrableFunction4(RasterBandEditors.rasterUnion),
-      inferrableFunction5(RasterBandEditors.rasterUnion),
-      inferrableFunction6(RasterBandEditors.rasterUnion),
-      inferrableFunction7(RasterBandEditors.rasterUnion)) {
+    extends InferredExpression(RS_Stack.overloads: _*) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

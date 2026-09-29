@@ -412,6 +412,7 @@ object Catalog extends AbstractCatalog with Logging {
     function[RS_SetValue](),
     function[RS_SetValues](),
     function[RS_SRID](),
+    function[RS_Stack](),
     function[RS_Union](),
     function[RS_Value](1),
     function[RS_Values](1))

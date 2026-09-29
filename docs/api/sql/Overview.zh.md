@@ -65,7 +65,7 @@ var myDataFrame = sedona.sql("YOUR_SQL")
 	* 示例：RS_Value (raster, point)。给定一个 Raster 和一个 Point 几何对象，返回该位置上的像元值。
 	* 文档：函数按类别组织。参见 [Raster Accessors](Raster-Functions.md#raster-accessors)、[Raster Operators](Raster-Functions.md#raster-operators)、[Raster Band Accessors](Raster-Functions.md#raster-band-accessors)、[Raster Output](Raster-Functions.md#raster-output)，以及侧边栏中的其他分类。
 * 聚合函数（Aggregate function）：对给定的 Raster 列返回聚合后的值
-	* 示例：RS_Union_Aggr (Raster column)。给定一个 Raster 列，将所有 Raster 合并为单个多波段栅格。
+	* 示例：RS_Stack_Aggr (Raster column)。给定一个 Raster 列，将所有 Raster 合并为单个多波段栅格。
 	* 文档：[点击查看](Raster-Functions.md#raster-aggregate-functions)
 * 谓词（Predicate）：在给定的列上执行逻辑判断，返回 true 或 false
 	* 示例：RS_Intersects (raster, geometry)。判断一个栅格是否与一个几何对象相交。如果是则返回 "True"，否则返回 "False"。
