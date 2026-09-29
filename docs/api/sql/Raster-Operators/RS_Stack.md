@@ -25,7 +25,7 @@ Introduction: Returns a combined multi-band raster from 2 or more input Rasters,
     If the provided input Rasters don't have same shape an IllegalArgumentException will be thrown.
 
 !!!note
-    This function was named `RS_Union` before v2.0.0. `RS_Union` still works as a deprecated alias, but the function stacks bands rather than merging grids the way a raster union does, so prefer `RS_Stack`.
+    This function was named `RS_Union` before v2.0.0. It was renamed because it stacks bands rather than merging grids the way a raster union does; `RS_Union` no longer exists.
 
 ![RS_Stack](../../../image/RS_Stack/RS_Stack.svg "RS_Stack")
 

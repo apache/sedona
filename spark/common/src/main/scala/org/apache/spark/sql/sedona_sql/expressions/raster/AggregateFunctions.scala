@@ -33,8 +33,8 @@ import scala.collection.mutable.ArrayBuffer
 case class BandData(index: Int, width: Int, height: Int, serializedRaster: Array[Byte])
 
 /**
- * Return a raster containing bands at given indexes from all rasters in a given column.
- * Registered as RS_Stack_Aggr, and as RS_Union_Aggr, its deprecated alias.
+ * Return a raster containing bands at given indexes from all rasters in a given column. Named
+ * RS_Union_Aggr before Sedona 2.0.
  */
 class RS_Stack_Aggr
     extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandData], GridCoverage2D] {

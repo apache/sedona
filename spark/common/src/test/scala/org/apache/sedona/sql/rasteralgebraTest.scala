@@ -712,15 +712,6 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         "RS_Metadata(actualRaster) as metadata",
         df,
         "RS_Metadata(raster1) as metadata")
-
-      // RS_Union is a deprecated alias of RS_Stack.
-      val aliasDf = df.selectExpr(
-        "RS_Stack(raster1, raster2) as stacked",
-        "RS_Union(raster1, raster2) as unioned")
-      assertEquals(3, aliasDf.selectExpr("RS_NumBands(unioned)").first().getInt(0))
-      assertEquals(
-        aliasDf.selectExpr("RS_BandAsArray(stacked, 3)").first().getSeq(0),
-        aliasDf.selectExpr("RS_BandAsArray(unioned, 3)").first().getSeq(0))
     }
 
     it("Passed RS_AddBand with empty raster") {
@@ -1755,14 +1746,6 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .format("binaryFile")
         .load(resourceFolder + "raster/test1.tiff")
         .selectExpr("RS_FromGeoTiff(content) as raster")
-
-      // RS_Union_Aggr is a deprecated alias of RS_Stack_Aggr.
-      val aliasBands = df
-        .selectExpr("RS_Union_Aggr(raster, index) as rasters")
-        .selectExpr("RS_NumBands(rasters)")
-        .first()
-        .get(0)
-      assertEquals(3, aliasBands)
 
       df = df.selectExpr("RS_Stack_aggr(raster, index) as rasters")
 

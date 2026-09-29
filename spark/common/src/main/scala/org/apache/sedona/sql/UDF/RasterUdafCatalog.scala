@@ -28,10 +28,4 @@ object RasterUdafCatalog {
   val rasterAggregateExpression
       : Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandData], GridCoverage2D] =
     new RS_Stack_Aggr
-
-  /**
-   * The names the raster aggregate is registered under: RS_Stack_Aggr, and RS_Union_Aggr, its
-   * deprecated alias.
-   */
-  val rasterAggregateNames: Seq[String] = Seq("RS_Stack_Aggr", "RS_Union_Aggr")
 }
