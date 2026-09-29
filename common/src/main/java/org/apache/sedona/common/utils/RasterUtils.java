@@ -537,7 +537,8 @@ public class RasterUtils {
 
   public static Point2D getWorldCornerCoordinates(GridCoverage2D raster, int colX, int rowY)
       throws TransformException {
-    Point2D.Double gridCoord = new Position2D(colX - 1, rowY - 1);
+    // Subtract in double: colX - 1 in int wraps Integer.MIN_VALUE to Integer.MAX_VALUE.
+    Point2D.Double gridCoord = new Position2D(colX - 1.0, rowY - 1.0);
     return raster
         .getGridGeometry()
         .getGridToCRS2D(PixelOrientation.UPPER_LEFT)
