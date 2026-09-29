@@ -81,10 +81,14 @@ public class ShapeFileReader extends RecordReader<ShapeKey, ShpRecord> {
       if (indexId == indexes.length) {
         return false;
       }
-      // check offset, if current offset in inputStream not match with information in shx, move it
+      // check offset, if current offset in inputStream not match with information in shx, move it.
+      // Only move forward: moving back would reread a record while the .dbf reader moves on.
       long pos = indexes[indexId] * 2L;
-      if (shpInputStream.getPos() != pos) {
-        shpInputStream.seek(pos);
+      if (shpInputStream.getPos() < pos) {
+        long skipBytes = pos - shpInputStream.getPos();
+        if (shpInputStream.skip(skipBytes) != skipBytes) {
+          throw new IOException("Failed to seek to the right place in .shp file");
+        }
       }
       recordKey = new ShapeKey();
       recordKey.setIndex(parser.parseRecordHeadID());
