@@ -27,6 +27,9 @@ RS_Values can be significantly faster since a raster only has to be loaded once 
 !!!Note
     Since `v1.5.1`, if the coordinate reference system (CRS) of the input `points` geometries differs from that of the `raster`, then `points` will be transformed to match the CRS of the `raster`. If the `raster` or `points` doesn't have a CRS then it will default to `4326/WGS84`.
 
+!!!Note
+    Since `v2.0.0`, grid coordinates are 1-based, as in PostGIS `ST_Value`: `(1, 1)` is the upper-left pixel. Earlier versions read them 0-based.
+
 Format:
 
 `RS_Values (raster: Raster, points: ARRAY[Geometry])`
@@ -53,7 +56,7 @@ FROM raster_table
 - For Arrays of grid coordinates:
 
 ```sql
-SELECT RS_Values(raster, Array(4, 5), Array(3, 2), 1) FROM raster_table
+SELECT RS_Values(raster, Array(5, 6), Array(4, 3), 1) FROM raster_table
 ```
 
 Output:

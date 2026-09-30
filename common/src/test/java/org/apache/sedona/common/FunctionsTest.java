@@ -3482,6 +3482,43 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void geometryNIsOneBased() throws ParseException {
+    // PostGIS semantics: n = 1 is the first element; 0, negatives and n > N are null.
+    Geometry multiPoint = geomFromWKT("MULTIPOINT ((1 1), (2 2), (3 3))", 4326);
+    assertEquals("POINT (1 1)", Functions.asWKT(Functions.geometryN(multiPoint, 1)));
+    assertEquals("POINT (3 3)", Functions.asWKT(Functions.geometryN(multiPoint, 3)));
+    assertEquals(4326, Functions.geometryN(multiPoint, 1).getSRID());
+    assertNull(Functions.geometryN(multiPoint, 0));
+    assertNull(Functions.geometryN(multiPoint, -1));
+    assertNull(Functions.geometryN(multiPoint, 4));
+
+    // A non-collection is its own first geometry.
+    Geometry point = geomFromWKT("POINT (1 1)", 0);
+    assertEquals("POINT (1 1)", Functions.asWKT(Functions.geometryN(point, 1)));
+    assertNull(Functions.geometryN(point, 0));
+    assertNull(Functions.geometryN(point, 2));
+  }
+
+  @Test
+  public void interiorRingNIsOneBased() throws ParseException {
+    // PostGIS semantics: n = 1 is the first hole; 0, negatives and n > N are null.
+    Geometry polygon =
+        geomFromWKT(
+            "POLYGON ((0 0, 6 0, 6 6, 0 6, 0 0), (1 1, 1 2, 2 2, 2 1, 1 1), (4 4, 4 5, 5 5, 5 4, 4 4))",
+            0);
+    assertEquals(
+        "LINESTRING (1 1, 1 2, 2 2, 2 1, 1 1)",
+        Functions.asWKT(Functions.interiorRingN(polygon, 1)));
+    assertEquals(
+        "LINESTRING (4 4, 4 5, 5 5, 5 4, 4 4)",
+        Functions.asWKT(Functions.interiorRingN(polygon, 2)));
+    assertNull(Functions.interiorRingN(polygon, 0));
+    assertNull(Functions.interiorRingN(polygon, -1));
+    assertNull(Functions.interiorRingN(polygon, 3));
+    assertNull(Functions.interiorRingN(geomFromWKT("POINT (0 0)", 0), 1));
+  }
+
+  @Test
   public void nRingsPolygonOnlyExternal() throws Exception {
     Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
     Integer expected = 1;

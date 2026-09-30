@@ -71,10 +71,10 @@ These functions extract information and properties from geometry objects.
 | [ST_DumpPoints](Geometry-Accessors/ST_DumpPoints.md) | Returns a MultiPoint geometry which consists of individual points that compose the input line string. |
 | [ST_EndPoint](Geometry-Accessors/ST_EndPoint.md) | Returns last point of given linestring. |
 | [ST_ExteriorRing](Geometry-Accessors/ST_ExteriorRing.md) | Returns a line string representing the exterior ring of the POLYGON geometry. Return NULL if the geometry is not a polygon. |
-| [ST_GeometryN](Geometry-Accessors/ST_GeometryN.md) | Return the 0-based Nth geometry if the geometry is a GEOMETRYCOLLECTION, (MULTI)POINT, (MULTI)LINESTRING, MULTICURVE or (MULTI)POLYGON. Otherwise, return null |
+| [ST_GeometryN](Geometry-Accessors/ST_GeometryN.md) | Return the 1-based Nth geometry if the geometry is a GEOMETRYCOLLECTION, (MULTI)POINT, (MULTI)LINESTRING, MULTICURVE or (MULTI)POLYGON. Otherwise, return null |
 | [ST_GeometryType](Geometry-Accessors/ST_GeometryType.md) | Returns the type of the geometry as a string. EG: 'ST_Linestring', 'ST_Polygon' etc. |
 | [ST_HasZ](Geometry-Accessors/ST_HasZ.md) | Checks for the presence of Z coordinate values representing measures or linear references. Returns true if the input geometry includes an Z coordinate, false otherwise. |
-| [ST_InteriorRingN](Geometry-Accessors/ST_InteriorRingN.md) | Returns the Nth interior linestring ring of the polygon geometry. Returns NULL if the geometry is not a polygon or the given N is out of range |
+| [ST_InteriorRingN](Geometry-Accessors/ST_InteriorRingN.md) | Returns the Nth (1-based) interior linestring ring of the polygon geometry. Returns NULL if the geometry is not a polygon or the given N is out of range |
 | [ST_IsClosed](Geometry-Accessors/ST_IsClosed.md) | RETURNS true if the LINESTRING start and end point are the same. |
 | [ST_IsCollection](Geometry-Accessors/ST_IsCollection.md) | Returns `TRUE` if the geometry type of the input is a geometry collection type. Collection types are the following: |
 | [ST_IsEmpty](Geometry-Accessors/ST_IsEmpty.md) | Test if a geometry is empty geometry |

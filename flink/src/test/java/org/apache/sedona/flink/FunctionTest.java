@@ -1139,7 +1139,7 @@ public class FunctionTest extends TestBase {
             "SELECT ST_GeomFromWKT('GEOMETRYCOLLECTION(POINT(10 10), POINT(30 30), LINESTRING(15 15, 20 20))') AS collection");
     Table resultTable =
         collectionTable.select(
-            call(Functions.ST_GeometryN.class.getSimpleName(), $("collection"), 1));
+            call(Functions.ST_GeometryN.class.getSimpleName(), $("collection"), 2));
     Point point = (Point) first(resultTable).getField(0);
     assertEquals("POINT (30 30)", point.toString());
   }
@@ -1151,7 +1151,7 @@ public class FunctionTest extends TestBase {
             "SELECT ST_GeomFromText('POLYGON((7 9,8 7,11 6,15 8,16 6,17 7,17 10,18 12,17 14,15 15,11 15,10 13,9 12,7 9),(9 9,10 10,11 11,11 10,10 8,9 9),(12 14,15 14,13 11,12 14))') AS polygon");
     Table resultTable =
         polygonTable.select(
-            call(Functions.ST_InteriorRingN.class.getSimpleName(), $("polygon"), 1));
+            call(Functions.ST_InteriorRingN.class.getSimpleName(), $("polygon"), 2));
     LineString lineString = (LineString) first(resultTable).getField(0);
     assertEquals("LINESTRING (12 14, 15 14, 13 11, 12 14)", lineString.toString());
   }

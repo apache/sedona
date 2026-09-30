@@ -19,12 +19,19 @@
 
 ## Sedona 2.0.0
 
+See [Migrating to Sedona 2.0](migration-2.0.md) for what to check when upgrading from 1.x.
+
 ### Breaking Changes
 
+* **Positions count from 1, as in PostGIS**: `ST_GeometryN` and `ST_InteriorRingN` read `n`
+  1-based, and the grid-coordinate forms of `RS_Value` and `RS_Values` read `(1, 1)` as the
+  upper-left pixel. They were 0-based, so existing queries now address the next element or pixel;
+  add 1 to the index. An index of `0` or below returns `NULL`.
 * **`RS_Union` and `RS_Union_Aggr` are renamed `RS_Stack` and `RS_Stack_Aggr`**: the functions
   stack the bands of several rasters into one raster; they do not merge grids the way a raster
   union (PostGIS `ST_Union`) does. The old names are removed, so replace them in queries. The
   behaviour is unchanged.
+
 * **WKB output**: `ST_AsBinary`, `ST_AsEWKB`, and `ST_AsHEXEWKB` now retain M for measured
   geometries in Spark, Flink, and Snowflake, including geometries read from WKT. Earlier
   versions dropped M, so these inputs now produce XYM or XYZM instead of XY or XYZ.

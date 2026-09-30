@@ -1761,8 +1761,8 @@ class functionTestScala
             |)
             |SELECT
             |  ST_SRID(geom),
-            |  ST_HasZ(ST_GeometryN(ST_GeometryN(geom, 0), 0)),
-            |  ST_HasM(ST_GeometryN(ST_GeometryN(geom, 0), 0))
+            |  ST_HasZ(ST_GeometryN(ST_GeometryN(geom, 1), 1)),
+            |  ST_HasM(ST_GeometryN(ST_GeometryN(geom, 1), 1))
             |FROM shared
             |""".stripMargin)
         .first()
@@ -1886,12 +1886,14 @@ class functionTestScala
   }
 
   it("Should pass ST_GeometryN") {
-    calculateGeometryN("MULTIPOINT((1 2), (3 4), (5 6), (8 9))", 0) shouldBe Some("POINT (1 2)")
-    calculateGeometryN("MULTIPOINT((1 2), (3 4), (5 6), (8 9))", 1) shouldBe Some("POINT (3 4)")
-    calculateGeometryN("MULTIPOINT((1 2), (3 4), (5 6), (8 9))", 2) shouldBe Some("POINT (5 6)")
-    calculateGeometryN("MULTIPOINT((1 2), (3 4), (5 6), (8 9))", 3) shouldBe Some("POINT (8 9)")
-    calculateGeometryN("MULTIPOINT((1 2), (3 4), (5 6), (8 9))", 4) shouldBe None
-    calculateGeometryN("MULTIPOINT((1 2), (3 4), (5 6), (8 9))", 4) shouldBe None
+    // 1-based, as in PostGIS
+    calculateGeometryN("MULTIPOINT((1 2), (3 4), (5 6), (8 9))", 1) shouldBe Some("POINT (1 2)")
+    calculateGeometryN("MULTIPOINT((1 2), (3 4), (5 6), (8 9))", 2) shouldBe Some("POINT (3 4)")
+    calculateGeometryN("MULTIPOINT((1 2), (3 4), (5 6), (8 9))", 3) shouldBe Some("POINT (5 6)")
+    calculateGeometryN("MULTIPOINT((1 2), (3 4), (5 6), (8 9))", 4) shouldBe Some("POINT (8 9)")
+    calculateGeometryN("MULTIPOINT((1 2), (3 4), (5 6), (8 9))", 5) shouldBe None
+    calculateGeometryN("MULTIPOINT((1 2), (3 4), (5 6), (8 9))", 0) shouldBe None
+    calculateGeometryN("MULTIPOINT((1 2), (3 4), (5 6), (8 9))", -1) shouldBe None
 
   }
 
@@ -1906,7 +1908,7 @@ class functionTestScala
       .union(createSampleLineStringsDf(5, "geom"))
 
     When("Using ST_InteriorRingN")
-    val wholes = (0 until 3).flatMap(index =>
+    val wholes = (1 to 3).flatMap(index =>
       polygonDf
         .selectExpr(s"ST_InteriorRingN(geom, $index) as geom")
         .selectExpr("ST_AsText(geom)")

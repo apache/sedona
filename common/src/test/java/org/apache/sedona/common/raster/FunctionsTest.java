@@ -99,10 +99,11 @@ public class FunctionsTest extends RasterTestBase {
 
   @Test
   public void valueWithGridCoords() throws TransformException {
-    int insideX = 1;
-    int insideY = 0;
-    int outsideX = 4;
-    int outsideY = 4;
+    // Grid coordinates are 1-based, as in PostGIS ST_Value.
+    int insideX = 2;
+    int insideY = 1;
+    int outsideX = 5;
+    int outsideY = 5;
 
     Double insideValue = PixelFunctions.value(oneBandRaster, insideX, insideY, 1);
     assertNotNull("Value should not be null for points inside the envelope.", insideValue);
@@ -110,12 +111,16 @@ public class FunctionsTest extends RasterTestBase {
         "Points outside of the envelope should return null.",
         PixelFunctions.value(oneBandRaster, outsideX, outsideY, 1));
 
-    int noDataX = 0;
-    int noDataY = 0;
+    int noDataX = 1;
+    int noDataY = 1;
 
     assertNull(
         "Null should be returned for no data values.",
         PixelFunctions.value(oneBandRaster, noDataX, noDataY, 1));
+
+    assertNull(
+        "Column 0 is outside the 1-based grid.", PixelFunctions.value(oneBandRaster, 0, 2, 1));
+    assertNull("Row 0 is outside the 1-based grid.", PixelFunctions.value(oneBandRaster, 2, 0, 1));
   }
 
   @Test
@@ -123,8 +128,8 @@ public class FunctionsTest extends RasterTestBase {
     // Multiband raster
     assertEquals(9d, PixelFunctions.value(multiBandRaster, point(4.5d, 4.5d), 3), 0.1d);
     assertEquals(255d, PixelFunctions.value(multiBandRaster, point(4.5d, 4.5d), 4), 0.1d);
-    assertEquals(4d, PixelFunctions.value(multiBandRaster, 2, 2, 3), 0.1d);
-    assertEquals(255d, PixelFunctions.value(multiBandRaster, 3, 4, 4), 0.1d);
+    assertEquals(4d, PixelFunctions.value(multiBandRaster, 3, 3, 3), 0.1d);
+    assertEquals(255d, PixelFunctions.value(multiBandRaster, 4, 5, 4), 0.1d);
   }
 
   @Test
@@ -394,8 +399,8 @@ public class FunctionsTest extends RasterTestBase {
 
   @Test
   public void valuesWithGridCoords() throws TransformException {
-    int[] xCoordinates = {1, 0};
-    int[] yCoordinates = {0, 1};
+    int[] xCoordinates = {2, 1};
+    int[] yCoordinates = {1, 2};
 
     List<Double> values = PixelFunctions.values(oneBandRaster, xCoordinates, yCoordinates, 1);
     assertEquals(2, values.size());
