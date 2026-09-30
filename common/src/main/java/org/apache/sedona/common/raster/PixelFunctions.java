@@ -240,7 +240,9 @@ public class PixelFunctions {
       int x = xCoordinates[i];
       int y = yCoordinates[i];
 
-      GridCoordinates2D gridCoord = new GridCoordinates2D(x, y);
+      // Pixel coordinates are 1-based (PostGIS semantics), like RS_PixelAsPoint; GeoTools
+      // grid space is 0-based.
+      GridCoordinates2D gridCoord = new GridCoordinates2D(x - 1, y - 1);
 
       try {
         pixelBuffer = rasterGeom.evaluate(gridCoord, pixelBuffer);

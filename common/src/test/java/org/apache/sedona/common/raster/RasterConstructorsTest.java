@@ -1520,7 +1520,7 @@ public class RasterConstructorsTest extends RasterTestBase {
       assertEquals(expectedMetadata[i], actualMetadata[i], 1e-5);
     }
 
-    double actualFirstGridVal = PixelFunctions.value(testRaster, 0, 0, 1);
+    double actualFirstGridVal = PixelFunctions.value(testRaster, 1, 1, 1);
     double expectedFirstGridVal = 60.95357131958008;
     assertEquals(expectedFirstGridVal, actualFirstGridVal, 1e-6);
   }
@@ -1534,7 +1534,7 @@ public class RasterConstructorsTest extends RasterTestBase {
       assertEquals(expectedMetadata[i], actualMetadata[i], 1e-5);
     }
 
-    double actualFirstGridVal = PixelFunctions.value(testRaster, 0, 0, 1);
+    double actualFirstGridVal = PixelFunctions.value(testRaster, 1, 1, 1);
     double expectedFirstGridVal = 60.95357131958008;
     assertEquals(expectedFirstGridVal, actualFirstGridVal, 1e-6);
   }

@@ -1919,15 +1919,16 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("This method is not implemented yet.")
 
     def get_geometry(self, index) -> "GeoSeries":
-        # Sedona errors on negative indexes, so we use a case statement to handle it ourselves.
+        # GeoPandas indexes are 0-based and may be negative, while ST_GeometryN is
+        # 1-based, so translate here: -1 is the last geometry.
         spark_expr = stf.ST_GeometryN(
             F.col("L"),
             F.when(
                 stf.ST_NumGeometries(F.col("L")) + F.col("R") < 0,
                 None,
             )
-            .when(F.col("R") < 0, stf.ST_NumGeometries(F.col("L")) + F.col("R"))
-            .otherwise(F.col("R")),
+            .when(F.col("R") < 0, stf.ST_NumGeometries(F.col("L")) + F.col("R") + 1)
+            .otherwise(F.col("R") + 1),
         )
 
         other, _ = self._make_series_of_val(index)
@@ -2092,10 +2093,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         ring_count = stf.ST_NumInteriorRings(geometry)
         empty_rings = F.slice(stf.ST_Dump(geometry), 1, 0)
         rings = F.transform(
-            F.sequence(F.lit(0), ring_count - 1),
+            F.sequence(F.lit(1), ring_count),
             lambda index: stf.ST_InteriorRingN(geometry, index),
         )
-        # Spark creates a descending sequence for sequence(0, -1), so this guard
+        # Spark creates a descending sequence for sequence(1, 0), so this guard
         # is required to keep polygons without interior rings as an empty array.
         polygon_rings = F.when(ring_count > 0, rings).otherwise(empty_rings)
         spark_expr = F.when(

@@ -1104,7 +1104,7 @@ class TestPredicateJoin(TestBase):
             data_frame.selectExpr(f"ST_GeometryN(geom, {i}) as geom")
             .selectExpr("st_asText(geom)")
             .collect()[0][0]
-            for i in range(0, 4)
+            for i in range(1, 5)
         ]
 
         assert wkts == ["POINT (1 2)", "POINT (3 4)", "POINT (5 6)", "POINT (8 9)"]
@@ -1123,7 +1123,7 @@ class TestPredicateJoin(TestBase):
             polygon_df.selectExpr(f"ST_InteriorRingN(geom, {i}) as geom")
             .selectExpr("ST_AsText(geom)")
             .collect()[0][0]
-            for i in range(3)
+            for i in range(1, 4)
         ]
 
         empty_df = other_geometry.selectExpr(
