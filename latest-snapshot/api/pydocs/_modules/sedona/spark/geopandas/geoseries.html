@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -2129,15 +2128,16 @@
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"This method is not implemented yet."</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeoSeries.get_geometry"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.get_geometry">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"GeoSeries"</span><span class="p">:</span>
-        <span class="c1"># Sedona errors on negative indexes, so we use a case statement to handle it ourselves.</span>
+        <span class="c1"># GeoPandas indexes are 0-based and may be negative, while ST_GeometryN is</span>
+        <span class="c1"># 1-based, so translate here: -1 is the last geometry.</span>
         <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_GeometryN</span><span class="p">(</span>
             <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span>
             <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span>
                 <span class="n">stf</span><span class="o">.</span><span class="n">ST_NumGeometries</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">))</span> <span class="o">+</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span>
                 <span class="kc">None</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_NumGeometries</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">))</span> <span class="o">+</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">))</span>
-            <span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">)),</span>
+            <span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_NumGeometries</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">))</span> <span class="o">+</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
         <span class="p">)</span>
 
         <span class="n">other</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_series_of_val</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
@@ -2302,10 +2302,10 @@
         <span class="n">ring_count</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_NumInteriorRings</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
         <span class="n">empty_rings</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_Dump</span><span class="p">(</span><span class="n">geometry</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="n">rings</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
-            <span class="n">F</span><span class="o">.</span><span class="n">sequence</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">ring_count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">sequence</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">ring_count</span><span class="p">),</span>
             <span class="k">lambda</span> <span class="n">index</span><span class="p">:</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_InteriorRingN</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">index</span><span class="p">),</span>
         <span class="p">)</span>
-        <span class="c1"># Spark creates a descending sequence for sequence(0, -1), so this guard</span>
+        <span class="c1"># Spark creates a descending sequence for sequence(1, 0), so this guard</span>
         <span class="c1"># is required to keep polygons without interior rings as an empty array.</span>
         <span class="n">polygon_rings</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">ring_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">rings</span><span class="p">)</span><span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">empty_rings</span><span class="p">)</span>
         <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span>
