@@ -815,10 +815,21 @@ public class Rasterization {
     if (polygons.isEmpty()) {
       return false;
     }
-    Geometry rasterArea = JTS.toGeometry((BoundingBox) rasterExtent);
+    Geometry rasterArea = null;
     for (Object polygon : polygons) {
+      Polygon polygonal = (Polygon) polygon;
       try {
-        if (((Polygon) polygon).relate(rasterArea, "T********")) {
+        // A valid polygon with positive area wholly inside the raster must overlap its area. This
+        // avoids constructing the raster polygon and relating it for unburned subpixel polygons.
+        if (rasterExtent.contains(polygonal.getEnvelopeInternal())
+            && polygonal.getArea() > 0
+            && polygonal.isValid()) {
+          return true;
+        }
+        if (rasterArea == null) {
+          rasterArea = JTS.toGeometry((BoundingBox) rasterExtent);
+        }
+        if (polygonal.relate(rasterArea, "T********")) {
           return true;
         }
       } catch (TopologyException e) {
@@ -1042,15 +1053,19 @@ public class Rasterization {
           // edge pixel: unlike the point path there is no per-cell intersection test here, so
           // folding would burn a pixel the polygon does not reach.
           if (range[0] >= 0 && range[0] < width) {
-            params.burn(range[0], y, value);
+            params.writableRaster.setSample(range[0], y, 0, value);
+            params.anyBurned = true;
           }
           continue;
         }
         int xStart = clampToGrid(range[0], width);
         int xEnd = clampToGrid(range[1], width);
 
+        if (xStart <= xEnd) {
+          params.anyBurned = true;
+        }
         for (int x = xStart; x <= xEnd; x++) {
-          params.burn(x, y, value);
+          params.writableRaster.setSample(x, y, 0, value);
         }
       }
     }
