@@ -20,11 +20,9 @@
 # RS_PixelAsPoint
 
 Introduction: Returns a point geometry of the specified pixel's upper-left corner. The pixel coordinates specified are 1-indexed.
+If `colX` and `rowY` are out of bounds for the raster, they are extrapolated assuming the same skew and translate values.
 
 ![RS_PixelAsPoint](../../../image/RS_PixelAsPoint/RS_PixelAsPoint.svg "RS_PixelAsPoint")
-
-!!!Note
-    If the pixel coordinates specified do not exist in the raster (out of bounds), RS_PixelAsPoint throws an IndexOutOfBoundsException.
 
 Format: `RS_PixelAsPoint(raster: Raster, colX: Integer, rowY: Integer)`
 
@@ -46,12 +44,16 @@ POINT (123.19, -12)
 
 SQL Example
 
+Out of the grid, the coordinate is extrapolated rather than rejected. The raster
+below is 5 pixels wide, so column 6 is the first column past its right edge, and
+that column's upper-left corner lies on the edge itself (x = 123 + 5 × 8 = 163):
+
 ```sql
-SELECT ST_AsText(RS_PixelAsPoint(raster, 6, 2)) from rasters
+SELECT ST_AsText(RS_PixelAsPoint(RS_MakeEmptyRaster(1, 5, 10, 123, -230, 8), 6, 2))
 ```
 
 Output:
 
 ```
-IndexOutOfBoundsException: Specified pixel coordinates (6, 2) do not lie in the raster
+POINT (163 -238)
 ```
