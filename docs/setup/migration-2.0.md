@@ -75,6 +75,21 @@ Code that builds the index with `sequence(0, n - 1)` or a `range(0, n)` loop nee
 The Python `ST_GeometryN` and `ST_InteriorRingN` DataFrame functions now reject an integer
 `n` below 1 rather than below 0.
 
+## Replacing a band's no-data value is a separate function
+
+The four-argument `RS_SetBandNoDataValue(raster, band, noDataValue, replace)` form is removed,
+so queries that use it fail until rewritten:
+
+* `RS_SetBandNoDataValue(raster, band, value, true)` becomes
+  `RS_ReplaceBandNoDataValue(raster, band, value)`, which rewrites the pixels holding the old
+  no-data value to the new one before declaring it.
+* `RS_SetBandNoDataValue(raster, band, value, false)` becomes
+  `RS_SetBandNoDataValue(raster, band, value)`, which declares the new value and leaves the pixels
+  as they are.
+
+In Java, `RasterBandEditors.setBandNoDataValue(raster, band, value, replace)` is likewise replaced
+by `RasterBandEditors.replaceBandNoDataValue(raster, band, value)`.
+
 ## Other behaviour changes
 
 * **WKB output keeps M.** `ST_AsBinary`, `ST_AsEWKB` and `ST_AsHEXEWKB` now write the M
