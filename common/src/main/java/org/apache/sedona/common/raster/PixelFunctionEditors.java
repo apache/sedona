@@ -162,7 +162,8 @@ public class PixelFunctionEditors {
         RasterConstructors.asRaster(geom, raster, bandDataType, allTouched, value, null);
     WritableRaster rasterCopied = makeCopiedRaster(raster);
     if (rasterizedGeom == null) {
-      // The geometry only touches the raster and covers none of its pixels, so nothing changes.
+      // The geometry only touches the raster's boundary and burns none of its pixels, so nothing
+      // changes.
       return RasterUtils.clone(rasterCopied, raster.getSampleDimensions(), raster, null, true);
     }
 

@@ -118,9 +118,10 @@ public class RasterConstructors {
    *     are set to this value
    * @param useGeometryExtent The way to generate extent of the resultant raster. Use the extent of
    *     the geometry to convert if true, else use the extent of the reference raster
-   * @return Rasterized Geometry, or null when useGeometryExtent is true and the geometry covers no
-   *     pixel of the reference raster (for example a polygon that only touches its edge), so there
-   *     is no extent to crop to
+   * @return Rasterized Geometry, or null when useGeometryExtent is true and the geometry neither
+   *     burns nor overlaps any pixel of the reference raster (for example a polygon that only
+   *     touches its boundary, or a line along its right or bottom edge), so there is nothing to
+   *     crop to
    * @throws FactoryException
    */
   public static GridCoverage2D asRaster(

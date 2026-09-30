@@ -1011,4 +1011,53 @@ public class RasterizationTest extends RasterTestBase {
       assertBurnedPixels(cropped, "[(0,0), (1,0), (0,1), (1,1), (5,2)]");
     }
   }
+
+  @Test
+  public void testCroppedOutputIsNullOnlyWhenNothingIsBurnedOrOverlapped()
+      throws ParseException, FactoryException, TransformException {
+    GridCoverage2D raster = unitGrid8x8(false);
+    // Each of these only touches the raster: a polygon meeting it diagonally at its top-right
+    // corner (its window still holds that corner cell), and lines along its right and bottom
+    // edges. GDAL burns nothing for them, and with nothing burned and no pixel area overlapped
+    // there is nothing to crop to.
+    String[] touchingOnly = {
+      "POLYGON ((9 7, 7 9, 10 10, 9 7))", "LINESTRING (8 1, 8 6)", "LINESTRING (1 0, 6 0)"
+    };
+    for (String wkt : touchingOnly) {
+      assertBurnedLikeGdal(raster, wkt, "[]");
+      for (boolean allTouched : new boolean[] {false, true}) {
+        Assert.assertNull(
+            RasterConstructors.asRaster(
+                wktReader.read(wkt), raster, "D", allTouched, 150, null, true));
+      }
+    }
+    Geometry corner = wktReader.read(touchingOnly[0]);
+    Assert.assertNull(RasterBandEditors.clip(raster, 1, corner, true, -1, true, true));
+    double[] allNoData = new double[64];
+    Arrays.fill(allNoData, -1);
+    Assert.assertArrayEquals(
+        allNoData,
+        MapAlgebra.bandAsArray(
+            RasterBandEditors.clip(raster, 1, corner, true, -1, false, false), 1),
+        0);
+    Assert.assertArrayEquals(
+        new double[64],
+        MapAlgebra.bandAsArray(PixelFunctionEditors.setValues(raster, 1, corner, 7, true), 1),
+        0);
+
+    // A polygon that overlaps a pixel without covering its centre burns nothing without allTouched,
+    // as in GDAL, but it does overlap the pixel, so its cropped output is that pixel, unburned.
+    Geometry small = wktReader.read("POLYGON ((3.1 4.1, 3.4 4.1, 3.4 4.4, 3.1 4.4, 3.1 4.1))");
+    assertBurnedPixels(
+        RasterConstructors.asRasterWithRasterExtent(small, raster, "D", false, 150, null), "[]");
+    GridCoverage2D cropped =
+        RasterConstructors.asRaster(small, raster, "D", false, 150, null, true);
+    Assert.assertEquals(1, RasterAccessors.getWidth(cropped));
+    Assert.assertEquals(1, RasterAccessors.getHeight(cropped));
+    Assert.assertEquals(3.0, RasterAccessors.getUpperLeftX(cropped), FP_TOLERANCE);
+    Assert.assertEquals(5.0, RasterAccessors.getUpperLeftY(cropped), FP_TOLERANCE);
+    assertBurnedPixels(cropped, "[]");
+    assertBurnedPixels(
+        RasterConstructors.asRaster(small, raster, "D", true, 150, null, true), "[(0,0)]");
+  }
 }

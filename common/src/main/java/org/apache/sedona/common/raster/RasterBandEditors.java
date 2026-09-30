@@ -376,8 +376,8 @@ public class RasterBandEditors {
     GridCoverage2D maskRaster =
         RasterConstructors.asRaster(geometry, raster, bandType, allTouched, 150, null);
     if (maskRaster == null) {
-      // The geometry only touches the raster and covers none of its pixels, so every pixel is
-      // outside it: the clipped raster is all nodata, and there is no extent to crop it to.
+      // The geometry only touches the raster's boundary and burns none of its pixels, so every
+      // pixel is outside it: the clipped raster is all nodata, and there is nothing to crop it to.
       if (crop) {
         if (lenient) {
           return null;

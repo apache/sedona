@@ -37,6 +37,7 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.algorithm.CGAlgorithmsDD;
 import org.locationtech.jts.algorithm.Orientation;
 import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.util.PolygonExtracter;
 
 public class Rasterization {
   protected static List<Object> rasterize(
@@ -72,8 +73,8 @@ public class Rasterization {
 
     ReferencedEnvelope geomExtent = rasterizeGeomExtent(geom, raster, metadata, allTouched);
     if (geomExtent == null && useGeometryExtent) {
-      // The geometry covers no cell under GDAL's half-open rule, for example a point on the
-      // raster's right or bottom edge or a polygon that only touches the raster, so there is no
+      // The geometry's window holds no cell of the raster, for example a point on the raster's
+      // right or bottom edge or a polygon that only touches one of its edges, so there is no
       // extent to crop the output to.
       return null;
     }
@@ -84,6 +85,15 @@ public class Rasterization {
     fillBackground(params.writableRaster, backgroundValue);
 
     rasterizeGeometry(raster, metadata, geom, params, geomExtent, value, allTouched);
+
+    if (useGeometryExtent && !params.anyBurned && !overlapsRasterArea(geom, rasterExtent)) {
+      // The window can hold cells that the geometry only touches, for example the corner cell of a
+      // polygon meeting the raster at that corner, or the edge column of a line along the
+      // raster's right edge. Under GDAL's half-open rule it burns none of them and it overlaps no
+      // pixel's area, so there is nothing to crop the output to either. A polygon that overlaps a
+      // pixel without covering its centre keeps its cropped, unburned output.
+      return null;
+    }
 
     // Create a GridCoverage2D for the rasterized result
     GridCoverageFactory coverageFactory = new GridCoverageFactory();
@@ -217,7 +227,7 @@ public class Rasterization {
     }
     // Rows count down from the geographic top here; reverse them for bottom-up rasters.
     int yIndex = params.bottomUp ? height - 1 - row : row;
-    params.writableRaster.setSample(col, yIndex, 0, value);
+    params.burn(col, yIndex, value);
   }
 
   /**
@@ -395,7 +405,7 @@ public class Rasterization {
     // Reverse the y index for bottom-up rasters
     int rasterY = params.bottomUp ? height - 1 - y : y;
     if (x >= 0 && x < width && rasterY >= 0 && rasterY < height) {
-      params.writableRaster.setSample(x, rasterY, 0, value);
+      params.burn(x, rasterY, value);
     }
   }
 
@@ -716,6 +726,15 @@ public class Rasterization {
     double rasterUpperLeftX;
     double rasterUpperLeftY;
     boolean bottomUp;
+    // Whether any cell has been burned; a cropped output with nothing burned may have nothing in
+    // it.
+    boolean anyBurned;
+
+    /** Burns one cell of the output raster. */
+    void burn(int x, int y, double value) {
+      writableRaster.setSample(x, y, 0, value);
+      anyBurned = true;
+    }
 
     RasterizationParams(
         WritableRaster writableRaster,
@@ -785,6 +804,30 @@ public class Rasterization {
         rasterizeGeometry(raster, metadata, toRasterize, params, geomExtent, value, allTouched);
       }
     }
+  }
+
+  /**
+   * Whether the geometry's polygonal parts overlap the raster's area, rather than only touching its
+   * boundary or lying outside it. Points and lines have no area, so they never do.
+   */
+  private static boolean overlapsRasterArea(Geometry geom, ReferencedEnvelope rasterExtent) {
+    List<?> polygons = PolygonExtracter.getPolygons(geom);
+    if (polygons.isEmpty()) {
+      return false;
+    }
+    Geometry rasterArea = JTS.toGeometry((BoundingBox) rasterExtent);
+    for (Object polygon : polygons) {
+      try {
+        if (((Polygon) polygon).relate(rasterArea, "T********")) {
+          return true;
+        }
+      } catch (TopologyException e) {
+        // An invalid polygon cannot be related exactly. Assume it overlaps, which keeps the
+        // cropped output as it was before rather than dropping it.
+        return true;
+      }
+    }
+    return false;
   }
 
   /** Keeps only the polygonal parts of a geometry, dropping any point or line components. */
@@ -999,7 +1042,7 @@ public class Rasterization {
           // edge pixel: unlike the point path there is no per-cell intersection test here, so
           // folding would burn a pixel the polygon does not reach.
           if (range[0] >= 0 && range[0] < width) {
-            params.writableRaster.setSample(range[0], y, 0, value);
+            params.burn(range[0], y, value);
           }
           continue;
         }
@@ -1007,7 +1050,7 @@ public class Rasterization {
         int xEnd = clampToGrid(range[1], width);
 
         for (int x = xStart; x <= xEnd; x++) {
-          params.writableRaster.setSample(x, y, 0, value);
+          params.burn(x, y, value);
         }
       }
     }
