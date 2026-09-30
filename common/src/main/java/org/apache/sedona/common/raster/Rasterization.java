@@ -736,6 +736,17 @@ public class Rasterization {
       anyBurned = true;
     }
 
+    /** Burns an inclusive horizontal span, recording the burn once for the entire span. */
+    void burnSpan(int xStart, int xEnd, int y, double value) {
+      if (xStart > xEnd) {
+        return;
+      }
+      for (int x = xStart; x <= xEnd; x++) {
+        writableRaster.setSample(x, y, 0, value);
+      }
+      anyBurned = true;
+    }
+
     RasterizationParams(
         WritableRaster writableRaster,
         String pixelType,
@@ -1053,20 +1064,14 @@ public class Rasterization {
           // edge pixel: unlike the point path there is no per-cell intersection test here, so
           // folding would burn a pixel the polygon does not reach.
           if (range[0] >= 0 && range[0] < width) {
-            params.writableRaster.setSample(range[0], y, 0, value);
-            params.anyBurned = true;
+            params.burn(range[0], y, value);
           }
           continue;
         }
         int xStart = clampToGrid(range[0], width);
         int xEnd = clampToGrid(range[1], width);
 
-        if (xStart <= xEnd) {
-          params.anyBurned = true;
-        }
-        for (int x = xStart; x <= xEnd; x++) {
-          params.writableRaster.setSample(x, y, 0, value);
-        }
+        params.burnSpan(xStart, xEnd, y, value);
       }
     }
   }
