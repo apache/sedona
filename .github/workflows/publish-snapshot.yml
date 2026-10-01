@@ -59,6 +59,10 @@ jobs:
     # `master`, and they are unreachable from anywhere else: no other workflow
     # can reference them, and a run on any other ref — a branch, a pull
     # request, a tag — fails to start this job rather than receiving them.
+    # The PyPI publish in python-wheel.yml needs no equivalent because OIDC
+    # Trusted Publishing mints its token per run; ASF Nexus authenticates with
+    # a username and password, so the credential exists at rest and this is
+    # what keeps it out of reach.
     # That is a branch restriction rather than a required reviewer on purpose:
     # snapshots publish on every merge, so a per-run approval would defeat the
     # point, and the property worth having here is that only master can
