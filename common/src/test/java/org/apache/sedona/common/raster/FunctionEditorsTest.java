@@ -70,9 +70,9 @@ public class FunctionEditorsTest extends RasterTestBase {
     expected =
         new double[] {
           0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0,
-          10.0, 0.0, 0.0, 0.0, 10.0, 10.0, 0.0, 0.0, 0.0, 10.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10.0,
+          10.0, 0.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 10.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10.0,
           10.0, 0.0, 10.0, 10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 10.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          0.0, 0.0, 0.0, 0.0, 10.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 10.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10.0, 10.0, 0.0, 10.0, 0.0,
           0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 10.0,
           10.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
         };
@@ -217,25 +217,29 @@ public class FunctionEditorsTest extends RasterTestBase {
         };
     assertArrayEquals(expected, actual, 0.1d);
 
-    // Point
+    // Point on the raster's right edge (x = 5 on a raster spanning x 1..5). Under GDAL's half-open
+    // rule a cell does not contain its right edge, so the point covers no pixel and the raster is
+    // left unchanged, as with rasterio all_touched=True.
     geom = Constructors.geomFromWKT("POINT(5 -5)", 0);
     raster = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 35);
     actual = MapAlgebra.bandAsArray(raster, 1);
     expected =
         new double[] {
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 35.0, 0.0, 0.0,
-          0.0, 35.0, 0.0, 0.0, 0.0, 0.0
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0
         };
     assertArrayEquals(expected, actual, 0.1d);
 
-    // MultiPoint
+    // MultiPoint: each point burns the one half-open cell containing it, as in GDAL. (2 -2) and
+    // (3 -3) sit on grid corners and (2 -1) on the top edge, so each burns the cell right of and
+    // below it; (4 -7) lies on the bottom edge and burns nothing.
     geom = Constructors.geomFromWKT("MULTIPOINT((2 -2), (2 -1), (3 -3), (4 -7))", 0);
     raster = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 400, false);
     actual = MapAlgebra.bandAsArray(raster, 1);
     expected =
         new double[] {
-          400.0, 400.0, 0.0, 0.0, 400.0, 400.0, 400.0, 0.0, 0.0, 400.0, 400.0, 0.0, 0.0, 0.0, 0.0,
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 400.0, 400.0
+          0.0, 400.0, 0.0, 0.0, 0.0, 400.0, 0.0, 0.0, 0.0, 0.0, 400.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
         };
     assertArrayEquals(expected, actual, 0.1d);
 

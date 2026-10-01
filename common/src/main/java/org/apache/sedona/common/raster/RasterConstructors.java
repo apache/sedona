@@ -118,7 +118,10 @@ public class RasterConstructors {
    *     are set to this value
    * @param useGeometryExtent The way to generate extent of the resultant raster. Use the extent of
    *     the geometry to convert if true, else use the extent of the reference raster
-   * @return Rasterized Geometry
+   * @return Rasterized Geometry, or null when useGeometryExtent is true and the geometry neither
+   *     burns nor overlaps any pixel of the reference raster (for example a polygon that only
+   *     touches its boundary, or a line along its right or bottom edge), so there is nothing to
+   *     crop to
    * @throws FactoryException
    */
   public static GridCoverage2D asRaster(
@@ -161,6 +164,9 @@ public class RasterConstructors {
     List<Object> objects =
         Rasterization.rasterize(
             geom, raster, pixelType, value, useGeometryExtent, allTouched, noDataValue);
+    if (objects == null) {
+      return null;
+    }
 
     WritableRaster writableRaster = (WritableRaster) objects.get(0);
     GridCoverage2D rasterized = (GridCoverage2D) objects.get(1);

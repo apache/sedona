@@ -375,6 +375,23 @@ public class RasterBandEditors {
     // mask logic would then misread as covered pixels.
     GridCoverage2D maskRaster =
         RasterConstructors.asRaster(geometry, raster, bandType, allTouched, 150, null);
+    if (maskRaster == null) {
+      // The geometry only touches the raster's boundary and burns none of its pixels, so every
+      // pixel is outside it: the clipped raster is all nodata, and there is nothing to crop it to.
+      if (crop) {
+        if (lenient) {
+          return null;
+        }
+        throw new IllegalArgumentException("Geometry does not cover any pixel of the raster.");
+      }
+      return RasterUtils.clone(
+          writableRaster,
+          raster.getGridGeometry(),
+          new GridSampleDimension[] {raster.getSampleDimension(band - 1)},
+          raster,
+          noDataValue,
+          true);
+    }
     Raster maskData = RasterUtils.getRaster(maskRaster.getRenderedImage());
     double[] maskMetadata = RasterAccessors.metadata(maskRaster);
     int maskWidth = (int) maskMetadata[2], maskHeight = (int) maskMetadata[3];
