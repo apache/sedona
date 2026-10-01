@@ -75,6 +75,12 @@ Code that builds the index with `sequence(0, n - 1)` or a `range(0, n)` loop nee
 The Python `ST_GeometryN` and `ST_InteriorRingN` DataFrame functions now reject an integer
 `n` below 1 rather than below 0.
 
+## Renamed functions
+
+`RS_Union` and `RS_Union_Aggr` are now `RS_Stack` and `RS_Stack_Aggr`. They stack the bands of
+several rasters into one raster, and never merged grids the way the old names suggested. The old
+names are removed, so queries that use them fail until renamed; the behaviour is unchanged.
+
 ## Replacing a band's no-data value is a separate function
 
 The four-argument `RS_SetBandNoDataValue(raster, band, noDataValue, replace)` form is removed,
@@ -86,9 +92,6 @@ so queries that use it fail until rewritten:
 * `RS_SetBandNoDataValue(raster, band, value, false)` becomes
   `RS_SetBandNoDataValue(raster, band, value)`, which declares the new value and leaves the pixels
   as they are.
-
-In Java, `RasterBandEditors.setBandNoDataValue(raster, band, value, replace)` is likewise replaced
-by `RasterBandEditors.replaceBandNoDataValue(raster, band, value)`.
 
 ## Other behaviour changes
 

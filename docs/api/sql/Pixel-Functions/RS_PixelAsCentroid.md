@@ -21,7 +21,7 @@
 
 Introduction: Returns the centroid (point geometry) of the specified pixel's area.
 The pixel coordinates specified are 1-indexed.
-If `colX` and `rowY` are out of bounds for the raster, they are interpolated assuming the same skew and translate values.
+If `colX` and `rowY` are out of bounds for the raster, they are extrapolated assuming the same skew and translate values.
 
 ![RS_PixelAsCentroid](../../../image/RS_PixelAsCentroid/RS_PixelAsCentroid.svg "RS_PixelAsCentroid")
 
