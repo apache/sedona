@@ -22,7 +22,7 @@
 本步骤用于将 Maven SNAPSHOT 发布到 https://repository.apache.org
 
 !!!note
-    SNAPSHOT 会自动发布。`Publish snapshot` GitHub Actions 工作流（`.github/workflows/publish-snapshot.yml`）会在每次修改 Java/Scala 代码的合并进入 `master` 时，为所有受支持的 Spark 与 Scala 组合部署当前的 `-SNAPSHOT` 版本，也可以在 Actions 页面手动运行。下面的手动步骤仍可供发布经理检验自己的凭据配置。
+    SNAPSHOT 会自动发布。`Publish snapshot` GitHub Actions 工作流（`.github/workflows/publish-snapshot.yml`）会在每次修改 Java/Scala 代码的合并进入 `master` 时，为所有受支持的 Spark 与 Scala 组合部署当前的 `-SNAPSHOT` 版本，也可以在 Actions 页面手动运行。部署凭据保存为 `nexus-snapshots` 环境的 secret，该环境的部署分支限制为 `master`，因此只有在 `master` 上的运行才能取得这些凭据。下面的手动步骤仍可供发布经理检验自己的凭据配置。
 
 使用 SNAPSHOT 时，需要在构建中加入 ASF snapshot 仓库，例如在 Spark 中：
 

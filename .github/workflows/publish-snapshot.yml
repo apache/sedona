@@ -54,6 +54,16 @@ jobs:
   publish:
     if: github.repository == 'apache/sedona'
     runs-on: ubuntu-22.04
+    # Scopes the Nexus credentials to this job. Hold them as environment
+    # secrets on an environment whose deployment branches are restricted to
+    # `master`, and they are unreachable from anywhere else: no other workflow
+    # can reference them, and a run on any other ref — a branch, a pull
+    # request, a tag — fails to start this job rather than receiving them.
+    # That is a branch restriction rather than a required reviewer on purpose:
+    # snapshots publish on every merge, so a per-run approval would defeat the
+    # point, and the property worth having here is that only master can
+    # publish, not that a human waves each one through.
+    environment: nexus-snapshots
     strategy:
       fail-fast: false
       # The POM deploys the shared modules (sedona-parent, common, flink,
@@ -110,7 +120,7 @@ jobs:
           SCALA: ${{ matrix.scala }}
         run: |
           if [[ -z "${NEXUS_USER}" || -z "${NEXUS_PW}" ]]; then
-            echo "::error::The NEXUS_USER and NEXUS_PW secrets are not available to this repository; ask ASF Infra to grant them"
+            echo "::error::NEXUS_USER and NEXUS_PW are not available to this job. They are expected as secrets on the nexus-snapshots environment; ask ASF Infra to grant them"
             exit 1
           fi
           mvn -B -q deploy -DskipTests -Dspark="${SPARK}" -Dscala="${SCALA}"

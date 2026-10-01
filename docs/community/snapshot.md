@@ -22,7 +22,7 @@
 This step is to publish Maven SNAPSHOTs to https://repository.apache.org
 
 !!!note
-    Snapshots are published automatically. The `Publish snapshot` GitHub Actions workflow (`.github/workflows/publish-snapshot.yml`) deploys the current `-SNAPSHOT` version for every supported Spark and Scala combination on each merge to `master` that changes the Java/Scala code. It can also be run by hand from the Actions tab. The manual steps below are still useful for a release manager checking their credential setup.
+    Snapshots are published automatically. The `Publish snapshot` GitHub Actions workflow (`.github/workflows/publish-snapshot.yml`) deploys the current `-SNAPSHOT` version for every supported Spark and Scala combination on each merge to `master` that changes the Java/Scala code. It can also be run by hand from the Actions tab. The deploy credentials live as secrets on the `nexus-snapshots` environment, whose deployment branches are restricted to `master`, so only a run on `master` can reach them. The manual steps below are still useful for a release manager checking their credential setup.
 
 To use a snapshot, add the ASF snapshot repository to your build, for example with Spark:
 
