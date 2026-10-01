@@ -17,24 +17,27 @@
  under the License.
  -->
 
-# RS_Union_Aggr
+# RS_Stack_Aggr
 
 Introduction: This function combines multiple rasters into a single multiband raster by stacking the bands of each input raster sequentially. The function arranges the bands in the output raster according to the order specified by the index column in the input. It is typically used in scenarios where rasters are grouped by certain criteria (e.g., time and/or location) and an aggregated raster output is desired.
 
 !!!Note
-    RS_Union_Aggr expects the following input, if not satisfied then will throw an IllegalArgumentException:
+    This function was named `RS_Union_Aggr` before v2.0.0. It was renamed because it stacks bands rather than merging grids the way a raster union does; `RS_Union_Aggr` no longer exists.
+
+!!!Note
+    RS_Stack_Aggr expects the following input, if not satisfied then will throw an IllegalArgumentException:
 
     - Indexes to be in an arithmetic sequence without any gaps.
     - Indexes to be unique and not repeated.
     - Rasters should be of the same shape.
 
-![RS_Union_Aggr](../../../image/RS_Union_Aggr/RS_Union_Aggr.svg "RS_Union_Aggr")
+![RS_Stack_Aggr](../../../image/RS_Stack_Aggr/RS_Stack_Aggr.svg "RS_Stack_Aggr")
 
-Format: `RS_Union_Aggr(A: rasterColumn, B: indexColumn)`
+Format: `RS_Stack_Aggr(A: rasterColumn, B: indexColumn)`
 
 Return type: `Raster`
 
-Since: `v1.5.1`
+Since: `v2.0.0` (as `RS_Union_Aggr` since `v1.5.1`)
 
 SQL Example:
 
@@ -80,7 +83,7 @@ To create a stacked raster by grouping on geometry.
 indexedDf.createOrReplaceTempView("indexedDf")
 
 sedona.sql('''
-    SELECT geometry, year, quarter, RS_Union_Aggr(raster, index) AS aggregated_raster
+    SELECT geometry, year, quarter, RS_Stack_Aggr(raster, index) AS aggregated_raster
     FROM indexedDf
     WHERE index <= 4
     GROUP BY geometry, year, quarter

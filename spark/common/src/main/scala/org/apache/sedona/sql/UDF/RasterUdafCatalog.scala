@@ -19,7 +19,7 @@
 package org.apache.sedona.sql.UDF
 
 import org.apache.spark.sql.expressions.Aggregator
-import org.apache.spark.sql.sedona_sql.expressions.raster.{BandData, RS_Union_Aggr}
+import org.apache.spark.sql.sedona_sql.expressions.raster.{BandData, RS_Stack_Aggr}
 import org.geotools.coverage.grid.GridCoverage2D
 
 import scala.collection.mutable.ArrayBuffer
@@ -27,5 +27,5 @@ import scala.collection.mutable.ArrayBuffer
 object RasterUdafCatalog {
   val rasterAggregateExpression
       : Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandData], GridCoverage2D] =
-    new RS_Union_Aggr
+    new RS_Stack_Aggr
 }

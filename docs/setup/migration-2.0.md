@@ -75,6 +75,12 @@ Code that builds the index with `sequence(0, n - 1)` or a `range(0, n)` loop nee
 The Python `ST_GeometryN` and `ST_InteriorRingN` DataFrame functions now reject an integer
 `n` below 1 rather than below 0.
 
+## Renamed functions
+
+`RS_Union` and `RS_Union_Aggr` are now `RS_Stack` and `RS_Stack_Aggr`. They stack the bands of
+several rasters into one raster, and never merged grids the way the old names suggested. The old
+names are removed, so queries that use them fail until renamed; the behaviour is unchanged.
+
 ## Other behaviour changes
 
 * **WKB output keeps M.** `ST_AsBinary`, `ST_AsEWKB` and `ST_AsHEXEWKB` now write the M

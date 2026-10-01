@@ -67,14 +67,14 @@ class RasterUDTSuite extends TestBaseScala with BeforeAndAfter {
       assert(readDf.count() == 1)
     }
 
-    it("RS_Union_Aggr output should write and read Parquet successfully") {
-      // Users reported (#2608) that RS_Union_Aggr output can be written to Delta/Parquet
-      // while RS_MakeEmptyRaster output cannot. RS_Union_Aggr uses ExpressionEncoder
-      // which resolves the UDT via UDTRegistration (class name without '$' suffix),
-      // whereas InferredExpression-based functions use the case object singleton
+    it("RS_Stack_Aggr output should write and read Parquet successfully") {
+      // Users reported (#2608) that RS_Union_Aggr (now RS_Stack_Aggr) output can be written
+      // to Delta/Parquet while RS_MakeEmptyRaster output cannot. RS_Stack_Aggr uses
+      // ExpressionEncoder, which resolves the UDT via UDTRegistration (class name without '$'
+      // suffix), whereas InferredExpression-based functions use the case object singleton
       // whose getClass.getName includes '$'.
       tempFolder.create()
-      val rasterDf = sparkSession.sql("""SELECT RS_Union_Aggr(raster) as raster FROM (
+      val rasterDf = sparkSession.sql("""SELECT RS_Stack_Aggr(raster) as raster FROM (
           |  SELECT RS_MakeEmptyRaster(1, 10, 10, 0, 0, 1) as raster
           |)""".stripMargin)
 

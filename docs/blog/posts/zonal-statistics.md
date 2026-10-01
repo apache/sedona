@@ -151,7 +151,7 @@ When a canton overlaps several tiles, the final `GROUP BY` must combine the part
 - **Add `count` and `sum`.** Addition works for any number of pairs.
 - **Combine `min` and `max`** by taking the lowest minimum and the highest maximum.
 - **Calculate `mean` as a ratio:** `SUM(s.sum) / SUM(s.count)`. Do not average the mean from each pair. That method gives the same weight to 2,761 pixels and 44,656 pixels, which changes Genève's result by 5 m.
-- **Do not combine `median`, `mode`, `stddev`, or `variance` from the partial values.** For example, the median of several tile medians is not the median of all pixels. These statistics need all pixels for the zone in one raster row. `retile = false` is enough when the zone fits inside one source raster. Otherwise, merge the tiles with `RS_Union_Aggr` before the zonal statistics call.
+- **Do not combine `median`, `mode`, `stddev`, or `variance` from the partial values.** For example, the median of several tile medians is not the median of all pixels. These statistics need all pixels for the zone in one raster row. `retile = false` is enough when the zone fits inside one source raster.
 
 One more case can produce a wrong number without an error. `RS_Intersects` compares the tile boundary with the zone. A tile can overlap a zone even when no pixel center is inside it. One of the 62 pairs has this result, and `RS_ZonalStatsAll` returns nine zeros:
 
