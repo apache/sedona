@@ -113,6 +113,35 @@ public class RasterOutputTest extends RasterTestBase {
   }
 
   @Test
+  public void testGeoTiffOutputsAreLittleEndian() throws FactoryException, IOException {
+    // Some readers decode pixel data in the platform's byte order without checking the header, so
+    // the files must be little endian, and the pixels must survive the trip in that byte order.
+    // Float32 values whose bytes are not palindromic catch a header/pixel byte order mismatch.
+    int width = 300;
+    int height = 300;
+    double[] values = new double[width * height];
+    for (int i = 0; i < values.length; i++) {
+      values[i] = (float) (i * 0.001 - 30);
+    }
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "F", width, height, 0, 0, 10, -10, 0, 0, 32610);
+    raster = MapAlgebra.addBandFromArray(raster, values, 1);
+
+    byte[][] outputs = {
+      RasterOutputs.asGeoTiff(raster),
+      RasterOutputs.asGeoTiff(raster, "Deflate", 0.5),
+      RasterOutputs.asGeoTiff(raster, "LZW", 1.0),
+      RasterOutputs.asCOG(raster, "Deflate", 256),
+    };
+    for (byte[] bytes : outputs) {
+      assertEquals('I', bytes[0]);
+      assertEquals('I', bytes[1]);
+      GridCoverage2D roundTripped = RasterConstructors.fromGeoTiff(bytes);
+      assertArrayEquals(values, MapAlgebra.bandAsArray(roundTripped, 1), 0.0);
+    }
+  }
+
+  @Test
   public void testAsGeoTiff() throws IOException {
     GridCoverage2D rasterOg = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
     GridCoverage2D rasterTest =
