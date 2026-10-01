@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.expressions.raster</title>
@@ -284,12 +283,12 @@
                         <a href="RS_SquareRoot.html" title="">RS_SquareRoot</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
-                        <a class="class" href="RS_Subtract.html" title=""></a>
-                        <a href="RS_Subtract.html" title="">RS_Subtract</a>
+                        <a class="class" href="RS_Stack_Aggr.html" title="Return a raster containing bands at given indexes from all rasters in a given column."></a>
+                        <a href="RS_Stack_Aggr.html" title="Return a raster containing bands at given indexes from all rasters in a given column.">RS_Stack_Aggr</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
-                        <a class="class" href="RS_Union_Aggr.html" title="Return a raster containing bands at given indexes from all rasters in a given column"></a>
-                        <a href="RS_Union_Aggr.html" title="Return a raster containing bands at given indexes from all rasters in a given column">RS_Union_Aggr</a>
+                        <a class="class" href="RS_Subtract.html" title=""></a>
+                        <a href="RS_Subtract.html" title="">RS_Subtract</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
                         <a class="object" href="implicits$.html" title=""></a>
@@ -757,6 +756,24 @@
       </span>
       
       
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Stack_Aggr" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="RS_Stack_AggrextendsAggregator[(org.geotools.coverage.grid.GridCoverage2D,Int),scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData],org.geotools.coverage.grid.GridCoverage2D]"></a><a id="RS_Stack_Aggr:RS_Stack_Aggr"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Return a raster containing bands at given indexes from all rasters in a given column." href="RS_Stack_Aggr.html"><span class="name">RS_Stack_Aggr</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.sql.expressions.Aggregator">expressions.Aggregator</span>[(<span class="extype" name="org.geotools.coverage.grid.GridCoverage2D">GridCoverage2D</span>, <span class="extype" name="scala.Int">Int</span>), <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<a href="BandData.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.BandData">BandData</a>], <span class="extype" name="org.geotools.coverage.grid.GridCoverage2D">GridCoverage2D</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Return a raster containing bands at given indexes from all rasters in a given column.</p><div class="fullcomment"><div class="comment cmt"><p>Return a raster containing bands at given indexes from all rasters in a given column. Named
+RS_Union_Aggr before Sedona 2.0.
+</p></div></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Subtract" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="RS_SubtractextendsInferredExpressionwithProductwithSerializable"></a><a id="RS_Subtract:RS_Subtract"></a>
       <span class="permalink">
@@ -773,23 +790,6 @@
       </span>
       
       
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Union_Aggr" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="RS_Union_AggrextendsAggregator[(org.geotools.coverage.grid.GridCoverage2D,Int),scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData],org.geotools.coverage.grid.GridCoverage2D]"></a><a id="RS_Union_Aggr:RS_Union_Aggr"></a>
-      <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="Return a raster containing bands at given indexes from all rasters in a given column" href="RS_Union_Aggr.html"><span class="name">RS_Union_Aggr</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.sql.expressions.Aggregator">expressions.Aggregator</span>[(<span class="extype" name="org.geotools.coverage.grid.GridCoverage2D">GridCoverage2D</span>, <span class="extype" name="scala.Int">Int</span>), <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<a href="BandData.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.BandData">BandData</a>], <span class="extype" name="org.geotools.coverage.grid.GridCoverage2D">GridCoverage2D</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">Return a raster containing bands at given indexes from all rasters in a given column
-</p>
     </li></ol>
             </div>
 

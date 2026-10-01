@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5976,7 +5975,7 @@
 <li><strong>Add <code>count</code> and <code>sum</code>.</strong> Addition works for any number of pairs.</li>
 <li><strong>Combine <code>min</code> and <code>max</code></strong> by taking the lowest minimum and the highest maximum.</li>
 <li><strong>Calculate <code>mean</code> as a ratio:</strong> <code>SUM(s.sum) / SUM(s.count)</code>. Do not average the mean from each pair. That method gives the same weight to 2,761 pixels and 44,656 pixels, which changes Genève's result by 5 m.</li>
-<li><strong>Do not combine <code>median</code>, <code>mode</code>, <code>stddev</code>, or <code>variance</code> from the partial values.</strong> For example, the median of several tile medians is not the median of all pixels. These statistics need all pixels for the zone in one raster row. <code>retile = false</code> is enough when the zone fits inside one source raster. Otherwise, merge the tiles with <code>RS_Union_Aggr</code> before the zonal statistics call.</li>
+<li><strong>Do not combine <code>median</code>, <code>mode</code>, <code>stddev</code>, or <code>variance</code> from the partial values.</strong> For example, the median of several tile medians is not the median of all pixels. These statistics need all pixels for the zone in one raster row. <code>retile = false</code> is enough when the zone fits inside one source raster.</li>
 </ul>
 <p>One more case can produce a wrong number without an error. <code>RS_Intersects</code> compares the tile boundary with the zone. A tile can overlap a zone even when no pixel center is inside it. One of the 62 pairs has this result, and <code>RS_ZonalStatsAll</code> returns nine zeros:</p>
 <div class="highlight"><pre><span></span><code>+----------------------------+---------------------------------------------+
@@ -6044,7 +6043,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 4, 2026 16:40:42 UTC">September 4, 2026 16:40:42</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="October 1, 2026 06:38:36 UTC">October 1, 2026 06:38:36</span>
   </span>
 
     

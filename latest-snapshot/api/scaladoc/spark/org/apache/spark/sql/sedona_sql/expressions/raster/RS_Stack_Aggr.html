@@ -1,12 +1,11 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-          <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.expressions.raster.RS_Union_Aggr</title>
-          <meta name="description" content="org.apache.sedona sedona - spark - common - 3.5 2.12 2.0.0 - SNAPSHOT API - org.apache.spark.sql.sedona sql.expressions.raster.RS Union Aggr" />
-          <meta name="keywords" content="org.apache.sedona sedona spark common 3.5 2.12 2.0.0 SNAPSHOT API org.apache.spark.sql.sedona sql.expressions.raster.RS Union Aggr" />
+          <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.expressions.raster.RS_Stack_Aggr</title>
+          <meta name="description" content="org.apache.sedona sedona - spark - common - 3.5 2.12 2.0.0 - SNAPSHOT API - org.apache.spark.sql.sedona sql.expressions.raster.RS Stack Aggr" />
+          <meta name="keywords" content="org.apache.sedona sedona spark common 3.5 2.12 2.0.0 SNAPSHOT API org.apache.spark.sql.sedona sql.expressions.raster.RS Stack Aggr" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       
@@ -284,12 +283,12 @@
                         <a href="RS_SquareRoot.html" title="">RS_SquareRoot</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
-                        <a class="class" href="RS_Subtract.html" title=""></a>
-                        <a href="RS_Subtract.html" title="">RS_Subtract</a>
+                        <a class="class" href="" title="Return a raster containing bands at given indexes from all rasters in a given column."></a>
+                        <a href="" title="Return a raster containing bands at given indexes from all rasters in a given column.">RS_Stack_Aggr</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
-                        <a class="class" href="" title="Return a raster containing bands at given indexes from all rasters in a given column"></a>
-                        <a href="" title="Return a raster containing bands at given indexes from all rasters in a given column">RS_Union_Aggr</a>
+                        <a class="class" href="RS_Subtract.html" title=""></a>
+                        <a href="RS_Subtract.html" title="">RS_Subtract</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
                         <a class="object" href="implicits$.html" title=""></a>
@@ -303,8 +302,8 @@
       <div id="definition">
         <div class="big-circle class">c</div>
         <p id="owner"><a href="../../../../../../index.html" class="extype" name="org">org</a>.<a href="../../../../../index.html" class="extype" name="org.apache">apache</a>.<a href="../../../../index.html" class="extype" name="org.apache.spark">spark</a>.<a href="../../../index.html" class="extype" name="org.apache.spark.sql">sql</a>.<a href="../../index.html" class="extype" name="org.apache.spark.sql.sedona_sql">sedona_sql</a>.<a href="../index.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions">expressions</a>.<a href="index.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster">raster</a></p>
-        <h1>RS_Union_Aggr<span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html" title="Permalink">
+        <h1>RS_Stack_Aggr<span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
@@ -317,12 +316,13 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">RS_Union_Aggr</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.expressions.Aggregator">expressions.Aggregator</span>[(<span class="extype" name="org.geotools.coverage.grid.GridCoverage2D">GridCoverage2D</span>, <span class="extype" name="scala.Int">Int</span>), <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<a href="BandData.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.BandData">BandData</a>], <span class="extype" name="org.geotools.coverage.grid.GridCoverage2D">GridCoverage2D</span>]</span>
+        <span class="name">RS_Stack_Aggr</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.expressions.Aggregator">expressions.Aggregator</span>[(<span class="extype" name="org.geotools.coverage.grid.GridCoverage2D">GridCoverage2D</span>, <span class="extype" name="scala.Int">Int</span>), <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<a href="BandData.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.BandData">BandData</a>], <span class="extype" name="org.geotools.coverage.grid.GridCoverage2D">GridCoverage2D</span>]</span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Return a raster containing bands at given indexes from all rasters in a given column
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Return a raster containing bands at given indexes from all rasters in a given column. Named
+RS_Union_Aggr before Sedona 2.0.
 </p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
@@ -353,7 +353,7 @@
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Union_Aggr"><span>RS_Union_Aggr</span></li><li class="in" name="org.apache.spark.sql.expressions.Aggregator"><span>Aggregator</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Stack_Aggr"><span>RS_Stack_Aggr</span></li><li class="in" name="org.apache.spark.sql.expressions.Aggregator"><span>Aggregator</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -373,10 +373,10 @@
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Union_Aggr#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;():org.apache.spark.sql.sedona_sql.expressions.raster.RS_Union_Aggr"></a><a id="&lt;init&gt;:RS_Union_Aggr"></a>
+              <ol><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Stack_Aggr#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;():org.apache.spark.sql.sedona_sql.expressions.raster.RS_Stack_Aggr"></a><a id="&lt;init&gt;:RS_Stack_Aggr"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#&lt;init&gt;():org.apache.spark.sql.sedona_sql.expressions.raster.RS_Union_Aggr" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#&lt;init&gt;():org.apache.spark.sql.sedona_sql.expressions.raster.RS_Stack_Aggr" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -385,7 +385,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">RS_Union_Aggr</span><span class="params">()</span>
+        <span class="name">RS_Stack_Aggr</span><span class="params">()</span>
       </span>
       
       
@@ -402,7 +402,7 @@
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#!=(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#!=(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -418,7 +418,7 @@
     </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html###():Int" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html###():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -434,7 +434,7 @@
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#==(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#==(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -450,7 +450,7 @@
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#asInstanceOf[T0]:T0" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#asInstanceOf[T0]:T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -463,10 +463,10 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Union_Aggr#bufferEncoder" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Stack_Aggr#bufferEncoder" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="bufferEncoder:org.apache.spark.sql.Encoder[scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData]]"></a><a id="bufferEncoder:Encoder[ArrayBuffer[BandData]]"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#bufferEncoder:org.apache.spark.sql.Encoder[scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData]]" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#bufferEncoder:org.apache.spark.sql.Encoder[scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -478,11 +478,11 @@
         <span class="name">bufferEncoder</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Encoder">Encoder</span>[<span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<a href="BandData.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.BandData">BandData</a>]]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Union_Aggr">RS_Union_Aggr</a> → Aggregator</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Union_Aggr#bufferSerde" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Stack_Aggr">RS_Stack_Aggr</a> → Aggregator</dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Stack_Aggr#bufferSerde" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="bufferSerde:org.apache.spark.sql.catalyst.encoders.ExpressionEncoder[scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData]]"></a><a id="bufferSerde:ExpressionEncoder[ArrayBuffer[BandData]]"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#bufferSerde:org.apache.spark.sql.catalyst.encoders.ExpressionEncoder[scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData]]" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#bufferSerde:org.apache.spark.sql.catalyst.encoders.ExpressionEncoder[scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -498,7 +498,7 @@
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#clone():Object" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#clone():Object" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -524,7 +524,7 @@
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#eq(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -540,7 +540,7 @@
     </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#equals(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#equals(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -553,10 +553,10 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Union_Aggr#finish" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Stack_Aggr#finish" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finish(merged:scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData]):org.geotools.coverage.grid.GridCoverage2D"></a><a id="finish(ArrayBuffer[BandData]):GridCoverage2D"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#finish(merged:scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData]):org.geotools.coverage.grid.GridCoverage2D" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#finish(merged:scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData]):org.geotools.coverage.grid.GridCoverage2D" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -568,11 +568,11 @@
         <span class="name">finish</span><span class="params">(<span name="merged">merged: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<a href="BandData.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.BandData">BandData</a>]</span>)</span><span class="result">: <span class="extype" name="org.geotools.coverage.grid.GridCoverage2D">GridCoverage2D</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Union_Aggr">RS_Union_Aggr</a> → Aggregator</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Stack_Aggr">RS_Stack_Aggr</a> → Aggregator</dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#getClass():Class[_]" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#getClass():Class[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -593,7 +593,7 @@
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#hashCode():Int" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#hashCode():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -614,7 +614,7 @@
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#isInstanceOf[T0]:Boolean" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#isInstanceOf[T0]:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -627,10 +627,10 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Union_Aggr#merge" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Stack_Aggr#merge" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="merge(buffer1:scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData],buffer2:scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData]):scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData]"></a><a id="merge(ArrayBuffer[BandData],ArrayBuffer[BandData]):ArrayBuffer[BandData]"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#merge(buffer1:scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData],buffer2:scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData]):scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData]" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#merge(buffer1:scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData],buffer2:scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData]):scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -642,11 +642,11 @@
         <span class="name">merge</span><span class="params">(<span name="buffer1">buffer1: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<a href="BandData.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.BandData">BandData</a>]</span>, <span name="buffer2">buffer2: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<a href="BandData.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.BandData">BandData</a>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<a href="BandData.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.BandData">BandData</a>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Union_Aggr">RS_Union_Aggr</a> → Aggregator</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Stack_Aggr">RS_Stack_Aggr</a> → Aggregator</dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#ne(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -662,7 +662,7 @@
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#notify():Unit" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#notify():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -683,7 +683,7 @@
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#notifyAll():Unit" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#notifyAll():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -701,10 +701,10 @@
                 <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Union_Aggr#outputEncoder" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Stack_Aggr#outputEncoder" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="outputEncoder:org.apache.spark.sql.catalyst.encoders.ExpressionEncoder[org.geotools.coverage.grid.GridCoverage2D]"></a><a id="outputEncoder:ExpressionEncoder[GridCoverage2D]"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#outputEncoder:org.apache.spark.sql.catalyst.encoders.ExpressionEncoder[org.geotools.coverage.grid.GridCoverage2D]" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#outputEncoder:org.apache.spark.sql.catalyst.encoders.ExpressionEncoder[org.geotools.coverage.grid.GridCoverage2D]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -716,11 +716,11 @@
         <span class="name">outputEncoder</span><span class="result">: <span class="extype" name="org.apache.spark.sql.catalyst.encoders.ExpressionEncoder">ExpressionEncoder</span>[<span class="extype" name="org.geotools.coverage.grid.GridCoverage2D">GridCoverage2D</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Union_Aggr">RS_Union_Aggr</a> → Aggregator</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Union_Aggr#reduce" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Stack_Aggr">RS_Stack_Aggr</a> → Aggregator</dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Stack_Aggr#reduce" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="reduce(buffer:scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData],input:(org.geotools.coverage.grid.GridCoverage2D,Int)):scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData]"></a><a id="reduce(ArrayBuffer[BandData],(GridCoverage2D,Int)):ArrayBuffer[BandData]"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#reduce(buffer:scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData],input:(org.geotools.coverage.grid.GridCoverage2D,Int)):scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData]" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#reduce(buffer:scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData],input:(org.geotools.coverage.grid.GridCoverage2D,Int)):scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -732,11 +732,11 @@
         <span class="name">reduce</span><span class="params">(<span name="buffer">buffer: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<a href="BandData.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.BandData">BandData</a>]</span>, <span name="input">input: (<span class="extype" name="org.geotools.coverage.grid.GridCoverage2D">GridCoverage2D</span>, <span class="extype" name="scala.Int">Int</span>)</span>)</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<a href="BandData.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.BandData">BandData</a>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Union_Aggr">RS_Union_Aggr</a> → Aggregator</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Union_Aggr#serde" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Stack_Aggr">RS_Stack_Aggr</a> → Aggregator</dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Stack_Aggr#serde" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="serde:org.apache.spark.sql.catalyst.encoders.ExpressionEncoder[org.geotools.coverage.grid.GridCoverage2D]"></a><a id="serde:ExpressionEncoder[GridCoverage2D]"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#serde:org.apache.spark.sql.catalyst.encoders.ExpressionEncoder[org.geotools.coverage.grid.GridCoverage2D]" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#serde:org.apache.spark.sql.catalyst.encoders.ExpressionEncoder[org.geotools.coverage.grid.GridCoverage2D]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -752,7 +752,7 @@
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -768,7 +768,7 @@
     </li><li name="org.apache.spark.sql.expressions.Aggregator#toColumn" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toColumn:org.apache.spark.sql.TypedColumn[IN,OUT]"></a><a id="toColumn:TypedColumn[(GridCoverage2D,Int),GridCoverage2D]"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#toColumn:org.apache.spark.sql.TypedColumn[IN,OUT]" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#toColumn:org.apache.spark.sql.TypedColumn[IN,OUT]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -784,7 +784,7 @@
     </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#toString():String" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#toString():String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -800,7 +800,7 @@
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -822,7 +822,7 @@
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#wait(x$1:Long):Unit" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#wait(x$1:Long):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -846,7 +846,7 @@
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#wait():Unit" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#wait():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -865,10 +865,10 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Union_Aggr#zero" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Stack_Aggr#zero" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="zero:scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData]"></a><a id="zero:ArrayBuffer[BandData]"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#zero:scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData]" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#zero:scala.collection.mutable.ArrayBuffer[org.apache.spark.sql.sedona_sql.expressions.raster.BandData]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -880,7 +880,7 @@
         <span class="name">zero</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<a href="BandData.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.BandData">BandData</a>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Union_Aggr">RS_Union_Aggr</a> → Aggregator</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Stack_Aggr">RS_Stack_Aggr</a> → Aggregator</dd></dl></div>
     </li>
               </ol>
             </div>
@@ -892,7 +892,7 @@
               <ol><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Union_Aggr.html#finalize():Unit" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_Stack_Aggr.html#finalize():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>

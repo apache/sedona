@@ -5377,11 +5377,11 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/Raster-Accessors/RS_WorldToRasterCoordY/"/>
     </url>
     <url>
-        <loc>https://sedona.apache.org/latest/api/sql/Raster-Aggregate-Functions/RS_Union_Aggr/</loc>
+        <loc>https://sedona.apache.org/latest/api/sql/Raster-Aggregate-Functions/RS_Stack_Aggr/</loc>
         <lastmod>2026-10-01</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/Raster-Aggregate-Functions/RS_Union_Aggr/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/Raster-Aggregate-Functions/RS_Union_Aggr/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/Raster-Aggregate-Functions/RS_Stack_Aggr/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/Raster-Aggregate-Functions/RS_Stack_Aggr/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/api/sql/Raster-Band-Accessors/RS_Band/</loc>
@@ -5657,11 +5657,11 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/Raster-Operators/RS_SetValues/"/>
     </url>
     <url>
-        <loc>https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_Union/</loc>
+        <loc>https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_Stack/</loc>
         <lastmod>2026-10-01</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_Union/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/Raster-Operators/RS_Union/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_Stack/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/Raster-Operators/RS_Stack/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_Value/</loc>
@@ -12440,11 +12440,11 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/Raster-Accessors/RS_WorldToRasterCoordY/"/>
     </url>
     <url>
-        <loc>https://sedona.apache.org/latest/zh/api/sql/Raster-Aggregate-Functions/RS_Union_Aggr/</loc>
+        <loc>https://sedona.apache.org/latest/zh/api/sql/Raster-Aggregate-Functions/RS_Stack_Aggr/</loc>
         <lastmod>2026-10-01</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/Raster-Aggregate-Functions/RS_Union_Aggr/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/Raster-Aggregate-Functions/RS_Union_Aggr/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/Raster-Aggregate-Functions/RS_Stack_Aggr/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/Raster-Aggregate-Functions/RS_Stack_Aggr/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/zh/api/sql/Raster-Band-Accessors/RS_Band/</loc>
@@ -12720,11 +12720,11 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/Raster-Operators/RS_SetValues/"/>
     </url>
     <url>
-        <loc>https://sedona.apache.org/latest/zh/api/sql/Raster-Operators/RS_Union/</loc>
+        <loc>https://sedona.apache.org/latest/zh/api/sql/Raster-Operators/RS_Stack/</loc>
         <lastmod>2026-10-01</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/Raster-Operators/RS_Union/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/Raster-Operators/RS_Union/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/Raster-Operators/RS_Stack/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/Raster-Operators/RS_Stack/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/zh/api/sql/Raster-Operators/RS_Value/</loc>
