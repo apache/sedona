@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -242,7 +241,7 @@ Replaces deprecated <code class="docutils literal notranslate"><span class="pre"
 for the ‘dwithin’ predicate. If array_like, must be
 one-dimensional with length equal to length of left GeoDataFrame.
 Required if <code class="docutils literal notranslate"><span class="pre">predicate='dwithin'</span></code>.</p></li>
-<li><p><strong>on_attribute</strong> (<em>string</em><em>, </em><em>list</em><em> or </em><em>tuple</em>) – Column name(s) to join on as an additional join restriction on top
+<li><p><strong>on_attribute</strong> (<em>string</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a>) – Column name(s) to join on as an additional join restriction on top
 of the spatial predicate. These must be found in both DataFrames.
 If set, observations are joined only if the predicate applies
 and values in specified columns match.</p></li>
@@ -287,13 +286,13 @@ geometries do not match. The left geometry, CRS and index are retained.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>left_df</strong> (<a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame" title="sedona.spark.geopandas.GeoDataFrame"><em>GeoDataFrame</em></a>) – Distributed point frames to join.</p></li>
 <li><p><strong>right_df</strong> (<a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame" title="sedona.spark.geopandas.GeoDataFrame"><em>GeoDataFrame</em></a>) – Distributed point frames to join.</p></li>
-<li><p><strong>how</strong> (<em>str</em><em>, </em><em>default 'inner'</em>) – Only inner joins are supported.</p></li>
-<li><p><strong>max_distance</strong> (<em>float</em><em>, </em><em>optional</em>) – Positive finite distance in CRS units. Filters nearest results; it
+<li><p><strong>how</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>default 'inner'</em>) – Only inner joins are supported.</p></li>
+<li><p><strong>max_distance</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Positive finite distance in CRS units. Filters nearest results; it
 does not reduce the KNN search radius.</p></li>
-<li><p><strong>lsuffix</strong> (<em>str</em><em>, </em><em>default 'left'</em><em>, </em><em>'right'</em>) – Only the default suffixes are supported for overlapping columns.</p></li>
-<li><p><strong>rsuffix</strong> (<em>str</em><em>, </em><em>default 'left'</em><em>, </em><em>'right'</em>) – Only the default suffixes are supported for overlapping columns.</p></li>
-<li><p><strong>distance_col</strong> (<em>str</em><em>, </em><em>optional</em>) – New output column for the distance. Must not replace an input column.</p></li>
-<li><p><strong>exclusive</strong> (<em>bool</em><em>, </em><em>default False</em>) – Only False is supported; equal points can match at distance zero.</p></li>
+<li><p><strong>lsuffix</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>default 'left'</em><em>, </em><em>'right'</em>) – Only the default suffixes are supported for overlapping columns.</p></li>
+<li><p><strong>rsuffix</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>default 'left'</em><em>, </em><em>'right'</em>) – Only the default suffixes are supported for overlapping columns.</p></li>
+<li><p><strong>distance_col</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – New output column for the distance. Must not replace an input column.</p></li>
+<li><p><strong>exclusive</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default False</em>) – Only False is supported; equal points can match at distance zero.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

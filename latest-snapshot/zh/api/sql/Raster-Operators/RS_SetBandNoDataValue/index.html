@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5622,18 +5621,13 @@
 
 <h1 id="rs_setbandnodatavalue">RS_SetBandNoDataValue<a class="headerlink" href="#rs_setbandnodatavalue" title="Permanent link">&para;</a></h1>
 <p>Introduction: This sets the no data value for a specified band in the raster. If the band index is not provided, band 1 is assumed by default. Passing a <code>null</code> value for <code>noDataValue</code> will remove the no data value and that will ensure all pixels are included in functions rather than excluded as no data.</p>
-<p>Since <code>v1.5.1</code>, this function supports the ability to replace the current no-data value with the new <code>noDataValue</code>.</p>
+<p>Only the band's metadata changes; pixel values are left as they are. To move the no-data value while carrying the existing no-data pixels over to the new value, use <a href="../RS_ReplaceBandNoDataValue/">RS_ReplaceBandNoDataValue</a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>When <code>replace</code> is true, any pixels matching the provided <code>noDataValue</code> will be considered as no-data in the output raster.</p>
-<p>An <code>IllegalArgumentException</code> will be thrown if the input raster does not already have a no-data value defined. Replacing existing values with <code>noDataValue</code> requires a defined no-data baseline to evaluate against.</p>
-<p>To use this for no-data replacement, the input raster must first set its no-data value, which can then be selectively replaced via this function.</p>
-<p><code>noDataValue</code> must be non-null when using the <code>replace</code> variant; to remove a no data value, use the 2 or 3 argument form.</p>
+<p>Since <code>v2.0.0</code>, the four-argument form <code>RS_SetBandNoDataValue(raster, bandIndex, noDataValue, replace)</code> is removed. Replace <code>RS_SetBandNoDataValue(raster, bandIndex, noDataValue, true)</code> with <code>RS_ReplaceBandNoDataValue(raster, bandIndex, noDataValue)</code>.</p>
 </div>
 <p>Format:</p>
 <div class="highlight"><pre><span></span><code>RS_SetBandNoDataValue(raster: Raster, bandIndex: Integer = 1, noDataValue: Double)
-</code></pre></div>
-<div class="highlight"><pre><span></span><code>RS_SetBandNoDataValue(raster: Raster, bandIndex: Integer, noDataValue: Double, replace: Boolean)
 </code></pre></div>
 <p>Return type: <code>Raster</code></p>
 <p>Since: <code>v1.5.0</code></p>
@@ -5680,7 +5674,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 14, 2026 02:06:13 UTC">September 14, 2026 02:06:13</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="October 2, 2026 04:02:34 UTC">October 2, 2026 04:02:34</span>
   </span>
 
     

@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -3554,6 +3553,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#replacing-a-bands-no-data-value-is-a-separate-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Replacing a band's no-data value is a separate function
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#other-behaviour-changes" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5728,6 +5738,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#replacing-a-bands-no-data-value-is-a-separate-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Replacing a band's no-data value is a separate function
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#other-behaviour-changes" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5872,6 +5893,17 @@ functions, whether it's a literal or a column. For example:</p>
 <p><code>RS_Union</code> and <code>RS_Union_Aggr</code> are now <code>RS_Stack</code> and <code>RS_Stack_Aggr</code>. They stack the bands of
 several rasters into one raster, and never merged grids the way the old names suggested. The old
 names are removed, so queries that use them fail until renamed; the behaviour is unchanged.</p>
+<h2 id="replacing-a-bands-no-data-value-is-a-separate-function">Replacing a band's no-data value is a separate function<a class="headerlink" href="#replacing-a-bands-no-data-value-is-a-separate-function" title="Permanent link">&para;</a></h2>
+<p>The four-argument <code>RS_SetBandNoDataValue(raster, band, noDataValue, replace)</code> form is removed,
+so queries that use it fail until rewritten:</p>
+<ul>
+<li><code>RS_SetBandNoDataValue(raster, band, value, true)</code> becomes
+  <code>RS_ReplaceBandNoDataValue(raster, band, value)</code>, which rewrites the pixels holding the old
+  no-data value to the new one before declaring it.</li>
+<li><code>RS_SetBandNoDataValue(raster, band, value, false)</code> becomes
+  <code>RS_SetBandNoDataValue(raster, band, value)</code>, which declares the new value and leaves the pixels
+  as they are.</li>
+</ul>
 <h2 id="other-behaviour-changes">Other behaviour changes<a class="headerlink" href="#other-behaviour-changes" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>WKB output keeps M.</strong> <code>ST_AsBinary</code>, <code>ST_AsEWKB</code> and <code>ST_AsHEXEWKB</code> now write the M
@@ -5917,7 +5949,7 @@ names are removed, so queries that use them fail until renamed; the behaviour is
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="October 1, 2026 06:38:36 UTC">October 1, 2026 06:38:36</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="October 2, 2026 04:02:34 UTC">October 2, 2026 04:02:34</span>
   </span>
 
     
