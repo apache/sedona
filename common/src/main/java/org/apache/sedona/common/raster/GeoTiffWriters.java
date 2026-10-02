@@ -21,10 +21,12 @@ package org.apache.sedona.common.raster;
 import it.geosolutions.imageio.plugins.tiff.TIFFImageWriteParam;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageWriter;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageWriterSpi;
+import it.geosolutions.imageioimpl.plugins.tiff.TIFFStreamMetadata;
 import java.awt.geom.AffineTransform;
 import java.awt.image.RenderedImage;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteOrder;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.ImageWriteParam;
@@ -181,11 +183,14 @@ public final class GeoTiffWriters {
       IIOMetadata imageMetadata =
           GeoTiffWriter.createGeoTiffIIOMetadata(
               writer, ImageTypeSpecifier.createFromRenderedImage(image), metadata, writeParam);
+      // ImageIO-Ext defaults to big endian. GDAL and most other writers produce little endian
+      // files, and some readers decode pixel data in the platform's byte order without checking
+      // the header, so big endian files render as garbage there.
+      TIFFStreamMetadata streamMetadata =
+          (TIFFStreamMetadata) writer.getDefaultStreamMetadata(writeParam);
+      streamMetadata.byteOrder = ByteOrder.LITTLE_ENDIAN;
       writer.setOutput(stream);
-      writer.write(
-          writer.getDefaultStreamMetadata(writeParam),
-          new IIOImage(image, null, imageMetadata),
-          writeParam);
+      writer.write(streamMetadata, new IIOImage(image, null, imageMetadata), writeParam);
       stream.flush();
     } finally {
       writer.dispose();
