@@ -6868,6 +6868,13 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/2026/07/24/openstreetmap-meet-sedona-raw-osmpbf-to-spatial-sql/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/blog/2026/10/02/australia-or-the-ocean-nobody-agrees-which-way-a-polygon-goes/</loc>
+        <lastmod>2026-10-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/blog/2026/10/02/australia-or-the-ocean-nobody-agrees-which-way-a-polygon-goes/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/2026/10/02/australia-or-the-ocean-nobody-agrees-which-way-a-polygon-goes/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/blog/2026/08/07/index-a-million-rasters-without-reading-a-pixel/</loc>
         <lastmod>2026-10-02</lastmod>
         <changefreq>daily</changefreq>
@@ -7069,6 +7076,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/blog/author/jia/page/2/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/author/jia/page/2/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/blog/author/jia/page/3/</loc>
+        <lastmod>2026-10-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/blog/author/jia/page/3/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/author/jia/page/3/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/zh/</loc>
@@ -13938,6 +13952,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/2026/07/24/openstreetmap-meet-sedona-raw-osmpbf-to-spatial-sql/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/zh/blog/2026/10/02/australia-or-the-ocean-nobody-agrees-which-way-a-polygon-goes/</loc>
+        <lastmod>2026-10-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/2026/10/02/australia-or-the-ocean-nobody-agrees-which-way-a-polygon-goes/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/2026/10/02/australia-or-the-ocean-nobody-agrees-which-way-a-polygon-goes/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/zh/blog/2026/08/07/index-a-million-rasters-without-reading-a-pixel/</loc>
         <lastmod>2026-10-02</lastmod>
         <changefreq>daily</changefreq>
@@ -14139,5 +14160,12 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/author/jia/page/2/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/author/jia/page/2/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/blog/author/jia/page/3/</loc>
+        <lastmod>2026-10-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/author/jia/page/3/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/author/jia/page/3/"/>
     </url>
 </urlset>
