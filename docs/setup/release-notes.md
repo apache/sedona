@@ -31,6 +31,11 @@ See [Migrating to Sedona 2.0](migration-2.0.md) for what to check when upgrading
   stack the bands of several rasters into one raster; they do not merge grids the way a raster
   union (PostGIS `ST_Union`) does. The old names are removed, so replace them in queries. The
   behaviour is unchanged.
+* **`RS_SetBandNoDataValue` replace form removed**: the 4-argument
+  `RS_SetBandNoDataValue(raster, bandIndex, noDataValue, replace)` form is replaced by
+  `RS_ReplaceBandNoDataValue(raster, bandIndex, noDataValue)`. Change
+  `RS_SetBandNoDataValue(raster, band, value, true)` to `RS_ReplaceBandNoDataValue(raster, band, value)`,
+  and drop a `false` fourth argument.
 
 * **WKB output**: `ST_AsBinary`, `ST_AsEWKB`, and `ST_AsHEXEWKB` now retain M for measured
   geometries in Spark, Flink, and Snowflake, including geometries read from WKT. Earlier

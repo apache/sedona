@@ -95,8 +95,7 @@ public class RasterEditors {
           throw new IllegalArgumentException(
               String.format(
                   "Band %d has a NaN nodata value, which cannot be represented in pixel type "
-                      + "'%s'; replace it first with RS_SetBandNoDataValue(raster, %d, value, "
-                      + "true)",
+                      + "'%s'; replace it first with RS_ReplaceBandNoDataValue(raster, %d, value)",
                   band + 1, dataType, band + 1));
         }
         sampleDimensions[band] =

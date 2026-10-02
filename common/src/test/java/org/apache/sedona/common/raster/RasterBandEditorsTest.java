@@ -83,10 +83,32 @@ public class RasterBandEditorsTest extends RasterTestBase {
   }
 
   @Test
+  public void testReplaceBandNoDataValueRequiresExistingNoData() throws FactoryException {
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 2, 1, 0, 1, 1, -1, 0, 0, 0);
+    IllegalArgumentException e =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterBandEditors.replaceBandNoDataValue(raster, 1, -9999.0));
+    assertTrue(e.getMessage().contains("no no-data value to replace"));
+  }
+
+  @Test
+  public void testReplaceBandNoDataValueMatchesSignedZero() throws FactoryException {
+    // A -0.0 pixel reads as no-data under a 0.0 no-data value, so it is carried over too.
+    GridCoverage2D raster =
+        RasterConstructors.makeNonEmptyRaster(
+            1, "d", 3, 1, 0, 1, 1, -1, 0, 0, 0, new double[][] {{-0.0, 0.0, 1.5}});
+    raster = RasterBandEditors.setBandNoDataValue(raster, 1, 0.0);
+    GridCoverage2D result = RasterBandEditors.replaceBandNoDataValue(raster, 1, -9999.0);
+    assertArrayEquals(new double[] {-9999.0, -9999.0, 1.5}, MapAlgebra.bandAsArray(result, 1), 0);
+    assertEquals(-9999.0, RasterBandAccessors.getBandNoDataValue(result, 1), 0);
+  }
+
+  @Test
   public void testGetSummaryStats() throws IOException {
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
-    raster = RasterBandEditors.setBandNoDataValue(raster, 1, 10.0, true);
+    raster = RasterBandEditors.replaceBandNoDataValue(raster, 1, 10.0);
 
     // Test single output
     double resultSummary = RasterBandAccessors.getSummaryStats(raster, "count", 1, false);
@@ -109,14 +131,14 @@ public class RasterBandEditorsTest extends RasterTestBase {
   }
 
   @Test
-  public void testSetBandNoDataValueWithReplaceOptionRaster() throws IOException {
+  public void testReplaceBandNoDataValueRaster() throws IOException {
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
     double[] originalSummary = RasterBandAccessors.getSummaryStatsAll(raster, 1, false);
     int sumOG = (int) originalSummary[1];
 
     assertEquals(206233487, sumOG);
-    GridCoverage2D resultRaster = RasterBandEditors.setBandNoDataValue(raster, 1, 10.0, true);
+    GridCoverage2D resultRaster = RasterBandEditors.replaceBandNoDataValue(raster, 1, 10.0);
     double[] resultSummary = RasterBandAccessors.getSummaryStatsAll(resultRaster, 1, false);
     int sumActual = (int) resultSummary[1];
 
@@ -133,7 +155,7 @@ public class RasterBandEditorsTest extends RasterTestBase {
   }
 
   @Test
-  public void testSetBandNoDataValueWithReplaceOption() throws FactoryException {
+  public void testReplaceBandNoDataValue() throws FactoryException {
     GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 10, 20, 10, 20, 1);
     double[] band1 = new double[200];
     DecimalFormat df = new DecimalFormat("0.00");
@@ -149,7 +171,7 @@ public class RasterBandEditorsTest extends RasterTestBase {
     raster = RasterBandEditors.setBandNoDataValue(raster, 1, 15.0);
 
     // invoking replace option.
-    GridCoverage2D result = RasterBandEditors.setBandNoDataValue(raster, 1, 20.0, true);
+    GridCoverage2D result = RasterBandEditors.replaceBandNoDataValue(raster, 1, 20.0);
     double[] resultBand = MapAlgebra.bandAsArray(result, 1);
 
     Map<Double, Long> resultMap =
@@ -166,7 +188,7 @@ public class RasterBandEditorsTest extends RasterTestBase {
   }
 
   @Test
-  public void testSetBandNoDataValueWithReplacePreservesOtherBands() throws FactoryException {
+  public void testReplaceBandNoDataValuePreservesOtherBands() throws FactoryException {
     double[][] originalBands = {{1, 5, 3, 4}, {11, 5, 13, 14}, {21, 22, 5, 24}};
     double[][] replacedBands = {{1, 99, 3, 4}, {11, 5, 99, 14}, {21, 22, 5, 99}};
     double[] noDataValues = {5, 13, 24};
@@ -179,8 +201,7 @@ public class RasterBandEditorsTest extends RasterTestBase {
       }
 
       for (int targetBand = 1; targetBand <= 3; targetBand++) {
-        GridCoverage2D result =
-            RasterBandEditors.setBandNoDataValue(raster, targetBand, 99.0, true);
+        GridCoverage2D result = RasterBandEditors.replaceBandNoDataValue(raster, targetBand, 99.0);
         assertEquals(raster.getGridGeometry(), result.getGridGeometry());
         assertEquals(
             raster.getRenderedImage().getSampleModel().getDataType(),
@@ -815,7 +836,7 @@ public class RasterBandEditorsTest extends RasterTestBase {
     assertSame(withNaN, RasterBandEditors.setBandNoDataValue(withNaN, 1, Double.NaN));
 
     // Replacing NaN nodata pixels with a new sentinel rewrites the NaN pixels.
-    GridCoverage2D replaced = RasterBandEditors.setBandNoDataValue(withNaN, 1, -9999.0, true);
+    GridCoverage2D replaced = RasterBandEditors.replaceBandNoDataValue(withNaN, 1, -9999.0);
     assertEquals(-9999.0, RasterBandAccessors.getBandNoDataValue(replaced, 1), 0);
     double[] pixels =
         RasterUtils.getRaster(replaced.getRenderedImage())
@@ -824,7 +845,7 @@ public class RasterBandEditorsTest extends RasterTestBase {
     assertEquals(3, RasterBandAccessors.getCount(replaced, 1, true));
 
     // Replacing a numeric nodata value with NaN rewrites those pixels to NaN.
-    GridCoverage2D backToNaN = RasterBandEditors.setBandNoDataValue(replaced, 1, Double.NaN, true);
+    GridCoverage2D backToNaN = RasterBandEditors.replaceBandNoDataValue(replaced, 1, Double.NaN);
     assertTrue(Double.isNaN(RasterBandAccessors.getBandNoDataValue(backToNaN, 1)));
     pixels =
         RasterUtils.getRaster(backToNaN.getRenderedImage())
@@ -847,7 +868,7 @@ public class RasterBandEditorsTest extends RasterTestBase {
   }
 
   @Test
-  public void testSetBandNoDataValueReplaceKeepsOtherBands() throws FactoryException {
+  public void testReplaceBandNoDataValueKeepsOtherBands() throws FactoryException {
     GridCoverage2D raster =
         RasterConstructors.makeNonEmptyRaster(
             2,
@@ -864,7 +885,7 @@ public class RasterBandEditorsTest extends RasterTestBase {
             new double[][] {{1, Double.NaN, 3, 4}, {10, 20, 30, 40}});
     raster = RasterBandEditors.setBandNoDataValue(raster, 1, Double.NaN);
 
-    GridCoverage2D replaced = RasterBandEditors.setBandNoDataValue(raster, 1, -9999.0, true);
+    GridCoverage2D replaced = RasterBandEditors.replaceBandNoDataValue(raster, 1, -9999.0);
     assertEquals(-9999.0, RasterBandAccessors.getBandNoDataValue(replaced, 1), 0);
     assertArrayEquals(new double[] {1, -9999, 3, 4}, MapAlgebra.bandAsArray(replaced, 1), 0);
     // The band that was not touched keeps its pixels

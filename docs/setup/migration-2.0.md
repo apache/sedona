@@ -81,6 +81,18 @@ The Python `ST_GeometryN` and `ST_InteriorRingN` DataFrame functions now reject 
 several rasters into one raster, and never merged grids the way the old names suggested. The old
 names are removed, so queries that use them fail until renamed; the behaviour is unchanged.
 
+## Replacing a band's no-data value is a separate function
+
+The four-argument `RS_SetBandNoDataValue(raster, band, noDataValue, replace)` form is removed,
+so queries that use it fail until rewritten:
+
+* `RS_SetBandNoDataValue(raster, band, value, true)` becomes
+  `RS_ReplaceBandNoDataValue(raster, band, value)`, which rewrites the pixels holding the old
+  no-data value to the new one before declaring it.
+* `RS_SetBandNoDataValue(raster, band, value, false)` becomes
+  `RS_SetBandNoDataValue(raster, band, value)`, which declares the new value and leaves the pixels
+  as they are.
+
 ## Other behaviour changes
 
 * **WKB output keeps M.** `ST_AsBinary`, `ST_AsEWKB` and `ST_AsHEXEWKB` now write the M

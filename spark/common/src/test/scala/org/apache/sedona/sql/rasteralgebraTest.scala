@@ -898,7 +898,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertNull(sparkSession.sql("SELECT RS_SetBandNoDataValue(null, -999)").first().get(0))
     }
 
-    it("Passed RS_SetBandNoDataValue replacement preserves other bands") {
+    it("Passed RS_ReplaceBandNoDataValue preserves other bands") {
       val input =
         Seq((Seq(1.25, 5.0, 3.0, 4.0), Seq(11.0, 5.0, 13.0, 14.0), Seq(21.0, 22.0, 5.0, 24.5)))
           .toDF("band1", "band2", "band3")
@@ -906,9 +906,9 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         "RS_AddBandFromArray(RS_AddBandFromArray(RS_AddBandFromArray(" +
           "RS_MakeEmptyRaster(3, 'd', 2, 2, 0, 2, 1, -1, 0, 0, 4326), " +
           "band1, 1, 5d), band2, 2, 13d), band3, 3, 24.5d) AS raster")
-      // Collect the raster itself to cover the four-argument SQL binding and serialization.
+      // Collect the raster itself to cover the SQL binding and serialization.
       val result = raster
-        .selectExpr("RS_SetBandNoDataValue(raster, 2, -999d, true)")
+        .selectExpr("RS_ReplaceBandNoDataValue(raster, 2, -999d)")
         .first()
         .getAs[GridCoverage2D](0)
       assert(MapAlgebra.bandAsArray(result, 1).toSeq == Seq(1.25, 5.0, 3.0, 4.0))
@@ -917,6 +917,40 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(5.0, RasterBandAccessors.getBandNoDataValue(result, 1), 0)
       assertEquals(-999.0, RasterBandAccessors.getBandNoDataValue(result, 2), 0)
       assertEquals(24.5, RasterBandAccessors.getBandNoDataValue(result, 3), 0)
+    }
+
+    it("RS_ReplaceBandNoDataValue keeps the same pixels as no-data (docs example)") {
+      val counts = sparkSession
+        .sql("""SELECT
+          |  RS_Count(r, 1, true) AS before,
+          |  RS_Count(RS_ReplaceBandNoDataValue(r, 1, -9999), 1, true) AS after,
+          |  RS_BandNoDataValue(RS_ReplaceBandNoDataValue(r, 1, -9999), 1) AS nodata
+          |FROM (SELECT RS_AddBandFromArray(
+          |  RS_MakeEmptyRaster(1, 'd', 2, 2, 0, 2, 1), array(0d, 1d, 0d, 2d), 1, 0d) AS r)
+          |""".stripMargin)
+        .first()
+      assertEquals(2L, counts.getLong(0))
+      assertEquals(2L, counts.getLong(1))
+      assertEquals(-9999.0, counts.getDouble(2), 0)
+    }
+
+    it("RS_ReplaceBandNoDataValue requires an existing no-data value") {
+      val error = intercept[Exception] {
+        sparkSession
+          .sql("SELECT RS_ReplaceBandNoDataValue(" +
+            "RS_MakeEmptyRaster(1, 'd', 2, 2, 0, 2, 1, -1, 0, 0, 4326), 1, -999d)")
+          .first()
+      }
+      assert(error.getMessage.contains("no no-data value to replace"))
+    }
+
+    it("RS_ReplaceBandNoDataValue with a null argument returns null") {
+      assertNull(
+        sparkSession
+          .sql("SELECT RS_ReplaceBandNoDataValue(" +
+            "RS_MakeEmptyRaster(1, 'd', 2, 2, 0, 2, 1, -1, 0, 0, 4326), 1, null)")
+          .first()
+          .get(0))
     }
 
     it("Passed RS_SetBandNoDataValue clearing a band other than band 1") {
@@ -2426,7 +2460,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
           .isNaN)
 
       // NaN nodata pixels can be replaced by a numeric nodata value
-      val replaced = df.selectExpr("RS_SetBandNoDataValue(raster, 1, -9999, true) as raster")
+      val replaced = df.selectExpr("RS_ReplaceBandNoDataValue(raster, 1, -9999) as raster")
       assertEquals(
         -9999.0,
         replaced.selectExpr("RS_BandNoDataValue(raster)").first().getDouble(0),
