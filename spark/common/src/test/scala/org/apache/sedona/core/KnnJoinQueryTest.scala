@@ -21,10 +21,12 @@ package org.apache.sedona.core
 import org.apache.sedona.common.enums.FileDataSplitter
 import org.apache.sedona.core.enums.{DistanceMetric, GridType, IndexType}
 import org.apache.sedona.core.spatialOperator.JoinQuery
+import org.apache.sedona.core.spatialOperator.JoinQuery.JoinParams
 import org.apache.sedona.core.spatialPartitioning.QuadTreeRTPartitioner
-import org.apache.sedona.core.spatialRDD.PointRDD
+import org.apache.sedona.core.spatialRDD.{PointRDD, SpatialRDD}
 import org.apache.sedona.sql.TestBaseScala
-import org.locationtech.jts.geom.Point
+import org.locationtech.jts.geom.{Geometry, Point}
+import org.locationtech.jts.io.WKTReader
 import org.scalatest.prop.TableDrivenPropertyChecks.{Table, forAll}
 import org.scalatest.prop.TableFor7
 
@@ -147,5 +149,41 @@ class KnnJoinQueryTest extends TestBaseScala {
         print(output)
         assert(expectedOutput == output)
       }
+  }
+
+  for (metric <- Seq(DistanceMetric.HAVERSINE, DistanceMetric.SPHEROID);
+    broadcastQuerySide <- Seq(false, true)) {
+    it(
+      s"broadcast KNN join with $metric skips empty geometries, " +
+        s"broadcastQuerySide=$broadcastQuerySide") {
+      val reader = new WKTReader()
+      def toSpatialRDD(wkts: Seq[String]): SpatialRDD[Geometry] = {
+        val rdd = new SpatialRDD[Geometry]
+        rdd.setRawSpatialRDD(sc.parallelize(wkts.map(wkt => reader.read(wkt)), 2).toJavaRDD())
+        rdd.analyze()
+        rdd
+      }
+      val queryRDD = toSpatialRDD(Seq("POINT (0 0)", "POLYGON EMPTY", "POINT (10 10)"))
+      val objectRDD =
+        toSpatialRDD(Seq("POINT (0.1 0.1)", "POLYGON EMPTY", "POINT (9 9)", "POINT (5 5)"))
+      if (broadcastQuerySide) {
+        // An index on the object side makes knnJoin broadcast the query side instead
+        objectRDD.buildIndex(IndexType.RTREE, false)
+      }
+      val joinParams = new JoinParams(true, null, IndexType.RTREE, null, 2, metric)
+      val pairs = JoinQuery
+        .knnJoin(queryRDD, objectRDD, joinParams, false, true)
+        .collect()
+        .asScala
+        .map(pair => (pair._1.toText, pair._2.toText))
+        .sorted
+      // Empty query geometries get no neighbors and empty objects are never neighbors
+      assert(
+        pairs == Seq(
+          ("POINT (0 0)", "POINT (0.1 0.1)"),
+          ("POINT (0 0)", "POINT (5 5)"),
+          ("POINT (10 10)", "POINT (5 5)"),
+          ("POINT (10 10)", "POINT (9 9)")))
+    }
   }
 }

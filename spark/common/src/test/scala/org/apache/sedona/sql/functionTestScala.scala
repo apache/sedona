@@ -3297,6 +3297,27 @@ class functionTestScala
     }
   }
 
+  it("ST_DistanceSphere and ST_DistanceSpheroid should return null for empty geometries") {
+    val point = "ST_GeomFromWKT('POINT (0 0)')"
+    for (wkt <- Seq(
+        "POINT EMPTY",
+        "LINESTRING EMPTY",
+        "POLYGON EMPTY",
+        "GEOMETRYCOLLECTION EMPTY")) {
+      val empty = s"ST_GeomFromWKT('$wkt')"
+      val row = sparkSession
+        .sql(s"""SELECT
+             |ST_DistanceSphere($point, $empty),
+             |ST_DistanceSphere($empty, $point),
+             |ST_DistanceSphere($point, $empty, 6378137.0),
+             |ST_DistanceSpheroid($point, $empty),
+             |ST_DistanceSpheroid($empty, $point),
+             |ST_DistanceSpheroid($empty, $empty)""".stripMargin)
+        .first()
+      (0 until row.length).foreach(i => assert(row.isNullAt(i), s"column $i for $wkt"))
+    }
+  }
+
   it("should pass ST_ClosestPoint") {
     val geomTestCases = Map(
       (

@@ -46,7 +46,12 @@ public class Haversine {
    */
   public static final double EARTH_POLAR_RADIUS = 6357000.0;
 
-  public static double distance(Geometry geom1, Geometry geom2, double avg_earth_radius) {
+  public static Double distance(Geometry geom1, Geometry geom2, double avg_earth_radius) {
+    // An empty geometry has no coordinate (or centroid) to measure from. Return null like the
+    // planar ST_Distance does, instead of dereferencing a null coordinate.
+    if (geom1.isEmpty() || geom2.isEmpty()) {
+      return null;
+    }
     Coordinate coordinate1 =
         geom1.getGeometryType().equals("Point")
             ? geom1.getCoordinate()
@@ -74,7 +79,7 @@ public class Haversine {
 
   // Calculate the distance between two points on the earth using the "haversine" formula.
   // The radius of the earth is 6371.0 km
-  public static double distance(Geometry geom1, Geometry geom2) {
+  public static Double distance(Geometry geom1, Geometry geom2) {
     return distance(geom1, geom2, AVG_EARTH_RADIUS);
   }
 
@@ -84,9 +89,14 @@ public class Haversine {
    * @param envelope the envelope to expand
    * @param distance in meter
    * @param sphereRadius radius of the sphere in meter
-   * @return expanded envelope
+   * @return expanded envelope, or a null envelope if the given envelope is null
    */
   public static Envelope expandEnvelope(Envelope envelope, double distance, double sphereRadius) {
+    if (envelope.isNull()) {
+      // The envelope of an empty geometry is null. Expanding its placeholder bounds would produce
+      // a bogus non-null envelope near (0, 0), so keep it null, as Envelope.expandBy does.
+      return new Envelope();
+    }
     // 10% buffer to get rid of false negatives
     double scaleFactor = 1.1;
     double latDeltaRadian = distance / sphereRadius;

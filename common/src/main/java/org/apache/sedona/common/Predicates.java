@@ -184,6 +184,12 @@ public class Predicates {
 
   public static boolean dWithin(
       Geometry leftGeometry, Geometry rightGeometry, double distance, boolean useSpheroid) {
+    // An empty geometry is not within any distance of another geometry. Check this up front: the
+    // spheroid distance is undefined for empty input, and JTS isWithinDistance treats the distance
+    // to an empty geometry as 0 whenever the envelope pre-check passes.
+    if (leftGeometry.isEmpty() || rightGeometry.isEmpty()) {
+      return false;
+    }
     if (useSpheroid) {
       double distanceSpheroid = Spheroid.distance(leftGeometry, rightGeometry);
       return distanceSpheroid <= distance;
