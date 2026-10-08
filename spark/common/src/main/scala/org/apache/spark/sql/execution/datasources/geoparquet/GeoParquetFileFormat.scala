@@ -85,6 +85,8 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
       job: Job,
       options: Map[String, String],
       dataSchema: StructType): OutputWriterFactory = {
+    // Fail on the driver, not in every write task
+    GeoParquetWriteSupport.requireGeometryColumn(dataSchema)
     val sqlConf = new PortableSQLConf(sparkSession.sessionState.conf)
     val parquetOptions = new ParquetOptions(options, sqlConf)
 

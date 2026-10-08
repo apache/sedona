@@ -303,6 +303,25 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       }
     }
 
+    it("GeoParquet save should fail before running any task when there is no geometry column") {
+      val df = sparkSession
+        .range(10)
+        .selectExpr("id", "CAST(id AS STRING) AS severity")
+        .repartition(2)
+      val geoParquetSavePath = geoparquetoutputlocation + "/no_geometry.parquet"
+      FileUtils.deleteQuietly(new File(geoParquetSavePath))
+
+      // A failure inside a write task would reach us wrapped in a SparkException, after the job
+      // launched and the task was retried; a plan-time failure is thrown as is.
+      val e = intercept[IllegalArgumentException] {
+        df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)
+      }
+      assert(e.getMessage.contains("GeoParquet requires at least one geometry column"))
+      assert(e.getMessage.contains("severity"))
+      assert(e.getMessage.contains("format(\"parquet\")"))
+      assert(!new File(geoParquetSavePath).exists())
+    }
+
     it("GeoParquet save should work with snake_case column names") {
       val schema = StructType(
         Seq(
@@ -1453,10 +1472,12 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         SELECT ARRAY(STRUCT(ST_POINT(1.0, 1.1) AS geometry)) AS nested_geom_array
       """)
 
-      // Writing nested geometry to GeoParquet should fail according to the specification
-      assertThrows[SparkException] {
+      // Writing nested geometry to GeoParquet should fail according to the specification. There
+      // is no geometry column at the root, so it fails when the write is planned.
+      val e = intercept[IllegalArgumentException] {
         df.write.mode("overwrite").format("geoparquet").save(testPath)
       }
+      assert(e.getMessage.contains("GeoParquet requires at least one geometry column"))
     }
 
     it("should handle deeply nested arrays with geometry UDT") {

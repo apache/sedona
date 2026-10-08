@@ -136,8 +136,9 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       }
     }
 
+    // prepareWrite already checked this on the driver
     if (geometryColumnInfoMap.isEmpty) {
-      throw new RuntimeException("No geometry column found in the schema")
+      GeoParquetWriteSupport.requireGeometryColumn(schema)
     }
 
     geoParquetVersion = configuration.get(GEOPARQUET_VERSION_KEY) match {
@@ -739,6 +740,21 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
 }
 
 object GeoParquetWriteSupport {
+
+  /**
+   * Fails unless `schema` has a geometry column, which GeoParquet requires. Called from
+   * `prepareWrite` on the driver, so a write without one fails before any task is launched rather
+   * than in every task.
+   */
+  def requireGeometryColumn(schema: StructType): Unit = {
+    if (!schema.exists(_.dataType == GeometryUDT)) {
+      throw new IllegalArgumentException(
+        "GeoParquet requires at least one geometry column, but the schema has none: " +
+          schema.simpleString + ". Use format(\"parquet\") to write a table without " +
+          "geometry columns.")
+    }
+  }
+
   class GeometryColumnInfo {
     val bbox: GeometryColumnBoundingBox = new GeometryColumnBoundingBox()
 
