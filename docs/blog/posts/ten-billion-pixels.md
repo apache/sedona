@@ -13,7 +13,7 @@ slug: ten-billion-pixels-one-sql-statement
 
 # Ten Billion Pixels, One SQL Statement, 45 Seconds
 
-Where are the trees in Washington State? The answer is spread across 10.4 billion pixels, one byte each. ESA mapped the land cover of the whole planet in 2021, one pixel for every 10 meters of ground, and 8 files of that map cover Washington. SedonaDB 0.5.0 reads the 8 files as one table. One SQL statement joins that table to the 39 counties and returns the tree cover of every county in 45 seconds, on one machine.
+Where are the trees in Washington State? The answer is spread across 10.4 billion pixels, one byte each. ESA mapped the land cover of the whole planet in 2021, one pixel for every 10 meters of ground, and 8 files of that map cover Washington. SedonaDB 0.5.0, written in Rust, reads the 8 files as one table. One SQL statement joins that table to the 39 counties and returns the tree cover of every county in 45 seconds, on one machine.
 
 ![Land cover pixels over Puget Sound: dark green tree cover, red built-up land around Seattle and Tacoma, blue water, with white county lines](ten-billion-pixels-cover.png)
 
@@ -114,7 +114,7 @@ The counts match NumPy. For one of the rows over King County, `bincount` over th
 
 ![Resident memory over time for two runs over the same 8 files: the scan on one core stays near 4 GiB in a flat sawtooth, and the same scan on ten cores reaches 12.5 GiB](ten-billion-pixels-memory.svg)
 
-Memory follows one rule in the scan. The process holds one file's band and its rows, about 4 GiB, then moves to the next file. On one core, all 10.4 billion pixels went by in 414 seconds and resident memory peaked at 4.0 GiB. Ten cores work on several files at once: 87 seconds, 12.5 GiB.
+Memory follows one rule in the scan. The Rust engine holds one file's band and its rows, about 4 GiB, then moves to the next file. On one core, all 10.4 billion pixels went by in 414 seconds and resident memory peaked at 4.0 GiB. Ten cores work on several files at once: 87 seconds, 12.5 GiB.
 
 One setting from 0.5.0 makes the rule work. Query engines size a batch of rows by row count, and a row that holds a raster can weigh a gigabyte. `sedona.raster.max_batch_bytes` sizes a batch of rasters by its pixel bytes, 256 MiB by default.
 
