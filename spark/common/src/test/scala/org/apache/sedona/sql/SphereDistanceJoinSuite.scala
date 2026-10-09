@@ -90,6 +90,46 @@ class SphereDistanceJoinSuite extends TestBaseScala with TableDrivenPropertyChec
     }
   }
 
+  describe("Sphere distance join with empty geometries") {
+    // (-0.5, -0.5) used to fall inside the bogus envelope derived from the null envelope of an
+    // empty geometry, which handed (POINT (-0.5 -0.5), <empty>) pairs to the distance functions.
+    val expected = Seq((1, 10), (2, 13))
+    val joinConditions = Seq(
+      "ST_DWithin(l.geom, r.geom, 30000.0, true)",
+      "ST_DistanceSphere(l.geom, r.geom) <= 30000.0",
+      "ST_DistanceSpheroid(l.geom, r.geom) <= 30000.0")
+    val hints = Seq("", "/*+ BROADCAST(l) */", "/*+ BROADCAST(r) */")
+    for (joinCondition <- joinConditions; hint <- hints) {
+      it(s"should not match empty geometries: $hint $joinCondition") {
+        prepareTempViewsWithEmptyGeometries()
+        val result = sparkSession.sql(
+          s"SELECT $hint l.id, r.id FROM empty_geoms_l l JOIN empty_geoms_r r ON $joinCondition")
+        val plan = result.queryExecution.sparkPlan
+        val broadcastJoins = plan.collect { case p: BroadcastIndexJoinExec => p }
+        val distanceJoins = plan.collect { case p: DistanceJoinExec => p }
+        if (hint.isEmpty) assert(distanceJoins.size == 1, plan.toString)
+        else assert(broadcastJoins.size == 1, plan.toString)
+        val actual = result.collect().map(row => (row.getInt(0), row.getInt(1))).sorted.toSeq
+        assert(actual === expected)
+      }
+    }
+  }
+
+  private def prepareTempViewsWithEmptyGeometries(): Unit = {
+    sparkSession
+      .sql("""SELECT id, ST_GeomFromWKT(wkt) AS geom FROM VALUES
+             |(1, 'POINT (0 0)'), (2, 'POINT (-0.5 -0.5)'), (3, 'POINT (10 10)'),
+             |(4, 'POLYGON EMPTY')
+             |AS t(id, wkt)""".stripMargin)
+      .createOrReplaceTempView("empty_geoms_l")
+    sparkSession
+      .sql("""SELECT id, ST_GeomFromWKT(wkt) AS geom FROM VALUES
+             |(10, 'POINT (0.0001 0.0001)'), (11, 'POLYGON EMPTY'), (12, 'POINT EMPTY'),
+             |(13, 'POLYGON ((-0.6 -0.6, -0.4 -0.6, -0.4 -0.4, -0.6 -0.4, -0.6 -0.6))')
+             |AS t(id, wkt)""".stripMargin)
+      .createOrReplaceTempView("empty_geoms_r")
+  }
+
   private def prepareTempViewsForTestData(): Unit = {
     import sparkSession.implicits._
     testData1.toDF("id", "dist", "geom").createOrReplaceTempView("df1")

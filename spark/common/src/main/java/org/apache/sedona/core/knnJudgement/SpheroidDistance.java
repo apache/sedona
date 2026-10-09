@@ -34,7 +34,7 @@ public class SpheroidDistance implements ItemDistance {
     } else {
       Geometry g1 = (Geometry) item1.getItem();
       Geometry g2 = (Geometry) item2.getItem();
-      return Spheroid.distance(g1, g2);
+      return distanceOrInfinity(g1, g2);
     }
   }
 
@@ -42,7 +42,17 @@ public class SpheroidDistance implements ItemDistance {
     if (geometry1 == geometry2) {
       return Double.MAX_VALUE;
     } else {
-      return Spheroid.distance(geometry1, geometry2);
+      return distanceOrInfinity(geometry1, geometry2);
     }
+  }
+
+  /**
+   * Spheroid.distance returns null when either geometry is empty. Rank such pairs as infinitely far
+   * apart so that empty geometries are never picked as nearest neighbors and an empty query
+   * geometry gets no neighbors, instead of failing with a NullPointerException.
+   */
+  private static double distanceOrInfinity(Geometry geometry1, Geometry geometry2) {
+    Double distance = Spheroid.distance(geometry1, geometry2);
+    return distance == null ? Double.POSITIVE_INFINITY : distance;
   }
 }

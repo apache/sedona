@@ -23,6 +23,8 @@ Introduction: Return the haversine / great-circle distance of A using a given ea
 
 Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lon/lat== order. You can use ==ST_FlipCoordinates== to swap lat and lon. For non-point data, we first take the centroids of both geometries and then compute the distance.
 
+If either geometry is empty, the function returns `NULL`.
+
 !!!note
     By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
 

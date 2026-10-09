@@ -465,6 +465,19 @@ class predicateTestScala extends TestBaseScala {
       assert(actual)
     }
 
+    it("Passed ST_DWithin with empty geometries") {
+      val row = sparkSession
+        .sql("""SELECT
+            |ST_DWithin(ST_GeomFromWKT('POINT (0 0)'), ST_GeomFromWKT('POLYGON EMPTY'), 1000.0, true),
+            |ST_DWithin(ST_GeomFromWKT('POLYGON EMPTY'), ST_GeomFromWKT('POINT (0 0)'), 1000.0, true),
+            |ST_DWithin(ST_GeomFromWKT('POINT EMPTY'), ST_GeomFromWKT('POINT EMPTY'), 1000.0, true),
+            |ST_DWithin(ST_GeomFromWKT('POINT (0 0)'), ST_GeomFromWKT('POLYGON EMPTY'), 1000.0),
+            |ST_DWithin(ST_GeomFromWKT('POINT (-0.5 -0.5)'), ST_GeomFromWKT('POINT EMPTY'), 1.0, false)
+            |""".stripMargin)
+        .first()
+      (0 until row.length).foreach(i => assert(!row.getBoolean(i), s"column $i"))
+    }
+
     Seq(
       ST_Contains,
       ST_Intersects,

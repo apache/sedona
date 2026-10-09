@@ -348,6 +348,22 @@ public class PredicateTest extends TestBase {
   }
 
   @Test
+  public void testDWithinEmptyGeometries() {
+    Table t =
+        tableEnv.sqlQuery(
+            "SELECT ST_DWithin(ST_GeomFromWKT('POINT (0 0)'), ST_GeomFromWKT('POLYGON EMPTY'),"
+                + " 1000.0, true),"
+                + " ST_DWithin(ST_GeomFromWKT('POINT EMPTY'), ST_GeomFromWKT('POINT (0 0)'),"
+                + " 1000.0, true),"
+                + " ST_DWithin(ST_GeomFromWKT('POINT (0 0)'), ST_GeomFromWKT('POLYGON EMPTY'),"
+                + " 1000.0)");
+    org.apache.flink.types.Row row = first(t);
+    for (int i = 0; i < row.getArity(); i++) {
+      assertEquals(false, row.getField(i));
+    }
+  }
+
+  @Test
   public void testDWithinFailure() {
     Table table =
         tableEnv.sqlQuery(

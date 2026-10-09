@@ -528,6 +528,30 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
       }
     }
 
+    for ((strategy, hint, expectedPlan) <- residualJoinStrategies) {
+      it(s"KNN Join with useSpheroid should skip empty geometries: $strategy") {
+        sparkSession
+          .sql("""SELECT id, ST_GeomFromWKT(wkt) AS geom FROM VALUES
+                 |(1, 'POINT (0 0)'), (2, 'POLYGON EMPTY'), (3, 'POINT (10 10)'), (4, 'POINT EMPTY')
+                 |AS t(id, wkt)""".stripMargin)
+          .createOrReplaceTempView("knn_empty_queries")
+        sparkSession
+          .sql("""SELECT id, ST_GeomFromWKT(wkt) AS geom FROM VALUES
+                 |(10, 'POINT (0.1 0.1)'), (11, 'POLYGON EMPTY'), (12, 'POINT (9 9)'),
+                 |(13, 'POINT EMPTY'), (14, 'POINT (5 5)')
+                 |AS t(id, wkt)""".stripMargin)
+          .createOrReplaceTempView("knn_empty_objects")
+        val joined = sparkSession.sql(
+          s"SELECT $hint q.id, o.id FROM knn_empty_queries q " +
+            "JOIN knn_empty_objects o ON ST_KNN(q.geom, o.geom, 2, true)")
+        val plan = joined.queryExecution.sparkPlan
+        assert(plan.find(_.getClass == expectedPlan).isDefined, plan.toString)
+        // Empty query geometries get no neighbors and empty objects are never neighbors
+        val pairs = joined.collect().map(row => (row.getInt(0), row.getInt(1))).sorted.toSeq
+        pairs should be(Seq((1, 10), (1, 14), (3, 12), (3, 14)))
+      }
+    }
+
     val additionalKnnPredicates = Seq(
       ("different k", s"ST_KNN(q.g, o.g, 2, false) AND $knnPredicate"),
       ("reciprocal", s"$knnPredicate AND ST_KNN(o.g, q.g, 1, false)"),

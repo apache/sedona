@@ -2330,6 +2330,35 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void sphereAndSpheroidDistanceEmptyGeometries() throws ParseException {
+    Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+    Geometry[] empties = {
+      wktReader.read("POINT EMPTY"),
+      wktReader.read("LINESTRING EMPTY"),
+      wktReader.read("POLYGON EMPTY"),
+      wktReader.read("MULTIPOLYGON EMPTY"),
+      wktReader.read("GEOMETRYCOLLECTION EMPTY"),
+      wktReader.read("GEOMETRYCOLLECTION (POINT EMPTY)")
+    };
+
+    // Like the planar Functions.distance, return null if either geometry is empty
+    for (Geometry empty : empties) {
+      assertNull(Haversine.distance(point, empty));
+      assertNull(Haversine.distance(empty, point));
+      assertNull(Haversine.distance(point, empty, 6378137.0));
+      assertNull(Spheroid.distance(point, empty));
+      assertNull(Spheroid.distance(empty, point));
+      assertNull(Haversine.distance(empty, empty));
+      assertNull(Spheroid.distance(empty, empty));
+    }
+
+    // A geometry with an empty component is not empty, so it is still measured
+    Geometry partiallyEmpty = wktReader.read("GEOMETRYCOLLECTION (POLYGON EMPTY, POINT (1 0))");
+    assertEquals(111319.49079327357, Spheroid.distance(point, partiallyEmpty), 0.1);
+    assertEquals(111195.06627089888, Haversine.distance(point, partiallyEmpty), 0.1);
+  }
+
+  @Test
   public void spheroidArea() {
     Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(90, 0));
     assertEquals(0, Spheroid.area(point), 0.1);
