@@ -230,6 +230,15 @@
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                     <resource>reference.conf</resource>
                                 </transformer>
+                                <!-- Each JAI-EXT module and some GeoTools/JAITools jars ship their own JAI operation
+                                     registry file; append them so every operation stays registered when GeoTools is
+                                     bundled (-Dgeotools). -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/registryFile.jaiext</resource>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/registryFile.jai</resource>
+                                </transformer>
                             </transformers>
                             <artifactSet>
                                 <excludes>
