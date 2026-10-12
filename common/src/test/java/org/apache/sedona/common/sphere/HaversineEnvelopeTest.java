@@ -60,6 +60,18 @@ public class HaversineEnvelopeTest {
   }
 
   @Test
+  public void testExpandNullEnvelope() {
+    // The envelope of an empty geometry is null and must stay null after expansion
+    Envelope expandedEnv = Haversine.expandEnvelope(new Envelope(), 30_000, SPHERE_RADIUS);
+    Assert.assertTrue(expandedEnv.isNull());
+
+    expandedEnv =
+        Haversine.expandEnvelope(
+            factory.createPolygon().getEnvelopeInternal(), 500_000, SPHERE_RADIUS);
+    Assert.assertTrue(expandedEnv.isNull());
+  }
+
+  @Test
   public void testExpandPointCrossingAntiMeridian() {
     // On the anti-meridian
     Envelope env = new Envelope(-180, -180, 50, 50);

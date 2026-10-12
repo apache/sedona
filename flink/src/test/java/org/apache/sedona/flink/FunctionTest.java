@@ -818,6 +818,20 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testDistanceSphereAndSpheroidEmptyGeometries() {
+    Table tbl =
+        tableEnv.sqlQuery(
+            "SELECT ST_DistanceSphere(ST_GeomFromWKT('POINT (0 0)'), ST_GeomFromWKT('POLYGON EMPTY')),"
+                + " ST_DistanceSphere(ST_GeomFromWKT('POINT EMPTY'), ST_GeomFromWKT('POINT (0 0)'), 6378137.0),"
+                + " ST_DistanceSpheroid(ST_GeomFromWKT('POINT (0 0)'), ST_GeomFromWKT('LINESTRING EMPTY')),"
+                + " ST_DistanceSpheroid(ST_GeomFromWKT('GEOMETRYCOLLECTION EMPTY'), ST_GeomFromWKT('POINT (0 0)'))");
+    Row row = first(tbl);
+    for (int i = 0; i < row.getArity(); i++) {
+      assertNull(row.getField(i));
+    }
+  }
+
+  @Test
   public void test3dDistance() {
     Table pointTable =
         tableEnv.sqlQuery(

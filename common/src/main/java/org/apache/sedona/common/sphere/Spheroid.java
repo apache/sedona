@@ -50,11 +50,16 @@ public class Spheroid {
    * please expect a small difference This will produce almost identical result to PostGIS
    * ST_DistanceSpheroid and PostGIS ST_Distance(useSpheroid=true)
    *
-   * @param geom1
-   * @param geom2
-   * @return
+   * @param geom1 The first geometry. Each coordinate is in lon/lat order
+   * @param geom2 The second geometry. Each coordinate is in lon/lat order
+   * @return the distance in meters, or null if either geometry is empty
    */
-  public static double distance(Geometry geom1, Geometry geom2) {
+  public static Double distance(Geometry geom1, Geometry geom2) {
+    // An empty geometry has no coordinate (or centroid) to measure from. Return null like the
+    // planar ST_Distance does, instead of dereferencing a null coordinate.
+    if (geom1.isEmpty() || geom2.isEmpty()) {
+      return null;
+    }
     Coordinate coordinate1 =
         geom1.getGeometryType().equals("Point")
             ? geom1.getCoordinate()

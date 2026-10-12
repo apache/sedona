@@ -30,6 +30,8 @@ If `useSpheroid` is passed false, ST_DWithin uses Euclidean distance and the uni
 
 If useSpheroid is not given, it defaults to false
 
+If either geometry is empty, ST_DWithin returns `false`, with or without `useSpheroid`.
+
 Format: `ST_DWithin (leftGeometry: Geometry, rightGeometry: Geometry, distance: Double, useSpheroid: Optional(Boolean) = false)`
 
 Return type: `Boolean`

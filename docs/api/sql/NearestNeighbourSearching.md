@@ -32,6 +32,8 @@ Queries side table contains geometries that are used to find the k-nearest neigh
 
 When either queries or objects data contain non-point data (geometries), we take the centroid of each geometry.
 
+When use_spheroid is true, empty geometries are skipped: an empty query geometry has no neighbors, and an empty object geometry is never returned as a neighbor.
+
 In case there are ties in the distance, the result will include all the tied geometries only when the following sedona config is set to true:
 
 **Note for Inner Join:**

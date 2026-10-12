@@ -23,6 +23,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 
 public class SpheroidTest {
@@ -41,6 +42,25 @@ public class SpheroidTest {
         Spheroid.angularWidth(geomFromWKT("LINESTRING (-90 0, 90 0)", 4326).getEnvelopeInternal());
 
     assertEquals(180.0, actual, 0.5);
+  }
+
+  @Test
+  public void testLengthAndAreaOfEmptyGeometries() throws ParseException {
+    // Same as the planar ST_Length / ST_Area: empty geometries measure 0
+    String[] empties = {
+      "POINT EMPTY",
+      "LINESTRING EMPTY",
+      "POLYGON EMPTY",
+      "MULTILINESTRING EMPTY",
+      "MULTIPOLYGON EMPTY",
+      "GEOMETRYCOLLECTION EMPTY"
+    };
+    for (String wkt : empties) {
+      Geometry empty = geomFromWKT(wkt, 4326);
+      assertEquals(0.0, Spheroid.length(empty), 0.0);
+      assertEquals(0.0, Spheroid.baseLength(empty), 0.0);
+      assertEquals(0.0, Spheroid.area(empty), 0.0);
+    }
   }
 
   @Test

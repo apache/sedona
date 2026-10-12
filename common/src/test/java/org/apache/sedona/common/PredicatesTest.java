@@ -242,6 +242,31 @@ public class PredicatesTest extends TestBase {
   }
 
   @Test
+  public void testDWithinEmptyGeometries() throws ParseException {
+    Geometry origin = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+    Geometry nearOrigin = GEOMETRY_FACTORY.createPoint(new Coordinate(-0.5, -0.5));
+    Geometry emptyPoint = GEOMETRY_FACTORY.createPoint();
+    Geometry emptyPolygon = GEOMETRY_FACTORY.createPolygon();
+    Geometry emptyCollection = GEOMETRY_FACTORY.createGeometryCollection();
+
+    for (Geometry empty : new Geometry[] {emptyPoint, emptyPolygon, emptyCollection}) {
+      // Spheroid distance is undefined for empty geometries
+      assertFalse(Predicates.dWithin(origin, empty, 1000.0, true));
+      assertFalse(Predicates.dWithin(empty, origin, 1000.0, true));
+      assertFalse(Predicates.dWithin(empty, empty, 1000.0, true));
+      // Planar: JTS would report true once the envelope pre-check passes
+      assertFalse(Predicates.dWithin(origin, empty, 1000.0));
+      assertFalse(Predicates.dWithin(nearOrigin, empty, 1.0));
+      assertFalse(Predicates.dWithin(empty, origin, 1000.0, false));
+    }
+
+    // A geometry with an empty component is not empty, so it is still measured
+    Geometry partiallyEmpty = geomFromEWKT("GEOMETRYCOLLECTION (POLYGON EMPTY, POINT (0.001 0))");
+    assertTrue(Predicates.dWithin(origin, partiallyEmpty, 1000.0, true));
+    assertTrue(Predicates.dWithin(origin, partiallyEmpty, 0.01));
+  }
+
+  @Test
   public void testDWithin3DGeometryXY() {
     // XY-only inputs fold to z=0, so 3D distance equals 2D distance.
     Geometry point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
