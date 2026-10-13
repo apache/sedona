@@ -35,9 +35,10 @@ when you upgrade from 1.x. The [release notes](release-notes.md#sedona-200) list
 
 ## Element and pixel positions now count from 1
 
-Four functions used to count positions from 0 and now count from 1, as PostGIS does. This is
-the change most likely to affect existing queries, because the old queries still run: they
-now return the *next* element or pixel, or `NULL` past the end, rather than raising an error.
+Four functions used to count positions from 0 and now count from 1, as PostGIS does. Existing
+queries can still run but return different results: the same positive index now selects the
+previous element or pixel position, while an index of `0` returns `NULL`. Update the indices
+in existing calls as shown below.
 
 | Function | Sedona 1.x | Sedona 2.0 (= PostGIS) |
 |---|---|---|

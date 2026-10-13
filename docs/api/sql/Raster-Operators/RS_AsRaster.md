@@ -71,7 +71,7 @@ SQL Example
 ```sql
 SELECT RS_AsRaster(
         ST_GeomFromWKT('POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))'),
-        RS_MakeEmptyRaster(2, 255, 255, 3, -215, 2, -2, 0, 0, 4326),
+        RS_MakeEmptyRaster(2, 255, 255, 3, 30, 2, -2, 0, 0, 4326),
         'D', false, 255.0, 0d
     )
 ```
@@ -89,7 +89,7 @@ With the `noDataValue` omitted, the output inherits the reference band's no data
 ```sql
 SELECT RS_AsRaster(
         ST_GeomFromWKT('POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))'),
-        RS_SetBandNoDataValue(RS_MakeEmptyRaster(2, 255, 255, 3, -215, 2, -2, 0, 0, 4326), 1, 0),
+        RS_SetBandNoDataValue(RS_MakeEmptyRaster(2, 255, 255, 3, 30, 2, -2, 0, 0, 4326), 1, 0),
         'D'
     )
 ```

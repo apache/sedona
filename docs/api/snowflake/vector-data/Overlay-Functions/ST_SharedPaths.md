@@ -31,6 +31,9 @@ containing exactly two `MultiLineString` elements. The first contains paths trav
 direction by both inputs; the second contains paths traversed in opposite directions. Coordinates
 in both elements follow the direction of `A`.
 
+Use `ST_GeometryN(result, 1)` to access the first element and `ST_GeometryN(result, 2)` to
+access the second.
+
 For non-simple inputs that traverse the same path more than once, direction follows the first
 matching source traversal. Consequently, swapping `A` and `B` can change which result element
 contains a path.
@@ -51,8 +54,8 @@ are empty `MultiLineString` geometries.
 ### Same and opposite directions
 
 Input `B` first follows `A`, leaves it, and later traverses another part of `A` backwards. The
-single result therefore populates both direction buckets. Notice that the path in element 1 is
-reoriented to follow `A`, even though `B` traverses it in the opposite direction.
+single result therefore populates both direction buckets. Notice that the path in the second
+element is reoriented to follow `A`, even though `B` traverses it in the opposite direction.
 
 ![Same-direction and opposite-direction paths returned together by ST_SharedPaths](../../../../image/ST_SharedPaths/ST_SharedPaths.svg "Both ST_SharedPaths result elements populated")
 
@@ -60,7 +63,7 @@ reoriented to follow `A`, even though `B` traverses it in the opposite direction
 
 Input `A` can be a `MultiLineString`. In this example, `B` shares part of two different components
 of `A`. The vertex at `(90 161)` belongs to `B` and splits the shared diagonal into two paths in
-element 0.
+the first element.
 
 ![ST_SharedPaths over multipart input with a shared path split at an input vertex](../../../../image/ST_SharedPaths/ST_SharedPaths_multipart.svg "Multipart and noded ST_SharedPaths result")
 
@@ -77,7 +80,8 @@ Wrap the result in `ST_AsText` to display its two direction buckets as WKT.
 
 ### Same direction
 
-The shared interval is returned in element 0 because both inputs traverse it from left to right.
+The shared interval is returned in the first element because both inputs traverse it from left
+to right.
 
 ```sql
 SELECT ST_AsText(ST_SharedPaths(
@@ -94,8 +98,8 @@ GEOMETRYCOLLECTION (MULTILINESTRING ((5 0, 10 0)), MULTILINESTRING EMPTY)
 
 ### Opposite direction
 
-The shared interval is returned in element 1 because `B` traverses it from right to left. Its
-coordinates still follow the left-to-right direction of `A`.
+The shared interval is returned in the second element because `B` traverses it from right to
+left. Its coordinates still follow the left-to-right direction of `A`.
 
 ```sql
 SELECT ST_AsText(ST_SharedPaths(
@@ -175,8 +179,8 @@ digitized consistently in two datasets from a one-way segment digitized in rever
 measure how much of an inspected utility route follows its reference alignment in either
 direction.
 
-The following query assumes that a spatial join has already paired candidate segments. Element 0
-measures consistently directed overlap, while element 1 measures reversed overlap:
+The following query assumes that a spatial join has already paired candidate segments. The first
+element measures consistently directed overlap, while the second element measures reversed overlap:
 
 ```sql
 WITH compared AS (
