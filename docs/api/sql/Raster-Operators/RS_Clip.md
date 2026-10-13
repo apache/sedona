@@ -23,12 +23,16 @@ Introduction: Returns a raster that is clipped by the given geometry.
 
 If `crop` is not specified then it will default to `true`, meaning it will make the resulting raster shrink to the geometry's extent and if `noDataValue` is not specified then the resulting raster will have the minimum possible value for the band pixel data type.
 
-The `allTouched` parameter (Since `v1.7.1`) determines how pixels are selected:
+For polygon geometries, the `allTouched` parameter (Since `v1.7.1`) determines how pixels are selected:
 
-- When true, pixels touched by the geometry are selected using the half-open pixel rules described in [RS_AsRaster](RS_AsRaster.md). A polygon aligned with grid lines selects only pixels inside it.
-- When false (default), pixels whose centroid intersects with the geometry will be included.
+- When true, pixel selection also includes cells entered by the polygon's boundary, following the [RS_AsRaster](RS_AsRaster.md) rules.
+- When false (default), pixels whose centroid intersects the polygon will be included.
 
-Point geometries select the single pixel containing the point under the same half-open rule, regardless of `allTouched`. A point on an internal pixel edge or corner selects one pixel.
+A polygon never selects a pixel it touches only on the pixel's boundary, whichever edge that is. A polygon aligned with grid lines selects only pixels inside it.
+
+Point geometries select the single pixel containing the point under the half-open rule, regardless of `allTouched`. Line rasterization follows the cells entered by its segments rather than requiring a pixel-centre intersection. A point or line lying on an internal grid edge selects the pixel after it in pixel order; one lying on the raster's last edge selects none. A neighboring pixel contacted only at a line endpoint is not selected unless the segment enters it.
+
+For `LineString` geometries, `allTouched` can also change the rasterization window at grid boundaries and therefore the selected pixels.
 
 !!!Note
     - Since `v1.5.1`, if the coordinate reference system (CRS) of the input `geom` geometry differs from that of the `raster`, then `geom` will be transformed to match the CRS of the `raster`. If the `raster` or `geom` doesn't have a CRS then it will default to `4326/WGS84`.

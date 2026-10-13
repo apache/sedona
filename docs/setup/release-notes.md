@@ -25,9 +25,11 @@ See [Migrating to Sedona 2.0](migration-2.0.md) for what to check when upgrading
 
 * **Positions count from 1, as in PostGIS**: `ST_GeometryN` and `ST_InteriorRingN` read `n`
   1-based, and the grid-coordinate forms of `RS_Value` and `RS_Values` read `(1, 1)` as the
-  upper-left pixel. They were 0-based, so the same positive index now addresses the previous
-  element or pixel position; add 1 to the index to preserve the original result. An index of
-  `0` or below returns `NULL`.
+  upper-left pixel. They were 0-based: an unchanged positive geometry or ring index selects
+  the previous element; unchanged positive grid coordinates select one column to the left
+  and one row up in grid order. Add 1 to the element index or to both column and row coordinates
+  (each entry of both arrays for `RS_Values`) to preserve the original result. Band arguments
+  remain unchanged. An element index or either grid coordinate of `0` or below returns `NULL`.
 * **`RS_Union` and `RS_Union_Aggr` are renamed `RS_Stack` and `RS_Stack_Aggr`**: the functions
   stack the bands of several rasters into one raster; they do not merge grids the way a raster
   union (PostGIS `ST_Union`) does. The old names are removed, so replace them in queries. The

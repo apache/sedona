@@ -78,8 +78,9 @@ public class RasterBandEditors {
   /**
    * Moves a band's no-data value to {@code noDataValue}, rewriting every pixel that holds the
    * current no-data value to the new one first. Pixels already equal to the new value also become
-   * no-data. A pixel holds the current no-data value by {@link RasterUtils#isNoData}: compared
-   * numerically, with any NaN matching a NaN no-data value.
+   * no-data. To preserve the same no-data mask, choose a value exactly representable in the band's
+   * pixel type and absent from valid pixels. A pixel holds the current no-data value by {@link
+   * RasterUtils#isNoData}: compared numerically, with any NaN matching a NaN no-data value.
    *
    * @param raster Source raster
    * @param bandIndex Band whose no-data value is replaced (1-based)

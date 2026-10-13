@@ -36,9 +36,10 @@ when you upgrade from 1.x. The [release notes](release-notes.md#sedona-200) list
 ## Element and pixel positions now count from 1
 
 Four functions used to count positions from 0 and now count from 1, as PostGIS does. Existing
-queries can still run but return different results: the same positive index now selects the
-previous element or pixel position, while an index of `0` returns `NULL`. Update the indices
-in existing calls as shown below.
+queries can still run but return different results: the same positive geometry or ring index
+now selects the previous element. Keeping both positive raster grid coordinates unchanged
+selects a pixel one column to the left and one row up in grid order. An element index or either
+grid coordinate of `0` returns `NULL`. Update existing calls as shown below.
 
 | Function | Sedona 1.x | Sedona 2.0 (= PostGIS) |
 |---|---|---|
@@ -49,8 +50,9 @@ in existing calls as shown below.
 
 In 2.0, an index of `0`, a negative index, or one past the last element returns `NULL`.
 
-**What to change:** add 1 to the index or grid coordinate in every call to these four
-functions, whether it's a literal or a column. For example:
+**What to change:** add 1 to the geometry or ring index, or to both the raster column and row
+coordinates (every entry of both coordinate arrays for `RS_Values`), whether they are literals
+or columns. Band arguments were already 1-based and do not change. For example:
 
 ```sql
 -- Sedona 1.x
