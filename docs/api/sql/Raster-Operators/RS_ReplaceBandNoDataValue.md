@@ -19,7 +19,7 @@
 
 # RS_ReplaceBandNoDataValue
 
-Introduction: Moves the no-data value of a band to `noDataValue`, carrying the no-data pixels with it. Every pixel of the band that holds the current no-data value is rewritten to `noDataValue`, which then becomes the band's no-data value, so the same pixels read as no-data before and after the call. [RS_SetBandNoDataValue](RS_SetBandNoDataValue.md), by contrast, changes only the declared value.
+Introduction: Moves the no-data value of a band to `noDataValue`, carrying the no-data pixels with it. Every pixel of the band that holds the current no-data value is rewritten to `noDataValue`, which then becomes the band's no-data value. Pixels that already equal the new value also become no-data; choose a value absent from valid pixels to preserve the same no-data mask. [RS_SetBandNoDataValue](RS_SetBandNoDataValue.md), by contrast, changes only the declared value.
 
 A pixel holds the current no-data value when it compares equal to it numerically: `-0.0` matches a `0.0` no-data value, and any `NaN` matches a `NaN` no-data value. Other bands are unchanged.
 
