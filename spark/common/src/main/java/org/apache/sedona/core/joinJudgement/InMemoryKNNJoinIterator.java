@@ -106,6 +106,12 @@ public class InMemoryKNNJoinIterator<T extends Geometry, U extends Geometry>
     }
     streamCount.add(1);
 
+    // An empty query geometry has no neighbors. Skip the search: every item distance to it is
+    // infinite, so the search would find no finite bound to prune with and visit every object.
+    if (queryGeom.isEmpty()) {
+      return;
+    }
+
     Object[] localK =
         strTree.nearestNeighbour(queryGeom.getEnvelopeInternal(), queryGeom, itemDistance, k);
     if (includeTies) {
