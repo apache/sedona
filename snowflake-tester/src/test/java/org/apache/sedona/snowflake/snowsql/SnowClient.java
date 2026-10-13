@@ -27,7 +27,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Properties;
-import net.snowflake.client.jdbc.SnowflakeConnection;
+import net.snowflake.client.api.connection.SnowflakeConnection;
+import net.snowflake.client.api.connection.UploadStreamConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,7 +81,11 @@ public class SnowClient {
       logger.info(String.format("upload file %s to stage %s", path, stage));
       FileInputStream fileInputStream = new FileInputStream(jarFile);
       conn.unwrap(SnowflakeConnection.class)
-          .uploadStream(stage, "", fileInputStream, fileName, false);
+          .uploadStream(
+              stage,
+              fileName,
+              fileInputStream,
+              UploadStreamConfig.builder().setDestPrefix("").setCompressData(false).build());
       logger.info("upload finished");
     } catch (FileNotFoundException | SQLException e) {
       throw new RuntimeException(e);
