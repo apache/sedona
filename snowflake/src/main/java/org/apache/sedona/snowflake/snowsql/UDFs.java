@@ -348,7 +348,7 @@ public class UDFs {
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"left", "right"})
-  public static double ST_Distance(byte[] left, byte[] right) {
+  public static Double ST_Distance(byte[] left, byte[] right) {
     return Functions.distance(GeometrySerde.deserialize(left), GeometrySerde.deserialize(right));
   }
 
@@ -542,13 +542,13 @@ public class UDFs {
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geom1", "geom2"})
-  public static double ST_HausdorffDistance(byte[] geom1, byte[] geom2) {
+  public static Double ST_HausdorffDistance(byte[] geom1, byte[] geom2) {
     return Functions.hausdorffDistance(
         GeometrySerde.deserialize(geom1), GeometrySerde.deserialize(geom2));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geom1", "geom2", "densifyFrac"})
-  public static double ST_HausdorffDistance(byte[] geom1, byte[] geom2, double densifyFrac) {
+  public static Double ST_HausdorffDistance(byte[] geom1, byte[] geom2, double densifyFrac) {
     return Functions.hausdorffDistance(
         GeometrySerde.deserialize(geom1), GeometrySerde.deserialize(geom2), densifyFrac);
   }
