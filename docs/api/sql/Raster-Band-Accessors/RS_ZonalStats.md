@@ -23,8 +23,10 @@ Introduction: This returns a statistic value specified by `statType` over the re
 
 The `allTouched` parameter (Since `v1.7.1`) determines how pixels are selected:
 
-- When true, any pixel touched by the geometry will be included. As in GDAL, a pixel the geometry touches only on its boundary, along an edge or at a corner, is not included, so a geometry that ends exactly on a pixel boundary does not pull in the pixels beyond it.
-- When false (default), only pixels whose centroid intersects with the geometry will be included.
+- When true, pixels touched by the geometry are selected using the half-open pixel rules described in [RS_AsRaster](../Raster-Operators/RS_AsRaster.md). A polygon aligned with grid lines selects only pixels inside it.
+- When false (default), pixels whose centroid intersects with the geometry will be included.
+
+Point geometries select the single pixel containing the point under the same half-open rule, regardless of `allTouched`. A point on an internal pixel edge or corner selects one pixel.
 
 ![RS_ZonalStats_allTouched](../../../image/RS_ZonalStats_allTouched/RS_ZonalStats_allTouched.svg "RS_ZonalStats_allTouched")
 
