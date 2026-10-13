@@ -122,6 +122,8 @@ jobs:
           else
             # Install specific pyspark version matching matrix
             uv add pyspark==${SPARK_VERSION}
+            # pyspark 3.5 still uses NumPy APIs removed in NumPy 2 (np.float_, np.string_, ...)
+            uv add --dev "numpy<2"
           fi
 
           uv sync
