@@ -365,6 +365,9 @@ public class TestFunctions extends TestBase {
     verifySqlSingleRes(
         "select sedona.ST_Distance(sedona.ST_GeomFromText('POINT(1 2)'), sedona.ST_GeomFromText('POINT(3 2)'))",
         2.0);
+    verifySqlSingleRes(
+        "select sedona.ST_Distance(sedona.ST_GeomFromText('POINT(1 2)'), sedona.ST_GeomFromText('POLYGON EMPTY'))",
+        null);
   }
 
   @Test
@@ -511,6 +514,9 @@ public class TestFunctions extends TestBase {
     verifySqlSingleRes(
         "select sedona.ST_HausdorffDistance(sedona.ST_GeomFromText('LINESTRING(0 0, 1 1, 2 2)'), sedona.ST_GeomFromText('LINESTRING(0 0, 1 1, 3 3)'))",
         1.4142135623730951);
+    verifySqlSingleRes(
+        "select sedona.ST_HausdorffDistance(sedona.ST_GeomFromText('LINESTRING(0 0, 1 1, 2 2)'), sedona.ST_GeomFromText('POLYGON EMPTY'))",
+        null);
   }
 
   @Test

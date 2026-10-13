@@ -482,7 +482,7 @@ public class UDFsV2 {
   @UDFAnnotations.ParamMeta(
       argNames = {"left", "right"},
       argTypes = {"Geometry", "Geometry"})
-  public static double ST_Distance(String left, String right) {
+  public static Double ST_Distance(String left, String right) {
     return Functions.distance(GeometrySerde.deserGeoJson(left), GeometrySerde.deserGeoJson(right));
   }
 
@@ -681,7 +681,7 @@ public class UDFsV2 {
   @UDFAnnotations.ParamMeta(
       argNames = {"geom1", "geom2"},
       argTypes = {"Geometry", "Geometry"})
-  public static double ST_HausdorffDistance(String geom1, String geom2) {
+  public static Double ST_HausdorffDistance(String geom1, String geom2) {
     return Functions.hausdorffDistance(
         GeometrySerde.deserGeoJson(geom1), GeometrySerde.deserGeoJson(geom2));
   }
@@ -689,7 +689,7 @@ public class UDFsV2 {
   @UDFAnnotations.ParamMeta(
       argNames = {"geom1", "geom2", "densifyFrac"},
       argTypes = {"Geometry", "Geometry", "double"})
-  public static double ST_HausdorffDistance(String geom1, String geom2, double densifyFrac) {
+  public static Double ST_HausdorffDistance(String geom1, String geom2, double densifyFrac) {
     return Functions.hausdorffDistance(
         GeometrySerde.deserGeoJson(geom1), GeometrySerde.deserGeoJson(geom2), densifyFrac);
   }

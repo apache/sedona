@@ -25,7 +25,7 @@ Each segment is broken down into equal-length subsegments whose ratio with segme
 
 Hence, the lower the densityFrac value, the more accurate is the computed hausdorff distance, and the more time it takes to compute it.
 
-If any of the geometry is empty, 0.0 is returned.
+If either geometry is empty, the function returns `NULL`.
 
 !!!Note
     Accepted range of densityFrac is (0.0, 1.0], if any other value is provided, ST_HausdorffDistance throws an IllegalArgumentException

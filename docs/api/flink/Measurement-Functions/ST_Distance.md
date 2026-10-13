@@ -21,6 +21,8 @@
 
 Introduction: Return the Euclidean distance between A and B
 
+If either geometry is empty, the function returns `NULL`.
+
 ![ST_Distance](../../../image/ST_Distance/ST_Distance.svg "ST_Distance")
 
 Format: `ST_Distance (A: Geometry, B: Geometry)`
