@@ -4,7 +4,7 @@ fiona==1.10.1
 geopandas==1.1.4
 ipykernel
 ipywidgets
-jupyterlab==4.6.3
+jupyterlab==4.6.4
 jupyterlab-widgets==3.0.17
 keplergl==0.3.7
 matplotlib
