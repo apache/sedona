@@ -151,7 +151,7 @@ class KnnJoinQueryTest extends TestBaseScala {
       }
   }
 
-  for (metric <- Seq(DistanceMetric.HAVERSINE, DistanceMetric.SPHEROID);
+  for (metric <- Seq(DistanceMetric.EUCLIDEAN, DistanceMetric.HAVERSINE, DistanceMetric.SPHEROID);
     broadcastQuerySide <- Seq(false, true)) {
     it(
       s"broadcast KNN join with $metric skips empty geometries, " +

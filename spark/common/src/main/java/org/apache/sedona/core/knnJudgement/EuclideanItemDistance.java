@@ -33,7 +33,7 @@ public class EuclideanItemDistance implements ItemDistance {
     } else {
       Geometry g1 = (Geometry) item1.getItem();
       Geometry g2 = (Geometry) item2.getItem();
-      return g1.distance(g2);
+      return distanceOrInfinity(g1, g2);
     }
   }
 
@@ -41,7 +41,20 @@ public class EuclideanItemDistance implements ItemDistance {
     if (geometry1 == geometry2) {
       return Double.MAX_VALUE;
     } else {
-      return geometry1.distance(geometry2);
+      return distanceOrInfinity(geometry1, geometry2);
     }
+  }
+
+  /**
+   * JTS returns 0 as the distance to an empty geometry, which would make an empty query geometry
+   * pick arbitrary nearest neighbors. Rank such pairs as infinitely far apart instead, so that an
+   * empty query geometry gets no neighbors and an empty object geometry is never picked, as with
+   * the sphere and spheroid metrics.
+   */
+  private static double distanceOrInfinity(Geometry geometry1, Geometry geometry2) {
+    if (geometry1.isEmpty() || geometry2.isEmpty()) {
+      return Double.POSITIVE_INFINITY;
+    }
+    return geometry1.distance(geometry2);
   }
 }
