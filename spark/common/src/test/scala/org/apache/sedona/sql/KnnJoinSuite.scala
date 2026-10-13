@@ -528,8 +528,9 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
       }
     }
 
-    for ((strategy, hint, expectedPlan) <- residualJoinStrategies) {
-      it(s"KNN Join with useSpheroid should skip empty geometries: $strategy") {
+    for ((strategy, hint, expectedPlan) <- residualJoinStrategies;
+      useSpheroid <- Seq(false, true)) {
+      it(s"KNN Join should skip empty geometries: $strategy, useSpheroid=$useSpheroid") {
         sparkSession
           .sql("""SELECT id, ST_GeomFromWKT(wkt) AS geom FROM VALUES
                  |(1, 'POINT (0 0)'), (2, 'POLYGON EMPTY'), (3, 'POINT (10 10)'), (4, 'POINT EMPTY')
@@ -543,7 +544,7 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
           .createOrReplaceTempView("knn_empty_objects")
         val joined = sparkSession.sql(
           s"SELECT $hint q.id, o.id FROM knn_empty_queries q " +
-            "JOIN knn_empty_objects o ON ST_KNN(q.geom, o.geom, 2, true)")
+            s"JOIN knn_empty_objects o ON ST_KNN(q.geom, o.geom, 2, $useSpheroid)")
         val plan = joined.queryExecution.sparkPlan
         assert(plan.find(_.getClass == expectedPlan).isDefined, plan.toString)
         // Empty query geometries get no neighbors and empty objects are never neighbors
