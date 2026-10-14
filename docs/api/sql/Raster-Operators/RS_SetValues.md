@@ -46,10 +46,16 @@ set to the corresponding value in `newValues`. The `newValues` should be provide
 
 The geometry variant of this function accepts all types of Geometries, and it sets the `newValue` in the specified region under the `geom`.
 
-The `allTouched` parameter (Since `v1.7.1`) determines how pixels are selected:
+For polygon geometries, the `allTouched` parameter (Since `v1.7.1`) determines how pixels are selected:
 
-- When true, any pixel touched by the geometry will be included. As in GDAL, a pixel the geometry touches only on its boundary, along an edge or at a corner, is not included, so a geometry that ends exactly on a pixel boundary does not pull in the pixels beyond it.
-- When false (default), only pixels whose centroid intersects with the geometry will be included.
+- When true, pixel selection also includes cells entered by the polygon's boundary, following the [RS_AsRaster](RS_AsRaster.md) rules.
+- When false (default), pixels whose centroid intersects the polygon will be included.
+
+A polygon never selects a pixel it touches only on the pixel's boundary, whichever edge that is. A polygon aligned with grid lines selects only pixels inside it.
+
+Point geometries select the single pixel containing the point under the half-open rule, regardless of `allTouched`. Line rasterization follows the cells entered by its segments rather than requiring a pixel-centre intersection. A point or line lying on an internal grid edge selects the pixel after it in pixel order; one lying on the raster's last edge selects none. A neighboring pixel contacted only at a line endpoint is not selected unless the segment enters it.
+
+For `LineString` geometries, `allTouched` can also change the rasterization window at grid boundaries and therefore the selected pixels.
 
 !!!note
     If the shape of `newValues` doesn't match with provided `width` and `height`, `IllegalArgumentException` is thrown.

@@ -61,12 +61,12 @@
   <text x="309" y="527" text-anchor="middle" font-size="12" font-weight="700" fill="#006b58">shared triangle edge</text>
   <line x1="65" y1="606" x2="95" y2="606" class="input-a"/><text x="104" y="611" font-size="12">A</text>
   <line x1="145" y1="606" x2="175" y2="606" class="input-b"/><text x="184" y="611" font-size="12">B</text>
-  <line x1="225" y1="606" x2="255" y2="606" class="same"/><text x="264" y="611" font-size="12">element 0 · same</text>
+  <line x1="225" y1="606" x2="255" y2="606" class="same"/><text x="264" y="611" font-size="12">first element · same</text>
 
   <rect x="740" y="335" width="335" height="300" rx="9" class="panel"/>
   <text x="760" y="362" class="title">4 · GeometryCollection output</text>
   <rect x="760" y="387" width="295" height="174" rx="7" fill="#ffffff" stroke="#007a65" stroke-width="2"/>
-  <text x="776" y="412" font-size="13" font-weight="700" fill="#006b58">Element 0 · same direction</text>
+  <text x="776" y="412" font-size="13" font-weight="700" fill="#006b58">First element · same direction</text>
   <path d="M800 435 L800 474" class="same" marker-end="url(#multipart-arrow-same)"/>
   <text x="820" y="458" class="wkt">(126 156.25, 126 125)</text>
   <path d="M1015 501 L961 478" class="same" marker-end="url(#multipart-arrow-same)"/>
@@ -75,7 +75,7 @@
   <text x="907" y="525" text-anchor="middle" class="wkt">(101 150, 90 161)</text>
   <text x="907" y="545" text-anchor="middle" class="wkt">(90 161, 76 175)</text>
   <rect x="760" y="578" width="295" height="39" rx="7" fill="#ffffff" stroke="#6f2da8" stroke-width="2"/>
-  <text x="776" y="603" font-size="12" font-weight="700" fill="#6f2da8">Element 1 · MULTILINESTRING EMPTY</text>
+  <text x="776" y="603" font-size="12" font-weight="700" fill="#6f2da8">Second element · MULTILINESTRING EMPTY</text>
 
   <rect x="25" y="660" width="1050" height="135" rx="9" fill="#f8fafc" stroke="#b8c3d1" stroke-width="1.5"/>
   <text x="45" y="687" font-size="14" font-weight="700">Exact inputs and output</text>

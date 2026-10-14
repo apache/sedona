@@ -71,11 +71,11 @@
   <rect x="710" y="282" width="365" height="270" rx="9" class="panel"/>
   <text x="730" y="309" class="panel-title">4 · GeometryCollection output</text>
   <rect x="730" y="333" width="325" height="89" rx="7" class="card" stroke="#007a65"/>
-  <text x="746" y="357" font-size="13" font-weight="700" fill="#006b58">Element 0 · same direction</text>
+  <text x="746" y="357" font-size="13" font-weight="700" fill="#006b58">First element · same direction</text>
   <path d="M765 385 L1015 385" class="same" marker-end="url(#main-arrow-same)"/>
   <text x="892" y="411" text-anchor="middle" class="wkt">MULTILINESTRING ((20 0, 30 0))</text>
   <rect x="730" y="442" width="325" height="89" rx="7" class="card" stroke="#6f2da8"/>
-  <text x="746" y="466" font-size="13" font-weight="700" fill="#6f2da8">Element 1 · opposite direction</text>
+  <text x="746" y="466" font-size="13" font-weight="700" fill="#6f2da8">Second element · opposite direction</text>
   <path d="M765 494 L1015 494" class="opposite" marker-end="url(#main-arrow-opposite)"/>
   <text x="892" y="520" text-anchor="middle" class="wkt">MULTILINESTRING ((70 0, 80 0))</text>
 
