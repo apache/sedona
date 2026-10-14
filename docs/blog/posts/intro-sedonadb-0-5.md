@@ -206,7 +206,7 @@ We've also implemented raster/vector joins à la Sedona Spark so that interactio
 
 
 ```python
-# pip install sedonadb-zarr sedonadb-expr
+# pip install sedonadb-zarr
 import sedonadb_zarr
 
 sd.register(sedonadb_zarr.ZarrExtension())
@@ -275,7 +275,7 @@ country_totals = (
 
 
 
-This version of a zonal statistics calculation is verbose compared to dedicated one-off tools. As with the 0.4.0 release, raster and N-D array support remains a work in progress, and we're working toward a balance of flexibility, performance, and familiarity with existing interfaces such as rasterio, the GDAL command-line interface, and xarray.
+We are well aware that this version of a zonal statistics calculation is verbose compared to dedicated one-off tools. As with the 0.4.0 release, raster and N-D array support remains a work in progress, and we're working toward a balance of flexibility, performance, and familiarity with existing interfaces such as rasterio, the GDAL command-line interface, and xarray.
 
 ## GeoPandas-compatible API coverage
 
