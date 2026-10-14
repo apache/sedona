@@ -18,8 +18,18 @@
  */
 package org.apache.sedona.sql
 
+import org.apache.sedona.common.geometrySerde.GeometrySerializer
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.catalyst.expressions.{EmptyRow, Literal}
-import org.apache.spark.sql.sedona_sql.expressions.{ST_Contains, ST_CoveredBy, ST_Covers, ST_Crosses, ST_DWithin, ST_Disjoint, ST_Equals, ST_EqualsExact, ST_EqualsIdentical, ST_Intersects, ST_OrderingEquals, ST_Overlaps, ST_Point, ST_Touches, ST_Within}
+import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.expressions.{ST_Contains, ST_CoveredBy, ST_Covers, ST_Crosses, ST_DWithin, ST_Disjoint, ST_Equals, ST_EqualsExact, ST_EqualsIdentical, ST_GeomFromWKT, ST_Intersects, ST_OrderingEquals, ST_Overlaps, ST_Point, ST_Touches, ST_Within}
+import org.apache.spark.sql.types.{IntegerType, StructField, StructType}
+import org.locationtech.jts.geom.{Coordinate, CoordinateXYZM, Geometry, GeometryFactory}
+import org.locationtech.jts.io.WKTReader
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{CALLS_REAL_METHODS, mockStatic, never, times}
+
+import java.util.Arrays
 
 class predicateTestScala extends TestBaseScala {
 
@@ -421,6 +431,224 @@ class predicateTestScala extends TestBaseScala {
       assert(!result.getBoolean(2))
       assert(!result.getBoolean(3))
       assert(result.isNullAt(4))
+    }
+
+    it("Passed ST_EqualsIdentical on stored columns and nested constructors") {
+      import sparkSession.implicits._
+      val line = "LINESTRING (0 0, 1 1, 2 2, 3 3, 4 4)"
+      val lineZM = "LINESTRING ZM (0 0 0 0, 1 1 1 1, 2 2 2 2, 3 3 3 3, 4 4 4 4)"
+      val polygon =
+        "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (1 1, 1 2, 2 2, 2 1, 1 1), (5 5, 5 6, 6 6, 6 5, 5 5))"
+      val multiPolygon = "MULTIPOLYGON (((0 0, 4 0, 4 4, 0 4, 0 0), (1 1, 1 2, 2 2, 1 1)))"
+      val collection =
+        s"GEOMETRYCOLLECTION (POINT (1 2), GEOMETRYCOLLECTION (LINESTRING (0 0, 1 1), $multiPolygon))"
+      // (left WKT, left SRID, right WKT, right SRID, expected result)
+      val cases: Seq[(String, Int, String, Int, Option[Boolean])] = Seq(
+        // Byte-identical inputs in every dimension layout
+        (line, 0, line, 0, Some(true)),
+        ("LINESTRING Z (0 0 1, 1 1 2)", 0, "LINESTRING Z (0 0 1, 1 1 2)", 0, Some(true)),
+        ("LINESTRING M (0 0 1, 1 1 2)", 0, "LINESTRING M (0 0 1, 1 1 2)", 0, Some(true)),
+        (lineZM, 4326, lineZM, 4326, Some(true)),
+        ("POINT EMPTY", 0, "POINT EMPTY", 0, Some(true)),
+        // Identical geometries with different SRIDs
+        ("POINT (1 2)", 4326, "POINT (1 2)", 3857, Some(true)),
+        (lineZM, 4326, lineZM, 0, Some(true)),
+        (polygon, 4326, polygon, 3857, Some(true)),
+        (collection, 0, collection, 4326, Some(true)),
+        // NaN ordinates and signed zeros
+        ("LINESTRING Z (0 0 1, 1 1 NaN)", 0, "LINESTRING Z (0 0 1, 1 1 NaN)", 0, Some(true)),
+        ("LINESTRING Z (0 0 1, 1 1 NaN)", 0, "LINESTRING Z (0 0 1, 1 1 2)", 0, Some(false)),
+        ("POINT ZM (-0 0 -0 1)", 0, "POINT ZM (0 -0 0 1)", 0, Some(true)),
+        // First, middle, and last coordinate mismatches
+        (line, 0, "LINESTRING (9 0, 1 1, 2 2, 3 3, 4 4)", 0, Some(false)),
+        (line, 0, "LINESTRING (0 0, 1 1, 2 9, 3 3, 4 4)", 0, Some(false)),
+        (line, 0, "LINESTRING (0 0, 1 1, 2 2, 3 3, 4 9)", 0, Some(false)),
+        (
+          lineZM,
+          0,
+          "LINESTRING ZM (9 0 0 0, 1 1 1 1, 2 2 2 2, 3 3 3 3, 4 4 4 4)",
+          0,
+          Some(false)),
+        (
+          lineZM,
+          0,
+          "LINESTRING ZM (0 0 0 0, 1 1 1 1, 2 2 9 2, 3 3 3 3, 4 4 4 4)",
+          0,
+          Some(false)),
+        (
+          lineZM,
+          0,
+          "LINESTRING ZM (0 0 0 0, 1 1 1 1, 2 2 2 2, 3 3 3 3, 4 4 4 9)",
+          0,
+          Some(false)),
+        // Polygons with holes
+        (polygon, 0, polygon, 0, Some(true)),
+        (
+          polygon,
+          0,
+          "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (5 5, 5 6, 6 6, 6 5, 5 5), (1 1, 1 2, 2 2, 2 1, 1 1))",
+          0,
+          Some(false)),
+        (
+          polygon,
+          0,
+          "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (1 1, 1 2, 2 2, 2 1, 1 1), (5 5, 5 6, 6 7, 6 5, 5 5))",
+          0,
+          Some(false)),
+        (polygon, 0, "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))", 0, Some(false)),
+        // Nested collections
+        (collection, 0, collection, 0, Some(true)),
+        (
+          collection,
+          0,
+          s"GEOMETRYCOLLECTION (POINT (1 2), GEOMETRYCOLLECTION ($multiPolygon, LINESTRING (0 0, 1 1)))",
+          0,
+          Some(false)),
+        (
+          collection,
+          0,
+          "GEOMETRYCOLLECTION (POINT (1 2), GEOMETRYCOLLECTION (LINESTRING (0 0, 1 1), " +
+            "MULTIPOLYGON (((0 0, 4 0, 4 4, 0 4, 0 0), (1 1, 1 3, 2 2, 1 1)))))",
+          0,
+          Some(false)),
+        (
+          collection,
+          0,
+          s"GEOMETRYCOLLECTION (POINT (1 2), LINESTRING (0 0, 1 1), $multiPolygon)",
+          0,
+          Some(false)),
+        // Dimension layouts must match exactly
+        ("POINT Z (1 2 3)", 0, "POINT M (1 2 3)", 0, Some(false)),
+        ("POINT (1 2)", 0, "POINT Z (1 2 0)", 0, Some(false)),
+        ("LINESTRING Z (0 0 1, 1 1 2)", 0, "LINESTRING ZM (0 0 1 0, 1 1 2 0)", 0, Some(false)),
+        ("POINT EMPTY", 0, "LINESTRING EMPTY", 0, Some(false)),
+        // NULL inputs
+        (null, 0, "POINT (1 2)", 0, None),
+        ("POINT (1 2)", 0, null, 0, None),
+        (null, 0, null, 0, None))
+
+      val stored = cases.zipWithIndex
+        .map { case ((lw, ls, rw, rs, _), id) => (id, lw, ls, rw, rs) }
+        .toDF("id", "lw", "ls", "rw", "rs")
+        .selectExpr(
+          "id",
+          "lw",
+          "ls",
+          "rw",
+          "rs",
+          "ST_GeomFromWKT(lw, ls) AS a",
+          "ST_GeomFromWKT(rw, rs) AS b")
+        .cache()
+      try {
+        val rows = stored
+          .selectExpr(
+            "id",
+            "ST_EqualsIdentical(a, b)",
+            "ST_EqualsIdentical(ST_GeomFromWKT(lw, ls), ST_GeomFromWKT(rw, rs))")
+          .collect()
+        assert(rows.length == cases.length)
+        rows.foreach { row =>
+          val id = row.getInt(0)
+          (1 until row.length).foreach { i =>
+            val actual = if (row.isNullAt(i)) None else Some(row.getBoolean(i))
+            assert(actual == cases(id)._5, s"column $i of case ${cases(id)}")
+          }
+        }
+      } finally {
+        stored.unpersist()
+      }
+    }
+
+    it("Passed ST_EqualsIdentical on identical geometries with different serialized bytes") {
+      val factory = new GeometryFactory()
+      val payloadNaN = java.lang.Double.longBitsToDouble(0x7ff8000000000001L)
+      def lineZM(last: Coordinate, srid: Int = 0): Geometry = {
+        val geom = factory.createLineString(
+          Array(new CoordinateXYZM(0, 0, 0, 0), new CoordinateXYZM(1, 1, 1, 1), last))
+        geom.setSRID(srid)
+        geom
+      }
+      def wkt(text: String, srid: Int): Geometry = {
+        val geom = new WKTReader().read(text)
+        geom.setSRID(srid)
+        geom
+      }
+      val polygon = "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (1 1, 1 2, 2 2, 2 1, 1 1))"
+      val collection = s"GEOMETRYCOLLECTION (POINT (1 2), GEOMETRYCOLLECTION ($polygon))"
+      // (left, right, expected result); every pair is encoded with different bytes
+      val cases: Seq[(Geometry, Geometry, Boolean)] = Seq(
+        (
+          lineZM(new CoordinateXYZM(2, 2, Double.NaN, Double.NaN)),
+          lineZM(new CoordinateXYZM(2, 2, payloadNaN, payloadNaN)),
+          true),
+        (
+          lineZM(new CoordinateXYZM(0.0, 0.0, 0.0, 0.0)),
+          lineZM(new CoordinateXYZM(-0.0, -0.0, -0.0, -0.0)),
+          true),
+        (
+          lineZM(new CoordinateXYZM(2, 2, 2, 2), 4326),
+          lineZM(new CoordinateXYZM(2, 2, 2, 2), 3857),
+          true),
+        (wkt(polygon, 4326), wkt(polygon, 0), true),
+        (wkt(collection, 0), wkt(collection, 4326), true),
+        (
+          lineZM(new CoordinateXYZM(2, 2, 2, payloadNaN)),
+          lineZM(new CoordinateXYZM(2, 2, 2, 2)),
+          false))
+      cases.foreach { case (left, right, _) =>
+        assert(
+          !Arrays.equals(GeometrySerializer.serialize(left), GeometrySerializer.serialize(right)))
+      }
+
+      val schema = StructType(
+        Seq(
+          StructField("id", IntegerType),
+          StructField("a", GeometryUDT()),
+          StructField("b", GeometryUDT())))
+      val rows = cases.zipWithIndex.map { case ((left, right, _), id) => Row(id, left, right) }
+      val df = sparkSession.createDataFrame(Arrays.asList(rows: _*), schema)
+      val results = df.selectExpr("id", "ST_EqualsIdentical(a, b)").collect()
+      assert(results.length == cases.length)
+      results.foreach { row =>
+        assert(row.getBoolean(1) == cases(row.getInt(0))._3, s"case ${row.getInt(0)}")
+      }
+    }
+
+    it("ST_EqualsIdentical skips deserialization only for byte-identical serialized inputs") {
+      val factory = new GeometryFactory()
+      val coordinates =
+        Array[Coordinate](new CoordinateXYZM(0, 0, 1, 2), new CoordinateXYZM(1, 1, 3, 4))
+      val bytes = GeometrySerializer.serialize(factory.createLineString(coordinates))
+      val lineWithSrid = factory.createLineString(coordinates)
+      lineWithSrid.setSRID(4326)
+      val bytesWithSrid = GeometrySerializer.serialize(lineWithSrid)
+      def stored(value: Array[Byte]) = Literal.create(value, GeometryUDT())
+      val constructed =
+        ST_GeomFromWKT(Seq(Literal("LINESTRING ZM (0 0 1 2, 1 1 3 4)"), Literal(0)))
+
+      val mocked = mockStatic(classOf[GeometrySerializer], CALLS_REAL_METHODS)
+      try {
+        assert(
+          ST_EqualsIdentical(Seq(stored(bytes), stored(bytes.clone()))).eval(EmptyRow) == true)
+        mocked.verify(() => GeometrySerializer.deserialize(any(classOf[Array[Byte]])), never())
+
+        assert(
+          ST_EqualsIdentical(Seq(stored(bytes), stored(bytesWithSrid))).eval(EmptyRow) == true)
+        mocked.verify(() => GeometrySerializer.deserialize(any(classOf[Array[Byte]])), times(2))
+
+        assert(ST_EqualsIdentical(Seq(stored(bytes), stored(null))).eval(EmptyRow) == null)
+        assert(ST_EqualsIdentical(Seq(stored(null), stored(bytes))).eval(EmptyRow) == null)
+        assert(ST_EqualsIdentical(Seq(stored(null), stored(null))).eval(EmptyRow) == null)
+
+        // Nested constructors are compared without serializing their results
+        mocked.clearInvocations()
+        assert(ST_EqualsIdentical(Seq(constructed, constructed)).eval(EmptyRow) == true)
+        assert(ST_EqualsIdentical(Seq(stored(bytes), constructed)).eval(EmptyRow) == true)
+        mocked.verify(() => GeometrySerializer.serialize(any(classOf[Geometry])), never())
+        mocked.verify(() => GeometrySerializer.deserialize(any(classOf[Array[Byte]])), times(1))
+      } finally {
+        mocked.close()
+      }
     }
 
     it("Passed edge cases of ST_Contains and ST_Covers") {
