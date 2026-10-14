@@ -25,6 +25,33 @@
 <meta name="msapplication-config" content="{{ 'favicons/browserconfig.xml' | url }}">
 <meta name="msapplication-TileColor" content="#ca463a">
 <meta name="theme-color" content="#ca463a">
+{# Open Graph / Twitter cards. Social crawlers need an absolute image URL (GH-1328). #}
+{%- set og_title = config.site_name -%}
+{%- if page and page.meta and page.meta.title -%}
+  {%- set og_title = page.meta.title -%}
+{%- elif page and page.title and not page.is_homepage -%}
+  {%- set og_title = page.title | striptags -%}
+{%- endif -%}
+{%- set og_description = config.site_description or '' -%}
+{%- if page and page.meta and page.meta.description -%}
+  {%- set og_description = page.meta.description -%}
+{%- endif -%}
+{%- set og_url = page.canonical_url if page and page.canonical_url else config.site_url -%}
+{%- set og_image = config.site_url.rstrip('/') ~ '/latest/image/sedona-ecosystem.png' -%}
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ og_title }}">
+<meta property="og:description" content="{{ og_description }}">
+<meta property="og:url" content="{{ og_url }}">
+<meta property="og:image" content="{{ og_image }}">
+<meta property="og:image:alt" content="Apache Sedona">
+<meta property="og:image:width" content="1920">
+<meta property="og:image:height" content="1080">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@ApacheSedona">
+<meta name="twitter:title" content="{{ og_title }}">
+<meta name="twitter:description" content="{{ og_description }}">
+<meta name="twitter:image" content="{{ og_image }}">
+<meta name="twitter:image:alt" content="Apache Sedona">
 {% endblock %}
 
 {% block header %}
