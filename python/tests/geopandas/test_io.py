@@ -429,6 +429,46 @@ class TestIO(TestGeopandasBase):
         gpd_df = gpd.read_parquet(temp_file_path)
         self.check_sgpd_df_equals_gpd_df(sgpd_df, gpd_df)
 
+    def test_to_feather(self):
+        sgpd_df = GeoDataFrame(
+            {"geometry": [Point(0, 0), LineString([(0, 0), (1, 1)])], "int": [1, 2]}
+        )
+
+        temp_file_path = self._get_next_temp_file_path("feather")
+        sgpd_df.to_feather(temp_file_path)
+
+        # Ensure reading from geopandas creates the same resulting GeoDataFrame
+        gpd_df = gpd.read_feather(temp_file_path)
+        self.check_sgpd_df_equals_gpd_df(sgpd_df, gpd_df)
+
+        # Ensure the file round-trips back through sedona's own GeoDataFrame constructor
+        sgpd_result = GeoDataFrame(gpd.read_feather(temp_file_path))
+        self.check_sgpd_df_equals_gpd_df(sgpd_result, gpd_df)
+
+    def test_to_feather_compression_kwarg(self):
+        sgpd_df = GeoDataFrame({"geometry": [Point(0, 0), Point(1, 1)], "int": [1, 2]})
+
+        temp_file_path = self._get_next_temp_file_path("feather")
+        sgpd_df.to_feather(temp_file_path, compression="uncompressed")
+
+        gpd_df = gpd.read_feather(temp_file_path)
+        self.check_sgpd_df_equals_gpd_df(sgpd_df, gpd_df)
+
+    @pytest.mark.parametrize("index", [True, False])
+    def test_to_feather_index(self, index):
+        sgpd_df = GeoDataFrame(
+            {"geometry": [Point(0, 0), LineString([(0, 0), (1, 1)])], "int": [1, 2]},
+            index=["a", "b"],
+        )
+        temp_file_path = self._get_next_temp_file_path("feather")
+        sgpd_df.to_feather(temp_file_path, index=index)
+
+        gpd_df = gpd.read_feather(temp_file_path)
+        if index:
+            self.check_sgpd_df_equals_gpd_df(sgpd_df, gpd_df)
+        else:
+            self.check_index_equal(gpd_df, pd.RangeIndex(start=0, stop=2, step=1))
+
     def test_to_parquet_writes_crs_of_spark_backed_frame(self):
         # The CRS is assigned on the frame while the geometries themselves carry SRID 0
         spark_df = self.spark.sql(
