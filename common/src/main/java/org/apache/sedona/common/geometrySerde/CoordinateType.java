@@ -18,7 +18,8 @@
  */
 package org.apache.sedona.common.geometrySerde;
 
-enum CoordinateType {
+/** Coordinate layout of a serialized geometry: which of the Z and M ordinates it stores. */
+public enum CoordinateType {
   XY(1, 2, false, false),
   XYZ(2, 3, true, false),
   XYM(3, 3, false, true),

@@ -24,9 +24,12 @@ import static org.junit.Assert.*;
 
 import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.geometryObjects.Box3D;
+import org.apache.sedona.common.geometrySerde.GeometrySerializer;
+import org.datasyslab.jts.geom.impl.DeclaredCoordinateSequence;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateSequence;
+import org.locationtech.jts.geom.CoordinateSequenceFactory;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -460,8 +463,9 @@ public class PredicatesTest extends TestBase {
   @Test
   public void testEqualsIdenticalDimensionsAndOrdinateValues() {
     // Construct explicit coordinate sequences here so the predicate receives the dimensional
-    // metadata being compared. Default JTS sequences cannot distinguish ordinary XY from declared
-    // XYZ when every Z ordinate is NaN after some serialization boundaries.
+    // metadata being compared. Default JTS sequences cannot distinguish ordinary XY from XYZ when
+    // every Z ordinate is NaN, so such a sequence counts as XY, as in the geometry serializer; an
+    // XYZ layout with NaN Z values needs a declared sequence.
     GeometryFactory factory = coordinateArrayFactory(0);
     Point xy = point(factory, false, false, 1, 2, Double.NaN, Double.NaN);
     Point xyz = point(factory, true, false, 1, 2, 3, Double.NaN);
@@ -471,9 +475,11 @@ public class PredicatesTest extends TestBase {
     assertTrue(Predicates.equalsIdentical(xy, xy.copy()));
     assertFalse(Predicates.equalsIdentical(xy, xyz));
     assertFalse(Predicates.equalsIdentical(xyz, xym));
-    Point xyzNaN = point(factory, true, false, 1, 2, Double.NaN, Double.NaN);
+    Point xyzNaN = point(declaredFactory(0), true, false, 1, 2, Double.NaN, Double.NaN);
     assertTrue(Predicates.equalsIdentical(xyzNaN, xyzNaN.copy()));
     assertFalse(Predicates.equalsIdentical(xy, xyzNaN));
+    assertTrue(
+        Predicates.equalsIdentical(xy, point(factory, true, false, 1, 2, Double.NaN, Double.NaN)));
     assertFalse(Predicates.equalsIdentical(xyz, point(factory, true, false, 1, 2, 4, Double.NaN)));
     assertFalse(Predicates.equalsIdentical(xym, point(factory, false, true, 1, 2, Double.NaN, 4)));
     assertTrue(Predicates.equalsIdentical(xyzm, xyzm.copy()));
@@ -503,11 +509,13 @@ public class PredicatesTest extends TestBase {
 
   @Test
   public void testEqualsIdenticalComparesRepresentedEmptyDimensions() {
-    // These empty geometries retain explicit sequence dimensions in memory. Some empty and
-    // zero-member values do not retain that declaration after serialization.
+    // These empty geometries retain explicit sequence dimensions in memory. An empty XYZ layout
+    // needs a declared sequence: a default JTS sequence without Z values counts as XY. Some empty
+    // and zero-member values do not retain the declaration after serialization.
     GeometryFactory factory = coordinateArrayFactory(0);
+    GeometryFactory declared = declaredFactory(0);
     Point emptyXY = emptyPoint(factory, false, false);
-    Point emptyXYZ = emptyPoint(factory, true, false);
+    Point emptyXYZ = emptyPoint(declared, true, false);
     Point emptyXYM = emptyPoint(factory, false, true);
 
     assertTrue(Predicates.equalsIdentical(emptyXY, emptyXY.copy()));
@@ -521,13 +529,13 @@ public class PredicatesTest extends TestBase {
     assertFalse(
         Predicates.equalsIdentical(
             factory.createLineString(coordinateSequence(factory, 0, false, false)),
-            factory.createLineString(coordinateSequence(factory, 0, true, false))));
+            declared.createLineString(coordinateSequence(declared, 0, true, false))));
     assertFalse(
         Predicates.equalsIdentical(
             factory.createPolygon(
                 factory.createLinearRing(coordinateSequence(factory, 0, false, false))),
-            factory.createPolygon(
-                factory.createLinearRing(coordinateSequence(factory, 0, true, false)))));
+            declared.createPolygon(
+                declared.createLinearRing(coordinateSequence(declared, 0, true, false)))));
   }
 
   @Test
@@ -580,6 +588,42 @@ public class PredicatesTest extends TestBase {
     assertFalse(
         Predicates.equalsIdentical(
             geomFromEWKT("MULTIPOINT((0 0))"), geomFromEWKT("GEOMETRYCOLLECTION(POINT(0 0))")));
+  }
+
+  @Test
+  public void testEqualsIdenticalMatchesSerializedRoundTrip() throws ParseException {
+    // WKT parsing stores 2D coordinates with a NaN Z ordinate, while the serializer reads them
+    // back as declared XY, so a stored geometry must be identical to the geometry it came from.
+    String[] wkts = {
+      "POINT (1 2)",
+      "POINT Z (1 2 3)",
+      "POINT M (1 2 3)",
+      "POINT ZM (1 2 3 4)",
+      "LINESTRING (0 0, 1 1, 2 0)",
+      "LINESTRING Z (0 0 1, 1 1 NaN, 2 0 3)",
+      "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (1 1, 2 1, 1 2, 1 1))",
+      "MULTIPOINT ((0 0), (1 1))",
+      "MULTIPOINT Z ((0 0 1), (1 1 NaN))",
+      "MULTILINESTRING ((0 0, 1 1), (2 2, 3 3))",
+      "MULTIPOLYGON (((0 0, 1 0, 1 1, 0 0)), ((2 2, 3 2, 3 3, 2 2)))",
+      "GEOMETRYCOLLECTION (POINT (1 2), LINESTRING Z (0 0 1, 1 1 2), POINT M (1 2 3))",
+      "POINT EMPTY",
+      "LINESTRING EMPTY",
+      "POLYGON EMPTY",
+      "GEOMETRYCOLLECTION EMPTY",
+    };
+    for (String wkt : wkts) {
+      Geometry parsed = geomFromEWKT(wkt);
+      Geometry stored = GeometrySerializer.deserialize(GeometrySerializer.serialize(parsed));
+      assertTrue(wkt, Predicates.equalsIdentical(parsed, stored));
+      assertTrue(wkt, Predicates.equalsIdentical(stored, parsed));
+    }
+
+    Geometry storedXY =
+        GeometrySerializer.deserialize(GeometrySerializer.serialize(geomFromEWKT("POINT (1 2)")));
+    assertFalse(Predicates.equalsIdentical(storedXY, geomFromEWKT("POINT Z (1 2 3)")));
+    assertFalse(Predicates.equalsIdentical(storedXY, geomFromEWKT("POINT M (1 2 3)")));
+    assertFalse(Predicates.equalsIdentical(storedXY, geomFromEWKT("POINT (1 3)")));
   }
 
   @Test
@@ -678,6 +722,34 @@ public class PredicatesTest extends TestBase {
   private static GeometryFactory coordinateArrayFactory(int srid) {
     return new GeometryFactory(
         new PrecisionModel(), srid, CoordinateArraySequenceFactory.instance());
+  }
+
+  /** Sequences that declare their dimension, as geometries read by the serializer do. */
+  private static GeometryFactory declaredFactory(int srid) {
+    return new GeometryFactory(new PrecisionModel(), srid, new DeclaredSequenceFactory());
+  }
+
+  private static final class DeclaredSequenceFactory implements CoordinateSequenceFactory {
+    @Override
+    public CoordinateSequence create(Coordinate[] coordinates) {
+      return new DeclaredCoordinateSequence(coordinates, 3, 0);
+    }
+
+    @Override
+    public CoordinateSequence create(CoordinateSequence coordinates) {
+      return new DeclaredCoordinateSequence(
+          coordinates.toCoordinateArray(), coordinates.getDimension(), coordinates.getMeasures());
+    }
+
+    @Override
+    public CoordinateSequence create(int size, int dimension) {
+      return new DeclaredCoordinateSequence(size, dimension, 0);
+    }
+
+    @Override
+    public CoordinateSequence create(int size, int dimension, int measures) {
+      return new DeclaredCoordinateSequence(size, dimension, measures);
+    }
   }
 
   private static Point point(

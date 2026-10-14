@@ -23,6 +23,8 @@ Introduction: Returns true if A and B have identical geometry types, component o
 
 Unlike `ST_EqualsExact`, this predicate compares every available coordinate dimension, including Z and M, and does not accept a tolerance. NaN ordinate values are considered equal to other NaN values. The SRID and other geometry metadata are not compared.
 
+The dimensions compared are the ones the geometry is stored with, so a 2D geometry built from WKT is identical to the same geometry read back from a table. A Z ordinate that is NaN in every coordinate counts only when the geometry declares a Z dimension.
+
 Format: `ST_EqualsIdentical(A: Geometry, B: Geometry)`
 
 Return type: `Boolean`

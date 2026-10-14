@@ -423,6 +423,38 @@ class predicateTestScala extends TestBaseScala {
       assert(result.isNullAt(4))
     }
 
+    it("Passed ST_EqualsIdentical between stored geometries and geometries parsed from WKT") {
+      val wkts = Seq(
+        "POINT (1 2)",
+        "LINESTRING (0 0, 1 1, 2 0)",
+        "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (1 1, 2 1, 1 2, 1 1))",
+        "MULTIPOINT ((0 0), (1 1))",
+        "POINT Z (1 2 3)",
+        "POINT M (1 2 3)",
+        "GEOMETRYCOLLECTION (POINT (1 2), LINESTRING Z (0 0 1, 1 1 2))")
+      // Materialize the geometries, so the comparison reads them back from stored buffers.
+      sparkSession
+        .createDataFrame(wkts.map(Tuple1(_)))
+        .toDF("wkt")
+        .selectExpr("wkt", "ST_GeomFromWKT(wkt) AS geom")
+        .cache()
+        .createOrReplaceTempView("stored_geometries")
+      for (wkt <- wkts) {
+        val result = sparkSession
+          .sql(s"""
+            SELECT
+              ST_EqualsIdentical(geom, ST_GeomFromWKT('$wkt')),
+              ST_EqualsIdentical(ST_GeomFromWKT('$wkt'), geom),
+              ST_EqualsIdentical(geom, ST_GeomFromWKT('POINT Z (1 2 9)'))
+            FROM stored_geometries WHERE wkt = '$wkt'
+          """)
+          .first()
+        assert(result.getBoolean(0), wkt)
+        assert(result.getBoolean(1), wkt)
+        assert(!result.getBoolean(2), wkt)
+      }
+    }
+
     it("Passed edge cases of ST_Contains and ST_Covers") {
       val testtable = sparkSession.sql(
         "select ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))') AS a, ST_GeomFromWKT('POINT(2 0)') AS b")
