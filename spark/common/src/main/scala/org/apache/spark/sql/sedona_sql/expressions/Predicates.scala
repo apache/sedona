@@ -279,10 +279,53 @@ private[apache] case class ST_EqualsExact(inputExpressions: Seq[Expression])
  * Test if two geometries have identical structure, coordinate ordering, dimensions, and ordinate
  * values.
  *
+ * When both inputs are serialized geometry buffers (for example stored geometry columns), a
+ * byte-identical pair is reported as identical without deserializing either side, because the
+ * buffer fully determines the geometry type, structure, dimensions and ordinate values. Pairs
+ * whose bytes differ still go through the structural comparison, since identical geometries can
+ * be encoded differently (different SRIDs, NaN payloads, or signed zeros). Inputs produced by
+ * nested SerdeAware expressions never materialize a buffer, so they always use the structural
+ * comparison.
+ *
  * @param inputExpressions
  */
 private[apache] case class ST_EqualsIdentical(inputExpressions: Seq[Expression])
     extends InferredExpression(inferrableFunction2(Predicates.equalsIdentical)) {
+
+  private lazy val inputsAreSerialized: Boolean =
+    !inputExpressions.exists(_.isInstanceOf[SerdeAware])
+
+  override def eval(input: InternalRow): Any = {
+    if (inputsAreSerialized) evalSerialized(input) else super.eval(input)
+  }
+
+  override def evalWithoutSerialization(input: InternalRow): Any = {
+    if (inputsAreSerialized) evalSerialized(input) else super.evalWithoutSerialization(input)
+  }
+
+  private def evalSerialized(input: InternalRow): Any = {
+    var leftGeometry: Geometry = null
+    var rightGeometry: Geometry = null
+    try {
+      val left = inputExpressions(0).eval(input).asInstanceOf[Array[Byte]]
+      val right = inputExpressions(1).eval(input).asInstanceOf[Array[Byte]]
+      if (left == null || right == null) {
+        null
+      } else if (java.util.Arrays.equals(left, right)) {
+        true
+      } else {
+        leftGeometry = GeometrySerializer.deserialize(left)
+        rightGeometry = GeometrySerializer.deserialize(right)
+        Predicates.equalsIdentical(leftGeometry, rightGeometry)
+      }
+    } catch {
+      case e: Exception =>
+        InferredExpression.throwExpressionInferenceException(
+          getClass.getSimpleName,
+          Seq(leftGeometry, rightGeometry).filter(_ != null),
+          e)
+    }
+  }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
