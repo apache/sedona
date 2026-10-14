@@ -6826,6 +6826,13 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/2026/06/19/sedonadb-040-release/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/blog/2026/10/13/sedonadb-050-release/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/blog/2026/10/13/sedonadb-050-release/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/2026/10/13/sedonadb-050-release/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/blog/2025/09/24/introducing-sedonadb-a-single-node-analytical-database-engine-with-geospatial-as-a-first-class-citizen/</loc>
         <lastmod>2026-10-14</lastmod>
         <changefreq>daily</changefreq>
@@ -6980,25 +6987,11 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/archive/2025/"/>
     </url>
     <url>
-        <loc>https://sedona.apache.org/latest/blog/author/jia/</loc>
-        <lastmod>2026-10-14</lastmod>
-        <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/blog/author/jia/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/author/jia/"/>
-    </url>
-    <url>
         <loc>https://sedona.apache.org/latest/blog/author/dewey/</loc>
         <lastmod>2026-10-14</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/blog/author/dewey/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/author/dewey/"/>
-    </url>
-    <url>
-        <loc>https://sedona.apache.org/latest/blog/author/kristin/</loc>
-        <lastmod>2026-10-14</lastmod>
-        <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/blog/author/kristin/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/author/kristin/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/blog/author/feng/</loc>
@@ -7013,6 +7006,20 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/blog/author/james/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/author/james/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/blog/author/jia/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/blog/author/jia/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/author/jia/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/blog/author/kristin/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/blog/author/kristin/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/author/kristin/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/blog/author/pranav/</loc>
@@ -13917,6 +13924,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/2026/06/19/sedonadb-040-release/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/zh/blog/2026/10/13/sedonadb-050-release/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/2026/10/13/sedonadb-050-release/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/2026/10/13/sedonadb-050-release/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/zh/blog/2025/09/24/introducing-sedonadb-a-single-node-analytical-database-engine-with-geospatial-as-a-first-class-citizen/</loc>
         <lastmod>2026-10-14</lastmod>
         <changefreq>daily</changefreq>
@@ -14071,25 +14085,11 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/archive/2025/"/>
     </url>
     <url>
-        <loc>https://sedona.apache.org/latest/zh/blog/author/jia/</loc>
-        <lastmod>2026-10-14</lastmod>
-        <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/author/jia/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/author/jia/"/>
-    </url>
-    <url>
         <loc>https://sedona.apache.org/latest/zh/blog/author/dewey/</loc>
         <lastmod>2026-10-14</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/author/dewey/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/author/dewey/"/>
-    </url>
-    <url>
-        <loc>https://sedona.apache.org/latest/zh/blog/author/kristin/</loc>
-        <lastmod>2026-10-14</lastmod>
-        <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/author/kristin/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/author/kristin/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/zh/blog/author/feng/</loc>
@@ -14104,6 +14104,20 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/author/james/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/author/james/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/blog/author/jia/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/author/jia/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/author/jia/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/blog/author/kristin/</loc>
+        <lastmod>2026-10-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/author/kristin/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/author/kristin/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/zh/blog/author/pranav/</loc>
