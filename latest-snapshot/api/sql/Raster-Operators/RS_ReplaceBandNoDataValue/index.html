@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5621,7 +5620,7 @@
  -->
 
 <h1 id="rs_replacebandnodatavalue">RS_ReplaceBandNoDataValue<a class="headerlink" href="#rs_replacebandnodatavalue" title="Permanent link">&para;</a></h1>
-<p>Introduction: Moves the no-data value of a band to <code>noDataValue</code>, carrying the no-data pixels with it. Every pixel of the band that holds the current no-data value is rewritten to <code>noDataValue</code>, which then becomes the band's no-data value, so the same pixels read as no-data before and after the call. <a href="../RS_SetBandNoDataValue/">RS_SetBandNoDataValue</a>, by contrast, changes only the declared value.</p>
+<p>Introduction: Moves the no-data value of a band to <code>noDataValue</code>, carrying the no-data pixels with it. Every pixel of the band that holds the current no-data value is rewritten to <code>noDataValue</code>, which then becomes the band's no-data value. Pixels that already equal the new value also become no-data; choose a value exactly representable in the band's pixel type and absent from valid pixels to preserve the same no-data mask. <a href="../RS_SetBandNoDataValue/">RS_SetBandNoDataValue</a>, by contrast, changes only the declared value.</p>
 <p>A pixel holds the current no-data value when it compares equal to it numerically: <code>-0.0</code> matches a <code>0.0</code> no-data value, and any <code>NaN</code> matches a <code>NaN</code> no-data value. Other bands are unchanged.</p>
 <p>The band must already have a no-data value; otherwise there is nothing to replace and an <code>IllegalArgumentException</code> is thrown. A <code>null</code> raster, band index or <code>noDataValue</code> returns <code>null</code>.</p>
 <p>Format:</p>
@@ -5662,7 +5661,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="October 2, 2026 04:02:34 UTC">October 2, 2026 04:02:34</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="October 14, 2026 03:52:34 UTC">October 14, 2026 03:52:34</span>
   </span>
 
     

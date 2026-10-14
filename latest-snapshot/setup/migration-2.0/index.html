@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5833,9 +5832,11 @@ when you upgrade from 1.x. The <a href="../release-notes/#sedona-200">release no
   restore from a checkpoint or savepoint taken with 1.x. Restart them without state.</li>
 </ul>
 <h2 id="element-and-pixel-positions-now-count-from-1">Element and pixel positions now count from 1<a class="headerlink" href="#element-and-pixel-positions-now-count-from-1" title="Permanent link">&para;</a></h2>
-<p>Four functions used to count positions from 0 and now count from 1, as PostGIS does. This is
-the change most likely to affect existing queries, because the old queries still run: they
-now return the <em>next</em> element or pixel, or <code>NULL</code> past the end, rather than raising an error.</p>
+<p>Four functions used to count positions from 0 and now count from 1, as PostGIS does. Existing
+queries can still run but return different results: the same positive geometry or ring index
+now selects the previous element. Keeping both positive raster grid coordinates unchanged
+selects a pixel one column to the left and one row up in grid order. An element index or either
+grid coordinate of <code>0</code> returns <code>NULL</code>. Update existing calls as shown below.</p>
 <table>
 <thead>
 <tr>
@@ -5868,8 +5869,9 @@ now return the <em>next</em> element or pixel, or <code>NULL</code> past the end
 </tbody>
 </table>
 <p>In 2.0, an index of <code>0</code>, a negative index, or one past the last element returns <code>NULL</code>.</p>
-<p><strong>What to change:</strong> add 1 to the index or grid coordinate in every call to these four
-functions, whether it's a literal or a column. For example:</p>
+<p><strong>What to change:</strong> add 1 to the geometry or ring index, or to both the raster column and row
+coordinates (every entry of both coordinate arrays for <code>RS_Values</code>), whether they are literals
+or columns. Band arguments were already 1-based and do not change. For example:</p>
 <div class="highlight"><pre><span></span><code><span class="c1">-- Sedona 1.x</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeometryN</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="n">RS_Value</span><span class="p">(</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">t</span>
 <span class="c1">-- Sedona 2.0</span>
@@ -5950,7 +5952,7 @@ so queries that use it fail until rewritten:</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="October 2, 2026 04:02:34 UTC">October 2, 2026 04:02:34</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="October 14, 2026 03:52:34 UTC">October 14, 2026 03:52:34</span>
   </span>
 
     
