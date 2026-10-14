@@ -447,11 +447,7 @@ public class GeometrySerializer {
    *
    * @throws IllegalArgumentException if the serializer cannot encode the geometry's layout
    */
-  public static CoordinateType coordinateType(Geometry geometry) {
-    return getCoordinateType(geometry);
-  }
-
-  private static CoordinateType getCoordinateType(Geometry geometry) {
+  public static CoordinateType getCoordinateType(Geometry geometry) {
     CoordinateDimensions dimensions = new CoordinateDimensions();
     collectCoordinateDimensions(geometry, dimensions);
     return dimensions.coordinateType == null ? CoordinateType.XY : dimensions.coordinateType;

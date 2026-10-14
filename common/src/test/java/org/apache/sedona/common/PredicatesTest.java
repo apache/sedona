@@ -22,6 +22,10 @@ import static org.apache.sedona.common.Constructors.geomFromEWKT;
 import static org.apache.sedona.common.Functions.crossesDateLine;
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.BiFunction;
 import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.geometryObjects.Box3D;
 import org.apache.sedona.common.geometrySerde.GeometrySerializer;
@@ -33,8 +37,10 @@ import org.locationtech.jts.geom.CoordinateSequenceFactory;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.locationtech.jts.geom.impl.CoordinateArraySequenceFactory;
 import org.locationtech.jts.geom.impl.PackedCoordinateSequenceFactory;
 import org.locationtech.jts.io.ParseException;
@@ -624,6 +630,108 @@ public class PredicatesTest extends TestBase {
     assertFalse(Predicates.equalsIdentical(storedXY, geomFromEWKT("POINT Z (1 2 3)")));
     assertFalse(Predicates.equalsIdentical(storedXY, geomFromEWKT("POINT M (1 2 3)")));
     assertFalse(Predicates.equalsIdentical(storedXY, geomFromEWKT("POINT (1 3)")));
+  }
+
+  @Test
+  public void testEqualsIdenticalIsSymmetricAndTransitiveAcrossSequenceLayouts() {
+    // MultiPoints with the same X/Y values whose members mix default and declared sequences, NaN
+    // and set Z values, and measures: some have a storable layout and some do not.
+    GeometryFactory array = coordinateArrayFactory(0);
+    GeometryFactory declared = declaredFactory(0);
+    List<BiFunction<Double, Double, Point>> kinds =
+        Arrays.asList(
+            (x, y) -> point(array, false, false, x, y, Double.NaN, Double.NaN),
+            (x, y) -> point(array, true, false, x, y, Double.NaN, Double.NaN),
+            (x, y) -> point(array, true, false, x, y, 5, Double.NaN),
+            (x, y) -> point(declared, false, false, x, y, Double.NaN, Double.NaN),
+            (x, y) -> point(declared, true, false, x, y, Double.NaN, Double.NaN),
+            (x, y) -> point(declared, true, false, x, y, 5, Double.NaN),
+            (x, y) -> point(array, false, true, x, y, Double.NaN, Double.NaN));
+    List<Geometry> multiPoints = new ArrayList<>();
+    for (BiFunction<Double, Double, Point> first : kinds) {
+      for (BiFunction<Double, Double, Point> second : kinds) {
+        multiPoints.add(
+            array.createMultiPoint(new Point[] {first.apply(0.0, 0.0), second.apply(1.0, 1.0)}));
+      }
+    }
+    for (int a = 0; a < multiPoints.size(); a++) {
+      for (int b = 0; b < multiPoints.size(); b++) {
+        boolean ab = Predicates.equalsIdentical(multiPoints.get(a), multiPoints.get(b));
+        assertEquals(
+            a + "," + b, ab, Predicates.equalsIdentical(multiPoints.get(b), multiPoints.get(a)));
+        if (!ab) {
+          continue;
+        }
+        for (int c = 0; c < multiPoints.size(); c++) {
+          if (Predicates.equalsIdentical(multiPoints.get(b), multiPoints.get(c))) {
+            assertTrue(
+                a + "," + b + "," + c,
+                Predicates.equalsIdentical(multiPoints.get(a), multiPoints.get(c)));
+          }
+        }
+      }
+    }
+  }
+
+  @Test
+  public void testEqualsIdenticalComparesComponentTypes() {
+    GeometryFactory factory = coordinateArrayFactory(0);
+    Coordinate[] closed = coordArray(0, 0, 1, 0, 1, 1, 0, 0);
+    Geometry withRing =
+        factory.createMultiLineString(new LineString[] {factory.createLinearRing(closed)});
+    Geometry withLine =
+        factory.createMultiLineString(new LineString[] {factory.createLineString(closed)});
+    assertTrue(Predicates.equalsIdentical(withRing, withRing.copy()));
+    assertFalse(Predicates.equalsIdentical(withRing, withLine));
+    assertFalse(Predicates.equalsIdentical(withLine, withRing));
+  }
+
+  @Test
+  public void testEqualsIdenticalRejectsMismatchesWithoutReadingZ() {
+    // Different sizes or a different first X are found before the coordinate layouts are
+    // resolved, which for default sequences means reading every Z value.
+    ZCountingSequence line = zCountingSequence(100_000, 0);
+    ZCountingSequence shortLine = zCountingSequence(2, 0);
+    ZCountingSequence otherFirstX = zCountingSequence(100_000, 1);
+    assertFalse(
+        Predicates.equalsIdentical(
+            GEOMETRY_FACTORY.createLineString(line), GEOMETRY_FACTORY.createLineString(shortLine)));
+    assertFalse(
+        Predicates.equalsIdentical(
+            GEOMETRY_FACTORY.createLineString(line),
+            GEOMETRY_FACTORY.createLineString(otherFirstX)));
+    assertEquals(0, line.zReads + shortLine.zReads + otherFirstX.zReads);
+  }
+
+  /** A default XY sequence (dimension 3, NaN Z) that counts reads of its Z ordinate. */
+  private static final class ZCountingSequence extends CoordinateArraySequence {
+    private int zReads;
+
+    private ZCountingSequence(Coordinate[] coordinates) {
+      super(coordinates, 3, 0);
+    }
+
+    @Override
+    public double getZ(int index) {
+      zReads++;
+      return super.getZ(index);
+    }
+
+    @Override
+    public double getOrdinate(int index, int ordinateIndex) {
+      if (ordinateIndex == CoordinateSequence.Z) {
+        zReads++;
+      }
+      return super.getOrdinate(index, ordinateIndex);
+    }
+  }
+
+  private static ZCountingSequence zCountingSequence(int size, double firstX) {
+    Coordinate[] coordinates = new Coordinate[size];
+    for (int i = 0; i < size; i++) {
+      coordinates[i] = new Coordinate(i == 0 ? firstX : i, i);
+    }
+    return new ZCountingSequence(coordinates);
   }
 
   @Test
