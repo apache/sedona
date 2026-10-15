@@ -31,6 +31,7 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.operation.MathTransform2D;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.locationtech.jts.geom.Geometry;
@@ -391,16 +392,36 @@ public class RasterBandAccessors {
     Raster rasterData = RasterUtils.getRaster(raster.getRenderedImage());
     String datatype = RasterBandAccessors.getBandType(raster, band);
     Double noDataValue = RasterBandAccessors.getBandNoDataValue(raster, band);
+
+    // CHANGED: rasterize only the part of the raster the geometry covers
     // Adding an arbitrary value '150' for the pixels that are under the geometry.
     GridCoverage2D rasterizedGeom =
-        RasterConstructors.asRasterWithRasterExtent(roi, raster, datatype, allTouched, 150, null);
+        RasterConstructors.asRaster(roi, raster, datatype, allTouched, 150, null, true);
+
+    int xOffset = 0, yOffset = 0;
+    if (rasterizedGeom == null) {
+      // NEW: the geometry does not burn any pixel, so there is nothing to compute over
+      double[] empty = new double[0];
+      return Arrays.asList(new DescriptiveStatistics(empty), empty);
+    }
+    int[] offset = windowOffset(raster, rasterizedGeom); // NEW
+    if (offset == null) {
+      // NEW: fall back to the full-extent path when the window cannot be placed exactly
+      rasterizedGeom =
+          RasterConstructors.asRasterWithRasterExtent(roi, raster, datatype, allTouched, 150, null);
+    } else {
+      xOffset = offset[0];
+      yOffset = offset[1];
+    }
+
     Raster rasterizedData = RasterUtils.getRaster(rasterizedGeom.getRenderedImage());
     int width = RasterAccessors.getWidth(rasterizedGeom),
         height = RasterAccessors.getHeight(rasterizedGeom);
     double[] rasterizedPixelData =
         rasterizedData.getSamples(0, 0, width, height, 0, (double[]) null);
+    // CHANGED: read only the window from the source raster
     double[] rasterPixelData =
-        rasterData.getSamples(0, 0, width, height, band - 1, (double[]) null);
+        rasterData.getSamples(xOffset, yOffset, width, height, band - 1, (double[]) null);
 
     List<Double> pixelData = new ArrayList<>();
 
@@ -428,6 +449,36 @@ public class RasterBandAccessors {
     statObjects.add(stats);
     statObjects.add(pixelsArray);
     return statObjects;
+  }
+
+  /**
+   * Returns {x, y}: the position of the window's top-left pixel inside the raster, or null if the
+   * window is not exactly aligned to the raster's pixel grid or does not fit inside it.
+   */
+  private static int[] windowOffset(GridCoverage2D raster, GridCoverage2D window) {
+    try {
+      MathTransform2D windowToWorld =
+          window
+              .getGridGeometry()
+              .getGridToCRS2D(org.geotools.api.metadata.spatial.PixelOrientation.CENTER);
+      MathTransform2D worldToRaster =
+          raster
+              .getGridGeometry()
+              .getGridToCRS2D(org.geotools.api.metadata.spatial.PixelOrientation.CENTER)
+              .inverse();
+      double[] pt = {0, 0}; // centre of the window's first pixel
+      windowToWorld.transform(pt, 0, pt, 0, 1);
+      worldToRaster.transform(pt, 0, pt, 0, 1);
+      int x = (int) Math.round(pt[0]), y = (int) Math.round(pt[1]);
+      if (Math.abs(pt[0] - x) > 1e-6 || Math.abs(pt[1] - y) > 1e-6) return null;
+      if (x < 0
+          || y < 0
+          || x + RasterAccessors.getWidth(window) > RasterAccessors.getWidth(raster)
+          || y + RasterAccessors.getHeight(window) > RasterAccessors.getHeight(raster)) return null;
+      return new int[] {x, y};
+    } catch (Exception e) { // TransformException, NoninvertibleTransformException
+      return null;
+    }
   }
 
   public static double getSummaryStats(
