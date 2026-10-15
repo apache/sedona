@@ -2320,7 +2320,63 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         schema_version=None,
         **kwargs,
     ):
-        raise NotImplementedError("to_feather() is not implemented yet.")
+        """Write a GeoDataFrame to the Feather format.
+
+        Any geometry columns present are serialized to WKB format in the file.
+
+        Note: Feather is a single-file format with no distributed writer, so this
+        collects the entire GeoDataFrame to the driver and delegates to GeoPandas.
+        It should only be used if the resulting GeoDataFrame is expected to be small.
+
+        Requires 'pyarrow' >= 0.17.
+
+        Parameters
+        ----------
+        path : str, path object
+        index : bool, default None
+            If ``True``, always include the dataframe's index(es) as columns
+            in the file output.
+            If ``False``, the index(es) will not be written to the file.
+            If ``None``, the index(ex) will be included as columns in the file
+            output except `RangeIndex` which is stored as metadata only.
+
+            Note: Unlike in geopandas, ``None`` will include the index in the column because Sedona always
+            converts `RangeIndex` into a general `Index`.
+        compression : {'zstd', 'lz4', 'uncompressed'}, optional
+            Name of the compression to use. Use ``"uncompressed"`` for no
+            compression. By default uses LZ4 if available, otherwise uncompressed.
+        schema_version : {'0.1.0', '0.4.0', '1.0.0', '1.1.0', None}
+            GeoParquet specification version; if not provided will default to
+            latest supported stable version.
+        **kwargs
+            Additional keyword arguments passed to
+            :func:`pyarrow.feather.write_feather`.
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoDataFrame
+        >>> from shapely.geometry import Point
+        >>> gdf = GeoDataFrame({"geometry": [Point(0, 0), Point(1, 1)], "value": [1, 2]})
+        >>> gdf.to_feather("data.feather")  # doctest: +SKIP
+
+        See Also
+        --------
+        GeoDataFrame.to_parquet : write GeoDataFrame to parquet
+        GeoDataFrame.to_file : write GeoDataFrame to file
+        """
+        # Feather has no distributed writer, so we rely on GeoPandas's implementation,
+        # the same way to_arrow() does. This also gets us all of GeoPandas's kwargs for free.
+        log_advice(
+            "`to_feather` loads all data into the driver's memory. "
+            "It should only be used if the resulting geopandas GeoDataFrame is expected to be small."
+        )
+        self.to_geopandas().to_feather(
+            path,
+            index=index,
+            compression=compression,
+            schema_version=schema_version,
+            **kwargs,
+        )
 
     @property
     def type(self):
