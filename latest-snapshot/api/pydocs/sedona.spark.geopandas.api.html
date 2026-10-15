@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7536,7 +7535,50 @@ place.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoDataFrame.to_feather">
 <span class="sig-name descname"><span class="pre">to_feather</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/geopandas/geodataframe.html#GeoDataFrame.to_feather"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoDataFrame.to_feather" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Write a GeoDataFrame to the Feather format.</p>
+<p>Any geometry columns present are serialized to WKB format in the file.</p>
+<p>Note: Feather is a single-file format with no distributed writer, so this
+collects the entire GeoDataFrame to the driver and delegates to GeoPandas.
+It should only be used if the resulting GeoDataFrame is expected to be small.</p>
+<p>Requires ‘pyarrow’ &gt;= 0.17.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>, </em><em>path object</em>) – </p></li>
+<li><p><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a><em>, </em><em>default None</em>) – <p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, always include the dataframe’s index(es) as columns
+in the file output.
+If <code class="docutils literal notranslate"><span class="pre">False</span></code>, the index(es) will not be written to the file.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the index(ex) will be included as columns in the file
+output except <cite>RangeIndex</cite> which is stored as metadata only.</p>
+<p>Note: Unlike in geopandas, <code class="docutils literal notranslate"><span class="pre">None</span></code> will include the index in the column because Sedona always
+converts <cite>RangeIndex</cite> into a general <cite>Index</cite>.</p>
+</p></li>
+<li><p><strong>compression</strong> (<em>{'zstd'</em><em>, </em><em>'lz4'</em><em>, </em><em>'uncompressed'}</em><em>, </em><em>optional</em>) – Name of the compression to use. Use <code class="docutils literal notranslate"><span class="pre">&quot;uncompressed&quot;</span></code> for no
+compression. By default uses LZ4 if available, otherwise uncompressed.</p></li>
+<li><p><strong>schema_version</strong> (<em>{'0.1.0'</em><em>, </em><em>'0.4.0'</em><em>, </em><em>'1.0.0'</em><em>, </em><em>'1.1.0'</em><em>, </em><em>None}</em>) – GeoParquet specification version; if not provided will default to
+latest supported stable version.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments passed to
+<code class="xref py py-func docutils literal notranslate"><span class="pre">pyarrow.feather.write_feather()</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoDataFrame</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gdf</span> <span class="o">=</span> <span class="n">GeoDataFrame</span><span class="p">({</span><span class="s2">"geometry"</span><span class="p">:</span> <span class="p">[</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span> <span class="s2">"value"</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gdf</span><span class="o">.</span><span class="n">to_feather</span><span class="p">(</span><span class="s2">"data.feather"</span><span class="p">)</span>  
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#sedona.spark.geopandas.GeoDataFrame.to_parquet" title="sedona.spark.geopandas.GeoDataFrame.to_parquet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoDataFrame.to_parquet</span></code></a></dt><dd><p>write GeoDataFrame to parquet</p>
+</dd>
+<dt><a class="reference internal" href="#sedona.spark.geopandas.GeoDataFrame.to_file" title="sedona.spark.geopandas.GeoDataFrame.to_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoDataFrame.to_file</span></code></a></dt><dd><p>write GeoDataFrame to file</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoDataFrame.to_file">

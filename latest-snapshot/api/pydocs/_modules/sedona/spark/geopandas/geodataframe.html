@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geodataframe &mdash; Apache Sedona Python Documentation</title>
@@ -2530,7 +2529,63 @@
         <span class="n">schema_version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"to_feather() is not implemented yet."</span><span class="p">)</span></div>
+<span class="w">        </span><span class="sd">"""Write a GeoDataFrame to the Feather format.</span>
+
+<span class="sd">        Any geometry columns present are serialized to WKB format in the file.</span>
+
+<span class="sd">        Note: Feather is a single-file format with no distributed writer, so this</span>
+<span class="sd">        collects the entire GeoDataFrame to the driver and delegates to GeoPandas.</span>
+<span class="sd">        It should only be used if the resulting GeoDataFrame is expected to be small.</span>
+
+<span class="sd">        Requires 'pyarrow' &gt;= 0.17.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path : str, path object</span>
+<span class="sd">        index : bool, default None</span>
+<span class="sd">            If ``True``, always include the dataframe's index(es) as columns</span>
+<span class="sd">            in the file output.</span>
+<span class="sd">            If ``False``, the index(es) will not be written to the file.</span>
+<span class="sd">            If ``None``, the index(ex) will be included as columns in the file</span>
+<span class="sd">            output except `RangeIndex` which is stored as metadata only.</span>
+
+<span class="sd">            Note: Unlike in geopandas, ``None`` will include the index in the column because Sedona always</span>
+<span class="sd">            converts `RangeIndex` into a general `Index`.</span>
+<span class="sd">        compression : {'zstd', 'lz4', 'uncompressed'}, optional</span>
+<span class="sd">            Name of the compression to use. Use ``"uncompressed"`` for no</span>
+<span class="sd">            compression. By default uses LZ4 if available, otherwise uncompressed.</span>
+<span class="sd">        schema_version : {'0.1.0', '0.4.0', '1.0.0', '1.1.0', None}</span>
+<span class="sd">            GeoParquet specification version; if not provided will default to</span>
+<span class="sd">            latest supported stable version.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Additional keyword arguments passed to</span>
+<span class="sd">            :func:`pyarrow.feather.write_feather`.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from sedona.spark.geopandas import GeoDataFrame</span>
+<span class="sd">        &gt;&gt;&gt; from shapely.geometry import Point</span>
+<span class="sd">        &gt;&gt;&gt; gdf = GeoDataFrame({"geometry": [Point(0, 0), Point(1, 1)], "value": [1, 2]})</span>
+<span class="sd">        &gt;&gt;&gt; gdf.to_feather("data.feather")  # doctest: +SKIP</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        GeoDataFrame.to_parquet : write GeoDataFrame to parquet</span>
+<span class="sd">        GeoDataFrame.to_file : write GeoDataFrame to file</span>
+<span class="sd">        """</span>
+        <span class="c1"># Feather has no distributed writer, so we rely on GeoPandas's implementation,</span>
+        <span class="c1"># the same way to_arrow() does. This also gets us all of GeoPandas's kwargs for free.</span>
+        <span class="n">log_advice</span><span class="p">(</span>
+            <span class="s2">"`to_feather` loads all data into the driver's memory. "</span>
+            <span class="s2">"It should only be used if the resulting geopandas GeoDataFrame is expected to be small."</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">to_geopandas</span><span class="p">()</span><span class="o">.</span><span class="n">to_feather</span><span class="p">(</span>
+            <span class="n">path</span><span class="p">,</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
+            <span class="n">compression</span><span class="o">=</span><span class="n">compression</span><span class="p">,</span>
+            <span class="n">schema_version</span><span class="o">=</span><span class="n">schema_version</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
