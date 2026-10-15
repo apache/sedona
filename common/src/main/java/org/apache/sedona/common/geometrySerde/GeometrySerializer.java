@@ -437,7 +437,17 @@ public class GeometrySerializer {
     return value;
   }
 
-  private static CoordinateType getCoordinateType(Geometry geometry) {
+  /**
+   * The coordinate layout that {@link #serialize} stores for {@code geometry}. Measures are
+   * explicit sequence metadata. A Z ordinate counts when the sequence declares it or holds a
+   * non-NaN Z value, because JTS's default sequences represent ordinary XY coordinates with a NaN
+   * Z. All parts of a point, line string, polygon or multi geometry share one layout, while the
+   * members of a GeometryCollection are stored with their own layouts, so ask for each member
+   * instead.
+   *
+   * @throws IllegalArgumentException if the serializer cannot encode the geometry's layout
+   */
+  public static CoordinateType getCoordinateType(Geometry geometry) {
     CoordinateDimensions dimensions = new CoordinateDimensions();
     collectCoordinateDimensions(geometry, dimensions);
     return dimensions.coordinateType == null ? CoordinateType.XY : dimensions.coordinateType;
