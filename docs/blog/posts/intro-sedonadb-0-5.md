@@ -13,7 +13,6 @@ title: "SedonaDB 0.5.0 Release"
 
 # SedonaDB 0.5.0 Release
 
-
 The Apache Sedona community is excited to announce the release of [SedonaDB](https://sedona.apache.org/sedonadb) version 0.5.0!
 
 SedonaDB is the first open-source, single-node analytical database engine that treats spatial data as a first-class citizen. It is developed as a subproject of Apache Sedona. This post also highlights several changes from [SedonaDB 0.4.1](https://sedona.apache.org/sedonadb/latest/release-notes/#sedonadb-041), which did not receive a separate release post.
@@ -35,7 +34,6 @@ The SedonaDB 0.5.0 release features a number of exciting updates!
 
 As usual, Python users can install from PyPI:
 
-
 ```python
 # pip install --upgrade "apache-sedona[db]"
 import sedona.db
@@ -56,7 +54,6 @@ install.packages(
 
 We'll use a few example datasets from [geoarrow.org's data section](https://geoarrow.org/data):
 
-
 ```python
 cities_url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities.parquet"
 countries_url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries.parquet"
@@ -65,7 +62,6 @@ countries_url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0
 ## FileFormat reorganization
 
 Previous versions of SedonaDB could read popular spatial file formats such as [FlatGeobuf](https://flatgeobuf.org), Shapefile, and [GeoPackage](https://www.geopackage.org/) in addition to GeoParquet and Parquet. However, SQL, Python, and R used slightly different code paths, and formats such as CSV and JSON were supported in SQL but not in Python or R. In 0.5.0, all reads go through the same pathway for better consistency among bindings. For example, all of the following access the same dataset through the unified format machinery:
-
 
 ```python
 sd.read(cities_url)
@@ -80,9 +76,6 @@ sd.sql("SELECT * FROM cities")
 # sd_read(cities_url)
 # sd_read(cities_url, format = "parquet")
 ```
-
-
-
 
     ┌──────────────┬───────────────────────────────┐
     │     name     ┆            geometry           │
@@ -109,14 +102,11 @@ sd.sql("SELECT * FROM cities")
     │ Bir Lehlou   ┆ POINT(-9.6525222 26.1191667)  │
     └──────────────┴───────────────────────────────┘
 
-
-
 CSV and JSON reads are now better supported: `sd.read()` (or `sd_read()` in R) should "just work" for most common data sources.
 
 ## Python support for `DataFrame.unnest()`
 
 One of my favorite functions in R has always been tidyr's `unnest_longer()`, which in SQL is an `UNNEST` and in Python has a few names depending on which DataFrame API you're dealing with. SedonaDB's version is `unnest()`, which works nicely with `ST_Dump()` to separate multigeometries and geometry collections into one row per component geometry.
-
 
 ```python
 countries = sd.read.parquet(countries_url)
@@ -135,9 +125,6 @@ country_parts = (
     .sort(sd.col("parts").desc())
 )
 ```
-
-
-
 
     ┌─────────────────────────┬───────┐
     │        continent        ┆ parts │
@@ -160,12 +147,9 @@ country_parts = (
     │ Seven seas (open ocean) ┆     1 │
     └─────────────────────────┴───────┘
 
-
-
 ## Improved raster functionality
 
 In our [last release post](https://sedona.apache.org/latest/blog/2026/06/19/sedonadb-040-release/) we warned that we're not quite ready to announce raster support in SedonaDB. In 0.5.0, we're still not quite ready to make a splash; however, we've made substantial progress in the underlying plumbing so that one can now solve a few real-world problems. For example, you can now pass a NumPy array with bounds into a SedonaDB Raster query without copying any pixel data (in this case, using `RS_Value()` to sample it with an existing geometry column).
-
 
 ```python
 import numpy as np
@@ -182,9 +166,6 @@ t = sd.read(cities_url)
 t.mutate(raster_value=f.rst.value(raster, t.geometry)).sort("name").limit(5)
 ```
 
-
-
-
     ┌─────────────┬──────────────────────────────────────────────┬──────────────┐
     │     name    ┆                   geometry                   ┆ raster_value │
     │     utf8    ┆                   geometry                   ┆    float64   │
@@ -200,10 +181,7 @@ t.mutate(raster_value=f.rst.value(raster, t.geometry)).sort("name").limit(5)
     │ Addis Ababa ┆ POINT(38.6980586 9.0352562)                  ┆      29595.0 │
     └─────────────┴──────────────────────────────────────────────┴──────────────┘
 
-
-
 We've also implemented raster/vector joins à la Sedona Spark so that interactions between rasters, N-D arrays, and vector features can be expressed in a SedonaDB logical plan. For example, calculating the mean annual number of dry days across raster cells in each country can now be expressed with:
-
 
 ```python
 # pip install sedonadb-zarr
@@ -214,17 +192,12 @@ era5_url = "https://weathermapdata.rdrn.me/era5_2015_2020_l5.zarr/2"
 era5 = sd.read(era5_url, format="zarr", options={"arrays": ["rain_ok"]}).alias("era5")
 countries = countries.alias("countries")
 
-country_chunk_stats = (
-    era5.join(
-        countries,
-        on=f.rs_intersects(era5.raster, countries.geometry),
-    )
-    .select(
-        country=countries.name,
-        stats=(
-            era5.raster.rst.slice("year", 0).rst.zonal_stats_all(countries.geometry)
-        ),
-    )
+country_chunk_stats = era5.join(
+    countries,
+    on=f.rs_intersects(era5.raster, countries.geometry),
+).select(
+    country=countries.name,
+    stats=(era5.raster.rst.slice("year", 0).rst.zonal_stats_all(countries.geometry)),
 )
 
 country_totals = (
@@ -238,15 +211,10 @@ country_totals = (
 
 (
     country_totals.mutate(
-        mean_dry_days=(
-            country_totals.dry_day_sum / country_totals.pixel_years
-        )
+        mean_dry_days=(country_totals.dry_day_sum / country_totals.pixel_years)
     ).sort(sd.col("mean_dry_days").desc())
 )
 ```
-
-
-
 
     ┌──────────────────────┬────────────────────┬─────────────┬────────────────────┐
     │        country       ┆     dry_day_sum    ┆ pixel_years ┆    mean_dry_days   │
@@ -273,14 +241,11 @@ country_totals = (
     │ Niger                ┆ 448227.84048461914 ┆        1290 ┆ 347.46344223613886 │
     └──────────────────────┴────────────────────┴─────────────┴────────────────────┘
 
-
-
 We are well aware that this version of a zonal statistics calculation is verbose compared to dedicated one-off tools. As with the 0.4.0 release, raster and N-D array support remains a work in progress, and we're working toward a balance of flexibility, performance, and familiarity with existing interfaces such as rasterio, the GDAL command-line interface, and xarray.
 
 ## GeoPandas-compatible API coverage
 
 Over the past few releases, our fearless leader and PMC chair, [Jia Yu](https://github.com/jiayuasu), has been working toward a [GeoPandas](https://geopandas.org)-compatible API to help GeoPandas users get started with SedonaDB. The compatibility layer is still experimental but supports a number of common GeoPandas operations.
-
 
 ```python
 # pip install sedonadb-geopandas
@@ -289,15 +254,8 @@ import sedonadb_geopandas as sgpd
 countries = sgpd.GeoDataFrame(sd.read(countries_url)).to_crs("EPSG:6933")
 countries = countries[["continent", "geometry"]]
 countries["geometry"] = countries.geometry.buffer(100_000)
-(
-    countries.dissolve(by="continent")
-    .to_crs("EPSG:4326")
-    .to_geopandas()
-)
+(countries.dissolve(by="continent").to_crs("EPSG:4326").to_geopandas())
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -365,8 +323,6 @@ countries["geometry"] = countries.geometry.buffer(100_000)
   </tbody>
 </table>
 </div>
-
-
 
 Unlike GeoPandas, a `sedonadb_geopandas.GeoDataFrame` remains lazy and is materialized when required (e.g., on `.to_geopandas()`). This allows SedonaDB's optimizer to do its magic and transparently parallelize the computation; however, it does mean that row order is not guaranteed and operations that need that assumption are not supported.
 
