@@ -1016,6 +1016,20 @@ def ST_H3ToParent(
     return _call_st_function("ST_H3ToParent", args)
 
 
+@validate_argument_types
+def ST_H3ToChildren(
+    cell: Union[ColumnOrName, int], resolution: Union[ColumnOrName, int]
+) -> Column:
+    """Return the children of an H3 cell at the requested resolution.
+    :param cell: H3 cell
+    :param resolution: resolution of the child cells, from the input resolution to 15
+    :return: child H3 cells, or the input cell when the resolutions are equal
+    :rtype: List[long]
+    """
+    args = (cell, resolution)
+    return _call_st_function("ST_H3ToChildren", args)
+
+
 # =========================================================================
 # Bing Tile functions
 # =========================================================================

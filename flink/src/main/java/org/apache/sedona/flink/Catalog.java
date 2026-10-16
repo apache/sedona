@@ -111,6 +111,7 @@ public class Catalog {
       new Functions.ST_H3KRing(),
       new Functions.ST_H3ToGeom(),
       new Functions.ST_H3ToParent(),
+      new Functions.ST_H3ToChildren(),
       new Functions.ST_HilbertDistance(),
       new Functions.ST_BingTile(),
       new Functions.ST_BingTileAt(),

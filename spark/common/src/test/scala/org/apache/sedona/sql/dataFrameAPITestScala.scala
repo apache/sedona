@@ -2097,6 +2097,25 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(result.getLong(1) == 601041811137363967L)
     }
 
+    it("Passed ST_H3ToChildren") {
+      val cell = 601041811137363967L
+      val result = sparkSession
+        .sql(s"SELECT $cell AS cell, 6 AS resolution")
+        .select(
+          ST_H3ToChildren(col("cell"), col("resolution")),
+          ST_H3ToChildren(col("cell"), 6),
+          ST_H3ToChildren(cell, 6))
+        .first()
+      val children = result.getSeq[Long](0)
+      assert(children.size == 7)
+      assert(children.distinct.size == 7)
+      assert(result.getSeq[Long](1) == children)
+      assert(result.getSeq[Long](2) == children)
+      children.foreach { child =>
+        assert(org.apache.sedona.common.Functions.h3ToParent(child, 5) == cell)
+      }
+    }
+
     it("Passed ST_DistanceSphere") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('POINT (0 0)') AS geom1, ST_GeomFromWKT('POINT (90 0)') AS geom2")

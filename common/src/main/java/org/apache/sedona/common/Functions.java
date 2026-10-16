@@ -2078,6 +2078,17 @@ public class Functions {
   }
 
   /**
+   * Returns the children of an H3 cell at the requested resolution.
+   *
+   * @param cell the H3 cell
+   * @param resolution the resolution of the child cells, between the input cell's resolution and 15
+   * @return the child H3 cells, or the input cell when the resolutions are equal
+   */
+  public static Long[] h3ToChildren(long cell, int resolution) {
+    return H3Utils.h3.cellToChildren(cell, resolution).toArray(new Long[0]);
+  }
+
+  /**
    * gets the polygon for each h3 index provided
    *
    * @param cells: the set of cells

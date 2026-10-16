@@ -311,6 +311,15 @@ object st_functions {
   def ST_H3ToParent(cell: Long, resolution: Integer): Column =
     wrapExpression[ST_H3ToParent](cell, resolution)
 
+  def ST_H3ToChildren(cell: Column, resolution: Column): Column =
+    wrapExpression[ST_H3ToChildren](cell, resolution)
+
+  def ST_H3ToChildren(cell: Column, resolution: Integer): Column =
+    wrapExpression[ST_H3ToChildren](cell, resolution)
+
+  def ST_H3ToChildren(cell: Long, resolution: Integer): Column =
+    wrapExpression[ST_H3ToChildren](cell, resolution)
+
   def ST_HilbertDistance(
       geometry: Column,
       xmin: Column,

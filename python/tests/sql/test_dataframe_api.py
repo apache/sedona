@@ -2009,6 +2009,18 @@ class TestDataFrameAPI(TestBase):
         parent = df.select(stf.ST_H3ToParent("cell", 5)).first()[0]
         assert parent == 601041811137363967
 
+    def test_st_h3_to_children(self):
+        parent = 601041811137363967
+        df = self.spark.createDataFrame([(parent, 6)], ["cell", "resolution"])
+        by_name, by_column, by_literal = df.select(
+            stf.ST_H3ToChildren("cell", 6),
+            stf.ST_H3ToChildren(f.col("cell"), f.col("resolution")),
+            stf.ST_H3ToChildren(parent, 6),
+        ).first()
+        assert len(by_name) == len(set(by_name)) == 7
+        assert by_name == by_column == by_literal
+        assert df.select(stf.ST_H3ToChildren("cell", 5)).first()[0] == [parent]
+
     def test_coverage_validation_catalog_calls(self):
         rows = self.spark.createDataFrame(
             [

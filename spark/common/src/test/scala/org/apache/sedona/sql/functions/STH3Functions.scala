@@ -144,6 +144,47 @@ class STH3Functions extends TestBaseScala with Matchers with GeometrySample with
       exacts should equal(expects)
     }
 
+    it("should return child cells at the requested resolution") {
+      val parent = H3Utils.coordinateToCell(new Coordinate(1, 2), 5)
+      val children = Seq((parent, 7))
+        .toDF("cell", "resolution")
+        .select(expr("ST_H3ToChildren(cell, resolution)"))
+        .first()
+        .getSeq[Long](0)
+
+      children.size should equal(49)
+      children.distinct.size should equal(49)
+      children.foreach { child =>
+        H3Utils.h3.getResolution(child) should equal(7)
+        Functions.h3ToParent(child, 5) should equal(parent)
+      }
+      sparkSession
+        .sql(s"SELECT ST_H3ToChildren($parent, 5)")
+        .first()
+        .getSeq[Long](0) should equal(Seq(parent))
+    }
+
+    it("should return six immediate children for a pentagon") {
+      val parent = H3Utils.h3.getPentagons(5).iterator().next().longValue()
+      val children = sparkSession
+        .sql(s"SELECT ST_H3ToChildren($parent, 6)")
+        .first()
+        .getSeq[Long](0)
+      children.size should equal(6)
+      children.foreach(child => Functions.h3ToParent(child, 5) should equal(parent))
+    }
+
+    it("should propagate null inputs to ST_H3ToChildren") {
+      val result = sparkSession
+        .sql("""SELECT
+            |ST_H3ToChildren(CAST(NULL AS BIGINT), 6),
+            |ST_H3ToChildren(601041811137363967, CAST(NULL AS INT)),
+            |ST_H3ToChildren(CAST(NULL AS BIGINT), CAST(NULL AS INT))
+            |""".stripMargin)
+        .first()
+      (0 until 3).foreach(i => result.isNullAt(i) should be(true))
+    }
+
     it("should return the parent cell at the requested resolution") {
       Given("DataFrame with a valid Geometry")
       val geometryTable = Seq("POINT(1 2)").map(geom => Tuple1(wktReader.read(geom))).toDF("geom")
