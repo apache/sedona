@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import inspect
 import os
 from typing import Union
 import warnings
@@ -394,3 +395,89 @@ def read_parquet(
         warnings.warn(f"The given arguments are not supported in Sedona: {kwargs}")
 
     return read_file(path, format="geoparquet")
+
+
+def read_feather(path, columns=None, to_pandas_kwargs=None, **kwargs):
+    """
+    Load a Feather object from the file path, returning a GeoDataFrame.
+
+    .. versionadded:: 2.0.0
+
+    You can read a subset of columns in the file using the ``columns`` parameter.
+    However, the structure of the returned GeoDataFrame will depend on which
+    columns you read:
+
+    * if no geometry columns are read, this will raise a ``ValueError`` - you
+      should use the pandas `read_feather` method instead.
+    * if the primary geometry column saved to this file is not included in
+      columns, the first available geometry column will be set as the geometry
+      column of the returned GeoDataFrame.
+
+    If 'crs' key is not present in the Feather metadata associated with the
+    Feather object, it will default to "OGC:CRS84" according to the specification.
+
+    Note: Feather is a single-file format with no distributed reader, so this
+    reads the whole file into the driver's memory with GeoPandas and then
+    distributes it. It should only be used if the file is expected to be small.
+    This is the counterpart of :meth:`GeoDataFrame.to_feather`.
+
+    Requires 'pyarrow' >= 0.17.
+
+    Parameters
+    ----------
+    path : str, path object or file-like object
+        String, path object (implementing os.PathLike[str]) or file-like object
+        implementing a binary read() function. The path is read on the driver,
+        so it must be accessible from the driver.
+    columns : list-like of strings, default=None
+        If not None, only these columns will be read from the file.  If
+        the primary geometry column is not included, the first secondary
+        geometry read from the file will be set as the geometry column
+        of the returned GeoDataFrame.  If no geometry columns are present,
+        a ``ValueError`` will be raised.
+    to_pandas_kwargs : dict, optional
+        Arguments passed to the `pa.Table.to_pandas` method for non-geometry
+        columns. Requires a GeoPandas version whose ``read_feather`` accepts it.
+    **kwargs
+        Any additional kwargs passed to :func:`pyarrow.feather.read_table`.
+
+    Returns
+    -------
+    GeoDataFrame
+
+    Examples
+    --------
+    >>> from sedona.spark.geopandas import read_feather
+    >>> df = read_feather("data.feather")  # doctest: +SKIP
+
+    Specifying columns to read:
+
+    >>> df = read_feather(
+    ...     "data.feather",
+    ...     columns=["geometry", "pop_est"]
+    ... )  # doctest: +SKIP
+
+    See Also
+    --------
+    GeoDataFrame.to_feather : write GeoDataFrame to Feather
+    read_parquet : read GeoParquet with Spark's distributed reader
+    """
+    import geopandas as gpd
+
+    if to_pandas_kwargs is not None:
+        # GeoPandas added to_pandas_kwargs to read_feather after its first releases.
+        if "to_pandas_kwargs" not in inspect.signature(gpd.read_feather).parameters:
+            raise NotImplementedError(
+                "to_pandas_kwargs is not supported by the installed GeoPandas version"
+            )
+        kwargs["to_pandas_kwargs"] = to_pandas_kwargs
+
+    # Feather has no distributed reader, so we rely on GeoPandas's implementation,
+    # the same way GeoDataFrame.to_feather() does. This also keeps GeoPandas's
+    # handling of the geo metadata: the active geometry column, CRS and index.
+    log_advice(
+        "`read_feather` loads all data into the driver's memory. "
+        "It should only be used if the file is expected to be small."
+    )
+    gpd_df = gpd.read_feather(path, columns=columns, **kwargs)
+    return GeoDataFrame(gpd_df)

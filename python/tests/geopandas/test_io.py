@@ -16,6 +16,7 @@
 # under the License.
 
 import glob
+import inspect
 import json
 import os
 import sqlite3
@@ -25,11 +26,18 @@ import pytest
 import shapely
 import pandas as pd
 import geopandas as gpd
+import pyarrow as pa
 import pyarrow.parquet as pq
 import pyspark.pandas as ps
 import sedona.spark.geopandas as sgpd
 from functools import partial
-from sedona.spark.geopandas import GeoDataFrame, GeoSeries, read_file, read_parquet
+from sedona.spark.geopandas import (
+    GeoDataFrame,
+    GeoSeries,
+    read_feather,
+    read_file,
+    read_parquet,
+)
 from sedona.spark.geopandas._crs import read_crs_metadata
 from tests import tests_resource
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
@@ -483,6 +491,182 @@ class TestIO(TestGeopandasBase):
             self.check_sgpd_df_equals_gpd_df(sgpd_df, gpd_df)
         else:
             self.check_index_equal(gpd_df, pd.RangeIndex(start=0, stop=2, step=1))
+
+    #########################################################
+    # read_feather tests
+    #########################################################
+
+    def _write_gpd_feather(self, gpd_df, **kwargs):
+        temp_file_path = self._get_next_temp_file_path("feather")
+        gpd_df.to_feather(temp_file_path, **kwargs)
+        return temp_file_path
+
+    def test_read_feather(self):
+        gpd_df = gpd.GeoDataFrame(
+            {
+                "geometry": [
+                    Point(0, 0),
+                    LineString([(0, 0), (1, 1)]),
+                    Polygon([(0, 0), (1, 0), (1, 1), (0, 0)]),
+                    None,
+                ],
+                "int": [1, 2, 3, 4],
+                "str": ["a", "b", "c", "d"],
+            }
+        )
+        temp_file_path = self._write_gpd_feather(gpd_df)
+
+        sgpd_df = read_feather(temp_file_path)
+
+        assert isinstance(sgpd_df, GeoDataFrame)
+        self.check_sgpd_df_equals_gpd_df(sgpd_df, gpd.read_feather(temp_file_path))
+
+    def test_read_feather_is_exported(self):
+        assert sgpd.read_feather is read_feather
+
+    def test_read_feather_round_trips_to_feather(self):
+        sgpd_df = GeoDataFrame(
+            {"geometry": [Point(0, 0), LineString([(0, 0), (1, 1)])], "int": [1, 2]},
+            index=["a", "b"],
+        )
+        temp_file_path = self._get_next_temp_file_path("feather")
+        sgpd_df.to_feather(temp_file_path)
+
+        result = read_feather(temp_file_path)
+
+        self.check_sgpd_df_equals_gpd_df(result, sgpd_df.to_geopandas())
+
+    def test_read_feather_columns(self):
+        gpd_df = gpd.GeoDataFrame(
+            {"geometry": [Point(0, 0), Point(1, 1)], "int": [1, 2], "str": ["a", "b"]}
+        )
+        temp_file_path = self._write_gpd_feather(gpd_df)
+
+        result = read_feather(temp_file_path, columns=["geometry", "int"])
+
+        assert list(result.columns) == ["geometry", "int"]
+        self.check_sgpd_df_equals_gpd_df(result, gpd_df[["geometry", "int"]])
+
+    def test_read_feather_columns_without_primary_geometry(self):
+        # As in GeoPandas, the first geometry column read becomes the active one
+        gpd_df = gpd.GeoDataFrame(
+            {
+                "geometry": [Point(0, 0), Point(1, 1)],
+                "other": gpd.GeoSeries([Point(5, 5), Point(6, 6)]),
+                "int": [1, 2],
+            }
+        )
+        temp_file_path = self._write_gpd_feather(gpd_df)
+
+        result = read_feather(temp_file_path, columns=["int", "other"])
+        expected = gpd.read_feather(temp_file_path, columns=["int", "other"])
+
+        assert expected.geometry.name == "other"
+        assert result.geometry.name == "other"
+        self.check_sgpd_df_equals_gpd_df(result, expected)
+
+    def test_read_feather_without_geometry_columns_raises(self):
+        gpd_df = gpd.GeoDataFrame({"geometry": [Point(0, 0)], "int": [1]})
+        temp_file_path = self._write_gpd_feather(gpd_df)
+
+        with pytest.raises(ValueError):
+            read_feather(temp_file_path, columns=["int"])
+
+    def test_read_feather_missing_file_raises(self):
+        with pytest.raises((FileNotFoundError, OSError)):
+            read_feather(self._get_next_temp_file_path("feather"))
+
+    def test_read_feather_preserves_crs(self):
+        gpd_df = gpd.GeoDataFrame(
+            {"geometry": [Point(100000, 200000)], "int": [1]}, crs="EPSG:3857"
+        )
+        temp_file_path = self._write_gpd_feather(gpd_df)
+
+        assert read_feather(temp_file_path).crs == "EPSG:3857"
+
+    def test_read_feather_without_crs(self):
+        gpd_df = gpd.GeoDataFrame({"geometry": [Point(0, 0)], "int": [1]})
+        temp_file_path = self._write_gpd_feather(gpd_df)
+
+        assert read_feather(temp_file_path).crs is None
+
+    def test_read_feather_preserves_index(self):
+        gpd_df = gpd.GeoDataFrame(
+            {"geometry": [Point(0, 0), Point(1, 1)], "int": [1, 2]},
+            index=pd.Index(["a", "b"], name="key"),
+        )
+        temp_file_path = self._write_gpd_feather(gpd_df)
+
+        result = read_feather(temp_file_path)
+
+        pd.testing.assert_index_equal(
+            result.index.to_pandas().sort_values(), gpd_df.index
+        )
+
+    def test_read_feather_accepts_path_object(self):
+        import pathlib
+
+        gpd_df = gpd.GeoDataFrame({"geometry": [Point(0, 0)], "int": [1]})
+        temp_file_path = self._write_gpd_feather(gpd_df)
+
+        result = read_feather(pathlib.Path(temp_file_path))
+
+        self.check_sgpd_df_equals_gpd_df(result, gpd.read_feather(temp_file_path))
+
+    def test_read_feather_empty_file(self):
+        gpd_df = gpd.GeoDataFrame(
+            {
+                "geometry": gpd.GeoSeries([], dtype="geometry"),
+                "int": pd.Series([], dtype="int64"),
+            }
+        )
+        temp_file_path = self._write_gpd_feather(gpd_df)
+
+        result = read_feather(temp_file_path)
+
+        assert isinstance(result, GeoDataFrame)
+        assert len(result) == 0
+        assert list(result.columns) == ["geometry", "int"]
+
+    def test_read_feather_passes_kwargs_to_pyarrow(self):
+        gpd_df = gpd.GeoDataFrame({"geometry": [Point(0, 0)], "int": [1]})
+        temp_file_path = self._write_gpd_feather(gpd_df)
+
+        result = read_feather(temp_file_path, memory_map=True)
+
+        self.check_sgpd_df_equals_gpd_df(result, gpd.read_feather(temp_file_path))
+
+    @pytest.mark.skipif(
+        "to_pandas_kwargs" not in inspect.signature(gpd.read_feather).parameters,
+        reason="to_pandas_kwargs requires a newer GeoPandas",
+    )
+    def test_read_feather_to_pandas_kwargs(self):
+        gpd_df = gpd.GeoDataFrame(
+            {"geometry": [Point(0, 0), Point(1, 1)], "int": [1, 2]}
+        )
+        temp_file_path = self._write_gpd_feather(gpd_df)
+        to_pandas_kwargs = {"types_mapper": {pa.int64(): pd.Int32Dtype()}.get}
+
+        result = read_feather(temp_file_path, to_pandas_kwargs=to_pandas_kwargs)
+
+        assert str(result["int"].dtype) == "Int32"
+
+    def test_read_feather_to_pandas_kwargs_on_older_geopandas(self, monkeypatch):
+        gpd_df = gpd.GeoDataFrame({"geometry": [Point(0, 0)], "int": [1]})
+        temp_file_path = self._write_gpd_feather(gpd_df)
+        original = gpd.read_feather
+
+        def read_feather_without_to_pandas_kwargs(path, columns=None, **kwargs):
+            return original(path, columns=columns, **kwargs)
+
+        monkeypatch.setattr(gpd, "read_feather", read_feather_without_to_pandas_kwargs)
+
+        with pytest.raises(NotImplementedError, match="to_pandas_kwargs"):
+            read_feather(temp_file_path, to_pandas_kwargs={})
+        # Without to_pandas_kwargs, older GeoPandas versions still work
+        self.check_sgpd_df_equals_gpd_df(
+            read_feather(temp_file_path), original(temp_file_path)
+        )
 
     def test_to_parquet_writes_crs_of_spark_backed_frame(self):
         # The CRS is assigned on the frame while the geometries themselves carry SRID 0
