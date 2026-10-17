@@ -584,12 +584,13 @@ public class GeomUtils {
     CoordinateList newCoordinates = new CoordinateList();
 
     Coordinate c1 = coordinates[0];
-    double measure, measureRange = measureEnd - measureStart;
+    double length = 0, measure, measureRange = measureEnd - measureStart;
     int numCoordinates = coordinates.length;
 
     for (int i = 0; i < numCoordinates; i++) {
       Coordinate c2 = coordinates[i];
-      double length = c1.distance(c2);
+      length += c1.distance(c2);
+      c1 = c2;
 
       if (totalLength > 0.0) {
         measure = measureStart + measureRange * (length / totalLength);
@@ -617,7 +618,7 @@ public class GeomUtils {
     for (int i = 0; i < geom.getNumGeometries(); i++) {
       double subMeasureStart, subMeasureEnd, subLength = 0;
       LineString lineString = (LineString) geom.getGeometryN(i);
-      if (lineString.getCoordinates().length > 1) subLength = lineString.getCoordinates().length;
+      if (lineString.getCoordinates().length > 1) subLength = lineString.getLength();
 
       subMeasureStart = measureStart + measureRange * length / totalLength;
       subMeasureEnd = measureStart + measureRange * (length + subLength) / totalLength;

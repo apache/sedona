@@ -5277,6 +5277,25 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void testAddMeasureUsesSegmentLengths() throws ParseException {
+    Geometry geom = Constructors.geomFromEWKT("LINESTRING (0 0, 3 0, 3 4)");
+    assertEquals(
+        "LINESTRING M(0 0 0, 3 0 3, 3 4 7)", Functions.asWKT(Functions.addMeasure(geom, 0, 7)));
+
+    geom = Constructors.geomFromEWKT("MULTILINESTRING ((0 0, 10 0), (0 1, 10 1))");
+    assertEquals(
+        "MULTILINESTRING M((0 0 0, 10 0 10), (0 1 10, 10 1 20))",
+        Functions.asWKT(Functions.addMeasure(geom, 0, 20)));
+
+    geom =
+        Constructors.geomFromEWKT(
+            "MULTILINESTRING ZM((0 0 1 99, 3 0 5 99, 3 4 9 99), (20 0 2 99, 30 0 3 99))");
+    assertEquals(
+        "MULTILINESTRING ZM((0 0 1 17, 3 0 5 14, 3 4 9 10), (20 0 2 10, 30 0 3 0))",
+        Functions.asWKT(Functions.addMeasure(geom, 17, 0)));
+  }
+
+  @Test
   public void voronoiPolygons() {
     MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0, 0, 2, 2));
     Geometry actual1 = Functions.voronoiPolygons(multiPoint, 0, null);
