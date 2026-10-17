@@ -185,6 +185,65 @@ class STH3Functions extends TestBaseScala with Matchers with GeometrySample with
       (0 until 3).foreach(i => result.isNullAt(i) should be(true))
     }
 
+    it("should uncompact cells at mixed resolutions") {
+      val parent = H3Utils.coordinateToCell(new Coordinate(1, 2), 5)
+      val other = H3Utils.coordinateToCell(new Coordinate(10, 20), 6)
+      val cells = Seq((Seq(parent, other), 6))
+        .toDF("cells", "resolution")
+        .select(expr("ST_H3Uncompact(cells, resolution)"))
+        .first()
+        .getSeq[Long](0)
+      cells.size should equal(8)
+      cells.toSet should equal(Functions.h3ToChildren(parent, 6).toSet + other)
+
+      val pentagon = H3Utils.h3.getPentagons(5).iterator().next().longValue()
+      sparkSession
+        .sql(s"SELECT ST_H3Uncompact(array($pentagon), 7)")
+        .first()
+        .getSeq[Long](0)
+        .size should equal(41)
+    }
+
+    it("should preserve cells at the target resolution and return empty arrays") {
+      val cell = H3Utils.coordinateToCell(new Coordinate(1, 2), 5)
+      val result = sparkSession
+        .sql(s"""SELECT ST_H3Uncompact(array($cell), 5),
+             |ST_H3Uncompact(CAST(array() AS ARRAY<BIGINT>), 6)
+             |""".stripMargin)
+        .first()
+      result.getSeq[Long](0) should equal(Seq(cell))
+      result.getSeq[Long](1) should be(empty)
+    }
+
+    it("should propagate null inputs to ST_H3Uncompact") {
+      val result = sparkSession
+        .sql("""SELECT
+            |ST_H3Uncompact(CAST(NULL AS ARRAY<BIGINT>), 6),
+            |ST_H3Uncompact(array(601041811137363967L), CAST(NULL AS INT)),
+            |ST_H3Uncompact(CAST(NULL AS ARRAY<BIGINT>), CAST(NULL AS INT))
+            |""".stripMargin)
+        .first()
+      (0 until 3).foreach(i => result.isNullAt(i) should be(true))
+
+      val inputs = Seq((None, Some(6)), (Some(Seq(601041811137363967L)), None), (None, None))
+      inputs
+        .toDF("cells", "resolution")
+        .select(expr("ST_H3Uncompact(cells, resolution)"))
+        .collect()
+        .foreach(row => row.isNullAt(0) should be(true))
+    }
+
+    it("should reject a target resolution coarser than an input cell") {
+      val cell = H3Utils.coordinateToCell(new Coordinate(1, 2), 6)
+      val error = intercept[Exception] {
+        sparkSession.sql(s"SELECT ST_H3Uncompact(array($cell), 5)").collect()
+      }
+      Iterator
+        .iterate[Throwable](error)(_.getCause)
+        .takeWhile(_ != null)
+        .exists(_.isInstanceOf[com.uber.h3core.exceptions.H3Exception]) should be(true)
+    }
+
     it("should return the parent cell at the requested resolution") {
       Given("DataFrame with a valid Geometry")
       val geometryTable = Seq("POINT(1 2)").map(geom => Tuple1(wktReader.read(geom))).toDF("geom")
