@@ -51,13 +51,14 @@ import org.locationtech.jts.geom.Geometry;
  * <p>NAD grid files can be specified in PROJ strings using the +nadgrids parameter:
  *
  * <ul>
- *   <li><b>Local file</b>: "+nadgrids=/path/to/grid.gsb"
- *   <li><b>PROJ CDN</b>: "+nadgrids=@us_noaa_conus.tif" (@ prefix means optional)
+ *   <li><b>Local file</b>: "+nadgrids=/path/to/us_noaa_conus.tif"
  *   <li><b>HTTPS URL</b>: "+nadgrids=https://cdn.proj.org/us_noaa_conus.tif"
  * </ul>
  *
- * <p>Grid files with @ prefix are optional - if not found, the transformation continues without the
- * grid. Without @ prefix, the grid is mandatory and an error is thrown if not found.
+ * <p>A bare grid name such as "@us_noaa_conus.tif" is not downloaded; use the full PROJ CDN URL.
+ * Grid files with @ prefix are optional - if not found, the transformation continues without the
+ * grid and applies no datum shift. Without @ prefix, the grid is mandatory and an error is thrown
+ * if not found.
  *
  * @since 1.9.0
  */

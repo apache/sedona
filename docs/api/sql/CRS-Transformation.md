@@ -368,7 +368,7 @@ See also: [Configuration parameters](Parameter.md#crs-transformation) for the fu
 
 ## Grid File Support
 
-Grid files enable high-accuracy datum transformations, such as NAD27 to NAD83 or OSGB36 to ETRS89. Sedona supports loading grid files from multiple sources.
+Grid files enable high-accuracy datum transformations, such as NAD27 to NAD83 or OSGB36 to ETRS89.
 
 ### Grid File Sources
 
@@ -376,42 +376,58 @@ Grid files can be specified using the `+nadgrids` parameter in PROJ strings:
 
 | Source | Format | Example |
 |--------|--------|---------|
-| Local file | Absolute path | `+nadgrids=/path/to/grid.gsb` |
-| PROJ CDN | `@` prefix | `+nadgrids=@us_noaa_conus.tif` |
+| Local file | Absolute path | `+nadgrids=/path/to/us_noaa_conus.tif` |
 | HTTPS URL | Full URL | `+nadgrids=https://cdn.proj.org/us_noaa_conus.tif` |
 
-When using the `@` prefix, grid files are automatically fetched from [PROJ CDN](https://cdn.proj.org/).
+Sedona loads a grid only from a local path or a full URL. It does not download a grid from a bare file name, so `+nadgrids=@us_noaa_conus.tif` does not fetch anything. To use a grid from the [PROJ CDN](https://cdn.proj.org/), give its full URL. A local file must exist at the same path on every executor. A grid from a URL is downloaded once per executor JVM.
 
 ### Optional vs Mandatory Grids
 
-- **`@` prefix (optional)**: The transformation continues without the grid if it's unavailable. Use this when the grid improves accuracy but isn't required.
-- **No prefix (mandatory)**: An error is thrown if the grid file cannot be found.
+- **`@` prefix (optional)**: If the grid cannot be loaded, the transformation continues without it and applies no datum shift.
+- **No prefix (mandatory)**: An error is thrown if the grid cannot be loaded.
+
+### NAD27 EPSG Codes
+
+EPSG codes for NAD27, such as EPSG:4267, EPSG:26714 or the NAD27 State Plane zones like EPSG:32041, use the NAD27 datum. Its datum shift needs NADCON or NTv2 grid files, and Sedona does not ship or download them. Transformations between two NAD27 coordinate systems are exact. Transformations between NAD27 and another datum, such as WGS84 or NAD83, apply no datum shift, so the result can be off by tens of meters. For an accurate shift, give the NAD27 side as a PROJ string with the grid file:
+
+```sql
+-- NAD27 / Texas South (EPSG:32041) to WGS84 with the NADCON grid
+SELECT ST_Transform(
+    ST_Point(2200000, 400000),
+    '+proj=lcc +lat_1=27.83333333333333 +lat_2=26.16666666666667 +lat_0=25.66666666666667 +lon_0=-98.5 +x_0=609601.2192024384 +y_0=0 +ellps=clrk66 +units=us-ft +nadgrids=https://cdn.proj.org/us_noaa_conus.tif +no_defs',
+    'EPSG:4326'
+) AS transformed_point
+```
+
+Only add the grid to the NAD27 side. For a transformation between two NAD27 coordinate systems, use the EPSG codes or PROJ strings without `+nadgrids`.
+
+Alternatively, set `spark.sedona.crs.geotools` to `all`. GeoTools then performs the transformation with a datum shift from its EPSG database, which is accurate to a few meters for NAD27.
 
 ### SQL Examples with Grid Files
 
 ```sql
--- Transform NAD27 to NAD83 using PROJ CDN grid (optional)
+-- Transform NAD27 to NAD83 using a PROJ CDN grid (optional)
 SELECT ST_Transform(
     ST_GeomFromText('POINT(-122.4194 37.7749)'),
-    '+proj=longlat +datum=NAD27 +no_defs +nadgrids=@us_noaa_conus.tif',
+    '+proj=longlat +datum=NAD27 +nadgrids=@https://cdn.proj.org/us_noaa_conus.tif +no_defs',
     'EPSG:4269'
 ) AS transformed_point
 ```
 
 ```sql
--- Transform using mandatory grid file (error if not found)
+-- Transform using a mandatory local grid file (error if not found)
 SELECT ST_Transform(
     ST_GeomFromText('POINT(-122.4194 37.7749)'),
-    '+proj=longlat +datum=NAD27 +no_defs +nadgrids=us_noaa_conus.tif',
+    '+proj=longlat +datum=NAD27 +nadgrids=/path/to/us_noaa_conus.tif +no_defs',
     'EPSG:4269'
 ) AS transformed_point
 ```
 
 ```sql
--- Transform OSGB36 to ETRS89 using UK grid
+-- Transform OSGB36 to ETRS89 using the UK grid
 SELECT ST_Transform(
     ST_GeomFromText('POINT(-0.1276 51.5074)'),
-    '+proj=longlat +datum=OSGB36 +nadgrids=@uk_os_OSTN15_NTv2_OSGBtoETRS.gsb +no_defs',
+    '+proj=longlat +datum=OSGB36 +nadgrids=https://cdn.proj.org/uk_os_OSTN15_NTv2_OSGBtoETRS.tif +no_defs',
     'EPSG:4258'
 ) AS transformed_point
 ```

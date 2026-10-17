@@ -368,7 +368,7 @@ sedona.sql("""
 
 ## 网格文件支持
 
-网格文件支持高精度的基准面（datum）转换，例如 NAD27 到 NAD83 或 OSGB36 到 ETRS89。Sedona 支持从多种来源加载网格文件。
+网格文件支持高精度的基准面（datum）转换，例如 NAD27 到 NAD83 或 OSGB36 到 ETRS89。
 
 ### 网格文件来源
 
@@ -376,42 +376,58 @@ sedona.sql("""
 
 | 来源 | 格式 | 示例 |
 |--------|--------|---------|
-| 本地文件 | 绝对路径 | `+nadgrids=/path/to/grid.gsb` |
-| PROJ CDN | `@` 前缀 | `+nadgrids=@us_noaa_conus.tif` |
+| 本地文件 | 绝对路径 | `+nadgrids=/path/to/us_noaa_conus.tif` |
 | HTTPS URL | 完整 URL | `+nadgrids=https://cdn.proj.org/us_noaa_conus.tif` |
 
-使用 `@` 前缀时，网格文件会自动从 [PROJ CDN](https://cdn.proj.org/) 获取。
+Sedona 只从本地路径或完整 URL 加载网格文件，不会根据单独的文件名下载网格，因此 `+nadgrids=@us_noaa_conus.tif` 不会获取任何文件。如需使用 [PROJ CDN](https://cdn.proj.org/) 上的网格，请提供其完整 URL。本地文件必须在每个 executor 上的相同路径下存在。通过 URL 加载的网格在每个 executor JVM 中只下载一次。
 
 ### 可选网格与必需网格
 
-- **`@` 前缀（可选）**：如果该网格不可用，转换会继续进行。当网格能提升精度但并非必需时使用。
-- **无前缀（必需）**：如果找不到该网格文件，会抛出错误。
+- **`@` 前缀（可选）**：如果无法加载该网格，转换会继续进行，但不应用基准面偏移。
+- **无前缀（必需）**：如果无法加载该网格文件，会抛出错误。
+
+### NAD27 EPSG 代码
+
+NAD27 的 EPSG 代码（例如 EPSG:4267、EPSG:26714，或 EPSG:32041 等 NAD27 州平面坐标系）使用 NAD27 基准面。其基准面偏移需要 NADCON 或 NTv2 网格文件，而 Sedona 既不自带也不会下载这些文件。两个 NAD27 坐标系之间的转换是精确的。NAD27 与其他基准面（例如 WGS84 或 NAD83）之间的转换不应用基准面偏移，因此结果可能偏差数十米。如需精确的偏移，请将 NAD27 一侧写成带网格文件的 PROJ 字符串：
+
+```sql
+-- NAD27 / Texas South (EPSG:32041) to WGS84 with the NADCON grid
+SELECT ST_Transform(
+    ST_Point(2200000, 400000),
+    '+proj=lcc +lat_1=27.83333333333333 +lat_2=26.16666666666667 +lat_0=25.66666666666667 +lon_0=-98.5 +x_0=609601.2192024384 +y_0=0 +ellps=clrk66 +units=us-ft +nadgrids=https://cdn.proj.org/us_noaa_conus.tif +no_defs',
+    'EPSG:4326'
+) AS transformed_point
+```
+
+只在 NAD27 一侧添加网格文件。对于两个 NAD27 坐标系之间的转换，请使用 EPSG 代码或不带 `+nadgrids` 的 PROJ 字符串。
+
+也可以将 `spark.sedona.crs.geotools` 设置为 `all`。此时由 GeoTools 使用其 EPSG 数据库中的基准面偏移执行转换，对 NAD27 的精度可达数米。
 
 ### 使用网格文件的 SQL 示例
 
 ```sql
--- Transform NAD27 to NAD83 using PROJ CDN grid (optional)
+-- Transform NAD27 to NAD83 using a PROJ CDN grid (optional)
 SELECT ST_Transform(
     ST_GeomFromText('POINT(-122.4194 37.7749)'),
-    '+proj=longlat +datum=NAD27 +no_defs +nadgrids=@us_noaa_conus.tif',
+    '+proj=longlat +datum=NAD27 +nadgrids=@https://cdn.proj.org/us_noaa_conus.tif +no_defs',
     'EPSG:4269'
 ) AS transformed_point
 ```
 
 ```sql
--- Transform using mandatory grid file (error if not found)
+-- Transform using a mandatory local grid file (error if not found)
 SELECT ST_Transform(
     ST_GeomFromText('POINT(-122.4194 37.7749)'),
-    '+proj=longlat +datum=NAD27 +no_defs +nadgrids=us_noaa_conus.tif',
+    '+proj=longlat +datum=NAD27 +nadgrids=/path/to/us_noaa_conus.tif +no_defs',
     'EPSG:4269'
 ) AS transformed_point
 ```
 
 ```sql
--- Transform OSGB36 to ETRS89 using UK grid
+-- Transform OSGB36 to ETRS89 using the UK grid
 SELECT ST_Transform(
     ST_GeomFromText('POINT(-0.1276 51.5074)'),
-    '+proj=longlat +datum=OSGB36 +nadgrids=@uk_os_OSTN15_NTv2_OSGBtoETRS.gsb +no_defs',
+    '+proj=longlat +datum=OSGB36 +nadgrids=https://cdn.proj.org/uk_os_OSTN15_NTv2_OSGBtoETRS.tif +no_defs',
     'EPSG:4258'
 ) AS transformed_point
 ```
