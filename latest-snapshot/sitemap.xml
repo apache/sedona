@@ -1828,6 +1828,13 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/flink/Spatial-Indexing/ST_H3KRing/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/api/flink/Spatial-Indexing/ST_H3ToChildren/</loc>
+        <lastmod>2026-10-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/flink/Spatial-Indexing/ST_H3ToChildren/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/flink/Spatial-Indexing/ST_H3ToChildren/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/api/flink/Spatial-Indexing/ST_H3ToGeom/</loc>
         <lastmod>2026-10-17</lastmod>
         <changefreq>daily</changefreq>
@@ -5874,6 +5881,13 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/Spatial-Indexing/ST_H3KRing/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_H3ToChildren/</loc>
+        <lastmod>2026-10-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_H3ToChildren/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/Spatial-Indexing/ST_H3ToChildren/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_H3ToGeom/</loc>
         <lastmod>2026-10-17</lastmod>
         <changefreq>daily</changefreq>
@@ -8924,6 +8938,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/flink/Spatial-Indexing/ST_H3KRing/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/flink/Spatial-Indexing/ST_H3KRing/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/api/flink/Spatial-Indexing/ST_H3ToChildren/</loc>
+        <lastmod>2026-10-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/flink/Spatial-Indexing/ST_H3ToChildren/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/flink/Spatial-Indexing/ST_H3ToChildren/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/zh/api/flink/Spatial-Indexing/ST_H3ToGeom/</loc>
@@ -12970,6 +12991,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/Spatial-Indexing/ST_H3KRing/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/Spatial-Indexing/ST_H3KRing/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/api/sql/Spatial-Indexing/ST_H3ToChildren/</loc>
+        <lastmod>2026-10-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/Spatial-Indexing/ST_H3ToChildren/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/Spatial-Indexing/ST_H3ToChildren/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/zh/api/sql/Spatial-Indexing/ST_H3ToGeom/</loc>
