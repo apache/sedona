@@ -23,6 +23,7 @@ import static org.apache.flink.table.api.Expressions.*;
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -2379,6 +2380,45 @@ public class FunctionTest extends TestBase {
 
     Table nullTable = tableEnv.sqlQuery("SELECT ST_H3ToParent(CAST(NULL AS BIGINT), 5)");
     assertNull(first(nullTable).getField(0));
+  }
+
+  @Test
+  public void testH3ToChildren() {
+    long parent = H3Utils.coordinateToCell(new Coordinate(1, 2), 5);
+    Long[] children =
+        (Long[]) first(tableEnv.sqlQuery("SELECT ST_H3ToChildren(" + parent + ", 7)")).getField(0);
+    assertNotNull(children);
+    assertEquals(49, children.length);
+    assertEquals(49, new HashSet<>(Arrays.asList(children)).size());
+    for (long child : children) {
+      assertEquals(7, H3Utils.h3.getResolution(child));
+      assertEquals(parent, H3Utils.h3.cellToParent(child, 5));
+    }
+    assertArrayEquals(
+        new Long[] {parent},
+        (Long[]) first(tableEnv.sqlQuery("SELECT ST_H3ToChildren(" + parent + ", 5)")).getField(0));
+
+    long pentagon = H3Utils.h3.getPentagons(5).iterator().next();
+    Long[] pentagonChildren =
+        (Long[])
+            first(tableEnv.sqlQuery("SELECT ST_H3ToChildren(" + pentagon + ", 6)")).getField(0);
+    assertNotNull(pentagonChildren);
+    assertEquals(6, pentagonChildren.length);
+    for (long child : pentagonChildren) {
+      assertEquals(pentagon, H3Utils.h3.cellToParent(child, 5));
+    }
+
+    Row nulls =
+        first(
+            tableEnv.sqlQuery(
+                "SELECT ST_H3ToChildren(CAST(NULL AS BIGINT), 6), "
+                    + "ST_H3ToChildren("
+                    + parent
+                    + ", CAST(NULL AS INT)), "
+                    + "ST_H3ToChildren(CAST(NULL AS BIGINT), CAST(NULL AS INT))"));
+    for (int i = 0; i < 3; i++) {
+      assertNull(nulls.getField(i));
+    }
   }
 
   @Test

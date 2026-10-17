@@ -2440,6 +2440,27 @@ class TestPredicateJoin(TestBase):
         ).first()[0]
         assert null_parent is None
 
+    def test_st_h3_to_children(self):
+        parent = 601041811137363967
+        children = self.spark.sql(f"SELECT ST_H3ToChildren({parent}, 6)").first()[0]
+        assert isinstance(children, list)
+        assert len(children) == len(set(children)) == 7
+        assert all(isinstance(child, int) for child in children)
+        parents = self.spark.createDataFrame([(child,) for child in children], ["cell"])
+        assert all(
+            row[0] == parent
+            for row in parents.selectExpr("ST_H3ToParent(cell, 5)").collect()
+        )
+        assert self.spark.sql(f"SELECT ST_H3ToChildren({parent}, 5)").first()[0] == [
+            parent
+        ]
+        nulls = self.spark.sql(f"""
+            SELECT ST_H3ToChildren(CAST(NULL AS BIGINT), 6),
+                   ST_H3ToChildren({parent}, CAST(NULL AS INT)),
+                   ST_H3ToChildren(CAST(NULL AS BIGINT), CAST(NULL AS INT))
+        """).first()
+        assert all(value is None for value in nulls)
+
     def test_st_h3_togeom(self):
         df = self.spark.sql("""
         SELECT

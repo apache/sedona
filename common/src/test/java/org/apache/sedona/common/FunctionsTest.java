@@ -24,6 +24,7 @@ import static org.junit.Assert.*;
 
 import com.google.common.geometry.S2CellId;
 import com.google.common.math.DoubleMath;
+import com.uber.h3core.exceptions.H3Exception;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.sedona.common.geometryObjects.Box2D;
@@ -1606,6 +1607,47 @@ public class FunctionsTest extends TestBase {
     assertEquals(5, H3Utils.h3.getResolution(parent));
     assertTrue(H3Utils.h3.cellToChildren(parent, 8).contains(child));
     assertEquals(child, Functions.h3ToParent(child, 8));
+  }
+
+  @Test
+  public void h3ToChildren() {
+    long parent = H3Utils.coordinateToCell(new Coordinate(1, 2), 5);
+    for (int resolution : new int[] {6, 7}) {
+      Long[] children = Functions.h3ToChildren(parent, resolution);
+      assertEquals(resolution == 6 ? 7 : 49, children.length);
+      assertEquals(children.length, new HashSet<>(Arrays.asList(children)).size());
+      for (long child : children) {
+        assertEquals(resolution, H3Utils.h3.getResolution(child));
+        assertEquals(parent, Functions.h3ToParent(child, 5));
+      }
+    }
+    for (int resolution : new int[] {0, 5, 15}) {
+      long cell = H3Utils.coordinateToCell(new Coordinate(1, 2), resolution);
+      assertArrayEquals(new Long[] {cell}, Functions.h3ToChildren(cell, resolution));
+    }
+  }
+
+  @Test
+  public void h3ToChildrenPentagon() {
+    long parent = H3Utils.h3.getPentagons(5).iterator().next();
+    for (int resolution : new int[] {6, 7}) {
+      Long[] children = Functions.h3ToChildren(parent, resolution);
+      assertEquals(resolution == 6 ? 6 : 41, children.length);
+      assertEquals(children.length, new HashSet<>(Arrays.asList(children)).size());
+      for (long child : children) {
+        assertEquals(resolution, H3Utils.h3.getResolution(child));
+        assertEquals(parent, Functions.h3ToParent(child, 5));
+      }
+    }
+  }
+
+  @Test
+  public void h3ToChildrenInvalidResolution() {
+    long cell = H3Utils.coordinateToCell(new Coordinate(1, 2), 5);
+    for (int resolution : new int[] {-1, 16}) {
+      assertThrows(IllegalArgumentException.class, () -> Functions.h3ToChildren(cell, resolution));
+    }
+    assertThrows(H3Exception.class, () -> Functions.h3ToChildren(cell, 4));
   }
 
   @Test
