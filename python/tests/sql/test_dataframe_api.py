@@ -2021,6 +2021,19 @@ class TestDataFrameAPI(TestBase):
         assert by_name == by_column == by_literal
         assert df.select(stf.ST_H3ToChildren("cell", 5)).first()[0] == [parent]
 
+    def test_st_h3_uncompact(self):
+        parent = 601041811137363967
+        df = self.spark.createDataFrame([([parent], 6)], ["cells", "resolution"])
+        by_name, by_column, by_literal = df.select(
+            stf.ST_H3Uncompact("cells", 6),
+            stf.ST_H3Uncompact(f.col("cells"), f.col("resolution")),
+            stf.ST_H3Uncompact([parent], 6),
+        ).first()
+        assert len(by_name) == len(set(by_name)) == 7
+        assert by_name == by_column == by_literal
+        assert df.select(stf.ST_H3Uncompact("cells", 5)).first()[0] == [parent]
+        assert df.select(stf.ST_H3Uncompact([], 6)).first()[0] == []
+
     def test_coverage_validation_catalog_calls(self):
         rows = self.spark.createDataFrame(
             [

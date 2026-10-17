@@ -1030,6 +1030,20 @@ def ST_H3ToChildren(
     return _call_st_function("ST_H3ToChildren", args)
 
 
+@validate_argument_types
+def ST_H3Uncompact(
+    cells: Union[ColumnOrName, list], resolution: Union[ColumnOrName, int]
+) -> Column:
+    """Expand H3 cells to the requested resolution.
+    :param cells: H3 cells, which may have different resolutions
+    :param resolution: target resolution, at least that of every input cell and at most 15
+    :return: H3 cells at the target resolution
+    :rtype: List[long]
+    """
+    args = (cells, resolution)
+    return _call_st_function("ST_H3Uncompact", args)
+
+
 # =========================================================================
 # Bing Tile functions
 # =========================================================================

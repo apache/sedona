@@ -2974,6 +2974,18 @@ public class Functions {
     }
   }
 
+  public static class ST_H3Uncompact extends ScalarFunction {
+    @DataTypeHint(value = "ARRAY<BIGINT>")
+    public Long[] eval(
+        @DataTypeHint("ARRAY<BIGINT>") Long[] cells, @DataTypeHint("INTEGER") Integer resolution) {
+      if (cells == null || resolution == null) {
+        return null;
+      }
+      return org.apache.sedona.common.Functions.h3Uncompact(
+          Arrays.stream(cells).mapToLong(Long::longValue).toArray(), resolution);
+    }
+  }
+
   // =========================================================================
   // Bing Tile functions
   // =========================================================================
