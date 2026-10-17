@@ -97,6 +97,27 @@ class CRSTransformProj4Test extends TestBaseScala {
       assertEquals(6400228.104394391, result.getCoordinate.y, COORD_TOLERANCE)
     }
 
+    it("should transform NAD27 EPSG codes without grid files") {
+      // Sedona 1.9.1 returned POINT (NaN NaN) for every NAD27 EPSG code, including
+      // NAD27 to NAD27 (apache/sedona discussion #3466). Reference values from pyproj 3.8.0.
+      val row = sparkSession
+        .sql("""SELECT
+            ST_Transform(ST_Point(2200000, 400000), 'EPSG:32041', 'EPSG:4267'),
+            ST_Transform(ST_Point(-98.0, 27.0), 'EPSG:4267', 'EPSG:4326')""")
+        .first()
+
+      val nad27 = row.getAs[Geometry](0)
+      assertEquals(4267, nad27.getSRID)
+      assertEquals(-97.88703650736258, nad27.getCoordinate.x, 1e-9)
+      assertEquals(26.765822655699218, nad27.getCoordinate.y, 1e-9)
+
+      // No grid file is loaded, so the datum shift is skipped and the point stays put.
+      val wgs84 = row.getAs[Geometry](1)
+      assertEquals(4326, wgs84.getSRID)
+      assertEquals(-98.0, wgs84.getCoordinate.x, 0.001)
+      assertEquals(27.0, wgs84.getCoordinate.y, 0.001)
+    }
+
     it("should transform using PROJ string") {
       val projString =
         "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +no_defs"
