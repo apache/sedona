@@ -745,9 +745,9 @@ def ST_GeomCollFromText(
     return _call_constructor_function("ST_GeomCollFromText", args)
 
 
-# Automatically populate __all__
+# Export the functions defined in this module. Imported helpers, such as lit, stay out of star imports.
 __all__ = [
     name
     for name, obj in inspect.getmembers(sys.modules[__name__])
-    if inspect.isfunction(obj)
+    if inspect.isfunction(obj) and obj.__module__ == __name__
 ]
