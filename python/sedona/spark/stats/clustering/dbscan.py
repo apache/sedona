@@ -50,7 +50,7 @@ def dbscan(
         min_pts: minimum number of points parameter of DBSCAN algorithm
         geometry: name of the geometry column
         include_outliers: whether to return outlier points. If True, outliers are returned with a cluster value of -1.
-            Default is False
+            Default is True
         use_spheroid: whether to use a cartesian or spheroidal distance calculation. Default is false
         is_core_column_name: what the name of the column indicating if this is a core point should be. Default is "isCore"
         cluster_column_name: what the name of the column indicating the cluster id should be. Default is "cluster"
