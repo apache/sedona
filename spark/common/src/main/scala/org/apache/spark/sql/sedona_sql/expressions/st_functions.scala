@@ -320,6 +320,15 @@ object st_functions {
   def ST_H3ToChildren(cell: Long, resolution: Integer): Column =
     wrapExpression[ST_H3ToChildren](cell, resolution)
 
+  def ST_H3Uncompact(cells: Column, resolution: Column): Column =
+    wrapExpression[ST_H3Uncompact](cells, resolution)
+
+  def ST_H3Uncompact(cells: Column, resolution: Integer): Column =
+    wrapExpression[ST_H3Uncompact](cells, resolution)
+
+  def ST_H3Uncompact(cells: Array[Long], resolution: Integer): Column =
+    wrapExpression[ST_H3Uncompact](cells, resolution)
+
   def ST_HilbertDistance(
       geometry: Column,
       xmin: Column,

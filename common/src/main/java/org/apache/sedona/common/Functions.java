@@ -2089,6 +2089,19 @@ public class Functions {
   }
 
   /**
+   * Expands a collection of H3 cells to the requested resolution.
+   *
+   * @param cells the H3 cells, which may have different resolutions
+   * @param resolution the target resolution, at least that of every input cell and at most 15
+   * @return the H3 cells at the target resolution
+   */
+  public static Long[] h3Uncompact(long[] cells, int resolution) {
+    return H3Utils.h3
+        .uncompactCells(Arrays.stream(cells).boxed().collect(Collectors.toList()), resolution)
+        .toArray(new Long[0]);
+  }
+
+  /**
    * gets the polygon for each h3 index provided
    *
    * @param cells: the set of cells

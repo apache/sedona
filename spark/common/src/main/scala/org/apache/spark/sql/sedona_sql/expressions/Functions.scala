@@ -1743,6 +1743,14 @@ private[apache] case class ST_H3ToChildren(inputExpressions: Seq[Expression])
   }
 }
 
+private[apache] case class ST_H3Uncompact(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.h3Uncompact _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 // =========================================================================
 // Bing Tile expressions
 // =========================================================================

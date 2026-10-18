@@ -23,12 +23,15 @@ import static org.apache.flink.table.api.Expressions.*;
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.types.Row;
 import org.apache.sedona.common.geometryObjects.Box2D;
@@ -2416,6 +2419,66 @@ public class FunctionTest extends TestBase {
                     + parent
                     + ", CAST(NULL AS INT)), "
                     + "ST_H3ToChildren(CAST(NULL AS BIGINT), CAST(NULL AS INT))"));
+    for (int i = 0; i < 3; i++) {
+      assertNull(nulls.getField(i));
+    }
+  }
+
+  @Test
+  public void testH3Uncompact() {
+    long parent = H3Utils.coordinateToCell(new Coordinate(1, 2), 5);
+    long other = H3Utils.coordinateToCell(new Coordinate(10, 20), 6);
+    Long[] cells =
+        (Long[])
+            first(
+                    tableEnv.sqlQuery(
+                        "SELECT ST_H3Uncompact(cells, resolution) FROM (VALUES (ARRAY["
+                            + parent
+                            + ", "
+                            + other
+                            + "], 6)) AS input(cells, resolution)"))
+                .getField(0);
+    assertNotNull(cells);
+    assertEquals(8, cells.length);
+    Set<Long> expected = new HashSet<>(H3Utils.h3.cellToChildren(parent, 6));
+    expected.add(other);
+    assertEquals(expected, new HashSet<>(Arrays.asList(cells)));
+    assertArrayEquals(
+        new Long[] {parent},
+        (Long[])
+            first(tableEnv.sqlQuery("SELECT ST_H3Uncompact(ARRAY[" + parent + "], 5)"))
+                .getField(0));
+    assertArrayEquals(
+        new Long[0],
+        (Long[])
+            first(
+                    tableEnv
+                        .fromDataStream(
+                            env.fromCollection(
+                                Collections.singletonList(new Long[0]),
+                                Types.OBJECT_ARRAY(Types.LONG)))
+                        .select(call("ST_H3Uncompact", $("f0"), 6)))
+                .getField(0));
+
+    long pentagon = H3Utils.h3.getPentagons(5).iterator().next();
+    Long[] pentagonCells =
+        (Long[])
+            first(tableEnv.sqlQuery("SELECT ST_H3Uncompact(ARRAY[" + pentagon + "], 7)"))
+                .getField(0);
+    assertNotNull(pentagonCells);
+    assertEquals(41, pentagonCells.length);
+    for (long cell : pentagonCells) {
+      assertEquals(pentagon, H3Utils.h3.cellToParent(cell, 5));
+    }
+
+    Row nulls =
+        first(
+            tableEnv.sqlQuery(
+                "SELECT ST_H3Uncompact(CAST(NULL AS ARRAY<BIGINT>), 6), "
+                    + "ST_H3Uncompact(ARRAY["
+                    + parent
+                    + "], CAST(NULL AS INT)), "
+                    + "ST_H3Uncompact(CAST(NULL AS ARRAY<BIGINT>), CAST(NULL AS INT))"));
     for (int i = 0; i < 3; i++) {
       assertNull(nulls.getField(i));
     }

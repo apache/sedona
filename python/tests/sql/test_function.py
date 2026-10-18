@@ -2461,6 +2461,39 @@ class TestPredicateJoin(TestBase):
         """).first()
         assert all(value is None for value in nulls)
 
+    def test_st_h3_uncompact(self):
+        parent = 601041811137363967
+        children = self.spark.sql(f"SELECT ST_H3ToChildren({parent}, 6)").first()[0]
+        # Mix a resolution 6 child with a sibling's resolution 7 descendants.
+        mixed = [children[0]] + self.spark.sql(
+            f"SELECT ST_H3ToChildren({children[1]}, 7)"
+        ).first()[0]
+        result = self.spark.sql(
+            f"SELECT ST_H3Uncompact(array({','.join(map(str, mixed))}), 7)"
+        ).first()[0]
+        expected = (
+            self.spark.sql(f"SELECT ST_H3ToChildren({children[0]}, 7)").first()[0]
+            + mixed[1:]
+        )
+        assert len(result) == len(set(result)) == 14
+        assert set(result) == set(expected)
+        unchanged = self.spark.sql(
+            f"SELECT ST_H3Uncompact(array({parent}), 5)"
+        ).first()[0]
+        assert unchanged == [parent]
+        assert (
+            self.spark.sql(
+                "SELECT ST_H3Uncompact(CAST(array() AS ARRAY<BIGINT>), 6)"
+            ).first()[0]
+            == []
+        )
+        nulls = self.spark.sql(f"""
+            SELECT ST_H3Uncompact(CAST(NULL AS ARRAY<BIGINT>), 6),
+                   ST_H3Uncompact(array({parent}), CAST(NULL AS INT)),
+                   ST_H3Uncompact(CAST(NULL AS ARRAY<BIGINT>), CAST(NULL AS INT))
+        """).first()
+        assert all(value is None for value in nulls)
+
     def test_st_h3_togeom(self):
         df = self.spark.sql("""
         SELECT
