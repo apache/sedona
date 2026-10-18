@@ -17,7 +17,19 @@
 
 """module without top level imports of these names"""
 
+import importlib
+
+import pytest
+
 from tests.test_base import TestBase
+
+DATAFRAME_API_MODULES = [
+    "sedona.spark.sql.st_aggregates",
+    "sedona.spark.sql.st_constructors",
+    "sedona.spark.sql.st_functions",
+    "sedona.spark.sql.st_predicates",
+]
+DATAFRAME_API_HELPERS = {"call_sedona_function", "lit", "validate_argument_types"}
 
 
 class TestStFunctionImport(TestBase):
@@ -40,3 +52,19 @@ class TestStFunctionImport(TestBase):
         from sedona.spark import GeometryType
 
         assert isinstance(GeometryType(), UserDefinedType)
+
+
+@pytest.mark.parametrize("module_name", DATAFRAME_API_MODULES)
+def test_all_lists_only_the_functions_defined_in_the_module(module_name):
+    module = importlib.import_module(module_name)
+    assert module.__all__
+    assert DATAFRAME_API_HELPERS.isdisjoint(module.__all__)
+    for name in module.__all__:
+        assert getattr(module, name).__module__ == module_name, name
+
+
+def test_star_import_does_not_export_dataframe_api_helpers():
+    namespace = {}
+    exec("from sedona.spark import *", namespace)
+    assert "ST_Point" in namespace
+    assert DATAFRAME_API_HELPERS.isdisjoint(namespace)
