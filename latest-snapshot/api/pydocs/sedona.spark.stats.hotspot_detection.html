@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -228,10 +227,11 @@ Geographical Analysis, 24(3), 189-206. <a class="reference external" href="https
 <dd><p>Performs the Gi or Gi* statistic on the x column of the dataframe.</p>
 <p>Weights should be the neighbors of this row. The members of the weights should be comprised of structs containing a
 value column and a neighbor column. The neighbor column should be the contents of the neighbors with the same types
-as the parent row (minus neighbors). You can use <cite>wherobots.weighing.add_distance_band_column</cite> to achieve this. To
-calculate the Gi* statistic, ensure the focal observation is in the neighbors array (i.e. the row is in the weights
-column) and <cite>star=true</cite>. Significance is calculated with a z score. Permutation tests are not yet implemented and
-thus island weight does nothing. The following columns will be added: G, E[G], V[G], Z, P.</p>
+as the parent row (minus neighbors). You can use <cite>sedona.spark.stats.weighting.add_distance_band_column</cite> to
+achieve this. To calculate the Gi* statistic, ensure the focal observation is in the neighbors array (pass
+<cite>include_self=True</cite> to the weighting function) and set <cite>star=True</cite>. Significance is calculated with a z score.
+Permutation tests are not yet implemented and thus island weight does nothing. The following columns will be
+added: G, EG (the expected G), VG (the variance of G), Z, and P (1 minus the standard normal CDF of <a href="#id1"><span class="problematic" id="id2">|Z|</span></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -239,7 +239,7 @@ thus island weight does nothing. The following columns will be added: G, E[G], V
 <li><p><strong>x</strong> – The column name we want to perform hotspot analysis on</p></li>
 <li><p><strong>weights</strong> – The column name containing the neighbors array. The neighbor column should be the contents of
 the neighbors with the same types as the parent row (minus neighbors). You can use
-<cite>wherobots.weighing.add_distance_band_column</cite> to achieve this.</p></li>
+<cite>sedona.spark.stats.weighting.add_distance_band_column</cite> to achieve this.</p></li>
 <li><p><strong>permutations</strong> – Not used. Permutation tests are not supported yet. The number of permutations to use for the
 significance test.</p></li>
 <li><p><strong>star</strong> – Whether the focal observation is in the neighbors array. If true this calculates Gi*, otherwise Gi</p></li>
@@ -247,7 +247,7 @@ significance test.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A dataframe with the original columns plus the columns G, E[G], V[G], Z, P.</p>
+<dd class="field-even"><p>A dataframe with the original columns plus the columns G, EG, VG, Z, P.</p>
 </dd>
 </dl>
 </dd></dl>

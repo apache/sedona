@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -225,10 +224,13 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="sedona.spark.stats.autocorrelation.html#sedona.spark.stats.autocorrelation.moran.MoranResult"><code class="docutils literal notranslate"><span class="pre">MoranResult</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stats.autocorrelation.html#sedona.spark.stats.autocorrelation.moran.MoranResult.__init__"><code class="docutils literal notranslate"><span class="pre">MoranResult.__init__()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.stats.autocorrelation.html#sedona.spark.stats.autocorrelation.moran.MoranResult.i"><code class="docutils literal notranslate"><span class="pre">MoranResult.i</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.stats.autocorrelation.html#sedona.spark.stats.autocorrelation.moran.MoranResult.p_norm"><code class="docutils literal notranslate"><span class="pre">MoranResult.p_norm</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.stats.autocorrelation.html#sedona.spark.stats.autocorrelation.moran.MoranResult.z_norm"><code class="docutils literal notranslate"><span class="pre">MoranResult.z_norm</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stats.autocorrelation.html#sedona.spark.stats.autocorrelation.moran.MoranResult.__init__"><code class="docutils literal notranslate"><span class="pre">MoranResult.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stats.autocorrelation.html#id0"><code class="docutils literal notranslate"><span class="pre">MoranResult.i</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stats.autocorrelation.html#id1"><code class="docutils literal notranslate"><span class="pre">MoranResult.p_norm</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stats.autocorrelation.html#id2"><code class="docutils literal notranslate"><span class="pre">MoranResult.z_norm</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -279,14 +281,13 @@
 <p>Weights will always be 1.0. The dataframe should contain at least one GeometryType column. Rows must be unique. If
 one geometry column is present it will be used automatically. If two are present, the one named ‘geometry’ will be
 used. If more than one are present and neither is named ‘geometry’, the column name must be provided. The new column
-will be named ‘cluster’.</p>
+is named by result_name, ‘weights’ by default.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dataframe</strong> – DataFrame with geometry column</p></li>
 <li><p><strong>threshold</strong> – Distance threshold for considering neighbors</p></li>
-<li><p><strong>include_zero_distance_neighbors</strong> – whether to include neighbors that are 0 distance. If 0 distance neighbors are
-included and binary is false, values are infinity as per the floating point spec (divide by 0)</p></li>
+<li><p><strong>include_zero_distance_neighbors</strong> – whether to include neighbors that are 0 distance. Default is True</p></li>
 <li><p><strong>include_self</strong> – whether to include self in the list of neighbors</p></li>
 <li><p><strong>geometry</strong> – name of the geometry column</p></li>
 <li><p><strong>use_spheroid</strong> – whether to use a cartesian or spheroidal distance calculation. Default is false</p></li>
@@ -308,7 +309,7 @@ row.</p>
 <p>The dataframe should contain at least one GeometryType column. Rows must be unique. If one
 geometry column is present it will be used automatically. If two are present, the one named
 ‘geometry’ will be used. If more than one are present and neither is named ‘geometry’, the
-column name must be provided. The new column will be named ‘cluster’.</p>
+column name must be provided. The new column is named by result_name, ‘weights’ by default.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -317,7 +318,7 @@ column name must be provided. The new column will be named ‘cluster’.</p>
 <li><p><strong>binary</strong> – whether to use binary weights or inverse distance weights for neighbors (dist^alpha)</p></li>
 <li><p><strong>alpha</strong> – alpha to use for inverse distance weights ignored when binary is true</p></li>
 <li><p><strong>include_zero_distance_neighbors</strong> – whether to include neighbors that are 0 distance. If 0 distance neighbors are
-included and binary is false, values are infinity as per the floating point spec (divide by 0)</p></li>
+included, binary is false, and alpha is negative, their weight is infinite (division by zero)</p></li>
 <li><p><strong>include_self</strong> – whether to include self in the list of neighbors</p></li>
 <li><p><strong>self_weight</strong> – the value to use for the self weight</p></li>
 <li><p><strong>geometry</strong> – name of the geometry column</p></li>
@@ -339,15 +340,16 @@ included and binary is false, values are infinity as per the floating point spec
 <p>Weights will be distance^alpha. The dataframe should contain at least one GeometryType column. Rows must be unique. If
 one geometry column is present it will be used automatically. If two are present, the one named ‘geometry’ will be
 used. If more than one are present and neither is named ‘geometry’, the column name must be provided. The new column
-will be named ‘cluster’.</p>
+is named by result_name, ‘weights’ by default.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dataframe</strong> – DataFrame with geometry column</p></li>
 <li><p><strong>threshold</strong> – Distance threshold for considering neighbors</p></li>
-<li><p><strong>alpha</strong> – alpha to use for inverse distance weights. Computation is dist^alpha. Default is -1.0</p></li>
-<li><p><strong>include_zero_distance_neighbors</strong> – whether to include neighbors that are 0 distance. If 0 distance neighbors are
-included and binary is false, values are infinity as per the floating point spec (divide by 0)</p></li>
+<li><p><strong>alpha</strong> – exponent of the distance weights, computed as dist^alpha. Use a negative value, such as -1.0, for
+inverse distance weights</p></li>
+<li><p><strong>include_zero_distance_neighbors</strong> – whether to include neighbors that are 0 distance. Default is True. With a
+negative alpha, their weight is infinite (division by zero)</p></li>
 <li><p><strong>include_self</strong> – whether to include self in the list of neighbors</p></li>
 <li><p><strong>self_weight</strong> – the value to use for the self weight. Default is 1.0</p></li>
 <li><p><strong>geometry</strong> – name of the geometry column</p></li>
@@ -357,8 +359,8 @@ included and binary is false, values are infinity as per the floating point spec
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The input DataFrame with a weight column added containing neighbors and their weights (always 1) added to each
-row.</p>
+<dd class="field-even"><p>The input DataFrame with a weight column added containing neighbors and their weights (dist^alpha) added to
+each row.</p>
 </dd>
 </dl>
 </dd></dl>

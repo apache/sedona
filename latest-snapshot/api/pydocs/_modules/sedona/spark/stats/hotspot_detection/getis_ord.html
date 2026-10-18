@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.stats.hotspot_detection.getis_ord &mdash; Apache Sedona Python Documentation</title>
@@ -248,23 +247,25 @@
 
 <span class="sd">    Weights should be the neighbors of this row. The members of the weights should be comprised of structs containing a</span>
 <span class="sd">    value column and a neighbor column. The neighbor column should be the contents of the neighbors with the same types</span>
-<span class="sd">    as the parent row (minus neighbors). You can use `wherobots.weighing.add_distance_band_column` to achieve this. To</span>
-<span class="sd">    calculate the Gi* statistic, ensure the focal observation is in the neighbors array (i.e. the row is in the weights</span>
-<span class="sd">    column) and `star=true`. Significance is calculated with a z score. Permutation tests are not yet implemented and</span>
-<span class="sd">    thus island weight does nothing. The following columns will be added: G, E[G], V[G], Z, P.</span>
+<span class="sd">    as the parent row (minus neighbors). You can use `sedona.spark.stats.weighting.add_distance_band_column` to</span>
+<span class="sd">    achieve this. To calculate the Gi* statistic, ensure the focal observation is in the neighbors array (pass</span>
+<span class="sd">    `include_self=True` to the weighting function) and set `star=True`. Significance is calculated with a z score.</span>
+<span class="sd">    Permutation tests are not yet implemented and thus island weight does nothing. The following columns will be</span>
+<span class="sd">    added: G, EG (the expected G), VG (the variance of G), Z, and P (1 minus the standard normal CDF of |Z|).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        dataframe: the dataframe to perform the G statistic on</span>
 <span class="sd">        x: The column name we want to perform hotspot analysis on</span>
 <span class="sd">        weights: The column name containing the neighbors array. The neighbor column should be the contents of</span>
 <span class="sd">            the neighbors with the same types as the parent row (minus neighbors). You can use</span>
-<span class="sd">            `wherobots.weighing.add_distance_band_column` to achieve this.</span>
+<span class="sd">            `sedona.spark.stats.weighting.add_distance_band_column` to achieve this.</span>
 <span class="sd">        permutations: Not used. Permutation tests are not supported yet. The number of permutations to use for the</span>
 <span class="sd">            significance test.</span>
 <span class="sd">        star: Whether the focal observation is in the neighbors array. If true this calculates Gi*, otherwise Gi</span>
 <span class="sd">        island_weight: Not used. The weight for the simulated neighbor used for records without a neighbor in perm tests</span>
+
 <span class="sd">    Returns:</span>
-<span class="sd">        A dataframe with the original columns plus the columns G, E[G], V[G], Z, P.</span>
+<span class="sd">        A dataframe with the original columns plus the columns G, EG, VG, Z, P.</span>
 <span class="sd">    """</span>
     <span class="n">sedona</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">getActiveSession</span><span class="p">()</span>
 

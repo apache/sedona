@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.stats.autocorrelation.moran &mdash; Apache Sedona Python Documentation</title>
@@ -232,12 +231,24 @@
 
 <div class="viewcode-block" id="MoranResult"><a class="viewcode-back" href="../../../../../sedona.spark.stats.autocorrelation.html#sedona.spark.stats.autocorrelation.moran.MoranResult">[docs]</a><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MoranResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Result of the global Moran's I test.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        i: Moran's I. Values near 1 mean that similar values are close to each other, values near -1</span>
+<span class="sd">            mean that neighbors tend to have dissimilar values, and values near 0 mean that the values</span>
+<span class="sd">            are randomly distributed.</span>
+<span class="sd">        p_norm: p-value of ``z_norm`` under the normality assumption. It is two-tailed unless</span>
+<span class="sd">            ``Moran.get_global`` was called with ``two_tailed=False``.</span>
+<span class="sd">        z_norm: z-score of ``i`` under the normality assumption.</span>
+<span class="sd">    """</span>
+
     <span class="n">i</span><span class="p">:</span> <span class="nb">float</span>
     <span class="n">p_norm</span><span class="p">:</span> <span class="nb">float</span>
     <span class="n">z_norm</span><span class="p">:</span> <span class="nb">float</span></div>
 
 
 <div class="viewcode-block" id="Moran"><a class="viewcode-back" href="../../../../../sedona.spark.stats.autocorrelation.html#sedona.spark.stats.autocorrelation.moran.Moran">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Moran</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Global Moran's I spatial autocorrelation test."""</span>
 
 <div class="viewcode-block" id="Moran.get_global"><a class="viewcode-back" href="../../../../../sedona.spark.stats.autocorrelation.html#sedona.spark.stats.autocorrelation.moran.Moran.get_global">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_global</span><span class="p">(</span>
@@ -246,6 +257,22 @@
         <span class="n">id_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"id"</span><span class="p">,</span>
         <span class="n">value_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"value"</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MoranResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Computes the global Moran's I of a value column.</span>
+
+<span class="sd">        The dataframe needs an id column that uniquely identifies each row, a numeric value column, and a</span>
+<span class="sd">        column named ``weights`` that lists each row's neighbors and their weights, such as the one added by</span>
+<span class="sd">        ``sedona.spark.stats.weighting.add_distance_band_column``. Each neighbor must include the id and value</span>
+<span class="sd">        columns, so pass them to the weighting function in ``saved_attributes``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df: dataframe with the id, value, and weights columns</span>
+<span class="sd">            two_tailed: whether to return a two-tailed p-value. Default is True</span>
+<span class="sd">            id_column: name of the column that identifies each row. Default is "id"</span>
+<span class="sd">            value_column: name of the numeric column to test. Default is "value"</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A MoranResult with Moran's I and its z-score and p-value under the normality assumption.</span>
+<span class="sd">        """</span>
         <span class="n">sedona</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">getActiveSession</span><span class="p">()</span>
 
         <span class="n">_jvm</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">_jvm</span>
