@@ -182,6 +182,8 @@ make docsbuild
 
 This guide explains how Apache Sedona manages local code quality checks, formatting, and linting. To ensure a fast and consistent developer experience, we combine `uv` (a lightning-fast Python package and environment manager) with `prek` (our internal pre-commit wrapper framework) and expose everything via a simple, unified `Makefile`.
 
+`.pre-commit-config.yaml` assigns the independent, read-only linters a `priority` named after the language or domain they check (e.g. `lint-python`, `lint-yaml`, `lint-shell`, `lint-actions`, `lint-makefile`, `lint-rst`). All of these aliases resolve to the same priority value, so `prek` runs them concurrently instead of one at a time — linting different languages in parallel, as described in [issue #3080](https://github.com/apache/sedona/issues/3080). Hooks that rewrite file contents (formatters, license insertion, tab fixers, etc.) instead get explicit, strictly increasing numeric `priority` values that preserve today's sequential execution order, since several of them touch overlapping files and `prek` only guarantees correct results when hooks sharing a priority don't mutate the same files. For hook IDs that match one of `prek`'s [Built-in Fast Hooks](https://prek.j178.dev/builtin/) (such as `check-yaml`, `check-json`, `trailing-whitespace`, and `end-of-file-fixer`), `prek` automatically swaps in its native Rust implementation instead of spinning up a Python environment, no config changes required.
+
 ### Prerequisites
 
 Make sure your machine has `uv` and Python 3.8+ installed before running checks.
