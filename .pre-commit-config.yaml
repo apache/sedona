@@ -21,24 +21,13 @@ default_stages: [pre-commit, pre-push]
 default_language_version:
   python: python3
   node: 24.16.0
-# Priority-based scheduling for hook concurrency (reusable `priority`
-# aliases landed in prek 0.4.11); '0.5.1' is simply a current stable
-# release at or above that baseline.
-minimum_prek_version: '0.5.1'
-# All lint-* aliases resolve to the same priority so prek runs them
-# concurrently: independent, read-only checks across languages/domains
-# (see https://github.com/apache/sedona/issues/3080).
-#
-# Hooks that rewrite file contents (formatters, license insertion, tab
-# fixers, etc.) are given explicit, strictly increasing `priority`
-# values instead, preserving today's sequential execution order. They
-# are NOT given a shared priority/alias: several of them touch
-# overlapping files (e.g. insert-license and clang-format both rewrite
-# .c files), and prek only guarantees correct results when hooks
-# sharing a priority don't mutate the same files. They are also kept
-# as plain integers rather than implicit (position-based) priorities,
-# so inserting new hooks later in the file can never accidentally push
-# one of them into the same numeric tier as the lint-* hooks below.
+# 0.4.11 added reusable `priority` aliases, used below.
+minimum_prek_version: '0.4.11'
+# lint-* aliases share one priority so independent, read-only checks run
+# concurrently (see https://github.com/apache/sedona/issues/3080). Hooks
+# that rewrite files keep strictly increasing integer priorities instead,
+# since some of them touch the same files and prek only parallelizes
+# safely when hooks sharing a priority don't mutate the same files.
 priorities:
   lint-actions: 100
   lint-docs: 100
