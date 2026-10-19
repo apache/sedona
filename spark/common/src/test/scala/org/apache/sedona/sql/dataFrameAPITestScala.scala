@@ -2116,6 +2116,24 @@ class dataFrameAPITestScala extends TestBaseScala {
       }
     }
 
+    it("Passed ST_H3Compact") {
+      val cell = 601041811137363967L
+      val children = org.apache.sedona.common.Functions.h3ToChildren(cell, 6).map(_.longValue())
+      val result = sparkSession
+        .sql(s"SELECT ST_H3ToChildren($cell, 6) AS cells")
+        .select(ST_H3Compact(col("cells")), ST_H3Compact(children))
+        .first()
+      assert(result.getSeq[Long](0) == Seq(cell))
+      assert(result.getSeq[Long](1) == Seq(cell))
+      assert(
+        sparkSession
+          .range(1)
+          .select(ST_H3Compact(Array.empty[Long]))
+          .first()
+          .getSeq[Long](0)
+          .isEmpty)
+    }
+
     it("Passed ST_H3Uncompact") {
       val cell = 601041811137363967L
       val result = sparkSession
