@@ -2425,6 +2425,52 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testH3ToCenterChild() {
+    long parent = 601041811137363967L;
+    Row result =
+        first(
+            tableEnv.sqlQuery(
+                "SELECT ST_H3ToCenterChild(cell, resolution), ST_H3ToCenterChild(cell, 5), "
+                    + "ST_H3ToParent(ST_H3ToCenterChild(cell, 15), 5) "
+                    + "FROM (VALUES ("
+                    + parent
+                    + ", 6)) AS input(cell, resolution)"));
+    assertEquals(605545409825210367L, result.getField(0));
+    assertEquals(parent, result.getField(1));
+    assertEquals(parent, result.getField(2));
+
+    long pentagon = H3Utils.h3.getPentagons(5).iterator().next();
+    long child =
+        (Long)
+            Objects.requireNonNull(
+                first(tableEnv.sqlQuery("SELECT ST_H3ToCenterChild(" + pentagon + ", 8)"))
+                    .getField(0));
+    assertTrue(H3Utils.h3.isPentagon(child));
+    assertEquals(8, H3Utils.h3.getResolution(child));
+    assertEquals(pentagon, H3Utils.h3.cellToParent(child, 5));
+
+    Row nulls =
+        first(
+            tableEnv.sqlQuery(
+                "SELECT ST_H3ToCenterChild(CAST(NULL AS BIGINT), 6), "
+                    + "ST_H3ToCenterChild("
+                    + parent
+                    + ", CAST(NULL AS INT)), "
+                    + "ST_H3ToCenterChild(CAST(NULL AS BIGINT), CAST(NULL AS INT))"));
+    for (int i = 0; i < 3; i++) {
+      assertNull(nulls.getField(i));
+    }
+    Table nullable =
+        tableEnv.sqlQuery(
+            "SELECT ST_H3ToCenterChild(cell, resolution) "
+                + "FROM (VALUES (CAST(NULL AS BIGINT), 6), ("
+                + parent
+                + ", CAST(NULL AS INT))) AS input(cell, resolution)");
+    assertNull(first(nullable).getField(0));
+    assertNull(last(nullable).getField(0));
+  }
+
+  @Test
   public void testH3Uncompact() {
     long parent = H3Utils.coordinateToCell(new Coordinate(1, 2), 5);
     long other = H3Utils.coordinateToCell(new Coordinate(10, 20), 6);

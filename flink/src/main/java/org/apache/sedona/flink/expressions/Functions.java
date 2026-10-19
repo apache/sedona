@@ -2986,6 +2986,17 @@ public class Functions {
     }
   }
 
+  public static class ST_H3ToCenterChild extends ScalarFunction {
+    @DataTypeHint(value = "BIGINT")
+    public Long eval(
+        @DataTypeHint("BIGINT") Long cell, @DataTypeHint("INTEGER") Integer resolution) {
+      if (cell == null || resolution == null) {
+        return null;
+      }
+      return org.apache.sedona.common.Functions.h3ToCenterChild(cell, resolution);
+    }
+  }
+
   // =========================================================================
   // Bing Tile functions
   // =========================================================================

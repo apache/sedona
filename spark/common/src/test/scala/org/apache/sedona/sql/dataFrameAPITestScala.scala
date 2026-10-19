@@ -2116,6 +2116,18 @@ class dataFrameAPITestScala extends TestBaseScala {
       }
     }
 
+    it("Passed ST_H3ToCenterChild") {
+      val cell = 601041811137363967L
+      val result = sparkSession
+        .sql(s"SELECT $cell AS cell, 6 AS resolution")
+        .select(
+          ST_H3ToCenterChild(col("cell"), col("resolution")),
+          ST_H3ToCenterChild(col("cell"), 6),
+          ST_H3ToCenterChild(cell, 6))
+        .first()
+      (0 until 3).foreach(i => assert(result.getLong(i) == 605545409825210367L))
+    }
+
     it("Passed ST_H3Uncompact") {
       val cell = 601041811137363967L
       val result = sparkSession

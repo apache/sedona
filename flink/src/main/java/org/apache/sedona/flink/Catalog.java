@@ -112,6 +112,7 @@ public class Catalog {
       new Functions.ST_H3ToGeom(),
       new Functions.ST_H3ToParent(),
       new Functions.ST_H3ToChildren(),
+      new Functions.ST_H3ToCenterChild(),
       new Functions.ST_H3Uncompact(),
       new Functions.ST_HilbertDistance(),
       new Functions.ST_BingTile(),

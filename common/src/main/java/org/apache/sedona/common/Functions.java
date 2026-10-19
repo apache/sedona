@@ -2089,6 +2089,18 @@ public class Functions {
   }
 
   /**
+   * Returns the center child of an H3 cell at the requested resolution.
+   *
+   * @param cell the H3 cell
+   * @param resolution the resolution of the center child, between the input cell's resolution and
+   *     15
+   * @return the center child H3 cell, or the input cell when the resolutions are equal
+   */
+  public static long h3ToCenterChild(long cell, int resolution) {
+    return H3Utils.h3.cellToCenterChild(cell, resolution);
+  }
+
+  /**
    * Expands a collection of H3 cells to the requested resolution.
    *
    * @param cells the H3 cells, which may have different resolutions

@@ -1031,6 +1031,20 @@ def ST_H3ToChildren(
 
 
 @validate_argument_types
+def ST_H3ToCenterChild(
+    cell: Union[ColumnOrName, int], resolution: Union[ColumnOrName, int]
+) -> Column:
+    """Return the center child of an H3 cell at the requested resolution.
+    :param cell: H3 cell
+    :param resolution: resolution of the center child, from the input resolution to 15
+    :return: center child H3 cell, or the input cell when the resolutions are equal
+    :rtype: Long
+    """
+    args = (cell, resolution)
+    return _call_st_function("ST_H3ToCenterChild", args)
+
+
+@validate_argument_types
 def ST_H3Uncompact(
     cells: Union[ColumnOrName, list], resolution: Union[ColumnOrName, int]
 ) -> Column:

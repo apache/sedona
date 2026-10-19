@@ -2021,6 +2021,26 @@ class TestDataFrameAPI(TestBase):
         assert by_name == by_column == by_literal
         assert df.select(stf.ST_H3ToChildren("cell", 5)).first()[0] == [parent]
 
+    def test_st_h3_to_center_child(self):
+        parent = 601041811137363967
+        df = self.spark.createDataFrame([(parent, 6)], ["cell", "resolution"])
+        by_name, by_column, by_literal = df.select(
+            stf.ST_H3ToCenterChild("cell", 6),
+            stf.ST_H3ToCenterChild(f.col("cell"), f.col("resolution")),
+            stf.ST_H3ToCenterChild(parent, 6),
+        ).first()
+        assert by_name == by_column == by_literal == 605545409825210367
+        assert df.select(stf.ST_H3ToCenterChild("cell", 5)).first()[0] == parent
+        nullable = self.spark.createDataFrame(
+            [(None, 6), (parent, None), (None, None)], "cell long, resolution int"
+        )
+        assert all(
+            row[0] is None
+            for row in nullable.select(
+                stf.ST_H3ToCenterChild("cell", "resolution")
+            ).collect()
+        )
+
     def test_st_h3_uncompact(self):
         parent = 601041811137363967
         df = self.spark.createDataFrame([([parent], 6)], ["cells", "resolution"])
