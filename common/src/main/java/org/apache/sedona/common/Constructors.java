@@ -29,9 +29,9 @@ import org.apache.sedona.common.geometryObjects.Box3D;
 import org.apache.sedona.common.utils.FormatUtils;
 import org.apache.sedona.common.utils.GeoHashDecoder;
 import org.datasyslab.jts.io.WKBReader;
+import org.datasyslab.jts.io.WKTReader;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.gml2.GMLReader;
 import org.locationtech.jts.io.kml.KMLReader;
 import org.xml.sax.SAXException;
@@ -44,8 +44,7 @@ public class Constructors {
     if (wkt == null) {
       return null;
     }
-    GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
-    return new WKTReader(geometryFactory).read(wkt);
+    return WKTReader.forDeclaredDimensions(srid).read(wkt);
   }
 
   public static Geometry geomFromEWKT(String ewkt) throws ParseException {
@@ -65,8 +64,7 @@ public class Constructors {
         throw new ParseException("Invalid EWKT string");
       }
     }
-    GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), SRID);
-    return new WKTReader(geometryFactory).read(wkt);
+    return WKTReader.forDeclaredDimensions(SRID).read(wkt);
   }
 
   public static Geometry geomFromWKB(byte[] wkb) throws ParseException {
@@ -114,32 +112,28 @@ public class Constructors {
     if (wkt == null || !wkt.startsWith("MULTIPOINT")) {
       return null;
     }
-    GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
-    return new WKTReader(geometryFactory).read(wkt);
+    return WKTReader.forDeclaredDimensions(srid).read(wkt);
   }
 
   public static Geometry mLineFromText(String wkt, int srid) throws ParseException {
     if (wkt == null || !wkt.startsWith("MULTILINESTRING")) {
       return null;
     }
-    GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
-    return new WKTReader(geometryFactory).read(wkt);
+    return WKTReader.forDeclaredDimensions(srid).read(wkt);
   }
 
   public static Geometry mPolyFromText(String wkt, int srid) throws ParseException {
     if (wkt == null || !wkt.startsWith("MULTIPOLYGON")) {
       return null;
     }
-    GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
-    return new WKTReader(geometryFactory).read(wkt);
+    return WKTReader.forDeclaredDimensions(srid).read(wkt);
   }
 
   public static Geometry geomCollFromText(String wkt, int srid) throws ParseException {
     if (wkt == null || !wkt.startsWith("GEOMETRYCOLLECTION")) {
       return null;
     }
-    GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
-    return new WKTReader(geometryFactory).read(wkt);
+    return WKTReader.forDeclaredDimensions(srid).read(wkt);
   }
 
   /**
