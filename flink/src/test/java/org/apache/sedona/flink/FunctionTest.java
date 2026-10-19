@@ -2425,6 +2425,54 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testH3Compact() {
+    long parent = H3Utils.coordinateToCell(new Coordinate(1, 2), 5);
+    long other = H3Utils.coordinateToCell(new Coordinate(10, 20), 7);
+    Long[] children = H3Utils.h3.cellToChildren(parent, 7).toArray(new Long[0]);
+    assertArrayEquals(
+        new Long[] {parent},
+        (Long[])
+            first(tableEnv.sqlQuery("SELECT ST_H3Compact(ST_H3ToChildren(" + parent + ", 7))"))
+                .getField(0));
+
+    Long[] withOther = Arrays.copyOf(children, children.length + 1);
+    withOther[children.length] = other;
+    List<Long[]> input = Arrays.asList(withOther, Arrays.copyOf(children, 6), new Long[0]);
+    for (Long[] sample : input) {
+      Long[] cells =
+          (Long[])
+              first(
+                      tableEnv
+                          .fromDataStream(
+                              env.fromCollection(
+                                  Collections.singletonList(sample),
+                                  Types.OBJECT_ARRAY(Types.LONG)))
+                          .select(call("ST_H3Compact", $("f0"))))
+                  .getField(0);
+      Set<Long> expected =
+          sample.length == withOther.length
+              ? new HashSet<>(Arrays.asList(parent, other))
+              : new HashSet<>(Arrays.asList(sample));
+      assertNotNull(cells);
+      assertEquals(expected.size(), cells.length);
+      assertEquals(expected, new HashSet<>(Arrays.asList(cells)));
+    }
+
+    long pentagon = H3Utils.h3.getPentagons(5).iterator().next();
+    assertArrayEquals(
+        new Long[] {pentagon},
+        (Long[])
+            first(tableEnv.sqlQuery("SELECT ST_H3Compact(ST_H3ToChildren(" + pentagon + ", 7))"))
+                .getField(0));
+    assertArrayEquals(
+        new Long[] {parent},
+        (Long[])
+            first(tableEnv.sqlQuery("SELECT ST_H3Compact(ARRAY[" + parent + "])")).getField(0));
+    assertNull(
+        first(tableEnv.sqlQuery("SELECT ST_H3Compact(CAST(NULL AS ARRAY<BIGINT>))")).getField(0));
+  }
+
+  @Test
   public void testH3Uncompact() {
     long parent = H3Utils.coordinateToCell(new Coordinate(1, 2), 5);
     long other = H3Utils.coordinateToCell(new Coordinate(10, 20), 6);

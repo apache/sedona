@@ -329,6 +329,10 @@ object st_functions {
   def ST_H3Uncompact(cells: Array[Long], resolution: Integer): Column =
     wrapExpression[ST_H3Uncompact](cells, resolution)
 
+  def ST_H3Compact(cells: Column): Column = wrapExpression[ST_H3Compact](cells)
+
+  def ST_H3Compact(cells: Array[Long]): Column = wrapExpression[ST_H3Compact](cells)
+
   def ST_HilbertDistance(
       geometry: Column,
       xmin: Column,

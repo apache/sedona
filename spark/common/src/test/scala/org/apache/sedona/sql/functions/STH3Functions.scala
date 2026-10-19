@@ -185,6 +185,74 @@ class STH3Functions extends TestBaseScala with Matchers with GeometrySample with
       (0 until 3).foreach(i => result.isNullAt(i) should be(true))
     }
 
+    it("should recursively compact complete child sets and retain partial sets") {
+      val parent = H3Utils.coordinateToCell(new Coordinate(1, 2), 5)
+      val other = H3Utils.coordinateToCell(new Coordinate(10, 20), 7)
+      val children = Functions.h3ToChildren(parent, 7).map(_.longValue()).toSeq
+      val inputs = Seq(children, children :+ other, children.take(6))
+      val results = inputs
+        .map(Tuple1(_))
+        .toDF("cells")
+        .select(expr("ST_H3Compact(cells)"))
+        .collect()
+      results(0).getSeq[Long](0) should equal(Seq(parent))
+      results(1).getSeq[Long](0).size should equal(2)
+      results(1).getSeq[Long](0).toSet should equal(Set(parent, other))
+      results(2).getSeq[Long](0).size should equal(6)
+      results(2).getSeq[Long](0).toSet should equal(children.take(6).toSet)
+    }
+
+    it("should compact pentagons and round trip through ST_H3Uncompact") {
+      val pentagon = H3Utils.h3.getPentagons(5).iterator().next().longValue()
+      sparkSession
+        .sql(s"SELECT ST_H3Compact(ST_H3ToChildren($pentagon, 7))")
+        .first()
+        .getSeq[Long](0) should equal(Seq(pentagon))
+
+      val cell = H3Utils.coordinateToCell(new Coordinate(1, 2), 6)
+      val original = Functions.h3KRing(cell, 2, false).map(_.longValue()).toSeq
+      val result = Seq(Tuple1(original))
+        .toDF("cells")
+        .select(
+          expr("ST_H3Compact(cells) AS compacted"),
+          expr("ST_H3Uncompact(ST_H3Compact(cells), 6) AS restored"))
+        .first()
+      result.getSeq[Long](0).size should be < original.size
+      result.getSeq[Long](1).size should equal(original.size)
+      result.getSeq[Long](1).toSet should equal(original.toSet)
+    }
+
+    it("should preserve empty and singleton arrays and propagate nulls to ST_H3Compact") {
+      val cell = H3Utils.coordinateToCell(new Coordinate(1, 2), 15)
+      val result = sparkSession
+        .sql(s"""SELECT ST_H3Compact(array($cell)),
+          |ST_H3Compact(CAST(array() AS ARRAY<BIGINT>)),
+          |ST_H3Compact(CAST(NULL AS ARRAY<BIGINT>))
+          |""".stripMargin)
+        .first()
+      result.getSeq[Long](0) should equal(Seq(cell))
+      result.getSeq[Long](1) should be(empty)
+      result.isNullAt(2) should be(true)
+
+      Seq(Tuple1(Option.empty[Seq[Long]]), Tuple1(Some(Seq.empty[Long])))
+        .toDF("cells")
+        .select(expr("ST_H3Compact(cells)"))
+        .collect()
+        .map(row => if (row.isNullAt(0)) None else Some(row.getSeq[Long](0)))
+        .toSeq should equal(Seq(None, Some(Seq.empty[Long])))
+    }
+
+    it("should propagate H3 compaction errors") {
+      val cell = H3Utils.coordinateToCell(new Coordinate(1, 2), 6)
+      val error = intercept[Exception] {
+        sparkSession.sql(s"SELECT ST_H3Compact(array_repeat($cell, 8))").collect()
+      }
+      Iterator
+        .iterate[Throwable](error)(_.getCause)
+        .takeWhile(_ != null)
+        .exists(_.isInstanceOf[com.uber.h3core.exceptions.H3Exception]) should be(true)
+    }
+
     it("should uncompact cells at mixed resolutions") {
       val parent = H3Utils.coordinateToCell(new Coordinate(1, 2), 5)
       val other = H3Utils.coordinateToCell(new Coordinate(10, 20), 6)
