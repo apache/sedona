@@ -31,9 +31,9 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.referencing.FactoryException;
-import org.geotools.api.referencing.operation.MathTransform2D;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.geom.Geometry;
 
 public class RasterBandAccessors {
@@ -393,27 +393,32 @@ public class RasterBandAccessors {
     String datatype = RasterBandAccessors.getBandType(raster, band);
     Double noDataValue = RasterBandAccessors.getBandNoDataValue(raster, band);
 
-    // CHANGED: rasterize only the part of the raster the geometry covers
-    // Adding an arbitrary value '150' for the pixels that are under the geometry.
-    GridCoverage2D rasterizedGeom =
-        RasterConstructors.asRaster(roi, raster, datatype, allTouched, 150, null, true);
-
-    int xOffset = 0, yOffset = 0;
-    if (rasterizedGeom == null) {
-      // NEW: the geometry does not burn any pixel, so there is nothing to compute over
-      double[] empty = new double[0];
-      return Arrays.asList(new DescriptiveStatistics(empty), empty);
+    double[] md = RasterAccessors.metadata(raster);
+    ReferencedEnvelope window = Rasterization.rasterizeGeomExtent(roi, raster, md, allTouched);
+    int[] offset = null;
+    if (window != null
+        && Math.round(window.getWidth() / Math.abs(md[4])) >= 1
+        && Math.round(window.getHeight() / Math.abs(md[5])) >= 1) {
+      offset = windowOffset(raster, md, window);
     }
-    int[] offset = windowOffset(raster, rasterizedGeom); // NEW
-    if (offset == null) {
-      // NEW: fall back to the full-extent path when the window cannot be placed exactly
+
+    GridCoverage2D rasterizedGeom;
+    int xOffset = 0, yOffset = 0;
+    if (offset != null) {
+      // Adding an arbitrary value '150' for the pixels that are under the geometry.
       rasterizedGeom =
-          RasterConstructors.asRasterWithRasterExtent(roi, raster, datatype, allTouched, 150, null);
-    } else {
+          RasterConstructors.asRaster(roi, raster, datatype, allTouched, 150, null, true);
+      if (rasterizedGeom == null) {
+        // the geometry burns no pixel: same result as an all-zero full-extent raster
+        double[] empty = new double[0];
+        return Arrays.asList(new DescriptiveStatistics(empty), empty);
+      }
       xOffset = offset[0];
       yOffset = offset[1];
+    } else {
+      rasterizedGeom =
+          RasterConstructors.asRasterWithRasterExtent(roi, raster, datatype, allTouched, 150, null);
     }
-
     Raster rasterizedData = RasterUtils.getRaster(rasterizedGeom.getRenderedImage());
     int width = RasterAccessors.getWidth(rasterizedGeom),
         height = RasterAccessors.getHeight(rasterizedGeom);
@@ -455,30 +460,20 @@ public class RasterBandAccessors {
    * Returns {x, y}: the position of the window's top-left pixel inside the raster, or null if the
    * window is not exactly aligned to the raster's pixel grid or does not fit inside it.
    */
-  private static int[] windowOffset(GridCoverage2D raster, GridCoverage2D window) {
-    try {
-      MathTransform2D windowToWorld =
-          window
-              .getGridGeometry()
-              .getGridToCRS2D(org.geotools.api.metadata.spatial.PixelOrientation.CENTER);
-      MathTransform2D worldToRaster =
-          raster
-              .getGridGeometry()
-              .getGridToCRS2D(org.geotools.api.metadata.spatial.PixelOrientation.CENTER)
-              .inverse();
-      double[] pt = {0, 0}; // centre of the window's first pixel
-      windowToWorld.transform(pt, 0, pt, 0, 1);
-      worldToRaster.transform(pt, 0, pt, 0, 1);
-      int x = (int) Math.round(pt[0]), y = (int) Math.round(pt[1]);
-      if (Math.abs(pt[0] - x) > 1e-6 || Math.abs(pt[1] - y) > 1e-6) return null;
-      if (x < 0
-          || y < 0
-          || x + RasterAccessors.getWidth(window) > RasterAccessors.getWidth(raster)
-          || y + RasterAccessors.getHeight(window) > RasterAccessors.getHeight(raster)) return null;
-      return new int[] {x, y};
-    } catch (Exception e) { // TransformException, NoninvertibleTransformException
-      return null;
-    }
+  private static int[] windowOffset(GridCoverage2D raster, double[] md, ReferencedEnvelope window) {
+    // md: 4 = scaleX, 5 = scaleY, 6/7 = skew, 2/3 = raster width/height
+    if (md[6] != 0 || md[7] != 0) return null; // skewed: use the full-extent path
+    double sx = Math.abs(md[4]), sy = Math.abs(md[5]);
+    ReferencedEnvelope re = raster.getEnvelope2D();
+    double fx = (window.getMinX() - re.getMinX()) / sx;
+    // bottom-up rasters (scaleY > 0) put row 0 at the minimum Y
+    double fy =
+        md[5] > 0 ? (window.getMinY() - re.getMinY()) / sy : (re.getMaxY() - window.getMaxY()) / sy;
+    int x = (int) Math.round(fx), y = (int) Math.round(fy);
+    int w = (int) Math.round(window.getWidth() / sx), h = (int) Math.round(window.getHeight() / sy);
+    if (Math.abs(fx - x) > 1e-6 || Math.abs(fy - y) > 1e-6) return null;
+    if (x < 0 || y < 0 || x + w > (int) md[2] || y + h > (int) md[3]) return null;
+    return new int[] {x, y};
   }
 
   public static double getSummaryStats(
