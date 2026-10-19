@@ -319,6 +319,7 @@ object Catalog extends AbstractCatalog with Logging {
     function[ST_H3ToGeom](),
     function[ST_H3ToParent](),
     function[ST_H3ToChildren](),
+    function[ST_H3ToCenterChild](),
     function[ST_H3Uncompact](),
     function[ST_H3Compact](),
     function[ST_HilbertDistance](),

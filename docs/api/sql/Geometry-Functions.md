@@ -359,6 +359,7 @@ These functions work with spatial indexing systems including Bing Tiles, H3, Hil
 | [ST_H3CellIDs](Spatial-Indexing/ST_H3CellIDs.md) | `Array<Long>` | Cover the geometry by H3 cell IDs with the given resolution(level). To understand the cell statistics please refer to [H3 Doc](https://h3geo.org/docs/core-library/restable) H3 native fill functions... | v1.5.0 |
 | [ST_H3Compact](Spatial-Indexing/ST_H3Compact.md) | `Array<Long>` | Compacts H3 cells by recursively replacing complete child sets with their parents. | v2.0.0 |
 | [ST_H3KRing](Spatial-Indexing/ST_H3KRing.md) | `Array<Long>` | return the result of H3 function [gridDisk(cell, k)](https://h3geo.org/docs/api/traversal#griddisk). | v1.5.0 |
+| [ST_H3ToCenterChild](Spatial-Indexing/ST_H3ToCenterChild.md) | Long | Returns the center child of an H3 cell at the requested resolution. | v2.0.0 |
 | [ST_H3ToChildren](Spatial-Indexing/ST_H3ToChildren.md) | `Array<Long>` | Returns the children of an H3 cell at the requested resolution. | v2.0.0 |
 | [ST_H3ToGeom](Spatial-Indexing/ST_H3ToGeom.md) | `Array<Geometry>` | Return the result of H3 function [cellsToMultiPolygon(cells)](https://h3geo.org/docs/api/regions#cellstolinkedmultipolygon--cellstomultipolygon). | v1.6.0 |
 | [ST_H3ToParent](Spatial-Indexing/ST_H3ToParent.md) | Long | Returns the parent of an H3 cell at the requested resolution. | v2.0.0 |

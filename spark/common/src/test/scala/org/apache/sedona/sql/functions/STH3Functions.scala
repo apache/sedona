@@ -185,6 +185,70 @@ class STH3Functions extends TestBaseScala with Matchers with GeometrySample with
       (0 until 3).foreach(i => result.isNullAt(i) should be(true))
     }
 
+    it("should return the center child at the requested resolution") {
+      val inputs = Seq(
+        (601041811137363967L, 6, 605545409825210367L),
+        (0x85283473fffffffL, 7, 0x872834700ffffffL))
+      inputs
+        .toDF("cell", "resolution", "expected")
+        .select(
+          col("cell"),
+          col("resolution"),
+          col("expected"),
+          expr("ST_H3ToCenterChild(cell, resolution)"))
+        .collect()
+        .foreach { row =>
+          row.getLong(3) should equal(row.getLong(2))
+          H3Utils.h3.getResolution(row.getLong(3)) should equal(row.getInt(1))
+          Functions.h3ToParent(row.getLong(3), 5) should equal(row.getLong(0))
+        }
+      val result = sparkSession
+        .sql("""SELECT
+          |ST_H3ToCenterChild(601041811137363967, 5),
+          |ST_H3ToParent(ST_H3ToCenterChild(601041811137363967, 15), 5)
+          |""".stripMargin)
+        .first()
+      result.getLong(0) should equal(601041811137363967L)
+      result.getLong(1) should equal(601041811137363967L)
+    }
+
+    it("should return a pentagon center child of a pentagon") {
+      val pentagon = H3Utils.h3.getPentagons(5).iterator().next().longValue()
+      val child = sparkSession
+        .sql(s"SELECT ST_H3ToCenterChild($pentagon, 8)")
+        .first()
+        .getLong(0)
+      H3Utils.h3.isPentagon(child) should be(true)
+      H3Utils.h3.getResolution(child) should equal(8)
+      Functions.h3ToParent(child, 5) should equal(pentagon)
+    }
+
+    it("should propagate null inputs to ST_H3ToCenterChild") {
+      val result = sparkSession
+        .sql("""SELECT
+          |ST_H3ToCenterChild(CAST(NULL AS BIGINT), 6),
+          |ST_H3ToCenterChild(601041811137363967, CAST(NULL AS INT)),
+          |ST_H3ToCenterChild(CAST(NULL AS BIGINT), CAST(NULL AS INT))
+          |""".stripMargin)
+        .first()
+      (0 until 3).foreach(i => result.isNullAt(i) should be(true))
+      Seq((None, Some(6)), (Some(601041811137363967L), None), (None, None))
+        .toDF("cell", "resolution")
+        .select(expr("ST_H3ToCenterChild(cell, resolution)"))
+        .collect()
+        .foreach(row => row.isNullAt(0) should be(true))
+    }
+
+    it("should reject a center-child resolution coarser than the input cell") {
+      val error = intercept[Exception] {
+        sparkSession.sql("SELECT ST_H3ToCenterChild(601041811137363967, 4)").collect()
+      }
+      Iterator
+        .iterate[Throwable](error)(_.getCause)
+        .takeWhile(_ != null)
+        .exists(_.isInstanceOf[com.uber.h3core.exceptions.H3Exception]) should be(true)
+    }
+
     it("should recursively compact complete child sets and retain partial sets") {
       val parent = H3Utils.coordinateToCell(new Coordinate(1, 2), 5)
       val other = H3Utils.coordinateToCell(new Coordinate(10, 20), 7)

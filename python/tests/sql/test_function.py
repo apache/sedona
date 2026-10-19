@@ -2461,6 +2461,22 @@ class TestPredicateJoin(TestBase):
         """).first()
         assert all(value is None for value in nulls)
 
+    def test_st_h3_to_center_child(self):
+        parent = 601041811137363967
+        child, same, ancestor = self.spark.sql(f"""
+            SELECT ST_H3ToCenterChild({parent}, 6),
+                   ST_H3ToCenterChild({parent}, 5),
+                   ST_H3ToParent(ST_H3ToCenterChild({parent}, 15), 5)
+        """).first()
+        assert child == 605545409825210367
+        assert same == ancestor == parent
+        nulls = self.spark.sql(f"""
+            SELECT ST_H3ToCenterChild(CAST(NULL AS BIGINT), 6),
+                   ST_H3ToCenterChild({parent}, CAST(NULL AS INT)),
+                   ST_H3ToCenterChild(CAST(NULL AS BIGINT), CAST(NULL AS INT))
+        """).first()
+        assert all(value is None for value in nulls)
+
     def test_st_h3_compact(self):
         parent = 601041811137363967
         original, compacted, restored = self.spark.sql(f"""

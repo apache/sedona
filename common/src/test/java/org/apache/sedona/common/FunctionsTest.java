@@ -1651,6 +1651,58 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void h3ToCenterChild() {
+    long parent = 601041811137363967L;
+    long immediate = Functions.h3ToCenterChild(parent, 6);
+    assertEquals(605545409825210367L, immediate);
+    assertTrue(H3Utils.h3.cellToChildren(parent, 6).contains(immediate));
+    for (int resolution : new int[] {6, 8, 15}) {
+      long child = Functions.h3ToCenterChild(parent, resolution);
+      assertEquals(resolution, H3Utils.h3.getResolution(child));
+      assertEquals(parent, Functions.h3ToParent(child, 5));
+      assertEquals(child, Functions.h3ToCenterChild(immediate, resolution));
+    }
+    // H3's documented center-child example, including a skip of two resolutions.
+    assertEquals(0x872834700ffffffL, Functions.h3ToCenterChild(0x85283473fffffffL, 7));
+  }
+
+  @Test
+  public void h3ToCenterChildPentagon() {
+    for (long pentagon : H3Utils.h3.getPentagons(5)) {
+      for (int resolution : new int[] {6, 8, 15}) {
+        long child = Functions.h3ToCenterChild(pentagon, resolution);
+        assertEquals(resolution, H3Utils.h3.getResolution(child));
+        assertTrue(H3Utils.h3.isPentagon(child));
+        assertEquals(pentagon, Functions.h3ToParent(child, 5));
+      }
+    }
+  }
+
+  @Test
+  public void h3ToCenterChildEqualResolutionAndBoundaries() {
+    for (int resolution : new int[] {0, 5, 15}) {
+      long cell = H3Utils.coordinateToCell(new Coordinate(1, 2), resolution);
+      assertEquals(cell, Functions.h3ToCenterChild(cell, resolution));
+    }
+    for (int resolution : new int[] {0, 14}) {
+      long cell = H3Utils.coordinateToCell(new Coordinate(1, 2), resolution);
+      long child = Functions.h3ToCenterChild(cell, resolution + 1);
+      assertEquals(resolution + 1, H3Utils.h3.getResolution(child));
+      assertEquals(cell, Functions.h3ToParent(child, resolution));
+    }
+  }
+
+  @Test
+  public void h3ToCenterChildInvalidResolution() {
+    long cell = H3Utils.coordinateToCell(new Coordinate(1, 2), 5);
+    for (int resolution : new int[] {-1, 16}) {
+      assertThrows(
+          IllegalArgumentException.class, () -> Functions.h3ToCenterChild(cell, resolution));
+    }
+    assertThrows(H3Exception.class, () -> Functions.h3ToCenterChild(cell, 4));
+  }
+
+  @Test
   public void h3CompactRecursive() {
     long parent = H3Utils.coordinateToCell(new Coordinate(1, 2), 5);
     for (int resolution : new int[] {6, 7}) {
