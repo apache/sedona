@@ -377,41 +377,40 @@ Grid files can be specified using the `+nadgrids` parameter in PROJ strings:
 | Source | Format | Example |
 |--------|--------|---------|
 | Local file | Absolute path | `+nadgrids=/path/to/grid.gsb` |
-| PROJ CDN | `@` prefix | `+nadgrids=@us_noaa_conus.tif` |
 | HTTPS URL | Full URL | `+nadgrids=https://cdn.proj.org/us_noaa_conus.tif` |
 
-When using the `@` prefix, grid files are automatically fetched from [PROJ CDN](https://cdn.proj.org/).
+Only a local file path or a full HTTPS URL (such as from [PROJ CDN](https://cdn.proj.org/)) will load a grid. Sedona does not automatically download grid files by bare filename.
 
 ### Optional vs Mandatory Grids
 
-- **`@` prefix (optional)**: The transformation continues without the grid if it's unavailable. Use this when the grid improves accuracy but isn't required.
-- **No prefix (mandatory)**: An error is thrown if the grid file cannot be found.
+- **`@` prefix (optional)**: The transformation continues without the grid if it's unavailable. Use this when the grid improves accuracy but isn't strictly required.
+- **No prefix (mandatory)**: An error is thrown if the grid file cannot be found or loaded.
 
 ### SQL Examples with Grid Files
 
 ```sql
--- Transform NAD27 to NAD83 using PROJ CDN grid (optional)
+-- Transform NAD27 to NAD83 using remote grid file URL (optional with @)
 SELECT ST_Transform(
     ST_GeomFromText('POINT(-122.4194 37.7749)'),
-    '+proj=longlat +datum=NAD27 +no_defs +nadgrids=@us_noaa_conus.tif',
+    '+proj=longlat +datum=NAD27 +no_defs +nadgrids=@https://cdn.proj.org/us_noaa_conus.tif',
     'EPSG:4269'
 ) AS transformed_point
 ```
 
 ```sql
--- Transform using mandatory grid file (error if not found)
+-- Transform using mandatory grid file URL (error if not found or unreachable)
 SELECT ST_Transform(
     ST_GeomFromText('POINT(-122.4194 37.7749)'),
-    '+proj=longlat +datum=NAD27 +no_defs +nadgrids=us_noaa_conus.tif',
+    '+proj=longlat +datum=NAD27 +no_defs +nadgrids=https://cdn.proj.org/us_noaa_conus.tif',
     'EPSG:4269'
 ) AS transformed_point
 ```
 
 ```sql
--- Transform OSGB36 to ETRS89 using UK grid
+-- Transform OSGB36 to ETRS89 using local UK grid file
 SELECT ST_Transform(
     ST_GeomFromText('POINT(-0.1276 51.5074)'),
-    '+proj=longlat +datum=OSGB36 +nadgrids=@uk_os_OSTN15_NTv2_OSGBtoETRS.gsb +no_defs',
+    '+proj=longlat +datum=OSGB36 +nadgrids=/path/to/uk_os_OSTN15_NTv2_OSGBtoETRS.gsb +no_defs',
     'EPSG:4258'
 ) AS transformed_point
 ```

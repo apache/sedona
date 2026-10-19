@@ -24,7 +24,7 @@ import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicInteger
 import org.apache.spark.sql.functions.lit
 import org.apache.spark.sql.sedona_sql.expressions.st_functions._
-import org.junit.Assert.{assertEquals, assertNotNull, assertTrue}
+import org.junit.Assert.{assertEquals, assertFalse, assertNotNull, assertTrue}
 import org.locationtech.jts.geom.Geometry
 
 /**
@@ -95,6 +95,32 @@ class CRSTransformProj4Test extends TestBaseScala {
       // projection-algorithm differences while guarding against the reported 180-metre error.
       assertEquals(320728.44351324334, result.getCoordinate.x, COORD_TOLERANCE)
       assertEquals(6400228.104394391, result.getCoordinate.y, COORD_TOLERANCE)
+    }
+
+    it("should transform NAD27 coordinate systems without returning NaN (GH-3472)") {
+      // EPSG:32041 (NAD27 / Texas South Central) to EPSG:4267 (NAD27)
+      // Both source and target are NAD27, so transform does not require datum shift
+      val result1 = sparkSession
+        .sql("SELECT ST_Transform(ST_Point(2200000, 400000), 'EPSG:32041', 'EPSG:4267')")
+        .first()
+        .getAs[Geometry](0)
+
+      assertNotNull(result1)
+      assertEquals(4267, result1.getSRID)
+      assertFalse(java.lang.Double.isNaN(result1.getCoordinate.x))
+      assertFalse(java.lang.Double.isNaN(result1.getCoordinate.y))
+
+      // EPSG:4267 (NAD27) to EPSG:4326 (WGS84)
+      // When no grid file is loaded, proj4sedona 0.1.7 skips the datum shift rather than returning NaN
+      val result2 = sparkSession
+        .sql("SELECT ST_Transform(ST_Point(-98, 27), 'EPSG:4267', 'EPSG:4326')")
+        .first()
+        .getAs[Geometry](0)
+
+      assertNotNull(result2)
+      assertEquals(4326, result2.getSRID)
+      assertFalse(java.lang.Double.isNaN(result2.getCoordinate.x))
+      assertFalse(java.lang.Double.isNaN(result2.getCoordinate.y))
     }
 
     it("should transform using PROJ string") {

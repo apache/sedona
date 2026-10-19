@@ -377,41 +377,40 @@ sedona.sql("""
 | 来源 | 格式 | 示例 |
 |--------|--------|---------|
 | 本地文件 | 绝对路径 | `+nadgrids=/path/to/grid.gsb` |
-| PROJ CDN | `@` 前缀 | `+nadgrids=@us_noaa_conus.tif` |
 | HTTPS URL | 完整 URL | `+nadgrids=https://cdn.proj.org/us_noaa_conus.tif` |
 
-使用 `@` 前缀时，网格文件会自动从 [PROJ CDN](https://cdn.proj.org/) 获取。
+仅支持通过本地文件路径或完整 HTTPS URL（如来自 [PROJ CDN](https://cdn.proj.org/)）加载网格。Sedona 不会自动通过简短文件名下载网格文件。
 
 ### 可选网格与必需网格
 
 - **`@` 前缀（可选）**：如果该网格不可用，转换会继续进行。当网格能提升精度但并非必需时使用。
-- **无前缀（必需）**：如果找不到该网格文件，会抛出错误。
+- **无前缀（必需）**：如果找不到或无法加载该网格文件，会抛出错误。
 
 ### 使用网格文件的 SQL 示例
 
 ```sql
--- Transform NAD27 to NAD83 using PROJ CDN grid (optional)
+-- Transform NAD27 to NAD83 using remote grid file URL (optional with @)
 SELECT ST_Transform(
     ST_GeomFromText('POINT(-122.4194 37.7749)'),
-    '+proj=longlat +datum=NAD27 +no_defs +nadgrids=@us_noaa_conus.tif',
+    '+proj=longlat +datum=NAD27 +no_defs +nadgrids=@https://cdn.proj.org/us_noaa_conus.tif',
     'EPSG:4269'
 ) AS transformed_point
 ```
 
 ```sql
--- Transform using mandatory grid file (error if not found)
+-- Transform using mandatory grid file URL (error if not found or unreachable)
 SELECT ST_Transform(
     ST_GeomFromText('POINT(-122.4194 37.7749)'),
-    '+proj=longlat +datum=NAD27 +no_defs +nadgrids=us_noaa_conus.tif',
+    '+proj=longlat +datum=NAD27 +no_defs +nadgrids=https://cdn.proj.org/us_noaa_conus.tif',
     'EPSG:4269'
 ) AS transformed_point
 ```
 
 ```sql
--- Transform OSGB36 to ETRS89 using UK grid
+-- Transform OSGB36 to ETRS89 using local UK grid file
 SELECT ST_Transform(
     ST_GeomFromText('POINT(-0.1276 51.5074)'),
-    '+proj=longlat +datum=OSGB36 +nadgrids=@uk_os_OSTN15_NTv2_OSGBtoETRS.gsb +no_defs',
+    '+proj=longlat +datum=OSGB36 +nadgrids=/path/to/uk_os_OSTN15_NTv2_OSGBtoETRS.gsb +no_defs',
     'EPSG:4258'
 ) AS transformed_point
 ```
