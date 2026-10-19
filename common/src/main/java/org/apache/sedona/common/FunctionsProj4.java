@@ -58,7 +58,11 @@ import org.locationtech.jts.geom.Geometry;
  * <p>A bare grid name such as "@us_noaa_conus.tif" is not downloaded; use the full PROJ CDN URL.
  * Grid files with @ prefix are optional - if not found, the transformation continues without the
  * grid and applies no datum shift. Without @ prefix, the grid is mandatory and an error is thrown
- * if not found.
+ * if not found. A point outside every loaded grid cannot be transformed.
+ *
+ * <p>NAD27 EPSG codes use the NAD27 datum, whose grids are not loaded unless given as above.
+ * Without them, a transformation between NAD27 and another datum uses the EPSG:4267 Helmert shift
+ * (-8,160,176), a few meters from the grid result in the contiguous US.
  *
  * @since 1.9.0
  */
@@ -206,7 +210,9 @@ public class FunctionsProj4 {
    *     use geometry's SRID
    * @param targetCRS Target CRS definition (EPSG code, WKT, PROJ string, or PROJJSON)
    * @return The transformed geometry with SRID set to the target CRS EPSG code (if identifiable)
-   * @throws IllegalArgumentException if source CRS is null and geometry has no SRID
+   * @throws IllegalArgumentException if source CRS is null and geometry has no SRID, or if a
+   *     coordinate cannot be transformed, for example a pole to EPSG:3857 or a point outside every
+   *     loaded grid
    */
   public static Geometry transform(Geometry geometry, String sourceCRS, String targetCRS) {
     if (geometry == null) {

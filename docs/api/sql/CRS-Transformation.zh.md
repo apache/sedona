@@ -386,9 +386,11 @@ Sedona 只从本地路径或完整 URL 加载网格文件，不会根据单独�
 - **`@` 前缀（可选）**：如果无法加载该网格，转换会继续进行，但不应用基准面偏移。
 - **无前缀（必需）**：如果无法加载该网格文件，会抛出错误。
 
+位于所有已加载网格之外的点无法转换，`ST_Transform` 会抛出错误。
+
 ### NAD27 EPSG 代码
 
-NAD27 的 EPSG 代码（例如 EPSG:4267、EPSG:26714，或 EPSG:32041 等 NAD27 州平面坐标系）使用 NAD27 基准面。其基准面偏移需要 NADCON 或 NTv2 网格文件，而 Sedona 既不自带也不会下载这些文件。两个 NAD27 坐标系之间的转换是精确的。NAD27 与其他基准面（例如 WGS84 或 NAD83）之间的转换不应用基准面偏移，因此结果可能偏差数十米。如需精确的偏移，请将 NAD27 一侧写成带网格文件的 PROJ 字符串：
+NAD27 的 EPSG 代码（例如 EPSG:4267、EPSG:26714，或 EPSG:32041 等 NAD27 州平面坐标系）使用 NAD27 基准面。其最精确的基准面偏移需要 NADCON 或 NTv2 网格文件，而 Sedona 既不自带也不会下载这些文件。没有网格文件时，NAD27 与其他基准面（例如 WGS84 或 NAD83）之间的转换使用 EPSG:4267 的 Helmert 偏移（-8、160、176 米）。在美国本土，结果与网格结果相差数米，例如在得克萨斯州南部为 2.5 米，在旧金山为 4 米。两个 NAD27 坐标系之间的转换不应用基准面偏移，结果是精确的。如需网格精度，请将 NAD27 一侧写成带网格文件的 PROJ 字符串：
 
 ```sql
 -- NAD27 / Texas South (EPSG:32041) to WGS84 with the NADCON grid
@@ -400,8 +402,6 @@ SELECT ST_Transform(
 ```
 
 只在 NAD27 一侧添加网格文件。对于两个 NAD27 坐标系之间的转换，请使用 EPSG 代码或不带 `+nadgrids` 的 PROJ 字符串。
-
-也可以将 `spark.sedona.crs.geotools` 设置为 `all`。此时由 GeoTools 使用其 EPSG 数据库中的基准面偏移执行转换，对 NAD27 的精度可达数米。
 
 ### 使用网格文件的 SQL 示例
 
@@ -431,6 +431,18 @@ SELECT ST_Transform(
     'EPSG:4258'
 ) AS transformed_point
 ```
+
+## 无法转换的点
+
+如果某个坐标无法转换，`ST_Transform` 会抛出错误，查询随之失败。例如，Web Mercator（EPSG:3857）无法表示两极，因此纬度为 90 或 -90 的点会失败，GeoTools 也是如此。位于 `+nadgrids` 列表中所有已加载网格之外的点同样会失败。Sedona 1.9.0 和 1.9.1 对这类点返回的是 `NaN` 坐标。如需跳过这些几何对象，请在转换前将其过滤掉：
+
+```sql
+SELECT ST_Transform(geom, 'EPSG:4326', 'EPSG:3857') AS transformed
+FROM geometries
+WHERE ST_YMin(geom) > -90 AND ST_YMax(geom) < 90
+```
+
+少数投影对某些点会返回无穷大或 `NaN` 坐标而不报告错误，例如立体投影中心的对跖点。`ST_Transform` 会原样返回这些坐标。
 
 ## 坐标顺序
 

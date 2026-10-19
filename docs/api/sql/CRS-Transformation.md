@@ -386,9 +386,11 @@ Sedona loads a grid only from a local path or a full URL. It does not download a
 - **`@` prefix (optional)**: If the grid cannot be loaded, the transformation continues without it and applies no datum shift.
 - **No prefix (mandatory)**: An error is thrown if the grid cannot be loaded.
 
+A point outside every loaded grid cannot be transformed, and `ST_Transform` raises an error.
+
 ### NAD27 EPSG Codes
 
-EPSG codes for NAD27, such as EPSG:4267, EPSG:26714 or the NAD27 State Plane zones like EPSG:32041, use the NAD27 datum. Its datum shift needs NADCON or NTv2 grid files, and Sedona does not ship or download them. Transformations between two NAD27 coordinate systems are exact. Transformations between NAD27 and another datum, such as WGS84 or NAD83, apply no datum shift, so the result can be off by tens of meters. For an accurate shift, give the NAD27 side as a PROJ string with the grid file:
+EPSG codes for NAD27, such as EPSG:4267, EPSG:26714 or the NAD27 State Plane zones like EPSG:32041, use the NAD27 datum. Its most accurate datum shift needs NADCON or NTv2 grid files, and Sedona does not ship or download them. Without a grid, a transformation between NAD27 and another datum, such as WGS84 or NAD83, uses the EPSG:4267 Helmert shift (-8, 160, 176 m). In the contiguous US, the result is a few meters from the grid result, for example 2.5 m in south Texas and 4 m in San Francisco. Transformations between two NAD27 coordinate systems apply no datum shift and are exact. For grid accuracy, give the NAD27 side as a PROJ string with the grid file:
 
 ```sql
 -- NAD27 / Texas South (EPSG:32041) to WGS84 with the NADCON grid
@@ -400,8 +402,6 @@ SELECT ST_Transform(
 ```
 
 Only add the grid to the NAD27 side. For a transformation between two NAD27 coordinate systems, use the EPSG codes or PROJ strings without `+nadgrids`.
-
-Alternatively, set `spark.sedona.crs.geotools` to `all`. GeoTools then performs the transformation with a datum shift from its EPSG database, which is accurate to a few meters for NAD27.
 
 ### SQL Examples with Grid Files
 
@@ -431,6 +431,18 @@ SELECT ST_Transform(
     'EPSG:4258'
 ) AS transformed_point
 ```
+
+## Points That Cannot Be Transformed
+
+If a coordinate cannot be transformed, `ST_Transform` raises an error and the query fails. For example, Web Mercator (EPSG:3857) cannot represent the poles, so a point at latitude 90 or -90 fails, as it does with GeoTools. A point outside every loaded grid of a `+nadgrids` list also fails. Sedona 1.9.0 and 1.9.1 returned `NaN` coordinates for such points instead. To skip these geometries, filter them out before the transformation:
+
+```sql
+SELECT ST_Transform(geom, 'EPSG:4326', 'EPSG:3857') AS transformed
+FROM geometries
+WHERE ST_YMin(geom) > -90 AND ST_YMax(geom) < 90
+```
+
+A few projections return infinite or `NaN` coordinates for some points without reporting an error, for example the point opposite the center of a stereographic projection. `ST_Transform` returns these coordinates unchanged.
 
 ## Coordinate Order
 

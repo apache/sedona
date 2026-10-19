@@ -395,14 +395,30 @@ public class FunctionsProj4Test extends TestBase {
 
   @Test
   public void testTransformNad27ToWgs84WithoutGrid() {
-    // Without a grid file the NAD27 datum shift is skipped, so the result must be finite and
-    // close to the input. The NADCON shift at this point is about 46 m.
+    // Without a grid file, NAD27 to another datum uses the EPSG:4267 Helmert shift
+    // (-8,160,176), as PROJ gives it for +towgs84=-8,160,176. At this point the result is
+    // 2.5 m from NADCON; with no shift it would be 46 m off.
     Geometry result =
         FunctionsProj4.transform(
             GEOMETRY_FACTORY.createPoint(new Coordinate(-98.0, 27.0)), "EPSG:4267", "EPSG:4326");
     assertEquals(4326, result.getSRID());
-    assertEquals(-98.0, result.getCoordinate().x, 0.001);
-    assertEquals(27.0, result.getCoordinate().y, 0.001);
+    assertEquals(-98.00030416754218, result.getCoordinate().x, 1e-9);
+    assertEquals(27.000326243662016, result.getCoordinate().y, 1e-9);
+
+    result =
+        FunctionsProj4.transform(
+            GEOMETRY_FACTORY.createPoint(new Coordinate(-98.0, 27.0)), "EPSG:4326", "EPSG:4267");
+    assertEquals(-97.99969584364611, result.getCoordinate().x, 1e-9);
+    assertEquals(26.99967374641001, result.getCoordinate().y, 1e-9);
+
+    // NAD27 / Texas South
+    result =
+        FunctionsProj4.transform(
+            GEOMETRY_FACTORY.createPoint(new Coordinate(2200000, 400000)),
+            "EPSG:32041",
+            "EPSG:4326");
+    assertEquals(-97.88733692934359, result.getCoordinate().x, 1e-9);
+    assertEquals(26.76615730274582, result.getCoordinate().y, 1e-9);
   }
 
   @Test
@@ -433,6 +449,33 @@ public class FunctionsProj4Test extends TestBase {
             texasSouthNad27);
     assertEquals(2162896.263676711, result.getCoordinate().x, 0.01);
     assertEquals(484833.74499888776, result.getCoordinate().y, 0.01);
+  }
+
+  @Test
+  public void testTransformFailureThrows() {
+    // A coordinate that cannot be transformed raises an error. proj4sedona 0.1.7 and earlier
+    // returned NaN coordinates instead.
+    Path gridPath = Path.of("src/test/resources/grids/us_noaa_conus.tif").toAbsolutePath();
+    assumeTrue("Grid file not found", Files.exists(gridPath));
+
+    // Alaska is outside the CONUS grid, the only grid listed, so PROJ fails here as well
+    String conusOnly = "+proj=longlat +ellps=clrk66 +nadgrids=@" + gridPath + " +no_defs";
+    IllegalArgumentException e =
+        assertThrows(
+            IllegalArgumentException.class,
+            () ->
+                FunctionsProj4.transform(
+                    GEOMETRY_FACTORY.createPoint(new Coordinate(-150.0, 61.0)),
+                    conusOnly,
+                    "EPSG:4326"));
+    assertTrue(e.getMessage().contains("(-150.0, 61.0)"));
+
+    // Web Mercator cannot represent a pole; GeoTools also rejects it
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            FunctionsProj4.transform(
+                GEOMETRY_FACTORY.createPoint(new Coordinate(0.0, 90.0)), "EPSG:4326", "EPSG:3857"));
   }
 
   // ==================== Geometry Type Tests ====================

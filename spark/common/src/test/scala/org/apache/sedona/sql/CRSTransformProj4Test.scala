@@ -111,11 +111,11 @@ class CRSTransformProj4Test extends TestBaseScala {
       assertEquals(-97.88703650736258, nad27.getCoordinate.x, 1e-9)
       assertEquals(26.765822655699218, nad27.getCoordinate.y, 1e-9)
 
-      // No grid file is loaded, so the datum shift is skipped and the point stays put.
+      // No grid file is loaded, so the EPSG:4267 Helmert shift (-8,160,176) is used.
       val wgs84 = row.getAs[Geometry](1)
       assertEquals(4326, wgs84.getSRID)
-      assertEquals(-98.0, wgs84.getCoordinate.x, 0.001)
-      assertEquals(27.0, wgs84.getCoordinate.y, 0.001)
+      assertEquals(-98.00030416754218, wgs84.getCoordinate.x, 1e-9)
+      assertEquals(27.000326243662016, wgs84.getCoordinate.y, 1e-9)
     }
 
     it("should transform using PROJ string") {
