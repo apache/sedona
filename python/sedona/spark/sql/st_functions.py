@@ -1058,6 +1058,16 @@ def ST_H3Uncompact(
     return _call_st_function("ST_H3Uncompact", args)
 
 
+@validate_argument_types
+def ST_H3Compact(cells: Union[ColumnOrName, list]) -> Column:
+    """Compact H3 cells by recursively replacing complete child sets with their parents.
+    :param cells: unique H3 cells at the same resolution
+    :return: compacted H3 cells, which may have different resolutions
+    :rtype: List[long]
+    """
+    return _call_st_function("ST_H3Compact", (cells,))
+
+
 # =========================================================================
 # Bing Tile functions
 # =========================================================================

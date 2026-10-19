@@ -1751,6 +1751,14 @@ private[apache] case class ST_H3ToCenterChild(inputExpressions: Seq[Expression])
   }
 }
 
+private[apache] case class ST_H3Compact(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.h3Compact _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 private[apache] case class ST_H3Uncompact(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.h3Uncompact _) {
 

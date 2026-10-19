@@ -1703,6 +1703,78 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void h3CompactRecursive() {
+    long parent = H3Utils.coordinateToCell(new Coordinate(1, 2), 5);
+    for (int resolution : new int[] {6, 7}) {
+      long[] children =
+          H3Utils.h3.cellToChildren(parent, resolution).stream()
+              .mapToLong(Long::longValue)
+              .toArray();
+      assertArrayEquals(new Long[] {parent}, Functions.h3Compact(children));
+    }
+  }
+
+  @Test
+  public void h3CompactPartialSets() {
+    long parent = H3Utils.coordinateToCell(new Coordinate(1, 2), 5);
+    List<Long> children = H3Utils.h3.cellToChildren(parent, 6);
+    long[] partial = children.subList(0, 6).stream().mapToLong(Long::longValue).toArray();
+    Long[] unchanged = Functions.h3Compact(partial);
+    assertEquals(6, unchanged.length);
+    assertEquals(new HashSet<>(children.subList(0, 6)), new HashSet<>(Arrays.asList(unchanged)));
+
+    long other = H3Utils.coordinateToCell(new Coordinate(10, 20), 6);
+    List<Long> input = new ArrayList<>(children);
+    input.add(other);
+    Long[] compacted = Functions.h3Compact(input.stream().mapToLong(Long::longValue).toArray());
+    assertEquals(2, compacted.length);
+    assertEquals(
+        new HashSet<>(Arrays.asList(parent, other)), new HashSet<>(Arrays.asList(compacted)));
+  }
+
+  @Test
+  public void h3CompactPentagon() {
+    long pentagon = H3Utils.h3.getPentagons(5).iterator().next();
+    for (int resolution : new int[] {6, 7}) {
+      long[] children =
+          H3Utils.h3.cellToChildren(pentagon, resolution).stream()
+              .mapToLong(Long::longValue)
+              .toArray();
+      assertEquals(resolution == 6 ? 6 : 41, children.length);
+      assertArrayEquals(new Long[] {pentagon}, Functions.h3Compact(children));
+    }
+  }
+
+  @Test
+  public void h3CompactRoundTrip() {
+    long cell = H3Utils.coordinateToCell(new Coordinate(1, 2), 6);
+    List<Long> original = H3Utils.h3.gridDisk(cell, 2);
+    Long[] compacted = Functions.h3Compact(original.stream().mapToLong(Long::longValue).toArray());
+    assertTrue(compacted.length < original.size());
+    Long[] restored =
+        Functions.h3Uncompact(Arrays.stream(compacted).mapToLong(Long::longValue).toArray(), 6);
+    assertEquals(original.size(), restored.length);
+    assertEquals(new HashSet<>(original), new HashSet<>(Arrays.asList(restored)));
+  }
+
+  @Test
+  public void h3CompactEmptyAndSingleton() {
+    assertArrayEquals(new Long[0], Functions.h3Compact(new long[0]));
+    for (int resolution : new int[] {0, 5, 15}) {
+      long cell = H3Utils.coordinateToCell(new Coordinate(1, 2), resolution);
+      assertArrayEquals(new Long[] {cell}, Functions.h3Compact(new long[] {cell}));
+    }
+  }
+
+  @Test
+  public void h3CompactDuplicateError() {
+    long cell = H3Utils.coordinateToCell(new Coordinate(1, 2), 6);
+    long[] duplicates = new long[8];
+    Arrays.fill(duplicates, cell);
+    assertThrows(H3Exception.class, () -> Functions.h3Compact(duplicates));
+  }
+
+  @Test
   public void h3UncompactMixedResolutions() {
     long parent = H3Utils.coordinateToCell(new Coordinate(1, 2), 5);
     long other = H3Utils.coordinateToCell(new Coordinate(10, 20), 6);

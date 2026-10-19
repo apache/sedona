@@ -2041,6 +2041,26 @@ class TestDataFrameAPI(TestBase):
             ).collect()
         )
 
+    def test_st_h3_compact(self):
+        parent = 601041811137363967
+        children = self.spark.sql(f"SELECT ST_H3ToChildren({parent}, 6)").first()[0]
+        df = self.spark.createDataFrame([(children,)], ["cells"])
+        by_name, by_column, by_literal = df.select(
+            stf.ST_H3Compact("cells"),
+            stf.ST_H3Compact(f.col("cells")),
+            stf.ST_H3Compact(children),
+        ).first()
+        assert by_name == by_column == by_literal == [parent]
+        assert df.select(stf.ST_H3Compact([])).first()[0] == []
+        assert df.select(stf.ST_H3Compact([parent])).first()[0] == [parent]
+        nullable = self.spark.createDataFrame([(None,), ([],)], "cells array<long>")
+        assert [
+            row[0] for row in nullable.select(stf.ST_H3Compact("cells")).collect()
+        ] == [
+            None,
+            [],
+        ]
+
     def test_st_h3_uncompact(self):
         parent = 601041811137363967
         df = self.spark.createDataFrame([([parent], 6)], ["cells", "resolution"])

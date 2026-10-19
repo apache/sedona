@@ -2101,6 +2101,18 @@ public class Functions {
   }
 
   /**
+   * Compacts H3 cells by recursively replacing complete child sets with their parents.
+   *
+   * @param cells unique H3 cells at the same resolution
+   * @return the compacted H3 cells, which may have different resolutions
+   */
+  public static Long[] h3Compact(long[] cells) {
+    return H3Utils.h3
+        .compactCells(Arrays.stream(cells).boxed().collect(Collectors.toList()))
+        .toArray(new Long[0]);
+  }
+
+  /**
    * Expands a collection of H3 cells to the requested resolution.
    *
    * @param cells the H3 cells, which may have different resolutions
