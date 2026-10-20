@@ -20,6 +20,7 @@ import json
 import os
 import sqlite3
 import tempfile
+import warnings
 import pytest
 import shapely
 import pandas as pd
@@ -358,6 +359,20 @@ class TestIO(TestGeopandasBase):
         df = read_func(datafile, table_name=table_name)
         assert df.active_geometry_name == "geom"
         assert df["geom"].count() == expected_cnt
+
+    def test_read_file_warns_only_about_unsupported_arguments(self):
+        datafile = os.path.join(TEST_DATA_DIR, "geopackage/features.gpkg")
+        table_name = "GB_Hex_5km_GS_Landslides_v8"
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            read_file(datafile, table_name=table_name)
+        assert not [w for w in caught if "not supported in Sedona" in str(w.message)]
+
+        with pytest.warns(UserWarning, match="not supported in Sedona") as caught:
+            read_file(datafile, table_name=table_name, rows=10)
+        messages = [str(w.message) for w in caught]
+        assert any("rows" in m and "table_name" not in m for m in messages)
 
     def test_geoseries_from_geopackage_uses_source_geometry_name(self):
         datafile = os.path.join(TEST_DATA_DIR, "geopackage/features.gpkg")

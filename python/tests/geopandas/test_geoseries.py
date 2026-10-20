@@ -1016,6 +1016,21 @@ class TestGeoSeries(TestGeopandasBase):
         ],
         ids=["wkt", "wkb"],
     )
+    def test_wkt_wkb_keyword_arguments(self, constructor, value):
+        assert constructor([value], name="geom").name == "geom"
+        with pytest.raises(
+            TypeError, match="Unsupported GeoSeries.from_wk[tb] arguments: dtype"
+        ):
+            constructor([value], dtype="geometry")
+
+    @pytest.mark.parametrize(
+        "constructor,value",
+        [
+            (GeoSeries.from_wkt, "POINT (1 1)"),
+            (GeoSeries.from_wkb, Point(1, 1).wkb),
+        ],
+        ids=["wkt", "wkb"],
+    )
     def test_wkt_wkb_from_renamed_pandas_on_spark_series(self, constructor, value):
         source = ps.Series([value], name="source")
         source.rename("renamed", inplace=True)
