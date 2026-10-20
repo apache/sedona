@@ -480,4 +480,4 @@ def read_feather(path, columns=None, to_pandas_kwargs=None, **kwargs):
         "It should only be used if the file is expected to be small."
     )
     gpd_df = gpd.read_feather(path, columns=columns, **kwargs)
-    return GeoDataFrame(gpd_df)
+    return GeoDataFrame._from_local_geopandas(gpd_df)

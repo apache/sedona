@@ -521,6 +521,18 @@ class TestIO(TestGeopandasBase):
         assert isinstance(sgpd_df, GeoDataFrame)
         self.check_sgpd_df_equals_gpd_df(sgpd_df, gpd.read_feather(temp_file_path))
 
+    def test_read_feather_leading_null_geometry(self):
+        # Spark 3 pandas-on-Spark infers the geometry type from the first value only
+        gpd_df = gpd.GeoDataFrame(
+            {"geometry": [None, Point(1, 2)], "int": [1, 2]}, crs="EPSG:4326"
+        )
+        temp_file_path = self._write_gpd_feather(gpd_df)
+
+        result = read_feather(temp_file_path)
+
+        assert result.crs == "EPSG:4326"
+        self.check_sgpd_df_equals_gpd_df(result, gpd.read_feather(temp_file_path))
+
     def test_read_feather_is_exported(self):
         assert sgpd.read_feather is read_feather
 
