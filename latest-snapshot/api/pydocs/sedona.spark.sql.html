@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -5280,6 +5279,10 @@ other NaN values.</p>
 <dt class="sig sig-object py" id="sedona.spark.sql.types.Box2DType">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.types.</span></span><span class="sig-name descname"><span class="pre">Box2DType</span></span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#Box2DType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.Box2DType" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">UserDefinedType</span></code></p>
+<p>Spark SQL type of Sedona <code class="docutils literal notranslate"><span class="pre">box2d</span></code> columns, such as the result of <code class="docutils literal notranslate"><span class="pre">ST_Box2D</span></code>.</p>
+<p>Values are <code class="xref py py-class docutils literal notranslate"><span class="pre">sedona.spark.core.geom.box2d.Box2D</span></code> objects in Python, with
+<code class="docutils literal notranslate"><span class="pre">xmin</span></code>, <code class="docutils literal notranslate"><span class="pre">ymin</span></code>, <code class="docutils literal notranslate"><span class="pre">xmax</span></code> and <code class="docutils literal notranslate"><span class="pre">ymax</span></code> attributes. A column of this type is
+stored as a struct of those four doubles.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.sql.types.Box2DType.deserialize">
 <span class="sig-name descname"><span class="pre">deserialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datum</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#Box2DType.deserialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.Box2DType.deserialize" title="Permalink to this definition"></a></dt>
@@ -5324,6 +5327,10 @@ is no corresponding one).</p>
 <dt class="sig sig-object py" id="sedona.spark.sql.types.Box3DType">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.types.</span></span><span class="sig-name descname"><span class="pre">Box3DType</span></span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#Box3DType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.Box3DType" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">UserDefinedType</span></code></p>
+<p>Spark SQL type of Sedona <code class="docutils literal notranslate"><span class="pre">box3d</span></code> columns, such as the result of <code class="docutils literal notranslate"><span class="pre">ST_Box3D</span></code>.</p>
+<p>Values are <code class="xref py py-class docutils literal notranslate"><span class="pre">sedona.spark.core.geom.box3d.Box3D</span></code> objects in Python, with
+<code class="docutils literal notranslate"><span class="pre">xmin</span></code>, <code class="docutils literal notranslate"><span class="pre">ymin</span></code>, <code class="docutils literal notranslate"><span class="pre">zmin</span></code>, <code class="docutils literal notranslate"><span class="pre">xmax</span></code>, <code class="docutils literal notranslate"><span class="pre">ymax</span></code> and <code class="docutils literal notranslate"><span class="pre">zmax</span></code> attributes. A
+column of this type is stored as a struct of those six doubles.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.sql.types.Box3DType.deserialize">
 <span class="sig-name descname"><span class="pre">deserialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datum</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#Box3DType.deserialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.Box3DType.deserialize" title="Permalink to this definition"></a></dt>
@@ -5368,6 +5375,11 @@ is no corresponding one).</p>
 <dt class="sig sig-object py" id="sedona.spark.sql.types.GeographyType">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.types.</span></span><span class="sig-name descname"><span class="pre">GeographyType</span></span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#GeographyType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.GeographyType" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">UserDefinedType</span></code></p>
+<p>Spark SQL type of Sedona geography columns.</p>
+<p>Geography values are <a class="reference internal" href="sedona.spark.core.geom.html#sedona.spark.core.geom.geography.Geography" title="sedona.spark.core.geom.geography.Geography"><code class="xref py py-class docutils literal notranslate"><span class="pre">sedona.spark.core.geom.geography.Geography</span></code></a>
+objects in Python, which hold a Shapely geometry in their <code class="docutils literal notranslate"><span class="pre">geometry</span></code>
+attribute. <code class="docutils literal notranslate"><span class="pre">DataFrame.collect()</span></code> returns them, and <code class="docutils literal notranslate"><span class="pre">Geography</span></code> objects
+passed to <code class="docutils literal notranslate"><span class="pre">createDataFrame</span></code> are stored as geographies.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.sql.types.GeographyType.deserialize">
 <span class="sig-name descname"><span class="pre">deserialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datum</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#GeographyType.deserialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.GeographyType.deserialize" title="Permalink to this definition"></a></dt>
@@ -5412,6 +5424,19 @@ is no corresponding one).</p>
 <dt class="sig sig-object py" id="sedona.spark.sql.types.GeometryType">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.types.</span></span><span class="sig-name descname"><span class="pre">GeometryType</span></span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#GeometryType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.GeometryType" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">UserDefinedType</span></code></p>
+<p>Spark SQL type of Sedona geometry columns.</p>
+<p>Geometry values are Shapely geometries in Python: <code class="docutils literal notranslate"><span class="pre">DataFrame.collect()</span></code>
+returns Shapely geometry objects, and Shapely geometries passed to
+<code class="docutils literal notranslate"><span class="pre">createDataFrame</span></code> are stored as geometries. Use <code class="docutils literal notranslate"><span class="pre">GeometryType()</span></code> in a
+schema to declare a geometry column.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructField</span><span class="p">,</span> <span class="n">StructType</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">schema</span> <span class="o">=</span> <span class="n">StructType</span><span class="p">([</span><span class="n">StructField</span><span class="p">(</span><span class="s2">"geom"</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">())])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">([(</span><span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),)],</span> <span class="n">schema</span><span class="p">)</span>  
+</pre></div>
+</div>
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.sql.types.GeometryType.deserialize">
 <span class="sig-name descname"><span class="pre">deserialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datum</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#GeometryType.deserialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.GeometryType.deserialize" title="Permalink to this definition"></a></dt>
@@ -5456,6 +5481,12 @@ is no corresponding one).</p>
 <dt class="sig sig-object py" id="sedona.spark.sql.types.RasterType">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.types.</span></span><span class="sig-name descname"><span class="pre">RasterType</span></span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#RasterType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.RasterType" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">UserDefinedType</span></code></p>
+<p>Spark SQL type of Sedona raster columns.</p>
+<p>Raster values are <code class="xref py py-class docutils literal notranslate"><span class="pre">sedona.spark.raster.SedonaRaster</span></code> objects in
+Python, which <code class="docutils literal notranslate"><span class="pre">DataFrame.collect()</span></code> and Python UDFs receive. Converting
+raster values requires <code class="docutils literal notranslate"><span class="pre">rasterio</span></code>; without it, they raise
+<code class="docutils literal notranslate"><span class="pre">NotImplementedError</span></code>. Only in-db rasters can be converted back to a
+raster column, for example when a UDF returns one.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.sql.types.RasterType.deserialize">
 <span class="sig-name descname"><span class="pre">deserialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datum</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#RasterType.deserialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.RasterType.deserialize" title="Permalink to this definition"></a></dt>

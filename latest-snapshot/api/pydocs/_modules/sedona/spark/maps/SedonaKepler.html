@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.maps.SedonaKepler &mdash; Apache Sedona Python Documentation</title>
@@ -230,6 +229,10 @@
 
 
 <div class="viewcode-block" id="SedonaKepler"><a class="viewcode-back" href="../../../../sedona.spark.maps.html#sedona.spark.maps.SedonaKepler.SedonaKepler">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SedonaKepler</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Plot Sedona DataFrames on Kepler.gl maps in a Jupyter notebook.</span>
+
+<span class="sd">    Requires the ``keplergl`` package, installed with ``apache-sedona[kepler-map]``.</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="SedonaKepler.create_map"><a class="viewcode-back" href="../../../../sedona.spark.maps.html#sedona.spark.maps.SedonaKepler.SedonaKepler.create_map">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">create_map</span><span class="p">(</span>
@@ -243,14 +246,15 @@
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Creates a map visualization using kepler, optionally taking a sedona dataFrame as data input</span>
+
 <span class="sd">        :param df: [Optional] SedonaDataFrame to plot on the map</span>
 <span class="sd">        :param name: [Optional] Name to be associated with the given</span>
-<span class="sd">        dataframe, if a df is passed with no name, a default name of 'unnamed' is set for it.</span>
-<span class="sd">        param config: [Optional] A map config to be applied to the rendered map</span>
-<span class="sd">        param height: [Optional] Height of the map in pixels, default is 600</span>
-<span class="sd">        param use_arrow: [Optional] Whether to use arrow for data transfer, default is False</span>
-<span class="sd">        param show_docs: [Optional] Whether to show the documentation, default is False</span>
-<span class="sd">        :return: A map object</span>
+<span class="sd">            dataframe, if a df is passed with no name, a default name of 'unnamed' is set for it.</span>
+<span class="sd">        :param config: [Optional] A Kepler.gl map config to be applied to the rendered map</span>
+<span class="sd">        :param height: [Optional] Height of the map in pixels, default is 600</span>
+<span class="sd">        :param use_arrow: [Optional] Whether to use Arrow to transfer the data to the map, default is False</span>
+<span class="sd">        :param show_docs: [Optional] Whether to show the Kepler.gl documentation, default is False</span>
+<span class="sd">        :return: A ``keplergl.KeplerGl`` map object</span>
 <span class="sd">        """</span>
 
         <span class="k">try</span><span class="p">:</span>
@@ -271,7 +275,8 @@
 <div class="viewcode-block" id="SedonaKepler.add_df"><a class="viewcode-back" href="../../../../sedona.spark.maps.html#sedona.spark.maps.SedonaKepler.SedonaKepler.add_df">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_df</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">kepler_map</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"unnamed"</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""</span>
-<span class="sd">        Adds a SedonaDataFrame to a given map object.</span>
+<span class="sd">        Adds a SedonaDataFrame to a given map object. Raster columns are left out.</span>
+
 <span class="sd">        :param kepler_map: Map object to add SedonaDataFrame to</span>
 <span class="sd">        :param df: SedonaDataFrame to add</span>
 <span class="sd">        :param name: [Optional] Name to assign to the dataframe, default name assigned is 'unnamed'</span>

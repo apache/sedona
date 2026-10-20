@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -342,6 +341,25 @@ are read from the wrong positions.</p>
 <dt class="sig sig-object py" id="sedona.spark.raster.meta.AffineTransform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sedona.spark.raster.meta.</span></span><span class="sig-name descname"><span class="pre">AffineTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scale_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skew_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skew_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ip_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ip_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_anchor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#sedona.spark.raster.meta.PixelAnchor" title="sedona.spark.raster.meta.PixelAnchor"><span class="pre">PixelAnchor</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/raster/meta.html#AffineTransform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.raster.meta.AffineTransform" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Affine transform from pixel coordinates to world coordinates.</p>
+<p>The pixel at column <code class="docutils literal notranslate"><span class="pre">col</span></code> and row <code class="docutils literal notranslate"><span class="pre">row</span></code> maps to
+<code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">ip_x</span> <span class="pre">+</span> <span class="pre">col</span> <span class="pre">*</span> <span class="pre">scale_x</span> <span class="pre">+</span> <span class="pre">row</span> <span class="pre">*</span> <span class="pre">skew_x</span></code> and
+<code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">=</span> <span class="pre">ip_y</span> <span class="pre">+</span> <span class="pre">col</span> <span class="pre">*</span> <span class="pre">skew_y</span> <span class="pre">+</span> <span class="pre">row</span> <span class="pre">*</span> <span class="pre">scale_y</span></code>. <code class="docutils literal notranslate"><span class="pre">repr()</span></code> shows the transform
+as a 3x3 matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scale_x</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – Pixel width in world units.</p></li>
+<li><p><strong>skew_y</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – Change in y per column; 0 for a raster without rotation.</p></li>
+<li><p><strong>skew_x</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – Change in x per row; 0 for a raster without rotation.</p></li>
+<li><p><strong>scale_y</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – Pixel height in world units, negative for a north-up raster.</p></li>
+<li><p><strong>ip_x</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – X coordinate of the upper-left pixel.</p></li>
+<li><p><strong>ip_y</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – Y coordinate of the upper-left pixel.</p></li>
+<li><p><strong>pixel_anchor</strong> (<a class="reference internal" href="#sedona.spark.raster.meta.PixelAnchor" title="sedona.spark.raster.meta.PixelAnchor"><em>PixelAnchor</em></a>) – Whether <code class="docutils literal notranslate"><span class="pre">ip_x</span></code> and <code class="docutils literal notranslate"><span class="pre">ip_y</span></code> refer to the center or the upper-left
+corner of that pixel.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.raster.meta.AffineTransform.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scale_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skew_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skew_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ip_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ip_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_anchor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#sedona.spark.raster.meta.PixelAnchor" title="sedona.spark.raster.meta.PixelAnchor"><span class="pre">PixelAnchor</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/raster/meta.html#AffineTransform.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.raster.meta.AffineTransform.__init__" title="Permalink to this definition"></a></dt>
@@ -385,12 +403,41 @@ are read from the wrong positions.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.raster.meta.AffineTransform.translate">
 <span class="sig-name descname"><span class="pre">translate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/raster/meta.html#AffineTransform.translate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.raster.meta.AffineTransform.translate" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Return the transform of a raster whose origin is offset by whole pixels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>offset_x</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – Offset in pixel columns.</p></li>
+<li><p><strong>offset_y</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – Offset in pixel rows.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new transform whose origin is pixel (<code class="docutils literal notranslate"><span class="pre">offset_x</span></code>, <code class="docutils literal notranslate"><span class="pre">offset_y</span></code>)
+of this one, for example the transform of a tile cut from the raster.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#sedona.spark.raster.meta.AffineTransform" title="sedona.spark.raster.meta.AffineTransform">AffineTransform</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.raster.meta.AffineTransform.with_anchor">
 <span class="sig-name descname"><span class="pre">with_anchor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pixel_anchor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#sedona.spark.raster.meta.PixelAnchor" title="sedona.spark.raster.meta.PixelAnchor"><span class="pre">PixelAnchor</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/raster/meta.html#AffineTransform.with_anchor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.raster.meta.AffineTransform.with_anchor" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Return the same transform expressed for another pixel anchor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pixel_anchor</strong> (<a class="reference internal" href="#sedona.spark.raster.meta.PixelAnchor" title="sedona.spark.raster.meta.PixelAnchor"><em>PixelAnchor</em></a>) – The pixel anchor of the returned transform.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>This transform if it already uses <code class="docutils literal notranslate"><span class="pre">pixel_anchor</span></code>; otherwise a new
+transform whose origin is shifted by half a pixel.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#sedona.spark.raster.meta.AffineTransform" title="sedona.spark.raster.meta.AffineTransform">AffineTransform</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -419,6 +466,16 @@ transformation between these conventions.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sedona.spark.raster.meta.</span></span><span class="sig-name descname"><span class="pre">SampleDimension</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">description</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/raster/meta.html#SampleDimension"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.raster.meta.SampleDimension" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Raster band metadata.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>description</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – Description of the band.</p></li>
+<li><p><strong>offset</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – Offset of the band: a stored pixel value means <code class="docutils literal notranslate"><span class="pre">value</span> <span class="pre">*</span> <span class="pre">scale</span> <span class="pre">+</span> <span class="pre">offset</span></code>.</p></li>
+<li><p><strong>scale</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – Scale of the band.</p></li>
+<li><p><strong>nodata</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – NODATA value of the band, or NaN if the band has none.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.raster.meta.SampleDimension.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">description</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/raster/meta.html#SampleDimension.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.raster.meta.SampleDimension.__init__" title="Permalink to this definition"></a></dt>

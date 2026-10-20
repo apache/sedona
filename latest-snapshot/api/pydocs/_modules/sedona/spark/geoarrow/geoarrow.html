@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geoarrow.geoarrow &mdash; Apache Sedona Python Documentation</title>
@@ -261,7 +260,7 @@
 <span class="sd">      `pyproj.CRS`). If provided, this will override any CRS present in the output</span>
 <span class="sd">      geometries. If omitted, the CRS will be inferred from the values present in</span>
 <span class="sd">      the output if exactly one CRS is present in the output.</span>
-<span class="sd">    :return:</span>
+<span class="sd">    :return: A ``pyarrow.Table``.</span>
 <span class="sd">    """</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
 
@@ -521,6 +520,19 @@
 <span class="c1"># Modified backport from Spark 4.0</span>
 <span class="c1"># https://github.com/apache/spark/blob/3515b207c41d78194d11933cd04bddc21f8418dd/python/pyspark/sql/pandas/conversion.py#L632</span>
 <div class="viewcode-block" id="create_spatial_dataframe"><a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.create_spatial_dataframe">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">create_spatial_dataframe</span><span class="p">(</span><span class="n">spark</span><span class="p">:</span> <span class="n">SparkSession</span><span class="p">,</span> <span class="n">gdf</span><span class="p">:</span> <span class="s2">"gpd.GeoDataFrame"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Create a Spark DataFrame from a GeoPandas GeoDataFrame, transferring the data with Arrow.</span>
+
+<span class="sd">    This is faster than ``spark.createDataFrame(gdf)`` for large GeoDataFrames.</span>
+<span class="sd">    Geometry columns become Sedona geometry columns, and the other columns get the</span>
+<span class="sd">    Spark types of their Arrow types.</span>
+
+<span class="sd">    :param spark: The Spark session.</span>
+<span class="sd">    :param gdf: The GeoPandas GeoDataFrame to convert. It must have at least one</span>
+<span class="sd">      geometry column.</span>
+<span class="sd">    :return: A Spark DataFrame with the columns of ``gdf``.</span>
+<span class="sd">    :raises ValueError: If ``gdf`` has no geometry column.</span>
+<span class="sd">    """</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.pandas.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
         <span class="n">to_arrow_type</span><span class="p">,</span>
     <span class="p">)</span>

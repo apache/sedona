@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.raster_utils.SedonaUtils &mdash; Apache Sedona Python Documentation</title>
@@ -229,15 +228,24 @@
 
 
 <div class="viewcode-block" id="SedonaUtils"><a class="viewcode-back" href="../../../../sedona.spark.raster_utils.html#sedona.spark.raster_utils.SedonaUtils.SedonaUtils">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SedonaUtils</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Notebook display helpers for Sedona DataFrames."""</span>
+
 <div class="viewcode-block" id="SedonaUtils.display_image"><a class="viewcode-back" href="../../../../sedona.spark.raster_utils.html#sedona.spark.raster_utils.SedonaUtils.SedonaUtils.display_image">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">display_image</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Display raster images in a Jupyter notebook.</span>
 
 <span class="sd">        Accepts DataFrames with either:</span>
+
 <span class="sd">        - A raster column (GridCoverage2D) — auto-applies RS_AsImage</span>
 <span class="sd">        - An HTML image column from RS_AsImage() — renders directly</span>
 
 <span class="sd">        Falls back to the SedonaMapUtils HTML table path for other DataFrames.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df : pyspark.sql.DataFrame</span>
+<span class="sd">            The DataFrame to display. All of its rows are collected to the</span>
+<span class="sd">            driver, so limit large DataFrames first.</span>
 <span class="sd">        """</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTML</span><span class="p">,</span> <span class="n">display</span>
 

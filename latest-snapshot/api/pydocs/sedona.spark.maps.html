@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -222,28 +221,46 @@
 <dt class="sig sig-object py" id="sedona.spark.maps.SedonaKepler.SedonaKepler">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sedona.spark.maps.SedonaKepler.</span></span><span class="sig-name descname"><span class="pre">SedonaKepler</span></span><a class="reference internal" href="_modules/sedona/spark/maps/SedonaKepler.html#SedonaKepler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.maps.SedonaKepler.SedonaKepler" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Plot Sedona DataFrames on Kepler.gl maps in a Jupyter notebook.</p>
+<p>Requires the <code class="docutils literal notranslate"><span class="pre">keplergl</span></code> package, installed with <code class="docutils literal notranslate"><span class="pre">apache-sedona[kepler-map]</span></code>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.maps.SedonaKepler.SedonaKepler.add_df">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">add_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kepler_map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'unnamed'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/maps/SedonaKepler.html#SedonaKepler.add_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.maps.SedonaKepler.SedonaKepler.add_df" title="Permalink to this definition"></a></dt>
-<dd><p>Adds a SedonaDataFrame to a given map object.
-:param kepler_map: Map object to add SedonaDataFrame to
-:param df: SedonaDataFrame to add
-:param name: [Optional] Name to assign to the dataframe, default name assigned is ‘unnamed’
-:return: Does not return anything, adds df directly to the given map object</p>
+<dd><p>Adds a SedonaDataFrame to a given map object. Raster columns are left out.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kepler_map</strong> – Map object to add SedonaDataFrame to</p></li>
+<li><p><strong>df</strong> – SedonaDataFrame to add</p></li>
+<li><p><strong>name</strong> – [Optional] Name to assign to the dataframe, default name assigned is ‘unnamed’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Does not return anything, adds df directly to the given map object</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.maps.SedonaKepler.SedonaKepler.create_map">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'unnamed'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">600</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_arrow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_docs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/maps/SedonaKepler.html#SedonaKepler.create_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.maps.SedonaKepler.SedonaKepler.create_map" title="Permalink to this definition"></a></dt>
-<dd><p>Creates a map visualization using kepler, optionally taking a sedona dataFrame as data input
-:param df: [Optional] SedonaDataFrame to plot on the map
-:param name: [Optional] Name to be associated with the given
-dataframe, if a df is passed with no name, a default name of ‘unnamed’ is set for it.
-param config: [Optional] A map config to be applied to the rendered map
-param height: [Optional] Height of the map in pixels, default is 600
-param use_arrow: [Optional] Whether to use arrow for data transfer, default is False
-param show_docs: [Optional] Whether to show the documentation, default is False
-:return: A map object</p>
+<dd><p>Creates a map visualization using kepler, optionally taking a sedona dataFrame as data input</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> – [Optional] SedonaDataFrame to plot on the map</p></li>
+<li><p><strong>name</strong> – [Optional] Name to be associated with the given
+dataframe, if a df is passed with no name, a default name of ‘unnamed’ is set for it.</p></li>
+<li><p><strong>config</strong> – [Optional] A Kepler.gl map config to be applied to the rendered map</p></li>
+<li><p><strong>height</strong> – [Optional] Height of the map in pixels, default is 600</p></li>
+<li><p><strong>use_arrow</strong> – [Optional] Whether to use Arrow to transfer the data to the map, default is False</p></li>
+<li><p><strong>show_docs</strong> – [Optional] Whether to show the Kepler.gl documentation, default is False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <code class="docutils literal notranslate"><span class="pre">keplergl.KeplerGl</span></code> map object</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -264,6 +281,8 @@ param show_docs: [Optional] Whether to show the documentation, default is False
 <dt class="sig sig-object py" id="sedona.spark.maps.SedonaPyDeck.SedonaPyDeck">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sedona.spark.maps.SedonaPyDeck.</span></span><span class="sig-name descname"><span class="pre">SedonaPyDeck</span></span><a class="reference internal" href="_modules/sedona/spark/maps/SedonaPyDeck.html#SedonaPyDeck"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.maps.SedonaPyDeck.SedonaPyDeck" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Plot Sedona DataFrames on pydeck maps in a Jupyter notebook.</p>
+<p>Requires the <code class="docutils literal notranslate"><span class="pre">pydeck</span></code> package, installed with <code class="docutils literal notranslate"><span class="pre">apache-sedona[pydeck-map]</span></code>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.maps.SedonaPyDeck.SedonaPyDeck.create_choropleth_map">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_choropleth_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_view_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_provider</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stroked</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/maps/SedonaPyDeck.html#SedonaPyDeck.create_choropleth_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.maps.SedonaPyDeck.SedonaPyDeck.create_choropleth_map" title="Permalink to this definition"></a></dt>
@@ -292,48 +311,74 @@ If no color scheme is given, a default color scheme is created using the ‘plot
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.maps.SedonaPyDeck.SedonaPyDeck.create_geometry_map">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_geometry_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'[85,</span> <span class="pre">183,</span> <span class="pre">177,</span> <span class="pre">255]'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'[85,</span> <span class="pre">183,</span> <span class="pre">177,</span> <span class="pre">255]'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_view_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_provider</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stroked</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/maps/SedonaPyDeck.html#SedonaPyDeck.create_geometry_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.maps.SedonaPyDeck.SedonaPyDeck.create_geometry_map" title="Permalink to this definition"></a></dt>
-<dd><p>Create a pydeck map with a GeoJsonLayer added for plotting given geometries.
-:param line_color:
-:param df: SedonaDataFrame with polygons
-:param fill_color: Optional color for the plotted polygons
-:param elevation_col: Optional column/numeric value to determine elevation for plotted polygons
-:param initial_view_state: optional initial view state of the pydeck map
-:param map_style: optional map_style of the pydeck map
-:param map_provider: optional map_provider of the pydeck map
-:param api_keys: Optional dictionary of API keys for Map providers
-:return: A pydeck map with a GeoJsonLayer map added</p>
+<dd><p>Create a pydeck map with a GeoJsonLayer added for plotting given geometries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> – SedonaDataFrame with polygons</p></li>
+<li><p><strong>fill_color</strong> – Optional color for the plotted polygons</p></li>
+<li><p><strong>line_color</strong> – Optional color for the outlines of the plotted geometries</p></li>
+<li><p><strong>elevation_col</strong> – Optional column/numeric value to determine elevation for plotted polygons</p></li>
+<li><p><strong>initial_view_state</strong> – optional initial view state of the pydeck map</p></li>
+<li><p><strong>map_style</strong> – optional map_style of the pydeck map</p></li>
+<li><p><strong>map_provider</strong> – optional map_provider of the pydeck map</p></li>
+<li><p><strong>api_keys</strong> – Optional dictionary of API keys for Map providers</p></li>
+<li><p><strong>stroked</strong> – Whether to draw the outlines of the polygons</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pydeck map with a GeoJsonLayer map added</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.maps.SedonaPyDeck.SedonaPyDeck.create_heatmap">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_heatmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SUM'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_view_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_provider</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/maps/SedonaPyDeck.html#SedonaPyDeck.create_heatmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.maps.SedonaPyDeck.SedonaPyDeck.create_heatmap" title="Permalink to this definition"></a></dt>
-<dd><p>Create a pydeck map with a heatmap layer added
-:param df: SedonaDataFrame to be used to plot the heatmap
-:param color_range: Optional color_range for the heatmap
-:param weight: Optional column to determine weight of each point while plotting the heatmap
-:param aggregation: Optional aggregation to use for the heatmap (used when rendering a zoomed out heatmap)
-:param initial_view_state: Optional initial view state of the pydeck map
-:param map_style: Optional map_style of the pydeck map
-:param map_provider: Optional map_provider for the pydeck map
-:param api_keys: Optional dictionary of API keys for Map providers
-:return: A pydeck map with a heatmap layer added</p>
+<dd><p>Create a pydeck map with a heatmap layer added</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> – SedonaDataFrame to be used to plot the heatmap</p></li>
+<li><p><strong>color_range</strong> – Optional color_range for the heatmap</p></li>
+<li><p><strong>weight</strong> – Optional column to determine weight of each point while plotting the heatmap</p></li>
+<li><p><strong>aggregation</strong> – Optional aggregation to use for the heatmap (used when rendering a zoomed out heatmap)</p></li>
+<li><p><strong>initial_view_state</strong> – Optional initial view state of the pydeck map</p></li>
+<li><p><strong>map_style</strong> – Optional map_style of the pydeck map</p></li>
+<li><p><strong>map_provider</strong> – Optional map_provider for the pydeck map</p></li>
+<li><p><strong>api_keys</strong> – Optional dictionary of API keys for Map providers</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pydeck map with a heatmap layer added</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.maps.SedonaPyDeck.SedonaPyDeck.create_scatterplot_map">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_scatterplot_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'[255,</span> <span class="pre">140,</span> <span class="pre">0]'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius_min_pixels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius_max_pixels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_view_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_provider</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/maps/SedonaPyDeck.html#SedonaPyDeck.create_scatterplot_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.maps.SedonaPyDeck.SedonaPyDeck.create_scatterplot_map" title="Permalink to this definition"></a></dt>
-<dd><p>Create a pydeck map with a scatterplot layer
-:param radius_scale:
-:param radius_max_pixels:
-:param radius_min_pixels:
-:param radius_col:
-:param df: SedonaDataFrame to plot
-:param fill_color: color of the points
-:param initial_view_state: optional initial view state of a pydeck map
-:param map_style: optional map_style to be added to the pydeck map
-:param map_provider: optional map_provider to be added to the pydeck map
-:param api_keys: Optional dictionary of API keys for Map providers
-:return: A pydeck map object with a scatterplot layer added</p>
+<dd><p>Create a pydeck map with a scatterplot layer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> – SedonaDataFrame to plot</p></li>
+<li><p><strong>fill_color</strong> – color of the points</p></li>
+<li><p><strong>radius_col</strong> – Column holding the radius of each point in meters, or a
+number to use as the radius of every point</p></li>
+<li><p><strong>radius_min_pixels</strong> – Minimum radius of a point on screen, in pixels</p></li>
+<li><p><strong>radius_max_pixels</strong> – Maximum radius of a point on screen, in pixels</p></li>
+<li><p><strong>radius_scale</strong> – Multiplier applied to every radius</p></li>
+<li><p><strong>initial_view_state</strong> – optional initial view state of a pydeck map</p></li>
+<li><p><strong>map_style</strong> – optional map_style to be added to the pydeck map</p></li>
+<li><p><strong>map_provider</strong> – optional map_provider to be added to the pydeck map</p></li>
+<li><p><strong>api_keys</strong> – Optional dictionary of API keys for Map providers</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pydeck map object with a scatterplot layer added</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

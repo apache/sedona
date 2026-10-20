@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.types &mdash; Apache Sedona Python Documentation</title>
@@ -255,6 +254,21 @@
 
 
 <div class="viewcode-block" id="GeometryType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeometryType">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">GeometryType</span><span class="p">(</span><span class="n">UserDefinedType</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Spark SQL type of Sedona geometry columns.</span>
+
+<span class="sd">    Geometry values are Shapely geometries in Python: ``DataFrame.collect()``</span>
+<span class="sd">    returns Shapely geometry objects, and Shapely geometries passed to</span>
+<span class="sd">    ``createDataFrame`` are stored as geometries. Use ``GeometryType()`` in a</span>
+<span class="sd">    schema to declare a geometry column.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pyspark.sql.types import StructField, StructType</span>
+<span class="sd">    &gt;&gt;&gt; from shapely.geometry import Point</span>
+<span class="sd">    &gt;&gt;&gt; from sedona.spark.sql.types import GeometryType</span>
+<span class="sd">    &gt;&gt;&gt; schema = StructType([StructField("geom", GeometryType())])</span>
+<span class="sd">    &gt;&gt;&gt; df = sedona.createDataFrame([(Point(1, 2),)], schema)  # doctest: +SKIP</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="GeometryType.sqlType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeometryType.sqlType">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">sqlType</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
@@ -280,6 +294,13 @@
 
 
 <div class="viewcode-block" id="GeographyType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeographyType">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">GeographyType</span><span class="p">(</span><span class="n">UserDefinedType</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Spark SQL type of Sedona geography columns.</span>
+
+<span class="sd">    Geography values are :class:`sedona.spark.core.geom.geography.Geography`</span>
+<span class="sd">    objects in Python, which hold a Shapely geometry in their ``geometry``</span>
+<span class="sd">    attribute. ``DataFrame.collect()`` returns them, and ``Geography`` objects</span>
+<span class="sd">    passed to ``createDataFrame`` are stored as geographies.</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="GeographyType.sqlType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeographyType.sqlType">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">sqlType</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
@@ -305,6 +326,12 @@
 
 
 <div class="viewcode-block" id="Box2DType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.Box2DType">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Box2DType</span><span class="p">(</span><span class="n">UserDefinedType</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Spark SQL type of Sedona ``box2d`` columns, such as the result of ``ST_Box2D``.</span>
+
+<span class="sd">    Values are :class:`sedona.spark.core.geom.box2d.Box2D` objects in Python, with</span>
+<span class="sd">    ``xmin``, ``ymin``, ``xmax`` and ``ymax`` attributes. A column of this type is</span>
+<span class="sd">    stored as a struct of those four doubles.</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="Box2DType.sqlType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.Box2DType.sqlType">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">sqlType</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
@@ -336,6 +363,12 @@
 
 
 <div class="viewcode-block" id="Box3DType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.Box3DType">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Box3DType</span><span class="p">(</span><span class="n">UserDefinedType</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Spark SQL type of Sedona ``box3d`` columns, such as the result of ``ST_Box3D``.</span>
+
+<span class="sd">    Values are :class:`sedona.spark.core.geom.box3d.Box3D` objects in Python, with</span>
+<span class="sd">    ``xmin``, ``ymin``, ``zmin``, ``xmax``, ``ymax`` and ``zmax`` attributes. A</span>
+<span class="sd">    column of this type is stored as a struct of those six doubles.</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="Box3DType.sqlType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.Box3DType.sqlType">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">sqlType</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
@@ -369,6 +402,14 @@
 
 
 <div class="viewcode-block" id="RasterType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.RasterType">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">RasterType</span><span class="p">(</span><span class="n">UserDefinedType</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Spark SQL type of Sedona raster columns.</span>
+
+<span class="sd">    Raster values are :class:`sedona.spark.raster.SedonaRaster` objects in</span>
+<span class="sd">    Python, which ``DataFrame.collect()`` and Python UDFs receive. Converting</span>
+<span class="sd">    raster values requires ``rasterio``; without it, they raise</span>
+<span class="sd">    ``NotImplementedError``. Only in-db rasters can be converted back to a</span>
+<span class="sd">    raster column, for example when a UDF returns one.</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="RasterType.sqlType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.RasterType.sqlType">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">sqlType</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>

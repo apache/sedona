@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.raster.meta &mdash; Apache Sedona Python Documentation</title>
@@ -242,6 +241,32 @@
 
 
 <div class="viewcode-block" id="AffineTransform"><a class="viewcode-back" href="../../../../sedona.spark.raster.html#sedona.spark.raster.meta.AffineTransform">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">AffineTransform</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Affine transform from pixel coordinates to world coordinates.</span>
+
+<span class="sd">    The pixel at column ``col`` and row ``row`` maps to</span>
+<span class="sd">    ``x = ip_x + col * scale_x + row * skew_x`` and</span>
+<span class="sd">    ``y = ip_y + col * skew_y + row * scale_y``. ``repr()`` shows the transform</span>
+<span class="sd">    as a 3x3 matrix.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    scale_x : float</span>
+<span class="sd">        Pixel width in world units.</span>
+<span class="sd">    skew_y : float</span>
+<span class="sd">        Change in y per column; 0 for a raster without rotation.</span>
+<span class="sd">    skew_x : float</span>
+<span class="sd">        Change in x per row; 0 for a raster without rotation.</span>
+<span class="sd">    scale_y : float</span>
+<span class="sd">        Pixel height in world units, negative for a north-up raster.</span>
+<span class="sd">    ip_x : float</span>
+<span class="sd">        X coordinate of the upper-left pixel.</span>
+<span class="sd">    ip_y : float</span>
+<span class="sd">        Y coordinate of the upper-left pixel.</span>
+<span class="sd">    pixel_anchor : PixelAnchor</span>
+<span class="sd">        Whether ``ip_x`` and ``ip_y`` refer to the center or the upper-left</span>
+<span class="sd">        corner of that pixel.</span>
+<span class="sd">    """</span>
+
     <span class="n">scale_x</span><span class="p">:</span> <span class="nb">float</span>
     <span class="n">skew_y</span><span class="p">:</span> <span class="nb">float</span>
     <span class="n">skew_x</span><span class="p">:</span> <span class="nb">float</span>
@@ -262,11 +287,39 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">pixel_anchor</span> <span class="o">=</span> <span class="n">pixel_anchor</span></div>
 
 <div class="viewcode-block" id="AffineTransform.with_anchor"><a class="viewcode-back" href="../../../../sedona.spark.raster.html#sedona.spark.raster.meta.AffineTransform.with_anchor">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">with_anchor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pixel_anchor</span><span class="p">:</span> <span class="n">PixelAnchor</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Return the same transform expressed for another pixel anchor.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pixel_anchor : PixelAnchor</span>
+<span class="sd">            The pixel anchor of the returned transform.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        AffineTransform</span>
+<span class="sd">            This transform if it already uses ``pixel_anchor``; otherwise a new</span>
+<span class="sd">            transform whose origin is shifted by half a pixel.</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">pixel_anchor</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_anchor</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_change_pixel_anchor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pixel_anchor</span><span class="p">,</span> <span class="n">pixel_anchor</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AffineTransform.translate"><a class="viewcode-back" href="../../../../sedona.spark.raster.html#sedona.spark.raster.meta.AffineTransform.translate">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">translate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset_x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">offset_y</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Return the transform of a raster whose origin is offset by whole pixels.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        offset_x : float</span>
+<span class="sd">            Offset in pixel columns.</span>
+<span class="sd">        offset_y : float</span>
+<span class="sd">            Offset in pixel rows.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        AffineTransform</span>
+<span class="sd">            A new transform whose origin is pixel (``offset_x``, ``offset_y``)</span>
+<span class="sd">            of this one, for example the transform of a tile cut from the raster.</span>
+<span class="sd">        """</span>
         <span class="n">new_ipx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip_x</span> <span class="o">+</span> <span class="n">offset_x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_x</span> <span class="o">+</span> <span class="n">offset_y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">skew_x</span>
         <span class="n">new_ipy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip_y</span> <span class="o">+</span> <span class="n">offset_x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">skew_y</span> <span class="o">+</span> <span class="n">offset_y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_y</span>
         <span class="k">return</span> <span class="n">AffineTransform</span><span class="p">(</span>
@@ -321,7 +374,19 @@
 
 
 <div class="viewcode-block" id="SampleDimension"><a class="viewcode-back" href="../../../../sedona.spark.raster.html#sedona.spark.raster.meta.SampleDimension">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SampleDimension</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Raster band metadata."""</span>
+<span class="w">    </span><span class="sd">"""Raster band metadata.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    description : str</span>
+<span class="sd">        Description of the band.</span>
+<span class="sd">    offset : float</span>
+<span class="sd">        Offset of the band: a stored pixel value means ``value * scale + offset``.</span>
+<span class="sd">    scale : float</span>
+<span class="sd">        Scale of the band.</span>
+<span class="sd">    nodata : float</span>
+<span class="sd">        NODATA value of the band, or NaN if the band has none.</span>
+<span class="sd">    """</span>
 
     <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">offset</span><span class="p">:</span> <span class="nb">float</span>

@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.maps.SedonaPyDeck &mdash; Apache Sedona Python Documentation</title>
@@ -241,6 +240,10 @@
 
 
 <div class="viewcode-block" id="SedonaPyDeck"><a class="viewcode-back" href="../../../../sedona.spark.maps.html#sedona.spark.maps.SedonaPyDeck.SedonaPyDeck">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SedonaPyDeck</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Plot Sedona DataFrames on pydeck maps in a Jupyter notebook.</span>
+
+<span class="sd">    Requires the ``pydeck`` package, installed with ``apache-sedona[pydeck-map]``.</span>
+<span class="sd">    """</span>
 
     <span class="c1"># User Facing APIs</span>
 <div class="viewcode-block" id="SedonaPyDeck.create_choropleth_map"><a class="viewcode-back" href="../../../../sedona.spark.maps.html#sedona.spark.maps.SedonaPyDeck.SedonaPyDeck.create_choropleth_map">[docs]</a>    <span class="nd">@classmethod</span>
@@ -337,14 +340,16 @@
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Create a pydeck map with a GeoJsonLayer added for plotting given geometries.</span>
-<span class="sd">        :param line_color:</span>
+
 <span class="sd">        :param df: SedonaDataFrame with polygons</span>
 <span class="sd">        :param fill_color: Optional color for the plotted polygons</span>
+<span class="sd">        :param line_color: Optional color for the outlines of the plotted geometries</span>
 <span class="sd">        :param elevation_col: Optional column/numeric value to determine elevation for plotted polygons</span>
 <span class="sd">        :param initial_view_state: optional initial view state of the pydeck map</span>
 <span class="sd">        :param map_style: optional map_style of the pydeck map</span>
 <span class="sd">        :param map_provider: optional map_provider of the pydeck map</span>
 <span class="sd">        :param api_keys: Optional dictionary of API keys for Map providers</span>
+<span class="sd">        :param stroked: Whether to draw the outlines of the polygons</span>
 <span class="sd">        :return: A pydeck map with a GeoJsonLayer map added</span>
 <span class="sd">        """</span>
         <span class="n">pdk</span> <span class="o">=</span> <span class="n">_try_import_pydeck</span><span class="p">()</span>
@@ -397,12 +402,14 @@
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Create a pydeck map with a scatterplot layer</span>
-<span class="sd">        :param radius_scale:</span>
-<span class="sd">        :param radius_max_pixels:</span>
-<span class="sd">        :param radius_min_pixels:</span>
-<span class="sd">        :param radius_col:</span>
+
 <span class="sd">        :param df: SedonaDataFrame to plot</span>
 <span class="sd">        :param fill_color: color of the points</span>
+<span class="sd">        :param radius_col: Column holding the radius of each point in meters, or a</span>
+<span class="sd">            number to use as the radius of every point</span>
+<span class="sd">        :param radius_min_pixels: Minimum radius of a point on screen, in pixels</span>
+<span class="sd">        :param radius_max_pixels: Maximum radius of a point on screen, in pixels</span>
+<span class="sd">        :param radius_scale: Multiplier applied to every radius</span>
 <span class="sd">        :param initial_view_state: optional initial view state of a pydeck map</span>
 <span class="sd">        :param map_style: optional map_style to be added to the pydeck map</span>
 <span class="sd">        :param map_provider: optional map_provider to be added to the pydeck map</span>
@@ -453,6 +460,7 @@
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Create a pydeck map with a heatmap layer added</span>
+
 <span class="sd">        :param df: SedonaDataFrame to be used to plot the heatmap</span>
 <span class="sd">        :param color_range: Optional color_range for the heatmap</span>
 <span class="sd">        :param weight: Optional column to determine weight of each point while plotting the heatmap</span>

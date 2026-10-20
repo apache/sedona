@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -222,14 +221,23 @@
 <dt class="sig sig-object py" id="sedona.spark.raster_utils.SedonaUtils.SedonaUtils">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sedona.spark.raster_utils.SedonaUtils.</span></span><span class="sig-name descname"><span class="pre">SedonaUtils</span></span><a class="reference internal" href="_modules/sedona/spark/raster_utils/SedonaUtils.html#SedonaUtils"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.raster_utils.SedonaUtils.SedonaUtils" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Notebook display helpers for Sedona DataFrames.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.raster_utils.SedonaUtils.SedonaUtils.display_image">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">display_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/raster_utils/SedonaUtils.html#SedonaUtils.display_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.raster_utils.SedonaUtils.SedonaUtils.display_image" title="Permalink to this definition"></a></dt>
 <dd><p>Display raster images in a Jupyter notebook.</p>
-<p>Accepts DataFrames with either:
-- A raster column (GridCoverage2D) — auto-applies RS_AsImage
-- An HTML image column from RS_AsImage() — renders directly</p>
+<p>Accepts DataFrames with either:</p>
+<ul class="simple">
+<li><p>A raster column (GridCoverage2D) — auto-applies RS_AsImage</p></li>
+<li><p>An HTML image column from RS_AsImage() — renders directly</p></li>
+</ul>
 <p>Falls back to the SedonaMapUtils HTML table path for other DataFrames.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df</strong> (<a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrame.html#pyspark.sql.DataFrame" title="(in PySpark vmaster)"><em>pyspark.sql.DataFrame</em></a>) – The DataFrame to display. All of its rows are collected to the
+driver, so limit large DataFrames first.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
