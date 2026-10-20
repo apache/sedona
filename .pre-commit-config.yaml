@@ -24,24 +24,26 @@ default_language_version:
 # 0.4.11 added reusable `priority` aliases, used below.
 minimum_prek_version: '0.4.11'
 # lint-* aliases share one priority so independent, read-only checks run
-# concurrently (see https://github.com/apache/sedona/issues/3080). Hooks
-# that rewrite files keep increasing integer priorities instead, since
-# some of them touch the same files and prek only parallelizes safely
-# when hooks sharing a priority don't mutate the same files. Those
-# integers are spaced by 10 (0, 10, 20, ...) so a new hook can be slotted
-# in later without renumbering every hook after it.
+# concurrently (see https://github.com/apache/sedona/issues/3080). The
+# two read-only meta hooks (identity, check-hooks-apply) share priority 0.
+# Hooks that rewrite files keep increasing integer priorities instead,
+# starting at 10 and spaced by 10 (10, 20, 30, ...) so a new hook can be
+# slotted in later without renumbering every hook after it. They can't
+# share a priority with each other because some of them touch the same
+# files, and prek only parallelizes safely when hooks sharing a priority
+# don't mutate the same files.
 priorities:
-  lint-actions: 1000
-  lint-docs: 1000
-  lint-generic: 1000
-  lint-json: 1000
-  lint-makefile: 1000
-  lint-python: 1000
-  lint-rst: 1000
-  lint-shell: 1000
-  lint-toml: 1000
-  lint-xml: 1000
-  lint-yaml: 1000
+  lint-actions: &lint_priority 1000
+  lint-docs: *lint_priority
+  lint-generic: *lint_priority
+  lint-json: *lint_priority
+  lint-makefile: *lint_priority
+  lint-python: *lint_priority
+  lint-rst: *lint_priority
+  lint-shell: *lint_priority
+  lint-toml: *lint_priority
+  lint-xml: *lint_priority
+  lint-yaml: *lint_priority
 repos:
   - repo: meta
     hooks:
