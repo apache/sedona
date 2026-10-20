@@ -252,6 +252,12 @@ def read_file(filename: str, format: Union[str, None] = None, **kwargs):
             - "geojson"
             - "geopackage"
             - "geoparquet"
+    **kwargs
+        Reader options. Only ``table_name`` is used: the name of the table to
+        read, required when ``format`` is "geopackage". Sedona warns about the
+        keyword arguments it receives, since other GeoPandas reader options are
+        not supported.
+
     See also
     --------
     GeoDataFrame.to_file : write GeoDataFrame to file
@@ -361,6 +367,7 @@ def read_parquet(
     Parameters
     ----------
     path : str, path object
+        Path to a GeoParquet file or a directory of GeoParquet files.
     columns : list-like of strings, default=None
         Not currently supported in Sedona
     storage_options : dict, optional
@@ -369,6 +376,9 @@ def read_parquet(
         Not currently supported in Sedona
     to_pandas_kwargs : dict, optional
         Not currently supported in Sedona
+    **kwargs
+        Not currently supported in Sedona. Any keyword argument is ignored with
+        a warning.
 
     Returns
     -------
@@ -376,14 +386,8 @@ def read_parquet(
 
     Examples
     --------
-    from sedona.spark.geopandas import read_parquet
+    >>> from sedona.spark.geopandas import read_parquet
     >>> df = read_parquet("data.parquet")  # doctest: +SKIP
-
-    Specifying columns to read:
-
-    >>> df = read_parquet(
-    ...     "data.parquet",
-    ... )  # doctest: +SKIP
     """
     if kwargs:
         warnings.warn(f"The given arguments are not supported in Sedona: {kwargs}")
