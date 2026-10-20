@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -595,7 +594,10 @@ point inputs return NULL. Non-point inputs raise an error.</p>
 This is an alias of ST_GeogFromWKT.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>wkt</strong> (<em>ColumnOrName</em>) – WKT string column to generate from.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wkt</strong> (<em>ColumnOrName</em>) – WKT string column to generate from.</p></li>
+<li><p><strong>srid</strong> (<em>Optional</em><em>[</em><em>ColumnOrNameOrNumber</em><em>]</em><em>, </em><em>optional</em>) – SRID to set on the geography, as an integer or integer column. Defaults to 0 (unknown).</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Geography column representing the WKT string.</p>
@@ -612,7 +614,10 @@ This is an alias of ST_GeogFromWKT.</p>
 <dd><p>Generate a geography column from a Well-Known Binary (WKB) binary column.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>wkb</strong> (<em>ColumnOrName</em>) – WKB binary column to generate from.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wkb</strong> (<em>ColumnOrName</em>) – WKB binary column to generate from.</p></li>
+<li><p><strong>srid</strong> (<em>Optional</em><em>[</em><em>ColumnOrNameOrNumber</em><em>]</em><em>, </em><em>optional</em>) – SRID to set on the geography, as an integer or integer column.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Geography column representing the WKB binary.</p>
@@ -629,7 +634,10 @@ This is an alias of ST_GeogFromWKT.</p>
 <dd><p>Generate a geography column from a Well-Known Text (WKT) string column.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>wkt</strong> (<em>ColumnOrName</em>) – WKT string column to generate from.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wkt</strong> (<em>ColumnOrName</em>) – WKT string column to generate from.</p></li>
+<li><p><strong>srid</strong> (<em>Optional</em><em>[</em><em>ColumnOrNameOrNumber</em><em>]</em><em>, </em><em>optional</em>) – SRID to set on the geography, as an integer or integer column. Defaults to 0 (unknown).</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Geography column representing the WKT string.</p>
@@ -809,7 +817,10 @@ POLYGON otherwise. NULL on null input.</p>
 This is an alias of ST_GeomFromWKT.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>wkt</strong> (<em>ColumnOrName</em>) – WKT string column to generate from.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wkt</strong> (<em>ColumnOrName</em>) – WKT string column to generate from.</p></li>
+<li><p><strong>srid</strong> (<em>Optional</em><em>[</em><em>ColumnOrNameOrNumber</em><em>]</em><em>, </em><em>optional</em>) – SRID to set on the geometry, as an integer or integer column. Defaults to 0 (unknown).</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Geometry column representing the WKT string.</p>
@@ -844,7 +855,10 @@ This is an alias of ST_GeomFromWKT.</p>
 This is an alias of ST_GeomFromText.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>wkt</strong> (<em>ColumnOrName</em>) – WKT string column to generate from.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wkt</strong> (<em>ColumnOrName</em>) – WKT string column to generate from.</p></li>
+<li><p><strong>srid</strong> (<em>Optional</em><em>[</em><em>ColumnOrNameOrNumber</em><em>]</em><em>, </em><em>optional</em>) – SRID to set on the geometry, as an integer or integer column. Defaults to 0 (unknown).</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Geometry column representing the WKT string.</p>
@@ -879,7 +893,10 @@ This is an alias of ST_GeomFromText.</p>
 This is an alias of ST_GeomFromWKT.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>wkt</strong> (<em>ColumnOrName</em>) – WKT string column to generate from.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wkt</strong> (<em>ColumnOrName</em>) – WKT string column to generate from.</p></li>
+<li><p><strong>srid</strong> (<em>Optional</em><em>[</em><em>ColumnOrNameOrNumber</em><em>]</em><em>, </em><em>optional</em>) – SRID to set on the geometry, as an integer or integer column. Defaults to 0 (unknown).</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Geometry column representing the WKT string.</p>
@@ -974,7 +991,10 @@ in a string column.</p>
 <dd><p>Generate multiLineString geometry from a multiLineString WKT representation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>wkt</strong> (<em>ColumnOrName</em>) – multiLineString WKT string column to generate from.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wkt</strong> (<em>ColumnOrName</em>) – multiLineString WKT string column to generate from.</p></li>
+<li><p><strong>srid</strong> (<em>Optional</em><em>[</em><em>ColumnOrNameOrNumber</em><em>]</em><em>, </em><em>optional</em>) – SRID to set on the geometry, as an integer or integer column. Defaults to 0 (unknown).</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>multiLineString geometry generated from the wkt column.</p>
@@ -1011,7 +1031,10 @@ in a string column.</p>
 <dd><p>Generate multiPolygon geometry from a multiPolygon WKT representation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>wkt</strong> (<em>ColumnOrName</em>) – multiPolygon WKT string column to generate from.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wkt</strong> (<em>ColumnOrName</em>) – multiPolygon WKT string column to generate from.</p></li>
+<li><p><strong>srid</strong> (<em>Optional</em><em>[</em><em>ColumnOrNameOrNumber</em><em>]</em><em>, </em><em>optional</em>) – SRID to set on the geometry, as an integer or integer column. Defaults to 0 (unknown).</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>multiPolygon geometry generated from the wkt column.</p>
@@ -1195,13 +1218,13 @@ in a string column.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="sedona.spark.sql.st_constructors.ST_PointM">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_constructors.</span></span><span class="sig-name descname"><span class="pre">ST_PointM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">srid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_constructors.html#ST_PointM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_constructors.ST_PointM" title="Permalink to this definition"></a></dt>
-<dd><p>Generates a 3D point geometry column from numeric values.</p>
+<dd><p>Generates a point geometry column with an M coordinate from numeric values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>ColumnOrNameOrNumber</em>) – Either a number or numeric column representing the X coordinate of a point.</p></li>
 <li><p><strong>y</strong> (<em>ColumnOrNameOrNumber</em>) – Either a number or numeric column representing the Y coordinate of a point.</p></li>
-<li><p><strong>z</strong> (<em>ColumnOrNameOrNumber</em>) – Either a number or numeric column representing the Z coordinate of a point, if None then a 2D point is generated, defaults to None</p></li>
+<li><p><strong>m</strong> (<em>ColumnOrNameOrNumber</em>) – Either a number or numeric column representing the M coordinate of a point.</p></li>
 <li><p><strong>srid</strong> (<em>Optional</em><em>[</em><em>ColumnOrNameOrNumber</em><em>]</em><em>, </em><em>optional</em>) – The srid of the point. Defaults to 0 (unknown).</p></li>
 </ul>
 </dd>
@@ -1417,24 +1440,33 @@ If index is not provided then point will be added to the end of line_string.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="sedona.spark.sql.st_functions.ST_Affine">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_Affine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">e</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">xOff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">yOff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zOff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_Affine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_Affine" title="Permalink to this definition"></a></dt>
-<dd><p>Apply a 3D/2D affine transformation to the given geometry
-x = a * x + b * y + c * z + xOff | x = a * x + b * y + xOff
+<dd><p>Apply a 3D/2D affine transformation to the given geometry.</p>
+<p>x = a * x + b * y + c * z + xOff | x = a * x + b * y + xOff
 y = d * x + e * y + f * z + yOff | y = d * x + e * y + yOff
-z = g * x + h * y + i * z + zOff
-:param geometry: Geometry to apply affine transformation to
-:param a:
-:param b:
-:param c: Default 0.0
-:param d:
-:param e:
-:param f: Default 0.0
-:param g: Default 0.0
-:param h: Default 0.0
-:param i: Default 0.0
-:param xOff:
-:param yOff:
-:param zOff: Default 0.0
-:return: Geometry with affine transformation applied</p>
+z = g * x + h * y + i * z + zOff</p>
+<p>The 3D form is used only when c, f, g, h, i and zOff are all given.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geometry</strong> – Geometry to apply affine transformation to</p></li>
+<li><p><strong>a</strong> – Coefficient of x in the new x value.</p></li>
+<li><p><strong>b</strong> – Coefficient of y in the new x value.</p></li>
+<li><p><strong>c</strong> – Coefficient of z in the new x value. Default 0.0</p></li>
+<li><p><strong>d</strong> – Coefficient of x in the new y value.</p></li>
+<li><p><strong>e</strong> – Coefficient of y in the new y value.</p></li>
+<li><p><strong>f</strong> – Coefficient of z in the new y value. Default 0.0</p></li>
+<li><p><strong>g</strong> – Coefficient of x in the new z value. Default 0.0</p></li>
+<li><p><strong>h</strong> – Coefficient of y in the new z value. Default 0.0</p></li>
+<li><p><strong>i</strong> – Coefficient of z in the new z value. Default 0.0</p></li>
+<li><p><strong>xOff</strong> – Offset added to the new x value.</p></li>
+<li><p><strong>yOff</strong> – Offset added to the new y value.</p></li>
+<li><p><strong>zOff</strong> – Offset added to the new z value. Default 0.0</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Geometry with affine transformation applied</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -1608,7 +1640,10 @@ geometry column.</p>
 <dd><p>Generate the GeoJSON style representation of a geometry column.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>geometry</strong> (<em>ColumnOrName</em>) – Geometry column to generate GeoJSON for.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geometry</strong> (<em>ColumnOrName</em>) – Geometry column to generate GeoJSON for.</p></li>
+<li><p><strong>type</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>]</em><em>]</em><em>, </em><em>optional</em>) – GeoJSON type to return: “Simple” (default) for a bare geometry, “Feature” to wrap it in a Feature, or “FeatureCollection” to wrap that Feature in a FeatureCollection.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>GeoJSON representation of geometry as a string column.</p>
@@ -1625,7 +1660,10 @@ geometry column.</p>
 <dd><p>Generate the Extended Well-Known Binary representation of a geometry as Hex string.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>geometry</strong> (<em>ColumnOrName</em>) – Geometry to generate EWKB for.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geometry</strong> (<em>ColumnOrName</em>) – Geometry to generate EWKB for.</p></li>
+<li><p><strong>endian</strong> (<em>Optional</em><em>[</em><em>ColumnOrName</em><em>]</em><em>, </em><em>optional</em>) – Byte order of the encoding: “NDR” for little-endian (default) or “XDR” for big-endian.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Extended Well-Known Binary representation of geometry as Hex string.</p>
@@ -1712,12 +1750,24 @@ geometry column.</p>
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_BinaryDistanceBandColumn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_zero_distance_neighbors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_spheroid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_BinaryDistanceBandColumn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_BinaryDistanceBandColumn" title="Permalink to this definition"></a></dt>
 <dd><p>Creates a weights column containing the other records within the threshold and their weight.</p>
 <p>Weights will always be 1.0.</p>
-<p>&#64;param geometry: name of the geometry column
-&#64;param threshold: Distance threshold for considering neighbors
-&#64;param include_zero_distance_neighbors: whether to include neighbors that are 0 distance.
-&#64;param include_self: whether to include self in the list of neighbors
-&#64;param use_spheroid: whether to use a cartesian or spheroidal distance calculation. Default is false
-&#64;param attributes: the attributes to save in the neighbor column.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geometry</strong> (<em>ColumnOrName</em>) – Geometry column or name.</p></li>
+<li><p><strong>threshold</strong> (<em>ColumnOrName</em>) – Distance threshold for considering neighbors.</p></li>
+<li><p><strong>include_zero_distance_neighbors</strong> (<em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a><em>]</em>) – Whether to include neighbors that are 0 distance. Default is True.</p></li>
+<li><p><strong>include_self</strong> (<em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a><em>]</em>) – Whether to include the record itself in its list of neighbors. Default is False.</p></li>
+<li><p><strong>use_spheroid</strong> (<em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a><em>]</em>) – Whether to use a cartesian or spheroidal distance calculation. Default is False.</p></li>
+<li><p><strong>attributes</strong> (<em>ColumnOrName</em>) – Struct column of the attributes to save for each neighbor.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Array of structs with each neighbor’s attributes and its weight.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -1898,6 +1948,8 @@ input geometry column is equal to or less than a given amount.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>geometry</strong> (<em>ColumnOrName</em>) – Input geometry column to buffer.</p></li>
 <li><p><strong>buffer</strong> (<em>ColumnOrNameOrNumber</em>) – Either a column or value for the amount to buffer the input geometry by.</p></li>
+<li><p><strong>useSpheroid</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a><em>]</em><em>]</em><em>, </em><em>optional</em>) – Whether to buffer on the spheroid, with the buffer amount in meters, instead of in the geometry’s planar coordinates. Default is False.</p></li>
+<li><p><strong>parameters</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>]</em><em>]</em><em>, </em><em>optional</em>) – Buffer style parameters as blank-separated key=value pairs, such as “quad_segs=8 endcap=round”.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -2080,15 +2132,22 @@ as a multi-geometry column.</p>
 <dt class="sig sig-object py" id="sedona.spark.sql.st_functions.ST_DBSCAN">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_DBSCAN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_pts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_spheroid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_DBSCAN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_DBSCAN" title="Permalink to this definition"></a></dt>
 <dd><p>Perform DBSCAN clustering on the given geometry column.</p>
-<p>&#64;param geometry: Geometry column or name
-:type geometry: ColumnOrName
-&#64;param epsilon: the distance between two points to be considered neighbors
-:type epsilon: ColumnOrName
-&#64;param min_pts: the number of neighbors a point should have to form a cluster
-:type min_pts: ColumnOrName
-&#64;param use_spheroid: whether to use spheroid for distance calculation
-:type use_spheroid: ColumnOrName
-&#64;return: A struct indicating the cluster to which the point belongs and whether it is a core point</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geometry</strong> (<em>ColumnOrName</em>) – Geometry column or name.</p></li>
+<li><p><strong>epsilon</strong> (<em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em>]</em>) – Maximum distance between two points for them to be considered neighbors.</p></li>
+<li><p><strong>min_pts</strong> (<em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em>]</em>) – Minimum number of neighbors a point must have to form a cluster.</p></li>
+<li><p><strong>use_spheroid</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a><em>]</em><em>]</em><em>, </em><em>optional</em>) – Whether to use ST_DistanceSpheroid instead of ST_Distance as the distance metric. Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Struct with the cluster the point belongs to and whether it is a core point.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -2107,8 +2166,8 @@ as a multi-geometry column.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>geometry</strong> (<em>ColumnOrName</em>) – Input geometry</p></li>
-<li><p><strong>tolerance</strong> (<em>ColumnOrName</em><em> or </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – </p></li>
-<li><p><strong>flag</strong> (<em>ColumnOrName</em><em> or </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Selects the output type</p></li>
+<li><p><strong>tolerance</strong> (<em>ColumnOrName</em><em> or </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – Distance within which input vertices are snapped together before triangulating. Default is 0.</p></li>
+<li><p><strong>flag</strong> (<em>ColumnOrName</em><em> or </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – Selects the output type: 0 (default) for a GeometryCollection of triangular Polygons, or 1 for a MultiLineString of the triangulation’s edges.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -2400,8 +2459,9 @@ geometry is already 4D, if geometry either has z or m, it will not change the ex
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>zValue</strong> – Optional value of z coordinate to be potentially added, default value is 0.0</p></li>
 <li><p><strong>geometry</strong> – Geometry column to make 4D</p></li>
+<li><p><strong>zValue</strong> – Optional value of z coordinate to be potentially added, default value is 0.0</p></li>
+<li><p><strong>mValue</strong> – Optional value of m coordinate to be potentially added, default value is 0.0</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -2499,23 +2559,39 @@ are preserved unchanged.</p>
 <dt class="sig sig-object py" id="sedona.spark.sql.st_functions.ST_FrechetDistance">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_FrechetDistance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">g2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_FrechetDistance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_FrechetDistance" title="Permalink to this definition"></a></dt>
 <dd><p>Computes discrete frechet distance between the two geometries.
-If any of the geometry is empty, ST_FrechetDistance returns 0
-:param g1:
-:param g2:
-:return: Computed Discrete Frechet Distance between g1 and g2</p>
+If any of the geometry is empty, ST_FrechetDistance returns 0</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>g1</strong> – First geometry column.</p></li>
+<li><p><strong>g2</strong> – Second geometry column.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Computed Discrete Frechet Distance between g1 and g2</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sedona.spark.sql.st_functions.ST_GLocal">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_GLocal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">star</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_GLocal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_GLocal" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate Getis Ord Gi(*) statistics on the given column.</p>
-<p>&#64;param x: The variable we want to compute Gi statistics for
-:type x: ColumnOrName
-&#64;param weights: the weights array containing the neighbors, their weights, and their values of x
-:type weights: ColumnOrName
-&#64;param star: whether to use the focal observation in the calculations
-:type star: ColumnOrName
-&#64;return: A struct containing the Gi statistics including a p value</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>ColumnOrName</em>) – The variable to compute Gi statistics for.</p></li>
+<li><p><strong>weights</strong> (<em>ColumnOrName</em>) – The weights array containing the neighbors, their weights, and their values of x, such as the column ST_BinaryDistanceBandColumn or ST_WeightedDistanceBandColumn creates.</p></li>
+<li><p><strong>star</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a><em>]</em><em>]</em><em>, </em><em>optional</em>) – Whether to include the focal observation in the calculations, computing Gi* instead of Gi. Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Struct with the G, EG, VG, Z and P statistics.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -2525,12 +2601,13 @@ If any of the geometry is empty, ST_FrechetDistance returns 0
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>geometry</strong> (<em>ColumnOrName</em>) – Geometry column to hash.</p></li>
-<li><p><strong>numPoints</strong> (<em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em>]</em>) – Precision level to hash geometry at, given as an integer or an integer column.</p></li>
+<li><p><strong>geometry</strong> (<em>ColumnOrName</em>) – Polygonal geometry column to generate points in.</p></li>
+<li><p><strong>numPoints</strong> (<em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em>]</em>) – Number of points to generate, given as an integer or an integer column.</p></li>
+<li><p><strong>seed</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em>]</em><em>]</em><em>, </em><em>optional</em>) – Seed for the random generator. When it is 0 or not set, the output is random.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Generate random points in given geometry</p>
+<dd class="field-even"><p>Random points within the given geometry.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Column</p>
@@ -2666,13 +2743,23 @@ a default <cite>tolerance</cite> value is <cite>1e-6</cite>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="sedona.spark.sql.st_functions.ST_H3CellDistance">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_H3CellDistance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_H3CellDistance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_H3CellDistance" title="Permalink to this definition"></a></dt>
-<dd><p>Cover Geometry with H3 Cells and return a List of Long type cell IDs
-:param cell: start cell
-:type cell: long
-:param k: end cell
-:type k: int
-:return: distance between cells
-:rtype: Long</p>
+<dd><p>Compute the H3 grid distance between two H3 cells.</p>
+<p>If H3 cannot compute the distance, for example because the cells are too far apart, Sedona estimates the
+shortest path and returns its length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cell1</strong> (<em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em>]</em>) – First H3 cell ID.</p></li>
+<li><p><strong>cell2</strong> (<em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em>]</em>) – Second H3 cell ID.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Number of grid steps between the cells.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -2799,11 +2886,19 @@ a default <cite>tolerance</cite> value is <cite>1e-6</cite>.</p>
 <dt class="sig sig-object py" id="sedona.spark.sql.st_functions.ST_HausdorffDistance">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_HausdorffDistance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">g2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">densityFrac</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_HausdorffDistance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_HausdorffDistance" title="Permalink to this definition"></a></dt>
 <dd><p>Returns discretized (and hence approximate) hausdorff distance between two given geometries.
-Optionally, a distance fraction can also be provided which decreases the gap between actual and discretized hausforff distance
-:param g1:
-:param g2:
-:param densityFrac: Optional
-:return:</p>
+Optionally, a distance fraction can also be provided which decreases the gap between actual and discretized hausforff distance</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>g1</strong> – First geometry column.</p></li>
+<li><p><strong>g2</strong> – Second geometry column.</p></li>
+<li><p><strong>densityFrac</strong> – Optional fraction in (0.0, 1.0] by which each segment is densified before computing the distance. Lower values are more accurate and slower.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Hausdorff distance between g1 and g2, or null if either geometry is empty.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -3268,9 +3363,20 @@ single linestring.</p>
 <dt class="sig sig-object py" id="sedona.spark.sql.st_functions.ST_LineSegments">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_LineSegments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">lenient</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_LineSegments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_LineSegments" title="Permalink to this definition"></a></dt>
 <dd><p>Convert multi-coordinate LineString into an array of LineStrings that contain exactly 2 points.</p>
-<p>&#64;param geom: input LineString geometry column.
-&#64;param lenient: suppresses exception
-&#64;return: array of LineStrings</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geom</strong> (<em>ColumnOrName</em>) – Input LineString geometry column.</p></li>
+<li><p><strong>lenient</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a><em>]</em><em>]</em><em>, </em><em>optional</em>) – Whether to suppress the error raised when the input is not a LineString. Default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Array of LineStrings.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -3298,25 +3404,33 @@ single linestring.</p>
 <dt class="sig sig-object py" id="sedona.spark.sql.st_functions.ST_LocalOutlierFactor">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_LocalOutlierFactor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_spheroid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_LocalOutlierFactor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_LocalOutlierFactor" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the local outlier factor on the given geometry column.</p>
-<p>&#64;param geometry: Geometry column or name
-:type geometry: ColumnOrName
-&#64;param k: the number of neighbors to use for LOF calculation
-:type k: ColumnOrName
-&#64;param use_spheroid: whether to use spheroid for distance calculation
-:type use_spheroid: ColumnOrName
-&#64;return: A Double indicating the local outlier factor of the point</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geometry</strong> (<em>ColumnOrName</em>) – Geometry column or name.</p></li>
+<li><p><strong>k</strong> (<em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em>]</em>) – Number of nearest neighbors to use for the LOF calculation.</p></li>
+<li><p><strong>use_spheroid</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a><em>]</em><em>]</em><em>, </em><em>optional</em>) – Whether to measure distances on a spherical model of the earth. Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Local outlier factor of the point as a double. Values substantially above 1 indicate an outlier.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sedona.spark.sql.st_functions.ST_LocateAlong">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_LocateAlong</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">measure</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_LocateAlong"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_LocateAlong" title="Permalink to this definition"></a></dt>
-<dd><p>return locations along a measure geometry that have the given measure value.</p>
+<dd><p>Return locations along a measure geometry that have the given measure value.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>geom</strong> (<em>ColumnOrName</em>) – </p></li>
-<li><p><strong>measure</strong> (<em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em>]</em>) – </p></li>
-<li><p><strong>offset</strong> (<em>Union</em><em>[</em><em>ColumnOrNameOrNumber</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em>]</em>) – </p></li>
+<li><p><strong>geom</strong> (<em>ColumnOrName</em>) – Measured LineString or MultiLineString geometry column.</p></li>
+<li><p><strong>measure</strong> (<em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em>]</em>) – Measure value to locate.</p></li>
+<li><p><strong>offset</strong> (<em>Union</em><em>[</em><em>ColumnOrNameOrNumber</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em>]</em>) – Distance to offset the located points by. Positive values move them to the left of the line, negative values to the right.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -3335,8 +3449,8 @@ single linestring.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>geom1</strong> (<em>ColumnOrName</em>) – </p></li>
-<li><p><strong>geom2</strong> (<em>ColumnOrName</em>) – </p></li>
+<li><p><strong>geom1</strong> (<em>ColumnOrName</em>) – First geometry column.</p></li>
+<li><p><strong>geom2</strong> (<em>ColumnOrName</em>) – Second geometry column.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -3354,7 +3468,7 @@ single linestring.</p>
 <dd><p>Return the M coordinate of a point geometry.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>point</strong> (<em>ColumnOrName</em>) – Point geometry column to get the coordinate for.</p>
+<dd class="field-odd"><p><strong>geom</strong> (<em>ColumnOrName</em>) – Point geometry column to get the coordinate for.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>M coordinate of the point geometry as a double column.</p>
@@ -3371,10 +3485,10 @@ single linestring.</p>
 <dd><p>Return the maximum M coordinate of a geometry.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>geometry</strong> (<em>ColumnOrName</em>) – Geometry column to get the maximum M coordinate from.</p>
+<dd class="field-odd"><p><strong>geom</strong> (<em>ColumnOrName</em>) – Geometry column to get the maximum M coordinate from.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Minimum M coordinate for the geometry as a double column.</p>
+<dd class="field-even"><p>Maximum M coordinate for the geometry as a double column.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Column</p>
@@ -3388,7 +3502,7 @@ single linestring.</p>
 <dd><p>Return the minimum M coordinate of a geometry.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>geometry</strong> (<em>ColumnOrName</em>) – Geometry column to get the minimum M coordinate from.</p>
+<dd class="field-odd"><p><strong>geom</strong> (<em>ColumnOrName</em>) – Geometry column to get the minimum M coordinate from.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Minimum M coordinate for the geometry as a double column.</p>
@@ -3473,8 +3587,8 @@ use the default value of False.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>geom1</strong> (<em>ColumnOrName</em>) – </p></li>
-<li><p><strong>geom2</strong> (<em>ColumnOrName</em>) – </p></li>
+<li><p><strong>geom1</strong> (<em>ColumnOrName</em>) – First geometry column.</p></li>
+<li><p><strong>geom2</strong> (<em>ColumnOrName</em>) – Second geometry column.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -3758,20 +3872,43 @@ default of <code class="docutils literal notranslate"><span class="pre">max(widt
 <dt class="sig sig-object py" id="sedona.spark.sql.st_functions.ST_Perimeter">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_Perimeter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_spheroid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lenient</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_Perimeter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_Perimeter" title="Permalink to this definition"></a></dt>
 <dd><p>Returns the perimeter of a Polygon/MultiPolygon geometries. Otherwise, returns 0</p>
-<p>&#64;param geom: Polygonal geometry
-&#64;param use_spheroid: Use Spheroid
-&#64;param lenient: suppresses the exception
-&#64;return: Perimeter of a Polygon/MultiPolygon geometries</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geom</strong> (<em>ColumnOrName</em>) – Polygonal geometry</p></li>
+<li><p><strong>use_spheroid</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a><em>]</em><em>]</em><em>, </em><em>optional</em>) – Whether to compute the geodesic perimeter in meters on the WGS84 spheroid.</p></li>
+<li><p><strong>lenient</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a><em>]</em><em>]</em><em>, </em><em>optional</em>) – With use_spheroid, whether to assume the geometry uses EPSG:4326 instead of raising an error. Default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Perimeter of a Polygon/MultiPolygon geometries</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sedona.spark.sql.st_functions.ST_Perimeter2D">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_Perimeter2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_spheroid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lenient</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_Perimeter2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_Perimeter2D" title="Permalink to this definition"></a></dt>
 <dd><p>Returns the perimeter of a Polygon/MultiPolygon geometries. Otherwise, returns 0</p>
-<p>&#64;param geom: Polygonal geometry
-&#64;param use_spheroid: Use Spheroid
-&#64;param lenient: suppresses the exception
-&#64;return: Perimeter of a Polygon/MultiPolygon geometries</p>
+<p>This is an alias of ST_Perimeter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geom</strong> (<em>ColumnOrName</em>) – Polygonal geometry</p></li>
+<li><p><strong>use_spheroid</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a><em>]</em><em>]</em><em>, </em><em>optional</em>) – Whether to compute the geodesic perimeter in meters on the WGS84 spheroid.</p></li>
+<li><p><strong>lenient</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a><em>]</em><em>]</em><em>, </em><em>optional</em>) – With use_spheroid, whether to assume the geometry uses EPSG:4326 instead of raising an error. Default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Perimeter of a Polygon/MultiPolygon geometries</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -3869,11 +4006,22 @@ default of <code class="docutils literal notranslate"><span class="pre">max(widt
 <dt class="sig sig-object py" id="sedona.spark.sql.st_functions.ST_Project">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_Project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">azimuth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">lenient</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_Project"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_Project" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates a new point location given a starting point, distance, and direction (azimuth).</p>
-<p>&#64;param geom:
-&#64;param distance:
-&#64;param azimuth:
-&#64;param lenient:
-&#64;return:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geom</strong> (<em>ColumnOrName</em>) – Starting Point geometry column.</p></li>
+<li><p><strong>distance</strong> (<em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em>]</em>) – Distance to move from the starting point.</p></li>
+<li><p><strong>azimuth</strong> (<em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em>]</em>) – Direction in radians, measured clockwise from true north.</p></li>
+<li><p><strong>lenient</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a><em>]</em><em>]</em><em>, </em><em>optional</em>) – Whether to suppress the error raised when the input is not a Point. Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Projected point geometry.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -3920,11 +4068,20 @@ default of <code class="docutils literal notranslate"><span class="pre">max(widt
 <dt class="sig sig-object py" id="sedona.spark.sql.st_functions.ST_RemoveRepeatedPoints">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_RemoveRepeatedPoints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_RemoveRepeatedPoints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_RemoveRepeatedPoints" title="Permalink to this definition"></a></dt>
 <dd><p>Removes duplicate coordinates from a geometry, optionally removing those within a specified distance tolerance.</p>
-<p>&#64;param geom: Geometry with repeated points
-&#64;type geom: ColumnOrName
-&#64;param tolerance: Tolerance for removing nearby coordinates
-&#64;type tolerance: Optional[Union[ColumnOrName, float]]
-&#64;return:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geom</strong> (<em>ColumnOrName</em>) – Geometry with repeated points</p></li>
+<li><p><strong>tolerance</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em>]</em><em>]</em>) – Tolerance for removing nearby coordinates</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Geometry without the repeated points.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -3971,22 +4128,40 @@ default of <code class="docutils literal notranslate"><span class="pre">max(widt
 <dt class="sig sig-object py" id="sedona.spark.sql.st_functions.ST_RotateX">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_RotateX</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_RotateX"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_RotateX" title="Permalink to this definition"></a></dt>
 <dd><p>Returns geometry rotated by the given angle in X axis</p>
-<p>&#64;param geometry: Geometry column or name
-:type geometry: ColumnOrName
-&#64;param angle: Rotation angle in radians
-:type angle: float
-&#64;return: X-axis rotated geometry</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geometry</strong> (<em>ColumnOrName</em>) – Geometry column or name</p></li>
+<li><p><strong>angle</strong> (<em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em>]</em>) – Rotation angle in radians</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>X-axis rotated geometry</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sedona.spark.sql.st_functions.ST_RotateY">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_RotateY</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_RotateY"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_RotateY" title="Permalink to this definition"></a></dt>
 <dd><p>Returns geometry rotated by the given angle in Y axis</p>
-<p>&#64;param geometry: Geometry column or name
-:type geometry: ColumnOrName
-&#64;param angle: Rotation angle in radians
-:type angle: float
-&#64;return: Y-axis rotated geometry</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geometry</strong> (<em>ColumnOrName</em>) – Geometry column or name</p></li>
+<li><p><strong>angle</strong> (<em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em>]</em>) – Rotation angle in radians</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Y-axis rotated geometry</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -4039,20 +4214,42 @@ default of <code class="docutils literal notranslate"><span class="pre">max(widt
 <dt class="sig sig-object py" id="sedona.spark.sql.st_functions.ST_Scale">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_Scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaleX</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaleY</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_Scale"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_Scale" title="Permalink to this definition"></a></dt>
 <dd><p>Scale geometry with X and Y axis.</p>
-<p>&#64;param geometry:
-&#64;param scaleX:
-&#64;param scaleY:
-&#64;return:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geometry</strong> (<em>ColumnOrName</em>) – Geometry column to scale.</p></li>
+<li><p><strong>scaleX</strong> (<em>Union</em><em>[</em><em>ColumnOrNameOrNumber</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em>]</em>) – Factor to multiply the X ordinates by.</p></li>
+<li><p><strong>scaleY</strong> (<em>Union</em><em>[</em><em>ColumnOrNameOrNumber</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em>]</em>) – Factor to multiply the Y ordinates by.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Scaled geometry.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sedona.spark.sql.st_functions.ST_ScaleGeom">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_ScaleGeom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_ScaleGeom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_ScaleGeom" title="Permalink to this definition"></a></dt>
-<dd><p>Scale geometry with the corodinates of factor geometry</p>
-<p>&#64;param geometry:
-&#64;param factor:
-&#64;param origin:
-&#64;return:</p>
+<dd><p>Scale geometry with the coordinates of factor geometry</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geometry</strong> (<em>ColumnOrName</em>) – Geometry column to scale.</p></li>
+<li><p><strong>factor</strong> (<em>ColumnOrName</em>) – Geometry whose coordinates are the scale factors for each axis.</p></li>
+<li><p><strong>origin</strong> (<em>Optional</em><em>[</em><em>ColumnOrName</em><em>]</em><em>, </em><em>optional</em>) – Geometry to scale relative to. If not set, the geometry is scaled relative to the true origin.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Scaled geometry.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -4198,16 +4395,17 @@ Z, while M values are dropped.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="sedona.spark.sql.st_functions.ST_SimplifyPolygonHull">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_SimplifyPolygonHull</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertexFactor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">isOuter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_SimplifyPolygonHull"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_SimplifyPolygonHull" title="Permalink to this definition"></a></dt>
-<dd><p>Simplify a geometry using Visvalingam-Whyatt algorithm within a specified tolerance while preserving topological relationships.</p>
+<dd><p>Compute a topology-preserving simplified outer or inner hull of a polygonal geometry.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>geometry</strong> (<em>ColumnOrName</em>) – Geometry column to simplify.</p></li>
-<li><p><strong>vertexFactor</strong> (<em>ColumnOrNameOrNumber</em>) – Tolerance for merging points together to simplify the geometry as either a number or numeric column.</p></li>
+<li><p><strong>geometry</strong> (<em>ColumnOrName</em>) – Polygonal geometry column to simplify.</p></li>
+<li><p><strong>vertexFactor</strong> (<em>ColumnOrNameOrNumber</em>) – Fraction of the vertices to keep, from 0 to 1, as either a number or numeric column. Lower values give simpler hulls; 1.0 returns the original geometry.</p></li>
+<li><p><strong>isOuter</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>ColumnOrName</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a><em>]</em><em>]</em><em>, </em><em>optional</em>) – Whether to compute an outer hull, which encloses the input, rather than an inner hull, which lies within it. Default is True.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Simplified geometry as a geometry column.</p>
+<dd class="field-even"><p>Simplified hull as a geometry column.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Column</p>
@@ -4694,6 +4892,12 @@ included, values are infinity as per the floating point spec (divide by 0)</p></
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">barrier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expression</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#barrier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.barrier" title="Permalink to this definition"></a></dt>
 <dd><p>Prevent filter pushdown and control predicate evaluation order in complex spatial joins.
 This function creates an optimization barrier by evaluating boolean expressions at runtime.</p>
+<p class="rubric">Example</p>
+<dl class="simple">
+<dt>df.where(barrier(‘rating &gt; 4.0 AND stars &gt;= 4’,</dt><dd><p>‘rating’, col(‘r.rating’),
+‘stars’, col(‘h.stars’)))</p>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -4706,12 +4910,6 @@ This function creates an optimization barrier by evaluating boolean expressions 
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Column</p>
-</dd>
-</dl>
-<p class="rubric">Example</p>
-<dl class="simple">
-<dt>df.where(barrier(‘rating &gt; 4.0 AND stars &gt;= 4’,</dt><dd><p>‘rating’, col(‘r.rating’),
-‘stars’, col(‘h.stars’)))</p>
 </dd>
 </dl>
 </dd></dl>

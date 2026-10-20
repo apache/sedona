@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.st_functions &mdash; Apache Sedona Python Documentation</title>
@@ -419,6 +418,8 @@
 
 <span class="sd">    :param geometry: Geometry to generate EWKB for.</span>
 <span class="sd">    :type geometry: ColumnOrName</span>
+<span class="sd">    :param endian: Byte order of the encoding: "NDR" for little-endian (default) or "XDR" for big-endian.</span>
+<span class="sd">    :type endian: Optional[ColumnOrName], optional</span>
 <span class="sd">    :return: Extended Well-Known Binary representation of geometry as Hex string.</span>
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
@@ -448,6 +449,8 @@
 
 <span class="sd">    :param geometry: Geometry column to generate GeoJSON for.</span>
 <span class="sd">    :type geometry: ColumnOrName</span>
+<span class="sd">    :param type: GeoJSON type to return: "Simple" (default) for a bare geometry, "Feature" to wrap it in a Feature, or "FeatureCollection" to wrap that Feature in a FeatureCollection.</span>
+<span class="sd">    :type type: Optional[Union[ColumnOrName, str]], optional</span>
 <span class="sd">    :return: GeoJSON representation of geometry as a string column.</span>
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
@@ -532,16 +535,16 @@
 <span class="w">    </span><span class="sd">"""Prevent filter pushdown and control predicate evaluation order in complex spatial joins.</span>
 <span class="sd">    This function creates an optimization barrier by evaluating boolean expressions at runtime.</span>
 
+<span class="sd">    Example:</span>
+<span class="sd">        df.where(barrier('rating &gt; 4.0 AND stars &gt;= 4',</span>
+<span class="sd">                        'rating', col('r.rating'),</span>
+<span class="sd">                        'stars', col('h.stars')))</span>
+
 <span class="sd">    :param expression: Boolean expression string to evaluate</span>
 <span class="sd">    :type expression: ColumnOrName</span>
 <span class="sd">    :param args: Variable name and value pairs (var_name1, var_value1, var_name2, var_value2, ...)</span>
 <span class="sd">    :return: Boolean result of the expression evaluation</span>
 <span class="sd">    :rtype: Column</span>
-
-<span class="sd">    Example:</span>
-<span class="sd">        df.where(barrier('rating &gt; 4.0 AND stars &gt;= 4',</span>
-<span class="sd">                        'rating', col('r.rating'),</span>
-<span class="sd">                        'stars', col('h.stars')))</span>
 <span class="sd">    """</span>
     <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">"barrier"</span><span class="p">,</span> <span class="p">(</span><span class="n">expression</span><span class="p">,)</span> <span class="o">+</span> <span class="n">args</span><span class="p">)</span></div>
 
@@ -596,6 +599,10 @@
 <span class="sd">    :type geometry: ColumnOrName</span>
 <span class="sd">    :param buffer: Either a column or value for the amount to buffer the input geometry by.</span>
 <span class="sd">    :type buffer: ColumnOrNameOrNumber</span>
+<span class="sd">    :param useSpheroid: Whether to buffer on the spheroid, with the buffer amount in meters, instead of in the geometry's planar coordinates. Default is False.</span>
+<span class="sd">    :type useSpheroid: Optional[Union[ColumnOrName, bool]], optional</span>
+<span class="sd">    :param parameters: Buffer style parameters as blank-separated key=value pairs, such as "quad_segs=8 endcap=round".</span>
+<span class="sd">    :type parameters: Optional[Union[ColumnOrName, str]], optional</span>
 <span class="sd">    :return: Buffered geometry as a geometry column.</span>
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
@@ -997,11 +1004,13 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Generate random points in given geometry.</span>
 
-<span class="sd">    :param geometry: Geometry column to hash.</span>
+<span class="sd">    :param geometry: Polygonal geometry column to generate points in.</span>
 <span class="sd">    :type geometry: ColumnOrName</span>
-<span class="sd">    :param numPoints: Precision level to hash geometry at, given as an integer or an integer column.</span>
+<span class="sd">    :param numPoints: Number of points to generate, given as an integer or an integer column.</span>
 <span class="sd">    :type numPoints: Union[ColumnOrName, int]</span>
-<span class="sd">    :return: Generate random points in given geometry</span>
+<span class="sd">    :param seed: Seed for the random generator. When it is 0 or not set, the output is random.</span>
+<span class="sd">    :type seed: Optional[Union[ColumnOrName, int]], optional</span>
+<span class="sd">    :return: Random points within the given geometry.</span>
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1150,13 +1159,17 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_H3CellDistance</span><span class="p">(</span>
     <span class="n">cell1</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">cell2</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Cover Geometry with H3 Cells and return a List of Long type cell IDs</span>
-<span class="sd">    :param cell: start cell</span>
-<span class="sd">    :type cell: long</span>
-<span class="sd">    :param k: end cell</span>
-<span class="sd">    :type k: int</span>
-<span class="sd">    :return: distance between cells</span>
-<span class="sd">    :rtype: Long</span>
+<span class="w">    </span><span class="sd">"""Compute the H3 grid distance between two H3 cells.</span>
+
+<span class="sd">    If H3 cannot compute the distance, for example because the cells are too far apart, Sedona estimates the</span>
+<span class="sd">    shortest path and returns its length.</span>
+
+<span class="sd">    :param cell1: First H3 cell ID.</span>
+<span class="sd">    :type cell1: Union[ColumnOrName, int]</span>
+<span class="sd">    :param cell2: Second H3 cell ID.</span>
+<span class="sd">    :type cell2: Union[ColumnOrName, int]</span>
+<span class="sd">    :return: Number of grid steps between the cells.</span>
+<span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
     <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">cell1</span><span class="p">,</span> <span class="n">cell2</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">"ST_H3CellDistance"</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
@@ -1692,12 +1705,14 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_LineSegments</span><span class="p">(</span>
     <span class="n">geom</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">lenient</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""</span>
-<span class="sd">    Convert multi-coordinate LineString into an array of LineStrings that contain exactly 2 points.</span>
+<span class="w">    </span><span class="sd">"""Convert multi-coordinate LineString into an array of LineStrings that contain exactly 2 points.</span>
 
-<span class="sd">    @param geom: input LineString geometry column.</span>
-<span class="sd">    @param lenient: suppresses exception</span>
-<span class="sd">    @return: array of LineStrings</span>
+<span class="sd">    :param geom: Input LineString geometry column.</span>
+<span class="sd">    :type geom: ColumnOrName</span>
+<span class="sd">    :param lenient: Whether to suppress the error raised when the input is not a LineString. Default is True.</span>
+<span class="sd">    :type lenient: Optional[Union[ColumnOrName, bool]], optional</span>
+<span class="sd">    :return: Array of LineStrings.</span>
+<span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
     <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">lenient</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">lenient</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1734,13 +1749,13 @@
     <span class="n">measure</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
     <span class="n">offset</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""return locations along a measure geometry that have the given measure value.</span>
+<span class="w">    </span><span class="sd">"""Return locations along a measure geometry that have the given measure value.</span>
 
-<span class="sd">    :param geom:</span>
+<span class="sd">    :param geom: Measured LineString or MultiLineString geometry column.</span>
 <span class="sd">    :type geom: ColumnOrName</span>
-<span class="sd">    :param measure:</span>
+<span class="sd">    :param measure: Measure value to locate.</span>
 <span class="sd">    :type measure: Union[ColumnOrName, float]</span>
-<span class="sd">    :param offset:</span>
+<span class="sd">    :param offset: Distance to offset the located points by. Positive values move them to the left of the line, negative values to the right.</span>
 <span class="sd">    :type offset: Union[ColumnOrNameOrNumber, float]</span>
 <span class="sd">    :return: Locations along a measure geometry that have the given measure value.</span>
 <span class="sd">    :rtype: Column</span>
@@ -1753,9 +1768,9 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_LongestLine</span><span class="p">(</span><span class="n">geom1</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">geom2</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Compute the longest line between the two geometries</span>
 
-<span class="sd">    :param geom1:</span>
+<span class="sd">    :param geom1: First geometry column.</span>
 <span class="sd">    :type geom1: ColumnOrName</span>
-<span class="sd">    :param geom2:</span>
+<span class="sd">    :param geom2: Second geometry column.</span>
 <span class="sd">    :type geom2: ColumnOrName</span>
 <span class="sd">    :return: Longest line between the two input geometries</span>
 <span class="sd">    :rtype: Column</span>
@@ -1791,8 +1806,8 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_M</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the M coordinate of a point geometry.</span>
 
-<span class="sd">    :param point: Point geometry column to get the coordinate for.</span>
-<span class="sd">    :type point: ColumnOrName</span>
+<span class="sd">    :param geom: Point geometry column to get the coordinate for.</span>
+<span class="sd">    :type geom: ColumnOrName</span>
 <span class="sd">    :return: M coordinate of the point geometry as a double column.</span>
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
@@ -1803,8 +1818,8 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_MMin</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the minimum M coordinate of a geometry.</span>
 
-<span class="sd">    :param geometry: Geometry column to get the minimum M coordinate from.</span>
-<span class="sd">    :type geometry: ColumnOrName</span>
+<span class="sd">    :param geom: Geometry column to get the minimum M coordinate from.</span>
+<span class="sd">    :type geom: ColumnOrName</span>
 <span class="sd">    :return: Minimum M coordinate for the geometry as a double column.</span>
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
@@ -1815,9 +1830,9 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_MMax</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the maximum M coordinate of a geometry.</span>
 
-<span class="sd">    :param geometry: Geometry column to get the maximum M coordinate from.</span>
-<span class="sd">    :type geometry: ColumnOrName</span>
-<span class="sd">    :return: Minimum M coordinate for the geometry as a double column.</span>
+<span class="sd">    :param geom: Geometry column to get the maximum M coordinate from.</span>
+<span class="sd">    :type geom: ColumnOrName</span>
+<span class="sd">    :return: Maximum M coordinate for the geometry as a double column.</span>
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
     <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">"ST_MMax"</span><span class="p">,</span> <span class="n">geom</span><span class="p">)</span></div>
@@ -1846,10 +1861,14 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Returns the perimeter of a Polygon/MultiPolygon geometries. Otherwise, returns 0</span>
 
-<span class="sd">    @param geom: Polygonal geometry</span>
-<span class="sd">    @param use_spheroid: Use Spheroid</span>
-<span class="sd">    @param lenient: suppresses the exception</span>
-<span class="sd">    @return: Perimeter of a Polygon/MultiPolygon geometries</span>
+<span class="sd">    :param geom: Polygonal geometry</span>
+<span class="sd">    :type geom: ColumnOrName</span>
+<span class="sd">    :param use_spheroid: Whether to compute the geodesic perimeter in meters on the WGS84 spheroid.</span>
+<span class="sd">    :type use_spheroid: Optional[Union[ColumnOrName, bool]], optional</span>
+<span class="sd">    :param lenient: With use_spheroid, whether to assume the geometry uses EPSG:4326 instead of raising an error. Default is True.</span>
+<span class="sd">    :type lenient: Optional[Union[ColumnOrName, bool]], optional</span>
+<span class="sd">    :return: Perimeter of a Polygon/MultiPolygon geometries</span>
+<span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
 
     <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">use_spheroid</span><span class="p">,</span> <span class="n">lenient</span><span class="p">)</span>
@@ -1870,10 +1889,16 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Returns the perimeter of a Polygon/MultiPolygon geometries. Otherwise, returns 0</span>
 
-<span class="sd">    @param geom: Polygonal geometry</span>
-<span class="sd">    @param use_spheroid: Use Spheroid</span>
-<span class="sd">    @param lenient: suppresses the exception</span>
-<span class="sd">    @return: Perimeter of a Polygon/MultiPolygon geometries</span>
+<span class="sd">    This is an alias of ST_Perimeter.</span>
+
+<span class="sd">    :param geom: Polygonal geometry</span>
+<span class="sd">    :type geom: ColumnOrName</span>
+<span class="sd">    :param use_spheroid: Whether to compute the geodesic perimeter in meters on the WGS84 spheroid.</span>
+<span class="sd">    :type use_spheroid: Optional[Union[ColumnOrName, bool]], optional</span>
+<span class="sd">    :param lenient: With use_spheroid, whether to assume the geometry uses EPSG:4326 instead of raising an error. Default is True.</span>
+<span class="sd">    :type lenient: Optional[Union[ColumnOrName, bool]], optional</span>
+<span class="sd">    :return: Perimeter of a Polygon/MultiPolygon geometries</span>
+<span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
 
     <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">use_spheroid</span><span class="p">,</span> <span class="n">lenient</span><span class="p">)</span>
@@ -1933,11 +1958,16 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Calculates a new point location given a starting point, distance, and direction (azimuth).</span>
 
-<span class="sd">    @param geom:</span>
-<span class="sd">    @param distance:</span>
-<span class="sd">    @param azimuth:</span>
-<span class="sd">    @param lenient:</span>
-<span class="sd">    @return:</span>
+<span class="sd">    :param geom: Starting Point geometry column.</span>
+<span class="sd">    :type geom: ColumnOrName</span>
+<span class="sd">    :param distance: Distance to move from the starting point.</span>
+<span class="sd">    :type distance: Union[ColumnOrName, float]</span>
+<span class="sd">    :param azimuth: Direction in radians, measured clockwise from true north.</span>
+<span class="sd">    :type azimuth: Union[ColumnOrName, float]</span>
+<span class="sd">    :param lenient: Whether to suppress the error raised when the input is not a Point. Default is False.</span>
+<span class="sd">    :type lenient: Optional[Union[ColumnOrName, bool]], optional</span>
+<span class="sd">    :return: Projected point geometry.</span>
+<span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
     <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">azimuth</span><span class="p">,</span> <span class="n">lenient</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">lenient</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -2010,9 +2040,9 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_MaxDistance</span><span class="p">(</span><span class="n">geom1</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">geom2</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Calculate the maximum distance between two furthest points in the geometries</span>
 
-<span class="sd">    :param geom1:</span>
+<span class="sd">    :param geom1: First geometry column.</span>
 <span class="sd">    :type geom1: ColumnOrName</span>
-<span class="sd">    :param geom2:</span>
+<span class="sd">    :param geom2: Second geometry column.</span>
 <span class="sd">    :type geom2: ColumnOrName</span>
 <span class="sd">    :return: Maximum distance between the geometries</span>
 <span class="sd">    :rtype: Column</span>
@@ -2259,11 +2289,12 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Removes duplicate coordinates from a geometry, optionally removing those within a specified distance tolerance.</span>
 
-<span class="sd">    @param geom: Geometry with repeated points</span>
-<span class="sd">    @type geom: ColumnOrName</span>
-<span class="sd">    @param tolerance: Tolerance for removing nearby coordinates</span>
-<span class="sd">    @type tolerance: Optional[Union[ColumnOrName, float]]</span>
-<span class="sd">    @return:</span>
+<span class="sd">    :param geom: Geometry with repeated points</span>
+<span class="sd">    :type geom: ColumnOrName</span>
+<span class="sd">    :param tolerance: Tolerance for removing nearby coordinates</span>
+<span class="sd">    :type tolerance: Optional[Union[ColumnOrName, float]]</span>
+<span class="sd">    :return: Geometry without the repeated points.</span>
+<span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
     <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">tolerance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -2530,13 +2561,15 @@
     <span class="n">vertexFactor</span><span class="p">:</span> <span class="n">ColumnOrNameOrNumber</span><span class="p">,</span>
     <span class="n">isOuter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Simplify a geometry using Visvalingam-Whyatt algorithm within a specified tolerance while preserving topological relationships.</span>
+<span class="w">    </span><span class="sd">"""Compute a topology-preserving simplified outer or inner hull of a polygonal geometry.</span>
 
-<span class="sd">    :param geometry: Geometry column to simplify.</span>
+<span class="sd">    :param geometry: Polygonal geometry column to simplify.</span>
 <span class="sd">    :type geometry: ColumnOrName</span>
-<span class="sd">    :param vertexFactor: Tolerance for merging points together to simplify the geometry as either a number or numeric column.</span>
+<span class="sd">    :param vertexFactor: Fraction of the vertices to keep, from 0 to 1, as either a number or numeric column. Lower values give simpler hulls; 1.0 returns the original geometry.</span>
 <span class="sd">    :type vertexFactor: ColumnOrNameOrNumber</span>
-<span class="sd">    :return: Simplified geometry as a geometry column.</span>
+<span class="sd">    :param isOuter: Whether to compute an outer hull, which encloses the input, rather than an inner hull, which lies within it. Default is True.</span>
+<span class="sd">    :type isOuter: Optional[Union[ColumnOrName, bool]], optional</span>
+<span class="sd">    :return: Simplified hull as a geometry column.</span>
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
     <span class="n">args</span> <span class="o">=</span> <span class="p">(</span>
@@ -2855,12 +2888,12 @@
     <span class="n">zValue</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
     <span class="n">mValue</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""</span>
-<span class="sd">    Return a geometry with a 4D coordinate of value 'zValue' and mValue forced upon it. No change happens if the</span>
+<span class="w">    </span><span class="sd">"""Return a geometry with a 4D coordinate of value 'zValue' and mValue forced upon it. No change happens if the</span>
 <span class="sd">    geometry is already 4D, if geometry either has z or m, it will not change the existing z or m value.</span>
 
-<span class="sd">    :param zValue: Optional value of z coordinate to be potentially added, default value is 0.0</span>
 <span class="sd">    :param geometry: Geometry column to make 4D</span>
+<span class="sd">    :param zValue: Optional value of z coordinate to be potentially added, default value is 0.0</span>
+<span class="sd">    :param mValue: Optional value of m coordinate to be potentially added, default value is 0.0</span>
 <span class="sd">    :return: 4D geometry with either already 4D geom or z and m component provided by zValue and mValue respectively</span>
 <span class="sd">    """</span>
     <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">zValue</span><span class="p">,</span> <span class="n">mValue</span><span class="p">)</span>
@@ -2958,11 +2991,11 @@
 
 <div class="viewcode-block" id="ST_FrechetDistance"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_FrechetDistance">[docs]</a><span class="nd">@validate_argument_types</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_FrechetDistance</span><span class="p">(</span><span class="n">g1</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">g2</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""</span>
-<span class="sd">    Computes discrete frechet distance between the two geometries.</span>
+<span class="w">    </span><span class="sd">"""Computes discrete frechet distance between the two geometries.</span>
 <span class="sd">    If any of the geometry is empty, ST_FrechetDistance returns 0</span>
-<span class="sd">    :param g1:</span>
-<span class="sd">    :param g2:</span>
+
+<span class="sd">    :param g1: First geometry column.</span>
+<span class="sd">    :param g2: Second geometry column.</span>
 <span class="sd">    :return: Computed Discrete Frechet Distance between g1 and g2</span>
 <span class="sd">    """</span>
 
@@ -2986,24 +3019,27 @@
     <span class="n">i</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">zOff</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""</span>
-<span class="sd">    Apply a 3D/2D affine transformation to the given geometry</span>
+<span class="w">    </span><span class="sd">"""Apply a 3D/2D affine transformation to the given geometry.</span>
+
 <span class="sd">    x = a * x + b * y + c * z + xOff | x = a * x + b * y + xOff</span>
 <span class="sd">    y = d * x + e * y + f * z + yOff | y = d * x + e * y + yOff</span>
 <span class="sd">    z = g * x + h * y + i * z + zOff</span>
+
+<span class="sd">    The 3D form is used only when c, f, g, h, i and zOff are all given.</span>
+
 <span class="sd">    :param geometry: Geometry to apply affine transformation to</span>
-<span class="sd">    :param a:</span>
-<span class="sd">    :param b:</span>
-<span class="sd">    :param c: Default 0.0</span>
-<span class="sd">    :param d:</span>
-<span class="sd">    :param e:</span>
-<span class="sd">    :param f: Default 0.0</span>
-<span class="sd">    :param g: Default 0.0</span>
-<span class="sd">    :param h: Default 0.0</span>
-<span class="sd">    :param i: Default 0.0</span>
-<span class="sd">    :param xOff:</span>
-<span class="sd">    :param yOff:</span>
-<span class="sd">    :param zOff: Default 0.0</span>
+<span class="sd">    :param a: Coefficient of x in the new x value.</span>
+<span class="sd">    :param b: Coefficient of y in the new x value.</span>
+<span class="sd">    :param c: Coefficient of z in the new x value. Default 0.0</span>
+<span class="sd">    :param d: Coefficient of x in the new y value.</span>
+<span class="sd">    :param e: Coefficient of y in the new y value.</span>
+<span class="sd">    :param f: Coefficient of z in the new y value. Default 0.0</span>
+<span class="sd">    :param g: Coefficient of x in the new z value. Default 0.0</span>
+<span class="sd">    :param h: Coefficient of y in the new z value. Default 0.0</span>
+<span class="sd">    :param i: Coefficient of z in the new z value. Default 0.0</span>
+<span class="sd">    :param xOff: Offset added to the new x value.</span>
+<span class="sd">    :param yOff: Offset added to the new y value.</span>
+<span class="sd">    :param zOff: Offset added to the new z value. Default 0.0</span>
 <span class="sd">    :return: Geometry with affine transformation applied</span>
 <span class="sd">    """</span>
     <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">xOff</span><span class="p">,</span> <span class="n">yOff</span><span class="p">)</span>
@@ -3075,14 +3111,13 @@
     <span class="n">tolerance</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">flag</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""</span>
-<span class="sd">    Computes the Delaunay Triangles of the vertices of the input geometry.</span>
+<span class="w">    </span><span class="sd">"""Computes the Delaunay Triangles of the vertices of the input geometry.</span>
 
 <span class="sd">    :param geometry: Input geometry</span>
 <span class="sd">    :type geometry: ColumnOrName</span>
-<span class="sd">    :param tolerance:</span>
+<span class="sd">    :param tolerance: Distance within which input vertices are snapped together before triangulating. Default is 0.</span>
 <span class="sd">    :type tolerance: ColumnOrName or float</span>
-<span class="sd">    :param flag: Selects the output type</span>
+<span class="sd">    :param flag: Selects the output type: 0 (default) for a GeometryCollection of triangular Polygons, or 1 for a MultiLineString of the triangulation's edges.</span>
 <span class="sd">    :type flag: ColumnOrName or int</span>
 <span class="sd">    :return: Delaunay triangles of the input geometry</span>
 <span class="sd">    :rtype: ColumnOrName</span>
@@ -3103,13 +3138,13 @@
     <span class="n">g2</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span>
     <span class="n">densityFrac</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""</span>
-<span class="sd">    Returns discretized (and hence approximate) hausdorff distance between two given geometries.</span>
+<span class="w">    </span><span class="sd">"""Returns discretized (and hence approximate) hausdorff distance between two given geometries.</span>
 <span class="sd">    Optionally, a distance fraction can also be provided which decreases the gap between actual and discretized hausforff distance</span>
-<span class="sd">    :param g1:</span>
-<span class="sd">    :param g2:</span>
-<span class="sd">    :param densityFrac: Optional</span>
-<span class="sd">    :return:</span>
+
+<span class="sd">    :param g1: First geometry column.</span>
+<span class="sd">    :param g2: Second geometry column.</span>
+<span class="sd">    :param densityFrac: Optional fraction in (0.0, 1.0] by which each segment is densified before computing the distance. Lower values are more accurate and slower.</span>
+<span class="sd">    :return: Hausdorff distance between g1 and g2, or null if either geometry is empty.</span>
 <span class="sd">    """</span>
     <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">,</span> <span class="n">densityFrac</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">"ST_HausdorffDistance"</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
@@ -3147,10 +3182,14 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Scale geometry with X and Y axis.</span>
 
-<span class="sd">    @param geometry:</span>
-<span class="sd">    @param scaleX:</span>
-<span class="sd">    @param scaleY:</span>
-<span class="sd">    @return:</span>
+<span class="sd">    :param geometry: Geometry column to scale.</span>
+<span class="sd">    :type geometry: ColumnOrName</span>
+<span class="sd">    :param scaleX: Factor to multiply the X ordinates by.</span>
+<span class="sd">    :type scaleX: Union[ColumnOrNameOrNumber, float]</span>
+<span class="sd">    :param scaleY: Factor to multiply the Y ordinates by.</span>
+<span class="sd">    :type scaleY: Union[ColumnOrNameOrNumber, float]</span>
+<span class="sd">    :return: Scaled geometry.</span>
+<span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
     <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">"ST_Scale"</span><span class="p">,</span> <span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">scaleX</span><span class="p">,</span> <span class="n">scaleY</span><span class="p">))</span></div>
 
@@ -3159,12 +3198,16 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_ScaleGeom</span><span class="p">(</span>
     <span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">factor</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Scale geometry with the corodinates of factor geometry</span>
+<span class="w">    </span><span class="sd">"""Scale geometry with the coordinates of factor geometry</span>
 
-<span class="sd">    @param geometry:</span>
-<span class="sd">    @param factor:</span>
-<span class="sd">    @param origin:</span>
-<span class="sd">    @return:</span>
+<span class="sd">    :param geometry: Geometry column to scale.</span>
+<span class="sd">    :type geometry: ColumnOrName</span>
+<span class="sd">    :param factor: Geometry whose coordinates are the scale factors for each axis.</span>
+<span class="sd">    :type factor: ColumnOrName</span>
+<span class="sd">    :param origin: Geometry to scale relative to. If not set, the geometry is scaled relative to the true origin.</span>
+<span class="sd">    :type origin: Optional[ColumnOrName], optional</span>
+<span class="sd">    :return: Scaled geometry.</span>
+<span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">factor</span><span class="p">,</span> <span class="n">origin</span><span class="p">)</span>
@@ -3177,11 +3220,12 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_RotateX</span><span class="p">(</span><span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Returns geometry rotated by the given angle in X axis</span>
 
-<span class="sd">    @param geometry: Geometry column or name</span>
+<span class="sd">    :param geometry: Geometry column or name</span>
 <span class="sd">    :type geometry: ColumnOrName</span>
-<span class="sd">    @param angle: Rotation angle in radians</span>
-<span class="sd">    :type angle: float</span>
-<span class="sd">    @return: X-axis rotated geometry</span>
+<span class="sd">    :param angle: Rotation angle in radians</span>
+<span class="sd">    :type angle: Union[ColumnOrName, float]</span>
+<span class="sd">    :return: X-axis rotated geometry</span>
+<span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
 
     <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">"ST_RotateX"</span><span class="p">,</span> <span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">angle</span><span class="p">))</span></div>
@@ -3191,11 +3235,12 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_RotateY</span><span class="p">(</span><span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Returns geometry rotated by the given angle in Y axis</span>
 
-<span class="sd">    @param geometry: Geometry column or name</span>
+<span class="sd">    :param geometry: Geometry column or name</span>
 <span class="sd">    :type geometry: ColumnOrName</span>
-<span class="sd">    @param angle: Rotation angle in radians</span>
-<span class="sd">    :type angle: float</span>
-<span class="sd">    @return: Y-axis rotated geometry</span>
+<span class="sd">    :param angle: Rotation angle in radians</span>
+<span class="sd">    :type angle: Union[ColumnOrName, float]</span>
+<span class="sd">    :return: Y-axis rotated geometry</span>
+<span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
 
     <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">"ST_RotateY"</span><span class="p">,</span> <span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">angle</span><span class="p">))</span></div>
@@ -3258,15 +3303,16 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Perform DBSCAN clustering on the given geometry column.</span>
 
-<span class="sd">    @param geometry: Geometry column or name</span>
+<span class="sd">    :param geometry: Geometry column or name.</span>
 <span class="sd">    :type geometry: ColumnOrName</span>
-<span class="sd">    @param epsilon: the distance between two points to be considered neighbors</span>
-<span class="sd">    :type epsilon: ColumnOrName</span>
-<span class="sd">    @param min_pts: the number of neighbors a point should have to form a cluster</span>
-<span class="sd">    :type min_pts: ColumnOrName</span>
-<span class="sd">    @param use_spheroid: whether to use spheroid for distance calculation</span>
-<span class="sd">    :type use_spheroid: ColumnOrName</span>
-<span class="sd">    @return: A struct indicating the cluster to which the point belongs and whether it is a core point</span>
+<span class="sd">    :param epsilon: Maximum distance between two points for them to be considered neighbors.</span>
+<span class="sd">    :type epsilon: Union[ColumnOrName, float]</span>
+<span class="sd">    :param min_pts: Minimum number of neighbors a point must have to form a cluster.</span>
+<span class="sd">    :type min_pts: Union[ColumnOrName, int]</span>
+<span class="sd">    :param use_spheroid: Whether to use ST_DistanceSpheroid instead of ST_Distance as the distance metric. Default is False.</span>
+<span class="sd">    :type use_spheroid: Optional[Union[ColumnOrName, bool]], optional</span>
+<span class="sd">    :return: Struct with the cluster the point belongs to and whether it is a core point.</span>
+<span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">epsilon</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
@@ -3289,13 +3335,14 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Calculate the local outlier factor on the given geometry column.</span>
 
-<span class="sd">    @param geometry: Geometry column or name</span>
+<span class="sd">    :param geometry: Geometry column or name.</span>
 <span class="sd">    :type geometry: ColumnOrName</span>
-<span class="sd">    @param k: the number of neighbors to use for LOF calculation</span>
-<span class="sd">    :type k: ColumnOrName</span>
-<span class="sd">    @param use_spheroid: whether to use spheroid for distance calculation</span>
-<span class="sd">    :type use_spheroid: ColumnOrName</span>
-<span class="sd">    @return: A Double indicating the local outlier factor of the point</span>
+<span class="sd">    :param k: Number of nearest neighbors to use for the LOF calculation.</span>
+<span class="sd">    :type k: Union[ColumnOrName, int]</span>
+<span class="sd">    :param use_spheroid: Whether to measure distances on a spherical model of the earth. Default is False.</span>
+<span class="sd">    :type use_spheroid: Optional[Union[ColumnOrName, bool]], optional</span>
+<span class="sd">    :return: Local outlier factor of the point as a double. Values substantially above 1 indicate an outlier.</span>
+<span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
@@ -3315,13 +3362,14 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Calculate Getis Ord Gi(*) statistics on the given column.</span>
 
-<span class="sd">    @param x: The variable we want to compute Gi statistics for</span>
+<span class="sd">    :param x: The variable to compute Gi statistics for.</span>
 <span class="sd">    :type x: ColumnOrName</span>
-<span class="sd">    @param weights: the weights array containing the neighbors, their weights, and their values of x</span>
+<span class="sd">    :param weights: The weights array containing the neighbors, their weights, and their values of x, such as the column ST_BinaryDistanceBandColumn or ST_WeightedDistanceBandColumn creates.</span>
 <span class="sd">    :type weights: ColumnOrName</span>
-<span class="sd">    @param star: whether to use the focal observation in the calculations</span>
-<span class="sd">    :type star: ColumnOrName</span>
-<span class="sd">    @return: A struct containing the Gi statistics including a p value</span>
+<span class="sd">    :param star: Whether to include the focal observation in the calculations, computing Gi* instead of Gi. Default is False.</span>
+<span class="sd">    :type star: Optional[Union[ColumnOrName, bool]], optional</span>
+<span class="sd">    :return: Struct with the G, EG, VG, Z and P statistics.</span>
+<span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">star</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
@@ -3343,14 +3391,20 @@
 
 <span class="sd">    Weights will always be 1.0.</span>
 
-
-<span class="sd">    @param geometry: name of the geometry column</span>
-<span class="sd">    @param threshold: Distance threshold for considering neighbors</span>
-<span class="sd">    @param include_zero_distance_neighbors: whether to include neighbors that are 0 distance.</span>
-<span class="sd">    @param include_self: whether to include self in the list of neighbors</span>
-<span class="sd">    @param use_spheroid: whether to use a cartesian or spheroidal distance calculation. Default is false</span>
-<span class="sd">    @param attributes: the attributes to save in the neighbor column.</span>
-
+<span class="sd">    :param geometry: Geometry column or name.</span>
+<span class="sd">    :type geometry: ColumnOrName</span>
+<span class="sd">    :param threshold: Distance threshold for considering neighbors.</span>
+<span class="sd">    :type threshold: ColumnOrName</span>
+<span class="sd">    :param include_zero_distance_neighbors: Whether to include neighbors that are 0 distance. Default is True.</span>
+<span class="sd">    :type include_zero_distance_neighbors: Union[ColumnOrName, bool]</span>
+<span class="sd">    :param include_self: Whether to include the record itself in its list of neighbors. Default is False.</span>
+<span class="sd">    :type include_self: Union[ColumnOrName, bool]</span>
+<span class="sd">    :param use_spheroid: Whether to use a cartesian or spheroidal distance calculation. Default is False.</span>
+<span class="sd">    :type use_spheroid: Union[ColumnOrName, bool]</span>
+<span class="sd">    :param attributes: Struct column of the attributes to save for each neighbor.</span>
+<span class="sd">    :type attributes: ColumnOrName</span>
+<span class="sd">    :return: Array of structs with each neighbor's attributes and its weight.</span>
+<span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">include_zero_distance_neighbors</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
         <span class="n">include_zero_distance_neighbors</span> <span class="o">=</span> <span class="n">lit</span><span class="p">(</span><span class="n">include_zero_distance_neighbors</span><span class="p">)</span>

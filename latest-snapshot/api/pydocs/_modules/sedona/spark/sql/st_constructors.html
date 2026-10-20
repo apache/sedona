@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.st_constructors &mdash; Apache Sedona Python Documentation</title>
@@ -320,6 +319,8 @@
 
 <span class="sd">    :param wkt: WKT string column to generate from.</span>
 <span class="sd">    :type wkt: ColumnOrName</span>
+<span class="sd">    :param srid: SRID to set on the geometry, as an integer or integer column. Defaults to 0 (unknown).</span>
+<span class="sd">    :type srid: Optional[ColumnOrNameOrNumber], optional</span>
 <span class="sd">    :return: Geometry column representing the WKT string.</span>
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
@@ -337,6 +338,8 @@
 
 <span class="sd">    :param wkt: WKT string column to generate from.</span>
 <span class="sd">    :type wkt: ColumnOrName</span>
+<span class="sd">    :param srid: SRID to set on the geometry, as an integer or integer column. Defaults to 0 (unknown).</span>
+<span class="sd">    :type srid: Optional[ColumnOrNameOrNumber], optional</span>
 <span class="sd">    :return: Geometry column representing the WKT string.</span>
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
@@ -378,6 +381,8 @@
 
 <span class="sd">    :param wkt: WKT string column to generate from.</span>
 <span class="sd">    :type wkt: ColumnOrName</span>
+<span class="sd">    :param srid: SRID to set on the geometry, as an integer or integer column. Defaults to 0 (unknown).</span>
+<span class="sd">    :type srid: Optional[ColumnOrNameOrNumber], optional</span>
 <span class="sd">    :return: Geometry column representing the WKT string.</span>
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
@@ -394,6 +399,8 @@
 
 <span class="sd">    :param wkt: WKT string column to generate from.</span>
 <span class="sd">    :type wkt: ColumnOrName</span>
+<span class="sd">    :param srid: SRID to set on the geography, as an integer or integer column. Defaults to 0 (unknown).</span>
+<span class="sd">    :type srid: Optional[ColumnOrNameOrNumber], optional</span>
 <span class="sd">    :return: Geography column representing the WKT string.</span>
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
@@ -411,6 +418,8 @@
 
 <span class="sd">    :param wkt: WKT string column to generate from.</span>
 <span class="sd">    :type wkt: ColumnOrName</span>
+<span class="sd">    :param srid: SRID to set on the geography, as an integer or integer column. Defaults to 0 (unknown).</span>
+<span class="sd">    :type srid: Optional[ColumnOrNameOrNumber], optional</span>
 <span class="sd">    :return: Geography column representing the WKT string.</span>
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
@@ -427,6 +436,8 @@
 
 <span class="sd">    :param wkb: WKB binary column to generate from.</span>
 <span class="sd">    :type wkb: ColumnOrName</span>
+<span class="sd">    :param srid: SRID to set on the geography, as an integer or integer column.</span>
+<span class="sd">    :type srid: Optional[ColumnOrNameOrNumber], optional</span>
 <span class="sd">    :return: Geography column representing the WKB binary.</span>
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
@@ -603,14 +614,14 @@
     <span class="n">m</span><span class="p">:</span> <span class="n">ColumnOrNameOrNumber</span><span class="p">,</span>
     <span class="n">srid</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ColumnOrNameOrNumber</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Generates a 3D point geometry column from numeric values.</span>
+<span class="w">    </span><span class="sd">"""Generates a point geometry column with an M coordinate from numeric values.</span>
 
 <span class="sd">    :param x: Either a number or numeric column representing the X coordinate of a point.</span>
 <span class="sd">    :type x: ColumnOrNameOrNumber</span>
 <span class="sd">    :param y: Either a number or numeric column representing the Y coordinate of a point.</span>
 <span class="sd">    :type y: ColumnOrNameOrNumber</span>
-<span class="sd">    :param z: Either a number or numeric column representing the Z coordinate of a point, if None then a 2D point is generated, defaults to None</span>
-<span class="sd">    :type z: ColumnOrNameOrNumber</span>
+<span class="sd">    :param m: Either a number or numeric column representing the M coordinate of a point.</span>
+<span class="sd">    :type m: ColumnOrNameOrNumber</span>
 <span class="sd">    :param srid: The srid of the point. Defaults to 0 (unknown).</span>
 <span class="sd">    :type srid: Optional[ColumnOrNameOrNumber], optional</span>
 <span class="sd">    :return: Point geometry column generated from the coordinate values.</span>
@@ -895,6 +906,8 @@
 
 <span class="sd">    :param wkt: multiPolygon WKT string column to generate from.</span>
 <span class="sd">    :type wkt: ColumnOrName</span>
+<span class="sd">    :param srid: SRID to set on the geometry, as an integer or integer column. Defaults to 0 (unknown).</span>
+<span class="sd">    :type srid: Optional[ColumnOrNameOrNumber], optional</span>
 <span class="sd">    :return: multiPolygon geometry generated from the wkt column.</span>
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
@@ -911,6 +924,8 @@
 
 <span class="sd">    :param wkt: multiLineString WKT string column to generate from.</span>
 <span class="sd">    :type wkt: ColumnOrName</span>
+<span class="sd">    :param srid: SRID to set on the geometry, as an integer or integer column. Defaults to 0 (unknown).</span>
+<span class="sd">    :type srid: Optional[ColumnOrNameOrNumber], optional</span>
 <span class="sd">    :return: multiLineString geometry generated from the wkt column.</span>
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
