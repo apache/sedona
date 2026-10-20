@@ -25,21 +25,23 @@ default_language_version:
 minimum_prek_version: '0.4.11'
 # lint-* aliases share one priority so independent, read-only checks run
 # concurrently (see https://github.com/apache/sedona/issues/3080). Hooks
-# that rewrite files keep strictly increasing integer priorities instead,
-# since some of them touch the same files and prek only parallelizes
-# safely when hooks sharing a priority don't mutate the same files.
+# that rewrite files keep increasing integer priorities instead, since
+# some of them touch the same files and prek only parallelizes safely
+# when hooks sharing a priority don't mutate the same files. Those
+# integers are spaced by 10 (0, 10, 20, ...) so a new hook can be slotted
+# in later without renumbering every hook after it.
 priorities:
-  lint-actions: 100
-  lint-docs: 100
-  lint-generic: 100
-  lint-json: 100
-  lint-makefile: 100
-  lint-python: 100
-  lint-rst: 100
-  lint-shell: 100
-  lint-toml: 100
-  lint-xml: 100
-  lint-yaml: 100
+  lint-actions: 1000
+  lint-docs: 1000
+  lint-generic: 1000
+  lint-json: 1000
+  lint-makefile: 1000
+  lint-python: 1000
+  lint-rst: 1000
+  lint-shell: 1000
+  lint-toml: 1000
+  lint-xml: 1000
+  lint-yaml: 1000
 repos:
   - repo: meta
     hooks:
@@ -50,7 +52,7 @@ repos:
       - id: check-hooks-apply
         name: run check hooks apply
         description: check that all the hooks apply to the repository
-        priority: 1
+        priority: 0
   - repo: https://github.com/thlorenz/doctoc.git
     rev: 59dcae910a6ad4bbe8711275b854e3cd5c30f08b # frozen: v2.5.0
     hooks:
@@ -58,7 +60,7 @@ repos:
         name: add TOC for Markdown files
         description: automatically keeps your table of contents up to date
         files: ^README\.md$
-        priority: 2
+        priority: 10
   - repo: local
     hooks:
       - id: docs-overrides-install
@@ -69,7 +71,7 @@ repos:
         files: ^docs-overrides/(package\.json|package-lock\.json)$
         description: Ensures local node_modules match the lockfile
         stages: [manual]
-        priority: 3
+        priority: 20
       - id: zeppelin-install
         name: Install Zeppelin Node dependencies
         description: Ensures local node_modules match the lockfile
@@ -78,7 +80,7 @@ repos:
         pass_filenames: false
         files: ^zeppelin/(package\.json|package-lock\.json)$
         stages: [manual]
-        priority: 4
+        priority: 30
       - id: prettier
         name: run prettier
         description: format files with prettier
@@ -87,7 +89,7 @@ repos:
         language: node
         additional_dependencies: ['prettier@3.8.4']
         pass_filenames: false
-        priority: 5
+        priority: 40
       - id: maven-spotless-apply
         name: maven spotless apply
         description: automatically formats Java and Scala code using mvn spotless:apply.
@@ -97,7 +99,7 @@ repos:
         pass_filenames: false # Crucial: tells pre-commit NOT to pass filenames as arguments to 'mvn spotless:apply'. Spotless typically scans the whole project based on its configuration.
         always_run: true # Ensures this hook runs even if no Java files are changed. This is useful for spotless:apply which might affect files not staged.
         stages: [manual]
-        priority: 6
+        priority: 50
       - id: check-zip-file-is-not-committed
         name: check no zip files are committed
         description: Zip files are not allowed in the repository
@@ -116,7 +118,7 @@ repos:
         pass_filenames: true # <-- Crucial change: pass filenames to the script
         types: [file] # Ensure only regular files are passed, not directories
         stages: [manual]
-        priority: 7
+        priority: 60
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: ad1b27d73581aa16cca06fc4a0761fc563ffe8e8 # frozen: v1.5.6
     hooks:
@@ -126,7 +128,7 @@ repos:
         args: ['644']
         files: \.md$
         stages: [manual]
-        priority: 8
+        priority: 70
       - id: insert-license
         name: add license for all Batch files
         description: automatically adds a licence header to all Batch files that don't have a license header
@@ -137,7 +139,7 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-        priority: 9
+        priority: 80
       - id: insert-license
         name: add license for all .c files
         description: automatically adds a licence header to all C files that don't have a license header
@@ -148,7 +150,7 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-        priority: 10
+        priority: 90
       - id: insert-license
         name: add license for all .h files
         description: automatically adds a licence header to all header files that don't have a license header
@@ -159,7 +161,7 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-        priority: 11
+        priority: 100
       - id: insert-license
         name: add license for all ini files
         description: automatically adds a licence header to all ini files that don't have a license header
@@ -170,7 +172,7 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-        priority: 12
+        priority: 110
       - id: insert-license
         name: add license for all Java files
         description: automatically adds a licence header to all Java files that don't have a license header
@@ -181,7 +183,7 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-        priority: 13
+        priority: 120
       - id: insert-license
         name: add license for all Markdown files
         description: automatically adds a licence header to all Markdown files that don't have a license header
@@ -199,7 +201,7 @@ repos:
             docs/blog/.*\.md|
             docs/index\.md
           )$
-        priority: 14
+        priority: 130
       - id: insert-license
         name: add license for all R Markdown files
         description: automatically adds a licence header to all R Markdown files that don't have a license header
@@ -210,7 +212,7 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-        priority: 15
+        priority: 140
       - id: insert-license
         name: add license for all Makefile files
         description: automatically adds a licence header to all Makefiles that don't have a license header
@@ -221,7 +223,7 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-        priority: 16
+        priority: 150
       - id: insert-license
         name: add license for all R files
         description: automatically adds a licence header to all R files that don't have a license header
@@ -232,7 +234,7 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-        priority: 17
+        priority: 160
       - id: insert-license
         name: add license for all Scala files
         description: automatically adds a licence header to all Scala files that don't have a license header
@@ -243,7 +245,7 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-        priority: 18
+        priority: 170
       - id: insert-license
         name: add license for all Shell files
         description: automatically adds a licence header to all Shell files that don't have a license header
@@ -254,7 +256,7 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-        priority: 19
+        priority: 180
       - id: insert-license
         name: add license for all TOML files
         description: automatically adds a licence header to all TOML files that don't have a license header
@@ -265,7 +267,7 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-        priority: 20
+        priority: 190
       - id: insert-license
         name: add license for all XML files
         description: automatically adds a licence header to all XML files that don't have a license header
@@ -282,7 +284,7 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-        priority: 21
+        priority: 200
       - id: insert-license
         name: add license for all YAML files
         description: automatically adds a licence header to all YAML files that don't have a license header
@@ -293,7 +295,7 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-        priority: 22
+        priority: 210
       - id: insert-license
         name: add license for all properties files
         description: automatically adds a licence header to all properties files that don't have a license header
@@ -305,7 +307,7 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-        priority: 23
+        priority: 220
       - id: insert-license
         name: add license for all Python files
         description: automatically adds a licence header to all Python files that don't have a license header
@@ -316,7 +318,7 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-        priority: 24
+        priority: 230
       - id: insert-license
         name: add license for all other files
         description: automatically adds a licence header to all other files that don't have a license header
@@ -339,7 +341,7 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-        priority: 25
+        priority: 240
       - id: forbid-tabs
         name: run forbid-tabs
         description: check the codebase for tabs
@@ -352,7 +354,7 @@ repos:
             \.md|
             \.tsv
           )$
-        priority: 26
+        priority: 250
       - id: remove-tabs
         name: run remove-tabs
         description: find and convert tabs to spaces
@@ -366,7 +368,7 @@ repos:
             \.md|
             \.tsv
           )$
-        priority: 27
+        priority: 260
   - repo: https://github.com/asottile/pyupgrade
     rev: 75992aaa40730136014f34227e0135f63fc951b4 # frozen: v3.21.2
     hooks:
@@ -374,14 +376,14 @@ repos:
         name: run pyupgrade
         description: a tool (and pre-commit hook) to automatically upgrade syntax for newer versions of the language
         args: [--py37-plus]
-        priority: 28
+        priority: 270
   - repo: https://github.com/psf/black-pre-commit-mirror
     rev: 4160603246a6b365d4a2af661c6d71b0a0f50478 # frozen: 26.5.1
     hooks:
       - id: black-jupyter
         name: run black-jupyter
         description: format Python files and Jupyter Notebooks with black
-        priority: 29
+        priority: 280
   - repo: https://github.com/pypa/pip-audit
     rev: 8894eb8cee033531a1fbd9f2fb160892531c14e3 # frozen: v2.10.1
     hooks:
@@ -389,7 +391,7 @@ repos:
         name: run pip-audit
         description: audits Python environments, requirements files and dependency trees for known security vulnerabilities, and can automatically fix them
         args: ['.']
-        priority: 30
+        priority: 290
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: e2b496dc2bd8340c2524cb9a2d2a943cde1bb6df # frozen: v23.1.1
     hooks:
@@ -398,7 +400,7 @@ repos:
         description: format C files with clang-format
         args: ['--style=file:.github/linters/.clang-format']
         types_or: [c]
-        priority: 31
+        priority: 300
   - repo: https://github.com/PyCQA/bandit
     rev: 92ae8b82fb422a639f0ed8d99e96cea769594e08 # frozen: 1.9.4
     hooks:
@@ -542,17 +544,17 @@ repos:
         name: run end-of-file-fixer
         description: makes sure files end in a newline and only a newline
         exclude: \.svg$|^docs/image|^spark/common/src/test/resources
-        priority: 32
+        priority: 310
       - id: file-contents-sorter
         name: run file-contents-sorter
         description: sort the lines in specified files (defaults to alphabetical)
         args: [--unique]
         files: ^\.github/linters/codespell\.txt$
-        priority: 33
+        priority: 320
       - id: fix-byte-order-marker
         name: run fix-byte-order-marker
         description: removes UTF-8 byte order marker
-        priority: 34
+        priority: 330
       - id: forbid-submodules
         name: run forbid-submodules
         description: forbids any submodules in the repository
@@ -561,7 +563,7 @@ repos:
         name: run mixed-line-ending
         description: replaces or checks mixed line ending
         exclude: \.csv$
-        priority: 35
+        priority: 340
       - id: name-tests-test
         name: run name-tests-test
         description: verifies that test files are named correctly
@@ -581,13 +583,13 @@ repos:
         name: run requirements-txt-fixer
         description: sorts entries in the Python requirements files and removes incorrect entry for pkg-resources==0.0.0
         files: ^docker/requirements\.txt$
-        priority: 36
+        priority: 350
       - id: trailing-whitespace
         name: run trailing-whitespace
         description: trims trailing whitespace
         args: [--markdown-linebreak-ext=md]
         exclude: \.Rd$
-        priority: 37
+        priority: 360
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: 5b5dddc4fb0f83c3ea1fc5616fa63e115dce83e0 # frozen: v0.49.1
     hooks:
@@ -638,7 +640,7 @@ repos:
         description: check PNG files with oxipng
         args: ['--fix', '-o', '4', '--strip', 'safe', '--alpha']
         stages: [manual]
-        priority: 38
+        priority: 370
   - repo: https://github.com/adamchainz/blacken-docs
     rev: fda77690955e9b63c6687d8806bafd56a526e45f # frozen: 1.20.0
     hooks:
@@ -646,7 +648,7 @@ repos:
         name: run blacken-docs
         description: run `black` on python code blocks in documentation files
         additional_dependencies: [black==26.5.1]
-        priority: 39
+        priority: 380
   - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
     rev: e8b4e28241a9ae8296ba6e4a491b5da4eda73283 # frozen: 3.11.1
     hooks:
