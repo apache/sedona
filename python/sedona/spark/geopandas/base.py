@@ -5143,6 +5143,8 @@ class GeoFrame(metaclass=ABCMeta):
         single_sided : bool, default False
             Whether to create a single-sided buffer. In Sedona, True will default to left-sided buffer.
             However, 'right' may be specified to use a right-sided buffer.
+        **kwargs
+            Accepted for compatibility with GeoPandas and ignored.
 
         Returns
         -------

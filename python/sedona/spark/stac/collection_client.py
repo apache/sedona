@@ -650,7 +650,21 @@ class CollectionClient:
         Loads items from the STAC collection as a Spark DataFrame.
 
         This method handles the conversion of headers to Spark options and
-        applies various filters to the data.
+        applies various filters to the data. ``get_dataframe`` and
+        ``get_items`` call it; pass None for any filter you do not need.
+
+        :param bbox: Bounding boxes for filtering the items, each a list of four
+            floats: [min_lon, min_lat, max_lon, max_lat]. A single bounding box
+            can also be given as a flat list of four floats.
+        :param geometry: Shapely geometry object(s) or WKT string(s) for spatial
+            filtering. If both bbox and geometry are provided, geometry takes precedence.
+        :param datetime: A single datetime, a date or RFC 3339 timestamp string,
+            or a list of date-time ranges for filtering the items. A partial date
+            string such as "2020" or "2020-01" covers that whole period.
+        :param ids: Item IDs to keep, as a string or a list or tuple of strings.
+        :param max_items: The maximum number of STAC API results to return, or None
+            for no limit.
+        :return: A Spark DataFrame containing the filtered items.
         """
         import json
 
