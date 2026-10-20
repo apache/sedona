@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -179,7 +178,10 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#module-sedona.spark">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-sedona.spark">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sedona.spark.to_sedonadb"><code class="docutils literal notranslate"><span class="pre">to_sedonadb()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -1452,7 +1454,7 @@ spatial types, functions and optimizations on a <code class="docutils literal no
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.SedonaContext.SedonaContext.builder">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">builder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">&lt;pyspark.sql.session.SparkSession.Builder</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7efc84fa95d0&gt;</span></span></span><a class="reference internal" href="_modules/sedona/spark/SedonaContext.html#SedonaContext.builder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.SedonaContext.SedonaContext.builder" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">builder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">&lt;pyspark.sql.session.SparkSession.Builder</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f0c7db3e1d0&gt;</span></span></span><a class="reference internal" href="_modules/sedona/spark/SedonaContext.html#SedonaContext.builder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.SedonaContext.SedonaContext.builder" title="Permalink to this definition"></a></dt>
 <dd><p>This method adds the basic Sedona configuration to the SparkSession builder.
 Usually the user does not need to call this method directly, as it is configured when a cluster is created.
 This method is needed when the user wants to manually configure Sedona
@@ -1479,6 +1481,14 @@ and register the core logics of Apache Sedona, for this SparkSession.</p>
 </section>
 <section id="module-sedona.spark">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-sedona.spark" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="sedona.spark.to_sedonadb">
+<span class="sig-prename descclassname"><span class="pre">sedona.spark.</span></span><span class="sig-name descname"><span class="pre">to_sedonadb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark.html#to_sedonadb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.to_sedonadb" title="Permalink to this definition"></a></dt>
+<dd><p>Converts a SedonaSpark DataFrame to a SedonaDB DataFrame.
+:param connection: Optional SedonaDB connection object. If None, a new connection will be created.
+:return: SedonaDB DataFrame</p>
+</dd></dl>
+
 </section>
 </section>
 
