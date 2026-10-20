@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -488,8 +487,9 @@ linear segments in a quarter circle in the approximation of circular arcs.</p></
 <li><p><strong>cap_style</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>, </em><em>default &quot;round&quot;</em>) – The style of the buffer cap. One of ‘round’, ‘flat’, ‘square’.</p></li>
 <li><p><strong>join_style</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>, </em><em>default &quot;round&quot;</em>) – The style of the buffer join. One of ‘round’, ‘mitre’, ‘bevel’.</p></li>
 <li><p><strong>mitre_limit</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em>, </em><em>default 5.0</em>) – The mitre limit ratio for joins when join_style=’mitre’.</p></li>
-<li><p><strong>single_sided</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a><em>, </em><em>default False</em>) – Whether to create a single-sided buffer. In Sedona, True will default to left-sided buffer.
-However, ‘right’ may be specified to use a right-sided buffer.</p></li>
+<li><p><strong>single_sided</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a><em>, </em><em>default False</em>) – Whether to create a single-sided buffer. As in GeoPandas, the sign of
+<code class="docutils literal notranslate"><span class="pre">distance</span></code> picks the side: a positive distance buffers the left side,
+and a negative distance buffers the right side.</p></li>
 <li><p><strong>**kwargs</strong> – Accepted for compatibility with GeoPandas and ignored.</p></li>
 </ul>
 </dd>
@@ -2321,8 +2321,8 @@ unclosed rings). If this is not possible, they are returned as <code class="docu
 without a warning. Requires GEOS &gt;= 3.11 and shapely &gt;= 2.1.</p></li>
 </ul>
 </p></li>
-<li><p><strong>kwargs</strong> – Additional arguments passed to the Series constructor,
-e.g. <code class="docutils literal notranslate"><span class="pre">name</span></code>.</p></li>
+<li><p><strong>**kwargs</strong> – Only <code class="docutils literal notranslate"><span class="pre">name</span></code> is supported, the name of the resulting GeoSeries.
+Other keyword arguments raise <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -2383,8 +2383,8 @@ unclosed rings). If this is not possible, they are returned as <code class="docu
 without a warning. Requires GEOS &gt;= 3.11 and shapely &gt;= 2.1.</p></li>
 </ul>
 </p></li>
-<li><p><strong>kwargs</strong> – Additional arguments passed to the Series constructor,
-e.g. <code class="docutils literal notranslate"><span class="pre">name</span></code>.</p></li>
+<li><p><strong>**kwargs</strong> – Only <code class="docutils literal notranslate"><span class="pre">name</span></code> is supported, the name of the resulting GeoSeries.
+Other keyword arguments raise <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>

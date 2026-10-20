@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.io &mdash; Apache Sedona Python Documentation</title>
@@ -464,9 +463,9 @@
 <span class="sd">            - "geoparquet"</span>
 <span class="sd">    **kwargs</span>
 <span class="sd">        Reader options. Only ``table_name`` is used: the name of the table to</span>
-<span class="sd">        read, required when ``format`` is "geopackage". Sedona warns about the</span>
-<span class="sd">        keyword arguments it receives, since other GeoPandas reader options are</span>
-<span class="sd">        not supported.</span>
+<span class="sd">        read, required when ``format`` is "geopackage". Sedona warns about any</span>
+<span class="sd">        other keyword argument, since other GeoPandas reader options are not</span>
+<span class="sd">        supported.</span>
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
@@ -474,8 +473,9 @@
 <span class="sd">    """</span>
 
     <span class="c1"># We warn the user if they try to use arguments that GeoPandas supports but not Sedona.</span>
-    <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The given arguments are not supported in Sedona: </span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">unsupported</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s2">"table_name"</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">unsupported</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The given arguments are not supported in Sedona: </span><span class="si">{</span><span class="n">unsupported</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="n">spark</span> <span class="o">=</span> <span class="n">default_session</span><span class="p">()</span>
 
@@ -602,7 +602,7 @@
     <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The given arguments are not supported in Sedona: </span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">read_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"geoparquet"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">read_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"geoparquet"</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

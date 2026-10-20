@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -4688,9 +4687,9 @@
 <span class="sd">              unclosed rings). If this is not possible, they are returned as ``None``</span>
 <span class="sd">              without a warning. Requires GEOS &gt;= 3.11 and shapely &gt;= 2.1.</span>
 
-<span class="sd">        kwargs</span>
-<span class="sd">            Additional arguments passed to the Series constructor,</span>
-<span class="sd">            e.g. ``name``.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Only ``name`` is supported, the name of the resulting GeoSeries.</span>
+<span class="sd">            Other keyword arguments raise ``TypeError``.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -4724,6 +4723,10 @@
 <span class="sd">        2    POINT (3 3)</span>
 <span class="sd">        dtype: geometry</span>
 <span class="sd">        """</span>
+        <span class="n">unsupported</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">unsupported</span><span class="p">:</span>
+            <span class="n">arguments</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">unsupported</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unsupported GeoSeries.from_wkb arguments: </span><span class="si">{</span><span class="n">arguments</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">on_invalid</span> <span class="o">!=</span> <span class="s2">"raise"</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
                 <span class="s2">"GeoSeries.from_wkb(): only on_invalid='raise' is implemented"</span>
@@ -4776,9 +4779,9 @@
 <span class="sd">              unclosed rings). If this is not possible, they are returned as ``None``</span>
 <span class="sd">              without a warning. Requires GEOS &gt;= 3.11 and shapely &gt;= 2.1.</span>
 
-<span class="sd">        kwargs</span>
-<span class="sd">            Additional arguments passed to the Series constructor,</span>
-<span class="sd">            e.g. ``name``.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Only ``name`` is supported, the name of the resulting GeoSeries.</span>
+<span class="sd">            Other keyword arguments raise ``TypeError``.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -4804,6 +4807,10 @@
 <span class="sd">        2    POINT (3 3)</span>
 <span class="sd">        dtype: geometry</span>
 <span class="sd">        """</span>
+        <span class="n">unsupported</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">unsupported</span><span class="p">:</span>
+            <span class="n">arguments</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">unsupported</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unsupported GeoSeries.from_wkt arguments: </span><span class="si">{</span><span class="n">arguments</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">on_invalid</span> <span class="o">!=</span> <span class="s2">"raise"</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
                 <span class="s2">"GeoSeries.from_wkt(): only on_invalid='raise' is implemented"</span>
