@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -2892,6 +2891,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#nad27-epsg" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NAD27 EPSG 代码
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#sql" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2909,6 +2919,17 @@
       
         <li class="md-nav__item">
   <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        无法转换的点
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       
         坐标顺序
@@ -2930,7 +2951,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
+  <a href="#_9" class="md-nav__link">
     <span class="md-ellipsis">
       
         参见
@@ -6117,6 +6138,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#nad27-epsg" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NAD27 EPSG 代码
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#sql" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6134,6 +6166,17 @@
       
         <li class="md-nav__item">
   <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        无法转换的点
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       
         坐标顺序
@@ -6155,7 +6198,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
+  <a href="#_9" class="md-nav__link">
     <span class="md-ellipsis">
       
         参见
@@ -6538,7 +6581,7 @@
 <p>要避免启用 URL 提供者，可以省略 <code>spark.sedona.crs.url.base</code> 或保持其为空字符串（默认值）。注意，一旦 URL 提供者已在某个 executor JVM 中注册，它在该 JVM 的生命周期内会一直保持激活。</p>
 <p>参见：<a href="../Parameter/#crs-transformation">Configuration parameters</a> 中 URL CRS 提供者的完整配置列表。</p>
 <h2 id="_4">网格文件支持<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<p>网格文件支持高精度的基准面（datum）转换，例如 NAD27 到 NAD83 或 OSGB36 到 ETRS89。Sedona 支持从多种来源加载网格文件。</p>
+<p>网格文件支持高精度的基准面（datum）转换，例如 NAD27 到 NAD83 或 OSGB36 到 ETRS89。</p>
 <h3 id="_5">网格文件来源<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
 <p>可以在 PROJ 字符串中通过 <code>+nadgrids</code> 参数指定网格文件：</p>
 <table>
@@ -6553,12 +6596,7 @@
 <tr>
 <td>本地文件</td>
 <td>绝对路径</td>
-<td><code>+nadgrids=/path/to/grid.gsb</code></td>
-</tr>
-<tr>
-<td>PROJ CDN</td>
-<td><code>@</code> 前缀</td>
-<td><code>+nadgrids=@us_noaa_conus.tif</code></td>
+<td><code>+nadgrids=/path/to/us_noaa_conus.tif</code></td>
 </tr>
 <tr>
 <td>HTTPS URL</td>
@@ -6567,35 +6605,53 @@
 </tr>
 </tbody>
 </table>
-<p>使用 <code>@</code> 前缀时，网格文件会自动从 <a href="https://cdn.proj.org/">PROJ CDN</a> 获取。</p>
+<p>Sedona 只从本地路径或完整 URL 加载网格文件，不会根据单独的文件名下载网格，因此 <code>+nadgrids=@us_noaa_conus.tif</code> 不会获取任何文件。如需使用 <a href="https://cdn.proj.org/">PROJ CDN</a> 上的网格，请提供其完整 URL。本地文件必须在每个 executor 上的相同路径下存在。通过 URL 加载的网格在每个 executor JVM 中只下载一次。</p>
 <h3 id="_6">可选网格与必需网格<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong><code>@</code> 前缀（可选）</strong>：如果该网格不可用，转换会继续进行。当网格能提升精度但并非必需时使用。</li>
-<li><strong>无前缀（必需）</strong>：如果找不到该网格文件，会抛出错误。</li>
+<li><strong><code>@</code> 前缀（可选）</strong>：如果无法加载该网格，转换会继续进行，但不应用基准面偏移。</li>
+<li><strong>无前缀（必需）</strong>：如果无法加载该网格文件，会抛出错误。</li>
 </ul>
+<p>位于所有已加载网格之外的点无法转换，<code>ST_Transform</code> 会抛出错误。</p>
+<h3 id="nad27-epsg">NAD27 EPSG 代码<a class="headerlink" href="#nad27-epsg" title="Permanent link">&para;</a></h3>
+<p>NAD27 的 EPSG 代码（例如 EPSG:4267、EPSG:26714，或 EPSG:32041 等 NAD27 州平面坐标系）使用 NAD27 基准面。其最精确的基准面偏移需要 NADCON 或 NTv2 网格文件，而 Sedona 既不自带也不会下载这些文件。没有网格文件时，NAD27 与其他基准面（例如 WGS84 或 NAD83）之间的转换使用 EPSG:4267 的 Helmert 偏移（-8、160、176 米）。在美国本土，结果与网格结果相差数米，例如在得克萨斯州南部为 2.5 米，在旧金山为 4 米。两个 NAD27 坐标系之间的转换不应用基准面偏移，结果是精确的。如需网格精度，请将 NAD27 一侧写成带网格文件的 PROJ 字符串：</p>
+<div class="highlight"><pre><span></span><code><span class="c1">-- NAD27 / Texas South (EPSG:32041) to WGS84 with the NADCON grid</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span>
+<span class="w">    </span><span class="n">ST_Point</span><span class="p">(</span><span class="mi">2200000</span><span class="p">,</span><span class="w"> </span><span class="mi">400000</span><span class="p">),</span>
+<span class="w">    </span><span class="s1">'+proj=lcc +lat_1=27.83333333333333 +lat_2=26.16666666666667 +lat_0=25.66666666666667 +lon_0=-98.5 +x_0=609601.2192024384 +y_0=0 +ellps=clrk66 +units=us-ft +nadgrids=https://cdn.proj.org/us_noaa_conus.tif +no_defs'</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'EPSG:4326'</span>
+<span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed_point</span>
+</code></pre></div>
+<p>只在 NAD27 一侧添加网格文件。对于两个 NAD27 坐标系之间的转换，请使用 EPSG 代码或不带 <code>+nadgrids</code> 的 PROJ 字符串。</p>
 <h3 id="sql">使用网格文件的 SQL 示例<a class="headerlink" href="#sql" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1">-- Transform NAD27 to NAD83 using PROJ CDN grid (optional)</span>
+<div class="highlight"><pre><span></span><code><span class="c1">-- Transform NAD27 to NAD83 using a PROJ CDN grid (optional)</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span>
 <span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(-122.4194 37.7749)'</span><span class="p">),</span>
-<span class="w">    </span><span class="s1">'+proj=longlat +datum=NAD27 +no_defs +nadgrids=@us_noaa_conus.tif'</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'+proj=longlat +datum=NAD27 +nadgrids=@https://cdn.proj.org/us_noaa_conus.tif +no_defs'</span><span class="p">,</span>
 <span class="w">    </span><span class="s1">'EPSG:4269'</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed_point</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="c1">-- Transform using mandatory grid file (error if not found)</span>
+<div class="highlight"><pre><span></span><code><span class="c1">-- Transform using a mandatory local grid file (error if not found)</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span>
 <span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(-122.4194 37.7749)'</span><span class="p">),</span>
-<span class="w">    </span><span class="s1">'+proj=longlat +datum=NAD27 +no_defs +nadgrids=us_noaa_conus.tif'</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'+proj=longlat +datum=NAD27 +nadgrids=/path/to/us_noaa_conus.tif +no_defs'</span><span class="p">,</span>
 <span class="w">    </span><span class="s1">'EPSG:4269'</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed_point</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="c1">-- Transform OSGB36 to ETRS89 using UK grid</span>
+<div class="highlight"><pre><span></span><code><span class="c1">-- Transform OSGB36 to ETRS89 using the UK grid</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span>
 <span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(-0.1276 51.5074)'</span><span class="p">),</span>
-<span class="w">    </span><span class="s1">'+proj=longlat +datum=OSGB36 +nadgrids=@uk_os_OSTN15_NTv2_OSGBtoETRS.gsb +no_defs'</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'+proj=longlat +datum=OSGB36 +nadgrids=https://cdn.proj.org/uk_os_OSTN15_NTv2_OSGBtoETRS.tif +no_defs'</span><span class="p">,</span>
 <span class="w">    </span><span class="s1">'EPSG:4258'</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed_point</span>
 </code></pre></div>
-<h2 id="_7">坐标顺序<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<h2 id="_7">无法转换的点<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<p>如果某个坐标无法转换，<code>ST_Transform</code> 会抛出错误，查询随之失败。例如，Web Mercator（EPSG:3857）无法表示两极，因此纬度为 90 或 -90 的点会失败，GeoTools 也是如此。位于 <code>+nadgrids</code> 列表中所有已加载网格之外的点同样会失败。Sedona 1.9.0 和 1.9.1 对这类点返回的是 <code>NaN</code> 坐标。如需跳过这些几何对象，请在转换前将其过滤掉：</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="s1">'EPSG:4326'</span><span class="p">,</span><span class="w"> </span><span class="s1">'EPSG:3857'</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">geometries</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">ST_YMin</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">-</span><span class="mi">90</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">ST_YMax</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">90</span>
+</code></pre></div>
+<p>少数投影对某些点会返回无穷大或 <code>NaN</code> 坐标而不报告错误，例如立体投影中心的对跖点。<code>ST_Transform</code> 会原样返回这些坐标。</p>
+<h2 id="_8">坐标顺序<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
 <p>Sedona 期望几何对象使用 <strong>经度/纬度（lon/lat）</strong> 顺序。如果你的数据是 lat/lon 顺序，请在转换前使用 <code>ST_FlipCoordinates</code> 交换坐标。</p>
 <div class="highlight"><pre><span></span><code><span class="c1">-- If your data is in lat/lon order, flip first</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span>
@@ -6613,7 +6669,7 @@
 <span class="w">    </span><span class="s1">'EPSG:3857'</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed_point</span>
 </code></pre></div>
-<h2 id="_8">参见<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
+<h2 id="_9">参见<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="../Spatial-Reference-System/ST_Transform/">ST_Transform</a> —— 函数参考</li>
 <li><a href="../Spatial-Reference-System/ST_SetSRID/">ST_SetSRID</a> —— 设置几何对象的 SRID</li>
@@ -6640,7 +6696,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月11日 04:13:31 UTC">2026年5月11日 04:13:31</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年10月20日 01:18:01 UTC">2026年10月20日 01:18:01</span>
   </span>
 
     

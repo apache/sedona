@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -2892,6 +2891,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#nad27-epsg-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NAD27 EPSG Codes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#sql-examples-with-grid-files" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2904,6 +2914,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#points-that-cannot-be-transformed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Points That Cannot Be Transformed
+      
+    </span>
+  </a>
   
 </li>
       
@@ -6117,6 +6138,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#nad27-epsg-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NAD27 EPSG Codes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#sql-examples-with-grid-files" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6129,6 +6161,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#points-that-cannot-be-transformed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Points That Cannot Be Transformed
+      
+    </span>
+  </a>
   
 </li>
       
@@ -6538,7 +6581,7 @@
 <p>To avoid enabling the URL provider, omit <code>spark.sedona.crs.url.base</code> or leave it as an empty string (the default). Note that once a URL provider has been registered in an executor JVM, it remains active for the lifetime of that JVM.</p>
 <p>See also: <a href="../Parameter/#crs-transformation">Configuration parameters</a> for the full list of URL CRS provider settings.</p>
 <h2 id="grid-file-support">Grid File Support<a class="headerlink" href="#grid-file-support" title="Permanent link">&para;</a></h2>
-<p>Grid files enable high-accuracy datum transformations, such as NAD27 to NAD83 or OSGB36 to ETRS89. Sedona supports loading grid files from multiple sources.</p>
+<p>Grid files enable high-accuracy datum transformations, such as NAD27 to NAD83 or OSGB36 to ETRS89.</p>
 <h3 id="grid-file-sources">Grid File Sources<a class="headerlink" href="#grid-file-sources" title="Permanent link">&para;</a></h3>
 <p>Grid files can be specified using the <code>+nadgrids</code> parameter in PROJ strings:</p>
 <table>
@@ -6553,12 +6596,7 @@
 <tr>
 <td>Local file</td>
 <td>Absolute path</td>
-<td><code>+nadgrids=/path/to/grid.gsb</code></td>
-</tr>
-<tr>
-<td>PROJ CDN</td>
-<td><code>@</code> prefix</td>
-<td><code>+nadgrids=@us_noaa_conus.tif</code></td>
+<td><code>+nadgrids=/path/to/us_noaa_conus.tif</code></td>
 </tr>
 <tr>
 <td>HTTPS URL</td>
@@ -6567,34 +6605,52 @@
 </tr>
 </tbody>
 </table>
-<p>When using the <code>@</code> prefix, grid files are automatically fetched from <a href="https://cdn.proj.org/">PROJ CDN</a>.</p>
+<p>Sedona loads a grid only from a local path or a full URL. It does not download a grid from a bare file name, so <code>+nadgrids=@us_noaa_conus.tif</code> does not fetch anything. To use a grid from the <a href="https://cdn.proj.org/">PROJ CDN</a>, give its full URL. A local file must exist at the same path on every executor. A grid from a URL is downloaded once per executor JVM.</p>
 <h3 id="optional-vs-mandatory-grids">Optional vs Mandatory Grids<a class="headerlink" href="#optional-vs-mandatory-grids" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong><code>@</code> prefix (optional)</strong>: The transformation continues without the grid if it's unavailable. Use this when the grid improves accuracy but isn't required.</li>
-<li><strong>No prefix (mandatory)</strong>: An error is thrown if the grid file cannot be found.</li>
+<li><strong><code>@</code> prefix (optional)</strong>: If the grid cannot be loaded, the transformation continues without it and applies no datum shift.</li>
+<li><strong>No prefix (mandatory)</strong>: An error is thrown if the grid cannot be loaded.</li>
 </ul>
+<p>A point outside every loaded grid cannot be transformed, and <code>ST_Transform</code> raises an error.</p>
+<h3 id="nad27-epsg-codes">NAD27 EPSG Codes<a class="headerlink" href="#nad27-epsg-codes" title="Permanent link">&para;</a></h3>
+<p>EPSG codes for NAD27, such as EPSG:4267, EPSG:26714 or the NAD27 State Plane zones like EPSG:32041, use the NAD27 datum. Its most accurate datum shift needs NADCON or NTv2 grid files, and Sedona does not ship or download them. Without a grid, a transformation between NAD27 and another datum, such as WGS84 or NAD83, uses the EPSG:4267 Helmert shift (-8, 160, 176 m). In the contiguous US, the result is a few meters from the grid result, for example 2.5 m in south Texas and 4 m in San Francisco. Transformations between two NAD27 coordinate systems apply no datum shift and are exact. For grid accuracy, give the NAD27 side as a PROJ string with the grid file:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">-- NAD27 / Texas South (EPSG:32041) to WGS84 with the NADCON grid</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span>
+<span class="w">    </span><span class="n">ST_Point</span><span class="p">(</span><span class="mi">2200000</span><span class="p">,</span><span class="w"> </span><span class="mi">400000</span><span class="p">),</span>
+<span class="w">    </span><span class="s1">'+proj=lcc +lat_1=27.83333333333333 +lat_2=26.16666666666667 +lat_0=25.66666666666667 +lon_0=-98.5 +x_0=609601.2192024384 +y_0=0 +ellps=clrk66 +units=us-ft +nadgrids=https://cdn.proj.org/us_noaa_conus.tif +no_defs'</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'EPSG:4326'</span>
+<span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed_point</span>
+</code></pre></div>
+<p>Only add the grid to the NAD27 side. For a transformation between two NAD27 coordinate systems, use the EPSG codes or PROJ strings without <code>+nadgrids</code>.</p>
 <h3 id="sql-examples-with-grid-files">SQL Examples with Grid Files<a class="headerlink" href="#sql-examples-with-grid-files" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1">-- Transform NAD27 to NAD83 using PROJ CDN grid (optional)</span>
+<div class="highlight"><pre><span></span><code><span class="c1">-- Transform NAD27 to NAD83 using a PROJ CDN grid (optional)</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span>
 <span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(-122.4194 37.7749)'</span><span class="p">),</span>
-<span class="w">    </span><span class="s1">'+proj=longlat +datum=NAD27 +no_defs +nadgrids=@us_noaa_conus.tif'</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'+proj=longlat +datum=NAD27 +nadgrids=@https://cdn.proj.org/us_noaa_conus.tif +no_defs'</span><span class="p">,</span>
 <span class="w">    </span><span class="s1">'EPSG:4269'</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed_point</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="c1">-- Transform using mandatory grid file (error if not found)</span>
+<div class="highlight"><pre><span></span><code><span class="c1">-- Transform using a mandatory local grid file (error if not found)</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span>
 <span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(-122.4194 37.7749)'</span><span class="p">),</span>
-<span class="w">    </span><span class="s1">'+proj=longlat +datum=NAD27 +no_defs +nadgrids=us_noaa_conus.tif'</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'+proj=longlat +datum=NAD27 +nadgrids=/path/to/us_noaa_conus.tif +no_defs'</span><span class="p">,</span>
 <span class="w">    </span><span class="s1">'EPSG:4269'</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed_point</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="c1">-- Transform OSGB36 to ETRS89 using UK grid</span>
+<div class="highlight"><pre><span></span><code><span class="c1">-- Transform OSGB36 to ETRS89 using the UK grid</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span>
 <span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(-0.1276 51.5074)'</span><span class="p">),</span>
-<span class="w">    </span><span class="s1">'+proj=longlat +datum=OSGB36 +nadgrids=@uk_os_OSTN15_NTv2_OSGBtoETRS.gsb +no_defs'</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'+proj=longlat +datum=OSGB36 +nadgrids=https://cdn.proj.org/uk_os_OSTN15_NTv2_OSGBtoETRS.tif +no_defs'</span><span class="p">,</span>
 <span class="w">    </span><span class="s1">'EPSG:4258'</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed_point</span>
 </code></pre></div>
+<h2 id="points-that-cannot-be-transformed">Points That Cannot Be Transformed<a class="headerlink" href="#points-that-cannot-be-transformed" title="Permanent link">&para;</a></h2>
+<p>If a coordinate cannot be transformed, <code>ST_Transform</code> raises an error and the query fails. For example, Web Mercator (EPSG:3857) cannot represent the poles, so a point at latitude 90 or -90 fails, as it does with GeoTools. A point outside every loaded grid of a <code>+nadgrids</code> list also fails. Sedona 1.9.0 and 1.9.1 returned <code>NaN</code> coordinates for such points instead. To skip these geometries, filter them out before the transformation:</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="s1">'EPSG:4326'</span><span class="p">,</span><span class="w"> </span><span class="s1">'EPSG:3857'</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">geometries</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">ST_YMin</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">-</span><span class="mi">90</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">ST_YMax</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">90</span>
+</code></pre></div>
+<p>A few projections return infinite or <code>NaN</code> coordinates for some points without reporting an error, for example the point opposite the center of a stereographic projection. <code>ST_Transform</code> returns these coordinates unchanged.</p>
 <h2 id="coordinate-order">Coordinate Order<a class="headerlink" href="#coordinate-order" title="Permanent link">&para;</a></h2>
 <p>Sedona expects geometries to be in <strong>longitude/latitude (lon/lat)</strong> order. If your data is in lat/lon order, use <code>ST_FlipCoordinates</code> to swap the coordinates before transformation.</p>
 <div class="highlight"><pre><span></span><code><span class="c1">-- If your data is in lat/lon order, flip first</span>
@@ -6640,7 +6696,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 27, 2026 06:37:29 UTC">February 27, 2026 06:37:29</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="October 20, 2026 01:18:01 UTC">October 20, 2026 01:18:01</span>
   </span>
 
     
