@@ -254,9 +254,9 @@ def read_file(filename: str, format: Union[str, None] = None, **kwargs):
             - "geoparquet"
     **kwargs
         Reader options. Only ``table_name`` is used: the name of the table to
-        read, required when ``format`` is "geopackage". Sedona warns about the
-        keyword arguments it receives, since other GeoPandas reader options are
-        not supported.
+        read, required when ``format`` is "geopackage". Sedona warns about any
+        other keyword argument, since other GeoPandas reader options are not
+        supported.
 
     See also
     --------
@@ -264,8 +264,9 @@ def read_file(filename: str, format: Union[str, None] = None, **kwargs):
     """
 
     # We warn the user if they try to use arguments that GeoPandas supports but not Sedona.
-    if kwargs:
-        warnings.warn(f"The given arguments are not supported in Sedona: {kwargs}")
+    unsupported = {k: v for k, v in kwargs.items() if k != "table_name"}
+    if unsupported:
+        warnings.warn(f"The given arguments are not supported in Sedona: {unsupported}")
 
     spark = default_session()
 
@@ -392,4 +393,4 @@ def read_parquet(
     if kwargs:
         warnings.warn(f"The given arguments are not supported in Sedona: {kwargs}")
 
-    return read_file(path, format="geoparquet", **kwargs)
+    return read_file(path, format="geoparquet")

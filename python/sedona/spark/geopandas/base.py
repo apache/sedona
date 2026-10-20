@@ -5141,8 +5141,9 @@ class GeoFrame(metaclass=ABCMeta):
         mitre_limit : float, default 5.0
             The mitre limit ratio for joins when join_style='mitre'.
         single_sided : bool, default False
-            Whether to create a single-sided buffer. In Sedona, True will default to left-sided buffer.
-            However, 'right' may be specified to use a right-sided buffer.
+            Whether to create a single-sided buffer. As in GeoPandas, the sign of
+            ``distance`` picks the side: a positive distance buffers the left side,
+            and a negative distance buffers the right side.
         **kwargs
             Accepted for compatibility with GeoPandas and ignored.
 

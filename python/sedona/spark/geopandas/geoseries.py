@@ -4478,9 +4478,9 @@ class GeoSeries(GeoFrame, pspd.Series):
               unclosed rings). If this is not possible, they are returned as ``None``
               without a warning. Requires GEOS >= 3.11 and shapely >= 2.1.
 
-        kwargs
-            Additional arguments passed to the Series constructor,
-            e.g. ``name``.
+        **kwargs
+            Only ``name`` is supported, the name of the resulting GeoSeries.
+            Other keyword arguments raise ``TypeError``.
 
         Returns
         -------
@@ -4514,6 +4514,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         2    POINT (3 3)
         dtype: geometry
         """
+        unsupported = set(kwargs) - {"name"}
+        if unsupported:
+            arguments = ", ".join(sorted(unsupported))
+            raise TypeError(f"Unsupported GeoSeries.from_wkb arguments: {arguments}")
         if on_invalid != "raise":
             raise NotImplementedError(
                 "GeoSeries.from_wkb(): only on_invalid='raise' is implemented"
@@ -4566,9 +4570,9 @@ class GeoSeries(GeoFrame, pspd.Series):
               unclosed rings). If this is not possible, they are returned as ``None``
               without a warning. Requires GEOS >= 3.11 and shapely >= 2.1.
 
-        kwargs
-            Additional arguments passed to the Series constructor,
-            e.g. ``name``.
+        **kwargs
+            Only ``name`` is supported, the name of the resulting GeoSeries.
+            Other keyword arguments raise ``TypeError``.
 
         Returns
         -------
@@ -4594,6 +4598,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         2    POINT (3 3)
         dtype: geometry
         """
+        unsupported = set(kwargs) - {"name"}
+        if unsupported:
+            arguments = ", ".join(sorted(unsupported))
+            raise TypeError(f"Unsupported GeoSeries.from_wkt arguments: {arguments}")
         if on_invalid != "raise":
             raise NotImplementedError(
                 "GeoSeries.from_wkt(): only on_invalid='raise' is implemented"
