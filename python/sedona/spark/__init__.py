@@ -86,7 +86,7 @@ def to_sedonadb(self, connection=None):
             import sedona.db
         except ImportError:
             raise ImportError(
-                "SedonaDB is not installed. Please install it using `pip install sedona-db`."
+                'SedonaDB is not installed. Please install it using `pip install "apache-sedona[db]"`.'
             )
         connection = sedona.db.connect()
 

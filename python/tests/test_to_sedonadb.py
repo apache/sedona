@@ -24,7 +24,6 @@ from pyspark.sql import SparkSession
 
 
 class TestToSedonaDB(unittest.TestCase):
-
     def setUp(self):
         # Preserve original state
         self._original_sedona_db_module = sys.modules.get("sedona.db")
@@ -118,7 +117,7 @@ class TestToSedonaDB(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            "SedonaDB is not installed. Please install it using `pip install sedona-db`.",
+            'SedonaDB is not installed. Please install it using `pip install "apache-sedona[db]"`.',
         )
 
 
