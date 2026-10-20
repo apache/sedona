@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.stac.collection_client &mdash; Apache Sedona Python Documentation</title>
@@ -860,7 +859,21 @@
 <span class="sd">        Loads items from the STAC collection as a Spark DataFrame.</span>
 
 <span class="sd">        This method handles the conversion of headers to Spark options and</span>
-<span class="sd">        applies various filters to the data.</span>
+<span class="sd">        applies various filters to the data. ``get_dataframe`` and</span>
+<span class="sd">        ``get_items`` call it; pass None for any filter you do not need.</span>
+
+<span class="sd">        :param bbox: Bounding boxes for filtering the items, each a list of four</span>
+<span class="sd">            floats: [min_lon, min_lat, max_lon, max_lat]. A single bounding box</span>
+<span class="sd">            can also be given as a flat list of four floats.</span>
+<span class="sd">        :param geometry: Shapely geometry object(s) or WKT string(s) for spatial</span>
+<span class="sd">            filtering. If both bbox and geometry are provided, geometry takes precedence.</span>
+<span class="sd">        :param datetime: A single datetime, a date or RFC 3339 timestamp string,</span>
+<span class="sd">            or a list of date-time ranges for filtering the items. A partial date</span>
+<span class="sd">            string such as "2020" or "2020-01" covers that whole period.</span>
+<span class="sd">        :param ids: Item IDs to keep, as a string or a list or tuple of strings.</span>
+<span class="sd">        :param max_items: The maximum number of STAC API results to return, or None</span>
+<span class="sd">            for no limit.</span>
+<span class="sd">        :return: A Spark DataFrame containing the filtered items.</span>
 <span class="sd">        """</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 

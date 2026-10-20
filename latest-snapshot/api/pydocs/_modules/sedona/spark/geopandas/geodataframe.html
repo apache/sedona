@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geodataframe &mdash; Apache Sedona Python Documentation</title>
@@ -783,6 +782,14 @@
 <span class="sd">        Column labels to use for the resulting frame.</span>
 <span class="sd">    index : Index or array-like, optional</span>
 <span class="sd">        Index to use for the resulting frame.</span>
+<span class="sd">    dtype : dtype, optional</span>
+<span class="sd">        Data type to force, passed to the pandas-on-Spark ``DataFrame``</span>
+<span class="sd">        constructor. If None, the data types are inferred.</span>
+<span class="sd">    copy : bool, default False</span>
+<span class="sd">        Whether to copy the input data, passed to the pandas-on-Spark</span>
+<span class="sd">        ``DataFrame`` constructor.</span>
+<span class="sd">    **kwargs</span>
+<span class="sd">        Accepted for compatibility with GeoPandas and ignored.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -1402,7 +1409,8 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        col : new geometry column label</span>
+<span class="sd">        col : str</span>
+<span class="sd">            New name for the geometry column.</span>
 <span class="sd">        inplace : boolean, default False</span>
 <span class="sd">            Modify the GeoDataFrame in place (without creating a new object)</span>
 
@@ -1560,6 +1568,25 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">crs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        The Coordinate Reference System (CRS) of the active geometry column.</span>
+
+<span class="sd">        Setting this property assigns the CRS to the active geometry column,</span>
+<span class="sd">        replacing any existing CRS, without transforming the coordinates. The</span>
+<span class="sd">        value can be anything accepted by</span>
+<span class="sd">        :meth:`pyproj.CRS.from_user_input() &lt;pyproj.crs.CRS.from_user_input&gt;`,</span>
+<span class="sd">        such as an authority string (eg "EPSG:4326") or a WKT string.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pyproj.CRS or None</span>
+<span class="sd">            The CRS of the active geometry column, or None if it has no CRS.</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        GeoDataFrame.set_crs : assign CRS</span>
+<span class="sd">        GeoDataFrame.to_crs : re-project to another CRS</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">crs</span>
 
     <span class="nd">@crs</span><span class="o">.</span><span class="n">setter</span>
@@ -2443,27 +2470,24 @@
         <span class="n">include_z</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Encode a GeoDataFrame to GeoArrow format.</span>
-<span class="sd">        See https://geoarrow.org/ for details on the GeoArrow specification.</span>
-<span class="sd">        This function returns a generic Arrow data object implementing</span>
-<span class="sd">        the `Arrow PyCapsule Protocol`_ (i.e. having an ``__arrow_c_stream__``</span>
-<span class="sd">        method). This object can then be consumed by your Arrow implementation</span>
-<span class="sd">        of choice that supports this protocol.</span>
-<span class="sd">        .. _Arrow PyCapsule Protocol: https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html</span>
 
-<span class="sd">        Note: Requires geopandas versions &gt;= 1.0.0 to use with Sedona.</span>
+<span class="sd">        See https://geoarrow.org/ for details on the GeoArrow specification.</span>
+<span class="sd">        This function returns a generic Arrow data object implementing the</span>
+<span class="sd">        `Arrow PyCapsule Protocol &lt;https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html&gt;`_</span>
+<span class="sd">        (i.e. having an ``__arrow_c_stream__`` method). This object can then be</span>
+<span class="sd">        consumed by your Arrow implementation of choice that supports this protocol.</span>
+
+<span class="sd">        Requires GeoPandas 1.0.0 or later.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        index : bool, default None</span>
 <span class="sd">            If ``True``, always include the dataframe's index(es) as columns</span>
-<span class="sd">            in the file output.</span>
-<span class="sd">            If ``False``, the index(es) will not be written to the file.</span>
-<span class="sd">            If ``None``, the index(ex) will be included as columns in the file</span>
-<span class="sd">            output except `RangeIndex` which is stored as metadata only.</span>
-
-<span class="sd">            Note: Unlike in geopandas, ``None`` will include the index in the column because Sedona always</span>
-<span class="sd">            converts `RangeIndex` into a general `Index`.</span>
-
+<span class="sd">            in the output.</span>
+<span class="sd">            If ``False``, the index(es) will not be included.</span>
+<span class="sd">            If ``None``, the index(es) are included as columns. Unlike GeoPandas,</span>
+<span class="sd">            this also applies to a ``RangeIndex``, because Sedona always converts</span>
+<span class="sd">            it into a general ``Index``.</span>
 <span class="sd">        geometry_encoding : {'WKB', 'geoarrow' }, default 'WKB'</span>
 <span class="sd">            The GeoArrow encoding to use for the data conversion.</span>
 <span class="sd">        interleaved : bool, default True</span>
@@ -2534,7 +2558,7 @@
 
 <span class="sd">        Any geometry columns present are serialized to WKB format in the file.</span>
 
-<span class="sd">        Note: Feather is a single-file format with no distributed writer, so this</span>
+<span class="sd">        Feather is a single-file format with no distributed writer, so this</span>
 <span class="sd">        collects the entire GeoDataFrame to the driver and delegates to GeoPandas.</span>
 <span class="sd">        It should only be used if the resulting GeoDataFrame is expected to be small.</span>
 
@@ -2543,15 +2567,14 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        path : str, path object</span>
+<span class="sd">            Local file path to write to.</span>
 <span class="sd">        index : bool, default None</span>
 <span class="sd">            If ``True``, always include the dataframe's index(es) as columns</span>
 <span class="sd">            in the file output.</span>
 <span class="sd">            If ``False``, the index(es) will not be written to the file.</span>
-<span class="sd">            If ``None``, the index(ex) will be included as columns in the file</span>
-<span class="sd">            output except `RangeIndex` which is stored as metadata only.</span>
-
-<span class="sd">            Note: Unlike in geopandas, ``None`` will include the index in the column because Sedona always</span>
-<span class="sd">            converts `RangeIndex` into a general `Index`.</span>
+<span class="sd">            If ``None``, the index(es) are written as columns. Unlike GeoPandas,</span>
+<span class="sd">            this also applies to a ``RangeIndex``, because Sedona always converts</span>
+<span class="sd">            it into a general ``Index``.</span>
 <span class="sd">        compression : {'zstd', 'lz4', 'uncompressed'}, optional</span>
 <span class="sd">            Name of the compression to use. Use ``"uncompressed"`` for no</span>
 <span class="sd">            compression. By default uses LZ4 if available, otherwise uncompressed.</span>
@@ -2604,6 +2627,9 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
+<span class="sd">        *args</span>
+<span class="sd">            Positional arguments passed to :meth:`geopandas.GeoDataFrame.plot`,</span>
+<span class="sd">            in the order of the options below.</span>
 <span class="sd">        column : str, np.array, pd.Series, pd.Index (default None)</span>
 <span class="sd">            The name of the dataframe column, np.array, pd.Series, or pd.Index</span>
 <span class="sd">            to be plotted. If np.array, pd.Series, or pd.Index are used then it</span>
@@ -2702,6 +2728,9 @@
 <span class="sd">            Style options to be passed on to the actual plot function, such</span>
 <span class="sd">            as ``edgecolor``, ``facecolor``, ``linewidth``, ``markersize``,</span>
 <span class="sd">            ``alpha``.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Keyword arguments passed to :meth:`geopandas.GeoDataFrame.plot`,</span>
+<span class="sd">            including the options above.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -3277,6 +3306,31 @@
 <span class="sd">        Ties follow ``spark.sedona.join.knn.includeTieBreakers``; all GeoPandas</span>
 <span class="sd">        equidistant rows are not guaranteed. See</span>
 <span class="sd">        :func:`sedona.spark.geopandas.sjoin_nearest` for the full restrictions.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        right : GeoDataFrame</span>
+<span class="sd">            Distributed point frame searched for the nearest neighbor of each row.</span>
+<span class="sd">        how : str, default 'inner'</span>
+<span class="sd">            Only inner joins are supported.</span>
+<span class="sd">        max_distance : float, optional</span>
+<span class="sd">            Positive finite distance in CRS units. Filters nearest results; it</span>
+<span class="sd">            does not reduce the KNN search radius.</span>
+<span class="sd">        lsuffix : str, default 'left'</span>
+<span class="sd">            Suffix for overlapping column names from this frame. Only the</span>
+<span class="sd">            default is supported.</span>
+<span class="sd">        rsuffix : str, default 'right'</span>
+<span class="sd">            Suffix for overlapping column names from ``right``. Only the</span>
+<span class="sd">            default is supported.</span>
+<span class="sd">        distance_col : str, optional</span>
+<span class="sd">            New output column for the distance. Must not replace an input column.</span>
+<span class="sd">        exclusive : bool, default False</span>
+<span class="sd">            Only False is supported; equal points can match at distance zero.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        GeoDataFrame</span>
+<span class="sd">            Nearest matches, with no guaranteed row order.</span>
 <span class="sd">        """</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas.tools.sjoin_nearest</span><span class="w"> </span><span class="kn">import</span> <span class="n">sjoin_nearest</span>
 

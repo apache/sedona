@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -757,6 +756,8 @@
 <span class="sd">        Name of the GeoSeries.</span>
 <span class="sd">    copy : bool, default False</span>
 <span class="sd">        Whether to copy the input data.</span>
+<span class="sd">    **kwargs</span>
+<span class="sd">        Accepted for compatibility with GeoPandas and ignored.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -1351,6 +1352,15 @@
         <span class="p">)</span>
 
 <div class="viewcode-block" id="GeoSeries.to_spark_pandas"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_spark_pandas">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_spark_pandas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Return the geometries as a plain pandas-on-Spark Series.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pyspark.pandas.Series</span>
+<span class="sd">            A Series with the same index and geometry values, without the</span>
+<span class="sd">            GeoSeries spatial methods.</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_psdf</span><span class="o">.</span><span class="n">_internal</span><span class="p">))</span></div>
 
     <span class="c1"># ============================================================================</span>
@@ -1359,6 +1369,16 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"GeoSeries"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        The GeoSeries itself.</span>
+
+<span class="sd">        Lets code written for the active geometry column of a ``GeoDataFrame``</span>
+<span class="sd">        (``gdf.geometry``) also accept a ``GeoSeries``.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        GeoSeries</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="nd">@property</span>
@@ -4408,12 +4428,14 @@
 
 <span class="sd">        Note: This method is not scalable and requires collecting all data to the driver.</span>
 
+<span class="sd">        Currently Polygon, MultiPolygon, LineString, MultiLineString, Point and</span>
+<span class="sd">        MultiPoint geometries can be plotted.</span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        s : Series</span>
-<span class="sd">            The GeoSeries to be plotted. Currently Polygon,</span>
-<span class="sd">            MultiPolygon, LineString, MultiLineString, Point and MultiPoint</span>
-<span class="sd">            geometries can be plotted.</span>
+<span class="sd">        *args</span>
+<span class="sd">            Positional arguments passed to :meth:`geopandas.GeoSeries.plot`, in</span>
+<span class="sd">            the order of the options below.</span>
 <span class="sd">        cmap : str (default None)</span>
 <span class="sd">            The name of a colormap recognized by matplotlib. Any</span>
 <span class="sd">            colormap will work, but categorical colormaps are</span>
@@ -4443,16 +4465,15 @@
 <span class="sd">            Color options to be passed on to the actual plot function, such</span>
 <span class="sd">            as ``edgecolor``, ``facecolor``, ``linewidth``, ``markersize``,</span>
 <span class="sd">            ``alpha``.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Keyword arguments passed to :meth:`geopandas.GeoSeries.plot`,</span>
+<span class="sd">            including the options above.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        ax : matplotlib axes instance</span>
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_geopandas</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"GeoSeries"</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span>
 
     <span class="c1"># GeoSeries-only (not in GeoDataFrame)</span>
     <span class="nd">@property</span>
@@ -4602,7 +4623,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">from_file</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"GeoSeries"</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Alternate constructor to create a ``GeoDataFrame`` from a file.</span>
+<span class="w">        </span><span class="sd">"""Alternate constructor to create a ``GeoSeries`` from a file.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -4617,6 +4638,9 @@
 <span class="sd">        table_name : str, optional</span>
 <span class="sd">            The name of the table to read from a GeoPackage file, by default</span>
 <span class="sd">            None. This is required if ``format`` is "geopackage".</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Keyword arguments passed to :func:`sedona.spark.geopandas.read_file`,</span>
+<span class="sd">            such as ``table_name``.</span>
 
 <span class="sd">        See Also</span>
 <span class="sd">        --------</span>
@@ -4808,7 +4832,12 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        x, y, z : iterable</span>
+<span class="sd">        x : iterable</span>
+<span class="sd">            X coordinates (longitude for geographic coordinates).</span>
+<span class="sd">        y : iterable</span>
+<span class="sd">            Y coordinates (latitude for geographic coordinates).</span>
+<span class="sd">        z : iterable, optional</span>
+<span class="sd">            Z coordinates. If omitted, 2D points are created.</span>
 <span class="sd">        index : array-like or Index, optional</span>
 <span class="sd">            The index for the GeoSeries. If not given and all coordinate inputs</span>
 <span class="sd">            are Series with an equal index, that index is used.</span>
@@ -4818,8 +4847,8 @@
 <span class="sd">            :meth:`pyproj.CRS.from_user_input() &lt;pyproj.crs.CRS.from_user_input&gt;`,</span>
 <span class="sd">            such as an authority string (eg "EPSG:4326") or a WKT string.</span>
 <span class="sd">        **kwargs</span>
-<span class="sd">            Additional arguments passed to the Series constructor,</span>
-<span class="sd">            e.g. ``name``.</span>
+<span class="sd">            Only ``name`` is supported, the name of the resulting GeoSeries.</span>
+<span class="sd">            Other keyword arguments raise ``TypeError``.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -5353,10 +5382,15 @@
 <span class="sd">        limit : int, default None</span>
 <span class="sd">            This is the maximum number of entries along the entire axis</span>
 <span class="sd">            where NaNs will be filled. Must be greater than 0 if not None.</span>
+<span class="sd">        inplace : bool, default False</span>
+<span class="sd">            If True, fill the missing values in place and return None.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Accepted for compatibility with GeoPandas and ignored.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        GeoSeries</span>
+<span class="sd">        GeoSeries or None</span>
+<span class="sd">            The filled GeoSeries, or None if ``inplace=True``.</span>
 
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
@@ -5934,15 +5968,17 @@
 <span class="sd">            &lt;https://tools.ietf.org/html/rfc7946&gt;`_.</span>
 <span class="sd">            Set to True to force re-projection and set to False to ignore CRS. False by</span>
 <span class="sd">            default.</span>
-
-<span class="sd">        *kwargs* that will be passed to json.dumps().</span>
-
-<span class="sd">        Note: Unlike geopandas, Sedona's implementation will replace 'LinearRing'</span>
-<span class="sd">        with 'LineString' in the GeoJSON output.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Keyword arguments passed to ``json.dumps()``.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        JSON string</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Unlike GeoPandas, Sedona's implementation replaces 'LinearRing' with</span>
+<span class="sd">        'LineString' in the GeoJSON output.</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
@@ -6164,6 +6200,8 @@
 <span class="sd">            The format driver used to write the file, by default None. If not</span>
 <span class="sd">            specified, it's inferred from the file extension. Available formats</span>
 <span class="sd">            are "geojson", "geopackage", and "geoparquet".</span>
+<span class="sd">        schema : dict, optional</span>
+<span class="sd">            Not applicable to Sedona's implementation.</span>
 <span class="sd">        index : bool, optional</span>
 <span class="sd">            If True, writes the index as a column. If False, no index is</span>
 <span class="sd">            written. By default None, the index is written only if it is named,</span>
@@ -6263,6 +6301,28 @@
             <span class="k">return</span> <span class="n">value</span><span class="p">,</span> <span class="kc">False</span>
 
 <div class="viewcode-block" id="GeoSeries.to_geoframe"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_geoframe">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_geoframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Convert the GeoSeries to a GeoDataFrame with the series as its active</span>
+<span class="sd">        geometry column.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name : str, optional</span>
+<span class="sd">            Name of the geometry column. If None, the series name is used, or</span>
+<span class="sd">            ``"geometry"`` if the series is unnamed.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        GeoDataFrame</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from shapely.geometry import Point</span>
+<span class="sd">        &gt;&gt;&gt; from sedona.spark.geopandas import GeoSeries</span>
+<span class="sd">        &gt;&gt;&gt; s = GeoSeries([Point(0, 0), Point(1, 1)])</span>
+<span class="sd">        &gt;&gt;&gt; s.to_geoframe().geometry.name</span>
+<span class="sd">        'geometry'</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">renamed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_column_label</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_column_label</span> <span class="o">==</span> <span class="p">(</span><span class="kc">None</span><span class="p">,):</span>

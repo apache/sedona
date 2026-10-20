@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -503,7 +502,28 @@ is raised with a message indicating the failure.</p>
 <span class="sig-name descname"><span class="pre">load_items_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bbox</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_items</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/stac/collection_client.html#CollectionClient.load_items_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.stac.collection_client.CollectionClient.load_items_df" title="Permalink to this definition"></a></dt>
 <dd><p>Loads items from the STAC collection as a Spark DataFrame.</p>
 <p>This method handles the conversion of headers to Spark options and
-applies various filters to the data.</p>
+applies various filters to the data. <code class="docutils literal notranslate"><span class="pre">get_dataframe</span></code> and
+<code class="docutils literal notranslate"><span class="pre">get_items</span></code> call it; pass None for any filter you do not need.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bbox</strong> – Bounding boxes for filtering the items, each a list of four
+floats: [min_lon, min_lat, max_lon, max_lat]. A single bounding box
+can also be given as a flat list of four floats.</p></li>
+<li><p><strong>geometry</strong> – Shapely geometry object(s) or WKT string(s) for spatial
+filtering. If both bbox and geometry are provided, geometry takes precedence.</p></li>
+<li><p><strong>datetime</strong> – A single datetime, a date or RFC 3339 timestamp string,
+or a list of date-time ranges for filtering the items. A partial date
+string such as “2020” or “2020-01” covers that whole period.</p></li>
+<li><p><strong>ids</strong> – Item IDs to keep, as a string or a list or tuple of strings.</p></li>
+<li><p><strong>max_items</strong> – The maximum number of STAC API results to return, or None
+for no limit.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A Spark DataFrame containing the filtered items.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

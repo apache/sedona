@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.io &mdash; Apache Sedona Python Documentation</title>
@@ -462,6 +461,12 @@
 <span class="sd">            - "geojson"</span>
 <span class="sd">            - "geopackage"</span>
 <span class="sd">            - "geoparquet"</span>
+<span class="sd">    **kwargs</span>
+<span class="sd">        Reader options. Only ``table_name`` is used: the name of the table to</span>
+<span class="sd">        read, required when ``format`` is "geopackage". Sedona warns about the</span>
+<span class="sd">        keyword arguments it receives, since other GeoPandas reader options are</span>
+<span class="sd">        not supported.</span>
+
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
 <span class="sd">    GeoDataFrame.to_file : write GeoDataFrame to file</span>
@@ -571,6 +576,7 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    path : str, path object</span>
+<span class="sd">        Path to a GeoParquet file or a directory of GeoParquet files.</span>
 <span class="sd">    columns : list-like of strings, default=None</span>
 <span class="sd">        Not currently supported in Sedona</span>
 <span class="sd">    storage_options : dict, optional</span>
@@ -579,6 +585,9 @@
 <span class="sd">        Not currently supported in Sedona</span>
 <span class="sd">    to_pandas_kwargs : dict, optional</span>
 <span class="sd">        Not currently supported in Sedona</span>
+<span class="sd">    **kwargs</span>
+<span class="sd">        Not currently supported in Sedona. Any keyword argument is ignored with</span>
+<span class="sd">        a warning.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -586,14 +595,8 @@
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
-<span class="sd">    from sedona.spark.geopandas import read_parquet</span>
+<span class="sd">    &gt;&gt;&gt; from sedona.spark.geopandas import read_parquet</span>
 <span class="sd">    &gt;&gt;&gt; df = read_parquet("data.parquet")  # doctest: +SKIP</span>
-
-<span class="sd">    Specifying columns to read:</span>
-
-<span class="sd">    &gt;&gt;&gt; df = read_parquet(</span>
-<span class="sd">    ...     "data.parquet",</span>
-<span class="sd">    ... )  # doctest: +SKIP</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The given arguments are not supported in Sedona: </span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>

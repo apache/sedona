@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.SedonaContext &mdash; Apache Sedona Python Documentation</title>
@@ -241,6 +240,20 @@
 
 <div class="viewcode-block" id="SedonaContext"><a class="viewcode-back" href="../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext">[docs]</a><span class="nd">@attr</span><span class="o">.</span><span class="n">s</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SedonaContext</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Entry point for using Sedona from PySpark.</span>
+
+<span class="sd">    ``SedonaContext.builder`` returns a ``SparkSession`` builder configured with</span>
+<span class="sd">    Sedona's Kryo serializer, and ``SedonaContext.create`` registers Sedona's</span>
+<span class="sd">    spatial types, functions and optimizations on a ``SparkSession``.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from sedona.spark import SedonaContext</span>
+<span class="sd">    &gt;&gt;&gt; config = SedonaContext.builder().getOrCreate()  # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; sedona = SedonaContext.create(config)  # doctest: +SKIP</span>
+<span class="sd">    """</span>
+
 <div class="viewcode-block" id="SedonaContext.create"><a class="viewcode-back" href="../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.create">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">spark</span><span class="p">:</span> <span class="n">SparkSession</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SparkSession</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""</span>
