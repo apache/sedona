@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5928,7 +5927,7 @@ For setup and examples, see the <a href="../../tutorial/geopandas-api/">GeoPanda
 Import <code>sedona.spark.geopandas</code> instead of <code>geopandas</code>; the tables use upstream
 API names so they can be compared directly with the GeoPandas catalog.</p>
 <h2 id="coverage-summary">Coverage summary<a class="headerlink" href="#coverage-summary" title="Permanent link">&para;</a></h2>
-<p><strong>91.4% API availability (160 of 175 catalogued APIs)</strong>, including partial implementations.</p>
+<p><strong>92.6% API availability (162 of 175 catalogued APIs)</strong>, including partial implementations.</p>
 <p>Availability is the number of APIs marked <strong>Available / partially available</strong>
 divided by the total. It measures whether a named API has an implementation, not
 complete parameter support, identical results, or fully distributed execution.
@@ -5949,13 +5948,13 @@ The notes below identify known restrictions.</p>
 </tr>
 <tr>
 <td>GeoDataFrame</td>
-<td style="text-align: right;">26</td>
-<td style="text-align: right;">7</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">6</td>
 </tr>
 <tr>
 <td>Input/output</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: right;">2</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">1</td>
 </tr>
 <tr>
 <td>Tools</td>
@@ -5969,8 +5968,8 @@ The notes below identify known restrictions.</p>
 </tr>
 <tr>
 <td>Total</td>
-<td style="text-align: right;">160</td>
-<td style="text-align: right;">15</td>
+<td style="text-align: right;">162</td>
+<td style="text-align: right;">13</td>
 </tr>
 </tbody>
 </table>
@@ -6835,8 +6834,8 @@ GeoPandas reference; they describe the target interface, not Sedona's support le
 </tr>
 <tr>
 <td><a href="https://geopandas.org/en/v1.1.4/docs/reference/api/geopandas.read_feather.html"><code>geopandas.read_feather</code></a></td>
-<td>Unsupported</td>
-<td>No implementation or public export in sedona.spark.geopandas.</td>
+<td>Available / partially available</td>
+<td>Reads the file on the driver with GeoPandas and distributes the result, so the path must be readable from the driver; columns, to_pandas_kwargs and PyArrow read options are passed through. Counterpart of GeoDataFrame.to_feather.</td>
 </tr>
 <tr>
 <td><a href="https://geopandas.org/en/v1.1.4/docs/reference/api/geopandas.read_parquet.html"><code>geopandas.read_parquet</code></a></td>
@@ -6966,7 +6965,7 @@ records ongoing work; this page records the implementation available in the vers
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="October 15, 2026 05:32:49 UTC">October 15, 2026 05:32:49</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="October 21, 2026 06:51:31 UTC">October 21, 2026 06:51:31</span>
   </span>
 
     
