@@ -53,10 +53,17 @@ trait TraitJoinQueryExec extends TraitJoinQueryBase {
     val (leftShapes, rightShapes) =
       toSpatialRddPair(leftResultsRaw, boundLeftShape, rightResultsRaw, boundRightShape)
 
+    val dominantSideConfigured = sedonaConf.isJoinSpartitionDominantSideConfigured
+    val buildSideConfigured = sedonaConf.isJoinBuildSideConfigured
+
     // Only do SpatialRDD analyze when the user doesn't know approximate total count of the spatial partitioning
     // dominant side rdd
     if (sedonaConf.getJoinApproximateTotalCount == -1) {
-      if (sedonaConf.getJoinSpartitionDominantSide == JoinSpartitionDominantSide.LEFT) {
+      if (!dominantSideConfigured || !buildSideConfigured) {
+        // Choosing a join side automatically needs the size of both sides
+        leftShapes.analyze()
+        rightShapes.analyze()
+      } else if (sedonaConf.getJoinSpartitionDominantSide == JoinSpartitionDominantSide.LEFT) {
         leftShapes.analyze()
       } else {
         rightShapes.analyze()
@@ -65,9 +72,16 @@ trait TraitJoinQueryExec extends TraitJoinQueryBase {
     log.info("[SedonaSQL] Number of partitions on the left: " + leftResultsRaw.partitions.size)
     log.info("[SedonaSQL] Number of partitions on the right: " + rightResultsRaw.partitions.size)
 
+    val (dominantSide, buildSide) = JoinSideSelection.chooseSides(
+      leftShapes.approximateTotalCount,
+      rightShapes.approximateTotalCount,
+      if (dominantSideConfigured) Some(sedonaConf.getJoinSpartitionDominantSide) else None,
+      if (buildSideConfigured) Some(sedonaConf.getJoinBuildSide) else None)
+    log.info(s"[SedonaSQL] Join dominant side: $dominantSide, index build side: $buildSide")
+
     var numPartitions = -1
     try {
-      if (sedonaConf.getJoinSpartitionDominantSide == JoinSpartitionDominantSide.LEFT) {
+      if (dominantSide == JoinSpartitionDominantSide.LEFT) {
         if (sedonaConf.getFallbackPartitionNum != -1) {
           numPartitions = sedonaConf.getFallbackPartitionNum
         } else {
@@ -93,7 +107,7 @@ trait TraitJoinQueryExec extends TraitJoinQueryBase {
         print(e.getMessage)
         // Partition number are not qualified
         // Use fallback num partitions specified in SedonaConf
-        if (sedonaConf.getJoinSpartitionDominantSide == JoinSpartitionDominantSide.LEFT) {
+        if (dominantSide == JoinSpartitionDominantSide.LEFT) {
           numPartitions = sedonaConf.getFallbackPartitionNum
           doSpatialPartitioning(leftShapes, rightShapes, numPartitions, sedonaConf)
         } else {
@@ -103,11 +117,8 @@ trait TraitJoinQueryExec extends TraitJoinQueryBase {
       }
     }
 
-    val joinParams = new JoinParams(
-      sedonaConf.getUseIndex,
-      spatialPredicate,
-      sedonaConf.getIndexType,
-      sedonaConf.getJoinBuildSide)
+    val joinParams =
+      new JoinParams(sedonaConf.getUseIndex, spatialPredicate, sedonaConf.getIndexType, buildSide)
 
     // logInfo(s"leftShape count ${leftShapes.spatialPartitionedRDD.count()}")
     // logInfo(s"rightShape count ${rightShapes.spatialPartitionedRDD.count()}")

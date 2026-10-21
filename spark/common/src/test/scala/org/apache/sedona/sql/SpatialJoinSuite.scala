@@ -226,6 +226,39 @@ class SpatialJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
     }
   }
 
+  describe("Spatial join with automatically chosen join sides (GH-854)") {
+    // df1 has more rows than df2. Without sedona.join.spatitionside and sedona.join.indexbuildside,
+    // the join uses the larger side for both, so listing df2 first makes it choose the right side.
+    val joinConditions = Table(
+      "join condition",
+      "ST_Contains(df1.geom, df2.geom)",
+      "ST_Intersects(df2.geom, df1.geom)",
+      "ST_Within(df1.geom, df2.geom)",
+      "ST_Distance(df1.geom, df2.geom) < 1.0",
+      "ST_Distance(df1.geom, df2.geom) < df2.dist")
+
+    forAll(joinConditions) { joinCondition =>
+      it(
+        s"should join with sides chosen automatically, larger side on the left: $joinCondition") {
+        val result =
+          sparkSession.sql(s"SELECT df1.id, df2.id FROM df1 JOIN df2 ON $joinCondition")
+        verifyResult(buildExpectedResult(joinCondition), result)
+      }
+      it(s"should join with sides chosen automatically, larger side on the right: $joinCondition") {
+        val result =
+          sparkSession.sql(s"SELECT df1.id, df2.id FROM df2 JOIN df1 ON $joinCondition")
+        verifyResult(buildExpectedResult(joinCondition), result)
+      }
+      it(s"should join with the index built on the right side: $joinCondition") {
+        withConf(Map("sedona.join.indexbuildside" -> "right")) {
+          val result =
+            sparkSession.sql(s"SELECT df1.id, df2.id FROM df1 JOIN df2 ON $joinCondition")
+          verifyResult(buildExpectedResult(joinCondition), result)
+        }
+      }
+    }
+  }
+
   describe("Spatial join should work with dataframe containing various number of partitions") {
     val queries = Table(
       "join queries",
