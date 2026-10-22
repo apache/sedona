@@ -547,6 +547,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         Name of the GeoSeries.
     copy : bool, default False
         Whether to copy the input data.
+    **kwargs
+        Accepted for compatibility with GeoPandas and ignored.
 
     Examples
     --------
@@ -1141,6 +1143,15 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
     def to_spark_pandas(self) -> pspd.Series:
+        """
+        Return the geometries as a plain pandas-on-Spark Series.
+
+        Returns
+        -------
+        pyspark.pandas.Series
+            A Series with the same index and geometry values, without the
+            GeoSeries spatial methods.
+        """
         return pspd.Series(pspd.DataFrame(self._psdf._internal))
 
     # ============================================================================
@@ -1149,6 +1160,16 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def geometry(self) -> "GeoSeries":
+        """
+        The GeoSeries itself.
+
+        Lets code written for the active geometry column of a ``GeoDataFrame``
+        (``gdf.geometry``) also accept a ``GeoSeries``.
+
+        Returns
+        -------
+        GeoSeries
+        """
         return self
 
     @property
@@ -4198,12 +4219,14 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Note: This method is not scalable and requires collecting all data to the driver.
 
+        Currently Polygon, MultiPolygon, LineString, MultiLineString, Point and
+        MultiPoint geometries can be plotted.
+
         Parameters
         ----------
-        s : Series
-            The GeoSeries to be plotted. Currently Polygon,
-            MultiPolygon, LineString, MultiLineString, Point and MultiPoint
-            geometries can be plotted.
+        *args
+            Positional arguments passed to :meth:`geopandas.GeoSeries.plot`, in
+            the order of the options below.
         cmap : str (default None)
             The name of a colormap recognized by matplotlib. Any
             colormap will work, but categorical colormaps are
@@ -4233,16 +4256,15 @@ class GeoSeries(GeoFrame, pspd.Series):
             Color options to be passed on to the actual plot function, such
             as ``edgecolor``, ``facecolor``, ``linewidth``, ``markersize``,
             ``alpha``.
+        **kwargs
+            Keyword arguments passed to :meth:`geopandas.GeoSeries.plot`,
+            including the options above.
 
         Returns
         -------
         ax : matplotlib axes instance
         """
         return self.to_geopandas().plot(*args, **kwargs)
-
-    @property
-    def geometry(self) -> "GeoSeries":
-        return self
 
     # GeoSeries-only (not in GeoDataFrame)
     @property
@@ -4392,7 +4414,7 @@ class GeoSeries(GeoFrame, pspd.Series):
     def from_file(
         cls, filename: str, format: Union[str, None] = None, **kwargs
     ) -> "GeoSeries":
-        """Alternate constructor to create a ``GeoDataFrame`` from a file.
+        """Alternate constructor to create a ``GeoSeries`` from a file.
 
         Parameters
         ----------
@@ -4407,6 +4429,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         table_name : str, optional
             The name of the table to read from a GeoPackage file, by default
             None. This is required if ``format`` is "geopackage".
+        **kwargs
+            Keyword arguments passed to :func:`sedona.spark.geopandas.read_file`,
+            such as ``table_name``.
 
         See Also
         --------
@@ -4453,9 +4478,9 @@ class GeoSeries(GeoFrame, pspd.Series):
               unclosed rings). If this is not possible, they are returned as ``None``
               without a warning. Requires GEOS >= 3.11 and shapely >= 2.1.
 
-        kwargs
-            Additional arguments passed to the Series constructor,
-            e.g. ``name``.
+        **kwargs
+            Only ``name`` is supported, the name of the resulting GeoSeries.
+            Other keyword arguments raise ``TypeError``.
 
         Returns
         -------
@@ -4489,6 +4514,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         2    POINT (3 3)
         dtype: geometry
         """
+        unsupported = set(kwargs) - {"name"}
+        if unsupported:
+            arguments = ", ".join(sorted(unsupported))
+            raise TypeError(f"Unsupported GeoSeries.from_wkb arguments: {arguments}")
         if on_invalid != "raise":
             raise NotImplementedError(
                 "GeoSeries.from_wkb(): only on_invalid='raise' is implemented"
@@ -4541,9 +4570,9 @@ class GeoSeries(GeoFrame, pspd.Series):
               unclosed rings). If this is not possible, they are returned as ``None``
               without a warning. Requires GEOS >= 3.11 and shapely >= 2.1.
 
-        kwargs
-            Additional arguments passed to the Series constructor,
-            e.g. ``name``.
+        **kwargs
+            Only ``name`` is supported, the name of the resulting GeoSeries.
+            Other keyword arguments raise ``TypeError``.
 
         Returns
         -------
@@ -4569,6 +4598,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         2    POINT (3 3)
         dtype: geometry
         """
+        unsupported = set(kwargs) - {"name"}
+        if unsupported:
+            arguments = ", ".join(sorted(unsupported))
+            raise TypeError(f"Unsupported GeoSeries.from_wkt arguments: {arguments}")
         if on_invalid != "raise":
             raise NotImplementedError(
                 "GeoSeries.from_wkt(): only on_invalid='raise' is implemented"
@@ -4598,7 +4631,12 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Parameters
         ----------
-        x, y, z : iterable
+        x : iterable
+            X coordinates (longitude for geographic coordinates).
+        y : iterable
+            Y coordinates (latitude for geographic coordinates).
+        z : iterable, optional
+            Z coordinates. If omitted, 2D points are created.
         index : array-like or Index, optional
             The index for the GeoSeries. If not given and all coordinate inputs
             are Series with an equal index, that index is used.
@@ -4608,8 +4646,8 @@ class GeoSeries(GeoFrame, pspd.Series):
             :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
             such as an authority string (eg "EPSG:4326") or a WKT string.
         **kwargs
-            Additional arguments passed to the Series constructor,
-            e.g. ``name``.
+            Only ``name`` is supported, the name of the resulting GeoSeries.
+            Other keyword arguments raise ``TypeError``.
 
         Returns
         -------
@@ -5143,10 +5181,15 @@ class GeoSeries(GeoFrame, pspd.Series):
         limit : int, default None
             This is the maximum number of entries along the entire axis
             where NaNs will be filled. Must be greater than 0 if not None.
+        inplace : bool, default False
+            If True, fill the missing values in place and return None.
+        **kwargs
+            Accepted for compatibility with GeoPandas and ignored.
 
         Returns
         -------
-        GeoSeries
+        GeoSeries or None
+            The filled GeoSeries, or None if ``inplace=True``.
 
         Notes
         -----
@@ -5724,15 +5767,17 @@ class GeoSeries(GeoFrame, pspd.Series):
             <https://tools.ietf.org/html/rfc7946>`_.
             Set to True to force re-projection and set to False to ignore CRS. False by
             default.
-
-        *kwargs* that will be passed to json.dumps().
-
-        Note: Unlike geopandas, Sedona's implementation will replace 'LinearRing'
-        with 'LineString' in the GeoJSON output.
+        **kwargs
+            Keyword arguments passed to ``json.dumps()``.
 
         Returns
         -------
         JSON string
+
+        Notes
+        -----
+        Unlike GeoPandas, Sedona's implementation replaces 'LinearRing' with
+        'LineString' in the GeoJSON output.
 
         Examples
         --------
@@ -5954,6 +5999,8 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             The format driver used to write the file, by default None. If not
             specified, it's inferred from the file extension. Available formats
             are "geojson", "geopackage", and "geoparquet".
+        schema : dict, optional
+            Not applicable to Sedona's implementation.
         index : bool, optional
             If True, writes the index as a column. If False, no index is
             written. By default None, the index is written only if it is named,
@@ -6053,6 +6100,28 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             return value, False
 
     def to_geoframe(self, name=None):
+        """
+        Convert the GeoSeries to a GeoDataFrame with the series as its active
+        geometry column.
+
+        Parameters
+        ----------
+        name : str, optional
+            Name of the geometry column. If None, the series name is used, or
+            ``"geometry"`` if the series is unnamed.
+
+        Returns
+        -------
+        GeoDataFrame
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> s = GeoSeries([Point(0, 0), Point(1, 1)])
+        >>> s.to_geoframe().geometry.name
+        'geometry'
+        """
         if name is not None:
             renamed = self.rename(name)
         elif self._column_label is None or self._column_label == (None,):

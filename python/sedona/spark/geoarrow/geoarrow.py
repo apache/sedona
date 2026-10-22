@@ -51,7 +51,7 @@ def dataframe_to_arrow(df, crs=None):
       `pyproj.CRS`). If provided, this will override any CRS present in the output
       geometries. If omitted, the CRS will be inferred from the values present in
       the output if exactly one CRS is present in the output.
-    :return:
+    :return: A ``pyarrow.Table``.
     """
     import pyarrow as pa
 
@@ -311,6 +311,19 @@ def infer_schema(gdf: "gpd.GeoDataFrame") -> StructType:
 # Modified backport from Spark 4.0
 # https://github.com/apache/spark/blob/3515b207c41d78194d11933cd04bddc21f8418dd/python/pyspark/sql/pandas/conversion.py#L632
 def create_spatial_dataframe(spark: SparkSession, gdf: "gpd.GeoDataFrame") -> DataFrame:
+    """
+    Create a Spark DataFrame from a GeoPandas GeoDataFrame, transferring the data with Arrow.
+
+    This is faster than ``spark.createDataFrame(gdf)`` for large GeoDataFrames.
+    Geometry columns become Sedona geometry columns, and the other columns get the
+    Spark types of their Arrow types.
+
+    :param spark: The Spark session.
+    :param gdf: The GeoPandas GeoDataFrame to convert. It must have at least one
+      geometry column.
+    :return: A Spark DataFrame with the columns of ``gdf``.
+    :raises ValueError: If ``gdf`` has no geometry column.
+    """
     from pyspark.sql.pandas.types import (
         to_arrow_type,
     )

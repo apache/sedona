@@ -2097,6 +2097,71 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(result.getLong(1) == 601041811137363967L)
     }
 
+    it("Passed ST_H3ToChildren") {
+      val cell = 601041811137363967L
+      val result = sparkSession
+        .sql(s"SELECT $cell AS cell, 6 AS resolution")
+        .select(
+          ST_H3ToChildren(col("cell"), col("resolution")),
+          ST_H3ToChildren(col("cell"), 6),
+          ST_H3ToChildren(cell, 6))
+        .first()
+      val children = result.getSeq[Long](0)
+      assert(children.size == 7)
+      assert(children.distinct.size == 7)
+      assert(result.getSeq[Long](1) == children)
+      assert(result.getSeq[Long](2) == children)
+      children.foreach { child =>
+        assert(org.apache.sedona.common.Functions.h3ToParent(child, 5) == cell)
+      }
+    }
+
+    it("Passed ST_H3ToCenterChild") {
+      val cell = 601041811137363967L
+      val result = sparkSession
+        .sql(s"SELECT $cell AS cell, 6 AS resolution")
+        .select(
+          ST_H3ToCenterChild(col("cell"), col("resolution")),
+          ST_H3ToCenterChild(col("cell"), 6),
+          ST_H3ToCenterChild(cell, 6))
+        .first()
+      (0 until 3).foreach(i => assert(result.getLong(i) == 605545409825210367L))
+    }
+
+    it("Passed ST_H3Compact") {
+      val cell = 601041811137363967L
+      val children = org.apache.sedona.common.Functions.h3ToChildren(cell, 6).map(_.longValue())
+      val result = sparkSession
+        .sql(s"SELECT ST_H3ToChildren($cell, 6) AS cells")
+        .select(ST_H3Compact(col("cells")), ST_H3Compact(children))
+        .first()
+      assert(result.getSeq[Long](0) == Seq(cell))
+      assert(result.getSeq[Long](1) == Seq(cell))
+      assert(
+        sparkSession
+          .range(1)
+          .select(ST_H3Compact(Array.empty[Long]))
+          .first()
+          .getSeq[Long](0)
+          .isEmpty)
+    }
+
+    it("Passed ST_H3Uncompact") {
+      val cell = 601041811137363967L
+      val result = sparkSession
+        .sql(s"SELECT array($cell) AS cells, 6 AS resolution")
+        .select(
+          ST_H3Uncompact(col("cells"), col("resolution")),
+          ST_H3Uncompact(col("cells"), 6),
+          ST_H3Uncompact(Array(cell), 6))
+        .first()
+      val cells = result.getSeq[Long](0)
+      assert(cells.size == 7)
+      assert(cells.toSet == org.apache.sedona.common.Functions.h3ToChildren(cell, 6).toSet)
+      assert(result.getSeq[Long](1) == cells)
+      assert(result.getSeq[Long](2) == cells)
+    }
+
     it("Passed ST_DistanceSphere") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('POINT (0 0)') AS geom1, ST_GeomFromWKT('POINT (90 0)') AS geom2")

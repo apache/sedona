@@ -230,7 +230,10 @@ object InferredTypes {
     } else if (t =:= typeOf[String]) { expr => input =>
       expr.asString(input)
     } else if (t =:= typeOf[Array[Long]]) { expr => input =>
-      expr.eval(input).asInstanceOf[ArrayData].toLongArray()
+      expr.eval(input).asInstanceOf[ArrayData] match {
+        case null => null
+        case arrayData: ArrayData => arrayData.toLongArray()
+      }
     } else if (t =:= typeOf[Array[String]]) { expr => input =>
       expr.eval(input).asInstanceOf[ArrayData] match {
         case null => null

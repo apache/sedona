@@ -20,6 +20,10 @@ from sedona.spark.sql.types import RasterType
 
 
 class SedonaKepler:
+    """Plot Sedona DataFrames on Kepler.gl maps in a Jupyter notebook.
+
+    Requires the ``keplergl`` package, installed with ``apache-sedona[kepler-map]``.
+    """
 
     @classmethod
     def create_map(
@@ -33,14 +37,15 @@ class SedonaKepler:
     ):
         """
         Creates a map visualization using kepler, optionally taking a sedona dataFrame as data input
+
         :param df: [Optional] SedonaDataFrame to plot on the map
         :param name: [Optional] Name to be associated with the given
-        dataframe, if a df is passed with no name, a default name of 'unnamed' is set for it.
-        param config: [Optional] A map config to be applied to the rendered map
-        param height: [Optional] Height of the map in pixels, default is 600
-        param use_arrow: [Optional] Whether to use arrow for data transfer, default is False
-        param show_docs: [Optional] Whether to show the documentation, default is False
-        :return: A map object
+            dataframe, if a df is passed with no name, a default name of 'unnamed' is set for it.
+        :param config: [Optional] A Kepler.gl map config to be applied to the rendered map
+        :param height: [Optional] Height of the map in pixels, default is 600
+        :param use_arrow: [Optional] Whether to use Arrow to transfer the data to the map, default is False
+        :param show_docs: [Optional] Whether to show the Kepler.gl documentation, default is False
+        :return: A ``keplergl.KeplerGl`` map object
         """
 
         try:
@@ -61,7 +66,8 @@ class SedonaKepler:
     @classmethod
     def add_df(cls, kepler_map, df, name="unnamed"):
         """
-        Adds a SedonaDataFrame to a given map object.
+        Adds a SedonaDataFrame to a given map object. Raster columns are left out.
+
         :param kepler_map: Map object to add SedonaDataFrame to
         :param df: SedonaDataFrame to add
         :param name: [Optional] Name to assign to the dataframe, default name assigned is 'unnamed'

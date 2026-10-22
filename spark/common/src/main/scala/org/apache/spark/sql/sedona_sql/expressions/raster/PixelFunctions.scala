@@ -93,8 +93,8 @@ private[apache] case class RS_PixelAsPoints(inputExpressions: Seq[Expression])
 
 private[apache] case class RS_PixelAsPolygon(inputExpressions: Seq[Expression])
     extends InferredExpression(PixelFunctions.getPixelAsPolygon _) {
-  protected def withNewChildrenInternal(newChilren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChilren)
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
   }
 }
 

@@ -155,9 +155,9 @@ def ST_Union_Agg(geometry: ColumnOrName) -> Column:
     return ST_Union_Aggr(geometry)
 
 
-# Automatically populate __all__
+# Export the functions defined in this module. Imported helpers, such as lit, stay out of star imports.
 __all__ = [
     name
     for name, obj in inspect.getmembers(sys.modules[__name__])
-    if inspect.isfunction(obj)
+    if inspect.isfunction(obj) and obj.__module__ == __name__
 ]

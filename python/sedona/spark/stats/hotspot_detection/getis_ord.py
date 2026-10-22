@@ -38,23 +38,25 @@ def g_local(
 
     Weights should be the neighbors of this row. The members of the weights should be comprised of structs containing a
     value column and a neighbor column. The neighbor column should be the contents of the neighbors with the same types
-    as the parent row (minus neighbors). You can use `wherobots.weighing.add_distance_band_column` to achieve this. To
-    calculate the Gi* statistic, ensure the focal observation is in the neighbors array (i.e. the row is in the weights
-    column) and `star=true`. Significance is calculated with a z score. Permutation tests are not yet implemented and
-    thus island weight does nothing. The following columns will be added: G, E[G], V[G], Z, P.
+    as the parent row (minus neighbors). You can use `sedona.spark.stats.weighting.add_distance_band_column` to
+    achieve this. To calculate the Gi* statistic, ensure the focal observation is in the neighbors array (pass
+    `include_self=True` to the weighting function) and set `star=True`. Significance is calculated with a z score.
+    Permutation tests are not yet implemented and thus island weight does nothing. The following columns will be
+    added: G, EG (the expected G), VG (the variance of G), Z, and P (1 minus the standard normal CDF of |Z|).
 
     Args:
         dataframe: the dataframe to perform the G statistic on
         x: The column name we want to perform hotspot analysis on
         weights: The column name containing the neighbors array. The neighbor column should be the contents of
             the neighbors with the same types as the parent row (minus neighbors). You can use
-            `wherobots.weighing.add_distance_band_column` to achieve this.
+            `sedona.spark.stats.weighting.add_distance_band_column` to achieve this.
         permutations: Not used. Permutation tests are not supported yet. The number of permutations to use for the
             significance test.
         star: Whether the focal observation is in the neighbors array. If true this calculates Gi*, otherwise Gi
         island_weight: Not used. The weight for the simulated neighbor used for records without a neighbor in perm tests
+
     Returns:
-        A dataframe with the original columns plus the columns G, E[G], V[G], Z, P.
+        A dataframe with the original columns plus the columns G, EG, VG, Z, P.
     """
     sedona = SparkSession.getActiveSession()
 

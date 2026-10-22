@@ -343,6 +343,7 @@ The GeoPandas API for Apache Sedona implements the most commonly used GeoSeries 
 - `read_file()` - Read various geospatial formats
 - `list_layers()` - List vector layers and nonspatial tables in a GeoPackage
 - `to_parquet()` - Write to Parquet format
+- `read_feather()` and `to_feather()` - Read and write Feather files on the driver, for small files
 
 ### Spatial Operations
 

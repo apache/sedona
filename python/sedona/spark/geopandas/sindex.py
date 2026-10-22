@@ -39,14 +39,18 @@ class SpatialIndex:
         Parameters
         ----------
         geometry : np.array of Shapely geometries, GeoSeries, or PySparkDataFrame
+            The geometries to index.
         index_type : str, default "strtree"
             The type of spatial index to use.
         column_name : str, optional
             The column name to extract geometry from if `geometry` is a PySparkDataFrame.
 
-        Note: query methods (i.e. query, nearest, intersection) have different behaviors depending on how the index is constructed.
-        When constructed from a np.array, the query methods return indices like original GeoPandas.
-        When constructed from a GeoSeries or PySparkDataFrame, the query methods return geometries.
+        Notes
+        -----
+        The query methods (``query``, ``nearest`` and ``intersection``) behave
+        differently depending on how the index is constructed. When constructed
+        from a np.array, they return indices like GeoPandas. When constructed
+        from a GeoSeries or PySparkDataFrame, they return geometries.
         """
         from sedona.spark.geopandas import GeoSeries
 
@@ -109,18 +113,20 @@ class SpatialIndex:
         sort : bool, optional, default False
             Whether to sort the results.
 
-        Note: query() has different behaviors depending on how the index is constructed.
-        When constructed from a np.array, this method returns indices like original GeoPandas.
-        When constructed from a GeoSeries or PySparkDataFrame, this method returns geometries.
-
-        Note: Unlike GeoPandas, Sedona does not support geometry input of type np.array or GeoSeries.
-        It is recommended to instead use GeoSeries.intersects directly.
-
         Returns
         -------
         list
             List of geometries if constructed from a GeoSeries or PySparkDataFrame.
             List of the corresponding indices if constructed from a np.array.
+
+        Notes
+        -----
+        The result depends on how the index is constructed. When constructed
+        from a np.array, this method returns indices like GeoPandas. When
+        constructed from a GeoSeries or PySparkDataFrame, it returns geometries.
+
+        Unlike GeoPandas, Sedona does not support geometry input of type
+        np.array or GeoSeries. Use ``GeoSeries.intersects`` directly instead.
         """
 
         if not isinstance(geometry, BaseGeometry):
@@ -201,17 +207,20 @@ class SpatialIndex:
         return_distance : bool, optional, default False
             Whether to return distances along with indices.
 
-        Note: Unlike GeoPandas, Sedona does not support geometry input of type np.array or GeoSeries.
-
-        Note: nearest() has different behaviors depending on how the index is constructed.
-        When constructed from a np.array, this method returns indices like original GeoPandas.
-        When constructed from a GeoSeries or PySparkDataFrame, this method returns geometries.
-
         Returns
         -------
         list or tuple
             List of geometries if constructed from a GeoSeries or PySparkDataFrame.
             List of the corresponding indices if constructed from a np.array.
+
+        Notes
+        -----
+        The result depends on how the index is constructed. When constructed
+        from a np.array, this method returns indices like GeoPandas. When
+        constructed from a GeoSeries or PySparkDataFrame, it returns geometries.
+
+        Unlike GeoPandas, Sedona does not support geometry input of type
+        np.array or GeoSeries.
         """
 
         if not isinstance(geometry, BaseGeometry):
@@ -269,18 +278,20 @@ class SpatialIndex:
         bounds : tuple
             Bounding box as (min_x, min_y, max_x, max_y).
 
-        Note: intersection() has different behaviors depending on how the index is constructed.
-        When constructed from a np.array, this method returns indices like original GeoPandas.
-        When constructed from a GeoSeries or PySparkDataFrame, this method returns geometries.
-
-        Note: Unlike GeoPandas, Sedona does not support geometry input of type np.array or GeoSeries.
-        It is recommended to instead use GeoSeries.intersects directly.
-
         Returns
         -------
         list
             List of geometries if constructed from a GeoSeries or PySparkDataFrame.
             List of the corresponding indices if constructed from a np.array.
+
+        Notes
+        -----
+        The result depends on how the index is constructed. When constructed
+        from a np.array, this method returns indices like GeoPandas. When
+        constructed from a GeoSeries or PySparkDataFrame, it returns geometries.
+
+        Unlike GeoPandas, Sedona does not support geometry input of type
+        np.array or GeoSeries. Use ``GeoSeries.intersects`` directly instead.
         """
         log_advice(
             "`intersection` returns local list of matching geometries onto driver's memory. "

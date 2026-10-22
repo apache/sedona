@@ -1016,6 +1016,21 @@ class TestGeoSeries(TestGeopandasBase):
         ],
         ids=["wkt", "wkb"],
     )
+    def test_wkt_wkb_keyword_arguments(self, constructor, value):
+        assert constructor([value], name="geom").name == "geom"
+        with pytest.raises(
+            TypeError, match="Unsupported GeoSeries.from_wk[tb] arguments: dtype"
+        ):
+            constructor([value], dtype="geometry")
+
+    @pytest.mark.parametrize(
+        "constructor,value",
+        [
+            (GeoSeries.from_wkt, "POINT (1 1)"),
+            (GeoSeries.from_wkb, Point(1, 1).wkb),
+        ],
+        ids=["wkt", "wkb"],
+    )
     def test_wkt_wkb_from_renamed_pandas_on_spark_series(self, constructor, value):
         source = ps.Series([value], name="source")
         source.rename("renamed", inplace=True)
@@ -8039,11 +8054,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             ]
         )
 
-        # JTS cannot distinguish empty XY and XYZ sequences. M and ZM sequence
-        # metadata is explicit, so the GeometryUDT serializers retain it.
+        # WKT tagged Z, M or ZM keeps that layout, even for empty geometries.
         self.check_pd_series_equal(
             empty_2d.geom_equals_identical(empty_dimensional, align=False),
-            pd.Series([True, True, True, False, False], dtype=bool),
+            pd.Series([False, False, False, False, False], dtype=bool),
         )
 
         nan_first_z = GeoSeries.from_wkt(["LINESTRING Z (0 0 NaN, 1 1 2)"])
@@ -8057,10 +8071,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         all_nan_z = GeoSeries.from_wkt(["LINESTRING Z (0 0 NaN, 1 1 NaN)"])
 
-        # An all-NaN Z sequence remains indistinguishable from ordinary XY in JTS.
+        # A tagged Z keeps the XYZ layout even when every Z value is NaN.
         self.check_pd_series_equal(
             all_nan_z.geom_equals_identical(two_dimensional, align=False),
-            pd.Series([True], dtype=bool),
+            pd.Series([False], dtype=bool),
         )
 
         mixed_dimension = GeoSeries([MultiPoint([Point(0, 0), Point(1, 1, 2)])])

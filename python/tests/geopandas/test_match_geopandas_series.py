@@ -260,6 +260,11 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         gpd_result = gpd.GeoSeries(self.linestrings).buffer(0.2, single_sided=True)
         self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
+        # A negative distance buffers the right side.
+        sgpd_result = GeoSeries(self.linestrings).buffer(-0.2, single_sided=True)
+        gpd_result = gpd.GeoSeries(self.linestrings).buffer(-0.2, single_sided=True)
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
         sgpd_result = GeoSeries(self.linestrings).buffer(
             0.2, join_style="mitre", mitre_limit=10.0
         )
