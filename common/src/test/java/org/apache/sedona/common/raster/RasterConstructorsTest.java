@@ -1044,8 +1044,7 @@ public class RasterConstructorsTest extends RasterTestBase {
         };
     assertArrayEquals(expected, actual, 0.1d);
 
-    // A LineString goes through the same segment code regardless of allTouched
-    // (a line has no interior); every pixel it crosses must be burned.
+    // Without allTouched, a LineString (which has no interior) burns every pixel it crosses.
     Geometry line = Constructors.geomFromWKT("LINESTRING (3.97 1.57, 0.31 3.24)", 0);
     rasterized = RasterConstructors.asRaster(line, raster, "d", false, 1d, 0d, false);
     actual = MapAlgebra.bandAsArray(rasterized, 1);

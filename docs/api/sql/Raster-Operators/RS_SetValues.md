@@ -55,7 +55,7 @@ A polygon never selects a pixel it touches only on the pixel's boundary, whichev
 
 Point geometries select the single pixel containing the point under the half-open rule, regardless of `allTouched`. Line rasterization follows the cells entered by its segments rather than requiring a pixel-centre intersection. A point or line lying on an internal grid edge selects the pixel after it in pixel order; one lying on the raster's last edge selects none. A neighboring pixel contacted only at a line endpoint is not selected unless the segment enters it.
 
-For `LineString` geometries, `allTouched` can also change the rasterization window at grid boundaries and therefore the selected pixels.
+For `LineString` geometries, `allTouched=true` selects the pixels GDAL selects with `ALL_TOUCHED=TRUE`: where a segment crosses a grid corner exactly, one of the two pixels that meet it only at that corner is also selected. `allTouched` can also change the rasterization window at grid boundaries and therefore the selected pixels.
 
 !!!note
     If the shape of `newValues` doesn't match with provided `width` and `height`, `IllegalArgumentException` is thrown.
