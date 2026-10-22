@@ -77,6 +77,17 @@ public class RasterizationUtilsTest {
     return result;
   }
 
+  /** Every pixel (x, y) with x0 <= x <= x1 and y0 <= y <= y1, as "x,y" strings. */
+  private static Set<String> rectangle(int x0, int x1, int y0, int y1) {
+    Set<String> result = new TreeSet<>();
+    for (int x = x0; x <= x1; x++) {
+      for (int y = y0; y <= y1; y++) {
+        result.add(x + "," + y);
+      }
+    }
+    return result;
+  }
+
   private static List<String> concat(List<String> first, List<String> second) {
     List<String> result = new ArrayList<>(first);
     result.addAll(second);
@@ -146,6 +157,34 @@ public class RasterizationUtilsTest {
 
     List<String> pixels =
         fill(polygon("POLYGON (" + EXTERIOR + ", " + HOLE + ", " + SECOND_HOLE + ")"));
+
+    assertEquals(new ArrayList<>(expected), pixels);
+  }
+
+  @Test
+  public void fillOfPolygonWithHoleSnappedOntoTheExteriorRing() throws ParseException {
+    // In pixels the hole runs from (0, 2) to (4, 4), so its left edge lies on the exterior ring
+    Set<String> expected = block(1, 8);
+    expected.removeAll(rectangle(1, 4, 2, 4));
+
+    List<String> pixels =
+        fill(polygon("POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (0.5 2, 4 2, 4 4, 0.5 4, 0.5 2))"));
+
+    assertEquals(new ArrayList<>(expected), pixels);
+  }
+
+  @Test
+  public void fillOfPolygonWithHolesSnappedOntoEachOther() throws ParseException {
+    // In pixels the holes run from x = 2 to 3 and from x = 3 to 5, sharing the edge x = 3
+    Set<String> expected = block(1, 8);
+    expected.removeAll(rectangle(2, 5, 2, 3));
+
+    List<String> pixels =
+        fill(
+            polygon(
+                "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0),"
+                    + " (2.1 2.1, 3.5 2.1, 3.5 3.5, 2.1 3.5, 2.1 2.1),"
+                    + " (3.6 2.1, 5.5 2.1, 5.5 3.5, 3.6 3.5, 3.6 2.1))"));
 
     assertEquals(new ArrayList<>(expected), pixels);
   }

@@ -22,11 +22,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
+import org.locationtech.jts.algorithm.locate.SimplePointInAreaLocator;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.Location;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import scala.Tuple2;
@@ -447,7 +449,9 @@ public class RasterizationUtils implements Serializable {
     int maxPixelY = (int) polygon.getEnvelopeInternal().getMaxY();
     for (int j = minPixelY; j <= maxPixelY; j++) {
       for (int i = minPixelX; i <= maxPixelX; i++) {
-        if (polygon.contains(geometryfactory.createPoint(new Coordinate(i, j)))) {
+        // Snapping to pixels can make a hole share an edge with the shell or another hole.
+        // Polygon.contains throws a TopologyException on such rings; the point locator does not.
+        if (SimplePointInAreaLocator.locate(new Coordinate(i, j), polygon) == Location.INTERIOR) {
           try {
             Pixel newPixel = new Pixel(i, j, resolutionX, resolutionY);
             result.add(new Tuple2<Pixel, Double>(newPixel, new Double(objectWeight)));
