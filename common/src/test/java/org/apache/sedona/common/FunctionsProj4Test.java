@@ -329,9 +329,13 @@ public class FunctionsProj4Test extends TestBase {
     String sourceCRS = "+proj=longlat +datum=NAD27 +nadgrids=@/nonexistent/path/grid.gsb +no_defs";
     String targetCRS = "EPSG:4326";
 
-    // Should not throw - optional grid just gets skipped
+    // Should not throw - optional grid just gets skipped and no datum shift is applied.
+    // proj4sedona 0.1.6 returned POINT (NaN NaN) here, so check the coordinates, not just
+    // that a geometry came back.
     Geometry result = FunctionsProj4.transform(point, sourceCRS, targetCRS);
     assertNotNull(result);
+    assertEquals(-79.0, result.getCoordinate().x, FP_TOLERANCE);
+    assertEquals(43.0, result.getCoordinate().y, FP_TOLERANCE);
   }
 
   @Test
@@ -349,6 +353,129 @@ public class FunctionsProj4Test extends TestBase {
       // Expected
       assertTrue(e.getMessage().contains("grid") || e.getCause() != null);
     }
+  }
+
+  // ==================== NAD27 Tests ====================
+
+  // NAD27 EPSG codes resolve to the NAD27 datum with optional NADCON/NTv2 grids. With
+  // proj4sedona 0.1.6 every such transform returned POINT (NaN NaN) when no grid was loaded,
+  // including NAD27 to NAD27 (apache/sedona discussion #3466). Reference values from
+  // pyproj 3.8.0 / PROJ 9.8.1.
+
+  @Test
+  public void testTransformNad27ToNad27() {
+    // NAD27 / Texas South (US survey feet) to NAD27 geographic
+    Geometry result =
+        FunctionsProj4.transform(
+            GEOMETRY_FACTORY.createPoint(new Coordinate(2200000, 400000)),
+            "EPSG:32041",
+            "EPSG:4267");
+    assertEquals(4267, result.getSRID());
+    assertEquals(-97.88703650736258, result.getCoordinate().x, 1e-9);
+    assertEquals(26.765822655699218, result.getCoordinate().y, 1e-9);
+
+    // NAD27 / Texas South Central
+    result =
+        FunctionsProj4.transform(
+            GEOMETRY_FACTORY.createPoint(new Coordinate(2000000, 400000)),
+            "EPSG:32040",
+            "EPSG:4267");
+    assertEquals(-99.0, result.getCoordinate().x, 1e-9);
+    assertEquals(28.933467490080247, result.getCoordinate().y, 1e-9);
+
+    // NAD27 / UTM zone 14N
+    result =
+        FunctionsProj4.transform(
+            GEOMETRY_FACTORY.createPoint(new Coordinate(500000, 3300000)),
+            "EPSG:26714",
+            "EPSG:4267");
+    assertEquals(-99.0, result.getCoordinate().x, 1e-9);
+    assertEquals(29.832085964986316, result.getCoordinate().y, 1e-9);
+  }
+
+  @Test
+  public void testTransformNad27ToWgs84WithoutGrid() {
+    // Without a grid file, NAD27 to another datum uses the EPSG:4267 Helmert shift
+    // (-8,160,176), as PROJ gives it for +towgs84=-8,160,176. At this point the result is
+    // 2.5 m from NADCON; with no shift it would be 46 m off.
+    Geometry result =
+        FunctionsProj4.transform(
+            GEOMETRY_FACTORY.createPoint(new Coordinate(-98.0, 27.0)), "EPSG:4267", "EPSG:4326");
+    assertEquals(4326, result.getSRID());
+    assertEquals(-98.00030416754218, result.getCoordinate().x, 1e-9);
+    assertEquals(27.000326243662016, result.getCoordinate().y, 1e-9);
+
+    result =
+        FunctionsProj4.transform(
+            GEOMETRY_FACTORY.createPoint(new Coordinate(-98.0, 27.0)), "EPSG:4326", "EPSG:4267");
+    assertEquals(-97.99969584364611, result.getCoordinate().x, 1e-9);
+    assertEquals(26.99967374641001, result.getCoordinate().y, 1e-9);
+
+    // NAD27 / Texas South
+    result =
+        FunctionsProj4.transform(
+            GEOMETRY_FACTORY.createPoint(new Coordinate(2200000, 400000)),
+            "EPSG:32041",
+            "EPSG:4326");
+    assertEquals(-97.88733692934359, result.getCoordinate().x, 1e-9);
+    assertEquals(26.76615730274582, result.getCoordinate().y, 1e-9);
+  }
+
+  @Test
+  public void testTransformNad27WithNadconGrid() {
+    Path gridPath = Path.of("src/test/resources/grids/us_noaa_conus.tif").toAbsolutePath();
+    assumeTrue("Grid file not found", Files.exists(gridPath));
+
+    // EPSG:32041 (NAD27 / Texas South) with the NADCON conus grid
+    String texasSouthNad27 =
+        "+proj=lcc +lat_1=27.83333333333333 +lat_2=26.16666666666667 +lat_0=25.66666666666667"
+            + " +lon_0=-98.5 +x_0=609601.2192024384 +y_0=0 +ellps=clrk66 +units=us-ft"
+            + " +nadgrids="
+            + gridPath
+            + " +no_defs";
+
+    Geometry result =
+        FunctionsProj4.transform(
+            GEOMETRY_FACTORY.createPoint(new Coordinate(2200000, 400000)),
+            texasSouthNad27,
+            "EPSG:4326");
+    assertEquals(-97.88731267786214, result.getCoordinate().x, 1e-8);
+    assertEquals(26.766159385758247, result.getCoordinate().y, 1e-8);
+
+    result =
+        FunctionsProj4.transform(
+            GEOMETRY_FACTORY.createPoint(new Coordinate(-98.0, 27.0)),
+            "EPSG:4326",
+            texasSouthNad27);
+    assertEquals(2162896.263676711, result.getCoordinate().x, 0.01);
+    assertEquals(484833.74499888776, result.getCoordinate().y, 0.01);
+  }
+
+  @Test
+  public void testTransformFailureThrows() {
+    // A coordinate that cannot be transformed raises an error. proj4sedona 0.1.7 and earlier
+    // returned NaN coordinates instead.
+    Path gridPath = Path.of("src/test/resources/grids/us_noaa_conus.tif").toAbsolutePath();
+    assumeTrue("Grid file not found", Files.exists(gridPath));
+
+    // Alaska is outside the CONUS grid, the only grid listed, so PROJ fails here as well
+    String conusOnly = "+proj=longlat +ellps=clrk66 +nadgrids=@" + gridPath + " +no_defs";
+    IllegalArgumentException e =
+        assertThrows(
+            IllegalArgumentException.class,
+            () ->
+                FunctionsProj4.transform(
+                    GEOMETRY_FACTORY.createPoint(new Coordinate(-150.0, 61.0)),
+                    conusOnly,
+                    "EPSG:4326"));
+    assertTrue(e.getMessage().contains("(-150.0, 61.0)"));
+
+    // Web Mercator cannot represent a pole; GeoTools also rejects it
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            FunctionsProj4.transform(
+                GEOMETRY_FACTORY.createPoint(new Coordinate(0.0, 90.0)), "EPSG:4326", "EPSG:3857"));
   }
 
   // ==================== Geometry Type Tests ====================

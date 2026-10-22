@@ -2963,6 +2963,51 @@ public class Functions {
     }
   }
 
+  public static class ST_H3ToChildren extends ScalarFunction {
+    @DataTypeHint(value = "ARRAY<BIGINT>")
+    public Long[] eval(
+        @DataTypeHint("BIGINT") Long cell, @DataTypeHint("INTEGER") Integer resolution) {
+      if (cell == null || resolution == null) {
+        return null;
+      }
+      return org.apache.sedona.common.Functions.h3ToChildren(cell, resolution);
+    }
+  }
+
+  public static class ST_H3Uncompact extends ScalarFunction {
+    @DataTypeHint(value = "ARRAY<BIGINT>")
+    public Long[] eval(
+        @DataTypeHint("ARRAY<BIGINT>") Long[] cells, @DataTypeHint("INTEGER") Integer resolution) {
+      if (cells == null || resolution == null) {
+        return null;
+      }
+      return org.apache.sedona.common.Functions.h3Uncompact(
+          Arrays.stream(cells).mapToLong(Long::longValue).toArray(), resolution);
+    }
+  }
+
+  public static class ST_H3ToCenterChild extends ScalarFunction {
+    @DataTypeHint(value = "BIGINT")
+    public Long eval(
+        @DataTypeHint("BIGINT") Long cell, @DataTypeHint("INTEGER") Integer resolution) {
+      if (cell == null || resolution == null) {
+        return null;
+      }
+      return org.apache.sedona.common.Functions.h3ToCenterChild(cell, resolution);
+    }
+  }
+
+  public static class ST_H3Compact extends ScalarFunction {
+    @DataTypeHint(value = "ARRAY<BIGINT>")
+    public Long[] eval(@DataTypeHint("ARRAY<BIGINT>") Long[] cells) {
+      if (cells == null) {
+        return null;
+      }
+      return org.apache.sedona.common.Functions.h3Compact(
+          Arrays.stream(cells).mapToLong(Long::longValue).toArray());
+    }
+  }
+
   // =========================================================================
   // Bing Tile functions
   // =========================================================================

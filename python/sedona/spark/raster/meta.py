@@ -32,6 +32,32 @@ class PixelAnchor(Enum):
 
 
 class AffineTransform:
+    """Affine transform from pixel coordinates to world coordinates.
+
+    The pixel at column ``col`` and row ``row`` maps to
+    ``x = ip_x + col * scale_x + row * skew_x`` and
+    ``y = ip_y + col * skew_y + row * scale_y``. ``repr()`` shows the transform
+    as a 3x3 matrix.
+
+    Parameters
+    ----------
+    scale_x : float
+        Pixel width in world units.
+    skew_y : float
+        Change in y per column; 0 for a raster without rotation.
+    skew_x : float
+        Change in x per row; 0 for a raster without rotation.
+    scale_y : float
+        Pixel height in world units, negative for a north-up raster.
+    ip_x : float
+        X coordinate of the upper-left pixel.
+    ip_y : float
+        Y coordinate of the upper-left pixel.
+    pixel_anchor : PixelAnchor
+        Whether ``ip_x`` and ``ip_y`` refer to the center or the upper-left
+        corner of that pixel.
+    """
+
     scale_x: float
     skew_y: float
     skew_x: float
@@ -52,11 +78,39 @@ class AffineTransform:
         self.pixel_anchor = pixel_anchor
 
     def with_anchor(self, pixel_anchor: PixelAnchor):
+        """Return the same transform expressed for another pixel anchor.
+
+        Parameters
+        ----------
+        pixel_anchor : PixelAnchor
+            The pixel anchor of the returned transform.
+
+        Returns
+        -------
+        AffineTransform
+            This transform if it already uses ``pixel_anchor``; otherwise a new
+            transform whose origin is shifted by half a pixel.
+        """
         if pixel_anchor == self.pixel_anchor:
             return self
         return self._do_change_pixel_anchor(self.pixel_anchor, pixel_anchor)
 
     def translate(self, offset_x: float, offset_y: float):
+        """Return the transform of a raster whose origin is offset by whole pixels.
+
+        Parameters
+        ----------
+        offset_x : float
+            Offset in pixel columns.
+        offset_y : float
+            Offset in pixel rows.
+
+        Returns
+        -------
+        AffineTransform
+            A new transform whose origin is pixel (``offset_x``, ``offset_y``)
+            of this one, for example the transform of a tile cut from the raster.
+        """
         new_ipx = self.ip_x + offset_x * self.scale_x + offset_y * self.skew_x
         new_ipy = self.ip_y + offset_x * self.skew_y + offset_y * self.scale_y
         return AffineTransform(
@@ -111,7 +165,19 @@ class AffineTransform:
 
 
 class SampleDimension:
-    """Raster band metadata."""
+    """Raster band metadata.
+
+    Parameters
+    ----------
+    description : str
+        Description of the band.
+    offset : float
+        Offset of the band: a stored pixel value means ``value * scale + offset``.
+    scale : float
+        Scale of the band.
+    nodata : float
+        NODATA value of the band, or NaN if the band has none.
+    """
 
     description: str
     offset: float

@@ -311,6 +311,37 @@ object st_functions {
   def ST_H3ToParent(cell: Long, resolution: Integer): Column =
     wrapExpression[ST_H3ToParent](cell, resolution)
 
+  def ST_H3ToChildren(cell: Column, resolution: Column): Column =
+    wrapExpression[ST_H3ToChildren](cell, resolution)
+
+  def ST_H3ToChildren(cell: Column, resolution: Integer): Column =
+    wrapExpression[ST_H3ToChildren](cell, resolution)
+
+  def ST_H3ToChildren(cell: Long, resolution: Integer): Column =
+    wrapExpression[ST_H3ToChildren](cell, resolution)
+
+  def ST_H3ToCenterChild(cell: Column, resolution: Column): Column =
+    wrapExpression[ST_H3ToCenterChild](cell, resolution)
+
+  def ST_H3ToCenterChild(cell: Column, resolution: Integer): Column =
+    wrapExpression[ST_H3ToCenterChild](cell, resolution)
+
+  def ST_H3ToCenterChild(cell: Long, resolution: Integer): Column =
+    wrapExpression[ST_H3ToCenterChild](cell, resolution)
+
+  def ST_H3Uncompact(cells: Column, resolution: Column): Column =
+    wrapExpression[ST_H3Uncompact](cells, resolution)
+
+  def ST_H3Uncompact(cells: Column, resolution: Integer): Column =
+    wrapExpression[ST_H3Uncompact](cells, resolution)
+
+  def ST_H3Uncompact(cells: Array[Long], resolution: Integer): Column =
+    wrapExpression[ST_H3Uncompact](cells, resolution)
+
+  def ST_H3Compact(cells: Column): Column = wrapExpression[ST_H3Compact](cells)
+
+  def ST_H3Compact(cells: Array[Long]): Column = wrapExpression[ST_H3Compact](cells)
+
   def ST_HilbertDistance(
       geometry: Column,
       xmin: Column,

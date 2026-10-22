@@ -24,6 +24,7 @@ import static org.junit.Assert.*;
 
 import com.google.common.geometry.S2CellId;
 import com.google.common.math.DoubleMath;
+import com.uber.h3core.exceptions.H3Exception;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.sedona.common.geometryObjects.Box2D;
@@ -1606,6 +1607,237 @@ public class FunctionsTest extends TestBase {
     assertEquals(5, H3Utils.h3.getResolution(parent));
     assertTrue(H3Utils.h3.cellToChildren(parent, 8).contains(child));
     assertEquals(child, Functions.h3ToParent(child, 8));
+  }
+
+  @Test
+  public void h3ToChildren() {
+    long parent = H3Utils.coordinateToCell(new Coordinate(1, 2), 5);
+    for (int resolution : new int[] {6, 7}) {
+      Long[] children = Functions.h3ToChildren(parent, resolution);
+      assertEquals(resolution == 6 ? 7 : 49, children.length);
+      assertEquals(children.length, new HashSet<>(Arrays.asList(children)).size());
+      for (long child : children) {
+        assertEquals(resolution, H3Utils.h3.getResolution(child));
+        assertEquals(parent, Functions.h3ToParent(child, 5));
+      }
+    }
+    for (int resolution : new int[] {0, 5, 15}) {
+      long cell = H3Utils.coordinateToCell(new Coordinate(1, 2), resolution);
+      assertArrayEquals(new Long[] {cell}, Functions.h3ToChildren(cell, resolution));
+    }
+  }
+
+  @Test
+  public void h3ToChildrenPentagon() {
+    long parent = H3Utils.h3.getPentagons(5).iterator().next();
+    for (int resolution : new int[] {6, 7}) {
+      Long[] children = Functions.h3ToChildren(parent, resolution);
+      assertEquals(resolution == 6 ? 6 : 41, children.length);
+      assertEquals(children.length, new HashSet<>(Arrays.asList(children)).size());
+      for (long child : children) {
+        assertEquals(resolution, H3Utils.h3.getResolution(child));
+        assertEquals(parent, Functions.h3ToParent(child, 5));
+      }
+    }
+  }
+
+  @Test
+  public void h3ToChildrenInvalidResolution() {
+    long cell = H3Utils.coordinateToCell(new Coordinate(1, 2), 5);
+    for (int resolution : new int[] {-1, 16}) {
+      assertThrows(IllegalArgumentException.class, () -> Functions.h3ToChildren(cell, resolution));
+    }
+    assertThrows(H3Exception.class, () -> Functions.h3ToChildren(cell, 4));
+  }
+
+  @Test
+  public void h3ToCenterChild() {
+    long parent = 601041811137363967L;
+    long immediate = Functions.h3ToCenterChild(parent, 6);
+    assertEquals(605545409825210367L, immediate);
+    assertTrue(H3Utils.h3.cellToChildren(parent, 6).contains(immediate));
+    for (int resolution : new int[] {6, 8, 15}) {
+      long child = Functions.h3ToCenterChild(parent, resolution);
+      assertEquals(resolution, H3Utils.h3.getResolution(child));
+      assertEquals(parent, Functions.h3ToParent(child, 5));
+      assertEquals(child, Functions.h3ToCenterChild(immediate, resolution));
+    }
+    // H3's documented center-child example, including a skip of two resolutions.
+    assertEquals(0x872834700ffffffL, Functions.h3ToCenterChild(0x85283473fffffffL, 7));
+  }
+
+  @Test
+  public void h3ToCenterChildPentagon() {
+    for (long pentagon : H3Utils.h3.getPentagons(5)) {
+      for (int resolution : new int[] {6, 8, 15}) {
+        long child = Functions.h3ToCenterChild(pentagon, resolution);
+        assertEquals(resolution, H3Utils.h3.getResolution(child));
+        assertTrue(H3Utils.h3.isPentagon(child));
+        assertEquals(pentagon, Functions.h3ToParent(child, 5));
+      }
+    }
+  }
+
+  @Test
+  public void h3ToCenterChildEqualResolutionAndBoundaries() {
+    for (int resolution : new int[] {0, 5, 15}) {
+      long cell = H3Utils.coordinateToCell(new Coordinate(1, 2), resolution);
+      assertEquals(cell, Functions.h3ToCenterChild(cell, resolution));
+    }
+    for (int resolution : new int[] {0, 14}) {
+      long cell = H3Utils.coordinateToCell(new Coordinate(1, 2), resolution);
+      long child = Functions.h3ToCenterChild(cell, resolution + 1);
+      assertEquals(resolution + 1, H3Utils.h3.getResolution(child));
+      assertEquals(cell, Functions.h3ToParent(child, resolution));
+    }
+  }
+
+  @Test
+  public void h3ToCenterChildInvalidResolution() {
+    long cell = H3Utils.coordinateToCell(new Coordinate(1, 2), 5);
+    for (int resolution : new int[] {-1, 16}) {
+      assertThrows(
+          IllegalArgumentException.class, () -> Functions.h3ToCenterChild(cell, resolution));
+    }
+    assertThrows(H3Exception.class, () -> Functions.h3ToCenterChild(cell, 4));
+  }
+
+  @Test
+  public void h3CompactRecursive() {
+    long parent = H3Utils.coordinateToCell(new Coordinate(1, 2), 5);
+    for (int resolution : new int[] {6, 7}) {
+      long[] children =
+          H3Utils.h3.cellToChildren(parent, resolution).stream()
+              .mapToLong(Long::longValue)
+              .toArray();
+      assertArrayEquals(new Long[] {parent}, Functions.h3Compact(children));
+    }
+  }
+
+  @Test
+  public void h3CompactPartialSets() {
+    long parent = H3Utils.coordinateToCell(new Coordinate(1, 2), 5);
+    List<Long> children = H3Utils.h3.cellToChildren(parent, 6);
+    long[] partial = children.subList(0, 6).stream().mapToLong(Long::longValue).toArray();
+    Long[] unchanged = Functions.h3Compact(partial);
+    assertEquals(6, unchanged.length);
+    assertEquals(new HashSet<>(children.subList(0, 6)), new HashSet<>(Arrays.asList(unchanged)));
+
+    long other = H3Utils.coordinateToCell(new Coordinate(10, 20), 6);
+    List<Long> input = new ArrayList<>(children);
+    input.add(other);
+    Long[] compacted = Functions.h3Compact(input.stream().mapToLong(Long::longValue).toArray());
+    assertEquals(2, compacted.length);
+    assertEquals(
+        new HashSet<>(Arrays.asList(parent, other)), new HashSet<>(Arrays.asList(compacted)));
+  }
+
+  @Test
+  public void h3CompactPentagon() {
+    long pentagon = H3Utils.h3.getPentagons(5).iterator().next();
+    for (int resolution : new int[] {6, 7}) {
+      long[] children =
+          H3Utils.h3.cellToChildren(pentagon, resolution).stream()
+              .mapToLong(Long::longValue)
+              .toArray();
+      assertEquals(resolution == 6 ? 6 : 41, children.length);
+      assertArrayEquals(new Long[] {pentagon}, Functions.h3Compact(children));
+    }
+  }
+
+  @Test
+  public void h3CompactRoundTrip() {
+    long cell = H3Utils.coordinateToCell(new Coordinate(1, 2), 6);
+    List<Long> original = H3Utils.h3.gridDisk(cell, 2);
+    Long[] compacted = Functions.h3Compact(original.stream().mapToLong(Long::longValue).toArray());
+    assertTrue(compacted.length < original.size());
+    Long[] restored =
+        Functions.h3Uncompact(Arrays.stream(compacted).mapToLong(Long::longValue).toArray(), 6);
+    assertEquals(original.size(), restored.length);
+    assertEquals(new HashSet<>(original), new HashSet<>(Arrays.asList(restored)));
+  }
+
+  @Test
+  public void h3CompactEmptyAndSingleton() {
+    assertArrayEquals(new Long[0], Functions.h3Compact(new long[0]));
+    for (int resolution : new int[] {0, 5, 15}) {
+      long cell = H3Utils.coordinateToCell(new Coordinate(1, 2), resolution);
+      assertArrayEquals(new Long[] {cell}, Functions.h3Compact(new long[] {cell}));
+    }
+  }
+
+  @Test
+  public void h3CompactDuplicateError() {
+    long cell = H3Utils.coordinateToCell(new Coordinate(1, 2), 6);
+    long[] duplicates = new long[8];
+    Arrays.fill(duplicates, cell);
+    assertThrows(H3Exception.class, () -> Functions.h3Compact(duplicates));
+  }
+
+  @Test
+  public void h3UncompactMixedResolutions() {
+    long parent = H3Utils.coordinateToCell(new Coordinate(1, 2), 5);
+    long other = H3Utils.coordinateToCell(new Coordinate(10, 20), 6);
+    for (int resolution : new int[] {6, 7}) {
+      Long[] cells = Functions.h3Uncompact(new long[] {parent, other}, resolution);
+      Set<Long> expected = new HashSet<>(H3Utils.h3.cellToChildren(parent, resolution));
+      expected.addAll(H3Utils.h3.cellToChildren(other, resolution));
+      assertEquals(resolution == 6 ? 8 : 56, cells.length);
+      assertEquals(expected, new HashSet<>(Arrays.asList(cells)));
+      for (long cell : cells) {
+        assertEquals(resolution, H3Utils.h3.getResolution(cell));
+      }
+    }
+  }
+
+  @Test
+  public void h3UncompactEqualResolutionAndEmpty() {
+    for (int resolution : new int[] {0, 5, 15}) {
+      long cell = H3Utils.coordinateToCell(new Coordinate(1, 2), resolution);
+      assertArrayEquals(new Long[] {cell}, Functions.h3Uncompact(new long[] {cell}, resolution));
+      assertArrayEquals(new Long[0], Functions.h3Uncompact(new long[0], resolution));
+    }
+  }
+
+  @Test
+  public void h3UncompactPentagon() {
+    long pentagon = H3Utils.h3.getPentagons(5).iterator().next();
+    for (int resolution : new int[] {6, 7}) {
+      Long[] cells = Functions.h3Uncompact(new long[] {pentagon}, resolution);
+      assertEquals(resolution == 6 ? 6 : 41, cells.length);
+      assertEquals(cells.length, new HashSet<>(Arrays.asList(cells)).size());
+      for (long cell : cells) {
+        assertEquals(resolution, H3Utils.h3.getResolution(cell));
+        assertEquals(pentagon, H3Utils.h3.cellToParent(cell, 5));
+      }
+    }
+  }
+
+  @Test
+  public void h3UncompactRoundTrip() {
+    long cell = H3Utils.coordinateToCell(new Coordinate(1, 2), 6);
+    List<Long> original = H3Utils.h3.gridDisk(cell, 2);
+    long[] compacted =
+        H3Utils.h3.compactCells(original).stream().mapToLong(Long::longValue).toArray();
+    assertTrue(compacted.length < original.size());
+    Long[] uncompacted = Functions.h3Uncompact(compacted, 6);
+    assertEquals(original.size(), uncompacted.length);
+    assertEquals(new HashSet<>(original), new HashSet<>(Arrays.asList(uncompacted)));
+  }
+
+  @Test
+  public void h3UncompactInvalidResolution() {
+    long parent = H3Utils.coordinateToCell(new Coordinate(1, 2), 5);
+    long child = H3Utils.h3.cellToCenterChild(parent, 6);
+    for (int resolution : new int[] {-1, 16}) {
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> Functions.h3Uncompact(new long[] {parent}, resolution));
+      assertThrows(
+          IllegalArgumentException.class, () -> Functions.h3Uncompact(new long[0], resolution));
+    }
+    assertThrows(H3Exception.class, () -> Functions.h3Uncompact(new long[] {parent}, 4));
+    assertThrows(H3Exception.class, () -> Functions.h3Uncompact(new long[] {parent, child}, 5));
   }
 
   @Test
@@ -5274,6 +5506,25 @@ public class FunctionsTest extends TestBase {
     actual = Functions.asWKT(Functions.addMeasure(geom, 1, 70));
     expected = "MULTILINESTRING M((1 0 1, 2 0 12.5, 4 0 35.5), (1 0 35.5, 2 0 47, 4 0 70))";
     assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testAddMeasureUsesSegmentLengths() throws ParseException {
+    Geometry geom = Constructors.geomFromEWKT("LINESTRING (0 0, 3 0, 3 4)");
+    assertEquals(
+        "LINESTRING M(0 0 0, 3 0 3, 3 4 7)", Functions.asWKT(Functions.addMeasure(geom, 0, 7)));
+
+    geom = Constructors.geomFromEWKT("MULTILINESTRING ((0 0, 10 0), (0 1, 10 1))");
+    assertEquals(
+        "MULTILINESTRING M((0 0 0, 10 0 10), (0 1 10, 10 1 20))",
+        Functions.asWKT(Functions.addMeasure(geom, 0, 20)));
+
+    geom =
+        Constructors.geomFromEWKT(
+            "MULTILINESTRING ZM((0 0 1 99, 3 0 5 99, 3 4 9 99), (20 0 2 99, 30 0 3 99))");
+    assertEquals(
+        "MULTILINESTRING ZM((0 0 1 17, 3 0 5 14, 3 4 9 10), (20 0 2 10, 30 0 3 0))",
+        Functions.asWKT(Functions.addMeasure(geom, 17, 0)));
   }
 
   @Test

@@ -209,6 +209,8 @@ def ST_AsHEXEWKB(
 
     :param geometry: Geometry to generate EWKB for.
     :type geometry: ColumnOrName
+    :param endian: Byte order of the encoding: "NDR" for little-endian (default) or "XDR" for big-endian.
+    :type endian: Optional[ColumnOrName], optional
     :return: Extended Well-Known Binary representation of geometry as Hex string.
     :rtype: Column
     """
@@ -238,6 +240,8 @@ def ST_AsGeoJSON(
 
     :param geometry: Geometry column to generate GeoJSON for.
     :type geometry: ColumnOrName
+    :param type: GeoJSON type to return: "Simple" (default) for a bare geometry, "Feature" to wrap it in a Feature, or "FeatureCollection" to wrap that Feature in a FeatureCollection.
+    :type type: Optional[Union[ColumnOrName, str]], optional
     :return: GeoJSON representation of geometry as a string column.
     :rtype: Column
     """
@@ -322,16 +326,16 @@ def barrier(expression: ColumnOrName, *args) -> Column:
     """Prevent filter pushdown and control predicate evaluation order in complex spatial joins.
     This function creates an optimization barrier by evaluating boolean expressions at runtime.
 
+    Example:
+        df.where(barrier('rating > 4.0 AND stars >= 4',
+                        'rating', col('r.rating'),
+                        'stars', col('h.stars')))
+
     :param expression: Boolean expression string to evaluate
     :type expression: ColumnOrName
     :param args: Variable name and value pairs (var_name1, var_value1, var_name2, var_value2, ...)
     :return: Boolean result of the expression evaluation
     :rtype: Column
-
-    Example:
-        df.where(barrier('rating > 4.0 AND stars >= 4',
-                        'rating', col('r.rating'),
-                        'stars', col('h.stars')))
     """
     return _call_st_function("barrier", (expression,) + args)
 
@@ -386,6 +390,10 @@ def ST_Buffer(
     :type geometry: ColumnOrName
     :param buffer: Either a column or value for the amount to buffer the input geometry by.
     :type buffer: ColumnOrNameOrNumber
+    :param useSpheroid: Whether to buffer on the spheroid, with the buffer amount in meters, instead of in the geometry's planar coordinates. Default is False.
+    :type useSpheroid: Optional[Union[ColumnOrName, bool]], optional
+    :param parameters: Buffer style parameters as blank-separated key=value pairs, such as "quad_segs=8 endcap=round".
+    :type parameters: Optional[Union[ColumnOrName, str]], optional
     :return: Buffered geometry as a geometry column.
     :rtype: Column
     """
@@ -787,11 +795,13 @@ def ST_GeneratePoints(
 ) -> Column:
     """Generate random points in given geometry.
 
-    :param geometry: Geometry column to hash.
+    :param geometry: Polygonal geometry column to generate points in.
     :type geometry: ColumnOrName
-    :param numPoints: Precision level to hash geometry at, given as an integer or an integer column.
+    :param numPoints: Number of points to generate, given as an integer or an integer column.
     :type numPoints: Union[ColumnOrName, int]
-    :return: Generate random points in given geometry
+    :param seed: Seed for the random generator. When it is 0 or not set, the output is random.
+    :type seed: Optional[Union[ColumnOrName, int]], optional
+    :return: Random points within the given geometry.
     :rtype: Column
     """
     if seed is None:
@@ -940,13 +950,17 @@ def ST_HilbertDistance(
 def ST_H3CellDistance(
     cell1: Union[ColumnOrName, int], cell2: Union[ColumnOrName, int]
 ) -> Column:
-    """Cover Geometry with H3 Cells and return a List of Long type cell IDs
-    :param cell: start cell
-    :type cell: long
-    :param k: end cell
-    :type k: int
-    :return: distance between cells
-    :rtype: Long
+    """Compute the H3 grid distance between two H3 cells.
+
+    If H3 cannot compute the distance, for example because the cells are too far apart, Sedona estimates the
+    shortest path and returns its length.
+
+    :param cell1: First H3 cell ID.
+    :type cell1: Union[ColumnOrName, int]
+    :param cell2: Second H3 cell ID.
+    :type cell2: Union[ColumnOrName, int]
+    :return: Number of grid steps between the cells.
+    :rtype: Column
     """
     args = (cell1, cell2)
     return _call_st_function("ST_H3CellDistance", args)
@@ -1014,6 +1028,58 @@ def ST_H3ToParent(
     """
     args = (cell, resolution)
     return _call_st_function("ST_H3ToParent", args)
+
+
+@validate_argument_types
+def ST_H3ToChildren(
+    cell: Union[ColumnOrName, int], resolution: Union[ColumnOrName, int]
+) -> Column:
+    """Return the children of an H3 cell at the requested resolution.
+    :param cell: H3 cell
+    :param resolution: resolution of the child cells, from the input resolution to 15
+    :return: child H3 cells, or the input cell when the resolutions are equal
+    :rtype: List[long]
+    """
+    args = (cell, resolution)
+    return _call_st_function("ST_H3ToChildren", args)
+
+
+@validate_argument_types
+def ST_H3ToCenterChild(
+    cell: Union[ColumnOrName, int], resolution: Union[ColumnOrName, int]
+) -> Column:
+    """Return the center child of an H3 cell at the requested resolution.
+    :param cell: H3 cell
+    :param resolution: resolution of the center child, from the input resolution to 15
+    :return: center child H3 cell, or the input cell when the resolutions are equal
+    :rtype: Long
+    """
+    args = (cell, resolution)
+    return _call_st_function("ST_H3ToCenterChild", args)
+
+
+@validate_argument_types
+def ST_H3Uncompact(
+    cells: Union[ColumnOrName, list], resolution: Union[ColumnOrName, int]
+) -> Column:
+    """Expand H3 cells to the requested resolution.
+    :param cells: H3 cells, which may have different resolutions
+    :param resolution: target resolution, at least that of every input cell and at most 15
+    :return: H3 cells at the target resolution
+    :rtype: List[long]
+    """
+    args = (cells, resolution)
+    return _call_st_function("ST_H3Uncompact", args)
+
+
+@validate_argument_types
+def ST_H3Compact(cells: Union[ColumnOrName, list]) -> Column:
+    """Compact H3 cells by recursively replacing complete child sets with their parents.
+    :param cells: unique H3 cells at the same resolution
+    :return: compacted H3 cells, which may have different resolutions
+    :rtype: List[long]
+    """
+    return _call_st_function("ST_H3Compact", (cells,))
 
 
 # =========================================================================
@@ -1430,12 +1496,14 @@ def ST_LineMerge(multi_line_string: ColumnOrName) -> Column:
 def ST_LineSegments(
     geom: ColumnOrName, lenient: Optional[Union[ColumnOrName, bool]] = None
 ) -> Column:
-    """
-    Convert multi-coordinate LineString into an array of LineStrings that contain exactly 2 points.
+    """Convert multi-coordinate LineString into an array of LineStrings that contain exactly 2 points.
 
-    @param geom: input LineString geometry column.
-    @param lenient: suppresses exception
-    @return: array of LineStrings
+    :param geom: Input LineString geometry column.
+    :type geom: ColumnOrName
+    :param lenient: Whether to suppress the error raised when the input is not a LineString. Default is True.
+    :type lenient: Optional[Union[ColumnOrName, bool]], optional
+    :return: Array of LineStrings.
+    :rtype: Column
     """
     args = (geom, lenient)
     if lenient is None:
@@ -1472,13 +1540,13 @@ def ST_LocateAlong(
     measure: Union[ColumnOrName, float],
     offset: Optional[Union[ColumnOrName, float]] = None,
 ) -> Column:
-    """return locations along a measure geometry that have the given measure value.
+    """Return locations along a measure geometry that have the given measure value.
 
-    :param geom:
+    :param geom: Measured LineString or MultiLineString geometry column.
     :type geom: ColumnOrName
-    :param measure:
+    :param measure: Measure value to locate.
     :type measure: Union[ColumnOrName, float]
-    :param offset:
+    :param offset: Distance to offset the located points by. Positive values move them to the left of the line, negative values to the right.
     :type offset: Union[ColumnOrNameOrNumber, float]
     :return: Locations along a measure geometry that have the given measure value.
     :rtype: Column
@@ -1491,9 +1559,9 @@ def ST_LocateAlong(
 def ST_LongestLine(geom1: ColumnOrName, geom2: ColumnOrName) -> Column:
     """Compute the longest line between the two geometries
 
-    :param geom1:
+    :param geom1: First geometry column.
     :type geom1: ColumnOrName
-    :param geom2:
+    :param geom2: Second geometry column.
     :type geom2: ColumnOrName
     :return: Longest line between the two input geometries
     :rtype: Column
@@ -1529,8 +1597,8 @@ def ST_HasM(geom: ColumnOrName) -> Column:
 def ST_M(geom: ColumnOrName) -> Column:
     """Return the M coordinate of a point geometry.
 
-    :param point: Point geometry column to get the coordinate for.
-    :type point: ColumnOrName
+    :param geom: Point geometry column to get the coordinate for.
+    :type geom: ColumnOrName
     :return: M coordinate of the point geometry as a double column.
     :rtype: Column
     """
@@ -1541,8 +1609,8 @@ def ST_M(geom: ColumnOrName) -> Column:
 def ST_MMin(geom: ColumnOrName) -> Column:
     """Return the minimum M coordinate of a geometry.
 
-    :param geometry: Geometry column to get the minimum M coordinate from.
-    :type geometry: ColumnOrName
+    :param geom: Geometry column to get the minimum M coordinate from.
+    :type geom: ColumnOrName
     :return: Minimum M coordinate for the geometry as a double column.
     :rtype: Column
     """
@@ -1553,9 +1621,9 @@ def ST_MMin(geom: ColumnOrName) -> Column:
 def ST_MMax(geom: ColumnOrName) -> Column:
     """Return the maximum M coordinate of a geometry.
 
-    :param geometry: Geometry column to get the maximum M coordinate from.
-    :type geometry: ColumnOrName
-    :return: Minimum M coordinate for the geometry as a double column.
+    :param geom: Geometry column to get the maximum M coordinate from.
+    :type geom: ColumnOrName
+    :return: Maximum M coordinate for the geometry as a double column.
     :rtype: Column
     """
     return _call_st_function("ST_MMax", geom)
@@ -1584,10 +1652,14 @@ def ST_Perimeter(
 ) -> Column:
     """Returns the perimeter of a Polygon/MultiPolygon geometries. Otherwise, returns 0
 
-    @param geom: Polygonal geometry
-    @param use_spheroid: Use Spheroid
-    @param lenient: suppresses the exception
-    @return: Perimeter of a Polygon/MultiPolygon geometries
+    :param geom: Polygonal geometry
+    :type geom: ColumnOrName
+    :param use_spheroid: Whether to compute the geodesic perimeter in meters on the WGS84 spheroid.
+    :type use_spheroid: Optional[Union[ColumnOrName, bool]], optional
+    :param lenient: With use_spheroid, whether to assume the geometry uses EPSG:4326 instead of raising an error. Default is True.
+    :type lenient: Optional[Union[ColumnOrName, bool]], optional
+    :return: Perimeter of a Polygon/MultiPolygon geometries
+    :rtype: Column
     """
 
     args = (geom, use_spheroid, lenient)
@@ -1608,10 +1680,16 @@ def ST_Perimeter2D(
 ) -> Column:
     """Returns the perimeter of a Polygon/MultiPolygon geometries. Otherwise, returns 0
 
-    @param geom: Polygonal geometry
-    @param use_spheroid: Use Spheroid
-    @param lenient: suppresses the exception
-    @return: Perimeter of a Polygon/MultiPolygon geometries
+    This is an alias of ST_Perimeter.
+
+    :param geom: Polygonal geometry
+    :type geom: ColumnOrName
+    :param use_spheroid: Whether to compute the geodesic perimeter in meters on the WGS84 spheroid.
+    :type use_spheroid: Optional[Union[ColumnOrName, bool]], optional
+    :param lenient: With use_spheroid, whether to assume the geometry uses EPSG:4326 instead of raising an error. Default is True.
+    :type lenient: Optional[Union[ColumnOrName, bool]], optional
+    :return: Perimeter of a Polygon/MultiPolygon geometries
+    :rtype: Column
     """
 
     args = (geom, use_spheroid, lenient)
@@ -1671,11 +1749,16 @@ def ST_Project(
 ) -> Column:
     """Calculates a new point location given a starting point, distance, and direction (azimuth).
 
-    @param geom:
-    @param distance:
-    @param azimuth:
-    @param lenient:
-    @return:
+    :param geom: Starting Point geometry column.
+    :type geom: ColumnOrName
+    :param distance: Distance to move from the starting point.
+    :type distance: Union[ColumnOrName, float]
+    :param azimuth: Direction in radians, measured clockwise from true north.
+    :type azimuth: Union[ColumnOrName, float]
+    :param lenient: Whether to suppress the error raised when the input is not a Point. Default is False.
+    :type lenient: Optional[Union[ColumnOrName, bool]], optional
+    :return: Projected point geometry.
+    :rtype: Column
     """
     args = (geom, distance, azimuth, lenient)
     if lenient is None:
@@ -1748,9 +1831,9 @@ def ST_MaximumInscribedCircle(
 def ST_MaxDistance(geom1: ColumnOrName, geom2: ColumnOrName) -> Column:
     """Calculate the maximum distance between two furthest points in the geometries
 
-    :param geom1:
+    :param geom1: First geometry column.
     :type geom1: ColumnOrName
-    :param geom2:
+    :param geom2: Second geometry column.
     :type geom2: ColumnOrName
     :return: Maximum distance between the geometries
     :rtype: Column
@@ -1997,11 +2080,12 @@ def ST_RemoveRepeatedPoints(
 ) -> Column:
     """Removes duplicate coordinates from a geometry, optionally removing those within a specified distance tolerance.
 
-    @param geom: Geometry with repeated points
-    @type geom: ColumnOrName
-    @param tolerance: Tolerance for removing nearby coordinates
-    @type tolerance: Optional[Union[ColumnOrName, float]]
-    @return:
+    :param geom: Geometry with repeated points
+    :type geom: ColumnOrName
+    :param tolerance: Tolerance for removing nearby coordinates
+    :type tolerance: Optional[Union[ColumnOrName, float]]
+    :return: Geometry without the repeated points.
+    :rtype: Column
     """
     args = (geom, tolerance)
     if tolerance is None:
@@ -2268,13 +2352,15 @@ def ST_SimplifyPolygonHull(
     vertexFactor: ColumnOrNameOrNumber,
     isOuter: Optional[Union[ColumnOrName, bool]] = None,
 ) -> Column:
-    """Simplify a geometry using Visvalingam-Whyatt algorithm within a specified tolerance while preserving topological relationships.
+    """Compute a topology-preserving simplified outer or inner hull of a polygonal geometry.
 
-    :param geometry: Geometry column to simplify.
+    :param geometry: Polygonal geometry column to simplify.
     :type geometry: ColumnOrName
-    :param vertexFactor: Tolerance for merging points together to simplify the geometry as either a number or numeric column.
+    :param vertexFactor: Fraction of the vertices to keep, from 0 to 1, as either a number or numeric column. Lower values give simpler hulls; 1.0 returns the original geometry.
     :type vertexFactor: ColumnOrNameOrNumber
-    :return: Simplified geometry as a geometry column.
+    :param isOuter: Whether to compute an outer hull, which encloses the input, rather than an inner hull, which lies within it. Default is True.
+    :type isOuter: Optional[Union[ColumnOrName, bool]], optional
+    :return: Simplified hull as a geometry column.
     :rtype: Column
     """
     args = (
@@ -2593,12 +2679,12 @@ def ST_Force4D(
     zValue: Optional[Union[ColumnOrName, float]] = 0.0,
     mValue: Optional[Union[ColumnOrName, float]] = 0.0,
 ) -> Column:
-    """
-    Return a geometry with a 4D coordinate of value 'zValue' and mValue forced upon it. No change happens if the
+    """Return a geometry with a 4D coordinate of value 'zValue' and mValue forced upon it. No change happens if the
     geometry is already 4D, if geometry either has z or m, it will not change the existing z or m value.
 
-    :param zValue: Optional value of z coordinate to be potentially added, default value is 0.0
     :param geometry: Geometry column to make 4D
+    :param zValue: Optional value of z coordinate to be potentially added, default value is 0.0
+    :param mValue: Optional value of m coordinate to be potentially added, default value is 0.0
     :return: 4D geometry with either already 4D geom or z and m component provided by zValue and mValue respectively
     """
     args = (geometry, zValue, mValue)
@@ -2696,11 +2782,11 @@ def ST_VoronoiPolygons(
 
 @validate_argument_types
 def ST_FrechetDistance(g1: ColumnOrName, g2: ColumnOrName) -> Column:
-    """
-    Computes discrete frechet distance between the two geometries.
+    """Computes discrete frechet distance between the two geometries.
     If any of the geometry is empty, ST_FrechetDistance returns 0
-    :param g1:
-    :param g2:
+
+    :param g1: First geometry column.
+    :param g2: Second geometry column.
     :return: Computed Discrete Frechet Distance between g1 and g2
     """
 
@@ -2724,24 +2810,27 @@ def ST_Affine(
     i: Optional[Union[ColumnOrName, float]] = None,
     zOff: Optional[Union[ColumnOrName, float]] = None,
 ) -> Column:
-    """
-    Apply a 3D/2D affine transformation to the given geometry
+    """Apply a 3D/2D affine transformation to the given geometry.
+
     x = a * x + b * y + c * z + xOff | x = a * x + b * y + xOff
     y = d * x + e * y + f * z + yOff | y = d * x + e * y + yOff
     z = g * x + h * y + i * z + zOff
+
+    The 3D form is used only when c, f, g, h, i and zOff are all given.
+
     :param geometry: Geometry to apply affine transformation to
-    :param a:
-    :param b:
-    :param c: Default 0.0
-    :param d:
-    :param e:
-    :param f: Default 0.0
-    :param g: Default 0.0
-    :param h: Default 0.0
-    :param i: Default 0.0
-    :param xOff:
-    :param yOff:
-    :param zOff: Default 0.0
+    :param a: Coefficient of x in the new x value.
+    :param b: Coefficient of y in the new x value.
+    :param c: Coefficient of z in the new x value. Default 0.0
+    :param d: Coefficient of x in the new y value.
+    :param e: Coefficient of y in the new y value.
+    :param f: Coefficient of z in the new y value. Default 0.0
+    :param g: Coefficient of x in the new z value. Default 0.0
+    :param h: Coefficient of y in the new z value. Default 0.0
+    :param i: Coefficient of z in the new z value. Default 0.0
+    :param xOff: Offset added to the new x value.
+    :param yOff: Offset added to the new y value.
+    :param zOff: Offset added to the new z value. Default 0.0
     :return: Geometry with affine transformation applied
     """
     args = (geometry, a, b, d, e, xOff, yOff)
@@ -2813,14 +2902,13 @@ def ST_DelaunayTriangles(
     tolerance: Optional[Union[ColumnOrName, float]] = None,
     flag: Optional[Union[ColumnOrName, int]] = None,
 ) -> Column:
-    """
-    Computes the Delaunay Triangles of the vertices of the input geometry.
+    """Computes the Delaunay Triangles of the vertices of the input geometry.
 
     :param geometry: Input geometry
     :type geometry: ColumnOrName
-    :param tolerance:
+    :param tolerance: Distance within which input vertices are snapped together before triangulating. Default is 0.
     :type tolerance: ColumnOrName or float
-    :param flag: Selects the output type
+    :param flag: Selects the output type: 0 (default) for a GeometryCollection of triangular Polygons, or 1 for a MultiLineString of the triangulation's edges.
     :type flag: ColumnOrName or int
     :return: Delaunay triangles of the input geometry
     :rtype: ColumnOrName
@@ -2841,13 +2929,13 @@ def ST_HausdorffDistance(
     g2: ColumnOrName,
     densityFrac: Optional[Union[ColumnOrName, float]] = -1,
 ) -> Column:
-    """
-    Returns discretized (and hence approximate) hausdorff distance between two given geometries.
+    """Returns discretized (and hence approximate) hausdorff distance between two given geometries.
     Optionally, a distance fraction can also be provided which decreases the gap between actual and discretized hausforff distance
-    :param g1:
-    :param g2:
-    :param densityFrac: Optional
-    :return:
+
+    :param g1: First geometry column.
+    :param g2: Second geometry column.
+    :param densityFrac: Optional fraction in (0.0, 1.0] by which each segment is densified before computing the distance. Lower values are more accurate and slower.
+    :return: Hausdorff distance between g1 and g2, or null if either geometry is empty.
     """
     args = (g1, g2, densityFrac)
     return _call_st_function("ST_HausdorffDistance", args)
@@ -2885,10 +2973,14 @@ def ST_Scale(
 ) -> Column:
     """Scale geometry with X and Y axis.
 
-    @param geometry:
-    @param scaleX:
-    @param scaleY:
-    @return:
+    :param geometry: Geometry column to scale.
+    :type geometry: ColumnOrName
+    :param scaleX: Factor to multiply the X ordinates by.
+    :type scaleX: Union[ColumnOrNameOrNumber, float]
+    :param scaleY: Factor to multiply the Y ordinates by.
+    :type scaleY: Union[ColumnOrNameOrNumber, float]
+    :return: Scaled geometry.
+    :rtype: Column
     """
     return _call_st_function("ST_Scale", (geometry, scaleX, scaleY))
 
@@ -2897,12 +2989,16 @@ def ST_Scale(
 def ST_ScaleGeom(
     geometry: ColumnOrName, factor: ColumnOrName, origin: Optional[ColumnOrName] = None
 ) -> Column:
-    """Scale geometry with the corodinates of factor geometry
+    """Scale geometry with the coordinates of factor geometry
 
-    @param geometry:
-    @param factor:
-    @param origin:
-    @return:
+    :param geometry: Geometry column to scale.
+    :type geometry: ColumnOrName
+    :param factor: Geometry whose coordinates are the scale factors for each axis.
+    :type factor: ColumnOrName
+    :param origin: Geometry to scale relative to. If not set, the geometry is scaled relative to the true origin.
+    :type origin: Optional[ColumnOrName], optional
+    :return: Scaled geometry.
+    :rtype: Column
     """
     if origin is not None:
         args = (geometry, factor, origin)
@@ -2915,11 +3011,12 @@ def ST_ScaleGeom(
 def ST_RotateX(geometry: ColumnOrName, angle: Union[ColumnOrName, float]) -> Column:
     """Returns geometry rotated by the given angle in X axis
 
-    @param geometry: Geometry column or name
+    :param geometry: Geometry column or name
     :type geometry: ColumnOrName
-    @param angle: Rotation angle in radians
-    :type angle: float
-    @return: X-axis rotated geometry
+    :param angle: Rotation angle in radians
+    :type angle: Union[ColumnOrName, float]
+    :return: X-axis rotated geometry
+    :rtype: Column
     """
 
     return _call_st_function("ST_RotateX", (geometry, angle))
@@ -2929,11 +3026,12 @@ def ST_RotateX(geometry: ColumnOrName, angle: Union[ColumnOrName, float]) -> Col
 def ST_RotateY(geometry: ColumnOrName, angle: Union[ColumnOrName, float]) -> Column:
     """Returns geometry rotated by the given angle in Y axis
 
-    @param geometry: Geometry column or name
+    :param geometry: Geometry column or name
     :type geometry: ColumnOrName
-    @param angle: Rotation angle in radians
-    :type angle: float
-    @return: Y-axis rotated geometry
+    :param angle: Rotation angle in radians
+    :type angle: Union[ColumnOrName, float]
+    :return: Y-axis rotated geometry
+    :rtype: Column
     """
 
     return _call_st_function("ST_RotateY", (geometry, angle))
@@ -2996,15 +3094,16 @@ def ST_DBSCAN(
 ) -> Column:
     """Perform DBSCAN clustering on the given geometry column.
 
-    @param geometry: Geometry column or name
+    :param geometry: Geometry column or name.
     :type geometry: ColumnOrName
-    @param epsilon: the distance between two points to be considered neighbors
-    :type epsilon: ColumnOrName
-    @param min_pts: the number of neighbors a point should have to form a cluster
-    :type min_pts: ColumnOrName
-    @param use_spheroid: whether to use spheroid for distance calculation
-    :type use_spheroid: ColumnOrName
-    @return: A struct indicating the cluster to which the point belongs and whether it is a core point
+    :param epsilon: Maximum distance between two points for them to be considered neighbors.
+    :type epsilon: Union[ColumnOrName, float]
+    :param min_pts: Minimum number of neighbors a point must have to form a cluster.
+    :type min_pts: Union[ColumnOrName, int]
+    :param use_spheroid: Whether to use ST_DistanceSpheroid instead of ST_Distance as the distance metric. Default is False.
+    :type use_spheroid: Optional[Union[ColumnOrName, bool]], optional
+    :return: Struct with the cluster the point belongs to and whether it is a core point.
+    :rtype: Column
     """
 
     if isinstance(epsilon, float):
@@ -3027,13 +3126,14 @@ def ST_LocalOutlierFactor(
 ) -> Column:
     """Calculate the local outlier factor on the given geometry column.
 
-    @param geometry: Geometry column or name
+    :param geometry: Geometry column or name.
     :type geometry: ColumnOrName
-    @param k: the number of neighbors to use for LOF calculation
-    :type k: ColumnOrName
-    @param use_spheroid: whether to use spheroid for distance calculation
-    :type use_spheroid: ColumnOrName
-    @return: A Double indicating the local outlier factor of the point
+    :param k: Number of nearest neighbors to use for the LOF calculation.
+    :type k: Union[ColumnOrName, int]
+    :param use_spheroid: Whether to measure distances on a spherical model of the earth. Default is False.
+    :type use_spheroid: Optional[Union[ColumnOrName, bool]], optional
+    :return: Local outlier factor of the point as a double. Values substantially above 1 indicate an outlier.
+    :rtype: Column
     """
 
     if isinstance(k, int):
@@ -3053,13 +3153,14 @@ def ST_GLocal(
 ) -> Column:
     """Calculate Getis Ord Gi(*) statistics on the given column.
 
-    @param x: The variable we want to compute Gi statistics for
+    :param x: The variable to compute Gi statistics for.
     :type x: ColumnOrName
-    @param weights: the weights array containing the neighbors, their weights, and their values of x
+    :param weights: The weights array containing the neighbors, their weights, and their values of x, such as the column ST_BinaryDistanceBandColumn or ST_WeightedDistanceBandColumn creates.
     :type weights: ColumnOrName
-    @param star: whether to use the focal observation in the calculations
-    :type star: ColumnOrName
-    @return: A struct containing the Gi statistics including a p value
+    :param star: Whether to include the focal observation in the calculations, computing Gi* instead of Gi. Default is False.
+    :type star: Optional[Union[ColumnOrName, bool]], optional
+    :return: Struct with the G, EG, VG, Z and P statistics.
+    :rtype: Column
     """
 
     if isinstance(star, bool):
@@ -3081,14 +3182,20 @@ def ST_BinaryDistanceBandColumn(
 
     Weights will always be 1.0.
 
-
-    @param geometry: name of the geometry column
-    @param threshold: Distance threshold for considering neighbors
-    @param include_zero_distance_neighbors: whether to include neighbors that are 0 distance.
-    @param include_self: whether to include self in the list of neighbors
-    @param use_spheroid: whether to use a cartesian or spheroidal distance calculation. Default is false
-    @param attributes: the attributes to save in the neighbor column.
-
+    :param geometry: Geometry column or name.
+    :type geometry: ColumnOrName
+    :param threshold: Distance threshold for considering neighbors.
+    :type threshold: ColumnOrName
+    :param include_zero_distance_neighbors: Whether to include neighbors that are 0 distance. Default is True.
+    :type include_zero_distance_neighbors: Union[ColumnOrName, bool]
+    :param include_self: Whether to include the record itself in its list of neighbors. Default is False.
+    :type include_self: Union[ColumnOrName, bool]
+    :param use_spheroid: Whether to use a cartesian or spheroidal distance calculation. Default is False.
+    :type use_spheroid: Union[ColumnOrName, bool]
+    :param attributes: Struct column of the attributes to save for each neighbor.
+    :type attributes: ColumnOrName
+    :return: Array of structs with each neighbor's attributes and its weight.
+    :rtype: Column
     """
     if isinstance(include_zero_distance_neighbors, bool):
         include_zero_distance_neighbors = lit(include_zero_distance_neighbors)
@@ -3168,9 +3275,9 @@ def ST_WeightedDistanceBandColumn(
     )
 
 
-# Automatically populate __all__
+# Export the functions defined in this module. Imported helpers, such as lit, stay out of star imports.
 __all__ = [
     name
     for name, obj in inspect.getmembers(sys.modules[__name__])
-    if inspect.isfunction(obj) and name != "GeometryType"
+    if inspect.isfunction(obj) and obj.__module__ == __name__ and name != "GeometryType"
 ]

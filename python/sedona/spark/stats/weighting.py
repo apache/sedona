@@ -40,7 +40,7 @@ def add_distance_band_column(
     The dataframe should contain at least one GeometryType column. Rows must be unique. If one
     geometry column is present it will be used automatically. If two are present, the one named
     'geometry' will be used. If more than one are present and neither is named 'geometry', the
-    column name must be provided. The new column will be named 'cluster'.
+    column name must be provided. The new column is named by result_name, 'weights' by default.
 
     Args:
         dataframe: DataFrame with geometry column
@@ -48,13 +48,14 @@ def add_distance_band_column(
         binary: whether to use binary weights or inverse distance weights for neighbors (dist^alpha)
         alpha: alpha to use for inverse distance weights ignored when binary is true
         include_zero_distance_neighbors: whether to include neighbors that are 0 distance. If 0 distance neighbors are
-            included and binary is false, values are infinity as per the floating point spec (divide by 0)
+            included, binary is false, and alpha is negative, their weight is infinite (division by zero)
         include_self: whether to include self in the list of neighbors
         self_weight: the value to use for the self weight
         geometry: name of the geometry column
         use_spheroid: whether to use a cartesian or spheroidal distance calculation. Default is false
         saved_attributes: the attributes to save in the neighbor column. Default is all columns.
         result_name: the name of the resulting column. Default is 'weights'.
+
     Returns:
         The input DataFrame with a weight column added containing neighbors and their weights added to each row.
 
@@ -93,13 +94,12 @@ def add_binary_distance_band_column(
     Weights will always be 1.0. The dataframe should contain at least one GeometryType column. Rows must be unique. If
     one geometry column is present it will be used automatically. If two are present, the one named 'geometry' will be
     used. If more than one are present and neither is named 'geometry', the column name must be provided. The new column
-    will be named 'cluster'.
+    is named by result_name, 'weights' by default.
 
     Args:
         dataframe: DataFrame with geometry column
         threshold: Distance threshold for considering neighbors
-        include_zero_distance_neighbors: whether to include neighbors that are 0 distance. If 0 distance neighbors are
-            included and binary is false, values are infinity as per the floating point spec (divide by 0)
+        include_zero_distance_neighbors: whether to include neighbors that are 0 distance. Default is True
         include_self: whether to include self in the list of neighbors
         geometry: name of the geometry column
         use_spheroid: whether to use a cartesian or spheroidal distance calculation. Default is false
@@ -148,14 +148,15 @@ def add_weighted_distance_band_column(
     Weights will be distance^alpha. The dataframe should contain at least one GeometryType column. Rows must be unique. If
     one geometry column is present it will be used automatically. If two are present, the one named 'geometry' will be
     used. If more than one are present and neither is named 'geometry', the column name must be provided. The new column
-    will be named 'cluster'.
+    is named by result_name, 'weights' by default.
 
     Args:
         dataframe: DataFrame with geometry column
         threshold: Distance threshold for considering neighbors
-        alpha: alpha to use for inverse distance weights. Computation is dist^alpha. Default is -1.0
-        include_zero_distance_neighbors: whether to include neighbors that are 0 distance. If 0 distance neighbors are
-            included and binary is false, values are infinity as per the floating point spec (divide by 0)
+        alpha: exponent of the distance weights, computed as dist^alpha. Use a negative value, such as -1.0, for
+            inverse distance weights
+        include_zero_distance_neighbors: whether to include neighbors that are 0 distance. Default is True. With a
+            negative alpha, their weight is infinite (division by zero)
         include_self: whether to include self in the list of neighbors
         self_weight: the value to use for the self weight. Default is 1.0
         geometry: name of the geometry column
@@ -164,8 +165,8 @@ def add_weighted_distance_band_column(
         result_name: the name of the resulting column. Default is 'weights'.
 
     Returns:
-        The input DataFrame with a weight column added containing neighbors and their weights (always 1) added to each
-        row.
+        The input DataFrame with a weight column added containing neighbors and their weights (dist^alpha) added to
+        each row.
 
     """
     sedona = SparkSession.getActiveSession()

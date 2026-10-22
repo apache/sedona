@@ -2078,6 +2078,54 @@ public class Functions {
   }
 
   /**
+   * Returns the children of an H3 cell at the requested resolution.
+   *
+   * @param cell the H3 cell
+   * @param resolution the resolution of the child cells, between the input cell's resolution and 15
+   * @return the child H3 cells, or the input cell when the resolutions are equal
+   */
+  public static Long[] h3ToChildren(long cell, int resolution) {
+    return H3Utils.h3.cellToChildren(cell, resolution).toArray(new Long[0]);
+  }
+
+  /**
+   * Returns the center child of an H3 cell at the requested resolution.
+   *
+   * @param cell the H3 cell
+   * @param resolution the resolution of the center child, between the input cell's resolution and
+   *     15
+   * @return the center child H3 cell, or the input cell when the resolutions are equal
+   */
+  public static long h3ToCenterChild(long cell, int resolution) {
+    return H3Utils.h3.cellToCenterChild(cell, resolution);
+  }
+
+  /**
+   * Compacts H3 cells by recursively replacing complete child sets with their parents.
+   *
+   * @param cells unique H3 cells at the same resolution
+   * @return the compacted H3 cells, which may have different resolutions
+   */
+  public static Long[] h3Compact(long[] cells) {
+    return H3Utils.h3
+        .compactCells(Arrays.stream(cells).boxed().collect(Collectors.toList()))
+        .toArray(new Long[0]);
+  }
+
+  /**
+   * Expands a collection of H3 cells to the requested resolution.
+   *
+   * @param cells the H3 cells, which may have different resolutions
+   * @param resolution the target resolution, at least that of every input cell and at most 15
+   * @return the H3 cells at the target resolution
+   */
+  public static Long[] h3Uncompact(long[] cells, int resolution) {
+    return H3Utils.h3
+        .uncompactCells(Arrays.stream(cells).boxed().collect(Collectors.toList()), resolution)
+        .toArray(new Long[0]);
+  }
+
+  /**
    * gets the polygon for each h3 index provided
    *
    * @param cells: the set of cells
