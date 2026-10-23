@@ -26,7 +26,15 @@ import java.nio.{ByteBuffer, ByteOrder}
 
 object GeometryReader {
 
+  /**
+   * Convert a GeoPackage geometry blob to Sedona's serialized geometry. A SQL NULL in a geometry
+   * column comes back from the driver as a null array, which maps to a null geometry.
+   */
   def extractWKB(gpkgGeom: Array[Byte]): Array[Byte] = {
+    if (gpkgGeom == null) {
+      return null
+    }
+
     val reader = ByteBuffer.wrap(gpkgGeom)
 
     val magic = new Array[Byte](2)
