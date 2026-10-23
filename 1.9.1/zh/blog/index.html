@@ -5569,6 +5569,51 @@
       <nav class="md-post__authors md-typeset">
         
           <span class="md-author">
+            <img src="../../assets/authors/jia.jpeg" alt="Jia Yu">
+          </span>
+        
+      </nav>
+    
+    <div class="md-post__meta md-meta">
+      <ul class="md-meta__list">
+        <li class="md-meta__item">
+          <time datetime="2026-10-23 00:00:00+00:00">2026年10月23日星期五</time></li>
+        
+        
+          
+          <li class="md-meta__item">
+            
+              需要 6 分钟阅读时间
+            
+          </li>
+        
+        
+      </ul>
+      
+    </div>
+  </header>
+  <div class="md-post__content md-typeset">
+    <h2 id="rust-warps-sql-calls-numpy-reads-three-rasters-on-one-grid"><a class="toclink" href="2026/10/23/same-ground-different-pixels/">Rust Warps, SQL Calls, NumPy Reads: Three Rasters on One Grid</a></h2>
+<p>A satellite image and a land cover map of Seattle do not line up pixel for pixel. Each is a raster, a grid of pixels over the ground, and the grids differ: 10 m and 20 m pixels in the image, pixels measured in degrees in the map. Before any comparison, every pixel has to cover the same patch of ground in every file. SedonaDB 0.5.0, a database written in Rust, lines them up with two SQL functions. <code>RS_Resample</code> changes a raster's pixel size, and <code>RS_ReprojectMatch</code> moves a raster onto another raster's grid. NumPy then reads the three rasters as arrays of the same shape.</p>
+<p><img alt="Sentinel-2 true color image of Seattle, Elliott Bay and Lake Union on 7 August 2026, with the post title on a dark card to the right" src="same-ground-different-pixels-cover.png" /></p>
+
+    
+      <nav class="md-post__action">
+        <a href="2026/10/23/same-ground-different-pixels/">
+          继续阅读
+        </a>
+      </nav>
+    
+    
+  </div>
+</article>
+      
+        <article class="md-post md-post--excerpt">
+  <header class="md-post__header">
+    
+      <nav class="md-post__authors md-typeset">
+        
+          <span class="md-author">
             <img src="../../assets/authors/dewey.jpeg" alt="Dewey Dunnington">
           </span>
         
@@ -5979,51 +6024,6 @@
     
       <nav class="md-post__action">
         <a href="2026/08/21/find-the-middle-of-the-mississippi/">
-          继续阅读
-        </a>
-      </nav>
-    
-    
-  </div>
-</article>
-      
-        <article class="md-post md-post--excerpt">
-  <header class="md-post__header">
-    
-      <nav class="md-post__authors md-typeset">
-        
-          <span class="md-author">
-            <img src="../../assets/authors/jia.jpeg" alt="Jia Yu">
-          </span>
-        
-      </nav>
-    
-    <div class="md-post__meta md-meta">
-      <ul class="md-meta__list">
-        <li class="md-meta__item">
-          <time datetime="2026-08-14 00:00:00+00:00">2026年8月14日星期五</time></li>
-        
-        
-          
-          <li class="md-meta__item">
-            
-              需要 5 分钟阅读时间
-            
-          </li>
-        
-        
-      </ul>
-      
-    </div>
-  </header>
-  <div class="md-post__content md-typeset">
-    <h2 id="seven-lines-of-numpy-121-million-pixels"><a class="toclink" href="2026/08/14/seven-lines-of-numpy-121-million-pixels/">Seven Lines of NumPy, 121 Million Pixels</a></h2>
-<p>Those deep-green grids are California's Central Valley — some of the most intensively farmed land on Earth, not as a camera sees it but as the NDVI vegetation index does: computed, pixel by pixel, by seven lines of NumPy. Sedona ran those seven lines on 484 satellite tiles in parallel, straight out of a public S3 bucket, and wrote the answer back as Cloud Optimized GeoTIFFs. That's the new move in Sedona 1.9.1: a plain Python UDF can take raster columns <em>and return rasters</em>. If the raster function you need isn't built in — your index, your QA rule, your model — write it.</p>
-<p><img alt="Five NDVI tiles computed by the seven-line Python UDF — deep-green field grids, blue canals, sandy rangeland, a city — above the UDF's code on a card" src="raster-python-udfs-cover.png" /></p>
-
-    
-      <nav class="md-post__action">
-        <a href="2026/08/14/seven-lines-of-numpy-121-million-pixels/">
           继续阅读
         </a>
       </nav>
