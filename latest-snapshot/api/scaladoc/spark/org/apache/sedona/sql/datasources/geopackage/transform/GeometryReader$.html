@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.sedona.sql.datasources.geopackage.transform.GeometryReader</title>
@@ -405,7 +404,7 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="org.apache.sedona.sql.datasources.geopackage.transform.GeometryReader#extractWKB" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="org.apache.sedona.sql.datasources.geopackage.transform.GeometryReader#extractWKB" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="extractWKB(gpkgGeom:Array[Byte]):Array[Byte]"></a><a id="extractWKB(Array[Byte]):Array[Byte]"></a>
       <span class="permalink">
       <a href="../../../../../../../org/apache/sedona/sql/datasources/geopackage/transform/GeometryReader$.html#extractWKB(gpkgGeom:Array[Byte]):Array[Byte]" title="Permalink">
@@ -420,7 +419,9 @@
         <span class="name">extractWKB</span><span class="params">(<span name="gpkgGeom">gpkgGeom: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>
       </span>
       
-      
+      <p class="shortcomment cmt">Convert a GeoPackage geometry blob to Sedona's serialized geometry.</p><div class="fullcomment"><div class="comment cmt"><p>Convert a GeoPackage geometry blob to Sedona's serialized geometry. A SQL NULL in a geometry
+column comes back from the driver as a null array, which maps to a null geometry.
+</p></div></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
