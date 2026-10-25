@@ -340,6 +340,24 @@ class GeoPackageReaderTest extends TestBaseScala with Matchers {
         df.filter(s"$name IS NULL").count() shouldEqual 1
       }
     }
+
+    it("should read a NULL geometry as null") {
+      // A NULL in a geometry column used to surface as a NullPointerException from
+      // GeometryReader.extractWKB and abort the whole scan.
+      val df = sparkSession.read
+        .format("geopackage")
+        .option("tableName", "test_features")
+        .load(resourceFolder + "geopackage/test_null_geometry.gpkg")
+
+      val rows = df.select("fid", "geom", "name").collect().sortBy(_.getInt(0))
+
+      rows.map(row => (row.getInt(0), row.isNullAt(1), row.getString(2))) shouldEqual Array(
+        (1, false, "point"),
+        (2, true, "null geometry"),
+        (3, false, "point"))
+
+      df.filter("geom IS NULL").count() shouldEqual 1
+    }
   }
 
   describe("GeoPackage Raster Data Test") {
