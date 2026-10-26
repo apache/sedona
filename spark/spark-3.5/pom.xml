@@ -57,6 +57,12 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.apache.arrow</groupId>
+            <artifactId>arrow-java-root</artifactId>
+            <version>18.2.0</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
             <groupId>org.apache.sedona</groupId>
             <artifactId>sedona-spark-common-${spark.compat.version}_${scala.compat.version}</artifactId>
             <version>${project.version}</version>
