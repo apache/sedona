@@ -572,19 +572,6 @@ repos:
       - id: actionlint
         name: run actionlint
         description: actionlint is a static checker for GitHub Actions workflow files
-        args:
-          - -ignore
-          - 'SC2015'
-          - -ignore
-          - 'SC2061'
-          - -ignore
-          - 'SC2072'
-          - -ignore
-          - 'SC2086'
-          - -ignore
-          - 'SC2102'
-          - -ignore
-          - 'SC2155'
   - repo: https://github.com/checkmake/checkmake.git
     rev: 59931d556f8f5cf4fbacf2c8390a8122ef7a881d # frozen: v0.3.2
     hooks:

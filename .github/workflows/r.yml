@@ -135,30 +135,33 @@ jobs:
           python-version: '3.11'
       - name: Install PySpark
         run: |
-          pip3 install pyspark==${SPARK_VERSION}
+          pip3 install "pyspark==${SPARK_VERSION}"
       - name: Download JAI libraries
         run: |
           PYSPARK_PATH=$(python3 -c "import pyspark; print(pyspark.__path__[0])")
-          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_core/${JAI_CORE_VERSION}/jai_core-${JAI_CORE_VERSION}.jar
-          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_codec/${JAI_CODEC_VERSION}/jai_codec-${JAI_CODEC_VERSION}.jar
-          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_imageio/${JAI_IMAGEIO_VERSION}/jai_imageio-${JAI_IMAGEIO_VERSION}.jar
-          mv -v jai_core-${JAI_CORE_VERSION}.jar ${PYSPARK_PATH}/jars
-          mv -v jai_codec-${JAI_CODEC_VERSION}.jar ${PYSPARK_PATH}/jars
-          mv -v jai_imageio-${JAI_IMAGEIO_VERSION}.jar ${PYSPARK_PATH}/jars
-          echo "PYSPARK_PATH=${PYSPARK_PATH}" >> $GITHUB_ENV
+          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 "https://repo.osgeo.org/repository/release/javax/media/jai_core/${JAI_CORE_VERSION}/jai_core-${JAI_CORE_VERSION}.jar"
+          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 "https://repo.osgeo.org/repository/release/javax/media/jai_codec/${JAI_CODEC_VERSION}/jai_codec-${JAI_CODEC_VERSION}.jar"
+          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 "https://repo.osgeo.org/repository/release/javax/media/jai_imageio/${JAI_IMAGEIO_VERSION}/jai_imageio-${JAI_IMAGEIO_VERSION}.jar"
+          mv -v "jai_core-${JAI_CORE_VERSION}.jar" "${PYSPARK_PATH}/jars"
+          mv -v "jai_codec-${JAI_CODEC_VERSION}.jar" "${PYSPARK_PATH}/jars"
+          mv -v "jai_imageio-${JAI_IMAGEIO_VERSION}.jar" "${PYSPARK_PATH}/jars"
+          echo "PYSPARK_PATH=${PYSPARK_PATH}" >> "$GITHUB_ENV"
       - name: Build Sedona libraries
         run: |
-          SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
-          mvn -q clean install -DskipTests -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dgeotools
+          SPARK_COMPAT_VERSION="${SPARK_VERSION:0:3}"
+          mvn -q clean install -DskipTests -Dspark="${SPARK_COMPAT_VERSION}" -Dscala="${SCALA_VERSION:0:4}" -Dgeotools
       - name: Copy Sedona JARs to PySpark
         run: |
-          find spark-shaded/target -name sedona-*.jar -exec cp {} ${PYSPARK_PATH}/jars/ \;
+          find spark-shaded/target -name 'sedona-*.jar' -exec cp {} "${PYSPARK_PATH}/jars/" \;
       - name: Run tests
         run: |
           # Set SPARK_HOME to PySpark path
-          export SPARK_HOME=${PYSPARK_PATH}
+          export SPARK_HOME="${PYSPARK_PATH}"
 
-          if [[ "${SPARK_VERSION:0:3}" < "3.3" ]]; then
+          spark_major="${SPARK_VERSION%%.*}"
+          spark_minor_rest="${SPARK_VERSION#*.}"
+          spark_minor="${spark_minor_rest%%.*}"
+          if (( spark_major < 3 || (spark_major == 3 && spark_minor < 3) )); then
             case "$HADOOP_VERSION" in
               3)
                 export HADOOP_VERSION=3.2

@@ -91,12 +91,12 @@ jobs:
           HADOOP_VERSION: ${{ matrix.hadoop }}
         run: |
           cd examples/spark-sql
-          mvn versions:set -DnewVersion=${SEDONA_VERSION} -DgenerateBackupPoms=false
+          mvn versions:set -DnewVersion="${SEDONA_VERSION}" -DgenerateBackupPoms=false
           mvn clean test \
-            -Dspark.version=${SPARK_VERSION} \
-            -Dspark.compat.version=${SPARK_COMPAT_VERSION} \
-            -Dsedona.version=${SEDONA_VERSION} \
-            -Dhadoop.version=${HADOOP_VERSION}
+            -Dspark.version="${SPARK_VERSION}" \
+            -Dspark.compat.version="${SPARK_COMPAT_VERSION}" \
+            -Dsedona.version="${SEDONA_VERSION}" \
+            -Dhadoop.version="${HADOOP_VERSION}"
       - name: Test Java Spark SQL Example
         env:
           SPARK_VERSION: ${{ matrix.spark }}
@@ -106,14 +106,14 @@ jobs:
           HADOOP_VERSION: ${{ matrix.hadoop }}
         run: |
           cd examples/java-spark-sql
-          mvn versions:set -DnewVersion=${SEDONA_VERSION} -DgenerateBackupPoms=false
+          mvn versions:set -DnewVersion="${SEDONA_VERSION}" -DgenerateBackupPoms=false
           mvn clean test \
-            -Dspark.version=${SPARK_VERSION} \
-            -Dspark.compat.version=${SPARK_COMPAT_VERSION}
+            -Dspark.version="${SPARK_VERSION}" \
+            -Dspark.compat.version="${SPARK_COMPAT_VERSION}"
       - name: Test Flink SQL Example
         env:
           SEDONA_VERSION: ${{ matrix.sedona }}
         run: |
           cd examples/flink-sql
-          mvn versions:set -DnewVersion=${SEDONA_VERSION} -DgenerateBackupPoms=false
+          mvn versions:set -DnewVersion="${SEDONA_VERSION}" -DgenerateBackupPoms=false
           mvn clean test

@@ -77,15 +77,15 @@ jobs:
           brew install colima
           brew install docker
           colima start
-          DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
-          mkdir -p $DOCKER_CONFIG/cli-plugins
-          curl -SL https://github.com/docker/buildx/releases/download/v0.14.1/buildx-v0.14.1.darwin-amd64 -o $DOCKER_CONFIG/cli-plugins/docker-buildx
-          chmod +x $DOCKER_CONFIG/cli-plugins/docker-buildx
+          DOCKER_CONFIG="${DOCKER_CONFIG:-$HOME/.docker}"
+          mkdir -p "$DOCKER_CONFIG/cli-plugins"
+          curl -SL https://github.com/docker/buildx/releases/download/v0.14.1/buildx-v0.14.1.darwin-amd64 -o "$DOCKER_CONFIG/cli-plugins/docker-buildx"
+          chmod +x "$DOCKER_CONFIG/cli-plugins/docker-buildx"
       - env:
           SPARK_VERSION: ${{ matrix.spark }}
           SEDONA_VERSION: ${{ matrix.sedona }}
           GEOTOOLS_VERSION: ${{ matrix.geotools }}
-        run: ./docker/build.sh ${SPARK_VERSION} ${SEDONA_VERSION} local ${GEOTOOLS_VERSION}
+        run: ./docker/build.sh "${SPARK_VERSION}" "${SEDONA_VERSION}" local "${GEOTOOLS_VERSION}"
       - name: Test notebooks
         run: |
           chmod +x docker/test-notebooks.sh
