@@ -35,6 +35,15 @@ from sedona.stats.hotspot_detection.getis_ord import g_local
 from sedona.stats.weighting import add_distance_band_column
 from sedona.stats.weighting import add_binary_distance_band_column
 from sedona.stats.weighting import add_weighted_distance_band_column
+from sedona.spark.stats.autocorrelation.moran import Moran, MoranResult
+from sedona.stats.autocorrelation import (
+    Moran as DeprecatedMoran,
+    MoranResult as DeprecatedMoranResult,
+)
+from sedona.stats.autocorrelation.moran import (
+    Moran as DeprecatedMoranModule,
+    MoranResult as DeprecatedMoranResultModule,
+)
 
 from sedona.sql import st_aggregates as sta
 from sedona.sql import st_constructors as stc
@@ -109,6 +118,12 @@ class TestPathCompatibility(TestBase):
         assert add_binary_distance_band_column is not None
         assert add_weighted_distance_band_column is not None
         assert local_outlier_factor is not None
+        assert Moran is not None
+        assert MoranResult is not None
+        assert DeprecatedMoran is not None
+        assert DeprecatedMoranResult is not None
+        assert DeprecatedMoranModule is not None
+        assert DeprecatedMoranResultModule is not None
 
     def test_util_imports(self):
         # Test utility imports
