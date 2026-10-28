@@ -53,10 +53,11 @@ import org.locationtech.jts.io.WKBWriter;
 
 public class RasterPredicates {
   /**
-   * Test if a raster intersects a query window. If both the raster and the query window have a CRS,
-   * the query window and the envelope of the raster will be transformed to a common CRS before
-   * testing for intersection. Please note that the CRS transformation will be lenient, which means
-   * that the transformation may not be accurate.
+   * Test if a raster intersects a query window. When the CRS differs, the query window is
+   * transformed into the raster's CRS so the raster footprint stays exact (affine pixel→world maps
+   * lines to lines). Falls back to comparing both sides in WGS84 if that transform fails. Please
+   * note that the CRS transformation will be lenient, which means that the transformation may not
+   * be accurate.
    *
    * @param raster the raster
    * @param geometry the query window
@@ -307,18 +308,21 @@ public class RasterPredicates {
       return Pair.of(rasterGeometry, queryWindow);
     }
 
-    // Raster has a non-authoritative CRS, or the CRS of the raster is different from the
-    // CRS of the query window. We'll transform both sides to a common CRS (WGS84) before
-    // testing for relationship.
-    CoordinateReferenceSystem queryWindowCRS;
-    queryWindowCRS = FunctionsGeoTools.sridToCRS(queryWindowSRID);
-    Geometry transformedQueryWindow = transformGeometryToWGS84(queryWindow, queryWindowCRS);
-
-    // Transform the raster envelope. Here we don't use the envelope transformation method
-    // provided by GeoTools since it performs poorly when the raster envelope crosses the
-    // anti-meridian.
-    Geometry transformedRasterGeometry = transformGeometryToWGS84(rasterGeometry, rasterCRS);
-    return Pair.of(transformedRasterGeometry, transformedQueryWindow);
+    // Prefer transforming the (usually smaller) geometry into the raster's native CRS so the
+    // raster footprint stays an exact straight-edged quadrilateral. Matches SedonaDB and avoids
+    // the corner-chord under-coverage of reprojecting the raster footprint to WGS84 (#3155).
+    CoordinateReferenceSystem queryWindowCRS = FunctionsGeoTools.sridToCRS(queryWindowSRID);
+    try {
+      Geometry transformedQueryWindow =
+          transformGeometry(queryWindow, queryWindowCRS, rasterCRS, false);
+      return Pair.of(rasterGeometry, transformedQueryWindow);
+    } catch (RuntimeException preferredFailed) {
+      // Fallback: transform both sides to WGS84. Needed when the preferred direction fails
+      // (e.g. some antimeridian / polar degeneracies) and preserves historical join behavior.
+      Geometry transformedQueryWindow = transformGeometryToWGS84(queryWindow, queryWindowCRS);
+      Geometry transformedRasterGeometry = transformGeometryToWGS84(rasterGeometry, rasterCRS);
+      return Pair.of(transformedRasterGeometry, transformedQueryWindow);
+    }
   }
 
   private static Pair<Geometry, Geometry> convertCRSIfNeeded(
@@ -345,8 +349,10 @@ public class RasterPredicates {
       return Pair.of(leftGeometry, rightGeometry);
     }
 
-    // Transform both sides to WGS84, and then return transformed geometries for evaluating
-    // predicates.
+    // Raster-raster: keep comparing in WGS84. Transforming one large footprint into the other's
+    // projected CRS silently mishandles antimeridian-crossing cases (see
+    // testRasterRasterPredicates*), whereas the geometry→raster path benefits from an exact
+    // raster footprint (#3155).
     Geometry transformedLeftGeometry = transformGeometryToWGS84(leftGeometry, leftCRS);
     Geometry transformedRightGeometry = transformGeometryToWGS84(rightGeometry, rightCRS);
     return Pair.of(transformedLeftGeometry, transformedRightGeometry);
@@ -401,14 +407,28 @@ public class RasterPredicates {
 
   private static Geometry transformGeometryToWGS84(
       Geometry geometry, CoordinateReferenceSystem crs) {
-    if (crs == DefaultGeographicCRS.WGS84) {
+    return transformGeometry(geometry, crs, DefaultGeographicCRS.WGS84, true);
+  }
+
+  /**
+   * Transform {@code geometry} from {@code sourceCRS} into {@code targetCRS}. When {@code
+   * antiMeridianSafe} is true and the source is projected, apply antimeridian-safe wrapping after
+   * transforming into a geographic CRS (historical WGS84 path behavior).
+   */
+  private static Geometry transformGeometry(
+      Geometry geometry,
+      CoordinateReferenceSystem sourceCRS,
+      CoordinateReferenceSystem targetCRS,
+      boolean antiMeridianSafe) {
+    if (sourceCRS == targetCRS || CRS.equalsIgnoreMetadata(sourceCRS, targetCRS)) {
       return geometry;
     }
     try {
-      MathTransform transform =
-          CachedCRSTransformFinder.findTransform(crs, DefaultGeographicCRS.WGS84);
+      MathTransform transform = CachedCRSTransformFinder.findTransform(sourceCRS, targetCRS);
       Geometry transformedGeometry = JTS.transform(geometry, transform);
-      if (!(crs instanceof GeographicCRS)) {
+      if (antiMeridianSafe
+          && !(sourceCRS instanceof GeographicCRS)
+          && targetCRS instanceof GeographicCRS) {
         transformedGeometry = GeomUtils.antiMeridianSafeGeom(transformedGeometry);
       }
       return transformedGeometry;
