@@ -2126,6 +2126,20 @@ public class Functions {
   }
 
   /**
+   * Returns the H3 cell center in longitude/latitude order, with SRID 0 as in h3ToGeom.
+   *
+   * @param cell H3 cell index
+   * @return the center point in degrees
+   * @throws IllegalArgumentException if cell is not a valid H3 cell index
+   */
+  public static Geometry h3ToPoint(long cell) {
+    if (!H3Utils.h3.isValidCell(cell)) {
+      throw new IllegalArgumentException("Invalid H3 cell index: " + cell);
+    }
+    return new GeometryFactory().createPoint(H3Utils.cellToCoordinate(cell));
+  }
+
+  /**
    * gets the polygon for each h3 index provided
    *
    * @param cells: the set of cells

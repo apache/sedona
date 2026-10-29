@@ -30,6 +30,33 @@ import scala.collection.mutable
 class STH3Functions extends TestBaseScala with Matchers with GeometrySample with GivenWhenThen {
   import sparkSession.implicits._
 
+  describe("ST_H3ToPoint") {
+    it("returns the H3 center as longitude/latitude with SRID 0") {
+      val row = sparkSession
+        .sql("""
+          |SELECT ST_X(ST_H3ToPoint(617700169958293503)),
+          |ST_Y(ST_H3ToPoint(617700169958293503)),
+          |ST_SRID(ST_H3ToPoint(617700169958293503)),
+          |ST_GeometryType(ST_H3ToPoint(617700169958293503))
+          |""".stripMargin)
+        .first()
+      assert(math.abs(row.getDouble(0) + 122.41845932318309) < 1e-10)
+      assert(math.abs(row.getDouble(1) - 37.776702349435695) < 1e-10)
+      assert(row.getInt(2) == 0)
+      assert(row.getString(3) == "ST_Point")
+    }
+
+    it("handles columns and propagates nulls") {
+      val rows = Seq[java.lang.Long](617700169958293503L, null)
+        .toDF("cell")
+        .selectExpr("ST_H3ToPoint(cell)")
+        .collect()
+      assert(rows(0).getAs[org.locationtech.jts.geom.Geometry](0).getSRID == 0)
+      assert(rows(1).isNullAt(0))
+      assert(sparkSession.sql("SELECT ST_H3ToPoint(CAST(NULL AS BIGINT))").first().isNullAt(0))
+    }
+  }
+
   describe("should pass ST_H3CellIDs") {
 
     it("should return null while using ST_H3CellIDs when geometry is empty") {
