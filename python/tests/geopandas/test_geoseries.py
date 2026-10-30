@@ -5373,7 +5373,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = source.scale(xfact=2, yfact=3, zfact=4, origin=origin)
 
         line = result.to_geopandas().iloc[0]
-        assert list(line.coords) == pytest.approx(expected_coordinates)
+        assert list(line.coords) == [pytest.approx(c) for c in expected_coordinates]
 
     def test_scale_2d_stays_2d_with_3d_parameters(self):
         geoms = [
@@ -5545,9 +5545,9 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         clamped = source.skew(180, 180, origin=(0, 0)).to_geopandas().iloc[0]
 
         expected = [(0.0, 0.0), (6.0, 5.1547005383792515)]
-        assert list(degrees.coords) == pytest.approx(expected)
-        assert list(radians.coords) == pytest.approx(expected)
-        assert list(numpy_bool_radians.coords) == pytest.approx(expected)
+        assert list(degrees.coords) == [pytest.approx(c) for c in expected]
+        assert list(radians.coords) == [pytest.approx(c) for c in expected]
+        assert list(numpy_bool_radians.coords) == [pytest.approx(c) for c in expected]
         assert list(clamped.coords) == [(0.0, 0.0), (2.0, 4.0)]
 
     @pytest.mark.parametrize(
@@ -5600,7 +5600,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         line = result.to_geopandas().iloc[0]
         assert line.has_z
-        assert list(line.coords) == pytest.approx([(2, 2, 3), (9, 9, 9)])
+        assert list(line.coords) == [pytest.approx(c) for c in [(2, 2, 3), (9, 9, 9)]]
         assert [coordinate[2] for coordinate in line.coords] == [3.0, 9.0]
 
     def test_skew_2d_stays_2d_with_3d_origin(self):
