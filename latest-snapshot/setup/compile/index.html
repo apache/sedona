@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6155,6 +6154,12 @@ uv run mike serve -b website
 <hr />
 <h2 id="code-quality-checks-with-prek-uv-and-make">Code Quality Checks with <code>prek</code>, <code>uv</code>, and <code>make</code><a class="headerlink" href="#code-quality-checks-with-prek-uv-and-make" title="Permanent link">&para;</a></h2>
 <p>This guide explains how Apache Sedona manages local code quality checks, formatting, and linting. To ensure a fast and consistent developer experience, we combine <code>uv</code> (a lightning-fast Python package and environment manager) with <code>prek</code> (our internal pre-commit wrapper framework) and expose everything via a simple, unified <code>Makefile</code>.</p>
+<p><code>.pre-commit-config.yaml</code> uses <code>prek</code>'s hook <code>priority</code> scheduling (see <a href="https://github.com/apache/sedona/issues/3080">issue #3080</a>):</p>
+<ul>
+<li><strong>Parallel lint aliases</strong> — Independent, read-only linters get a <code>priority</code> named after the language or domain they check (e.g. <code>lint-python</code>, <code>lint-yaml</code>, <code>lint-shell</code>, <code>lint-actions</code>, <code>lint-makefile</code>, <code>lint-rst</code>). All of these aliases resolve to the same priority value, so <code>prek</code> runs them concurrently instead of one at a time — linting different languages in parallel.</li>
+<li><strong>Sequential mutators</strong> — Hooks that rewrite file contents (formatters, license insertion, tab fixers, etc.) get explicit, increasing numeric <code>priority</code> values that preserve their execution order, since several of them touch overlapping files and <code>prek</code> only guarantees correct results when hooks sharing a priority don't mutate the same files. These run before the parallel lint group.</li>
+<li><strong>Built-in Fast Hooks</strong> — For hook IDs that match one of <code>prek</code>'s <a href="https://prek.j178.dev/builtin/">Built-in Fast Hooks</a> (such as <code>check-yaml</code>, <code>check-json</code>, <code>trailing-whitespace</code>, and <code>end-of-file-fixer</code>), <code>prek</code> automatically swaps in its native Rust implementation instead of spinning up a Python environment, no config changes required.</li>
+</ul>
 <h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h3>
 <p>Make sure your machine has <code>uv</code> and Python 3.8+ installed before running checks.</p>
 <h3 id="core-workflow-via-makefile">Core Workflow via Makefile<a class="headerlink" href="#core-workflow-via-makefile" title="Permanent link">&para;</a></h3>
@@ -6260,7 +6265,7 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="August 30, 2026 05:22:11 UTC">August 30, 2026 05:22:11</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="October 30, 2026 07:55:25 UTC">October 30, 2026 07:55:25</span>
   </span>
 
     
