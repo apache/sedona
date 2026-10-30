@@ -101,8 +101,8 @@ jobs:
           SPARK_VERSION: ${{ matrix.spark }}
           SCALA_VERSION: ${{ matrix.scala }}
         run: |
-          SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
-          mvn -q clean install -DskipTests -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dgeotools
+          SPARK_COMPAT_VERSION="${SPARK_VERSION:0:3}"
+          mvn -q clean install -DskipTests -Dspark="${SPARK_COMPAT_VERSION}" -Dscala="${SCALA_VERSION:0:4}" -Dgeotools
       - name: Setup Python build environment
         env:
           SPARK_VERSION: ${{ matrix.spark }}
@@ -121,7 +121,7 @@ jobs:
             uv add "pyspark==${SPARK_VERSION}; python_version >= '3.10'"
           else
             # Install specific pyspark version matching matrix
-            uv add pyspark==${SPARK_VERSION}
+            uv add "pyspark==${SPARK_VERSION}"
             # pyspark 3.5 still uses NumPy APIs removed in NumPy 2 (np.float_, np.string_, ...)
             uv add --dev "numpy<2"
           fi
@@ -133,28 +133,30 @@ jobs:
         run: cd python; uv pip install -e .
       - name: Prepare Sedona Spark Dependencies
         run: |
-          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_core/${JAI_CORE_VERSION}/jai_core-${JAI_CORE_VERSION}.jar
-          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_codec/${JAI_CODEC_VERSION}/jai_codec-${JAI_CODEC_VERSION}.jar
-          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_imageio/${JAI_IMAGEIO_VERSION}/jai_imageio-${JAI_IMAGEIO_VERSION}.jar
+          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 "https://repo.osgeo.org/repository/release/javax/media/jai_core/${JAI_CORE_VERSION}/jai_core-${JAI_CORE_VERSION}.jar"
+          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 "https://repo.osgeo.org/repository/release/javax/media/jai_codec/${JAI_CODEC_VERSION}/jai_codec-${JAI_CODEC_VERSION}.jar"
+          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 "https://repo.osgeo.org/repository/release/javax/media/jai_imageio/${JAI_IMAGEIO_VERSION}/jai_imageio-${JAI_IMAGEIO_VERSION}.jar"
 
           PY_SITE=$(cd python; uv run python -c "import site; print(site.getsitepackages()[0])")
           echo "Python site-packages: $PY_SITE"
-          mv -v jai_core-${JAI_CORE_VERSION}.jar ${PY_SITE}/pyspark/jars
-          mv -v jai_codec-${JAI_CODEC_VERSION}.jar ${PY_SITE}/pyspark/jars
-          mv -v jai_imageio-${JAI_IMAGEIO_VERSION}.jar ${PY_SITE}/pyspark/jars
+          mv -v "jai_core-${JAI_CORE_VERSION}.jar" "${PY_SITE}/pyspark/jars"
+          mv -v "jai_codec-${JAI_CODEC_VERSION}.jar" "${PY_SITE}/pyspark/jars"
+          mv -v "jai_imageio-${JAI_IMAGEIO_VERSION}.jar" "${PY_SITE}/pyspark/jars"
       - name: Copy Sedona Spark JARs
         run: |
           PY_SITE=$(cd python; uv run python -c "import site; print(site.getsitepackages()[0])")
-          find spark-shaded/target -name sedona-*.jar -exec cp {} ${PY_SITE}/pyspark/jars/ \;
+          find spark-shaded/target -name 'sedona-*.jar' -exec cp {} "${PY_SITE}/pyspark/jars/" \;
       - name: Run tests
         run: |
           cd python
-          export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
+          SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
+          export SPARK_HOME
           uv run pytest -v tests
       - name: Run basic tests without rasterio
         run: |
           cd python
-          export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
+          SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
+          export SPARK_HOME
           uv remove rasterio --optional all
           uv remove rasterio --dev
           uv sync
@@ -163,6 +165,7 @@ jobs:
         run: |
           cd python
           export SPARK_REMOTE=local
-          export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
+          SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
+          export SPARK_HOME
           uv pip install "pyspark[connect]==${{ matrix.spark }}" --reinstall
           uv run pytest -v tests/sql/test_dataframe_api.py

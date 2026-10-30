@@ -125,7 +125,7 @@ jobs:
         run: |
           mkdir -p dist
           for pattern in artifacts/cibw-sdist/* artifacts/cibw-wheels-macos-*/* artifacts/cibw-wheels-ubuntu-*/* artifacts/cibw-wheels-windows-*/*; do
-              cp -r $pattern dist 2>/dev/null || echo "No files matched $pattern"
+              cp -r "$pattern" dist 2>/dev/null || echo "No files matched $pattern"
           done
           echo "Content copied to dist."
       - name: Publish package to PyPI

@@ -144,23 +144,28 @@ jobs:
           SEDONA_SKIP_LIBPOSTAL_TESTS: ${{ matrix.skipLibPostalTests }}
           FLINK_VERSION: ${{ matrix.flinkVersion }}
         run: |
-          SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
+          SPARK_COMPAT_VERSION="${SPARK_VERSION:0:3}"
 
           if [[ "${SPARK_VERSION}" == "3.5"* ]] || [[ "${SPARK_VERSION}" == "4."* ]]; then
-              pip install pyspark==$SPARK_VERSION pandas shapely apache-sedona pyarrow
-              export SPARK_HOME=$(python -c "import pyspark; print(pyspark.__path__[0])")
+              pip install "pyspark==${SPARK_VERSION}" pandas shapely apache-sedona pyarrow
+              SPARK_HOME=$(python -c "import pyspark; print(pyspark.__path__[0])")
+              export SPARK_HOME
           fi
 
-          FLINK_ARGS=""
+          mvn_args=(-q clean install "-Dspark=${SPARK_COMPAT_VERSION}" "-Dscala=${SCALA_VERSION:0:4}" "-Dspark.version=${SPARK_VERSION}")
           if [[ -n "${FLINK_VERSION}" ]]; then
-              FLINK_ARGS="-Dflink.version=${FLINK_VERSION}"
+              mvn_args+=("-Dflink.version=${FLINK_VERSION}")
           fi
-
-          mvn -q clean install -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} ${FLINK_ARGS} ${SKIP_TESTS}
+          if [[ -n "${SKIP_TESTS}" ]]; then
+              mvn_args+=("${SKIP_TESTS}")
+          fi
+          mvn "${mvn_args[@]}"
       - run: mkdir staging
       - run: cp spark-shaded/target/sedona-*.jar staging
       - run: |
-          [ -d "flink-shaded/target/" ] && cp flink-shaded/target/sedona-*.jar staging 2>/dev/null || true
+          if [ -d "flink-shaded/target/" ]; then
+            cp flink-shaded/target/sedona-*.jar staging 2>/dev/null || true
+          fi
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: generated-jars_spark-${{ matrix.spark }}_scala-${{ matrix.scala }}_jdk-${{ matrix.jdk }}
