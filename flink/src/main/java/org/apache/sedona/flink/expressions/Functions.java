@@ -2941,6 +2941,19 @@ public class Functions {
     }
   }
 
+  public static class ST_H3ToPoint extends ScalarFunction {
+    @DataTypeHint(
+        value = "RAW",
+        rawSerializer = GeometryTypeSerializer.class,
+        bridgedTo = Geometry.class)
+    public Geometry eval(@DataTypeHint("BIGINT") Long cell) {
+      if (cell == null) {
+        return null;
+      }
+      return org.apache.sedona.common.Functions.h3ToPoint(cell);
+    }
+  }
+
   public static class ST_H3ToGeom extends ScalarFunction {
     @DataTypeHint(
         value = "RAW",

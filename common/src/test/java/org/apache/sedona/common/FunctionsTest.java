@@ -1468,6 +1468,41 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void h3ToPoint() {
+    Geometry center = Functions.h3ToPoint(0x8928308280fffffL);
+    assertTrue(center instanceof Point);
+    assertEquals(-122.41845932318309, center.getCoordinate().x, 1e-10);
+    assertEquals(37.776702349435695, center.getCoordinate().y, 1e-10);
+    assertEquals(0, center.getSRID());
+  }
+
+  @Test
+  public void h3ToPointAcrossResolutions() {
+    for (int resolution = 0; resolution <= 15; resolution++) {
+      long cell = H3Utils.coordinateToCell(new Coordinate(10.75, 59.91), resolution);
+      Geometry center = Functions.h3ToPoint(cell);
+      assertEquals(cell, H3Utils.coordinateToCell(center.getCoordinate(), resolution));
+      for (long pentagon : H3Utils.h3.getPentagons(resolution)) {
+        Geometry pentagonCenter = Functions.h3ToPoint(pentagon);
+        assertEquals(
+            pentagon, H3Utils.coordinateToCell(pentagonCenter.getCoordinate(), resolution));
+        assertEquals(0, pentagonCenter.getSRID());
+      }
+    }
+  }
+
+  @Test
+  public void h3ToPointUsesH3Center() {
+    long cell = H3Utils.coordinateToCell(new Coordinate(10.75, 59.91), 0);
+    Geometry center = Functions.h3ToPoint(cell);
+    Geometry polygon = Functions.h3ToGeom(new long[] {cell})[0];
+    assertTrue(center.distance(polygon.getCentroid()) > 1e-6);
+    assertEquals(polygon.getSRID(), center.getSRID());
+    assertThrows(IllegalArgumentException.class, () -> Functions.h3ToPoint(0L));
+    assertThrows(IllegalArgumentException.class, () -> Functions.h3ToPoint(-1L));
+  }
+
+  @Test
   public void testH3ToGeom() {
     Geometry target =
         GEOMETRY_FACTORY.createPolygon(
