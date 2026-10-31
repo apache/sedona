@@ -22,11 +22,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
+import org.locationtech.jts.algorithm.locate.SimplePointInAreaLocator;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.Location;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import scala.Tuple2;
@@ -375,35 +377,22 @@ public class RasterizationUtils implements Serializable {
       Envelope datasetBoundary,
       Polygon spatialObject,
       boolean reverseSpatialCoordinate) {
-    List<Tuple2<Pixel, Double>> result = new ArrayList<Tuple2<Pixel, Double>>();
-    for (int i = 0; i < spatialObject.getCoordinates().length - 1; i++) {
-      Tuple2<Integer, Integer> pixelCoordinate1 = null;
-      Tuple2<Integer, Integer> pixelCoordinate2 = null;
-      try {
-        pixelCoordinate1 =
-            FindOnePixelCoordinate(
-                resolutionX,
-                resolutionY,
-                datasetBoundary,
-                spatialObject.getCoordinates()[i],
-                reverseSpatialCoordinate);
-        pixelCoordinate2 =
-            FindOnePixelCoordinate(
-                resolutionX,
-                resolutionY,
-                datasetBoundary,
-                spatialObject.getCoordinates()[i + 1],
-                reverseSpatialCoordinate);
-      } catch (Exception e) {
-        // This pixel is out of boundary. Should be ignored.
-        continue;
-      }
+    // Trace each ring on its own. Polygon.getCoordinates() concatenates the rings, so tracing it
+    // directly also draws a segment from the end of one ring to the start of the next.
+    List<Tuple2<Pixel, Double>> result =
+        FindPixelCoordinates(
+            resolutionX,
+            resolutionY,
+            datasetBoundary,
+            spatialObject.getExteriorRing(),
+            reverseSpatialCoordinate);
+    for (int i = 0; i < spatialObject.getNumInteriorRing(); i++) {
       result.addAll(
           FindPixelCoordinates(
               resolutionX,
               resolutionY,
-              pixelCoordinate1,
-              pixelCoordinate2,
+              datasetBoundary,
+              spatialObject.getInteriorRingN(i),
               reverseSpatialCoordinate));
     }
     return result;
@@ -428,34 +417,41 @@ public class RasterizationUtils implements Serializable {
       boolean reverseSpatialCoordinate,
       Double objectWeight) {
     List<Tuple2<Pixel, Double>> result = new ArrayList<Tuple2<Pixel, Double>>();
+    if (spatialObject.isEmpty()) {
+      return result;
+    }
     GeometryFactory geometryfactory = new GeometryFactory();
-    ArrayList<Coordinate> coordinatesList = new ArrayList<Coordinate>();
-    LinearRing linear;
-    for (int i = 0; i < spatialObject.getCoordinates().length; i++) {
-      Tuple2<Integer, Integer> pixelCoordinate = null;
-      pixelCoordinate =
-          FindOnePixelCoordinate(
+    // Convert each ring to pixel space on its own, keeping the holes as holes. Converting
+    // Polygon.getCoordinates() as one ring would join the rings into a single self-crossing ring.
+    LinearRing shell =
+        toPixelRing(
+            spatialObject.getExteriorRing(),
+            resolutionX,
+            resolutionY,
+            datasetBoundary,
+            reverseSpatialCoordinate,
+            geometryfactory);
+    LinearRing[] holes = new LinearRing[spatialObject.getNumInteriorRing()];
+    for (int i = 0; i < holes.length; i++) {
+      holes[i] =
+          toPixelRing(
+              spatialObject.getInteriorRingN(i),
               resolutionX,
               resolutionY,
               datasetBoundary,
-              spatialObject.getCoordinates()[i],
-              reverseSpatialCoordinate);
-
-      coordinatesList.add(new Coordinate(pixelCoordinate._1, pixelCoordinate._2));
+              reverseSpatialCoordinate,
+              geometryfactory);
     }
-
-    coordinatesList.add(coordinatesList.get(0));
-    linear =
-        geometryfactory.createLinearRing(
-            coordinatesList.toArray(new Coordinate[coordinatesList.size()]));
-    Polygon polygon = new Polygon(linear, null, geometryfactory);
+    Polygon polygon = geometryfactory.createPolygon(shell, holes);
     int minPixelX = (int) polygon.getEnvelopeInternal().getMinX();
     int maxPixelX = (int) polygon.getEnvelopeInternal().getMaxX();
     int minPixelY = (int) polygon.getEnvelopeInternal().getMinY();
     int maxPixelY = (int) polygon.getEnvelopeInternal().getMaxY();
     for (int j = minPixelY; j <= maxPixelY; j++) {
       for (int i = minPixelX; i <= maxPixelX; i++) {
-        if (polygon.contains(geometryfactory.createPoint(new Coordinate(i, j)))) {
+        // Snapping to pixels can make a hole share an edge with the shell or another hole.
+        // Polygon.contains throws a TopologyException on such rings; the point locator does not.
+        if (SimplePointInAreaLocator.locate(new Coordinate(i, j), polygon) == Location.INTERIOR) {
           try {
             Pixel newPixel = new Pixel(i, j, resolutionX, resolutionY);
             result.add(new Tuple2<Pixel, Double>(newPixel, new Double(objectWeight)));
@@ -468,6 +464,25 @@ public class RasterizationUtils implements Serializable {
       }
     }
     return result;
+  }
+
+  /** Converts a ring's coordinates to pixel coordinates, as a closed ring in pixel space. */
+  private static LinearRing toPixelRing(
+      LineString ring,
+      int resolutionX,
+      int resolutionY,
+      Envelope datasetBoundary,
+      boolean reverseSpatialCoordinate,
+      GeometryFactory geometryfactory) {
+    Coordinate[] coordinates = ring.getCoordinates();
+    Coordinate[] pixelCoordinates = new Coordinate[coordinates.length];
+    for (int i = 0; i < coordinates.length; i++) {
+      Tuple2<Integer, Integer> pixelCoordinate =
+          FindOnePixelCoordinate(
+              resolutionX, resolutionY, datasetBoundary, coordinates[i], reverseSpatialCoordinate);
+      pixelCoordinates[i] = new Coordinate(pixelCoordinate._1, pixelCoordinate._2);
+    }
+    return geometryfactory.createLinearRing(pixelCoordinates);
   }
 
   /**
