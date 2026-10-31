@@ -109,6 +109,8 @@ Introduction: Convert a geometry to an array of pixels given a resolution
 
 You should use it together with `Lateral View` and `Explode`
 
+Lines and polygons are converted to the pixels along their outline. A line or polygon small enough to fit inside a single pixel returns that pixel. Collections, including the Multi* types, return the pixels of each member, and an empty geometry returns an empty array.
+
 Format:
 
 ```
