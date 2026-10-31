@@ -32,7 +32,7 @@ def add_distance_band_column(
     self_weight: float = 1.0,
     geometry: Optional[str] = None,
     use_spheroid: bool = False,
-    saved_attributes: List[str] = None,
+    saved_attributes: Optional[List[str]] = None,
     result_name: str = "weights",
 ) -> DataFrame:
     """Annotates a dataframe with a weights column containing the other records within the threshold and their weight.
@@ -86,7 +86,7 @@ def add_binary_distance_band_column(
     include_self: bool = False,
     geometry: Optional[str] = None,
     use_spheroid: bool = False,
-    saved_attributes: List[str] = None,
+    saved_attributes: Optional[List[str]] = None,
     result_name: str = "weights",
 ) -> DataFrame:
     """Annotates a dataframe with a weights column containing the other records within the threshold and their weight.
@@ -140,7 +140,7 @@ def add_weighted_distance_band_column(
     self_weight: float = 1.0,
     geometry: Optional[str] = None,
     use_spheroid: bool = False,
-    saved_attributes: List[str] = None,
+    saved_attributes: Optional[List[str]] = None,
     result_name: str = "weights",
 ) -> DataFrame:
     """Annotates a dataframe with a weights column containing the other records within the threshold and their weight.
