@@ -1007,6 +1007,17 @@ def ST_H3KRing(
 
 
 @validate_argument_types
+def ST_H3ToPoint(cell: Union[ColumnOrName, int]) -> Column:
+    """Return an H3 cell's center as a point in longitude/latitude order, with SRID 0.
+
+    :param cell: H3 cell index
+    :return: center point in degrees
+    :rtype: Geometry
+    """
+    return _call_st_function("ST_H3ToPoint", cell)
+
+
+@validate_argument_types
 def ST_H3ToGeom(cells: Union[ColumnOrName, list]) -> Column:
     """Cover Geometry with H3 Cells and return a List of Long type cell IDs
     :param cells: h3 cells
