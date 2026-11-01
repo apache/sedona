@@ -35,7 +35,7 @@ Pixel selection depends on the geometry type:
 * A point selects its containing half-open pixel, regardless of `allTouched`. A pixel contains its first edges in pixel order (the left and top edges on a north-up raster) but not its last. A point on an internal edge or corner selects the pixel after it in pixel order; a point on the raster's last edge selects none.
 * Line rasterization follows the cells entered by its segments rather than requiring a pixel-centre intersection. A segment lying on a grid line selects the pixels after it in pixel order; one lying on the raster's last edge selects none. A neighboring pixel contacted only at a segment endpoint is not selected unless the segment enters it.
 
-For `LineString` geometries, `allTouched=true` can expand the geometry extent at grid boundaries. With `useGeometryExtent=true`, this can change both the output dimensions and the selected pixels.
+For `LineString` geometries, `allTouched=true` selects the pixels GDAL selects with `ALL_TOUCHED=TRUE`: where a segment crosses a grid corner exactly, one of the two pixels that meet it only at that corner is also selected. It can also expand the geometry extent at grid boundaries. With `useGeometryExtent=true`, this can change both the output dimensions and the selected pixels.
 
 Format:
 
