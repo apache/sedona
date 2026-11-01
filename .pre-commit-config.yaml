@@ -372,7 +372,7 @@ repos:
           )$
         priority: 260
   - repo: https://github.com/asottile/pyupgrade
-    rev: 75992aaa40730136014f34227e0135f63fc951b4 # frozen: v3.21.2
+    rev: f22ea0651f4355c655cc581f67813c991c74a312 # frozen: v3.22.0
     hooks:
       - id: pyupgrade
         name: run pyupgrade
@@ -380,7 +380,7 @@ repos:
         args: [--py37-plus]
         priority: 270
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 4160603246a6b365d4a2af661c6d71b0a0f50478 # frozen: 26.5.1
+    rev: a5439e9af2ff9371297bb1a76a01b8ad17989b88 # frozen: 26.10.1
     hooks:
       - id: black-jupyter
         name: run black-jupyter
@@ -395,7 +395,7 @@ repos:
         args: ['.']
         priority: 290
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: e2b496dc2bd8340c2524cb9a2d2a943cde1bb6df # frozen: v23.1.1
+    rev: 98ad4ddb9c057de2f5b9e93e44e6db959807d68c # frozen: v23.1.3
     hooks:
       - id: clang-format
         name: run clang-format
@@ -427,7 +427,7 @@ repos:
         description: check for secrets with gitleaks
         priority: lint-generic
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: fa412071e4f5d44d44f9e365f4676f9df92456a2 # frozen: v1.30.1
+    rev: c92afdf2c6ca336aaa8f39e2bd8d48f62dbd8e1f # frozen: v1.31.1
     hooks:
       - id: zizmor
         name: run zizmor
@@ -593,7 +593,7 @@ repos:
         exclude: \.Rd$
         priority: 360
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: 5b5dddc4fb0f83c3ea1fc5616fa63e115dce83e0 # frozen: v0.49.1
+    rev: cbcdc463be5464e25e3e955a511599a67b9b987f # frozen: v0.50.0
     hooks:
       - id: markdownlint
         name: run markdownlint
@@ -649,7 +649,7 @@ repos:
       - id: blacken-docs
         name: run blacken-docs
         description: run `black` on python code blocks in documentation files
-        additional_dependencies: [black==26.5.1]
+        additional_dependencies: [black==26.10.1]
         priority: 380
   - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
     rev: e8b4e28241a9ae8296ba6e4a491b5da4eda73283 # frozen: 3.11.1
