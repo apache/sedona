@@ -1,7 +1,7 @@
 attrs
 descartes
 fiona==1.10.1
-geopandas==1.1.4
+geopandas==1.2.0
 ipykernel
 ipywidgets
 jupyterlab==4.6.4
@@ -12,5 +12,5 @@ numpy==2.2.6
 pandas==2.3.3
 py4j==0.10.9.9
 pydeck==0.9.3
-rasterio==1.5.1
-shapely==2.1.2
+rasterio==1.5.2
+shapely==2.2.0
