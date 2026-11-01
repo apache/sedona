@@ -241,6 +241,40 @@ public class RasterPredicatesTest extends RasterTestBase {
     Assert.assertFalse(result);
   }
 
+  /**
+   * Polar rasters reprojected to WGS84 with corner-only chords lose most of the polar cap (#3323).
+   * Transforming the query point into the raster CRS keeps the footprint exact (#3155).
+   */
+  @Test
+  public void testIntersectsPolarRasterInNativeCrs() {
+    // 20x20 EPSG:3413 raster covering (-1e6,-1e6)–(1e6,1e6): a 2000 km square on the north pole.
+    GridCoverage2D raster =
+        createRandomRaster(
+            DataBuffer.TYPE_BYTE, 20, 20, -1_000_000, 1_000_000, 100_000, 1, "EPSG:3413");
+
+    Geometry inside = GEOMETRY_FACTORY.createPoint(new Coordinate(45, 82));
+    inside.setSRID(4326);
+    Assert.assertTrue(RasterPredicates.rsIntersects(raster, inside));
+    Assert.assertTrue(RasterPredicates.rsContains(raster, inside));
+
+    inside = GEOMETRY_FACTORY.createPoint(new Coordinate(180, 85));
+    inside.setSRID(4326);
+    Assert.assertTrue(RasterPredicates.rsIntersects(raster, inside));
+
+    inside = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 85));
+    inside.setSRID(4326);
+    Assert.assertTrue(RasterPredicates.rsIntersects(raster, inside));
+
+    inside = GEOMETRY_FACTORY.createPoint(new Coordinate(90, 85));
+    inside.setSRID(4326);
+    Assert.assertTrue(RasterPredicates.rsIntersects(raster, inside));
+    Assert.assertTrue(RasterPredicates.rsContains(raster, inside));
+
+    Geometry outside = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 60));
+    outside.setSRID(4326);
+    Assert.assertFalse(RasterPredicates.rsIntersects(raster, outside));
+  }
+
   @Test
   public void testContainsNoCrs() throws FactoryException {
     Geometry geometry = GEOMETRY_FACTORY.toGeometry(new Envelope(5, 10, 5, 10));
