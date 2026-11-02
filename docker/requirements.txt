@@ -7,12 +7,12 @@ ipywidgets
 jupyterlab==4.6.4
 jupyterlab-widgets==3.0.17
 keplergl==0.3.7
-# KeplerGl imports pkg_resources, which setuptools 82 removed.
-setuptools>=69,<82
 matplotlib
 numpy==2.2.6
 pandas==2.3.3
 py4j==0.10.9.9
 pydeck==0.9.3
 rasterio==1.5.1
+# KeplerGl imports pkg_resources, which setuptools 82 removed.
+setuptools>=69,<82
 shapely==2.1.2
