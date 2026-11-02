@@ -86,7 +86,7 @@ class JvmGeometryAdapter:
         self._jvm = jvm
 
     def translate_to_java(self, bytes):
-        bytes_data = [el for el in bytes]
+        bytes_data = [*bytes]
         return self._jvm.GeometryAdapter.translateToJava(bytes_data)
 
 
