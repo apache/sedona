@@ -46,7 +46,7 @@ def require(library_names: List[str]):
         def run_function(*args, **kwargs):
             from sedona.spark.core.utils import ImportedJvmLib
 
-            has_all_libs = [lib for lib in library_names]
+            has_all_libs = [*library_names]
             first_not_fulfill_value = get_first_meet_criteria_element_from_iterable(
                 has_all_libs, lambda x: not ImportedJvmLib.has_library(x)
             )
