@@ -7,6 +7,8 @@ ipywidgets
 jupyterlab==4.6.4
 jupyterlab-widgets==3.0.17
 keplergl==0.3.7
+# KeplerGl imports pkg_resources, which setuptools 82 removed.
+setuptools>=69,<82
 matplotlib
 numpy==2.2.6
 pandas==2.3.3

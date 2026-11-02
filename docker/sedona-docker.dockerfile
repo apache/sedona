@@ -50,7 +50,6 @@ ENV PYTHONPATH=${SPARK_HOME}/python
 # Set up OS libraries and PySpark
 RUN apt-get update
 RUN apt-get install -y openjdk-17-jdk-headless curl python3-pip maven
-RUN pip3 install --no-cache-dir pipenv --break-system-packages
 COPY --from=spark --chown=root:root /opt/spark ${SPARK_HOME}
 COPY ./docker/install-spark.sh ${SEDONA_HOME}/docker/
 RUN chmod +x ${SEDONA_HOME}/docker/install-spark.sh
