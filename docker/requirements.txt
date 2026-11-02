@@ -13,4 +13,6 @@ pandas==2.3.3
 py4j==0.10.9.9
 pydeck==0.9.3
 rasterio==1.5.2
+# KeplerGl imports pkg_resources, which setuptools 82 removed.
+setuptools>=69,<82
 shapely==2.2.0
