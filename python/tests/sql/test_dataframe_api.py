@@ -2004,6 +2004,22 @@ class TestDataFrameAPI(TestBase):
         for future in futures:
             future.result()
 
+    def test_st_h3_to_point(self):
+        cell = 617700169958293503
+        df = self.spark.createDataFrame([(cell,), (None,)], "cell long")
+        rows = df.select(
+            stf.ST_H3ToPoint("cell"),
+            stf.ST_H3ToPoint(f.col("cell")),
+            stf.ST_H3ToPoint(cell),
+        ).collect()
+        for point in rows[0]:
+            assert point.geom_type == "Point"
+            assert abs(point.x + 122.41845932318309) < 1e-10
+            assert abs(point.y - 37.776702349435695) < 1e-10
+        assert rows[1][0] is None
+        assert rows[1][1] is None
+        assert rows[1][2] == rows[0][2]
+
     def test_st_h3_to_parent(self):
         df = self.spark.createDataFrame([(614552609325318143,)], ["cell"])
         parent = df.select(stf.ST_H3ToParent("cell", 5)).first()[0]

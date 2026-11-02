@@ -1718,6 +1718,15 @@ private[apache] case class ST_H3KRing(inputExpressions: Seq[Expression])
   }
 }
 
+private[apache] case class ST_H3ToPoint(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.h3ToPoint _)
+    with FoldableExpression {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 private[apache] case class ST_H3ToGeom(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.h3ToGeom _)
     with FoldableExpression {

@@ -2116,6 +2116,20 @@ class dataFrameAPITestScala extends TestBaseScala {
       }
     }
 
+    it("Passed ST_H3ToPoint") {
+      val cell = 617700169958293503L
+      val row = sparkSession
+        .sql(s"SELECT $cell AS cell")
+        .select(ST_H3ToPoint(col("cell")), ST_H3ToPoint(cell))
+        .first()
+      (0 until 2).foreach { i =>
+        val point = row.getAs[org.locationtech.jts.geom.Geometry](i)
+        assert(math.abs(point.getCoordinate.x + 122.41845932318309) < 1e-10)
+        assert(math.abs(point.getCoordinate.y - 37.776702349435695) < 1e-10)
+        assert(point.getSRID == 0)
+      }
+    }
+
     it("Passed ST_H3ToCenterChild") {
       val cell = 601041811137363967L
       val result = sparkSession

@@ -355,6 +355,7 @@ These functions work with spatial indexing systems including Bing Tiles, H3, Hil
 | [ST_H3ToChildren](Spatial-Indexing/ST_H3ToChildren.md) | `Array<Long>` | Returns the children of an H3 cell at the requested resolution. | v2.0.0 |
 | [ST_H3ToGeom](Spatial-Indexing/ST_H3ToGeom.md) | `Array<Geometry>` | Return the result of H3 function [cellsToMultiPolygon(cells)](https://h3geo.org/docs/api/regions#cellstolinkedmultipolygon--cellstomultipolygon). | v1.6.0 |
 | [ST_H3ToParent](Spatial-Indexing/ST_H3ToParent.md) | Long | Returns the parent of an H3 cell at the requested resolution. | v2.0.0 |
+| [ST_H3ToPoint](Spatial-Indexing/ST_H3ToPoint.md) | Geometry | Returns the center of an H3 cell as a point in longitude/latitude order with SRID 0. | v2.0.0 |
 | [ST_H3Uncompact](Spatial-Indexing/ST_H3Uncompact.md) | `Array<Long>` | Expands H3 cells to the requested resolution. | v2.0.0 |
 | [ST_HilbertDistance](Spatial-Indexing/ST_HilbertDistance.md) | Long | Maps the midpoint of a geometry's envelope to an unsigned Hilbert-curve address within a supplied extent. | v2.0.0 |
 | [ST_S2CellIDs](Spatial-Indexing/ST_S2CellIDs.md) | `Array<Long>` | Cover the geometry with Google S2 Cells, return the corresponding cell IDs with the given level. The level indicates the [size of cells](https://s2geometry.io/resources/s2cell_statistics.html). With... | v1.4.0 |

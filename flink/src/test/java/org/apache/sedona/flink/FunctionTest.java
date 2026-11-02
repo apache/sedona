@@ -2353,6 +2353,22 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testH3ToPoint() {
+    Geometry center =
+        (Geometry)
+            first(
+                    tableEnv.sqlQuery(
+                        "SELECT ST_H3ToPoint(cell) FROM (VALUES (617700169958293503)) AS cells(cell)"))
+                .getField(0);
+    assertNotNull(center);
+    assertEquals("Point", center.getGeometryType());
+    assertEquals(-122.41845932318309, center.getCoordinate().x, 1e-10);
+    assertEquals(37.776702349435695, center.getCoordinate().y, 1e-10);
+    assertEquals(0, center.getSRID());
+    assertNull(first(tableEnv.sqlQuery("SELECT ST_H3ToPoint(CAST(NULL AS BIGINT))")).getField(0));
+  }
+
+  @Test
   public void testH3ToGeom() {
     Table pointTable =
         tableEnv.sqlQuery(

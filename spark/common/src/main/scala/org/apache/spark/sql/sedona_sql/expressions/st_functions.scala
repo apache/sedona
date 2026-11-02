@@ -298,6 +298,10 @@ object st_functions {
   def ST_H3KRing(cell: Long, k: Integer, exactRing: Boolean): Column =
     wrapExpression[ST_H3KRing](cell, k, exactRing)
 
+  def ST_H3ToPoint(cell: Column): Column = wrapExpression[ST_H3ToPoint](cell)
+
+  def ST_H3ToPoint(cell: Long): Column = wrapExpression[ST_H3ToPoint](cell)
+
   def ST_H3ToGeom(cellIds: Column): Column = wrapExpression[ST_H3ToGeom](cellIds)
 
   def ST_H3ToGeom(cellIds: Array[Long]): Column = wrapExpression[ST_H3ToGeom](cellIds)

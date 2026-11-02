@@ -109,6 +109,7 @@ public class Catalog {
       new Functions.ST_H3CellDistance(),
       new Functions.ST_H3CellIDs(),
       new Functions.ST_H3KRing(),
+      new Functions.ST_H3ToPoint(),
       new Functions.ST_H3ToGeom(),
       new Functions.ST_H3ToParent(),
       new Functions.ST_H3ToChildren(),
