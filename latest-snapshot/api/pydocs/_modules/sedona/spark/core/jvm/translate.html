@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.core.jvm.translate &mdash; Apache Sedona Python Documentation</title>
@@ -300,7 +299,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span> <span class="o">=</span> <span class="n">jvm</span></div>
 
 <div class="viewcode-block" id="JvmGeometryAdapter.translate_to_java"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmGeometryAdapter.translate_to_java">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">translate_to_java</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
-        <span class="n">bytes_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">bytes</span><span class="p">]</span>
+        <span class="n">bytes_data</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="nb">bytes</span><span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">GeometryAdapter</span><span class="o">.</span><span class="n">translateToJava</span><span class="p">(</span><span class="n">bytes_data</span><span class="p">)</span></div></div>
 
 

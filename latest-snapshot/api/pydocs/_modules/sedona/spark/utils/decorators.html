@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.utils.decorators &mdash; Apache Sedona Python Documentation</title>
@@ -260,7 +259,7 @@
         <span class="k">def</span><span class="w"> </span><span class="nf">run_function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">ImportedJvmLib</span>
 
-            <span class="n">has_all_libs</span> <span class="o">=</span> <span class="p">[</span><span class="n">lib</span> <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="n">library_names</span><span class="p">]</span>
+            <span class="n">has_all_libs</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">library_names</span><span class="p">]</span>
             <span class="n">first_not_fulfill_value</span> <span class="o">=</span> <span class="n">get_first_meet_criteria_element_from_iterable</span><span class="p">(</span>
                 <span class="n">has_all_libs</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="ow">not</span> <span class="n">ImportedJvmLib</span><span class="o">.</span><span class="n">has_library</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
             <span class="p">)</span>
