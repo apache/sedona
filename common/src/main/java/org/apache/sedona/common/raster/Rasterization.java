@@ -169,7 +169,11 @@ public class Rasterization {
       case "LineString":
       case "MultiLineString":
       case "LinearRing":
-        rasterizeLineString(geom, params, value, geomExtent);
+        if (allTouched) {
+          rasterizeLineStringAllTouched(geom, metadata, params, value);
+        } else {
+          rasterizeLineString(geom, params, value, geomExtent);
+        }
         break;
       default:
         rasterizePolygon(raster, metadata, geom, params, geomExtent, value, allTouched);
@@ -295,6 +299,187 @@ public class Rasterization {
         double y1 = (end.y - params.upperLeftY) / params.scaleY;
 
         traverseSegment(params, x0, y0, x1, y1, value);
+      }
+    }
+  }
+
+  /** Receives the cells, as {col, row} in the raster's own pixel order, that a line walk visits. */
+  @FunctionalInterface
+  private interface CellVisitor {
+    void visit(int col, int row);
+  }
+
+  /**
+   * Burns every cell a line touches, for allTouched, following GDAL's ALL_TOUCHED line walk
+   * (GDALdllImageLineAllTouched in GDAL's alg/llrasterize.cpp), so lines rasterize as in GDAL and
+   * rasterio with all_touched=True.
+   *
+   * <p>Besides the cells the segment passes through, this burns the cells the walk enters where the
+   * segment crosses a grid corner exactly: it steps one axis at a time, so it visits one of the two
+   * cells that meet the segment only at that corner. Without allTouched, {@link #traverseSegment}
+   * burns only the cells the segment passes through.
+   *
+   * <p>As in GDAL, the walk runs over the whole reference raster in the raster's own pixel order.
+   * Each cell is then placed in the output grid, which may be cropped to the geometry's extent, the
+   * same way {@link #rasterizePoint} places its cell.
+   */
+  private static void rasterizeLineStringAllTouched(
+      Geometry geom, double[] metadata, RasterizationParams params, double value) {
+    int rasterWidth = (int) metadata[2];
+    int rasterHeight = (int) metadata[3];
+    boolean rasterBottomUp = metadata[5] > 0;
+
+    // Where the output grid sits within the reference raster's grid: zero unless the output was
+    // cropped to the geometry extent.
+    int colOffset = (int) Math.round((params.upperLeftX - params.rasterUpperLeftX) / params.scaleX);
+    int rowOffset = (int) Math.round((params.upperLeftY - params.rasterUpperLeftY) / params.scaleY);
+    int width = params.writableRaster.getWidth();
+    int height = params.writableRaster.getHeight();
+
+    CellVisitor burnVisited =
+        (col, pixelRow) -> {
+          // Count the row down from the geographic top, then move it onto the output grid.
+          int rowFromTop = rasterBottomUp ? rasterHeight - 1 - pixelRow : pixelRow;
+          int x = col - colOffset;
+          int row = rowFromTop - rowOffset;
+          if (x < 0 || x >= width || row < 0 || row >= height) {
+            return;
+          }
+          // Rows count down from the geographic top here; reverse them for bottom-up rasters.
+          params.burn(x, params.bottomUp ? height - 1 - row : row, value);
+        };
+
+    for (int i = 0; i < geom.getNumGeometries(); i++) {
+      Coordinate[] coords = geom.getGeometryN(i).getCoordinates();
+      for (int j = 0; j < coords.length - 1; j++) {
+        walkSegmentAllTouched(
+            (coords[j].x - metadata[0]) / metadata[4],
+            (coords[j].y - metadata[1]) / metadata[5],
+            (coords[j + 1].x - metadata[0]) / metadata[4],
+            (coords[j + 1].y - metadata[1]) / metadata[5],
+            rasterWidth,
+            rasterHeight,
+            burnVisited);
+      }
+    }
+  }
+
+  /**
+   * Visits the cells GDAL's ALL_TOUCHED line walk burns for one segment, given in pixel coordinates
+   * on a width by height grid. This follows GDALdllImageLineAllTouched step for step, including its
+   * tolerances, so that ties on grid lines resolve exactly as in GDAL.
+   */
+  private static void walkSegmentAllTouched(
+      double x0, double y0, double x1, double y1, int width, int height, CellVisitor visitor) {
+    // GDAL's tolerance for an end coordinate lying on a grid line.
+    final double gridLineEpsilon = 1e-4;
+    // GDAL's minimum step when moving to the next row of the walk.
+    final double minRowStep = 1e-9;
+
+    // Skip segments that are off the grid.
+    if ((y0 < 0 && y1 < 0)
+        || (y0 > height && y1 > height)
+        || (x0 < 0 && x1 < 0)
+        || (x0 > width && x1 > width)) {
+      return;
+    }
+
+    // Walk from left to right.
+    if (x0 > x1) {
+      double t = x0;
+      x0 = x1;
+      x1 = t;
+      t = y0;
+      y0 = y1;
+      y1 = t;
+    }
+
+    // A segment within one column of cells, or nearly vertical, burns a run of that column.
+    if (Math.floor(x0) == Math.floor(x1) || Math.abs(x0 - x1) < 0.01) {
+      double top = Math.min(y0, y1);
+      double bottom = Math.max(y0, y1);
+      int col = (int) Math.floor(x1);
+      if (col < 0 || col >= width) {
+        return;
+      }
+      int row = Math.max((int) Math.floor(top), 0);
+      int lastRow = Math.min((int) Math.floor(bottom - gridLineEpsilon), height - 1);
+      for (; row <= lastRow; row++) {
+        visitor.visit(col, row);
+      }
+      return;
+    }
+
+    // A segment within one row of cells, or nearly horizontal, burns a run of that row.
+    if (Math.floor(y0) == Math.floor(y1) || Math.abs(y0 - y1) < 0.01) {
+      int row = (int) Math.floor(y0);
+      if (row < 0 || row >= height) {
+        return;
+      }
+      int col = Math.max((int) Math.floor(x0), 0);
+      int lastCol = Math.min((int) Math.floor(x1 - gridLineEpsilon), width - 1);
+      for (; col <= lastCol; col++) {
+        visitor.visit(col, row);
+      }
+      return;
+    }
+
+    double slope = (y1 - y0) / (x1 - x0);
+
+    // Clip the segment to the grid in x, then in y, as GDAL does.
+    if (x1 > width) {
+      y1 -= (x1 - width) * slope;
+      x1 = width;
+    }
+    if (x0 < 0) {
+      y0 += (0 - x0) * slope;
+      x0 = 0;
+    }
+    if (y1 > y0) {
+      if (y0 < 0) {
+        x0 += (0 - y0) / slope;
+        y0 = 0;
+      }
+      if (y1 >= height) {
+        x1 += (y1 - height) / slope;
+        if (x1 > width) {
+          x1 = width;
+        }
+      }
+    } else {
+      if (y0 >= height) {
+        x0 += (height - y0) / slope;
+        y0 = height;
+      }
+      if (y1 < 0) {
+        x1 -= y1 / slope;
+      }
+    }
+
+    // Step from cell to cell: to the next column if the segment reaches it within the current row,
+    // otherwise to the next row.
+    double x = x0;
+    double y = y0;
+    while (x >= 0 && x < x1) {
+      int col = (int) Math.floor(x);
+      int row = (int) Math.floor(y);
+      if (row >= 0 && row < height) {
+        visitor.visit(col, row);
+      }
+
+      double stepX = Math.floor(x + 1.0) - x;
+      double stepY = stepX * slope;
+      if ((int) Math.floor(y + stepY) == row) {
+        x += stepX;
+        y += stepY;
+      } else if (slope < 0) {
+        stepY = Math.min(row - y, -minRowStep);
+        x += stepY / slope;
+        y += stepY;
+      } else {
+        stepY = Math.max((row + 1) - y, minRowStep);
+        x += stepY / slope;
+        y += stepY;
       }
     }
   }
