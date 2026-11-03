@@ -56,6 +56,8 @@ import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.gml2.GMLWriter;
 import org.locationtech.jts.io.kml.KMLWriter;
 import org.locationtech.jts.linearref.LengthIndexedLine;
+import org.locationtech.jts.linearref.LinearLocation;
+import org.locationtech.jts.linearref.LocationIndexedLine;
 import org.locationtech.jts.operation.buffer.BufferOp;
 import org.locationtech.jts.operation.buffer.BufferParameters;
 import org.locationtech.jts.operation.buffer.OffsetCurve;
@@ -3175,24 +3177,20 @@ public class Functions {
     LineString line = (LineString) geom1;
     Point point = (Point) geom2;
 
-    // Find the closest point on the line to the input point
-    Coordinate closestPoint = DistanceOp.nearestPoints(line, point)[0];
+    // Locate the closest point on the line (the first one along the line if there is a tie)
+    LinearLocation location = new LocationIndexedLine(line).project(point.getCoordinate());
 
-    // Use LengthIndexedLine to extract the index at the closest point
-    LengthIndexedLine indexedLine = new LengthIndexedLine(line);
-    double index = indexedLine.indexOf(closestPoint);
-
-    // Extract the point at that index and compute its length fraction
-    double totalLength = indexedLine.getEndIndex();
-    double fractionAlongLine = index / totalLength;
-
-    // Get the start and end coordinates of the line
-    Geometry start = line.getStartPoint();
-    Geometry end = line.getEndPoint();
-
-    // Interpolate the M value
-    return fractionAlongLine * (end.getCoordinate().getM() - start.getCoordinate().getM())
-        + start.getCoordinate().getM();
+    // Interpolate the M value between the two vertices of the segment containing that point.
+    // Measures need not be proportional to length, so the line's first and last measures alone
+    // are not enough.
+    CoordinateSequence coordinates = line.getCoordinateSequence();
+    int segmentIndex = location.getSegmentIndex();
+    if (segmentIndex >= coordinates.size() - 1) {
+      return coordinates.getM(coordinates.size() - 1);
+    }
+    double startM = coordinates.getM(segmentIndex);
+    double endM = coordinates.getM(segmentIndex + 1);
+    return startM + location.getSegmentFraction() * (endM - startM);
   }
 
   /**
