@@ -33,6 +33,7 @@ import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.geom.Geometry;
 
 public class RasterBandAccessors {
@@ -391,16 +392,41 @@ public class RasterBandAccessors {
     Raster rasterData = RasterUtils.getRaster(raster.getRenderedImage());
     String datatype = RasterBandAccessors.getBandType(raster, band);
     Double noDataValue = RasterBandAccessors.getBandNoDataValue(raster, band);
-    // Adding an arbitrary value '150' for the pixels that are under the geometry.
-    GridCoverage2D rasterizedGeom =
-        RasterConstructors.asRasterWithRasterExtent(roi, raster, datatype, allTouched, 150, null);
+
+    double[] md = RasterAccessors.metadata(raster);
+    ReferencedEnvelope window = Rasterization.rasterizeGeomExtent(roi, raster, md, allTouched);
+    int[] offset = null;
+    if (window != null
+        && Math.round(window.getWidth() / Math.abs(md[4])) >= 1
+        && Math.round(window.getHeight() / Math.abs(md[5])) >= 1) {
+      offset = windowOffset(raster, md, window);
+    }
+
+    GridCoverage2D rasterizedGeom;
+    int xOffset = 0, yOffset = 0;
+    if (offset != null) {
+      // Adding an arbitrary value '150' for the pixels that are under the geometry.
+      rasterizedGeom =
+          RasterConstructors.asRaster(roi, raster, datatype, allTouched, 150, null, true);
+      if (rasterizedGeom == null) {
+        // the geometry burns no pixel: same result as an all-zero full-extent raster
+        double[] empty = new double[0];
+        return Arrays.asList(new DescriptiveStatistics(empty), empty);
+      }
+      xOffset = offset[0];
+      yOffset = offset[1];
+    } else {
+      rasterizedGeom =
+          RasterConstructors.asRasterWithRasterExtent(roi, raster, datatype, allTouched, 150, null);
+    }
     Raster rasterizedData = RasterUtils.getRaster(rasterizedGeom.getRenderedImage());
     int width = RasterAccessors.getWidth(rasterizedGeom),
         height = RasterAccessors.getHeight(rasterizedGeom);
     double[] rasterizedPixelData =
         rasterizedData.getSamples(0, 0, width, height, 0, (double[]) null);
+    // CHANGED: read only the window from the source raster
     double[] rasterPixelData =
-        rasterData.getSamples(0, 0, width, height, band - 1, (double[]) null);
+        rasterData.getSamples(xOffset, yOffset, width, height, band - 1, (double[]) null);
 
     List<Double> pixelData = new ArrayList<>();
 
@@ -428,6 +454,26 @@ public class RasterBandAccessors {
     statObjects.add(stats);
     statObjects.add(pixelsArray);
     return statObjects;
+  }
+
+  /**
+   * Returns {x, y}: the position of the window's top-left pixel inside the raster, or null if the
+   * window is not exactly aligned to the raster's pixel grid or does not fit inside it.
+   */
+  private static int[] windowOffset(GridCoverage2D raster, double[] md, ReferencedEnvelope window) {
+    // md: 4 = scaleX, 5 = scaleY, 6/7 = skew, 2/3 = raster width/height
+    if (md[6] != 0 || md[7] != 0) return null; // skewed: use the full-extent path
+    double sx = Math.abs(md[4]), sy = Math.abs(md[5]);
+    ReferencedEnvelope re = raster.getEnvelope2D();
+    double fx = (window.getMinX() - re.getMinX()) / sx;
+    // bottom-up rasters (scaleY > 0) put row 0 at the minimum Y
+    double fy =
+        md[5] > 0 ? (window.getMinY() - re.getMinY()) / sy : (re.getMaxY() - window.getMaxY()) / sy;
+    int x = (int) Math.round(fx), y = (int) Math.round(fy);
+    int w = (int) Math.round(window.getWidth() / sx), h = (int) Math.round(window.getHeight() / sy);
+    if (Math.abs(fx - x) > 1e-6 || Math.abs(fy - y) > 1e-6) return null;
+    if (x < 0 || y < 0 || x + w > (int) md[2] || y + h > (int) md[3]) return null;
+    return new int[] {x, y};
   }
 
   public static double getSummaryStats(
