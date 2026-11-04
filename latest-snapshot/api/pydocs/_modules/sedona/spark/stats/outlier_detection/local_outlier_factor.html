@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.stats.outlier_detection.local_outlier_factor &mdash; Apache Sedona Python Documentation</title>
@@ -244,9 +243,9 @@
     <span class="n">k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
     <span class="n">geometry</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">handle_ties</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">use_spheroid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">use_spheroid</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">result_column_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"lof"</span><span class="p">,</span>
-<span class="p">):</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Annotates a dataframe with a column containing the local outlier factor for each data record.</span>
 
 <span class="sd">    The dataframe should contain at least one GeometryType column. Rows must be unique. If one geometry column is</span>

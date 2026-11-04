@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.stats.clustering.dbscan &mdash; Apache Sedona Python Documentation</title>
@@ -248,10 +247,10 @@
     <span class="n">min_pts</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">geometry</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">include_outliers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">use_spheroid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">is_core_column_name</span><span class="o">=</span><span class="s2">"isCore"</span><span class="p">,</span>
-    <span class="n">cluster_column_name</span><span class="o">=</span><span class="s2">"cluster"</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">use_spheroid</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">is_core_column_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"isCore"</span><span class="p">,</span>
+    <span class="n">cluster_column_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"cluster"</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Annotates a dataframe with a cluster label for each data record using the DBSCAN algorithm.</span>
 
 <span class="sd">    The dataframe should contain at least one GeometryType column. Rows must be unique. If one geometry column is</span>
