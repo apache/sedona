@@ -14,3 +14,34 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
+import warnings
+
+from sedona.spark.stats.autocorrelation.moran import Moran, MoranResult
+from sedona.spark.stats.clustering.dbscan import dbscan
+from sedona.spark.stats.hotspot_detection.getis_ord import g_local
+from sedona.spark.stats.outlier_detection.local_outlier_factor import (
+    local_outlier_factor,
+)
+from sedona.spark.stats.weighting import (
+    add_binary_distance_band_column,
+    add_distance_band_column,
+    add_weighted_distance_band_column,
+)
+
+warnings.warn(
+    "Importing from 'sedona.stats' is deprecated. Please use 'sedona.spark.stats' instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
+__all__ = [
+    "Moran",
+    "MoranResult",
+    "dbscan",
+    "g_local",
+    "local_outlier_factor",
+    "add_distance_band_column",
+    "add_binary_distance_band_column",
+    "add_weighted_distance_band_column",
+]

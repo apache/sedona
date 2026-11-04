@@ -34,10 +34,10 @@ def dbscan(
     min_pts: int,
     geometry: Optional[str] = None,
     include_outliers: bool = True,
-    use_spheroid=False,
-    is_core_column_name="isCore",
-    cluster_column_name="cluster",
-):
+    use_spheroid: bool = False,
+    is_core_column_name: str = "isCore",
+    cluster_column_name: str = "cluster",
+) -> DataFrame:
     """Annotates a dataframe with a cluster label for each data record using the DBSCAN algorithm.
 
     The dataframe should contain at least one GeometryType column. Rows must be unique. If one geometry column is
