@@ -3172,27 +3172,33 @@ public class Functions {
               geom1.getSRID(), geom2.getSRID()));
     }
 
-    LineString line = (LineString) geom1;
-    Point point = (Point) geom2;
+    CoordinateSequence coordinates = ((LineString) geom1).getCoordinateSequence();
+    Coordinate target = geom2.getCoordinate();
 
-    // Find the closest point on the line to the input point
-    Coordinate closestPoint = DistanceOp.nearestPoints(line, point)[0];
+    // Find the segment closest to the point, keeping the first one along the line on a tie, so a
+    // stationary track (a zero-length segment) keeps the measure of its first vertex
+    LineSegment segment = new LineSegment();
+    int closestIndex = 0;
+    double closestFraction = 0;
+    double closestDistance = Double.POSITIVE_INFINITY;
+    for (int i = 0; i < coordinates.size() - 1; i++) {
+      segment.setCoordinates(coordinates.getCoordinate(i), coordinates.getCoordinate(i + 1));
+      double distance = segment.distance(target);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestIndex = i;
+        closestFraction =
+            segment.getLength() == 0
+                ? 0
+                : Math.max(0, Math.min(1, segment.projectionFactor(target)));
+      }
+    }
 
-    // Use LengthIndexedLine to extract the index at the closest point
-    LengthIndexedLine indexedLine = new LengthIndexedLine(line);
-    double index = indexedLine.indexOf(closestPoint);
-
-    // Extract the point at that index and compute its length fraction
-    double totalLength = indexedLine.getEndIndex();
-    double fractionAlongLine = index / totalLength;
-
-    // Get the start and end coordinates of the line
-    Geometry start = line.getStartPoint();
-    Geometry end = line.getEndPoint();
-
-    // Interpolate the M value
-    return fractionAlongLine * (end.getCoordinate().getM() - start.getCoordinate().getM())
-        + start.getCoordinate().getM();
+    // Interpolate the M value between the two vertices of that segment. Measures need not be
+    // proportional to length, so the line's first and last measures alone are not enough.
+    double startM = coordinates.getM(closestIndex);
+    double endM = coordinates.getM(closestIndex + 1);
+    return startM + closestFraction * (endM - startM);
   }
 
   /**

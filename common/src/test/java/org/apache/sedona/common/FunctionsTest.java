@@ -6009,6 +6009,46 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void interpolatePointMeasuresNotProportionalToLength() throws ParseException {
+    // The M value comes from the segment that holds the closest point, not from the line's first
+    // and last measures.
+    Geometry line = Constructors.geomFromEWKT("LINESTRING M (0 0 0, 2 0 2, 4 0 20)");
+    assertEquals(
+        1.0, Functions.interpolatePoint(line, Constructors.geomFromEWKT("POINT (1 1)")), 1e-9);
+    assertEquals(
+        11.0, Functions.interpolatePoint(line, Constructors.geomFromEWKT("POINT (3 1)")), 1e-9);
+
+    // Closest point is a vertex or an endpoint
+    assertEquals(
+        2.0, Functions.interpolatePoint(line, Constructors.geomFromEWKT("POINT (2 5)")), 1e-9);
+    assertEquals(
+        0.0, Functions.interpolatePoint(line, Constructors.geomFromEWKT("POINT (-1 0)")), 1e-9);
+    assertEquals(
+        20.0, Functions.interpolatePoint(line, Constructors.geomFromEWKT("POINT (9 0)")), 1e-9);
+
+    // Uneven spacing in time: a track that moves slowly on its second segment
+    line = Constructors.geomFromEWKT("LINESTRING M (0 0 0, 10 0 10, 20 0 1000)");
+    assertEquals(
+        5.0, Functions.interpolatePoint(line, Constructors.geomFromEWKT("POINT (5 1)")), 1e-9);
+    assertEquals(
+        505.0, Functions.interpolatePoint(line, Constructors.geomFromEWKT("POINT (15 1)")), 1e-9);
+
+    // Decreasing measures on an XYZM line
+    line = Constructors.geomFromEWKT("LINESTRING ZM (0 0 5 100, 10 0 5 90, 10 10 5 0)");
+    assertEquals(
+        45.0, Functions.interpolatePoint(line, Constructors.geomFromEWKT("POINT (10 5)")), 1e-9);
+
+    // A stationary track (zero-length segment) keeps the measure of the first closest vertex
+    line = Constructors.geomFromEWKT("LINESTRING M (0 0 0, 0 0 10, 10 0 20)");
+    assertEquals(
+        0.0, Functions.interpolatePoint(line, Constructors.geomFromEWKT("POINT (0 1)")), 1e-9);
+    assertEquals(
+        0.0, Functions.interpolatePoint(line, Constructors.geomFromEWKT("POINT (-1 0)")), 1e-9);
+    assertEquals(
+        15.0, Functions.interpolatePoint(line, Constructors.geomFromEWKT("POINT (5 1)")), 1e-9);
+  }
+
+  @Test
   public void emptyPoint() throws ParseException {
     Geometry point = Constructors.geomFromEWKT("POINT(1 1)");
     Geometry emptyPoint = Constructors.geomFromEWKT("POINT EMPTY");
