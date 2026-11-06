@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5582,6 +5581,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#one-sort-many-indexes-spatial-correlation-in-geoparquet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One Sort, Many Indexes: Spatial Correlation in GeoParquet
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#sedonadb-ranks-beverly-hills-the-second-scariest-city-in-the-us-guess-who-is-first" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5680,17 +5690,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#one-more-dimension-apache-sedona-enters-the-3d-world" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        One More Dimension: Apache Sedona Enters the 3D World
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -5705,6 +5704,52 @@
       <header class="md-typeset">
         <h1 id="jia-yu">Jia Yu<a class="headerlink" href="#jia-yu" title="Permanent link">&para;</a></h1>
       </header>
+      
+        <article class="md-post md-post--excerpt">
+  <header class="md-post__header">
+    
+      <nav class="md-post__authors md-typeset">
+        
+          <span class="md-author">
+            <img src="../../../assets/authors/jia.jpeg" alt="Jia Yu">
+          </span>
+        
+      </nav>
+    
+    <div class="md-post__meta md-meta">
+      <ul class="md-meta__list">
+        <li class="md-meta__item">
+          <time datetime="2026-11-06 00:00:00+00:00">Friday, November 6, 2026</time></li>
+        
+        
+          
+          <li class="md-meta__item">
+            
+              5 min read
+            
+          </li>
+        
+        
+      </ul>
+      
+    </div>
+  </header>
+  <div class="md-post__content md-typeset">
+    <h2 id="one-sort-many-indexes-spatial-correlation-in-geoparquet"><a class="toclink" href="../../2026/11/06/one-sort-many-indexes/">One Sort, Many Indexes: Spatial Correlation in GeoParquet</a></h2>
+<p><em>SedonaDB, GeoParquet, and a story that continued at SIGMOD 2019, now in Rust.</em></p>
+<p>A GeoParquet file has one row order and many columns. In September, <a href="https://sedona.apache.org/latest/blog/2026/09/18/order-by-is-an-index-does-it-have-to-be/">ORDER BY Is an Index</a> showed that the order is the index, and this post shows that one sort indexes every column that follows the map. Sort 3,036,650 Washington addresses by geometry, and the postcode column gets an index for free. Sort by postcode, and the map gets one. SedonaDB 0.5.0, a database written in Rust, wrote the files and read the footers. The idea comes from <a href="https://dl.acm.org/doi/10.1145/3299869.3319861">HERMIT</a>, which Jia Yu, the original creator of Apache Sedona, co-authored at SIGMOD 2019, one of the top three database conferences alongside VLDB and ICDE.</p>
+<p><img alt="The title on the left, with Ferris the Rust crab after the subtitle, above three index cards for row group 15: postcode 98101 to 98199, city SEATTLE to SEATTLE, bbox -122.43 to -122.28 and 47.61 to 47.71; on the right a map of Washington State made of addresses, one color per row group, with the Seattle row group ringed in orange" src="../../one-sort-many-indexes-cover.png" /></p>
+
+    
+      <nav class="md-post__action">
+        <a href="../../2026/11/06/one-sort-many-indexes/">
+          Continue reading
+        </a>
+      </nav>
+    
+    
+  </div>
+</article>
       
         <article class="md-post md-post--excerpt">
   <header class="md-post__header">
@@ -6121,52 +6166,6 @@
     
       <nav class="md-post__action">
         <a href="../../2026/09/04/group-by-but-for-pixels/">
-          Continue reading
-        </a>
-      </nav>
-    
-    
-  </div>
-</article>
-      
-        <article class="md-post md-post--excerpt">
-  <header class="md-post__header">
-    
-      <nav class="md-post__authors md-typeset">
-        
-          <span class="md-author">
-            <img src="../../../assets/authors/jia.jpeg" alt="Jia Yu">
-          </span>
-        
-      </nav>
-    
-    <div class="md-post__meta md-meta">
-      <ul class="md-meta__list">
-        <li class="md-meta__item">
-          <time datetime="2026-08-28 00:00:00+00:00">Friday, August 28, 2026</time></li>
-        
-        
-          
-          <li class="md-meta__item">
-            
-              7 min read
-            
-          </li>
-        
-        
-      </ul>
-      
-    </div>
-  </header>
-  <div class="md-post__content md-typeset">
-    <h2 id="one-more-dimension-apache-sedona-enters-the-3d-world"><a class="toclink" href="../../2026/08/28/one-more-dimension-apache-sedona-enters-the-3d-world/">One More Dimension: Apache Sedona Enters the 3D World</a></h2>
-<p>In a flat spatial query the world is only its noon shadow on the ground. Two objects whose shadows touch can be four hundred feet apart, and from a flat predicate the answer is the same for both.</p>
-<p>The questions put to spatial engines have stopped being flat. Drones under FAA ceilings, aircraft over towers, apartments above restaurants, mineral deposits below mining leases: each one comes down to whether two volumes meet, and until now the SQL answer was the shadow version. Sedona 1.9.1 adds the missing axis. There is a <code>Box3D</code> type with constructors and accessors, 3D predicates and distances, a 3D extent aggregate, and query plans that account for the third axis.</p>
-<p><img alt="The cover: an isometric drawing of a San Diego neighborhood, its street grid on the ground and every building rendered as an extruded box, beside the post title" src="../../box3d-3d-world-cover.svg" /></p>
-
-    
-      <nav class="md-post__action">
-        <a href="../../2026/08/28/one-more-dimension-apache-sedona-enters-the-3d-world/">
           Continue reading
         </a>
       </nav>
