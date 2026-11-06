@@ -17,7 +17,10 @@
 
 
 from sedona.spark.sql.types import GeometryType
-from sedona.spark.utils import geometry_serde
+from sedona.spark.utils.geometry_sql_serde import (
+    deserialize_geometry,
+    serialize_geometry,
+)
 from sedona.spark.sql.functions import sedona_vectorized_udf, SedonaUDFType
 from tests import chicago_crimes_input_location
 from tests.test_base import TestBase
@@ -107,7 +110,7 @@ def test_vectorized_udf_preserves_null_geometries(geometries, udf_type):
     udf = (
         translate_batch if udf_type == SedonaUDFType.GEO_SERIES else translate_geometry
     )
-    encoded = pd.Series([geometry_serde.serialize(geom) for geom in geometries])
+    encoded = pd.Series([serialize_geometry(geom) for geom in geometries])
     result = udf.func(encoded)
     arrow_result = pa.Array.from_pandas(result, type=pa.binary())
     assert arrow_result.to_pylist() == list(result)
@@ -117,8 +120,13 @@ def test_vectorized_udf_preserves_null_geometries(geometries, udf_type):
     for actual, geometry in zip(result, expected):
         if geometry is None:
             assert actual is None
+        elif geometry.is_empty:
+            # Shapely 1.x Point() internally holds an empty GeometryCollection.
+            decoded = deserialize_geometry(actual)
+            assert decoded.is_empty
+            assert decoded.geom_type == type(geometry).__name__
         else:
-            assert geometry_serde.deserialize(actual)[0].equals_exact(geometry, 0)
+            assert deserialize_geometry(actual).equals_exact(geometry, 0)
 
 
 def test_shapely_scalar_udf_passes_null_to_callback():
@@ -127,7 +135,7 @@ def test_shapely_scalar_udf_passes_null_to_callback():
         return Point(9, 10) if geom is None else geom
 
     result = replace_null.func(pd.Series([None]))
-    assert geometry_serde.deserialize(result.iloc[0])[0].equals_exact(Point(9, 10), 0)
+    assert deserialize_geometry(result.iloc[0]).equals_exact(Point(9, 10), 0)
 
 
 class TestSedonaArrowUDF(TestBase):

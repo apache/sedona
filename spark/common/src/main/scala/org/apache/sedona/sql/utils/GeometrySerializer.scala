@@ -18,11 +18,14 @@
  */
 package org.apache.sedona.sql.utils
 
-import org.apache.sedona.common.geometrySerde
+import org.apache.sedona.common.Constructors
+import org.apache.sedona.common.geometrySerde.{GeometrySerializer => LayoutPolicy}
+import org.apache.sedona.common.utils.GeomUtils
 import org.locationtech.jts.geom.{Geometry, GeometryFactory}
 
 /**
- * SerDe using the WKB reader and writer objects
+ * SQL geometry transport using public EWKB. RDD/index serializers use their separate compact
+ * format.
  */
 object GeometrySerializer {
 
@@ -32,17 +35,30 @@ object GeometrySerializer {
    * @param geometry
    *   JTS geometry
    * @return
-   *   Array of bites represents this geometry
+   *   EWKB bytes preserving coordinate dimensions and SRID
    */
   def serialize(geometry: Geometry): Array[Byte] = {
-    geometrySerde.GeometrySerializer.serialize(geometry)
+    validateLayout(geometry)
+    GeomUtils.getEWKB(geometry)
+  }
+
+  // Preserve the existing layout contract without using compact byte serialization.
+  // General collections have independent member layouts; polygons and multipart values do not.
+  private def validateLayout(geometry: Geometry): Unit = {
+    if (geometry != null) {
+      if (geometry.getGeometryType == "GeometryCollection") {
+        (0 until geometry.getNumGeometries).foreach(i => validateLayout(geometry.getGeometryN(i)))
+      } else {
+        LayoutPolicy.getCoordinateType(geometry)
+      }
+    }
   }
 
   /**
-   * Given ArrayData returns Geometry
+   * Given EWKB bytes returns Geometry
    *
    * @param value
-   *   ArrayData
+   *   EWKB bytes
    * @return
    *   JTS geometry
    */
@@ -50,6 +66,6 @@ object GeometrySerializer {
     if (value == null) {
       return new GeometryFactory().createGeometryCollection()
     }
-    geometrySerde.GeometrySerializer.deserialize(value)
+    Constructors.geomFromWKB(value)
   }
 }
