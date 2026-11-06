@@ -56,8 +56,6 @@ import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.gml2.GMLWriter;
 import org.locationtech.jts.io.kml.KMLWriter;
 import org.locationtech.jts.linearref.LengthIndexedLine;
-import org.locationtech.jts.linearref.LinearLocation;
-import org.locationtech.jts.linearref.LocationIndexedLine;
 import org.locationtech.jts.operation.buffer.BufferOp;
 import org.locationtech.jts.operation.buffer.BufferParameters;
 import org.locationtech.jts.operation.buffer.OffsetCurve;
@@ -3174,23 +3172,33 @@ public class Functions {
               geom1.getSRID(), geom2.getSRID()));
     }
 
-    LineString line = (LineString) geom1;
-    Point point = (Point) geom2;
+    CoordinateSequence coordinates = ((LineString) geom1).getCoordinateSequence();
+    Coordinate target = geom2.getCoordinate();
 
-    // Locate the closest point on the line (the first one along the line if there is a tie)
-    LinearLocation location = new LocationIndexedLine(line).project(point.getCoordinate());
-
-    // Interpolate the M value between the two vertices of the segment containing that point.
-    // Measures need not be proportional to length, so the line's first and last measures alone
-    // are not enough.
-    CoordinateSequence coordinates = line.getCoordinateSequence();
-    int segmentIndex = location.getSegmentIndex();
-    if (segmentIndex >= coordinates.size() - 1) {
-      return coordinates.getM(coordinates.size() - 1);
+    // Find the segment closest to the point, keeping the first one along the line on a tie, so a
+    // stationary track (a zero-length segment) keeps the measure of its first vertex
+    LineSegment segment = new LineSegment();
+    int closestIndex = 0;
+    double closestFraction = 0;
+    double closestDistance = Double.POSITIVE_INFINITY;
+    for (int i = 0; i < coordinates.size() - 1; i++) {
+      segment.setCoordinates(coordinates.getCoordinate(i), coordinates.getCoordinate(i + 1));
+      double distance = segment.distance(target);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestIndex = i;
+        closestFraction =
+            segment.getLength() == 0
+                ? 0
+                : Math.max(0, Math.min(1, segment.projectionFactor(target)));
+      }
     }
-    double startM = coordinates.getM(segmentIndex);
-    double endM = coordinates.getM(segmentIndex + 1);
-    return startM + location.getSegmentFraction() * (endM - startM);
+
+    // Interpolate the M value between the two vertices of that segment. Measures need not be
+    // proportional to length, so the line's first and last measures alone are not enough.
+    double startM = coordinates.getM(closestIndex);
+    double endM = coordinates.getM(closestIndex + 1);
+    return startM + closestFraction * (endM - startM);
   }
 
   /**

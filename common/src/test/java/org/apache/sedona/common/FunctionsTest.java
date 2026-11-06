@@ -6037,6 +6037,15 @@ public class FunctionsTest extends TestBase {
     line = Constructors.geomFromEWKT("LINESTRING ZM (0 0 5 100, 10 0 5 90, 10 10 5 0)");
     assertEquals(
         45.0, Functions.interpolatePoint(line, Constructors.geomFromEWKT("POINT (10 5)")), 1e-9);
+
+    // A stationary track (zero-length segment) keeps the measure of the first closest vertex
+    line = Constructors.geomFromEWKT("LINESTRING M (0 0 0, 0 0 10, 10 0 20)");
+    assertEquals(
+        0.0, Functions.interpolatePoint(line, Constructors.geomFromEWKT("POINT (0 1)")), 1e-9);
+    assertEquals(
+        0.0, Functions.interpolatePoint(line, Constructors.geomFromEWKT("POINT (-1 0)")), 1e-9);
+    assertEquals(
+        15.0, Functions.interpolatePoint(line, Constructors.geomFromEWKT("POINT (5 1)")), 1e-9);
   }
 
   @Test
