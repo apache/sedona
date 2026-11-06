@@ -21,7 +21,6 @@ import itertools
 import typing
 from typing import Any, Callable, Iterable, List, Mapping, Tuple, Type, Union
 
-from pyspark import SparkContext
 from pyspark.sql import Column, SparkSession
 from pyspark.sql import functions as f
 
@@ -70,6 +69,9 @@ def call_sedona_function(
         return call_sedona_function_connect(function_name, args)
 
     args = map(_convert_argument_to_java_column, args)
+
+    # Only here: pyspark-client (Spark Connect only) has no SparkContext.
+    from pyspark import SparkContext
 
     jvm = SparkContext._jvm
     if jvm is None:

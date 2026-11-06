@@ -16,7 +16,6 @@
 # under the License.
 
 import attr
-from py4j.java_gateway import java_import
 from pyspark.sql import SparkSession
 
 from sedona.spark.core.jvm.config import deprecated
@@ -62,6 +61,9 @@ class PackageImporter:
         :param jvm: Jvm gateway from py4j
         :return:
         """
+        # Only here: pyspark-client (Spark Connect only) does not ship py4j.
+        from py4j.java_gateway import java_import
+
         for lib in SedonaJvmLib:
             java_import(jvm, lib.value)
             ImportedJvmLib.import_lib(lib.name)
