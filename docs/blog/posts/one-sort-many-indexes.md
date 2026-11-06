@@ -13,11 +13,11 @@ slug: one-sort-many-indexes
 
 # One Sort, Many Indexes: Spatial Correlation in GeoParquet
 
-*SedonaDB, GeoParquet, and a story that continued at SIGMOD 2019.*
+*SedonaDB, GeoParquet, and a story that continued at SIGMOD 2019, now in Rust.*
 
 A GeoParquet file has one row order and many columns. In September, [ORDER BY Is an Index](https://sedona.apache.org/latest/blog/2026/09/18/order-by-is-an-index-does-it-have-to-be/) showed that the order is the index, and this post shows that one sort indexes every column that follows the map. Sort 3,036,650 Washington addresses by geometry, and the postcode column gets an index for free. Sort by postcode, and the map gets one. SedonaDB 0.5.0, a database written in Rust, wrote the files and read the footers. The idea comes from [HERMIT](https://dl.acm.org/doi/10.1145/3299869.3319861), which Jia Yu, the original creator of Apache Sedona, co-authored at SIGMOD 2019, one of the top three database conferences alongside VLDB and ICDE.
 
-![The title on the left above three index cards for row group 15: postcode 98101 to 98199, city SEATTLE to SEATTLE, bbox -122.43 to -122.28 and 47.61 to 47.71; on the right a map of Washington State made of addresses, one color per row group, with the Seattle row group ringed in orange](one-sort-many-indexes-cover.png)
+![The title on the left, with Ferris the Rust crab after the subtitle, above three index cards for row group 15: postcode 98101 to 98199, city SEATTLE to SEATTLE, bbox -122.43 to -122.28 and 47.61 to 47.71; on the right a map of Washington State made of addresses, one color per row group, with the Seattle row group ringed in orange](one-sort-many-indexes-cover.png)
 
 <!-- more -->
 
