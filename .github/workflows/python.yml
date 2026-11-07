@@ -200,3 +200,13 @@ jobs:
             uv pip install "pyspark[connect]==${{ matrix.spark }}" --reinstall
             uv run pytest -v tests/sql/test_dataframe_api.py
           fi
+      - name: Run Spark Connect-only tests
+        # pyspark-client is the Spark Connect-only distribution (Spark 4.0+): no RDD API, no JVM.
+        # sedona.spark must import there; the tests under tests/connect_only skip everywhere else.
+        if: ${{ !startsWith(matrix.spark, '3.') }}
+        run: |
+          cd python
+          uv pip uninstall pyspark
+          uv pip install "pyspark-client==${{ matrix.spark }}"
+          uv run --no-sync python -c "from pyspark.util import is_remote_only; assert is_remote_only()"
+          uv run --no-sync pytest -v tests/connect_only
