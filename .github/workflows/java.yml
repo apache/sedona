@@ -62,6 +62,11 @@ jobs:
       fail-fast: true
       matrix:
         include:
+          - spark: 4.2.0
+            scala: 2.13.18
+            jdk: '17'
+            nativeSpatial: true
+            skipLibPostalTests: 'true'
           - spark: 4.1.1
             scala: 2.13.17
             jdk: '17'
@@ -143,6 +148,8 @@ jobs:
           SKIP_TESTS: ${{ matrix.skipTests }}
           SEDONA_SKIP_LIBPOSTAL_TESTS: ${{ matrix.skipLibPostalTests }}
           FLINK_VERSION: ${{ matrix.flinkVersion }}
+          PYTHONPATH: ${{ github.workspace }}/python
+          NATIVE_SPATIAL: ${{ matrix.nativeSpatial }}
         run: |
           SPARK_COMPAT_VERSION="${SPARK_VERSION:0:3}"
 
@@ -159,7 +166,25 @@ jobs:
           if [[ -n "${SKIP_TESTS}" ]]; then
               mvn_args+=("${SKIP_TESTS}")
           fi
-          mvn "${mvn_args[@]}"
+          if [[ "${NATIVE_SPATIAL}" == "true" ]]; then
+              # Compile/package the complete native reactor before testing its boundaries.
+              mvn "${mvn_args[@]}" -DskipTests
+              native_args=(-q "-Dspark=${SPARK_COMPAT_VERSION}" "-Dscala=${SCALA_VERSION:0:4}" "-Dspark.version=${SPARK_VERSION}")
+              # The shared suite includes explicit UDT controls and registration/metadata contracts.
+              suites=org.apache.sedona.sql.UDF.NativeFunctionRegistrationTest
+              suites+=,org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetNativeCrsTest
+              suites+=,org.apache.sedona.sql.SpatialIOBoundaryCompatibilityTest
+              suites+=,org.apache.sedona.sql.SqlGeometrySerializerSuite
+              suites+=,org.apache.sedona.sql.SpatialAdapterBoundaryTest
+              suites+=,org.apache.spark.sql.sedona_sql.strategy.join.LegacyGeographyDistanceJoinSuite
+              suites+=,org.apache.sedona.sql.SpatialTestValuesTest
+              suites+=,org.apache.sedona.sql.KnnShapeBindingTest
+              mvn "${native_args[@]}" -pl spark/common test "-Dsuites=${suites}"
+              # Do not pass -Dsuites here: discover every native version-module suite.
+              mvn "${native_args[@]}" -pl spark/spark-4.2 test
+          else
+              mvn "${mvn_args[@]}"
+          fi
       - run: mkdir staging
       - run: cp spark-shaded/target/sedona-*.jar staging
       - run: |

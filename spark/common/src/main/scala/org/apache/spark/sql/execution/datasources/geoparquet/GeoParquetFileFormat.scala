@@ -38,7 +38,7 @@ import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeProjectio
 import org.apache.spark.sql.catalyst.parser.LegacyTypeStringParser
 import org.apache.spark.sql.catalyst.util.DateTimeUtils
 import org.apache.spark.sql.execution.datasources.{FileFormat, OutputWriter, OutputWriterFactory, PartitionedFile, RecordReaderIterator}
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.sources.{DataSourceRegister, Filter}
 import org.apache.spark.sql.types._
 import org.apache.spark.util.SerializableConfiguration
@@ -373,12 +373,41 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
     }
   }
 
-  override def supportDataType(dataType: DataType): Boolean = super.supportDataType(dataType)
+  override def supportDataType(dataType: DataType): Boolean = dataType match {
+    // Explicit ANY read schemas preserve per-file CRSs. prepareWrite rejects ANY outputs.
+    case dt if SpatialTypeSupport.isNativeGeometry(dt) => true
+    case dt if SpatialTypeSupport.isNativeGeography(dt) => false
+    case StructType(fields) => fields.forall(field => supportDataType(field.dataType))
+    case ArrayType(elementType, _) => supportDataType(elementType)
+    case MapType(keyType, valueType, _) => supportDataType(keyType) && supportDataType(valueType)
+    case other => super.supportDataType(other)
+  }
 
   override def supportBatch(sparkSession: SparkSession, schema: StructType): Boolean = false
 }
 
 object GeoParquetFileFormat extends Logging {
+
+  /** Merge only column CRS declarations, so mergeSchema=false still checks every data file. */
+  private[geoparquet] def mergeGeometrySchemasInParallel(
+      parameters: Map[String, String],
+      filesToTouch: Seq[FileStatus],
+      sparkSession: SparkSession): Option[StructType] = {
+    val reader = (files: Seq[FileStatus], conf: Configuration, ignoreCorruptFiles: Boolean) => {
+      ParquetFileFormat.readParquetFootersInParallel(conf, files, ignoreCorruptFiles).map {
+        footer =>
+          val metadata = GeoParquetUtils.parseGeoParquetMetaData(
+            footer.getParquetMetadata.getFileMetaData.getKeyValueMetaData,
+            parameters)
+          StructType(metadata.columns.toSeq.sortBy(_._1).map { case (name, column) =>
+            StructField(
+              name,
+              SpatialTypeSupport.geometryType(GeoParquetNativeCrs.readSrid(name, column.crs)))
+          })
+      }
+    }
+    SchemaMergeUtils.mergeSchemasInParallel(sparkSession, parameters, filesToTouch, reader)
+  }
 
   /**
    * Figures out a merged Parquet schema with a distributed Spark job.
@@ -454,11 +483,10 @@ object GeoParquetFileFormat extends Logging {
       }
       .toOption
 
-    schemaOpt.map(schema =>
-      replaceGeometryColumnWithGeometryUDT(schema, keyValueMetaData, parameters))
+    schemaOpt.map(schema => replaceGeometryColumnType(schema, keyValueMetaData, parameters))
   }
 
-  private def replaceGeometryColumnWithGeometryUDT(
+  private def replaceGeometryColumnType(
       schema: StructType,
       keyValueMetaData: java.util.Map[String, String],
       parameters: Map[String, String]): StructType = {
@@ -467,7 +495,11 @@ object GeoParquetFileFormat extends Logging {
     val fields = schema.fields.map { field =>
       field.dataType match {
         case _: BinaryType if geoParquetMetaData.columns.contains(field.name) =>
-          field.copy(dataType = GeometryUDT())
+          field.copy(dataType = SpatialTypeSupport.geometryType(
+            if (SpatialTypeSupport.usesNativeTypes)
+              GeoParquetNativeCrs.readSrid(field.name, geoParquetMetaData.columns(field.name).crs)
+            else
+              GeoParquetMetaData.extractSridFromCrs(geoParquetMetaData.columns(field.name).crs)))
         case _ => field
       }
     }

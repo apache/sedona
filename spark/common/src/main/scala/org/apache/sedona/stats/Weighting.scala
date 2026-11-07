@@ -107,7 +107,7 @@ object Weighting {
         col(s"r.$geometryColumn")) > 0
     }
 
-    val formattedDataFrame = dataframe.withColumn(ID_COLUMN, sha2(to_json(struct("*")), 256))
+    val formattedDataFrame = dataframe.withColumn(ID_COLUMN, SpatialRowHash(dataframe.schema))
 
     val spatiallyJoined = formattedDataFrame
       .alias("l")

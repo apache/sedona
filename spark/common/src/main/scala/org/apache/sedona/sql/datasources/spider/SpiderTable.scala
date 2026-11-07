@@ -22,7 +22,7 @@ import org.apache.spark.sql.connector.catalog.SupportsRead
 import org.apache.spark.sql.connector.catalog.Table
 import org.apache.spark.sql.connector.catalog.TableCapability
 import org.apache.spark.sql.connector.read.ScanBuilder
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
@@ -50,5 +50,5 @@ class SpiderTable(
 
 object SpiderTable {
   val SCHEMA: StructType = StructType(
-    Seq(StructField("id", LongType), StructField("geometry", GeometryUDT())))
+    Seq(StructField("id", LongType), StructField("geometry", SpatialTypeSupport.geometryType)))
 }

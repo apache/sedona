@@ -22,7 +22,7 @@ import shapely
 from shapely import wkb, wkt
 from shapely.geometry import LineString, Point, Polygon
 
-from sedona.spark.sql.types import GeometryType
+from sedona.spark.sql.types import LegacyGeometryType as GeometryType
 from sedona.spark.utils import geometry_wkb
 
 HAS_M = hasattr(shapely, "has_m") and shapely.geos_version >= (3, 12, 0)

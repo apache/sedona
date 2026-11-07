@@ -52,6 +52,7 @@ import org.apache.spark.sql.sedona_sql.UDT.{Box2DUDT, Box3DUDT, GeometryUDT}
 import org.apache.spark.sql.sedona_sql.expressions.{ST_AsEWKT, ST_Buffer, ST_Contains, ST_CoveredBy, ST_Covers, ST_Crosses, ST_DWithin, ST_Distance, ST_DistanceSphere, ST_DistanceSpheroid, ST_Equals, ST_Intersects, ST_OrderingEquals, ST_Overlaps, ST_Touches, ST_Within}
 import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils.splitConjunctivePredicates
 import org.apache.spark.sql.types.DoubleType
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.geom.Point
 
@@ -89,15 +90,21 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
 
   def translateToGeoParquetSpatialFilters(
       predicates: Seq[Expression]): Seq[GeoParquetSpatialFilter] = {
-    val pushableColumn = PushableColumn(nestedPredicatePushdownEnabled = false)
+    val pushableColumn = new SpatialPushableColumn(
+      PushableColumn(nestedPredicatePushdownEnabled = false))
     predicates.flatMap { predicate =>
       translateToGeoParquetSpatialFilter(predicate, pushableColumn)
     }
   }
 
+  private class SpatialPushableColumn(underlying: PushableColumnBase) {
+    def unapply(expression: Expression): Option[String] =
+      underlying.unapply(SpatialTypeSupport.unwrapGeometryInput(expression))
+  }
+
   private def translateToGeoParquetSpatialFilter(
       predicate: Expression,
-      pushableColumn: PushableColumnBase): Option[GeoParquetSpatialFilter] = {
+      pushableColumn: SpatialPushableColumn): Option[GeoParquetSpatialFilter] = {
     predicate match {
       case And(left, right) =>
         val spatialFilterLeft = translateToGeoParquetSpatialFilter(left, pushableColumn)
@@ -310,7 +317,7 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
 
   private def resolveNameAndLiteral(
       expressions: Seq[Expression],
-      pushableColumn: PushableColumnBase): Option[(String, Any)] = {
+      pushableColumn: SpatialPushableColumn): Option[(String, Any)] = {
     expressions match {
       case Seq(pushableColumn(name), Literal(v, _)) => Some(name, v)
       case Seq(Literal(v, _), pushableColumn(name)) => Some(name, v)

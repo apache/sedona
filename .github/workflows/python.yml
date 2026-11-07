@@ -60,6 +60,11 @@ jobs:
     strategy:
       matrix:
         include:
+          - spark: '4.2.0'
+            scala: '2.13.18'
+            java: '17'
+            python: '3.11'
+            nativeSpatial: true
           - spark: '4.1.1'
             scala: '2.13.8'
             java: '17'
@@ -102,11 +107,12 @@ jobs:
           SCALA_VERSION: ${{ matrix.scala }}
         run: |
           SPARK_COMPAT_VERSION="${SPARK_VERSION:0:3}"
-          mvn -q clean install -DskipTests -Dspark="${SPARK_COMPAT_VERSION}" -Dscala="${SCALA_VERSION:0:4}" -Dgeotools
+          mvn -q clean install -DskipTests -Dspark="${SPARK_COMPAT_VERSION}" -Dscala="${SCALA_VERSION:0:4}" -Dspark.version="${SPARK_VERSION}" -Dgeotools
       - name: Setup Python build environment
         env:
           SPARK_VERSION: ${{ matrix.spark }}
           SHAPELY_VERSION: ${{ matrix.shapely }}
+          NATIVE_SPATIAL: ${{ matrix.nativeSpatial }}
         run: |
           cd python
 
@@ -118,7 +124,13 @@ jobs:
           if [ "${SPARK_VERSION:0:1}" == "4" ]; then
             # Spark 4.x requires Python 3.10+, and we remove flink since it conflicts with pyspark 4.x
             uv remove apache-flink --optional flink
-            uv add "pyspark==${SPARK_VERSION}; python_version >= '3.10'"
+            if [ "${NATIVE_SPATIAL}" == "true" ]; then
+              uv add "pyspark[connect]==${SPARK_VERSION}; python_version >= '3.10'"
+              # The native dimension matrix includes M/ZM, supported by Shapely 2.1.
+              uv add --dev "shapely>=2.1"
+            else
+              uv add "pyspark==${SPARK_VERSION}; python_version >= '3.10'"
+            fi
           else
             # Install specific pyspark version matching matrix
             uv add "pyspark==${SPARK_VERSION}"
@@ -146,13 +158,25 @@ jobs:
         run: |
           PY_SITE=$(cd python; uv run python -c "import site; print(site.getsitepackages()[0])")
           find spark-shaded/target -name 'sedona-*.jar' -exec cp {} "${PY_SITE}/pyspark/jars/" \;
+      - name: Run native pure Python boundary tests
+        if: ${{ matrix.nativeSpatial }}
+        run: |
+          cd python
+          uv run pytest -v tests/utils/test_native_python_values.py tests/utils/test_geometry_sql_serde.py tests/utils/test_geography_sql_serde.py
       - name: Run tests
+        env:
+          NATIVE_SPATIAL: ${{ matrix.nativeSpatial }}
         run: |
           cd python
           SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
           export SPARK_HOME
-          uv run pytest -v tests
+          if [ "${NATIVE_SPATIAL}" == "true" ]; then
+            uv run pytest -v tests/sql/test_native_spatial.py tests/geopandas/test_native_spatial.py
+          else
+            uv run pytest -v tests
+          fi
       - name: Run basic tests without rasterio
+        if: ${{ !matrix.nativeSpatial }}
         run: |
           cd python
           SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
@@ -162,10 +186,17 @@ jobs:
           uv sync
           uv run pytest -v tests/core/test_rdd.py tests/sql/test_dataframe_api.py
       - name: Run Spark Connect tests
+        env:
+          NATIVE_SPATIAL: ${{ matrix.nativeSpatial }}
         run: |
           cd python
           export SPARK_REMOTE=local
           SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
           export SPARK_HOME
-          uv pip install "pyspark[connect]==${{ matrix.spark }}" --reinstall
-          uv run pytest -v tests/sql/test_dataframe_api.py
+          if [ "${NATIVE_SPATIAL}" == "true" ]; then
+            # Connect extras were installed before adding the freshly built Sedona jar.
+            uv run pytest -v tests/sql/test_native_spatial.py
+          else
+            uv pip install "pyspark[connect]==${{ matrix.spark }}" --reinstall
+            uv run pytest -v tests/sql/test_dataframe_api.py
+          fi

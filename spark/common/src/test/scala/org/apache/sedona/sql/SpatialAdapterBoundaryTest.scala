@@ -24,6 +24,7 @@ import org.apache.sedona.sql.utils.Adapter
 import org.apache.sedona.util.DfUtils
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.sedona_sql.UDT.{GeographyUDT, GeometryUDT}
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.sedona_sql.adapters.StructuredAdapter
 import org.apache.spark.sql.types._
 import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory, PrecisionModel}
@@ -42,11 +43,11 @@ class SpatialAdapterBoundaryTest extends TestBaseScala {
       assert(
         frame.schema == StructType(
           Seq(
-            StructField("geometry", GeometryUDT()),
+            StructField("geometry", SpatialTypeSupport.geometryType),
             StructField("label", StringType),
             StructField("empty", StringType))))
       val row = frame.head()
-      assert(row.getAs[Geometry](0).getSRID == 4326)
+      assert(SpatialTestValues.geometry(row, 0).getSRID == 4326)
       assert(row.getString(1) == "alpha")
       assert(row.getString(2) == "")
       val restored = Adapter.toSpatialRdd(frame, "geometry").rawSpatialRDD.first()

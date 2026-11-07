@@ -19,6 +19,8 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.spark.sql.Column
+import org.apache.spark.sql.functions.{col, lit}
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.sedona_sql.DataFrameShims.{wrapExpression, _}
 import org.apache.spark.sql.sedona_sql.expressions.geography.{ST_GeogCollFromText, ST_GeogFromEWKB, ST_GeogFromEWKT, ST_GeogFromGeoHash, ST_GeogFromText, ST_GeogFromWKB, ST_GeogFromWKT, ST_GeogToGeometry, ST_GeomToGeography}
 
@@ -101,8 +103,9 @@ object st_constructors {
   def ST_GeomFromEWKT(wkt: Column): Column = wrapExpression[ST_GeomFromEWKT](wkt)
   def ST_GeomFromEWKT(wkt: String): Column = wrapExpression[ST_GeomFromEWKT](wkt)
 
-  def ST_GeogFromWKT(wkt: Column): Column = wrapExpression[ST_GeogFromWKT](wkt, 0)
-  def ST_GeogFromWKT(wkt: String): Column = wrapExpression[ST_GeogFromWKT](wkt, 0)
+  def ST_GeogFromWKT(wkt: Column): Column =
+    wrapExpression[ST_GeogFromWKT](wkt, if (SpatialTypeSupport.usesNativeTypes) 4326 else 0)
+  def ST_GeogFromWKT(wkt: String): Column = ST_GeogFromWKT(col(wkt))
   def ST_GeogFromWKT(wkt: Column, srid: Column): Column =
     wrapExpression[ST_GeogFromWKT](wkt, srid)
   def ST_GeogFromWKT(wkt: String, srid: Int): Column = wrapExpression[ST_GeogFromWKT](wkt, srid)
@@ -110,17 +113,28 @@ object st_constructors {
   def ST_GeogFromEWKT(wkt: Column): Column = wrapExpression[ST_GeogFromEWKT](wkt)
   def ST_GeogFromEWKT(wkt: String): Column = wrapExpression[ST_GeogFromEWKT](wkt)
 
-  def ST_GeogFromText(wkt: Column): Column = wrapExpression[ST_GeogFromText](wkt, 0)
-  def ST_GeogFromText(wkt: String): Column = wrapExpression[ST_GeogFromText](wkt, 0)
+  def ST_GeogFromText(wkt: Column): Column =
+    wrapExpression[ST_GeogFromText](wkt, if (SpatialTypeSupport.usesNativeTypes) 4326 else 0)
+  def ST_GeogFromText(wkt: String): Column = ST_GeogFromText(col(wkt))
   def ST_GeogFromText(wkt: Column, srid: Column): Column =
     wrapExpression[ST_GeogFromText](wkt, srid)
   def ST_GeogFromText(wkt: String, srid: Int): Column = wrapExpression[ST_GeogFromText](wkt, srid)
 
-  def ST_GeogFromWKB(wkb: Column): Column = wrapExpression[ST_GeogFromWKB](wkb, 0)
-  def ST_GeogFromWKB(wkb: String): Column = wrapExpression[ST_GeogFromWKB](wkb, 0)
+  def ST_GeogFromWKB(wkb: Column): Column =
+    if (SpatialTypeSupport.usesNativeTypes) wrapExpression[ST_GeogFromWKB](wkb)
+    else wrapExpression[ST_GeogFromWKB](wkb, 0)
+
+  def ST_GeogFromWKB(wkb: String): Column = ST_GeogFromWKB(col(wkb))
+
   def ST_GeogFromWKB(wkb: Column, srid: Column): Column =
-    wrapExpression[ST_GeogFromWKB](wkb, srid)
-  def ST_GeogFromWKB(wkb: String, srid: Int): Column = wrapExpression[ST_GeogFromWKB](wkb, srid)
+    if (SpatialTypeSupport.usesNativeTypes) {
+      // Spark's native geography constructor is unary and defaults to SRID 4326.
+      st_functions.ST_SetSRID(ST_GeogFromWKB(wkb), srid)
+    } else {
+      wrapExpression[ST_GeogFromWKB](wkb, srid)
+    }
+
+  def ST_GeogFromWKB(wkb: String, srid: Int): Column = ST_GeogFromWKB(col(wkb), lit(srid))
 
   def ST_GeogFromEWKB(wkb: Column): Column = wrapExpression[ST_GeogFromEWKB](wkb)
   def ST_GeogFromEWKB(wkb: String): Column = wrapExpression[ST_GeogFromEWKB](wkb)
@@ -302,8 +316,9 @@ object st_constructors {
   def ST_GeomCollFromText(wkt: String, srid: Int): Column =
     wrapExpression[ST_GeomCollFromText](wkt, srid)
 
-  def ST_GeogCollFromText(wkt: Column): Column = wrapExpression[ST_GeogCollFromText](wkt, 0)
-  def ST_GeogCollFromText(wkt: String): Column = wrapExpression[ST_GeogCollFromText](wkt, 0)
+  def ST_GeogCollFromText(wkt: Column): Column =
+    wrapExpression[ST_GeogCollFromText](wkt, if (SpatialTypeSupport.usesNativeTypes) 4326 else 0)
+  def ST_GeogCollFromText(wkt: String): Column = ST_GeogCollFromText(col(wkt))
   def ST_GeogCollFromText(wkt: Column, srid: Column): Column =
     wrapExpression[ST_GeogCollFromText](wkt, srid)
   def ST_GeogCollFromText(wkt: String, srid: Int): Column =

@@ -1628,17 +1628,17 @@ class functionTestScala
       val points = pointDF
         .selectExpr("ST_StartPoint(geom) as geom")
         .filter("geom IS NOT NULL")
-        .toSeq[Geometry]
+        .toGeometrySeq
 
       val polygons = polygonDF
         .selectExpr("ST_StartPoint(geom) as geom")
         .filter("geom IS NOT NULL")
-        .toSeq[Geometry]
+        .toGeometrySeq
 
       val linestrings = lineStringDF
         .selectExpr("ST_StartPoint(geom) as geom")
         .filter("geom IS NOT NULL")
-        .toSeq[Geometry]
+        .toGeometrySeq
 
       Then("Linestring should result in list of points")
       linestrings should contain theSameElementsAs expectedStartingPoints.map(_.toGeom)

@@ -21,7 +21,14 @@ from enum import Enum
 
 import pandas as pd
 
-from sedona.spark.sql.types import GeometryType
+from sedona.spark.sql.types import (
+    GeometryType,
+    GeographyType,
+    USES_NATIVE_SPATIAL_TYPES,
+    to_shapely,
+    to_spark_geometry,
+    to_spark_geography,
+)
 from sedona.spark.utils.geometry_sql_serde import (
     deserialize_geometry,
     serialize_geometry,
@@ -75,6 +82,9 @@ def sedona_vectorized_udf(
             if issubclass(param.annotation, gpd.GeoSeries):
                 deserialize_geom = True
 
+        if USES_NATIVE_SPATIAL_TYPES:
+            return _apply_native_series_udf(fn, return_type, udf_type, deserialize_geom)
+
         if udf_type == SedonaUDFType.SHAPELY_SCALAR:
             return _apply_shapely_series_udf(
                 fn, return_type, serialize_geom, deserialize_geom
@@ -88,6 +98,36 @@ def sedona_vectorized_udf(
         raise InvalidSedonaUDFType(f"Invalid UDF type: {udf_type}")
 
     return apply_fn
+
+
+def _apply_native_series_udf(fn, return_type, udf_type, deserialize_geom):
+    """Use Spark's pandas UDF transport for its own native spatial values."""
+    import geopandas as gpd
+    from pyspark.sql.functions import pandas_udf, PandasUDFType
+
+    if udf_type not in (SedonaUDFType.SHAPELY_SCALAR, SedonaUDFType.GEO_SERIES):
+        raise InvalidSedonaUDFType(f"Invalid UDF type: {udf_type}")
+
+    def apply(series):
+        values = series.map(to_shapely) if deserialize_geom else series
+        if udf_type == SedonaUDFType.GEO_SERIES:
+            output = fn(gpd.GeoSeries(values) if deserialize_geom else values)
+        else:
+            output = values.map(fn)
+        if isinstance(return_type, (GeometryType, GeographyType)):
+            convert = (
+                to_spark_geometry
+                if isinstance(return_type, GeometryType)
+                else to_spark_geography
+            )
+            # Empty/all-null GeoSeries retain geometry dtype after map(). Spark
+            # native values need an ordinary object Series at its Arrow boundary.
+            return pd.Series(
+                [convert(value) for value in output], index=output.index, dtype=object
+            )
+        return output
+
+    return pandas_udf(apply, return_type, PandasUDFType.SCALAR)
 
 
 def _apply_shapely_series_udf(
