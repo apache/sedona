@@ -280,13 +280,9 @@ def infer_schema(gdf: "gpd.GeoDataFrame") -> StructType:
 
     fields = gdf.dtypes.reset_index().values.tolist()
     geom_fields = []
-    index = 0
-    for name, dtype in fields:
+    for index, (name, dtype) in enumerate(fields):
         if dtype == "geometry":
             geom_fields.append((index, name))
-            continue
-
-        index += 1
 
     if not geom_fields:
         raise ValueError("No geometry field found in the GeoDataFrame")
