@@ -16,8 +16,16 @@
 # under the License.
 
 
-from sedona.spark.sql.types import GeometryType
-from sedona.spark.utils import geometry_serde
+from sedona.spark.sql.types import (
+    geometry_type,
+    USES_NATIVE_SPATIAL_TYPES,
+    to_spark_geometry,
+    to_shapely,
+)
+from sedona.spark.utils.geometry_sql_serde import (
+    deserialize_geometry,
+    serialize_geometry,
+)
 from sedona.spark.sql.functions import sedona_vectorized_udf, SedonaUDFType
 from tests import chicago_crimes_input_location
 from tests.test_base import TestBase
@@ -39,7 +47,7 @@ def non_vectorized_buffer_udf(geom: b.BaseGeometry) -> b.BaseGeometry:
     return geom.buffer(0.1)
 
 
-@sedona_vectorized_udf(return_type=GeometryType())
+@sedona_vectorized_udf(return_type=geometry_type())
 def vectorized_buffer_udf(geom: b.BaseGeometry) -> b.BaseGeometry:
     return geom.buffer(0.1)
 
@@ -54,7 +62,7 @@ def vectorized_geom_to_numeric_udf_child_geom(geom: Point) -> float:
     return geom.x
 
 
-@sedona_vectorized_udf(return_type=GeometryType())
+@sedona_vectorized_udf(return_type=geometry_type())
 def vectorized_numeric_to_geom(x: float) -> b.BaseGeometry:
     return Point(x, x)
 
@@ -66,17 +74,17 @@ def vectorized_series_to_numeric_udf(series: gpd.GeoSeries) -> pd.Series:
     return buffered
 
 
-@sedona_vectorized_udf(udf_type=SedonaUDFType.GEO_SERIES, return_type=GeometryType())
+@sedona_vectorized_udf(udf_type=SedonaUDFType.GEO_SERIES, return_type=geometry_type())
 def vectorized_series_string_to_geom(x: pd.Series) -> b.BaseGeometry:
     return x.apply(lambda x: loads(str(x)))
 
 
-@sedona_vectorized_udf(udf_type=SedonaUDFType.GEO_SERIES, return_type=GeometryType())
+@sedona_vectorized_udf(udf_type=SedonaUDFType.GEO_SERIES, return_type=geometry_type())
 def vectorized_series_string_to_geom_2(x: pd.Series):
     return x.apply(lambda x: loads(str(x)))
 
 
-@sedona_vectorized_udf(udf_type=SedonaUDFType.GEO_SERIES, return_type=GeometryType())
+@sedona_vectorized_udf(udf_type=SedonaUDFType.GEO_SERIES, return_type=geometry_type())
 def vectorized_series_buffer_udf(series: gpd.GeoSeries) -> gpd.GeoSeries:
     buffered = series.buffer(0.1)
 
@@ -88,46 +96,71 @@ def squared_udf(s: pd.Series) -> pd.Series:
     return s**2  # Perform vectorized operation
 
 
-buffer_distanced_udf = f.udf(non_vectorized_buffer_udf, GeometryType())
+buffer_distanced_udf = f.udf(non_vectorized_buffer_udf, geometry_type())
 
 
 @pytest.mark.parametrize("udf_type", list(SedonaUDFType))
 @pytest.mark.parametrize("geometries", [[Point(1, 2), None, Point()], [None], []])
 def test_vectorized_udf_preserves_null_geometries(geometries, udf_type):
     @sedona_vectorized_udf(
-        udf_type=SedonaUDFType.GEO_SERIES, return_type=GeometryType()
+        udf_type=SedonaUDFType.GEO_SERIES, return_type=geometry_type()
     )
     def translate_batch(series: gpd.GeoSeries) -> gpd.GeoSeries:
         return series.translate(xoff=3, yoff=4)
 
-    @sedona_vectorized_udf(return_type=GeometryType())
+    @sedona_vectorized_udf(return_type=geometry_type())
     def translate_geometry(geom: b.BaseGeometry) -> b.BaseGeometry:
         return translate(geom, xoff=3, yoff=4) if geom is not None else None
 
     udf = (
         translate_batch if udf_type == SedonaUDFType.GEO_SERIES else translate_geometry
     )
-    encoded = pd.Series([geometry_serde.serialize(geom) for geom in geometries])
+    encoded = pd.Series(
+        [
+            (
+                to_spark_geometry(geom)
+                if USES_NATIVE_SPATIAL_TYPES
+                else serialize_geometry(geom)
+            )
+            for geom in geometries
+        ],
+        dtype=object,
+    )
     result = udf.func(encoded)
-    arrow_result = pa.Array.from_pandas(result, type=pa.binary())
-    assert arrow_result.to_pylist() == list(result)
+    wire_result = (
+        result.map(lambda value: serialize_geometry(to_shapely(value)))
+        if USES_NATIVE_SPATIAL_TYPES
+        else result
+    )
+    arrow_result = pa.Array.from_pandas(wire_result, type=pa.binary())
+    assert arrow_result.to_pylist() == list(wire_result)
     expected = gpd.GeoSeries(geometries).translate(xoff=3, yoff=4)
 
     assert len(result) == len(geometries)
-    for actual, geometry in zip(result, expected):
+    for actual, geometry in zip(wire_result, expected):
         if geometry is None:
             assert actual is None
+        elif geometry.is_empty:
+            # Shapely 1.x Point() internally holds an empty GeometryCollection.
+            decoded = deserialize_geometry(actual)
+            assert decoded.is_empty
+            assert decoded.geom_type == type(geometry).__name__
         else:
-            assert geometry_serde.deserialize(actual)[0].equals_exact(geometry, 0)
+            assert deserialize_geometry(actual).equals_exact(geometry, 0)
 
 
 def test_shapely_scalar_udf_passes_null_to_callback():
-    @sedona_vectorized_udf(return_type=GeometryType())
+    @sedona_vectorized_udf(return_type=geometry_type())
     def replace_null(geom: b.BaseGeometry) -> b.BaseGeometry:
         return Point(9, 10) if geom is None else geom
 
     result = replace_null.func(pd.Series([None]))
-    assert geometry_serde.deserialize(result.iloc[0])[0].equals_exact(Point(9, 10), 0)
+    actual = (
+        to_shapely(result.iloc[0])
+        if USES_NATIVE_SPATIAL_TYPES
+        else deserialize_geometry(result.iloc[0])
+    )
+    assert actual.equals_exact(Point(9, 10), 0)
 
 
 class TestSedonaArrowUDF(TestBase):

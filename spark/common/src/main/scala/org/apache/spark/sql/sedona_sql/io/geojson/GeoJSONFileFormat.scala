@@ -29,7 +29,8 @@ import org.apache.spark.sql.catalyst.util.CompressionCodecs
 import org.apache.spark.sql.execution.datasources._
 import org.apache.spark.sql.execution.datasources.json.JsonDataSource
 import org.apache.spark.sql.internal.SQLConf
-import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, RasterUDT}
+import org.apache.spark.sql.sedona_sql.UDT.RasterUDT
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.sources._
 import org.apache.spark.sql.types._
 import org.apache.spark.util.SerializableConfiguration
@@ -68,8 +69,9 @@ class GeoJSONFileFormat extends TextBasedFileFormat with DataSourceRegister {
       JsonDataSource(parsedOptions).inferSchema(sparkSession, files, parsedOptions)
 
     fullSchemaOption.map { fullSchema =>
-      // Replace 'geometry' field type with GeometryUDT
-      val newFields = GeoJSONUtils.updateGeometrySchema(fullSchema, GeometryUDT())
+      // Replace the geometry field with the version-specific spatial type
+      val newFields =
+        GeoJSONUtils.updateGeometrySchema(fullSchema, SpatialTypeSupport.geometryType)
       StructType(newFields)
     }
   }
@@ -97,7 +99,7 @@ class GeoJSONFileFormat extends TextBasedFileFormat with DataSourceRegister {
         // Pick up a geometry column to be written as the geometry field of GeoJSON.
         // 1. If there's a column named "geometry" with geometry type, Sedona will use this column
         // 2. Otherwise, Sedona will use the first geometry column found in the root schema
-        dataSchema.fields.filter(_.dataType == GeometryUDT) match {
+        dataSchema.fields.filter(field => SpatialTypeSupport.isGeometry(field.dataType)) match {
           case Array() =>
             throw new IllegalArgumentException("No geometry column found in the schema")
           case geometryFields =>
@@ -131,7 +133,7 @@ class GeoJSONFileFormat extends TextBasedFileFormat with DataSourceRegister {
       geometryColumnName.split('.'),
       resolver = SQLConf.get.resolver) match {
       case Some(StructField(_, dataType, _, _)) =>
-        if (!dataType.acceptsType(GeometryUDT())) {
+        if (!SpatialTypeSupport.isGeometry(dataType)) {
           throw new IllegalArgumentException(s"$geometryColumnName is not a geometry column")
         }
       case None =>
@@ -178,7 +180,7 @@ class GeoJSONFileFormat extends TextBasedFileFormat with DataSourceRegister {
       SparkCompatUtil
         .readFile(dataSource, broadcastedHadoopConf.value.value, file, parser, actualSchema)
         .map(row => {
-          val newRow = GeoJSONUtils.convertGeoJsonToGeometry(row, alteredSchema)
+          val newRow = GeoJSONUtils.convertGeoJsonToGeometry(row, alteredSchema, actualSchema)
           newRow
         })
     }
@@ -201,7 +203,7 @@ class GeoJSONFileFormat extends TextBasedFileFormat with DataSourceRegister {
     case MapType(keyType, valueType, _) =>
       supportDataType(keyType) && supportDataType(valueType)
 
-    case GeometryUDT => true
+    case dt if SpatialTypeSupport.isGeometry(dt) => true
     case RasterUDT => false
     case udt: UserDefinedType[_] => supportDataType(udt.sqlType)
 

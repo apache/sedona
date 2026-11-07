@@ -44,7 +44,7 @@ from pyspark.sql.types import (
 from sedona.spark.geopandas._crs import with_crs_metadata
 from sedona.spark.sql import st_constructors as stc
 from sedona.spark.sql import st_functions as stf
-from sedona.spark.sql.types import GeometryType
+from sedona.spark.sql.types import geometry_type
 
 
 def _is_distributed_series(value: Any) -> bool:
@@ -121,7 +121,7 @@ def _distributed_points_from_xy(
     result_template = with_crs_metadata(
         InternalField(
             np.dtype("object"),
-            StructField(result_name, GeometryType(), nullable=True),
+            StructField(result_name, geometry_type(), nullable=True),
         ),
         normalized_crs,
     )

@@ -304,3 +304,53 @@ class TestGeographyFunctionsDataFrameAPI(TestBase):
             ).alias("r")
         )
         assert df.first()[0] is True
+
+
+class TestGeographyPythonSerde(TestBase):
+    """Exercise actual geography values across JVM, Python and UDF boundaries."""
+
+    def test_collect_geography_and_create_dataframe(self):
+        from sedona.spark.core.geom.geography import Geography
+
+        source = self.spark.sql("SELECT ST_GeogFromWKT('POINT (1 2)', 4326) AS g")
+        value = source.first()[0]
+        assert isinstance(value, Geography)
+        assert list(value.geometry.coords) == [(1.0, 2.0)]
+        restored = self.spark.createDataFrame([(value,)], source.schema)
+        assert (
+            restored.selectExpr("ST_AsEWKT(g)").first()[0] == "SRID=4326; POINT (1 2)"
+        )
+
+    def test_geography_python_udf_preserves_srid_and_null(self):
+        from pyspark.sql.functions import udf
+        from sedona.spark.sql.types import GeographyType
+
+        source = self.spark.sql(
+            "SELECT id, IF(id = 0, ST_GeogFromWKT('POINT (1 2)', 4269), NULL) AS g "
+            "FROM range(2)"
+        )
+        identity = udf(lambda value: value, GeographyType())
+        restored = source.select("id", identity("g").alias("g"))
+        assert restored.selectExpr("id", "ST_AsEWKT(g)").orderBy("id").collect() == [
+            (0, "SRID=4269; POINT (1 2)"),
+            (1, None),
+        ]
+
+    def test_python_payload_is_readable_by_jvm_geography_serializer(self):
+        import struct
+        from shapely import wkb
+        from sedona.spark.core.geom.geography import Geography
+        from sedona.spark.sql.types import GeographyType
+
+        point = struct.pack("<BIidd", 1, 0x20000001, 4326, 1.0, 2.0)
+        python_value = Geography(wkb.loads(point))
+        serializer = (
+            self.spark._jvm.org.apache.sedona.common.S2Geography.GeographyWKBSerializer
+        )
+        jvm_value = serializer.deserialize(
+            bytearray(GeographyType().serialize(python_value))
+        )
+        assert jvm_value.getSRID() == 4326
+        assert jvm_value.toString() == "POINT (1 2)"
+        returned = GeographyType().deserialize(bytes(serializer.serialize(jvm_value)))
+        assert returned.geometry.wkb == python_value.geometry.wkb

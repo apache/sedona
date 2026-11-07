@@ -58,21 +58,21 @@ object ValuesMapper {
         case (GeoPackageType.DATETIME, _) =>
           parseNullable(rs.getString(column.name))(DataTypesTransformations.epoch(_) * 1000)
         case (GeoPackageType.POINT, _) =>
-          GeometryReader.extractWKB(rs.getBytes(column.name))
+          GeometryReader.extractGeometry(rs.getBytes(column.name))
         case (GeoPackageType.LINESTRING, _) =>
-          GeometryReader.extractWKB(rs.getBytes(column.name))
+          GeometryReader.extractGeometry(rs.getBytes(column.name))
         case (GeoPackageType.POLYGON, _) =>
-          GeometryReader.extractWKB(rs.getBytes(column.name))
+          GeometryReader.extractGeometry(rs.getBytes(column.name))
         case (GeoPackageType.GEOMETRY, _) =>
-          GeometryReader.extractWKB(rs.getBytes(column.name))
+          GeometryReader.extractGeometry(rs.getBytes(column.name))
         case (GeoPackageType.MULTIPOINT, _) =>
-          GeometryReader.extractWKB(rs.getBytes(column.name))
+          GeometryReader.extractGeometry(rs.getBytes(column.name))
         case (GeoPackageType.MULTILINESTRING, _) =>
-          GeometryReader.extractWKB(rs.getBytes(column.name))
+          GeometryReader.extractGeometry(rs.getBytes(column.name))
         case (GeoPackageType.MULTIPOLYGON, _) =>
-          GeometryReader.extractWKB(rs.getBytes(column.name))
+          GeometryReader.extractGeometry(rs.getBytes(column.name))
         case (GeoPackageType.GEOMETRYCOLLECTION, _) =>
-          GeometryReader.extractWKB(rs.getBytes(column.name))
+          GeometryReader.extractGeometry(rs.getBytes(column.name))
         case _ =>
           UTF8String.fromString(rs.getString(column.name))
       }

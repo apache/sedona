@@ -83,15 +83,15 @@ object ScalarUDF {
             |from shapely.geometry import Point
             |from sedona.sql.types import GeometryType
             |from pyspark.serializers import CloudPickleSerializer
-            |from sedona.utils import geometry_serde
+            |from sedona.spark.utils import geometry_sql_serde
             |from shapely import box
             |f = open('$path', 'wb');
             |def w(x):
             |    def apply_function(w):
-            |        geom, offset = geometry_serde.deserialize(w)
+            |        geom = geometry_sql_serde.deserialize_geometry(w)
             |        bounds = geom.buffer(1).bounds
             |        x = box(*bounds)
-            |        return geometry_serde.serialize(x)
+            |        return geometry_sql_serde.serialize_geometry(x)
             |    return x.apply(apply_function)
             |f.write(CloudPickleSerializer().dumps((w, GeometryType())))
             |""".stripMargin),

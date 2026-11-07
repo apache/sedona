@@ -19,7 +19,7 @@
 package org.apache.sedona.sql.datasources.shapefile
 
 import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.dbf.FieldDescriptor
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.catalyst.analysis.SqlApiAnalysis.Resolver
 import org.apache.spark.sql.types.BooleanType
 import org.apache.spark.sql.types.DateType
@@ -141,9 +141,11 @@ object ShapefileUtils {
           throw new IllegalArgumentException(s"geometry.name and key.name cannot be the same")
         }
         StructType(
-          Seq(StructField(options.geometryFieldName, GeometryUDT()), StructField(name, LongType)))
+          Seq(
+            StructField(options.geometryFieldName, SpatialTypeSupport.geometryType),
+            StructField(name, LongType)))
       case _ =>
-        StructType(StructField(options.geometryFieldName, GeometryUDT()) :: Nil)
+        StructType(StructField(options.geometryFieldName, SpatialTypeSupport.geometryType) :: Nil)
     }
   }
 

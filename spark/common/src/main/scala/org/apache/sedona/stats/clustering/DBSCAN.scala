@@ -20,7 +20,8 @@ package org.apache.sedona.stats.clustering
 
 import org.apache.sedona.util.DfUtils.getGeometryColumnName
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
+import org.apache.sedona.stats.SpatialRowHash
 import org.apache.spark.sql.sedona_sql.expressions.st_functions.{ST_Distance, ST_DistanceSpheroid}
 import org.apache.spark.sql.{Column, DataFrame}
 import org.graphframes.GraphFrame
@@ -78,13 +79,9 @@ object DBSCAN {
       if (useSpheroid) ST_DistanceSpheroid else ST_Distance
 
     val hasIdColumn = dataframe.columns.contains("id")
-    val idDataframe = if (hasIdColumn) {
-      dataframe
-        .withColumnRenamed("id", ID_COLUMN)
-        .withColumn("id", sha2(to_json(struct("*")), 256))
-    } else {
-      dataframe.withColumn("id", sha2(to_json(struct("*")), 256))
-    }
+    val originalDataframe =
+      if (hasIdColumn) dataframe.withColumnRenamed("id", ID_COLUMN) else dataframe
+    val idDataframe = originalDataframe.withColumn("id", SpatialRowHash(originalDataframe.schema))
 
     val isCorePointsDF = idDataframe
       .alias("left")
@@ -109,9 +106,20 @@ object DBSCAN {
       .join(corePointsDF.alias("right"), col("left.dst") === col(s"right.id"))
       .select(col("left.src"), col(s"right.id").alias("dst"))
 
-    val connectedComponentsDF = GraphFrame(corePointsDF, coreEdgesDf).connectedComponents
+    // GraphFrames only needs IDs for component computation. Keep native payload columns out
+    // of its internal cache, then restore them in their original order.
+    val vertices =
+      if (SpatialTypeSupport.usesNativeTypes) corePointsDF.select("id") else corePointsDF
+    val components = GraphFrame(vertices, coreEdgesDf).connectedComponents
       .setUseLabelsAsComponents(false)
       .run
+    val connectedComponentsDF = if (SpatialTypeSupport.usesNativeTypes) {
+      corePointsDF
+        .join(components, Seq("id"))
+        .select(
+          (corePointsDF.columns.map(name => col(s"`${name.replace("`", "``")}`")) :+
+            col("component")): _*)
+    } else components
 
     val borderComponentsDF = borderPointsDF
       .select(struct("*").alias("leftContent"), explode(col("neighbors")).alias("neighbor"))
@@ -154,7 +162,8 @@ object DBSCAN {
     require(minPts > 0, "minPts must be greater than 0")
     require(geo_df.columns.contains(geometry), "geometry column not found in dataframe")
     require(
-      geo_df.schema.fields(geo_df.schema.fieldIndex(geometry)).dataType == GeometryUDT,
+      SpatialTypeSupport.isGeometry(
+        geo_df.schema.fields(geo_df.schema.fieldIndex(geometry)).dataType),
       "geometry column must be of type GeometryType")
   }
 }

@@ -35,6 +35,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -58,7 +59,7 @@ public class adapterTestJava implements Serializable {
             SedonaContext.builder()
                 .master("local[*]")
                 .appName("adapterTestJava")
-                .config("spark.sql.geospatial.enabled", "false")
+                .config("spark.sql.geospatial.enabled", SpatialTypeSupport.usesNativeTypes())
                 .getOrCreate());
     Logger.getLogger("org").setLevel(Level.WARN);
     Logger.getLogger("akka").setLevel(Level.WARN);

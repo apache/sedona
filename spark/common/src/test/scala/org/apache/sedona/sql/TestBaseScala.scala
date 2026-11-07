@@ -29,6 +29,7 @@ import org.apache.sedona.common.sphere.{Haversine, Spheroid}
 import org.apache.sedona.spark.SedonaContext
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.locationtech.jts.geom._
 import org.locationtech.jts.io.WKTReader
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
@@ -49,9 +50,8 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     "spark.sql.warehouse.dir" -> (System.getProperty("user.dir") + "/target/"),
     "sedona.join.autoBroadcastJoinThreshold" -> "-1",
     "spark.kryoserializer.buffer.max" -> "64m",
-    // Disable Spark 4.1+ native geospatial functions that shadow Sedona's ST functions.
-    // This config is ignored on Spark versions that don't have it.
-    "spark.sql.geospatial.enabled" -> "false")
+    // Spark 4.2 owns the native spatial built-ins; older runtimes retain Sedona ownership.
+    "spark.sql.geospatial.enabled" -> SpatialTypeSupport.usesNativeTypes.toString)
 
   // Method to be overridden by subclasses to provide additional configurations
   def sparkConfig: Map[String, String] = defaultSparkConfig
@@ -210,10 +210,10 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     val input = buildPointLonLatDf.limit(sampleCount).collect()
     input
       .map(row => {
-        val point1 = row.getAs[org.locationtech.jts.geom.Point](0)
+        val point1 = SpatialTestValues.geometry(row, 0)
         input
           .map(row => {
-            val point2 = row.getAs[org.locationtech.jts.geom.Point](0)
+            val point2 = SpatialTestValues.geometry(row, 0)
             if (Spheroid.distance(point1, point2) <= distance) 1 else 0
           })
           .sum
@@ -225,10 +225,10 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     val input = buildPointLonLatDf.limit(sampleCount).collect()
     input
       .map(row => {
-        val point1 = row.getAs[org.locationtech.jts.geom.Point](0)
+        val point1 = SpatialTestValues.geometry(row, 0)
         input
           .map(row => {
-            val point2 = row.getAs[org.locationtech.jts.geom.Point](0)
+            val point2 = SpatialTestValues.geometry(row, 0)
             if (Haversine.distance(point1, point2) <= distance) 1 else 0
           })
           .sum
@@ -245,10 +245,10 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     val inputPoint = buildPointDf.limit(sampleCount).collect()
     inputPoint
       .map(row => {
-        val point = row.getAs[org.locationtech.jts.geom.Point](0)
+        val point = SpatialTestValues.geometry(row, 0)
         inputPolygon
           .map(row => {
-            val polygon = row.getAs[org.locationtech.jts.geom.Polygon](0)
+            val polygon = SpatialTestValues.geometry(row, 0)
             if (densityFrac == 0) {
               if (intersects)
                 if (hausdorffDistance(point, polygon) <= distance) 1 else 0
@@ -274,10 +274,10 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     val inputPoint = buildPointDf.limit(sampleCount).collect()
     inputPoint
       .map(row => {
-        val point = row.getAs[org.locationtech.jts.geom.Point](0)
+        val point = SpatialTestValues.geometry(row, 0)
         inputPolygon
           .map(row => {
-            val polygon = row.getAs[org.locationtech.jts.geom.Polygon](0)
+            val polygon = SpatialTestValues.geometry(row, 0)
             if (intersects)
               if (frechetDistance(point, polygon) <= distance) 1 else 0
             else if (frechetDistance(point, polygon) < distance) 1
@@ -294,10 +294,10 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
 
     inputPoint
       .map(row => {
-        val point = row.getAs[org.locationtech.jts.geom.Point](0)
+        val point = SpatialTestValues.geometry(row, 0)
         inputPolygon
           .map(row => {
-            val polygon = row.getAs[org.locationtech.jts.geom.Polygon](0)
+            val polygon = SpatialTestValues.geometry(row, 0)
             if (dWithin(point, polygon, distance, false)) 1 else 0
           })
           .sum
@@ -311,10 +311,10 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     val sphericalDf2Collected = sphericalDf2.collect()
     sphericalDf1Collected
       .map(row => {
-        val geom1 = row.get(2).asInstanceOf[org.locationtech.jts.geom.Point]
+        val geom1 = SpatialTestValues.geometry(row, 2)
         sphericalDf2Collected
           .map(row => {
-            val geom2 = row.get(2).asInstanceOf[org.locationtech.jts.geom.Point]
+            val geom2 = SpatialTestValues.geometry(row, 2)
             if (dWithin(geom1, geom2, distance, true)) 1 else 0
           })
           .sum

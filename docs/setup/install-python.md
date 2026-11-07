@@ -84,6 +84,8 @@ Sedona Python needs one additional jar file called `sedona-spark-shaded` or `sed
 
 Please use Spark major.minor version number in artifact names.
 
+For Spark/PySpark 4.2, use a matching Sedona Python package and Scala 2.13 Spark 4.2 JVM artifact. The [native spatial type guide](sql-geometry-serialization.md#spark-42-native-types) covers Python value helpers, explicit UDT schemas, GeoPandas boundaries and upstream limitations. Native Python spatial conversion requires Shapely 2 or later.
+
 You can get it using one of the following methods:
 
 1. If you run Sedona in Databricks, AWS EMR, or other cloud platform's notebook, use the `shaded jar`: Download [sedona-spark-shaded jar](https://repo.maven.apache.org/maven2/org/apache/sedona/) and [geotools-wrapper jar](https://repo.maven.apache.org/maven2/org/datasyslab/geotools-wrapper/) from Maven Central, and put them in SPARK_HOME/jars/ folder.

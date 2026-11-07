@@ -30,6 +30,7 @@ import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.util.{ArrayBasedMapData, CaseInsensitiveMap, DateTimeUtils, GenericArrayData}
 import org.apache.spark.sql.execution.datasources.geoparquet.internal._
 
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
@@ -214,15 +215,21 @@ private[geoparquet] class GeoParquetRowConverter(
       case BooleanType | IntegerType | LongType | FloatType | DoubleType | BinaryType =>
         new ParquetPrimitiveConverter(updater)
 
-      case GeometryUDT =>
+      case dt if SpatialTypeSupport.isGeometry(dt) =>
         // Compute SRID once per column converter, not per row
-        val srid = schemaConverter.getSrid(parquetType.getName)
+        val srid = if (SpatialTypeSupport.isNativeGeometry(catalystType)) {
+          val sourceSrid = schemaConverter.getNativeSrid(parquetType.getName)
+          SpatialTypeSupport.geometrySrid(catalystType).foreach { targetSrid =>
+            GeoParquetNativeCrs.requireSrid(parquetType.getName, targetSrid, sourceSrid)
+          }
+          sourceSrid
+        } else schemaConverter.getSrid(parquetType.getName)
         if (parquetType.isPrimitive) {
           new ParquetPrimitiveConverter(updater) {
             override def addBinary(value: Binary): Unit = {
               val geom = WKBReader.forDeclaredDimensions().read(value.getBytes)
               geom.setSRID(srid)
-              this.updater.set(GeometryUDT.serialize(geom))
+              this.updater.set(SpatialTypeSupport.serializeGeometry(geom, catalystType))
             }
           }
         } else {
@@ -235,7 +242,7 @@ private[geoparquet] class GeoParquetRowConverter(
                 val byteArray = currentArray.map(_.asInstanceOf[Byte]).toArray
                 val geom = WKBReader.forDeclaredDimensions().read(byteArray)
                 geom.setSRID(srid)
-                this.updater.set(GeometryUDT.serialize(geom))
+                this.updater.set(SpatialTypeSupport.serializeGeometry(geom, catalystType))
               }
             }
           } else {

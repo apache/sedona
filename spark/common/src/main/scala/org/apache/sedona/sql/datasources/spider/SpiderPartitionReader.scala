@@ -22,7 +22,7 @@ import org.apache.sedona.common.spider.Generator
 import org.apache.sedona.common.spider.GeneratorFactory
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.connector.read.PartitionReader
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.geom.util.AffineTransformation
 
@@ -46,7 +46,9 @@ class SpiderPartitionReader(partition: SpiderPartition) extends PartitionReader[
   }
 
   override def get(): InternalRow = {
-    InternalRow(partition.startIndex + count, GeometryUDT.serialize(currentGeometry))
+    InternalRow(
+      partition.startIndex + count,
+      SpatialTypeSupport.serializeGeometry(currentGeometry))
   }
 
   override def close(): Unit = {}

@@ -32,7 +32,6 @@ import org.apache.spark.sql.catalyst.plans.logical._
 import org.apache.spark.sql.catalyst.trees.TreePattern.PLAN_EXPRESSION
 import org.apache.spark.sql.connector.catalog.{CatalogManager, FunctionCatalog, Identifier}
 import org.apache.spark.sql.connector.catalog.functions.UnboundFunction
-import org.apache.spark.sql.internal.connector.V1Function
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
@@ -278,7 +277,8 @@ object ResolveDefaultColumns extends ResolveDefaultColumnsUtils {
    */
   object DefaultColumnAnalyzer
       extends Analyzer(
-        new CatalogManager(BuiltInFunctionCatalog, BuiltInFunctionCatalog.v1Catalog)) {}
+        DefaultColumnCompatibility
+          .catalogManager(BuiltInFunctionCatalog, BuiltInFunctionCatalog.v1Catalog)) {}
 
   /**
    * This is an Optimizer for convert default column expressions to foldable literals.
@@ -305,7 +305,7 @@ object ResolveDefaultColumns extends ResolveDefaultColumnsUtils {
       throw new UnsupportedOperationException()
     }
     override def loadFunction(ident: Identifier): UnboundFunction = {
-      V1Function(v1Catalog.lookupPersistentFunction(ident.asFunctionIdentifier))
+      DefaultColumnCompatibility.loadFunction(v1Catalog, ident.asFunctionIdentifier)
     }
     override def functionExists(ident: Identifier): Boolean = {
       v1Catalog.isPersistentFunction(ident.asFunctionIdentifier)

@@ -22,6 +22,7 @@ import org.apache.sedona.common.S2Geography.Geography
 import org.apache.sedona.common.geography.Constructors
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.sedona_sql.UDT.GeographyUDT
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.sql.sedona_sql.expressions.{InferrableFunction, InferredExpression}
 import org.locationtech.jts.geom.Geometry
@@ -47,7 +48,7 @@ private[apache] case class ST_GeogFromWKT(inputExpressions: Seq[Expression])
  *   This function takes a geography string. The string format must be EWKT.
  */
 private[apache] case class ST_GeogFromEWKT(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.geogFromEWKT _) {
+    extends InferredExpression(SpatialTypeSupport.geogFromEWKT _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -105,7 +106,7 @@ private[apache] case class ST_GeogFromWKB(inputExpressions: Seq[Expression])
  *   / string.
  */
 private[apache] case class ST_GeogFromEWKB(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.geogFromWKB(_: Array[Byte])) {
+    extends InferredExpression(SpatialTypeSupport.geogFromEWKB _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

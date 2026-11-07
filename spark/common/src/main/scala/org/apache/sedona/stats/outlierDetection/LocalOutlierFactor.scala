@@ -19,6 +19,7 @@
 package org.apache.sedona.stats.outlierDetection
 
 import org.apache.sedona.util.DfUtils.getGeometryColumnName
+import org.apache.sedona.stats.SpatialRowHash
 import org.apache.spark.sql.sedona_sql.expressions.st_functions.{ST_Distance, ST_DistanceSphere}
 import org.apache.spark.sql.{Column, DataFrame, SparkSession, functions => f}
 
@@ -81,7 +82,9 @@ object LocalOutlierFactor {
     // Store original contents, prep necessary columns
     val formattedDataframe = dataframe
       .withColumn(CONTENTS_COLUMN_NAME, f.struct("*"))
-      .withColumn(ID_COLUMN_NAME, f.sha2(f.to_json(f.col(CONTENTS_COLUMN_NAME)), 256))
+      .withColumn(
+        ID_COLUMN_NAME,
+        SpatialRowHash.hash(f.col(CONTENTS_COLUMN_NAME), dataframe.schema))
       .withColumnRenamed(geometryColumn, "geometry")
 
     val kDistanceDf = formattedDataframe

@@ -25,7 +25,7 @@ import org.apache.spark.sql.catalyst.expressions.SpecializedGetters
 import org.apache.spark.sql.catalyst.json.JSONOptions
 import org.apache.spark.sql.catalyst.util.LegacyDateFormats.FAST_DATE_FORMAT
 import org.apache.spark.sql.catalyst.util._
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.sedona_sql.io.geojson.GeoJSONUtils.geometryToGeoJson
 import org.apache.spark.sql.types._
 import org.datasyslab.jts.io.WKTWriter
@@ -149,11 +149,11 @@ private[sql] class GeoJSONJacksonGenerator(
       (row: SpecializedGetters, ordinal: Int) =>
         writeObject(writeMapData(row.getMap(ordinal), mt, valueWriter))
 
-    case GeometryUDT =>
+    case dt if SpatialTypeSupport.isGeometry(dt) =>
       // We'll only write non-primary geometry columns here, we'll write it as WKT to properties object.
       (row: SpecializedGetters, ordinal: Int) =>
         {
-          val geom = GeometryUDT.deserialize(row.getBinary(ordinal))
+          val geom = SpatialTypeSupport.readGeometry(row, ordinal, dataType)
           val wkt = wktWriter.write(geom)
           gen.writeString(wkt)
         }
@@ -192,7 +192,7 @@ private[sql] class GeoJSONJacksonGenerator(
         // Primary geometry field, don't need to write out the key. We save the geometry and will write it out as
         // geometry field after we've done with writing the properties field.
         if (!row.isNullAt(i)) {
-          val geoJson = geometryToGeoJson(row.getBinary(i))
+          val geoJson = geometryToGeoJson(row.get(i, field.dataType), field.dataType)
           currentGeoJsonString = Some(geoJson)
         } else {
           currentGeoJsonString = None

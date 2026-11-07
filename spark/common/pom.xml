@@ -310,6 +310,7 @@
                         <configuration>
                             <sources>
                                 <source>src/main/scala-spark-${spark.major.version}</source>
+                                <source>src/main/scala-spatial-${sedona.spatial.type.impl}</source>
                             </sources>
                         </configuration>
                     </execution>
@@ -334,6 +335,28 @@
             <plugin>
                 <groupId>org.scalastyle</groupId>
                 <artifactId>scalastyle-maven-plugin</artifactId>
+                <configuration>
+                    <sourceDirectories>
+                        <sourceDirectory>${project.basedir}/src/main/scala</sourceDirectory>
+                        <sourceDirectory>${project.basedir}/src/main/scala-spatial-${sedona.spatial.type.impl}</sourceDirectory>
+                    </sourceDirectories>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <configuration>
+                    <scala>
+                        <includes>
+                            <include>src/main/scala/**/*.scala</include>
+                            <include>src/test/scala/**/*.scala</include>
+                            <include>src/main/scala/**/*.sc</include>
+                            <include>src/test/scala/**/*.sc</include>
+                            <include>src/main/scala-spatial-${sedona.spatial.type.impl}/**/*.scala</include>
+                            <include>src/main/scala-spark-4.1/**/*.scala</include>
+                        </includes>
+                    </scala>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -371,6 +394,40 @@
                     <scope>provided</scope>
                 </dependency>
             </dependencies>
+        </profile>
+        <profile>
+            <id>sedona-spark-4.2</id>
+            <activation>
+                <property>
+                    <name>spark</name>
+                    <value>4.2</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.spark</groupId>
+                    <artifactId>spark-sql-api_${scala.compat.version}</artifactId>
+                    <version>${spark.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <excludes>
+                                <!-- Hadoop MiniDFS starts a Jersey 2/javax WebHDFS server,
+                                     incompatible with Spark 4.2's Jersey 3/jakarta classes.
+                                     Keep this HDFS fixture on the older-runtime matrices;
+                                     native shapefile data-source tests run in spark-4.2. -->
+                                <exclude>**/ShapefileReaderTest.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>

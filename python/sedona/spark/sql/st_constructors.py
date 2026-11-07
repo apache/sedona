@@ -190,7 +190,7 @@ def ST_GeogFromWKT(
 
     :param wkt: WKT string column to generate from.
     :type wkt: ColumnOrName
-    :param srid: SRID to set on the geography, as an integer or integer column. Defaults to 0 (unknown).
+    :param srid: SRID to set on the geography, as an integer or integer column. Defaults to 4326 on Spark 4.2+, or 0 (unknown) on older Spark.
     :type srid: Optional[ColumnOrNameOrNumber], optional
     :return: Geography column representing the WKT string.
     :rtype: Column
@@ -209,7 +209,7 @@ def ST_GeogFromText(
 
     :param wkt: WKT string column to generate from.
     :type wkt: ColumnOrName
-    :param srid: SRID to set on the geography, as an integer or integer column. Defaults to 0 (unknown).
+    :param srid: SRID to set on the geography, as an integer or integer column. Defaults to 4326 on Spark 4.2+, or 0 (unknown) on older Spark.
     :type srid: Optional[ColumnOrNameOrNumber], optional
     :return: Geography column representing the WKT string.
     :rtype: Column
