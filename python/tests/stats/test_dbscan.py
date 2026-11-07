@@ -34,6 +34,73 @@ import os
 )
 class TestDBScan(TestBase):
 
+    def test_constant_geometry_column(self):
+        df = self.spark.range(2).withColumn(
+            "geometry", ST_MakePoint(f.lit(0.0), f.lit(0.0))
+        )
+        rows = dbscan(df, 0.1, 2).select("id", "cluster").collect()
+        assert len(rows) == 2
+        assert all(row.cluster != -1 for row in rows)
+
+    def test_preserves_internal_named_columns(self):
+        df = self.spark.createDataFrame(
+            [(1, 0.0, "original", 42)], ["id", "x", "__isCore", "__cluster"]
+        ).select("*", ST_MakePoint("x", f.lit(0.0)).alias("geometry"))
+        rows = dbscan(df, 0.1, 1).collect()
+        assert len(rows) == 1
+        assert rows[0]["__isCore"] == "original"
+        assert rows[0]["__cluster"] == 42
+        assert rows[0].isCore
+        assert rows[0].cluster != -1
+
+    def test_geometry_validation(self, sample_dataframe):
+        ambiguous = sample_dataframe.withColumn("other", f.col("arealandmark"))
+        with pytest.raises(ValueError, match="Multiple GeometryType"):
+            dbscan(ambiguous, 1.0, 2)
+        with pytest.raises(Exception, match="DATATYPE_MISMATCH"):
+            dbscan(sample_dataframe, 1.0, 2, geometry="id").collect()
+
+    def test_projection_preserves_coincident_records(self):
+        df = self.spark.createDataFrame(
+            [(1, 0.0), (2, 0.0), (3, 10.0)], ["id", "x"]
+        ).select("id", ST_MakePoint("x", f.lit(0.0)).alias("geometry"))
+        result = dbscan(df, 0.1, 2)
+        rows = result.select("cluster").collect()
+        assert len(rows) == 3
+        assert sum(row.cluster == -1 for row in rows) == 1
+
+    def test_per_call_outliers_and_custom_columns(self):
+        df = self.spark.createDataFrame(
+            [(1, 0.0), (2, 0.5), (3, 10.0)], ["id", "x"]
+        ).select("id", ST_MakePoint("x", f.lit(0.0)).alias("shape"))
+        key = "spark.sedona.dbscan.includeOutliers"
+        prior = self.spark.conf.get(key, "true")
+        try:
+            self.spark.conf.set(key, "false")
+            with_noise = dbscan(
+                df,
+                1.0,
+                2,
+                include_outliers=True,
+                is_core_column_name="core",
+                cluster_column_name="label",
+            )
+            without_noise = dbscan(df, 1.0, 2, include_outliers=False)
+            rows = with_noise.orderBy("id").collect()
+            assert with_noise.columns == ["id", "shape", "core", "label"]
+            assert [row.core for row in rows] == [True, True, False]
+            assert rows[0].label == rows[1].label
+            assert rows[2].label == -1
+            assert self.spark.conf.get(key) == "false"
+            # Changing configuration after building the plan must not change
+            # the per-call option captured by without_noise.
+            self.spark.conf.set(key, "true")
+            assert without_noise.count() == 2
+            assert [row.id for row in without_noise.orderBy("id").collect()] == [1, 2]
+            assert self.spark.conf.get(key) == "true"
+        finally:
+            self.spark.conf.set(key, prior)
+
     @pytest.fixture
     def sample_data(self):
         return [
@@ -169,16 +236,16 @@ class TestDBScan(TestBase):
         )
 
     def test_dbscan_invalid_epsilon(self, sample_dataframe):
-        with pytest.raises(Exception):
-            dbscan(sample_dataframe, -0.1, 5, "arealandmark")
+        with pytest.raises(Exception, match="epsilon must not be negative"):
+            dbscan(sample_dataframe, -0.1, 5, "arealandmark").collect()
 
     def test_dbscan_invalid_min_pts(self, sample_dataframe):
-        with pytest.raises(Exception):
-            dbscan(sample_dataframe, 0.1, -5, "arealandmark")
+        with pytest.raises(Exception, match="minPts must be greater than 0"):
+            dbscan(sample_dataframe, 0.1, -5, "arealandmark").collect()
 
     def test_dbscan_invalid_geometry_column(self, sample_dataframe):
-        with pytest.raises(Exception):
-            dbscan(sample_dataframe, 0.1, 5, "invalid_column")
+        with pytest.raises(Exception, match="UNRESOLVED_COLUMN"):
+            dbscan(sample_dataframe, 0.1, 5, "invalid_column").collect()
 
     def test_return_empty_df_when_no_clusters(self, sample_data, sample_dataframe):
         # repeated broadcast joins with this small data size use a lot of RAM on broadcast references

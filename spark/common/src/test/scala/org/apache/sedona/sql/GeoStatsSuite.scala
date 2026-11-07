@@ -157,13 +157,12 @@ class GeoStatsSuite extends TestBaseScala {
   }
 
   it("test dbscan with geom literal") {
-    val error = intercept[IllegalArgumentException] {
-      spark.sql("SELECT ST_DBSCAN(ST_GeomFromWKT('POINT(0.0 1.1)'), 1.0, 4, false)").collect()
-    }
-    assert(
-      error
-        .asInstanceOf[IllegalArgumentException]
-        .getMessage == "geometry argument must be a named reference to an existing column")
+    val result = spark
+      .sql("SELECT ST_DBSCAN(ST_GeomFromWKT('POINT(0.0 1.1)'), 1.0, 4, false)")
+      .head()
+      .getStruct(0)
+    assert(!result.getBoolean(0))
+    assert(result.getLong(1) == -1L)
   }
 
   it("test dbscan with minPts variable") {
@@ -206,15 +205,15 @@ class GeoStatsSuite extends TestBaseScala {
     assert(result.length > 0)
   }
 
-  it("test DBSCAN with a column named __isCore in input df") {
-    val exception = intercept[IllegalArgumentException] {
-      getData
-        .withColumn("__isCore", lit(1))
-        .withColumn("sql_result", expr("ST_DBSCAN(geometry, 0.1, 4, false)"))
-        .collect()
-    }
-    assert(
-      exception.getMessage == "requirement failed: __isCore is a  reserved name by the dbscan algorithm. Please rename the columns before calling the ST_DBSCAN function.")
+  it("test DBSCAN preserves columns named __isCore and __cluster") {
+    val rows = getData
+      .withColumn("__isCore", col("id"))
+      .withColumn("__cluster", col("id"))
+      .withColumn("sql_result", expr("ST_DBSCAN(geometry, 0.1, 4, false)"))
+      .collect()
+    assert(rows.length == 9)
+    assert(rows.forall(row => row.getAs[Int]("__isCore") == row.getAs[Int]("id")))
+    assert(rows.forall(row => row.getAs[Int]("__cluster") == row.getAs[Int]("id")))
   }
 
   it("test ST_BinaryDistanceBandColumn") {

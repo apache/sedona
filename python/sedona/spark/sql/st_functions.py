@@ -2992,7 +2992,10 @@ def ST_DBSCAN(
     geometry: ColumnOrName,
     epsilon: Union[ColumnOrName, float],
     min_pts: Union[ColumnOrName, int],
-    use_spheroid: Optional[Union[ColumnOrName, bool]] = False,
+    use_spheroid: Union[ColumnOrName, bool] = False,
+    include_outliers: Union[ColumnOrName, bool] = True,
+    is_core_column_name: Union[ColumnOrName, str] = "isCore",
+    cluster_column_name: Union[ColumnOrName, str] = "cluster",
 ) -> Column:
     """Perform DBSCAN clustering on the given geometry column.
 
@@ -3004,6 +3007,7 @@ def ST_DBSCAN(
     :type min_pts: ColumnOrName
     @param use_spheroid: whether to use spheroid for distance calculation
     :type use_spheroid: ColumnOrName
+    @param include_outliers: whether to include noise points. If omitted, uses spark.sedona.dbscan.includeOutliers.
     @return: A struct indicating the cluster to which the point belongs and whether it is a core point
     """
 
@@ -3016,7 +3020,27 @@ def ST_DBSCAN(
     if isinstance(use_spheroid, bool):
         use_spheroid = lit(use_spheroid)
 
-    return _call_st_function("ST_DBSCAN", (geometry, epsilon, min_pts, use_spheroid))
+    if isinstance(include_outliers, bool):
+        include_outliers = lit(include_outliers)
+
+    if isinstance(is_core_column_name, str):
+        is_core_column_name = lit(is_core_column_name)
+
+    if isinstance(cluster_column_name, str):
+        cluster_column_name = lit(cluster_column_name)
+
+    return _call_st_function(
+        "ST_DBSCAN",
+        (
+            geometry,
+            epsilon,
+            min_pts,
+            use_spheroid,
+            include_outliers,
+            is_core_column_name,
+            cluster_column_name,
+        ),
+    )
 
 
 @validate_argument_types

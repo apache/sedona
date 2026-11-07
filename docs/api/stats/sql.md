@@ -28,6 +28,10 @@ complete set of geospatial analysis tools.
 
 ## Using DBSCAN
 
+The Python DBSCAN API uses `ST_DBSCAN` and supports classic PySpark and Spark
+Connect. The Spark server must have Sedona SQL functions registered. Spark Connect
+requires Spark 4.0 or later and a checkpoint directory configured on the server.
+
 The DBSCAN function is provided at `org.apache.sedona.stats.clustering.DBSCAN.dbscan` in scala/java and `sedona.stats.clustering.dbscan.dbscan` in python.
 
 The function annotates a dataframe with a cluster label for each data record using the DBSCAN algorithm.
@@ -44,7 +48,7 @@ names in parentheses are python variable names
 - epsilon - minimum distance parameter of DBSCAN algorithm
 - minPts (min_pts) - minimum number of points parameter of DBSCAN algorithm
 - geometry - name of the geometry column
-- includeOutliers (include_outliers) - whether to include outliers in the output. Default is false
+- includeOutliers (include_outliers) - whether to include outliers in the output. Default is true
 - useSpheroid (use_spheroid) - whether to use a cartesian or spheroidal distance calculation. Default is false
 
 The output is the input DataFrame with the cluster label added to each row. Outlier will have a cluster value of -1 if included.
