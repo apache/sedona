@@ -143,6 +143,7 @@ jobs:
           SKIP_TESTS: ${{ matrix.skipTests }}
           SEDONA_SKIP_LIBPOSTAL_TESTS: ${{ matrix.skipLibPostalTests }}
           FLINK_VERSION: ${{ matrix.flinkVersion }}
+          PYTHONPATH: ${{ github.workspace }}/python
         run: |
           SPARK_COMPAT_VERSION="${SPARK_VERSION:0:3}"
 
