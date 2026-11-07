@@ -23,7 +23,7 @@ from shapely import wkb, wkt
 from shapely.geometry import LineString, Point, Polygon
 
 from sedona.spark.sql.types import GeometryType
-from sedona.spark.utils import geometry_sql_serde
+from sedona.spark.utils import geometry_wkb
 
 HAS_M = hasattr(shapely, "has_m") and shapely.geos_version >= (3, 12, 0)
 LAYOUTS = [
@@ -174,8 +174,8 @@ def test_empty_point_uses_standard_wkb_when_geos_cannot_write_it(monkeypatch):
     def unsupported_writer(*args, **kwargs):
         raise AssertionError("GEOS < 3.9 cannot write empty points")
 
-    monkeypatch.setattr(geometry_sql_serde, "geos_version", (3, 8, 0), raising=False)
-    monkeypatch.setattr(geometry_sql_serde.wkb, "dumps", unsupported_writer)
+    monkeypatch.setattr(geometry_wkb, "geos_version", (3, 8, 0), raising=False)
+    monkeypatch.setattr(geometry_wkb.wkb, "dumps", unsupported_writer)
     if hasattr(shapely, "to_wkb"):
         monkeypatch.setattr(shapely, "to_wkb", unsupported_writer)
 
@@ -215,7 +215,7 @@ def test_old_geos_collection_fallback_retains_empty_members(monkeypatch, expecte
             raise AssertionError("Old GEOS cannot write collections with empty Points")
         return original_dumps(geometry, *args, **kwargs)
 
-    monkeypatch.setattr(geometry_sql_serde, "geos_version", (3, 8, 0))
+    monkeypatch.setattr(geometry_wkb, "geos_version", (3, 8, 0))
     monkeypatch.setattr(wkb, "dumps", unsupported_collection_writer)
     if original_to_wkb is not None:
 
@@ -234,6 +234,6 @@ def test_old_geos_collection_fallback_retains_empty_members(monkeypatch, expecte
 def test_old_geos_empty_point_fallback_preserves_srid(monkeypatch):
     expected = bytes.fromhex("0101000020e6100000000000000000f87f000000000000f87f")
     geometry = wkb.loads(expected)
-    monkeypatch.setattr(geometry_sql_serde, "geos_version", (3, 8, 0))
+    monkeypatch.setattr(geometry_wkb, "geos_version", (3, 8, 0))
 
     assert GeometryType().serialize(geometry) == expected
