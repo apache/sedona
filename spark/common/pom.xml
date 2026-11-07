@@ -310,6 +310,7 @@
                         <configuration>
                             <sources>
                                 <source>src/main/scala-spark-${spark.major.version}</source>
+                                <source>src/main/scala-spatial-${sedona.spatial.type.impl}</source>
                             </sources>
                         </configuration>
                     </execution>
@@ -334,6 +335,27 @@
             <plugin>
                 <groupId>org.scalastyle</groupId>
                 <artifactId>scalastyle-maven-plugin</artifactId>
+                <configuration>
+                    <sourceDirectories>
+                        <sourceDirectory>${project.basedir}/src/main/scala</sourceDirectory>
+                        <sourceDirectory>${project.basedir}/src/main/scala-spatial-${sedona.spatial.type.impl}</sourceDirectory>
+                    </sourceDirectories>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <configuration>
+                    <scala>
+                        <includes>
+                            <include>src/main/scala/**/*.scala</include>
+                            <include>src/test/scala/**/*.scala</include>
+                            <include>src/main/scala/**/*.sc</include>
+                            <include>src/test/scala/**/*.sc</include>
+                            <include>src/main/scala-spatial-${sedona.spatial.type.impl}/**/*.scala</include>
+                        </includes>
+                    </scala>
+                </configuration>
             </plugin>
         </plugins>
     </build>

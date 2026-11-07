@@ -75,6 +75,7 @@
         <jackson.version>2.13.4</jackson.version>
         <jts.version>1.20.0</jts.version>
         <jts.io.patch.version>1.21.0-datasyslab-3</jts.io.patch.version>
+        <sedona.spatial.type.impl>legacy</sedona.spatial.type.impl>
         <jts2geojson.version>0.16.1</jts2geojson.version>
         <spatial4j.version>0.8</spatial4j.version>
 
