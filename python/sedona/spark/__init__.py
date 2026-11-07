@@ -22,28 +22,19 @@ except ImportError:
         "Apache Sedona requires PySpark. Please install PySpark before using Sedona spark."
     )
 
+try:
+    from pyspark.util import is_remote_only
+except ImportError:
+    # PySpark before 4.0 is always the full distribution: the RDD API and the JVM gateway are there.
+    def is_remote_only() -> bool:
+        return False
+
+
 from sedona.spark.SedonaContext import SedonaContext
-from sedona.spark.core.SpatialRDD import (
-    CircleRDD,
-    LineStringRDD,
-    PointRDD,
-    PolygonRDD,
-    RectangleRDD,
-    SpatialRDD,
-)
 from sedona.spark.core.enums import FileDataSplitter, GridType, IndexType
-from sedona.spark.core.formatMapper import GeoJsonReader, WkbReader, WktReader
-from sedona.spark.core.formatMapper.shapefileParser import ShapefileReader
 from sedona.spark.core.geom.circle import Circle
 from sedona.spark.core.geom.envelope import Envelope
 from sedona.spark.core.geom.geography import Geography
-from sedona.spark.core.spatialOperator import (
-    JoinQuery,
-    JoinQueryRaw,
-    KNNQuery,
-    RangeQuery,
-    RangeQueryRaw,
-)
 from sedona.spark.geoarrow import create_spatial_dataframe, dataframe_to_arrow
 from sedona.spark.geoarrow.geoarrow import dataframe_to_arrow
 from sedona.spark.maps.SedonaKepler import SedonaKepler
@@ -74,9 +65,31 @@ from sedona.spark.stats.weighting import add_distance_band_column
 from sedona.spark.stats.weighting import add_binary_distance_band_column
 from sedona.spark.stats.weighting import add_weighted_distance_band_column
 from sedona.spark.utils import KryoSerializer, SedonaKryoRegistrator
-from sedona.spark.utils.adapter import Adapter
 from sedona.spark.utils.spatial_rdd_parser import GeoData
-from sedona.spark.utils.structured_adapter import StructuredAdapter
+
+# The RDD API drives the JVM through py4j. pyspark-client, the Spark Connect-only distribution,
+# ships neither (pyspark.RDD, SparkContext and py4j are absent), so with it these names are not
+# exported; the DataFrame API above works against any Spark Connect server.
+if not is_remote_only():
+    from sedona.spark.core.SpatialRDD import (
+        CircleRDD,
+        LineStringRDD,
+        PointRDD,
+        PolygonRDD,
+        RectangleRDD,
+        SpatialRDD,
+    )
+    from sedona.spark.core.formatMapper import GeoJsonReader, WkbReader, WktReader
+    from sedona.spark.core.formatMapper.shapefileParser import ShapefileReader
+    from sedona.spark.core.spatialOperator import (
+        JoinQuery,
+        JoinQueryRaw,
+        KNNQuery,
+        RangeQuery,
+        RangeQueryRaw,
+    )
+    from sedona.spark.utils.adapter import Adapter
+    from sedona.spark.utils.structured_adapter import StructuredAdapter
 
 from pyspark.sql import DataFrame
 
