@@ -38,7 +38,6 @@ else:
     raster_serde = None
     SedonaRaster = None
 
-from sedona.spark.utils import geometry_serde
 from sedona.spark.utils.geometry_sql_serde import (
     deserialize_geometry,
     serialize_geometry,
