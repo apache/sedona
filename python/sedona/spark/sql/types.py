@@ -46,6 +46,10 @@ from sedona.spark.utils.geometry_sql_serde import (
 from sedona.spark.core.geom.geography import Geography
 from sedona.spark.core.geom.box2d import Box2D
 from sedona.spark.core.geom.box3d import Box3D
+from sedona.spark.utils.geography_sql_serde import (
+    deserialize_geography,
+    serialize_geography,
+)
 
 
 class GeometryType(UserDefinedType):
@@ -101,11 +105,10 @@ class GeographyType(UserDefinedType):
         return BinaryType()
 
     def serialize(self, obj):
-        return geometry_serde.serialize(obj.geometry)
+        return serialize_geography(obj)
 
     def deserialize(self, datum):
-        geom, offset = geometry_serde.deserialize(datum)
-        return Geography(geom)
+        return deserialize_geography(datum)
 
     @classmethod
     def module(cls):
