@@ -23,41 +23,17 @@ import org.apache.sedona.stats.Weighting.{addBinaryDistanceBandColumn, addWeight
 import org.apache.sedona.stats.clustering.DBSCAN.dbscan
 import org.apache.sedona.stats.hotspotDetection.GetisOrd.gLocal
 import org.apache.sedona.stats.outlierDetection.LocalOutlierFactor.localOutlierFactor
-import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{Alias, Attribute, AttributeReference, Expression}
-import org.apache.spark.sql.execution.{ProjectExec, SparkPlan}
+import org.apache.spark.sql.catalyst.expressions.{Attribute, Expression}
 import org.apache.spark.sql.functions.{col, struct}
-import org.apache.spark.sql.sedona_sql.DataFrameShims
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
 
 private[apache] case class ST_DBSCAN(children: Seq[Expression])
     extends DataframePhysicalFunction {
 
-  private lazy val materializedGeometryName =
-    "__sedona_dbscan_geometry_" + java.util.UUID.randomUUID().toString.replace("-", "")
-
-  override protected def getInputName(i: Int, fieldName: String): String = {
-    if (i == 0 && !children.head.isInstanceOf[AttributeReference]) materializedGeometryName
-    else super.getInputName(i, fieldName)
-  }
-
-  override def execute(plan: SparkPlan, resultAttrs: Seq[Attribute]): RDD[InternalRow] = {
-    children.head match {
-      case _: AttributeReference => super.execute(plan, resultAttrs)
-      case geometry =>
-        // Materialize a named geometry after optimization can inline its expression.
-        val projected = ProjectExec(plan.output :+ Alias(geometry, geometryColumnName)(), plan)
-        transformDataframe(
-          DataFrameShims.createDataFrame(sparkSession, projected.execute(), projected.schema),
-          resultAttrs)
-          .drop(geometryColumnName)
-          .queryExecution
-          .toRdd
-    }
-  }
+  private lazy val temporaryColumnPrefix =
+    "__sedona_dbscan_" + java.util.UUID.randomUUID().toString.replace("-", "")
 
   override def dataType: DataType =
     StructType(Seq(StructField("isCore", BooleanType), StructField("cluster", LongType)))
@@ -72,9 +48,9 @@ private[apache] case class ST_DBSCAN(children: Seq[Expression])
   override def transformDataframe(
       dataframe: DataFrame,
       resultAttrs: Seq[Attribute]): DataFrame = {
-    val isCoreColumnName = materializedGeometryName + "_isCore"
-    val clusterColumnName = materializedGeometryName + "_cluster"
-    val includeOutliers =
+    val isCoreColumnName = temporaryColumnPrefix + "_isCore"
+    val clusterColumnName = temporaryColumnPrefix + "_cluster"
+    val includeOutliers: Boolean =
       if (children.length > 4) getScalarValue[Boolean](4, "includeOutliers")
       else SedonaConf.fromActiveSession().getDBSCANIncludeOutliers
 

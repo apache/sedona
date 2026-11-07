@@ -34,14 +34,6 @@ import os
 )
 class TestDBScan(TestBase):
 
-    def test_constant_geometry_column(self):
-        df = self.spark.range(2).withColumn(
-            "geometry", ST_MakePoint(f.lit(0.0), f.lit(0.0))
-        )
-        rows = dbscan(df, 0.1, 2).select("id", "cluster").collect()
-        assert len(rows) == 2
-        assert all(row.cluster != -1 for row in rows)
-
     def test_preserves_internal_named_columns(self):
         df = self.spark.createDataFrame(
             [(1, 0.0, "original", 42)], ["id", "x", "__isCore", "__cluster"]

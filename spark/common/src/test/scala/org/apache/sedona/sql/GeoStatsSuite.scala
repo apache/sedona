@@ -157,12 +157,13 @@ class GeoStatsSuite extends TestBaseScala {
   }
 
   it("test dbscan with geom literal") {
-    val result = spark
-      .sql("SELECT ST_DBSCAN(ST_GeomFromWKT('POINT(0.0 1.1)'), 1.0, 4, false)")
-      .head()
-      .getStruct(0)
-    assert(!result.getBoolean(0))
-    assert(result.getLong(1) == -1L)
+    val error = intercept[IllegalArgumentException] {
+      spark.sql("SELECT ST_DBSCAN(ST_GeomFromWKT('POINT(0.0 1.1)'), 1.0, 4, false)").collect()
+    }
+    assert(
+      error
+        .asInstanceOf[IllegalArgumentException]
+        .getMessage == "geometry argument must be a named reference to an existing column")
   }
 
   it("test dbscan with minPts variable") {
