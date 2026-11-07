@@ -92,3 +92,5 @@ A self-contained project allows you to create multiple Scala / Java files and wr
 
 !!!note
 	The detailed explanation of spark-submit is available on [Spark website](https://spark.apache.org/docs/latest/submitting-applications.html).
+
+See [Spark SQL geometry serialization](sql-geometry-serialization.md) before upgrading data stored with the legacy geometry UDT payload.
