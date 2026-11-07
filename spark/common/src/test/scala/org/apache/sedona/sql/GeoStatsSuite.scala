@@ -24,7 +24,7 @@ import org.apache.sedona.stats.hotspotDetection.GetisOrd.gLocal
 import org.apache.sedona.stats.outlierDetection.LocalOutlierFactor.localOutlierFactor
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.{col, expr, lit}
-import org.apache.spark.sql.types.LongType
+import org.apache.spark.sql.types.{BooleanType, LongType, StructField, StructType}
 import org.apache.spark.sql.sedona_sql.expressions.st_functions.{ST_DBSCAN, ST_LocalOutlierFactor}
 
 class GeoStatsSuite extends TestBaseScala {
@@ -107,6 +107,33 @@ class GeoStatsSuite extends TestBaseScala {
     val functionDf = dbscan(getData, 1.0, 4).select(col("id"), col("cluster"), col("isCore"))
 
     assert(sqlDf.join(functionDf, "id").count() == getData.count())
+  }
+
+  it("test dbscan with custom result field names") {
+    val functions = Seq(
+      ST_DBSCAN(
+        col("geometry"),
+        lit(0.5),
+        lit(4),
+        lit(false),
+        lit(true),
+        lit("core"),
+        lit("label")),
+      expr("ST_DBSCAN(geometry, 0.5, 4, false, true, 'core', 'label')"))
+
+    functions.foreach { function =>
+      val result = getData.withColumn("result", function)
+      assert(
+        result.schema("result").dataType ==
+          StructType(Seq(StructField("core", BooleanType), StructField("label", LongType))))
+
+      val rows = result.select("id", "result.core", "result.label").collect()
+      assert(rows.length == 9)
+      assert(rows.count(_.getAs[Boolean]("core")) == 8)
+      assert(rows.find(_.getAs[Int]("id") == 14).get.getAs[Long]("label") == -1L)
+      assert(
+        rows.filter(_.getAs[Boolean]("core")).map(_.getAs[Long]("label")).distinct.length == 2)
+    }
   }
 
   it("test dbscan function with distance column") {

@@ -108,11 +108,17 @@ def dbscan(
                 float(epsilon),
                 min_pts,
                 use_spheroid,
-                include_outliers=include_outliers,
+                include_outliers,
+                is_core_column_name,
+                cluster_column_name,
             ),
         )
-        .withColumn(is_core_column_name, _column(dbscan_result).getField("isCore"))
-        .withColumn(cluster_column_name, _column(dbscan_result).getField("cluster"))
+        .withColumn(
+            is_core_column_name, _column(dbscan_result).getField(is_core_column_name)
+        )
+        .withColumn(
+            cluster_column_name, _column(dbscan_result).getField(cluster_column_name)
+        )
         .drop(dbscan_result)
     )
     if not include_outliers:

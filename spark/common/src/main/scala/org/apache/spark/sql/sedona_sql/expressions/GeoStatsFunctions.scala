@@ -28,6 +28,7 @@ import org.apache.spark.sql.catalyst.expressions.{Attribute, Expression}
 import org.apache.spark.sql.functions.{col, struct}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
+import org.apache.spark.unsafe.types.UTF8String
 
 private[apache] case class ST_DBSCAN(children: Seq[Expression])
     extends DataframePhysicalFunction {
@@ -35,12 +36,21 @@ private[apache] case class ST_DBSCAN(children: Seq[Expression])
   private lazy val temporaryColumnPrefix =
     "__sedona_dbscan_" + java.util.UUID.randomUUID().toString.replace("-", "")
 
+  private def isCoreColumnName: String =
+    if (children.length > 5) getScalarValue[UTF8String](5, "isCoreColumnName").toString
+    else "isCore"
+
+  private def clusterColumnName: String =
+    if (children.length > 6) getScalarValue[UTF8String](6, "clusterColumnName").toString
+    else "cluster"
+
   override def dataType: DataType =
-    StructType(Seq(StructField("isCore", BooleanType), StructField("cluster", LongType)))
+    StructType(
+      Seq(StructField(isCoreColumnName, BooleanType), StructField(clusterColumnName, LongType)))
 
   override def inputTypes: Seq[AbstractDataType] =
-    Seq(GeometryUDT(), DoubleType, IntegerType, BooleanType) ++
-      (if (children.length > 4) Seq(BooleanType) else Seq.empty)
+    Seq(GeometryUDT(), DoubleType, IntegerType, BooleanType, BooleanType, StringType, StringType)
+      .take(children.length)
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression =
     copy(children = newChildren)
@@ -48,8 +58,8 @@ private[apache] case class ST_DBSCAN(children: Seq[Expression])
   override def transformDataframe(
       dataframe: DataFrame,
       resultAttrs: Seq[Attribute]): DataFrame = {
-    val isCoreColumnName = temporaryColumnPrefix + "_isCore"
-    val clusterColumnName = temporaryColumnPrefix + "_cluster"
+    val tempIsCoreColumnName = temporaryColumnPrefix + "_isCore"
+    val tempClusterColumnName = temporaryColumnPrefix + "_cluster"
     val includeOutliers: Boolean =
       if (children.length > 4) getScalarValue[Boolean](4, "includeOutliers")
       else SedonaConf.fromActiveSession().getDBSCANIncludeOutliers
@@ -61,12 +71,14 @@ private[apache] case class ST_DBSCAN(children: Seq[Expression])
       geometryColumnName,
       includeOutliers,
       getScalarValue[Boolean](3, "useSpheroid"),
-      isCoreColumnName,
-      clusterColumnName)
+      tempIsCoreColumnName,
+      tempClusterColumnName)
       .withColumn(
         getResultName(resultAttrs),
-        struct(col(isCoreColumnName), col(clusterColumnName)))
-      .drop(isCoreColumnName, clusterColumnName)
+        struct(
+          col(tempIsCoreColumnName).as(isCoreColumnName),
+          col(tempClusterColumnName).as(clusterColumnName)))
+      .drop(tempIsCoreColumnName, tempClusterColumnName)
 
     ret
 
