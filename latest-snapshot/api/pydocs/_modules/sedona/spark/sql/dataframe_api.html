@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.dataframe_api &mdash; Apache Sedona Python Documentation</title>
@@ -177,6 +176,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../sedona.spark.html#module-sedona.spark">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.html#sedona.spark.is_remote_only"><code class="docutils literal notranslate"><span class="pre">is_remote_only()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.html#sedona.spark.to_sedonadb"><code class="docutils literal notranslate"><span class="pre">to_sedonadb()</span></code></a></li>
 </ul>
 </li>
@@ -235,7 +235,6 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparkContext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">Column</span><span class="p">,</span> <span class="n">SparkSession</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">functions</span> <span class="k">as</span> <span class="n">f</span>
 
@@ -284,6 +283,9 @@
         <span class="k">return</span> <span class="n">call_sedona_function_connect</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
 
     <span class="n">args</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">_convert_argument_to_java_column</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+    <span class="c1"># Only here: pyspark-client (Spark Connect only) has no SparkContext.</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparkContext</span>
 
     <span class="n">jvm</span> <span class="o">=</span> <span class="n">SparkContext</span><span class="o">.</span><span class="n">_jvm</span>
     <span class="k">if</span> <span class="n">jvm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

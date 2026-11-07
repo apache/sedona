@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.utils.binary_parser &mdash; Apache Sedona Python Documentation</title>
@@ -177,6 +176,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../sedona.spark.html#module-sedona.spark">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.html#sedona.spark.is_remote_only"><code class="docutils literal notranslate"><span class="pre">is_remote_only()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.html#sedona.spark.to_sedonadb"><code class="docutils literal notranslate"><span class="pre">to_sedonadb()</span></code></a></li>
 </ul>
 </li>
@@ -230,11 +230,14 @@
 <span class="c1"># under the License.</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">attr</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparkContext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.wkb</span><span class="w"> </span><span class="kn">import</span> <span class="n">loads</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="c1"># An annotation only; pyspark-client (Spark Connect only) has no SparkContext.</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparkContext</span>
 
 <span class="n">DOUBLE_SIZE</span> <span class="o">=</span> <span class="mi">8</span>
 <span class="n">INT_SIZE</span> <span class="o">=</span> <span class="mi">4</span>
@@ -311,7 +314,7 @@
             <span class="k">raise</span> <span class="ne">UnicodeEncodeError</span>
         <span class="k">return</span> <span class="n">encoded_string</span></div>
 
-<div class="viewcode-block" id="BinaryParser.read_kryo_string"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.read_kryo_string">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">read_kryo_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">sc</span><span class="p">:</span> <span class="n">SparkContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="BinaryParser.read_kryo_string"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.read_kryo_string">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">read_kryo_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">sc</span><span class="p">:</span> <span class="s2">"SparkContext"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">array_length</span> <span class="o">=</span> <span class="n">length</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span>
         <span class="n">byte_array</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">_gateway</span><span class="o">.</span><span class="n">new_array</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">Byte</span><span class="p">,</span> <span class="n">array_length</span><span class="p">)</span>
 

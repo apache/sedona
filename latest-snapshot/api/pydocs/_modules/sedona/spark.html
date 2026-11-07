@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark &mdash; Apache Sedona Python Documentation</title>
@@ -177,6 +176,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../sedona.spark.html#module-sedona.spark">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../sedona.spark.html#sedona.spark.is_remote_only"><code class="docutils literal notranslate"><span class="pre">is_remote_only()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../sedona.spark.html#sedona.spark.to_sedonadb"><code class="docutils literal notranslate"><span class="pre">to_sedonadb()</span></code></a></li>
 </ul>
 </li>
@@ -235,28 +235,19 @@
         <span class="s2">"Apache Sedona requires PySpark. Please install PySpark before using Sedona spark."</span>
     <span class="p">)</span>
 
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_remote_only</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="c1"># PySpark before 4.0 is always the full distribution: the RDD API and the JVM gateway are there.</span>
+<div class="viewcode-block" id="is_remote_only"><a class="viewcode-back" href="../../sedona.spark.html#sedona.spark.is_remote_only">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">is_remote_only</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.SedonaContext</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaContext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.SpatialRDD</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">CircleRDD</span><span class="p">,</span>
-    <span class="n">LineStringRDD</span><span class="p">,</span>
-    <span class="n">PointRDD</span><span class="p">,</span>
-    <span class="n">PolygonRDD</span><span class="p">,</span>
-    <span class="n">RectangleRDD</span><span class="p">,</span>
-    <span class="n">SpatialRDD</span><span class="p">,</span>
-<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileDataSplitter</span><span class="p">,</span> <span class="n">GridType</span><span class="p">,</span> <span class="n">IndexType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.formatMapper</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoJsonReader</span><span class="p">,</span> <span class="n">WkbReader</span><span class="p">,</span> <span class="n">WktReader</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.formatMapper.shapefileParser</span><span class="w"> </span><span class="kn">import</span> <span class="n">ShapefileReader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.geom.circle</span><span class="w"> </span><span class="kn">import</span> <span class="n">Circle</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.geom.envelope</span><span class="w"> </span><span class="kn">import</span> <span class="n">Envelope</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.geom.geography</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geography</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.spatialOperator</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">JoinQuery</span><span class="p">,</span>
-    <span class="n">JoinQueryRaw</span><span class="p">,</span>
-    <span class="n">KNNQuery</span><span class="p">,</span>
-    <span class="n">RangeQuery</span><span class="p">,</span>
-    <span class="n">RangeQueryRaw</span><span class="p">,</span>
-<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geoarrow</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_spatial_dataframe</span><span class="p">,</span> <span class="n">dataframe_to_arrow</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geoarrow.geoarrow</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataframe_to_arrow</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.maps.SedonaKepler</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaKepler</span>
@@ -287,9 +278,31 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.stats.weighting</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_binary_distance_band_column</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.stats.weighting</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_weighted_distance_band_column</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">KryoSerializer</span><span class="p">,</span> <span class="n">SedonaKryoRegistrator</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.utils.adapter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Adapter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.utils.spatial_rdd_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoData</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.utils.structured_adapter</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructuredAdapter</span>
+
+<span class="c1"># The RDD API drives the JVM through py4j. pyspark-client, the Spark Connect-only distribution,</span>
+<span class="c1"># ships neither (pyspark.RDD, SparkContext and py4j are absent), so with it these names are not</span>
+<span class="c1"># exported; the DataFrame API above works against any Spark Connect server.</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">is_remote_only</span><span class="p">():</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.SpatialRDD</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+        <span class="n">CircleRDD</span><span class="p">,</span>
+        <span class="n">LineStringRDD</span><span class="p">,</span>
+        <span class="n">PointRDD</span><span class="p">,</span>
+        <span class="n">PolygonRDD</span><span class="p">,</span>
+        <span class="n">RectangleRDD</span><span class="p">,</span>
+        <span class="n">SpatialRDD</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.formatMapper</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoJsonReader</span><span class="p">,</span> <span class="n">WkbReader</span><span class="p">,</span> <span class="n">WktReader</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.formatMapper.shapefileParser</span><span class="w"> </span><span class="kn">import</span> <span class="n">ShapefileReader</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.spatialOperator</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+        <span class="n">JoinQuery</span><span class="p">,</span>
+        <span class="n">JoinQueryRaw</span><span class="p">,</span>
+        <span class="n">KNNQuery</span><span class="p">,</span>
+        <span class="n">RangeQuery</span><span class="p">,</span>
+        <span class="n">RangeQueryRaw</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.utils.adapter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Adapter</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.utils.structured_adapter</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructuredAdapter</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span>
 
