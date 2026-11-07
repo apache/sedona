@@ -184,8 +184,9 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
   /**
    * Gets the query and object plans based on the left shape.
    *
-   * This method checks if the left shape is part of the left or right plan and returns the query
-   * and object plans accordingly.
+   * Match both shape expressions by attribute identity, as the logical planner does. Expression
+   * text need not appear in an input plan when a shape is computed or wrapped by an input
+   * adapter.
    *
    * @param leftShape
    *   The left shape expression.
@@ -193,8 +194,14 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
    *   (SparkPlan, SparkPlan) The query and object plans.
    */
   private def getQueryAndObjectPlans(leftShape: Expression) = {
-    val isLeftQuerySide =
-      left.toString().toLowerCase().contains(leftShape.toString().toLowerCase())
+    def matches(shape: Expression, plan: SparkPlan): Boolean =
+      shape.references.nonEmpty && shape.references.subsetOf(plan.outputSet)
+
+    val isLeftQuerySide = matches(leftShape, left) && matches(rightShape, right)
+    val isRightQuerySide = matches(leftShape, right) && matches(rightShape, left)
+    require(
+      isLeftQuerySide || isRightQuerySide,
+      "KNN join shape expressions must reference their respective input plans")
     if (isLeftQuerySide) {
       querySide = LeftSide
       (left, right, false)
