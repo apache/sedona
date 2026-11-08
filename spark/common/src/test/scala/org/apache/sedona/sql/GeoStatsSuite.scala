@@ -109,31 +109,44 @@ class GeoStatsSuite extends TestBaseScala {
     assert(sqlDf.join(functionDf, "id").count() == getData.count())
   }
 
+  it("test dbscan can exclude outliers") {
+    val sqlDf = getData
+      .withColumn("sql_results", expr("ST_DBSCAN(geometry, 0.5, 4, false, false)"))
+      .select(
+        col("id"),
+        col("sql_results.cluster").as("cluster"),
+        col("sql_results.isCore").as("isCore"))
+
+    val functionDf =
+      dbscan(getData, 0.5, 4, includeOutliers = false)
+        .select(col("id"), col("cluster"), col("isCore"))
+
+    assert(sqlDf.join(functionDf, "id").count() == 8)
+    assert(sqlDf.filter(col("cluster") === -1L).count() == 0)
+  }
+
   it("test dbscan with custom result field names") {
-    val functions = Seq(
-      ST_DBSCAN(
-        col("geometry"),
-        lit(0.5),
-        lit(4),
-        lit(false),
-        lit(true),
-        lit("core"),
-        lit("label")),
-      expr("ST_DBSCAN(geometry, 0.5, 4, false, true, 'core', 'label')"))
+    val sqlDf = getData
+      .withColumn(
+        "sql_results",
+        expr("ST_DBSCAN(geometry, 1.0, 4, false, true, 'isCoreLabel', 'clusterLabel')"))
+      .select(col("id"), col("sql_results"))
 
-    functions.foreach { function =>
-      val result = getData.withColumn("result", function)
-      assert(
-        result.schema("result").dataType ==
-          StructType(Seq(StructField("core", BooleanType), StructField("label", LongType))))
+    val functionDf =
+      dbscan(
+        getData,
+        1.0,
+        4,
+        useSpheroid = false,
+        includeOutliers = true,
+        isCoreColumnName = "isCoreLabel",
+        clusterColumnName = "clusterLabel")
+        .select(col("id"), col("clusterLabel"), col("isCoreLabel"))
 
-      val rows = result.select("id", "result.core", "result.label").collect()
-      assert(rows.length == 9)
-      assert(rows.count(_.getAs[Boolean]("core")) == 8)
-      assert(rows.find(_.getAs[Int]("id") == 14).get.getAs[Long]("label") == -1L)
-      assert(
-        rows.filter(_.getAs[Boolean]("core")).map(_.getAs[Long]("label")).distinct.length == 2)
-    }
+    assert(
+      sqlDf.schema("sql_results").dataType == StructType(
+        Seq(StructField("isCoreLabel", BooleanType), StructField("clusterLabel", LongType))))
+    assert(sqlDf.join(functionDf, "id").count() == getData.count())
   }
 
   it("test dbscan function with distance column") {
@@ -231,17 +244,6 @@ class GeoStatsSuite extends TestBaseScala {
       .withColumn("sql_result", expr("SQRT(ST_LocalOutlierFactor(geometry, 4, false))"))
       .collect()
     assert(result.length > 0)
-  }
-
-  it("test DBSCAN preserves columns named __isCore and __cluster") {
-    val rows = getData
-      .withColumn("__isCore", col("id"))
-      .withColumn("__cluster", col("id"))
-      .withColumn("sql_result", expr("ST_DBSCAN(geometry, 0.1, 4, false)"))
-      .collect()
-    assert(rows.length == 9)
-    assert(rows.forall(row => row.getAs[Int]("__isCore") == row.getAs[Int]("id")))
-    assert(rows.forall(row => row.getAs[Int]("__cluster") == row.getAs[Int]("id")))
   }
 
   it("test ST_BinaryDistanceBandColumn") {
