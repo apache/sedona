@@ -33,9 +33,6 @@ import org.apache.spark.unsafe.types.UTF8String
 private[apache] case class ST_DBSCAN(children: Seq[Expression])
     extends DataframePhysicalFunction {
 
-  private lazy val temporaryColumnPrefix =
-    "__sedona_dbscan_" + java.util.UUID.randomUUID().toString.replace("-", "")
-
   private def isCoreColumnName: String =
     if (children.length > 5) getScalarValue[UTF8String](5, "isCoreColumnName").toString
     else "isCore"
@@ -58,8 +55,13 @@ private[apache] case class ST_DBSCAN(children: Seq[Expression])
   override def transformDataframe(
       dataframe: DataFrame,
       resultAttrs: Seq[Attribute]): DataFrame = {
-    val tempIsCoreColumnName = temporaryColumnPrefix + "_isCore"
-    val tempClusterColumnName = temporaryColumnPrefix + "_cluster"
+    require(
+      !dataframe.columns.contains("__isCore"),
+      "__isCore is a  reserved name by the dbscan algorithm. Please rename the columns before calling the ST_DBSCAN function.")
+    require(
+      !dataframe.columns.contains("__cluster"),
+      "__cluster is a  reserved name by the dbscan algorithm. Please rename the columns before calling the ST_DBSCAN function.")
+
     val includeOutliers: Boolean =
       if (children.length > 4) getScalarValue[Boolean](4, "includeOutliers")
       else SedonaConf.fromActiveSession().getDBSCANIncludeOutliers
@@ -71,14 +73,12 @@ private[apache] case class ST_DBSCAN(children: Seq[Expression])
       geometryColumnName,
       includeOutliers,
       getScalarValue[Boolean](3, "useSpheroid"),
-      tempIsCoreColumnName,
-      tempClusterColumnName)
+      "__isCore",
+      "__cluster")
       .withColumn(
         getResultName(resultAttrs),
-        struct(
-          col(tempIsCoreColumnName).as(isCoreColumnName),
-          col(tempClusterColumnName).as(clusterColumnName)))
-      .drop(tempIsCoreColumnName, tempClusterColumnName)
+        struct(col("__isCore").as(isCoreColumnName), col("__cluster").as(clusterColumnName)))
+      .drop("__isCore", "__cluster")
 
     ret
 

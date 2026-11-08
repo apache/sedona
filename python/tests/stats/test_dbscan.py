@@ -34,17 +34,6 @@ import os
 )
 class TestDBScan(TestBase):
 
-    def test_preserves_internal_named_columns(self):
-        df = self.spark.createDataFrame(
-            [(1, 0.0, "original", 42)], ["id", "x", "__isCore", "__cluster"]
-        ).select("*", ST_MakePoint("x", f.lit(0.0)).alias("geometry"))
-        rows = dbscan(df, 0.1, 1).collect()
-        assert len(rows) == 1
-        assert rows[0]["__isCore"] == "original"
-        assert rows[0]["__cluster"] == 42
-        assert rows[0].isCore
-        assert rows[0].cluster != -1
-
     def test_geometry_validation(self, sample_dataframe):
         ambiguous = sample_dataframe.withColumn("other", f.col("arealandmark"))
         with pytest.raises(ValueError, match="Multiple GeometryType"):

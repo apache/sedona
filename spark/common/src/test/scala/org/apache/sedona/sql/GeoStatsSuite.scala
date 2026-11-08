@@ -246,6 +246,17 @@ class GeoStatsSuite extends TestBaseScala {
     assert(result.length > 0)
   }
 
+  it("test DBSCAN with a column named __isCore in input df") {
+    val exception = intercept[IllegalArgumentException] {
+      getData
+        .withColumn("__isCore", lit(1))
+        .withColumn("sql_result", expr("ST_DBSCAN(geometry, 0.1, 4, false)"))
+        .collect()
+    }
+    assert(
+      exception.getMessage == "requirement failed: __isCore is a  reserved name by the dbscan algorithm. Please rename the columns before calling the ST_DBSCAN function.")
+  }
+
   it("test ST_BinaryDistanceBandColumn") {
     val weightedDf = getData
       .withColumn(
