@@ -17,11 +17,17 @@
  under the License.
  -->
 
-# Spark SQL geometry serialization
+# Spark SQL spatial serialization
 
 Starting in v2.0.0, Spark SQL geometry values use a signed four-byte little-endian SRID followed by ISO WKB internally. The JVM uses the public JTS IO implementation and Python uses Shapely WKB. The WKB type codes use ISO offsets (1000 for Z, 2000 for M, 3000 for ZM), and the writer emits little-endian WKB. Readers accept either WKB byte order; the SRID prefix is always little-endian. The prefix supplies the SRID for the whole geometry, including collection members. The SQL transport preserves SRID and supported XY, XYZ, XYM and XYZM layouts, including dimensional empties. Python M support depends on the installed Shapely/GEOS version.
 
 The UDT payload is not a standalone WKB/EWKB value: use `ST_AsBinary` or `ST_AsEWKB` for explicit interchange columns. This changes the internal payload of `GeometryUDT`; it does not change its SQL type name or the Python Shapely geometry API. The JVM writer retains its existing layout validation: explicitly different layouts within a polygon or multipart geometry are rejected, while general geometry collection members can retain independent layouts. Python follows Shapely's public WKB representation, which can preserve mixed member layouts instead of applying the compact SQL serializer's single-layout promotion. When Shapely/GEOS retains the declared dimensions, an XY/XYZ `MultiPoint` remains distinct from an all-XYZ `MultiPoint` whose first Z is NaN in `geom_equals_identical`. GEOS versions before 3.12 can treat a NaN-Z member as XY before Sedona receives the value. The public JVM WKB writer canonicalizes NaN payload bits and represents a point whose X and Y are both NaN as `POINT EMPTY`. SRIDs use the full signed 32-bit prefix instead of the compact format's 24-bit field. Finite coordinates and supported coordinate dimensions are preserved.
+
+## Geography SQL values
+
+`GeographyUDT` uses the same four-byte little-endian SRID prefix and ISO WKB contract. Geography retains its non-negative SRID requirement. The prefix is authoritative even when input EWKB contains an embedded SRID. The JVM preserves the WKB byte order and coordinate bytes of lazy geography values while normalizing their headers to ISO types; computed S2 values use the public S2 WKB writer. Python uses public Shapely WKB. This changes SQL transport only: S2 spherical computation, lazy/eager shape-index behavior and the Python `Geography` wrapper are preserved.
+
+Geometry and geography UDT payloads have the same framing, but their type metadata and computation remain distinct. They are also distinct from Spark 4.2 native spatial values, which use Spark's default serializer and native CRS validation.
 
 ## Migrating persisted UDT values
 
@@ -44,8 +50,32 @@ new_df = portable_df.selectExpr("id", "ST_GeomFromWKB(geom_wkb) AS geom")
 
 Include the remaining non-geometry columns in the projection as appropriate. Check row counts, nulls, SRIDs and coordinate dimensions after migrating. Standard GeoParquet and explicit WKB/EWKB columns already use portable geometry encodings and do not need this compact-UDT conversion.
 
+### Geography UDT files
+
+Earlier `GeographyUDT` files contain a **big-endian** SRID prefix followed by WKB. The new SQL reader expects a **little-endian** prefix. Export these files with the version that wrote them before upgrading, even though their WKB coordinate payload may already be valid ISO WKB. There is no automatic format detection: SRID 0 looks identical, SRID 4326 becomes negative when byte-swapped, and SRID 1 can silently become 16777216.
+
+Export explicit EWKB and SRID columns with the old version. Convert to geometry only for this transport operation; the restored column remains geography:
+
+```python
+old_df = sedona.read.parquet("old-geography-udt-data")
+old_df.selectExpr(
+    "id",
+    "ST_AsEWKB(ST_GeogToGeometry(geog)) AS geog_wkb",
+    "ST_SRID(ST_GeogToGeometry(geog)) AS geog_srid",
+).write.parquet("portable-geography-data")
+```
+
+On Spark 3.5–4.1, reconstruct geography with the new version and the explicit SRID column:
+
+```python
+portable_df = sedona.read.parquet("portable-geography-data")
+new_df = portable_df.selectExpr("id", "ST_GeogFromWKB(geog_wkb, geog_srid) AS geog")
+```
+
+Include other columns as needed and verify row counts, nulls, SRIDs, coordinate dimensions and representative spherical operations. Spark 4.2 native geography additionally requires a supported native CRS; changing the UDT framing does not relax that validation. Its built-in `ST_GeogFromWKB` takes one argument, so the two-argument reconstruction above is specific to older runtimes. Keep the separate SRID column when planning a native migration: EWKB writers can omit SRID 0, and a native constructor treats an absent CRS as 4326. Use an explicit Sedona UDT schema when retaining values outside the native contract rather than silently assigning a different CRS. Never relabel old geography bytes as new UDT data or infer their prefix byte order from the SRID's value.
+
 ## Scope
 
-The RDD/Kryo geometry and spatial-index serializers, Python RDD framing and Flink serialization retain their existing formats. Geography's S2 implementation and geography UDT byte format are also unchanged by this geometry-only migration.
+The RDD/Kryo geometry and geography serializers, spatial-index serializers, Python RDD framing and Flink serialization retain their existing formats. In particular, the common geography serializer used by these paths keeps its big-endian SRID prefix. Only Spark SQL geography callers use the new SQL serializer. Standard GeoParquet and explicit WKB/EWKB columns are unaffected by this UDT framing migration.
 
 Application code should pass Shapely objects through `GeometryType` or use SQL WKB functions at external boundaries. The legacy `geometry_serde` utilities remain available for their existing compact-format contract; their bytes are no longer the SQL geometry payload.
