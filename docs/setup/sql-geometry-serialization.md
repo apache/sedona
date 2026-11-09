@@ -31,7 +31,7 @@ Geometry and geography UDT payloads have the same framing, but their type metada
 
 ## Migrating persisted UDT values
 
-An ordinary Parquet file written with the old `GeometryUDT` can contain Sedona's compact serialization bytes under UDT metadata. These bytes are not the new SRID-prefixed ISO WKB payload and are not automatically converted by the new reader. Earlier development snapshots using EWKB-only UDT payloads must also be rewritten before switching formats; the reader does not guess the stored encoding. Export such data with the old Sedona version before upgrading. For example:
+An ordinary Parquet file written with the old `GeometryUDT` can contain Sedona's compact serialization bytes under UDT metadata. These bytes are not the new SRID-prefixed ISO WKB payload and are not automatically converted by the new reader. The reader does not guess the stored encoding. Export such data with the old Sedona version before upgrading. For example:
 
 ```python
 # Run with the Sedona version that wrote the original UDT data.
