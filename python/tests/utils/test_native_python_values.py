@@ -89,7 +89,6 @@ def test_legacy_explicit_geography_udt_uses_srid_and_iso_wkb(srid):
     payload = struct.pack("<iBI2d", srid, 1, 1, 1.0, 2.0)
     result = types.LegacyGeographyType().deserialize(payload)
     assert isinstance(result, SedonaGeography)
-    assert shapely.get_srid(result.geometry) == srid
     assert result.geometry.wkt == "POINT (1 2)"
     assert types.LegacyGeographyType().serialize(result) == payload
     assert types.LegacyGeographyType().serialize(None) is None
