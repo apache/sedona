@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -28,7 +27,7 @@
       
       
       <link rel="icon" href="../../../favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -5870,15 +5869,15 @@ JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 11)}" exec "/usr/local/Cella
 </ol>
 <h2 id="1-sedona-github">1. 获得 Sedona GitHub 仓库的写权限<a class="headerlink" href="#1-sedona-github" title="Permanent link">&para;</a></h2>
 <ol>
-<li>确认您的 GitHub 账号已启用 2FA：<a href="https://help.github.com/articles/securing-your-account-with-two-factor-authentication-2fa/">https://help.github.com/articles/securing-your-account-with-two-factor-authentication-2fa/</a></li>
-<li>在 Apache ID 资料中填写您的 GitHub ID：<a href="https://id.apache.org/">https://id.apache.org/</a></li>
-<li>通过 GitBox（Apache 账号关联工具）合并 Apache 与 GitHub 账号：<a href="https://gitbox.apache.org/setup/">https://gitbox.apache.org/setup/</a><ul>
+<li>确认您的 GitHub 账号已启用 2FA：https://help.github.com/articles/securing-your-account-with-two-factor-authentication-2fa/</li>
+<li>在 Apache ID 资料中填写您的 GitHub ID：https://id.apache.org/</li>
+<li>通过 GitBox（Apache 账号关联工具）合并 Apache 与 GitHub 账号：https://gitbox.apache.org/setup/<ul>
 <li>GitBox 中应能看到 5 个绿色对勾。</li>
 <li>等待至少 30 分钟，您会收到一封邀请加入 Apache GitHub 组织的邮件，点击接受邀请即可。</li>
 </ul>
 </li>
-<li>接受邀请后，确认您已在团队中：<a href="https://github.com/orgs/apache/teams/sedona-committers">https://github.com/orgs/apache/teams/sedona-committers</a></li>
-<li>此外，如果您当选为 Sedona PMC 成员，还应确认自己出现在 LDAP 的 Sedona PMC 列表中：<a href="https://whimsy.apache.org/roster/pmc/sedona">https://whimsy.apache.org/roster/pmc/sedona</a></li>
+<li>接受邀请后，确认您已在团队中：https://github.com/orgs/apache/teams/sedona-committers</li>
+<li>此外，如果您当选为 Sedona PMC 成员，还应确认自己出现在 LDAP 的 Sedona PMC 列表中：https://whimsy.apache.org/roster/pmc/sedona</li>
 </ol>
 <h2 id="2-gpg">2. 准备 GPG 私钥<a class="headerlink" href="#2-gpg" title="Permanent link">&para;</a></h2>
 <ol>
@@ -5896,7 +5895,7 @@ JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 11)}" exec "/usr/local/Cella
 <li>运行 <code>gpg --export --armor 3AA5C34371567BD2</code>，替换为您的 key ID。</li>
 <li>复制 <code>-----BEGIN PGP PUBLIC KEY BLOCK-----</code> 与 <code>-----END PGP PUBLIC KEY BLOCK-----</code> 之间的内容（即 armored key）。</li>
 <li><code>-----BEGIN PGP PUBLIC KEY BLOCK-----</code> 与实际 key 之间必须有一空行。</li>
-<li>将 armored key 发布到主流 key server：<a href="https://keyserver.pgp.com/">https://keyserver.pgp.com/</a></li>
+<li>将 armored key 发布到主流 key server：https://keyserver.pgp.com/</li>
 </ol>
 <h2 id="3-svn-keys">3. 使用 SVN 更新 KEYS<a class="headerlink" href="#3-svn-keys" title="Permanent link">&para;</a></h2>
 <p>通过 SVN 将您的 armored 公钥追加到下面这两个 <code>KEYS</code> 文件中：</p>
@@ -6120,7 +6119,7 @@ rm<span class="w"> </span>-rf<span class="w"> </span>sedona-release
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["announce.dismiss", "content.code.copy", "content.action.edit", "search.highlight", "search.share", "search.suggest", "navigation.footer", "navigation.instant", "navigation.instant.prefetch", "navigation.tabs", "navigation.tabs.sticky", "navigation.top"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"default": ["latest"], "provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.c21346df.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
         <script src="../../../assets/javascripts/main.min.js"></script>
       
