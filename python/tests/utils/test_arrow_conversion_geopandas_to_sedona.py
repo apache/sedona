@@ -85,16 +85,23 @@ class TestGeopandasToSedonaWithArrow(TestBase):
             {
                 "name": ["Sedona", "Apache"],
                 "geometry": gpd.points_from_xy([0, 1], [0, 1]),
-                "geometry2": gpd.points_from_xy([0, 1], [0, 1]),
+                "geometry2": gpd.points_from_xy([10, 11], [20, 21]),
             }
         )
 
         df = create_spatial_dataframe(self.spark, gdf)
 
         assert df.count() == 2
-        assert df.columns == ["name", "geometry2", "geometry"]
+        assert df.columns == ["name", "geometry", "geometry2"]
         assert df.schema["geometry"].dataType == GeometryType()
         assert df.schema["geometry2"].dataType == GeometryType()
+        assert {
+            row.name: (row.geometry.coords[0], row.geometry2.coords[0])
+            for row in df.collect()
+        } == {
+            "Sedona": ((0, 0), (10, 20)),
+            "Apache": ((1, 1), (11, 21)),
+        }
 
     @pytest.mark.skipif(
         not pyspark.__version__.startswith("3.5"),
