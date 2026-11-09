@@ -18,14 +18,18 @@
  */
 package org.apache.sedona.sql.utils
 
-import org.apache.sedona.common.Constructors
+import java.nio.{ByteBuffer, ByteOrder}
+import java.util.Arrays
+
 import org.apache.sedona.common.geometrySerde.{GeometrySerializer => LayoutPolicy}
-import org.apache.sedona.common.utils.GeomUtils
+import org.apache.spark.sql.sedona_sql.types.PublicWkbHeaderAdapter
+import org.datasyslab.jts.io.{WKBReader, WKBWriter}
 import org.locationtech.jts.geom.{Geometry, GeometryFactory}
+import org.locationtech.jts.io.{ByteOrderValues, ParseException}
 
 /**
- * SQL geometry transport using public EWKB. RDD/index serializers use their separate compact
- * format.
+ * SQL geometry transport: a signed little-endian int32 SRID followed by ISO WKB. RDD/index
+ * serializers use their separate compact format.
  */
 object GeometrySerializer {
 
@@ -35,11 +39,20 @@ object GeometrySerializer {
    * @param geometry
    *   JTS geometry
    * @return
-   *   EWKB bytes preserving coordinate dimensions and SRID
+   *   SRID-prefixed ISO WKB preserving coordinate dimensions
    */
   def serialize(geometry: Geometry): Array[Byte] = {
+    if (geometry == null) return null
     validateLayout(geometry)
-    GeomUtils.getEWKB(geometry)
+    val writer = new WKBWriter(4, ByteOrderValues.LITTLE_ENDIAN, false)
+    writer.setPreserveCoordinateDimensions(true)
+    val wkb = PublicWkbHeaderAdapter.toIsoWkb(writer.write(geometry))
+    ByteBuffer
+      .allocate(Integer.BYTES + wkb.length)
+      .order(ByteOrder.LITTLE_ENDIAN)
+      .putInt(geometry.getSRID)
+      .put(wkb)
+      .array()
   }
 
   // Preserve the existing layout contract without using compact byte serialization.
@@ -55,10 +68,10 @@ object GeometrySerializer {
   }
 
   /**
-   * Given EWKB bytes returns Geometry
+   * Given SRID-prefixed ISO WKB bytes returns Geometry
    *
    * @param value
-   *   EWKB bytes
+   *   SRID-prefixed ISO WKB bytes
    * @return
    *   JTS geometry
    */
@@ -66,6 +79,18 @@ object GeometrySerializer {
     if (value == null) {
       return new GeometryFactory().createGeometryCollection()
     }
-    Constructors.geomFromWKB(value)
+    if (value.length < Integer.BYTES) {
+      throw new IllegalArgumentException("Truncated spatial SRID header")
+    }
+    val srid = ByteBuffer.wrap(value).order(ByteOrder.LITTLE_ENDIAN).getInt
+    try {
+      // The byte-array reader bounds declared counts by payload size; its stream entry point does not.
+      WKBReader
+        .forDeclaredDimensions(srid)
+        .read(Arrays.copyOfRange(value, Integer.BYTES, value.length))
+    } catch {
+      case e: ParseException =>
+        throw new IllegalArgumentException("Invalid serialized Geometry", e)
+    }
   }
 }

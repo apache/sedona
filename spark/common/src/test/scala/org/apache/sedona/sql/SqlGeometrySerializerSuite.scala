@@ -29,22 +29,28 @@ class SqlGeometrySerializerSuite extends AnyFunSuite {
     reader.setIsOldJtsCoordinateSyntaxAllowed(false)
     reader.read(text)
   }
-  private def decode(bytes: Array[Byte]) = WKBReader.forDeclaredDimensions().read(bytes)
+  private def decode(bytes: Array[Byte]) = {
+    val srid = java.nio.ByteBuffer.wrap(bytes).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt
+    WKBReader.forDeclaredDimensions(srid).read(bytes.drop(4))
+  }
 
-  test("SQL geometry bytes are public EWKB with coordinates and SRID") {
+  test("SQL geometry bytes are a little endian SRID followed by ISO WKB") {
     val point = read("POINT (1 2)")
     point.setSRID(4326)
     val bytes = GeometrySerializer.serialize(point)
+    assert(
+      bytes.sameElements(
+        WKBReader.hexToBytes("E61000000101000000000000000000F03F0000000000000040")))
     val decoded = decode(bytes).asInstanceOf[Point]
     assert(decoded.getX == 1 && decoded.getY == 2)
     assert(decoded.getSRID == 4326)
     assert(decoded.getCoordinateSequence.getDimension == 2)
   }
 
-  test("SQL geometry reads independent little and big endian EWKB fixtures") {
+  test("SQL geometry reads independent ISO fixtures with either WKB byte order") {
     val fixtures = Seq(
-      "0101000020E6100000000000000000F03F0000000000000040",
-      "0020000001000010E63FF00000000000004000000000000000")
+      "E61000000101000000000000000000F03F0000000000000040",
+      "E610000000000000013FF00000000000004000000000000000")
     fixtures.foreach { hex =>
       val point = GeometrySerializer.deserialize(WKBReader.hexToBytes(hex)).asInstanceOf[Point]
       assert(point.getX == 1 && point.getY == 2)
@@ -135,11 +141,70 @@ class SqlGeometrySerializerSuite extends AnyFunSuite {
   }
 
   test("SQL geometry owns decoded coordinates and retains null join sentinel") {
-    val bytes = WKBReader.hexToBytes("0101000000000000000000F03F0000000000000040")
+    val bytes = WKBReader.hexToBytes("000000000101000000000000000000F03F0000000000000040")
     val point = GeometrySerializer.deserialize(bytes).asInstanceOf[Point]
     java.util.Arrays.fill(bytes, 0.toByte)
     assert(point.getX == 1 && point.getY == 2)
     val empty = GeometrySerializer.deserialize(null)
     assert(empty.isInstanceOf[GeometryCollection] && empty.isEmpty)
+  }
+  test("SQL geometry retains the full signed SRID independently of WKB byte order") {
+    Seq(Int.MinValue, -1, 0, 4326, 16777216, Int.MaxValue).foreach { srid =>
+      Seq(
+        "0101000000000000000000F03F0000000000000040",
+        "00000000013FF00000000000004000000000000000").foreach { hex =>
+        val header = java.nio.ByteBuffer
+          .allocate(4)
+          .order(java.nio.ByteOrder.LITTLE_ENDIAN)
+          .putInt(srid)
+          .array()
+        val point = GeometrySerializer.deserialize(header ++ WKBReader.hexToBytes(hex))
+        assert(point.getSRID == srid && point.getFactory.getSRID == srid)
+        val bytes = GeometrySerializer.serialize(point)
+        assert(bytes.take(4).sameElements(header))
+        assert(
+          bytes
+            .drop(4)
+            .sameElements(WKBReader.hexToBytes("0101000000000000000000F03F0000000000000040")))
+      }
+    }
+  }
+
+  test("SQL geometry emits ISO dimension offsets rather than EWKB flags") {
+    Seq(("", 1, "1 2"), (" Z", 1001, "1 2 3"), (" M", 2001, "1 2 3"), (" ZM", 3001, "1 2 3 4"))
+      .foreach { case (layout, typeCode, values) =>
+        val bytes = GeometrySerializer.serialize(read(s"POINT$layout ($values)"))
+        assert(bytes(4) == 1)
+        assert(
+          java.nio.ByteBuffer
+            .wrap(bytes, 5, 4)
+            .order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            .getInt == typeCode)
+      }
+  }
+
+  test("SQL geometry rejects a truncated SRID header and incomplete point payload") {
+    val complete = WKBReader.hexToBytes("E61000000101000000000000000000F03F0000000000000040")
+    (0 until complete.length).foreach { length =>
+      intercept[IllegalArgumentException] {
+        GeometrySerializer.deserialize(complete.take(length))
+      }
+    }
+    assert(GeometrySerializer.serialize(null) == null)
+  }
+
+  test("SQL geometry rejects oversized counts before allocating coordinates or members") {
+    // Tiny external payloads must not allocate arrays based on an unchecked count.
+    (2 to 7).foreach { kind =>
+      val bytes = java.nio.ByteBuffer
+        .allocate(13)
+        .order(java.nio.ByteOrder.LITTLE_ENDIAN)
+        .putInt(4326)
+        .put(1.toByte)
+        .putInt(kind)
+        .putInt(Int.MaxValue)
+        .array()
+      intercept[IllegalArgumentException] { GeometrySerializer.deserialize(bytes) }
+    }
   }
 }
