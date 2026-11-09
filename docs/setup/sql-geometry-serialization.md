@@ -25,7 +25,7 @@ The UDT payload is not a standalone WKB/EWKB value: use `ST_AsBinary` or `ST_AsE
 
 ## Geography SQL values
 
-`GeographyUDT` uses the same four-byte little-endian SRID prefix and ISO WKB contract. Geography retains its non-negative SRID requirement. The prefix is authoritative even when input EWKB contains an embedded SRID. The JVM preserves the WKB byte order and coordinate bytes of lazy geography values while normalizing their headers to ISO types; computed S2 values use the public S2 WKB writer. Python uses public Shapely WKB. This changes SQL transport only: S2 spherical computation, lazy/eager shape-index behavior and the Python `Geography` wrapper are preserved.
+`GeographyUDT` uses the same four-byte little-endian SRID prefix and ISO WKB contract. Geography retains its non-negative SRID requirement. The SQL payload uses ISO WKB without embedded SRIDs. The JVM preserves the WKB byte order and coordinate bytes of lazy geography values while normalizing their headers to ISO types; computed S2 values use the public S2 WKB writer. Python uses public Shapely WKB. This changes SQL transport only: S2 spherical computation, lazy/eager shape-index behavior and the Python `Geography` wrapper are preserved.
 
 Geometry and geography UDT payloads have the same framing, but their type metadata and computation remain distinct. They are also distinct from Spark 4.2 native spatial values, which use Spark's default serializer and native CRS validation.
 
