@@ -28,43 +28,55 @@ from sedona.spark.utils import geometry_wkb
 HAS_M = hasattr(shapely, "has_m") and shapely.geos_version >= (3, 12, 0)
 LAYOUTS = [
     (0, (1.0, 2.0)),
-    (0x80000000, (1.0, 2.0, 3.0)),
+    (1000, (1.0, 2.0, 3.0)),
     pytest.param(
-        0x40000000,
+        2000,
         (1.0, 2.0, 3.0),
         marks=pytest.mark.skipif(not HAS_M, reason="Shapely cannot retain M"),
     ),
     pytest.param(
-        0xC0000000,
+        3000,
         (1.0, 2.0, 3.0, 4.0),
         marks=pytest.mark.skipif(not HAS_M, reason="Shapely cannot retain M"),
     ),
 ]
 
 
+def _with_srid(geometry, srid):
+    return wkb.loads(wkb.dumps(geometry, srid=srid, include_srid=True))
+
+
+def _srid(geometry):
+    payload = wkb.dumps(geometry, big_endian=False, include_srid=True)
+    flags = struct.unpack_from("<I", payload, 1)[0]
+    return struct.unpack_from("<i", payload, 5)[0] if flags & 0x20000000 else 0
+
+
 @pytest.mark.parametrize("layout,coordinates", LAYOUTS)
-def test_geometry_udt_writes_independent_ewkb_with_srid(layout, coordinates):
-    # An independent EWKB fixture pins coordinates, dimension flags and SRID.
-    expected = struct.pack("<BIi", 1, 1 | layout | 0x20000000, 4326)
-    expected += struct.pack("<" + "d" * len(coordinates), *coordinates)
-    geometry = wkb.loads(expected)
+def test_geometry_udt_writes_independent_srid_and_iso_wkb(layout, coordinates):
+    # Independent ISO type codes pin the little-endian SRID prefix and ordinates.
+    iso = struct.pack("<BI", 1, 1 + layout)
+    iso += struct.pack("<" + "d" * len(coordinates), *coordinates)
+    expected = struct.pack("<i", 4326) + iso
+    geometry = _with_srid(wkb.loads(iso), 4326)
 
     assert GeometryType().serialize(geometry) == expected
 
 
 @pytest.mark.parametrize("byte_order", ["<", ">"])
 @pytest.mark.parametrize("buffer_type", [bytes, bytearray, memoryview])
-def test_geometry_udt_reads_external_ewkb_and_owns_coordinates(byte_order, buffer_type):
+def test_geometry_udt_reads_external_iso_wkb_and_owns_coordinates(
+    byte_order, buffer_type
+):
     source = bytearray(
-        struct.pack(byte_order + "BIi2d", byte_order == "<", 0x20000001, 3857, 3, 4)
+        struct.pack("<i", 3857)
+        + struct.pack(byte_order + "BI2d", byte_order == "<", 1, 3, 4)
     )
     geometry = GeometryType().deserialize(buffer_type(source))
     source[:] = b"\x00" * len(source)
 
     assert tuple(geometry.coords[0]) == (3.0, 4.0)
-    assert GeometryType().serialize(geometry) == struct.pack(
-        "<BIi2d", 1, 0x20000001, 3857, 3, 4
-    )
+    assert GeometryType().serialize(geometry) == struct.pack("<iBI2d", 3857, 1, 1, 3, 4)
 
 
 @pytest.mark.parametrize(
@@ -82,17 +94,20 @@ def test_geometry_udt_reads_external_ewkb_and_owns_coordinates(byte_order, buffe
     ],
 )
 def test_geometry_udt_preserves_typed_empty_layouts(text, expected_hex):
-    expected = bytes.fromhex(expected_hex)
+    original = bytes.fromhex(expected_hex)
     geometry = wkt.loads(text)
-    if geometry.wkb != expected:
+    if geometry.wkb != original:
         pytest.skip("This GEOS version cannot construct the requested empty layout")
 
+    type_code = struct.unpack_from("<I", original, 1)[0]
+    iso_code = (type_code & 0xFFFF) + (1000 if type_code & 0x80000000 else 0)
+    expected = struct.pack("<iBI", 0, 1, iso_code) + original[5:]
     encoded = GeometryType().serialize(geometry)
     assert encoded == expected
     actual = GeometryType().deserialize(expected)
     assert actual.is_empty
     assert actual.geom_type == geometry.geom_type
-    assert actual.wkb == expected
+    assert actual.wkb == original
 
 
 @pytest.mark.parametrize(
@@ -100,8 +115,8 @@ def test_geometry_udt_preserves_typed_empty_layouts(text, expected_hex):
 )
 def test_geometry_udt_preserves_empty_constructor_type(constructor, type_id):
     encoded = GeometryType().serialize(constructor())
-    assert struct.unpack_from("<I", encoded, 1)[0] == type_id
-    actual = wkb.loads(encoded)
+    assert struct.unpack_from("<I", encoded, 5)[0] == type_id
+    actual = wkb.loads(encoded[4:])
     assert actual.is_empty
     assert actual.geom_type == constructor.__name__
 
@@ -123,7 +138,7 @@ def test_geometry_udt_preserves_srid_when_restoring_empty_constructor_type(
         original_srid = lgeos.GEOSGetSRID(geometry._geom)
         lgeos.GEOSSetSRID(geometry._geom, 4326)
 
-    expected = struct.pack("<BIi", 1, type_id | 0x20000000, 4326)
+    expected = struct.pack("<iBI", 4326, 1, type_id)
     expected += (
         bytes.fromhex("000000000000f87f000000000000f87f")
         if type_id == 1
@@ -137,23 +152,29 @@ def test_geometry_udt_preserves_srid_when_restoring_empty_constructor_type(
             lgeos.GEOSSetSRID(geometry._geom, original_srid)
 
     assert encoded == expected
-    actual = wkb.loads(encoded)
+    actual = wkb.loads(encoded[4:])
     assert actual.is_empty
     assert actual.geom_type == constructor.__name__
 
 
 def test_geometry_udt_preserves_independent_collection_member_layouts():
     # XY point, XYZ point, and XYZ empty line in one collection.
-    expected = bytes.fromhex(
+    original = bytes.fromhex(
         "010700008003000000"
         "0101000000000000000000f03f0000000000000040"
         "0101000080000000000000084000000000000010400000000000001440"
         "010200008000000000"
     )
-    geometry = wkb.loads(expected)
-    if geometry.wkb != expected:
+    geometry = wkb.loads(original)
+    if geometry.wkb != original:
         pytest.skip("This GEOS version changes empty collection member layouts")
 
+    expected = bytes.fromhex(
+        "0000000001ef03000003000000"
+        "0101000000000000000000f03f0000000000000040"
+        "01e9030000000000000000084000000000000010400000000000001440"
+        "01ea03000000000000"
+    )
     assert GeometryType().serialize(geometry) == expected
     actual = GeometryType().deserialize(expected)
     assert [member.geom_type for member in actual.geoms] == [
@@ -162,7 +183,7 @@ def test_geometry_udt_preserves_independent_collection_member_layouts():
         "LineString",
     ]
     assert actual.geoms[2].is_empty
-    assert actual.wkb == expected
+    assert actual.wkb == original
 
 
 def test_geometry_udt_preserves_null():
@@ -180,7 +201,7 @@ def test_empty_point_uses_standard_wkb_when_geos_cannot_write_it(monkeypatch):
         monkeypatch.setattr(shapely, "to_wkb", unsupported_writer)
 
     assert GeometryType().serialize(Point()) == bytes.fromhex(
-        "0101000000000000000000f87f000000000000f87f"
+        "000000000101000000000000000000f87f000000000000f87f"
     )
 
 
@@ -228,7 +249,7 @@ def test_old_geos_collection_fallback_retains_empty_members(monkeypatch, expecte
 
         monkeypatch.setattr(shapely, "to_wkb", unsupported_to_wkb)
 
-    assert GeometryType().serialize(geometry) == expected
+    assert GeometryType().serialize(geometry) == b"\x00" * 4 + expected
 
 
 def test_old_geos_empty_point_fallback_preserves_srid(monkeypatch):
@@ -236,4 +257,78 @@ def test_old_geos_empty_point_fallback_preserves_srid(monkeypatch):
     geometry = wkb.loads(expected)
     monkeypatch.setattr(geometry_wkb, "geos_version", (3, 8, 0))
 
+    assert GeometryType().serialize(geometry) == bytes.fromhex(
+        "e61000000101000000000000000000f87f000000000000f87f"
+    )
+
+
+@pytest.mark.parametrize("srid", [0, 4326, -1, -2147483648, 2147483647])
+@pytest.mark.parametrize("byte_order", ["<", ">"])
+def test_geometry_udt_preserves_full_signed_srid(srid, byte_order):
+    payload = struct.pack("<i", srid) + struct.pack(
+        byte_order + "BI2d", byte_order == "<", 1, 1, 2
+    )
+    geometry = GeometryType().deserialize(payload)
+    assert _srid(geometry) == srid
+    assert GeometryType().serialize(geometry) == struct.pack("<iBI2d", srid, 1, 1, 1, 2)
+
+
+@pytest.mark.parametrize("length", range(9))
+def test_geometry_udt_rejects_truncated_framing(length):
+    with pytest.raises(ValueError, match="four-byte SRID and WKB"):
+        GeometryType().deserialize(b"\x00" * length)
+
+
+def test_geometry_udt_rejects_invalid_wkb_byte_order():
+    with pytest.raises(ValueError, match="byte order"):
+        GeometryType().deserialize(struct.pack("<iBI2d", 4326, 2, 1, 1, 2))
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "POINT Z EMPTY",
+        "LINESTRING Z EMPTY",
+        "POLYGON Z EMPTY",
+        "MULTILINESTRING Z ((0 0 1, 1 1 2))",
+        "MULTIPOLYGON Z (((0 0 1, 1 0 2, 0 1 3, 0 0 1)))",
+        "GEOMETRYCOLLECTION Z (POINT Z (1 2 3), GEOMETRYCOLLECTION Z (LINESTRING Z EMPTY))",
+    ],
+)
+def test_legacy_writer_iso_headers_match_modern_writer(monkeypatch, text):
+    source = _with_srid(wkt.loads(text), 4326)
+    expected = GeometryType().serialize(source)
+    # Exercise the header-only fallback using the existing public EWKB writer.
+    # This is not a claim of running an actual GEOS < 3.10 library.
+    monkeypatch.setattr(geometry_wkb, "geos_version", (3, 9, 0))
+    assert GeometryType().serialize(source) == expected
+    restored = GeometryType().deserialize(expected)
+    assert _srid(restored) == 4326
+    assert restored.wkb == source.wkb
+
+
+@pytest.mark.parametrize("type_code", [0, 8, 4001, 1008])
+def test_geometry_udt_does_not_normalize_invalid_iso_types(type_code):
+    with pytest.raises(ValueError, match="Invalid geometry WKB type"):
+        GeometryType().deserialize(struct.pack("<iBI2d", 4326, 1, type_code, 1, 2))
+
+
+@pytest.mark.skipif(not HAS_M, reason="Shapely cannot retain M")
+@pytest.mark.parametrize(
+    "text,iso_hex",
+    [
+        ("POINT M EMPTY", "01d1070000" + "000000000000f87f" * 3),
+        ("POINT ZM EMPTY", "01b90b0000" + "000000000000f87f" * 4),
+        ("LINESTRING M EMPTY", "01d207000000000000"),
+        ("LINESTRING ZM EMPTY", "01ba0b000000000000"),
+        ("POLYGON M EMPTY", "01d307000000000000"),
+        ("POLYGON ZM EMPTY", "01bb0b000000000000"),
+    ],
+)
+def test_geometry_udt_retains_measured_empty_layouts(text, iso_hex):
+    expected = struct.pack("<i", 4326) + bytes.fromhex(iso_hex)
+    geometry = _with_srid(wkt.loads(text), 4326)
     assert GeometryType().serialize(geometry) == expected
+    restored = GeometryType().deserialize(expected)
+    assert _srid(restored) == 4326
+    assert restored.wkb == geometry.wkb

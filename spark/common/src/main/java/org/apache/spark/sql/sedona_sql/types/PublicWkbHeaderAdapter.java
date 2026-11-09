@@ -22,7 +22,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-/** Header-only public EWKB-to-ISO adaptation; Spark still validates and serializes geometry. */
+/** Converts public WKB headers to ISO types without changing coordinate bytes. */
 public final class PublicWkbHeaderAdapter {
   public static byte[] toIsoWkb(byte[] source) {
     Cursor sizing = new Cursor(source, null);
@@ -80,7 +80,7 @@ public final class PublicWkbHeaderAdapter {
           boolean m = (code & 0x40000000) != 0 || layout == 2 || layout == 3;
           int iso = base + (z ? 1000 : 0) + (m ? 2000 : 0);
           int dimensions = 2 + (z ? 1 : 0) + (m ? 1 : 0);
-          if ((code & 0x20000000) != 0) input.getInt(); // Caller supplies native SRID.
+          if ((code & 0x20000000) != 0) input.getInt(); // Caller supplies the SRID separately.
           changed |= code != iso;
           if (output != null) output.order(order).put(endian).putInt(iso);
           outputSize += 5;
@@ -101,7 +101,7 @@ public final class PublicWkbHeaderAdapter {
           }
           if (pending > input.remaining() / 5) throw invalid();
         }
-        coordinates(input.remaining()); // Leave trailing-byte acceptance to Spark.
+        coordinates(input.remaining()); // Leave trailing-byte acceptance to the caller.
         return outputSize;
       } catch (BufferUnderflowException e) {
         throw invalid();

@@ -661,12 +661,13 @@ class predicateTestScala extends TestBaseScala {
       assert(ST_EqualsIdentical(Seq(stored(null), stored(bytes))).eval(EmptyRow) == null)
       assert(ST_EqualsIdentical(Seq(stored(null), stored(null))).eval(EmptyRow) == null)
 
-      // Independent EWKB fixtures keep the byte-distinct NaN fallback covered even when the
+      // Independent SRID/ISO WKB fixtures keep the byte-distinct NaN fallback covered even when the
       // public writer canonicalizes NaN payloads while constructing DataFrame values.
       val nanA = org.datasyslab.jts.io.WKBReader
-        .hexToBytes("01010000C0000000000000F03F0000000000000040000000000000F87F0000000000001040")
+        .hexToBytes(
+          "0000000001B90B0000000000000000F03F0000000000000040000000000000F87F0000000000001040")
       val nanB = nanA.clone()
-      nanB(21) = 1
+      nanB(25) = 1
       assert(!Arrays.equals(nanA, nanB))
       assert(ST_EqualsIdentical(Seq(stored(nanA), stored(nanB))).eval(EmptyRow) == true)
 

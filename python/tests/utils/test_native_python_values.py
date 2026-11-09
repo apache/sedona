@@ -57,14 +57,14 @@ def test_type_ownership_and_legacy_registration():
         assert SedonaGeography.__UDT__ == types.GeographyType()
 
 
-def test_legacy_explicit_geometry_udt_uses_sql_ewkb_transport():
+def test_legacy_explicit_geometry_udt_uses_srid_and_iso_wkb():
     import struct
 
     # Pin the SQL payload independently of either implementation.
-    ewkb = struct.pack("<BIi2d", 1, 0x20000001, 3857, 1.0, 2.0)
-    result = types.LegacyGeometryType().deserialize(ewkb)
+    payload = struct.pack("<iBI2d", 3857, 1, 1, 1.0, 2.0)
+    result = types.LegacyGeometryType().deserialize(payload)
     assert result.wkt == "POINT (1 2)"
-    assert types.LegacyGeometryType().serialize(result) == ewkb
+    assert types.LegacyGeometryType().serialize(result) == payload
     explicit_type = types.LegacyGeometryType()
     assert (
         spark_types.UserDefinedType.fromJson(explicit_type.jsonValue()) == explicit_type
