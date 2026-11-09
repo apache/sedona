@@ -41,10 +41,15 @@ class TestDBScan(TestBase):
         with pytest.raises(Exception, match="DATATYPE_MISMATCH"):
             dbscan(sample_dataframe, 1.0, 2, geometry="id").collect()
 
-    def test_projection_preserves_coincident_records(self):
-        df = self.spark.createDataFrame(
-            [(1, 0.0), (2, 0.0), (3, 10.0)], ["id", "x"]
-        ).select("id", ST_MakePoint("x", f.lit(0.0)).alias("geometry"))
+    @pytest.mark.parametrize("identity_column", ["id", "record_key"])
+    def test_projection_preserves_coincident_records(self, identity_column):
+        df = (
+            self.spark.createDataFrame(
+                [(1, 0.0), (2, 0.0), (3, 10.0)], [identity_column, "x"]
+            )
+            .select(identity_column, ST_MakePoint("x", f.lit(0.0)).alias("geometry"))
+            .repartition(2)
+        )
         result = dbscan(df, 0.1, 2)
         rows = result.select("cluster").collect()
         assert len(rows) == 3

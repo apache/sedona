@@ -26,7 +26,6 @@ from typing import Optional
 from pyspark.sql import DataFrame
 from pyspark.sql import functions as f
 
-from sedona.spark.sql.st_functions import ST_DBSCAN
 from sedona.spark.sql.types import GeometryType
 
 ID_COLUMN_NAME = "__id"
@@ -103,14 +102,17 @@ def dbscan(
     result_df = (
         dataframe.withColumn(
             dbscan_result,
-            ST_DBSCAN(
+            f.call_function(
+                "ST_DBSCAN",
                 _column(geometry),
-                float(epsilon),
-                min_pts,
-                use_spheroid,
-                include_outliers,
-                is_core_column_name,
-                cluster_column_name,
+                f.lit(float(epsilon)),
+                f.lit(min_pts),
+                f.lit(use_spheroid),
+                f.lit(include_outliers),
+                f.lit(is_core_column_name),
+                f.lit(cluster_column_name),
+                # Keep all input columns available for DBSCAN's row IDs.
+                f.struct(*[_column(name) for name in dataframe.columns]),
             ),
         )
         .withColumn(

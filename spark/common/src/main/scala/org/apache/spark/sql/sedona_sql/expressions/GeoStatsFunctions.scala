@@ -47,7 +47,10 @@ private[apache] case class ST_DBSCAN(children: Seq[Expression])
 
   override def inputTypes: Seq[AbstractDataType] =
     Seq(GeometryUDT(), DoubleType, IntegerType, BooleanType, BooleanType, StringType, StringType)
-      .take(children.length)
+      .take(children.length) ++
+      // Referencing the original attributes prevents column pruning from changing
+      // the row values used by DBSCAN to generate record IDs.
+      (if (children.length > 7) Seq(children(7).dataType) else Seq.empty)
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression =
     copy(children = newChildren)
