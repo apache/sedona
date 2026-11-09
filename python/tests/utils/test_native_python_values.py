@@ -81,11 +81,15 @@ def test_rdd_geometry_transport_retains_independent_compact_bytes():
     assert bytes(geometry_serde.serialize(result)) == compact
 
 
-def test_legacy_explicit_geography_udt_keeps_published_prefix_wkb_fix():
-    # Big-endian SRID4326 prefix followed by little-endian XY WKB.
-    payload = bytes.fromhex("000010e60101000000000000000000f03f0000000000000040")
+@pytest.mark.parametrize("srid", [0, 4326])
+def test_legacy_explicit_geography_udt_uses_srid_and_iso_wkb(srid):
+    import struct
+
+    # Pin the SQL payload independently, including an explicit zero SRID.
+    payload = struct.pack("<iBI2d", srid, 1, 1, 1.0, 2.0)
     result = types.LegacyGeographyType().deserialize(payload)
     assert isinstance(result, SedonaGeography)
+    assert shapely.get_srid(result.geometry) == srid
     assert result.geometry.wkt == "POINT (1 2)"
     assert types.LegacyGeographyType().serialize(result) == payload
     assert types.LegacyGeographyType().serialize(None) is None

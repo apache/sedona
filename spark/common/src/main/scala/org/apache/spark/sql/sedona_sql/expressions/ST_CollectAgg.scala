@@ -23,9 +23,8 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, DataInputStream, Da
 import scala.collection.mutable.ArrayBuffer
 
 import org.apache.sedona.common.Functions
-import org.apache.sedona.common.S2Geography.GeographyWKBSerializer
 import org.apache.sedona.common.geography.{Functions => GeographyFunctions}
-import org.apache.sedona.sql.utils.GeometrySerializer
+import org.apache.sedona.sql.utils.{GeographySerializer, GeometrySerializer}
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{Expression, ImplicitCastInputTypes}
 import org.apache.spark.sql.catalyst.expressions.aggregate.{ImperativeAggregate, TypedImperativeAggregate}
@@ -93,9 +92,8 @@ private[apache] case class ST_Collect_Agg(
     if (buffer.isEmpty) {
       null
     } else if (isGeography) {
-      val geographies = buffer.map(GeographyWKBSerializer.deserialize)
-      GeographyWKBSerializer.serialize(
-        GeographyFunctions.createMultiGeography(geographies.toArray))
+      val geographies = buffer.map(GeographySerializer.deserialize)
+      GeographySerializer.serialize(GeographyFunctions.createMultiGeography(geographies.toArray))
     } else {
       val geometries = buffer.map(GeometrySerializer.deserialize)
       GeometrySerializer.serialize(Functions.createMultiGeometry(geometries.toArray))
@@ -163,19 +161,9 @@ private object ST_Collect_Agg {
     inputExpressions.head
   }
 
-  private def readGeographySRID(value: Array[Byte]): Int = {
-    if (value.length < Integer.BYTES) {
-      throw new IllegalArgumentException("Invalid serialized Geography in ST_Collect_Agg")
-    }
-    ((value(0) & 0xff) << 24) |
-      ((value(1) & 0xff) << 16) |
-      ((value(2) & 0xff) << 8) |
-      (value(3) & 0xff)
-  }
-
   private def requireMatchingSRID(left: Array[Byte], right: Array[Byte]): Unit = {
-    val leftSRID = readGeographySRID(left)
-    val rightSRID = readGeographySRID(right)
+    val leftSRID = GeographySerializer.readSRID(left)
+    val rightSRID = GeographySerializer.readSRID(right)
     if (leftSRID != rightSRID) {
       throw new IllegalArgumentException(
         s"ST_Collect_Agg requires all Geography inputs to have the same SRID; " +

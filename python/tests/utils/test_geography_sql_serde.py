@@ -26,6 +26,22 @@ from sedona.spark.core.geom.geography import Geography
 from sedona.spark.sql.types import LegacyGeographyType as GeographyType
 from sedona.spark.utils import geography_sql_serde
 
+HAS_M = hasattr(shapely, "has_m") and shapely.geos_version >= (3, 12, 0)
+LAYOUTS = [
+    (0, (1.0, 2.0)),
+    (1000, (1.0, 2.0, 3.0)),
+    pytest.param(
+        2000,
+        (1.0, 2.0, 3.0),
+        marks=pytest.mark.skipif(not HAS_M, reason="Shapely cannot retain M"),
+    ),
+    pytest.param(
+        3000,
+        (1.0, 2.0, 3.0, 4.0),
+        marks=pytest.mark.skipif(not HAS_M, reason="Shapely cannot retain M"),
+    ),
+]
+
 
 def _point_wkb(endian="<", srid=None):
     header = struct.pack(
@@ -42,26 +58,59 @@ def _srid(geometry):
     return struct.unpack_from("<i", payload, 5)[0] if geometry_type & 0x20000000 else 0
 
 
-@pytest.mark.parametrize("srid", [0, 4269, 4326, 2147483647])
+@pytest.mark.parametrize("srid", [0, 1, 4269, 4326, 2147483647])
 def test_python_geography_matches_jvm_srid_prefix(srid):
     geography = Geography(wkb.loads(_point_wkb(srid=srid)))
     assert (
-        GeographyType().serialize(geography) == struct.pack(">i", srid) + _point_wkb()
+        GeographyType().serialize(geography) == struct.pack("<i", srid) + _point_wkb()
     )
 
 
 @pytest.mark.parametrize("endian", ["<", ">"])
-@pytest.mark.parametrize("srid", [0, 4326])
+@pytest.mark.parametrize("srid", [0, 1, 4326])
 def test_decode_jvm_geography_in_either_wkb_byte_order(endian, srid):
-    value = GeographyType().deserialize(struct.pack(">i", srid) + _point_wkb(endian))
+    value = GeographyType().deserialize(struct.pack("<i", srid) + _point_wkb(endian))
     assert isinstance(value, Geography)
     assert list(value.geometry.coords) == [(1.0, 2.0)]
     assert _srid(value.geometry) == srid
 
 
-def test_outer_srid_is_authoritative_for_embedded_ewkb():
-    value = GeographyType().deserialize(struct.pack(">i", 4269) + _point_wkb(srid=4326))
-    assert _srid(value.geometry) == 4269
+@pytest.mark.parametrize("srid", [0, 1, 4269])
+def test_outer_srid_is_authoritative_for_embedded_ewkb(srid):
+    value = GeographyType().deserialize(struct.pack("<i", srid) + _point_wkb(srid=4326))
+    assert _srid(value.geometry) == srid
+
+
+@pytest.mark.parametrize("srid", [0, 1, 4326])
+@pytest.mark.parametrize("layout,coordinates", LAYOUTS)
+def test_geography_uses_srid_and_iso_wkb(srid, layout, coordinates):
+    iso = struct.pack("<BI", 1, 1 + layout)
+    iso += struct.pack("<" + "d" * len(coordinates), *coordinates)
+    source = wkb.loads(wkb.dumps(wkb.loads(iso), srid=srid, include_srid=True))
+    expected = struct.pack("<i", srid) + iso
+    assert GeographyType().serialize(Geography(source)) == expected
+    result = GeographyType().deserialize(expected).geometry
+    assert _srid(result) == srid
+    assert result.wkb == source.wkb
+
+
+@pytest.mark.parametrize("layout,coordinates", LAYOUTS)
+def test_geography_preserves_empty_point_layout(layout, coordinates):
+    iso = struct.pack("<BI", 1, 1 + layout)
+    iso += bytes.fromhex("000000000000f87f") * len(coordinates)
+    expected = struct.pack("<i", 4326) + iso
+    result = GeographyType().deserialize(expected)
+    assert result.geometry.is_empty
+    assert _srid(result.geometry) == 4326
+    assert GeographyType().serialize(result) == expected
+
+
+@pytest.mark.parametrize("srid", [-1, -2147483648])
+def test_geography_rejects_negative_srid(srid):
+    with pytest.raises(ValueError, match="non-negative"):
+        GeographyType().serialize(Geography(wkb.loads(_point_wkb(srid=srid))))
+    with pytest.raises(ValueError, match="non-negative"):
+        GeographyType().deserialize(struct.pack("<i", srid) + _point_wkb())
 
 
 @pytest.mark.parametrize(
@@ -131,12 +180,12 @@ def test_empty_constructor_retains_declared_type_and_srid(constructor):
     [
         "0101000000000000000000f87f000000000000f87f",
         # Empty Z points can report has_z=False on older GEOS.
-        "0101000080000000000000f87f000000000000f87f000000000000f87f",
-        "010700008001000000"
-        "0101000080000000000000f87f000000000000f87f000000000000f87f",
-        "010700008002000000"
+        "01e9030000000000000000f87f000000000000f87f000000000000f87f",
+        "01ef03000001000000"
+        "01e9030000000000000000f87f000000000000f87f000000000000f87f",
+        "01ef03000002000000"
         "0101000000000000000000f03f0000000000000040"
-        "0101000080000000000000f87f000000000000f87f000000000000f87f",
+        "01e9030000000000000000f87f000000000000f87f000000000000f87f",
         # A collection with only empty members must retain its membership.
         "0107000000010000000101000000000000000000f87f000000000000f87f",
         # A nested collection must keep the empty Point in its original position.
@@ -168,7 +217,7 @@ def test_old_geos_empty_point_transport(monkeypatch, expected_hex):
 
     # This tests the old-GEOS compatibility branch on the installed runtime;
     # it does not claim an actual GEOS < 3.9 library is installed.
-    writer = getattr(geography_sql_serde, "geometry_wkb", geography_sql_serde)
+    writer = geography_sql_serde.geometry_sql_serde.geometry_wkb
     monkeypatch.setattr(writer, "geos_version", (3, 8, 0), raising=False)
     monkeypatch.setattr(wkb, "dumps", old_writer)
     if original_to_wkb is not None:
@@ -187,6 +236,8 @@ def test_old_geos_empty_point_retains_srid(monkeypatch):
     geometry = wkb.loads(
         bytes.fromhex("0101000020e6100000000000000000f87f000000000000f87f")
     )
-    monkeypatch.setattr(geography_sql_serde.geometry_wkb, "geos_version", (3, 8, 0))
-    expected = bytes.fromhex("000010e60101000000000000000000f87f000000000000f87f")
+    monkeypatch.setattr(
+        geography_sql_serde.geometry_sql_serde.geometry_wkb, "geos_version", (3, 8, 0)
+    )
+    expected = bytes.fromhex("e61000000101000000000000000000f87f000000000000f87f")
     assert GeographyType().serialize(Geography(geometry)) == expected

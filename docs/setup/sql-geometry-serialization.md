@@ -25,6 +25,12 @@ The UDT payload is not a standalone WKB/EWKB value: use `ST_AsBinary` or `ST_AsE
 
 Spark 4.2 instead uses Spark's native `GEOMETRY` and `GEOGRAPHY` SQL types and Spark's default spatial serializer. Their values and CRS validation follow Spark's native contract; the SRID-prefixed ISO WKB payload and layout rules above describe the explicit Sedona UDT path. Sedona still uses its S2 implementation for geography computation.
 
+## Geography SQL values
+
+`GeographyUDT` uses the same four-byte little-endian SRID prefix and ISO WKB contract. Geography retains its non-negative SRID requirement. The prefix is authoritative even when input EWKB contains an embedded SRID. The JVM preserves the WKB byte order and coordinate bytes of lazy geography values while normalizing their headers to ISO types; computed S2 values use the public S2 WKB writer. Python uses public Shapely WKB. This changes SQL transport only: S2 spherical computation, lazy/eager shape-index behavior and the Python `Geography` wrapper are preserved.
+
+Geometry and geography UDT payloads have the same framing, but their type metadata and computation remain distinct. They are also distinct from Spark 4.2 native spatial values, which use Spark's default serializer and native CRS validation.
+
 ## Spark 4.2 native types
 
 Use a Sedona version that provides the Spark 4.2 module, with Scala 2.13 and matching Spark/PySpark 4.2 versions. The artifact names are `sedona-spark-4.2_2.13` and `sedona-spark-shaded-4.2_2.13`; use the same Sedona version for the JVM artifact and Python package. A Spark 3.5, 4.0 or 4.1 artifact does not enable native integration on Spark 4.2. Managed Spark distributions require their own compatibility validation.
@@ -60,9 +66,58 @@ new_df = portable_df.selectExpr("id", "ST_GeomFromEWKB(geom_wkb) AS geom")
 
 Use `ST_GeomFromEWKB` for this exported EWKB column on every supported Spark version. On Spark 4.2, `ST_GeomFromWKB` is Spark's built-in function and expects ISO WKB, not EWKB. Include the remaining non-geometry columns in the projection as appropriate. Check row counts, nulls, SRIDs and coordinate dimensions after migrating. Standard GeoParquet and explicit WKB/EWKB columns already use portable geometry encodings and do not need this compact-UDT conversion.
 
+### Geography UDT files
+
+Earlier `GeographyUDT` files contain a **big-endian** SRID prefix followed by WKB. The new SQL reader expects a **little-endian** prefix. Export these files with the version that wrote them before upgrading, even though their WKB coordinate payload may already be valid ISO WKB. There is no automatic format detection: SRID 0 looks identical, SRID 4326 becomes negative when byte-swapped, and SRID 1 can silently become 16777216.
+
+Export explicit EWKB and SRID columns with the old version. Convert to geometry only for this transport operation; the restored column remains geography:
+
+```python
+old_df = sedona.read.parquet("old-geography-udt-data")
+old_df.selectExpr(
+    "id",
+    "ST_AsEWKB(ST_GeogToGeometry(geog)) AS geog_wkb",
+    "ST_SRID(ST_GeogToGeometry(geog)) AS geog_srid",
+).write.parquet("portable-geography-data")
+```
+
+On Spark 3.5–4.1, reconstruct geography with the new version and the explicit SRID column:
+
+```python
+portable_df = sedona.read.parquet("portable-geography-data")
+new_df = portable_df.selectExpr("id", "ST_GeogFromWKB(geog_wkb, geog_srid) AS geog")
+```
+
+Include other columns as needed and verify row counts, nulls, SRIDs, coordinate dimensions and representative spherical operations. Spark 4.2 native geography additionally requires a supported native CRS; changing the UDT framing does not relax that validation. Its built-in `ST_GeogFromWKB` takes one argument, so the two-argument reconstruction above is specific to older runtimes. Keep the separate SRID column when planning a native migration: EWKB writers can omit SRID 0, and a native constructor treats an absent CRS as 4326. Use an explicit Sedona UDT schema when retaining values outside the native contract rather than silently assigning a different CRS. Never relabel old geography bytes as new UDT data or infer their prefix byte order from the SRID's value.
+
+On Spark 4.2, this explicit UDT reconstruction retains the exported SRIDs, including 0, without applying native geography CRS defaults. Use a row-based Python UDF because Spark's Arrow UDF conversion does not support this explicit UDT output:
+
+```python
+import shapely
+from pyspark.sql.functions import udf
+from sedona.spark.core.geom.geography import Geography
+from sedona.spark.sql.types import LegacyGeographyType
+
+
+@udf(returnType=LegacyGeographyType(), useArrow=False)
+def restore_geography(payload, srid):
+    if payload is None:
+        return None
+    geometry = shapely.from_wkb(bytes(payload))
+    return Geography(shapely.set_srid(geometry, int(srid)))
+
+
+portable_df = sedona.read.parquet("portable-geography-data")
+new_df = portable_df.select(
+    "id", restore_geography("geog_wkb", "geog_srid").alias("geog")
+)
+```
+
+This produces `LegacyGeographyType`, not Spark native `GEOGRAPHY`. Converting the result to native geography still requires a supported CRS.
+
 ## Scope
 
-The RDD/Kryo geometry and spatial-index serializers, Python RDD framing and Flink serialization retain their existing formats. Geography's S2 implementation and explicit geography UDT byte format are unchanged; the Spark 4.2 native boundary converts to and from Spark geography values.
+The RDD/Kryo geometry and geography serializers, spatial-index serializers, Python RDD framing and Flink serialization retain their existing formats. In particular, the common geography serializer used by these paths keeps its big-endian SRID prefix. Only Spark SQL geography callers use the new SQL serializer. Standard GeoParquet and explicit WKB/EWKB columns are unaffected by this UDT framing migration.
 
 ## Python and explicit UDT schemas
 
@@ -82,7 +137,7 @@ from sedona.spark.sql.types import (
 
 Native conversion requires Shapely 2 or later. For classic PySpark `createDataFrame` with an explicit legacy schema and plain Shapely or Sedona `Geography` inputs, set `verifySchema=False`; the declared UDT still performs serialization. Use the conversion helpers for native input without changing global `__UDT__` registrations. On the JVM, explicit UDT schemas import `GeometryUDT` and `GeographyUDT` from `org.apache.spark.sql.sedona_sql.UDT`; they are distinct from Spark's native `org.apache.spark.sql.types` classes.
 
-An explicit `GeometryUDT` uses the SRID-prefixed ISO WKB payload on every supported Spark version, so choosing that type does not restore the old compact SQL bytes. Follow the migration steps above for persisted compact UDT data. The `geometry_serde` Python utilities retain their separate compact-format contract; their bytes are no longer the SQL geometry payload.
+Explicit `GeometryUDT` and `GeographyUDT` schemas use the SRID-prefixed ISO WKB payload on every supported Spark version. Choosing a UDT does not restore old compact geometry bytes or the old big-endian geography prefix. Follow the migration steps above for persisted UDT data. The `geometry_serde` Python utilities retain their separate compact-format contract; their bytes are no longer the SQL geometry payload.
 
 ### Sedona GeoPandas boundaries
 

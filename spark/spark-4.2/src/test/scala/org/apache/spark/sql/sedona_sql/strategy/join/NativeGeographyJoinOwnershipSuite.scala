@@ -21,8 +21,9 @@ package org.apache.spark.sql.sedona_sql.strategy.join
 import java.nio.{ByteBuffer, ByteOrder}
 import java.util.Arrays
 import com.google.common.geometry.S2LatLng
-import org.apache.sedona.common.S2Geography.{Geography, GeographyWKBSerializer, PointGeography, WKBGeography}
+import org.apache.sedona.common.S2Geography.{Geography, PointGeography, WKBGeography}
 import org.apache.sedona.common.geography.Constructors
+import org.apache.sedona.sql.utils.GeographySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{BoundReference, Expression, GenericInternalRow, LeafExpression, UnsafeRow}
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
@@ -79,7 +80,7 @@ class NativeGeographyJoinOwnershipSuite extends AnyFunSuite {
   test("previous serialized geography evaluation isolates the same reusable binary child") {
     withLazyGeography {
       val expression = ST_GeogFromEWKB(Seq(ReusedWkbExpression()))
-      def previousPath(input: InternalRow): WKBGeography = GeographyWKBSerializer
+      def previousPath(input: InternalRow): WKBGeography = GeographySerializer
         .deserialize(expression.eval(input).asInstanceOf[Array[Byte]])
         .asInstanceOf[WKBGeography]
       val first = previousPath(row(1d))
@@ -118,7 +119,7 @@ class NativeGeographyJoinOwnershipSuite extends AnyFunSuite {
           Seq(BoundReference(0, DoubleType, nullable = false)),
           new ReusedS2JoinFunction)
         def previous(input: InternalRow): Geography =
-          GeographyWKBSerializer.deserialize(control.eval(input).asInstanceOf[Array[Byte]])
+          GeographySerializer.deserialize(control.eval(input).asInstanceOf[Array[Byte]])
         val previousIndex = index(previous(row(1d)))
         assertLongitude(previous(row(21d)), 21d)
         assertLongitude(payload(previousIndex), 1d)

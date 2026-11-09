@@ -22,8 +22,8 @@ import java.nio.ByteOrder
 
 import org.apache.sedona.common.Functions
 import org.apache.sedona.common.geometrySerde.{GeometrySerializer => LayoutPolicy}
-import org.apache.sedona.common.S2Geography.{Geography, GeographyWKBSerializer, WKBGeography, WKBWriter => GeographyWKBWriter}
-import org.apache.sedona.sql.utils.GeometrySerializer
+import org.apache.sedona.common.S2Geography.{Geography, WKBGeography, WKBWriter => GeographyWKBWriter}
+import org.apache.sedona.sql.utils.{GeographySerializer, GeometrySerializer}
 import org.datasyslab.jts.io.WKBReader
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.execution.aggregate.ScalaAggregator
@@ -111,7 +111,7 @@ object SpatialTypeSupport {
       }
   }
   def serializeGeography(value: Geography, dataType: DataType): Any = dataType match {
-    case _: GeographyUDT => if (value == null) null else GeographyWKBSerializer.serialize(value)
+    case _: GeographyUDT => if (value == null) null else GeographySerializer.serialize(value)
     case native: GeographyType =>
       if (value == null) null
       else {
@@ -130,7 +130,7 @@ object SpatialTypeSupport {
     else
       dataType match {
         case _: GeographyUDT =>
-          GeographyWKBSerializer.deserialize(value.asInstanceOf[Array[Byte]])
+          GeographySerializer.deserialize(value.asInstanceOf[Array[Byte]])
         case native: GeographyType =>
           val result = geography(value)
           native.assertSridAllowedForType(result.getSRID)
@@ -241,7 +241,7 @@ object SpatialTypeSupport {
     if (value == null) return null
     dataType match {
       case _: GeometryType => GeometrySerializer.serialize(geometry(value))
-      case _: GeographyType => GeographyWKBSerializer.serialize(geography(value))
+      case _: GeographyType => GeographySerializer.serialize(geography(value))
       case _ => convertContainers(value, dataType, toLegacyValue)
     }
   }
@@ -258,7 +258,7 @@ object SpatialTypeSupport {
           targetType)
       case _: GeographyUDT =>
         serializeGeography(
-          GeographyWKBSerializer.deserialize(value.asInstanceOf[Array[Byte]]),
+          GeographySerializer.deserialize(value.asInstanceOf[Array[Byte]]),
           targetType)
       case _ => convertContainers(value, dataType, toNativeValue)
     }
