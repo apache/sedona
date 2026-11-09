@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.types &mdash; Apache Sedona Python Documentation</title>
@@ -257,6 +256,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.geom.geography</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geography</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.geom.box2d</span><span class="w"> </span><span class="kn">import</span> <span class="n">Box2D</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.geom.box3d</span><span class="w"> </span><span class="kn">import</span> <span class="n">Box3D</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.utils.geography_sql_serde</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">deserialize_geography</span><span class="p">,</span>
+    <span class="n">serialize_geography</span><span class="p">,</span>
+<span class="p">)</span>
 
 
 <div class="viewcode-block" id="GeometryType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeometryType">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">GeometryType</span><span class="p">(</span><span class="n">UserDefinedType</span><span class="p">):</span>
@@ -313,11 +316,10 @@
         <span class="k">return</span> <span class="n">BinaryType</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="GeographyType.serialize"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeographyType.serialize">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">geometry_serde</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">serialize_geography</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeographyType.deserialize"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeographyType.deserialize">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datum</span><span class="p">):</span>
-        <span class="n">geom</span><span class="p">,</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">geometry_serde</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">datum</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Geography</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">deserialize_geography</span><span class="p">(</span><span class="n">datum</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeographyType.module"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeographyType.module">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">module</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
