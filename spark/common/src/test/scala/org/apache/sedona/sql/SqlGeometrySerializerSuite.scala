@@ -58,6 +58,59 @@ class SqlGeometrySerializerSuite extends AnyFunSuite {
     }
   }
 
+  test("SQL geometry prefix overrides embedded EWKB SRIDs in either byte order") {
+    Seq(Int.MinValue, -1, 0, 4326, Int.MaxValue).foreach { srid =>
+      val header = java.nio.ByteBuffer
+        .allocate(4)
+        .order(java.nio.ByteOrder.LITTLE_ENDIAN)
+        .putInt(srid)
+        .array()
+      Seq(
+        "0101000020110F0000000000000000F03F0000000000000040",
+        "002000000100000F113FF00000000000004000000000000000").foreach { hex =>
+        val point = GeometrySerializer
+          .deserialize(header ++ WKBReader.hexToBytes(hex))
+          .asInstanceOf[Point]
+        assert(point.getSRID == srid && point.getFactory.getSRID == srid)
+        assert(point.getCentroid.getSRID == srid)
+        assert(point.getX == 1 && point.getY == 2)
+      }
+    }
+  }
+
+  test("SQL geometry prefix overrides nested EWKB SRIDs while preserving independent layouts") {
+    val members =
+      "00A0000001000010AD3FF000000000000040000000000000004008000000000000" +
+        "0020000007000010AD00000001" +
+        "0101000040000000000000F03F00000000000000400000000000000840"
+    Seq(0, -1, 4326).foreach { srid =>
+      val header = java.nio.ByteBuffer
+        .allocate(4)
+        .order(java.nio.ByteOrder.LITTLE_ENDIAN)
+        .putInt(srid)
+        .array()
+      // A root without EWKB SRID must still override SRIDs declared by descendants.
+      Seq("0107000020110F000002000000", "010700000002000000").foreach { root =>
+        val bytes = header ++ WKBReader.hexToBytes(root + members)
+        val original = bytes.clone()
+        val result = GeometrySerializer.deserialize(bytes)
+        val first = result.getGeometryN(0).asInstanceOf[Point]
+        val nested = result.getGeometryN(1)
+        val last = nested.getGeometryN(0).asInstanceOf[Point]
+        Seq(result, first, nested, last).foreach { geometry =>
+          assert(geometry.getSRID == srid && geometry.getFactory.getSRID == srid)
+          assert(geometry.getCentroid.getSRID == srid)
+        }
+        Seq(first -> 0, last -> 1).foreach { case (point, measures) =>
+          val sequence = point.getCoordinateSequence
+          assert(sequence.getDimension == 3 && sequence.getMeasures == measures)
+          (0 until 3).foreach(i => assert(sequence.getOrdinate(0, i) == i + 1.0))
+        }
+        assert(bytes.sameElements(original))
+      }
+    }
+  }
+
   Seq(("", 2, 0), (" Z", 3, 0), (" M", 3, 1), (" ZM", 4, 1)).foreach {
     case (layout, dimensions, measures) =>
       val values = layout match {
