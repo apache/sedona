@@ -353,7 +353,6 @@
                             <include>src/main/scala/**/*.sc</include>
                             <include>src/test/scala/**/*.sc</include>
                             <include>src/main/scala-spatial-${sedona.spatial.type.impl}/**/*.scala</include>
-                            <include>src/main/scala-spark-4.1/**/*.scala</include>
                         </includes>
                     </scala>
                 </configuration>
