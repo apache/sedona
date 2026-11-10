@@ -25,6 +25,9 @@ import org.locationtech.jts.io.WKTReader
 object implicits {
 
   implicit class DataFrameEnhancer(df: DataFrame) {
+    def toGeometrySeq: Seq[Geometry] =
+      df.collect().toSeq.map(row => SpatialTestValues.geometry(row, 0)).toList
+
     def toSeq[T]: Seq[T] =
       df.collect().toSeq.map(element => element(0).asInstanceOf[T]).toList
 

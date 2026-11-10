@@ -16,17 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.udf
+package org.apache.sedona.sql
 
-import org.apache.spark.sql.catalyst.expressions.{Attribute, PythonUDF}
-import org.apache.spark.sql.catalyst.plans.logical.{BaseEvalPython, LogicalPlan}
+import org.apache.spark.sql.Row
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
+import org.locationtech.jts.geom.Geometry
 
-case class SedonaArrowEvalPython(
-    udfs: Seq[PythonUDF],
-    resultAttrs: Seq[Attribute],
-    child: LogicalPlan,
-    evalType: Int)
-    extends BaseEvalPython {
-  override protected def withNewChildInternal(newChild: LogicalPlan): SedonaArrowEvalPython =
-    copy(child = newChild)
+/** Geometry result access for semantic tests across external SQL representations. */
+object SpatialTestValues {
+  def geometry(value: Any): Geometry = SpatialTypeSupport.fromExternalGeometry(value)
+
+  def geometry(row: Row, ordinal: Int): Geometry = geometry(row.get(ordinal))
+
+  def geometry(row: Row, field: String): Geometry = geometry(row, row.fieldIndex(field))
 }
