@@ -55,6 +55,22 @@ class TestDBScan(TestBase):
         assert len(rows) == 3
         assert sum(row.cluster == -1 for row in rows) == 1
 
+    def test_calculated_geometry_column(self):
+        df = self.spark.createDataFrame(
+            [(1, 0.0), (2, 0.5), (3, 10.0)], ["id", "x"]
+        ).selectExpr("id", "ST_Point(x, 0.0) AS geometry")
+        rows = dbscan(df, 1.0, 2).select("id", "cluster").collect()
+        assert len(rows) == 3
+        clusters = {row.id: row.cluster for row in rows}
+        assert clusters[1] == clusters[2] != -1
+        assert clusters[3] == -1
+
+    def test_constant_geometry_column(self):
+        df = self.spark.range(2).selectExpr("id", "ST_Point(0.0, 0.0) AS geometry")
+        rows = dbscan(df, 1.0, 2).select("id", "cluster").collect()
+        assert {row.id for row in rows} == {0, 1}
+        assert rows[0].cluster == rows[1].cluster != -1
+
     def test_per_call_outliers_and_custom_columns(self):
         df = self.spark.createDataFrame(
             [(1, 0.0), (2, 0.5), (3, 10.0)], ["id", "x"]

@@ -22,7 +22,7 @@ import org.apache.sedona.stats.Weighting.{addBinaryDistanceBandColumn, addWeight
 import org.apache.sedona.stats.clustering.DBSCAN.dbscan
 import org.apache.sedona.stats.hotspotDetection.GetisOrd.gLocal
 import org.apache.sedona.stats.outlierDetection.LocalOutlierFactor.localOutlierFactor
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, Row}
 import org.apache.spark.sql.functions.{col, expr, lit}
 import org.apache.spark.sql.types.{BooleanType, LongType, StructField, StructType}
 import org.apache.spark.sql.sedona_sql.expressions.st_functions.{ST_DBSCAN, ST_LocalOutlierFactor}
@@ -197,13 +197,10 @@ class GeoStatsSuite extends TestBaseScala {
   }
 
   it("test dbscan with geom literal") {
-    val error = intercept[IllegalArgumentException] {
-      spark.sql("SELECT ST_DBSCAN(ST_GeomFromWKT('POINT(0.0 1.1)'), 1.0, 4, false)").collect()
-    }
-    assert(
-      error
-        .asInstanceOf[IllegalArgumentException]
-        .getMessage == "geometry argument must be a named reference to an existing column")
+    val result = spark
+      .sql("SELECT ST_DBSCAN(ST_GeomFromWKT('POINT(0.0 1.1)'), 1.0, 4, false)")
+      .collect()
+    assert(result.toSeq == Seq(Row(Row(false, -1L))))
   }
 
   it("test dbscan with minPts variable") {

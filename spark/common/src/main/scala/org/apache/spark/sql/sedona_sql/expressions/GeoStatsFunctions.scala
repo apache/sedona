@@ -23,15 +23,41 @@ import org.apache.sedona.stats.Weighting.{addBinaryDistanceBandColumn, addWeight
 import org.apache.sedona.stats.clustering.DBSCAN.dbscan
 import org.apache.sedona.stats.hotspotDetection.GetisOrd.gLocal
 import org.apache.sedona.stats.outlierDetection.LocalOutlierFactor.localOutlierFactor
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.catalyst.expressions.{Attribute, Expression}
+import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.sql.catalyst.expressions.{Alias, Attribute, AttributeReference, Expression}
+import org.apache.spark.sql.execution.{ProjectExec, SparkPlan}
 import org.apache.spark.sql.functions.{col, struct}
+import org.apache.spark.sql.sedona_sql.DataFrameShims
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
 
 private[apache] case class ST_DBSCAN(children: Seq[Expression])
     extends DataframePhysicalFunction {
+
+  private lazy val materializedGeometryName =
+    "__sedona_dbscan_geometry_" + java.util.UUID.randomUUID().toString.replace("-", "")
+
+  override protected def getInputName(i: Int, fieldName: String): String = {
+    if (i == 0 && !children.head.isInstanceOf[AttributeReference]) materializedGeometryName
+    else super.getInputName(i, fieldName)
+  }
+
+  override def execute(plan: SparkPlan, resultAttrs: Seq[Attribute]): RDD[InternalRow] = {
+    children.head match {
+      case _: AttributeReference => super.execute(plan, resultAttrs)
+      case geometry =>
+        val projected = ProjectExec(plan.output :+ Alias(geometry, geometryColumnName)(), plan)
+        transformDataframe(
+          DataFrameShims.createDataFrame(sparkSession, projected.execute(), projected.schema),
+          resultAttrs)
+          .drop(geometryColumnName)
+          .queryExecution
+          .toRdd
+    }
+  }
 
   private def isCoreColumnName: String =
     if (children.length > 5) getScalarValue[UTF8String](5, "isCoreColumnName").toString
