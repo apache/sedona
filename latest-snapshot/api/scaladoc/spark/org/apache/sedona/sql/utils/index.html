@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.sedona.sql.utils</title>
@@ -208,8 +207,12 @@
                         <a href="GeoToolsCoverageAvailability$.html" title="A helper object to check if GeoTools GridCoverage2D is available on the classpath.">GeoToolsCoverageAvailability</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="object" href="GeometrySerializer$.html" title="SerDe using the WKB reader and writer objects"></a>
-                        <a href="GeometrySerializer$.html" title="SerDe using the WKB reader and writer objects">GeometrySerializer</a>
+                        <a class="object" href="GeographySerializer$.html" title="SQL geography transport."></a>
+                        <a href="GeographySerializer$.html" title="SQL geography transport.">GeographySerializer</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="object" href="GeometrySerializer$.html" title="SQL geometry transport: a signed little-endian int32 SRID followed by ISO WKB."></a>
+                        <a href="GeometrySerializer$.html" title="SQL geometry transport: a signed little-endian int32 SRID followed by ISO WKB.">GeometrySerializer</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
                         <a class="object" href="IndexSerializer$.html" title=""></a>
@@ -327,7 +330,23 @@ SpatialRDD and you want to convert it to DataFrame.
       </span>
       
       <p class="shortcomment cmt">A helper object to check if GeoTools GridCoverage2D is available on the classpath.</p>
-    </li><li name="org.apache.sedona.sql.utils.GeometrySerializer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="org.apache.sedona.sql.utils.GeographySerializer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="GeographySerializer"></a><a id="GeographySerializer:GeographySerializer"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/utils/GeographySerializer$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="SQL geography transport." href="GeographySerializer$.html"><span class="name">GeographySerializer</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">SQL geography transport.</p><div class="fullcomment"><div class="comment cmt"><p>SQL geography transport. The common geography serializer retains its separate RDD format.</p></div></div>
+    </li><li name="org.apache.sedona.sql.utils.GeometrySerializer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="GeometrySerializer"></a><a id="GeometrySerializer:GeometrySerializer"></a>
       <span class="permalink">
       <a href="../../../../../org/apache/sedona/sql/utils/GeometrySerializer$.html" title="Permalink">
@@ -339,11 +358,12 @@ SpatialRDD and you want to convert it to DataFrame.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="SerDe using the WKB reader and writer objects" href="GeometrySerializer$.html"><span class="name">GeometrySerializer</span></a>
+        <a title="SQL geometry transport: a signed little-endian int32 SRID followed by ISO WKB." href="GeometrySerializer$.html"><span class="name">GeometrySerializer</span></a>
       </span>
       
-      <p class="shortcomment cmt">SerDe using the WKB reader and writer objects
-</p>
+      <p class="shortcomment cmt">SQL geometry transport: a signed little-endian int32 SRID followed by ISO WKB.</p><div class="fullcomment"><div class="comment cmt"><p>SQL geometry transport: a signed little-endian int32 SRID followed by ISO WKB. RDD/index
+serializers use their separate compact format.
+</p></div></div>
     </li><li name="org.apache.sedona.sql.utils.IndexSerializer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="IndexSerializer"></a><a id="IndexSerializer:IndexSerializer"></a>
       <span class="permalink">

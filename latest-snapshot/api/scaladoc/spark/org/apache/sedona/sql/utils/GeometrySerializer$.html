@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.sedona.sql.utils.GeometrySerializer</title>
@@ -160,8 +159,12 @@
                         <a href="GeoToolsCoverageAvailability$.html" title="A helper object to check if GeoTools GridCoverage2D is available on the classpath.">GeoToolsCoverageAvailability</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="object" href="" title="SerDe using the WKB reader and writer objects"></a>
-                        <a href="" title="SerDe using the WKB reader and writer objects">GeometrySerializer</a>
+                        <a class="object" href="GeographySerializer$.html" title="SQL geography transport."></a>
+                        <a href="GeographySerializer$.html" title="SQL geography transport.">GeographySerializer</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="object" href="" title="SQL geometry transport: a signed little-endian int32 SRID followed by ISO WKB."></a>
+                        <a href="" title="SQL geometry transport: a signed little-endian int32 SRID followed by ISO WKB.">GeometrySerializer</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
                         <a class="object" href="IndexSerializer$.html" title=""></a>
@@ -202,7 +205,8 @@
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>SerDe using the WKB reader and writer objects
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>SQL geometry transport: a signed little-endian int32 SRID followed by ISO WKB. RDD/index
+serializers use their separate compact format.
 </p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
@@ -365,10 +369,10 @@
         <span class="name">deserialize</span><span class="params">(<span name="value">value: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>)</span><span class="result">: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>
       </span>
       
-      <p class="shortcomment cmt">Given ArrayData returns Geometry
-</p><div class="fullcomment"><div class="comment cmt"><p>Given ArrayData returns Geometry
+      <p class="shortcomment cmt">Given SRID-prefixed ISO WKB bytes returns Geometry
+</p><div class="fullcomment"><div class="comment cmt"><p>Given SRID-prefixed ISO WKB bytes returns Geometry
 </p></div><dl class="paramcmts block"><dt class="param">value</dt><dd class="cmt"><p>
-  ArrayData</p></dd><dt>returns</dt><dd class="cmt"><p>
+  SRID-prefixed ISO WKB bytes</p></dd><dt>returns</dt><dd class="cmt"><p>
   JTS geometry</p></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
@@ -537,7 +541,7 @@
 </p><div class="fullcomment"><div class="comment cmt"><p>Given a geometry returns array of bytes
 </p></div><dl class="paramcmts block"><dt class="param">geometry</dt><dd class="cmt"><p>
   JTS geometry</p></dd><dt>returns</dt><dd class="cmt"><p>
-  Array of bites represents this geometry</p></dd></dl></div>
+  SRID-prefixed ISO WKB preserving coordinate dimensions</p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.functions &mdash; Apache Sedona Python Documentation</title>
@@ -237,7 +236,10 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">geometry_serde</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.utils.geometry_sql_serde</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">deserialize_geometry</span><span class="p">,</span>
+    <span class="n">serialize_geometry</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.udf</span><span class="w"> </span><span class="kn">import</span> <span class="n">UserDefinedFunction</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseGeometry</span>
@@ -308,15 +310,13 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">apply</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
         <span class="n">applied</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
             <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span>
-                <span class="n">fn</span><span class="p">(</span><span class="n">geometry_serde</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">fn</span><span class="p">(</span><span class="n">deserialize_geometry</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
                 <span class="k">if</span> <span class="n">deserialize_geom</span> <span class="ow">and</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                 <span class="k">else</span> <span class="n">fn</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">applied</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
-            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">geometry_serde</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="n">serialize_geom</span> <span class="k">else</span> <span class="n">x</span>
-        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">applied</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">serialize_geometry</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="n">serialize_geom</span> <span class="k">else</span> <span class="n">x</span><span class="p">)</span>
 
     <span class="n">udf</span> <span class="o">=</span> <span class="n">UserDefinedFunction</span><span class="p">(</span>
         <span class="n">apply</span><span class="p">,</span> <span class="n">return_type</span><span class="p">,</span> <span class="s2">"SedonaPandasArrowUDF"</span><span class="p">,</span> <span class="n">evalType</span><span class="o">=</span><span class="n">SEDONA_SCALAR_EVAL_TYPE</span>
@@ -335,9 +335,7 @@
         <span class="k">if</span> <span class="n">deserialize_geom</span><span class="p">:</span>
             <span class="n">series_data</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">(</span>
                 <span class="n">series</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
-                    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span>
-                        <span class="n">geometry_serde</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
-                    <span class="p">)</span>
+                    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">deserialize_geometry</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="p">)</span>
             <span class="p">)</span>
 
@@ -346,7 +344,7 @@
             <span class="c1"># GeoSeries.apply retains geometry dtype for empty or all-null</span>
             <span class="c1"># results, which Arrow cannot convert to the binary storage type.</span>
             <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-                <span class="p">[</span><span class="n">geometry_serde</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span> <span class="k">for</span> <span class="n">geom</span> <span class="ow">in</span> <span class="n">result</span><span class="p">],</span>
+                <span class="p">[</span><span class="n">serialize_geometry</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span> <span class="k">for</span> <span class="n">geom</span> <span class="ow">in</span> <span class="n">result</span><span class="p">],</span>
                 <span class="n">index</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
                 <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">,</span>
             <span class="p">)</span>
@@ -359,14 +357,14 @@
 
 <div class="viewcode-block" id="deserialize_geometry_if_geom"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.functions.deserialize_geometry_if_geom">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">deserialize_geometry_if_geom</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">BaseGeometry</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">geometry_serde</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">deserialize_geometry</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">data</span></div>
 
 
 <div class="viewcode-block" id="serialize_to_geometry_if_geom"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.functions.serialize_to_geometry_if_geom">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">serialize_to_geometry_if_geom</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">return_type</span><span class="p">:</span> <span class="n">DataType</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">return_type</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">geometry_serde</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">serialize_geometry</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">data</span></div>
 </pre></div>

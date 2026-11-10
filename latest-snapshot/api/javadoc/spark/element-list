@@ -35,3 +35,4 @@ org.apache.sedona.viz.extension.photoFilter
 org.apache.sedona.viz.extension.visualizationEffect
 org.apache.sedona.viz.showcase
 org.apache.sedona.viz.utils
+org.apache.spark.sql.sedona_sql.types

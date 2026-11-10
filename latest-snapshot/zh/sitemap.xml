@@ -6588,6 +6588,13 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/setup/release-notes/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/setup/sql-geometry-serialization/</loc>
+        <lastmod>2026-11-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/setup/sql-geometry-serialization/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/setup/sql-geometry-serialization/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/setup/wherobots/</loc>
         <lastmod>2026-11-10</lastmod>
         <changefreq>daily</changefreq>
@@ -13782,6 +13789,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/setup/release-notes/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestsetup/release-notes/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/setup/sql-geometry-serialization/</loc>
+        <lastmod>2026-11-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/setup/sql-geometry-serialization/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestsetup/sql-geometry-serialization/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/zh/setup/wherobots/</loc>
