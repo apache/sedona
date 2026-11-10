@@ -29,6 +29,7 @@ import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeRowJoiner
 import org.apache.spark.sql.catalyst.expressions.{BindReferences, Expression, Predicate, UnsafeRow}
 import org.apache.spark.sql.execution.metric.SQLMetric
 import org.apache.spark.sql.execution.{SQLExecution, SparkPlan}
+import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils
 import org.locationtech.jts.geom.{Envelope, Geometry}
 
 import java.io.PrintWriter
@@ -184,8 +185,9 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
   /**
    * Gets the query and object plans based on the left shape.
    *
-   * This method checks if the left shape is part of the left or right plan and returns the query
-   * and object plans accordingly.
+   * Match both shape expressions by attribute identity, as the logical planner does. Expression
+   * text need not appear in an input plan when a shape is computed or wrapped by an input
+   * adapter.
    *
    * @param leftShape
    *   The left shape expression.
@@ -193,15 +195,13 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
    *   (SparkPlan, SparkPlan) The query and object plans.
    */
   private def getQueryAndObjectPlans(leftShape: Expression) = {
-    val isLeftQuerySide =
-      left.toString().toLowerCase().contains(leftShape.toString().toLowerCase())
-    if (isLeftQuerySide) {
-      querySide = LeftSide
-      (left, right, false)
-    } else {
-      querySide = RightSide
-      (right, left, true)
-    }
+    val plans = ExpressionUtils.matchExpressionsToPlans(leftShape, rightShape, left, right)
+    require(
+      plans.isDefined,
+      "KNN join shape expressions must reference their respective input plans")
+    val (querySidePlan, objectSidePlan, swapped) = plans.get
+    querySide = if (swapped) RightSide else LeftSide
+    (querySidePlan, objectSidePlan, swapped)
   }
 
   /**
