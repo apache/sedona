@@ -185,7 +185,7 @@
                         <configuration>
                             <sources>
                                 <source>${project.basedir}/../shared/src/main/scala-spark-4</source>
-                                <source>${project.basedir}/../common/src/main/scala-spark-4.1</source>
+                                <source>${project.basedir}/../shared/src/main/scala-spark-4.1</source>
                             </sources>
                         </configuration>
                     </execution>
@@ -206,7 +206,7 @@
                     <sourceDirectories>
                         <sourceDirectory>${project.basedir}/src/main/scala</sourceDirectory>
                         <sourceDirectory>${project.basedir}/../shared/src/main/scala-spark-4</sourceDirectory>
-                        <sourceDirectory>${project.basedir}/../common/src/main/scala-spark-4.1</sourceDirectory>
+                        <sourceDirectory>${project.basedir}/../shared/src/main/scala-spark-4.1</sourceDirectory>
                     </sourceDirectories>
                 </configuration>
             </plugin>
