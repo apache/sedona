@@ -21,7 +21,7 @@ package org.apache.spark.sql.sedona_sql.strategy.join
 import org.apache.sedona.core.enums.{IndexType, SpatialJoinOptimizationMode}
 import org.apache.sedona.core.spatialOperator.SpatialPredicate
 import org.apache.sedona.core.utils.SedonaConf
-import org.apache.spark.sql.catalyst.expressions.{And, EqualNullSafe, EqualTo, Expression, LessThan, LessThanOrEqual}
+import org.apache.spark.sql.catalyst.expressions.{And, EqualNullSafe, EqualTo, Expression, LessThan, LessThanOrEqual, Literal}
 import org.apache.spark.sql.catalyst.plans._
 import org.apache.spark.sql.catalyst.plans.logical._
 import org.apache.spark.sql.execution.{SparkPlan, SparkStrategy}
@@ -67,6 +67,20 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
   // Other ST_Predicates reject Geography inputs at analysis time, so no guard is needed there.
   private def isGeographyInput(shape: Expression): Boolean =
     shape.dataType.isInstanceOf[GeographyUDT]
+
+  // Spark orders NaN above finite distances; S2's dWithin does not. Keep unsupported
+  // or row-dependent geography comparison bounds on Spark's exact scalar join path.
+  private def canOptimizeDistanceComparison(
+      leftShape: Expression,
+      rightShape: Expression,
+      distance: Expression): Boolean = {
+    if (!isGeographyInput(leftShape) && !isGeographyInput(rightShape)) true
+    else
+      distance match {
+        case Literal(radius: Double, _) => radius >= 0 && java.lang.Double.isFinite(radius)
+        case _ => false
+      }
+  }
 
   /**
    * Both shape expressions resolve to Box2DUDT. The executors materialise each Box2D as a
@@ -481,7 +495,10 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
 
             // For distance joins we execute the actual predicate (condition) and not only extraConditions.
             // ST_Distance
-            case LessThanOrEqual(ST_Distance(Seq(leftShape, rightShape)), distance) =>
+            case LessThanOrEqual(ST_Distance(Seq(leftShape, rightShape)), distance)
+                if canOptimizeDistanceComparison(leftShape, rightShape, distance) =>
+              val geographyShape =
+                isGeographyInput(leftShape) || isGeographyInput(rightShape)
               Some(
                 JoinQueryDetection(
                   left,
@@ -489,10 +506,14 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
                   leftShape,
                   rightShape,
                   SpatialPredicate.INTERSECTS,
-                  false,
+                  isGeography = geographyShape,
                   condition,
-                  Some(distance)))
-            case LessThan(ST_Distance(Seq(leftShape, rightShape)), distance) =>
+                  Some(distance),
+                  geographyShape = geographyShape))
+            case LessThan(ST_Distance(Seq(leftShape, rightShape)), distance)
+                if canOptimizeDistanceComparison(leftShape, rightShape, distance) =>
+              val geographyShape =
+                isGeographyInput(leftShape) || isGeographyInput(rightShape)
               Some(
                 JoinQueryDetection(
                   left,
@@ -500,9 +521,10 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
                   leftShape,
                   rightShape,
                   SpatialPredicate.INTERSECTS,
-                  false,
+                  isGeography = geographyShape,
                   condition,
-                  Some(distance)))
+                  Some(distance),
+                  geographyShape = geographyShape))
 
             // ST_DistanceSphere
             case LessThanOrEqual(ST_DistanceSphere(Seq(leftShape, rightShape)), distance) =>

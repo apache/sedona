@@ -80,3 +80,5 @@ sedona.sql("SELECT ST_GeomFromWKT('POINT (1 2)') AS geom").show()
 ```
 
 The Sedona Python package on the client should use the same Sedona version as the server package. See [Install Sedona Python](install-python.md) for client installation details.
+
+The client can be [`pyspark-client`](https://pypi.org/project/pyspark-client/), the Spark Connect-only distribution of PySpark (Spark 4.0 and later), instead of the full `pyspark` package: `sedona.spark` imports without a JVM, and the DataFrame API, `SedonaContext` and the `ST_*` functions work as above. The RDD API (`SpatialRDD` and its readers, the spatial queries and `Adapter`) needs the JVM and is not available there.
