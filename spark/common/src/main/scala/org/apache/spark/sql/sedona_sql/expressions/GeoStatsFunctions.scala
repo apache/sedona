@@ -26,7 +26,7 @@ import org.apache.sedona.stats.outlierDetection.LocalOutlierFactor.localOutlierF
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{Alias, Attribute, AttributeReference, Expression}
+import org.apache.spark.sql.catalyst.expressions.{Alias, Attribute, AttributeReference, Expression, Literal}
 import org.apache.spark.sql.execution.{ProjectExec, SparkPlan}
 import org.apache.spark.sql.functions.{col, struct}
 import org.apache.spark.sql.sedona_sql.DataFrameShims
@@ -91,9 +91,11 @@ private[apache] case class ST_DBSCAN(children: Seq[Expression])
       !dataframe.columns.contains("__cluster"),
       "__cluster is a  reserved name by the dbscan algorithm. Please rename the columns before calling the ST_DBSCAN function.")
 
-    val includeOutliers: Boolean =
-      if (children.length > 4) getScalarValue[Boolean](4, "includeOutliers")
-      else SedonaConf.fromActiveSession().getDBSCANIncludeOutliers
+    val includeOutliers: Boolean = children.lift(4) match {
+      case None | Some(Literal(null, _)) =>
+        SedonaConf.fromActiveSession().getDBSCANIncludeOutliers
+      case _ => getScalarValue[Boolean](4, "includeOutliers")
+    }
 
     val ret = dbscan(
       dataframe,

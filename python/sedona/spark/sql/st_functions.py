@@ -2993,7 +2993,7 @@ def ST_DBSCAN(
     epsilon: Union[ColumnOrName, float],
     min_pts: Union[ColumnOrName, int],
     use_spheroid: Union[ColumnOrName, bool] = False,
-    include_outliers: Union[ColumnOrName, bool] = True,
+    include_outliers: Optional[Union[ColumnOrName, bool]] = None,
     is_core_column_name: Union[ColumnOrName, str] = "isCore",
     cluster_column_name: Union[ColumnOrName, str] = "cluster",
 ) -> Column:
@@ -3007,7 +3007,7 @@ def ST_DBSCAN(
     :type min_pts: ColumnOrName
     @param use_spheroid: whether to use spheroid for distance calculation
     :type use_spheroid: ColumnOrName
-    @param include_outliers: whether to include noise points. If omitted, uses spark.sedona.dbscan.includeOutliers.
+    @param include_outliers: whether to include noise points. If omitted or set to None, the value of spark.sedona.dbscan.includeOutliers is used.
     @return: A struct indicating the cluster to which the point belongs and whether it is a core point
     """
 
