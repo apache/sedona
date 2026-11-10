@@ -19,7 +19,7 @@
 package org.apache.spark.sql.sedona_sql.optimization
 
 import org.apache.spark.sql.catalyst.expressions.{And, Expression}
-import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
+import org.apache.spark.sql.catalyst.plans.QueryPlan
 import org.apache.spark.sql.sedona_sql.strategy.join.{JoinSide, LeftSide, RightSide}
 
 /**
@@ -50,14 +50,14 @@ object ExpressionUtils {
    * Returns true if specified expression has at least one reference and all its references map to
    * the output of the specified plan.
    */
-  def matches(expr: Expression, plan: LogicalPlan): Boolean =
+  def matches(expr: Expression, plan: QueryPlan[_]): Boolean =
     expr.references.nonEmpty && expr.references.subsetOf(plan.outputSet)
 
-  def matchExpressionsToPlans(
+  def matchExpressionsToPlans[T <: QueryPlan[T]](
       exprA: Expression,
       exprB: Expression,
-      planA: LogicalPlan,
-      planB: LogicalPlan): Option[(LogicalPlan, LogicalPlan, Boolean)] =
+      planA: T,
+      planB: T): Option[(T, T, Boolean)] =
     if (matches(exprA, planA) && matches(exprB, planB)) {
       Some((planA, planB, false))
     } else if (matches(exprA, planB) && matches(exprB, planA)) {
@@ -68,8 +68,8 @@ object ExpressionUtils {
 
   def matchDistanceExpressionToJoinSide(
       distance: Expression,
-      left: LogicalPlan,
-      right: LogicalPlan): Option[JoinSide] = {
+      left: QueryPlan[_],
+      right: QueryPlan[_]): Option[JoinSide] = {
     if (distance.references.isEmpty || matches(distance, left)) {
       Some(LeftSide)
     } else if (matches(distance, right)) {
