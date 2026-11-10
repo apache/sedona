@@ -29,6 +29,7 @@ import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeRowJoiner
 import org.apache.spark.sql.catalyst.expressions.{BindReferences, Expression, Predicate, UnsafeRow}
 import org.apache.spark.sql.execution.metric.SQLMetric
 import org.apache.spark.sql.execution.{SQLExecution, SparkPlan}
+import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils
 import org.locationtech.jts.geom.{Envelope, Geometry}
 
 import java.io.PrintWriter
@@ -194,21 +195,13 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
    *   (SparkPlan, SparkPlan) The query and object plans.
    */
   private def getQueryAndObjectPlans(leftShape: Expression) = {
-    def matches(shape: Expression, plan: SparkPlan): Boolean =
-      shape.references.nonEmpty && shape.references.subsetOf(plan.outputSet)
-
-    val isLeftQuerySide = matches(leftShape, left) && matches(rightShape, right)
-    val isRightQuerySide = matches(leftShape, right) && matches(rightShape, left)
+    val plans = ExpressionUtils.matchExpressionsToPlans(leftShape, rightShape, left, right)
     require(
-      isLeftQuerySide || isRightQuerySide,
+      plans.isDefined,
       "KNN join shape expressions must reference their respective input plans")
-    if (isLeftQuerySide) {
-      querySide = LeftSide
-      (left, right, false)
-    } else {
-      querySide = RightSide
-      (right, left, true)
-    }
+    val (querySidePlan, objectSidePlan, swapped) = plans.get
+    querySide = if (swapped) RightSide else LeftSide
+    (querySidePlan, objectSidePlan, swapped)
   }
 
   /**
