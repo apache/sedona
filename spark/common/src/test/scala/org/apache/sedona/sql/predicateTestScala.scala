@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.sql
 
-import org.apache.sedona.common.geometrySerde.GeometrySerializer
+import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.catalyst.expressions.{EmptyRow, Literal}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
@@ -26,8 +26,6 @@ import org.apache.spark.sql.sedona_sql.expressions.{ST_Contains, ST_CoveredBy, S
 import org.apache.spark.sql.types.{IntegerType, StructField, StructType}
 import org.locationtech.jts.geom.{Coordinate, CoordinateXYZM, Geometry, GeometryFactory}
 import org.locationtech.jts.io.WKTReader
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{CALLS_REAL_METHODS, mockStatic, never, times}
 
 import java.util.Arrays
 
@@ -607,7 +605,7 @@ class predicateTestScala extends TestBaseScala {
       }
       val polygon = "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (1 1, 1 2, 2 2, 2 1, 1 1))"
       val collection = s"GEOMETRYCOLLECTION (POINT (1 2), GEOMETRYCOLLECTION ($polygon))"
-      // (left, right, expected result); every pair is encoded with different bytes
+      // (left, right, expected result). Public WKB writers may canonicalize NaN payload bits.
       val cases: Seq[(Geometry, Geometry, Boolean)] = Seq(
         (
           lineZM(new CoordinateXYZM(2, 2, Double.NaN, Double.NaN)),
@@ -627,10 +625,9 @@ class predicateTestScala extends TestBaseScala {
           lineZM(new CoordinateXYZM(2, 2, 2, payloadNaN)),
           lineZM(new CoordinateXYZM(2, 2, 2, 2)),
           false))
-      cases.foreach { case (left, right, _) =>
-        assert(
-          !Arrays.equals(GeometrySerializer.serialize(left), GeometrySerializer.serialize(right)))
-      }
+      assert(cases.exists { case (left, right, _) =>
+        !Arrays.equals(GeometrySerializer.serialize(left), GeometrySerializer.serialize(right))
+      })
 
       val schema = StructType(
         Seq(
@@ -655,32 +652,35 @@ class predicateTestScala extends TestBaseScala {
       lineWithSrid.setSRID(4326)
       val bytesWithSrid = GeometrySerializer.serialize(lineWithSrid)
       def stored(value: Array[Byte]) = Literal.create(value, GeometryUDT())
-      val constructed =
-        ST_GeomFromWKT(Seq(Literal("LINESTRING ZM (0 0 1 2, 1 1 3 4)"), Literal(0)))
+      val constructed = ObjectOnlyGeometry(
+        ST_GeomFromWKT(Seq(Literal("LINESTRING ZM (0 0 1 2, 1 1 3 4)"), Literal(0))))
 
-      val mocked = mockStatic(classOf[GeometrySerializer], CALLS_REAL_METHODS)
-      try {
-        assert(
-          ST_EqualsIdentical(Seq(stored(bytes), stored(bytes.clone()))).eval(EmptyRow) == true)
-        mocked.verify(() => GeometrySerializer.deserialize(any(classOf[Array[Byte]])), never())
+      assert(ST_EqualsIdentical(Seq(stored(bytes), stored(bytes.clone()))).eval(EmptyRow) == true)
+      assert(ST_EqualsIdentical(Seq(stored(bytes), stored(bytesWithSrid))).eval(EmptyRow) == true)
+      assert(ST_EqualsIdentical(Seq(stored(bytes), stored(null))).eval(EmptyRow) == null)
+      assert(ST_EqualsIdentical(Seq(stored(null), stored(bytes))).eval(EmptyRow) == null)
+      assert(ST_EqualsIdentical(Seq(stored(null), stored(null))).eval(EmptyRow) == null)
 
-        assert(
-          ST_EqualsIdentical(Seq(stored(bytes), stored(bytesWithSrid))).eval(EmptyRow) == true)
-        mocked.verify(() => GeometrySerializer.deserialize(any(classOf[Array[Byte]])), times(2))
+      // Independent SRID/ISO WKB fixtures keep the byte-distinct NaN fallback covered even when the
+      // public writer canonicalizes NaN payloads while constructing DataFrame values.
+      val nanA = org.datasyslab.jts.io.WKBReader
+        .hexToBytes(
+          "0000000001B90B0000000000000000F03F0000000000000040000000000000F87F0000000000001040")
+      val nanB = nanA.clone()
+      nanB(25) = 1
+      assert(!Arrays.equals(nanA, nanB))
+      assert(ST_EqualsIdentical(Seq(stored(nanA), stored(nanB))).eval(EmptyRow) == true)
 
-        assert(ST_EqualsIdentical(Seq(stored(bytes), stored(null))).eval(EmptyRow) == null)
-        assert(ST_EqualsIdentical(Seq(stored(null), stored(bytes))).eval(EmptyRow) == null)
-        assert(ST_EqualsIdentical(Seq(stored(null), stored(null))).eval(EmptyRow) == null)
-
-        // Nested constructors are compared without serializing their results
-        mocked.clearInvocations()
-        assert(ST_EqualsIdentical(Seq(constructed, constructed)).eval(EmptyRow) == true)
-        assert(ST_EqualsIdentical(Seq(stored(bytes), constructed)).eval(EmptyRow) == true)
-        mocked.verify(() => GeometrySerializer.serialize(any(classOf[Geometry])), never())
-        mocked.verify(() => GeometrySerializer.deserialize(any(classOf[Array[Byte]])), times(1))
-      } finally {
-        mocked.close()
+      // Identical buffers need no parsing; different buffers must still be decoded.
+      val invalid = Array[Byte](0, 1, 2)
+      assert(
+        ST_EqualsIdentical(Seq(stored(invalid), stored(invalid.clone()))).eval(EmptyRow) == true)
+      intercept[Exception] {
+        ST_EqualsIdentical(Seq(stored(invalid), stored(bytes))).eval(EmptyRow)
       }
+      // ObjectOnlyGeometry rejects SQL-byte evaluation, including the mixed stored/object case.
+      assert(ST_EqualsIdentical(Seq(constructed, constructed)).eval(EmptyRow) == true)
+      assert(ST_EqualsIdentical(Seq(stored(bytes), constructed)).eval(EmptyRow) == true)
     }
 
     it("Passed edge cases of ST_Contains and ST_Covers") {

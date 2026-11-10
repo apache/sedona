@@ -344,9 +344,7 @@ class TestGeographyPythonSerde(TestBase):
 
         point = struct.pack("<BIidd", 1, 0x20000001, 4326, 1.0, 2.0)
         python_value = Geography(wkb.loads(point))
-        serializer = (
-            self.spark._jvm.org.apache.sedona.common.S2Geography.GeographyWKBSerializer
-        )
+        serializer = self.spark._jvm.org.apache.sedona.sql.utils.GeographySerializer
         jvm_value = serializer.deserialize(
             bytearray(GeographyType().serialize(python_value))
         )
@@ -354,3 +352,48 @@ class TestGeographyPythonSerde(TestBase):
         assert jvm_value.toString() == "POINT (1 2)"
         returned = GeographyType().deserialize(bytes(serializer.serialize(jvm_value)))
         assert returned.geometry.wkb == python_value.geometry.wkb
+
+    def test_plain_parquet_preserves_geography_srid_and_null(self, tmp_path):
+        import struct
+        from pyspark.sql.types import IntegerType, StructField, StructType
+        from shapely import wkb
+        from sedona.spark.core.geom.geography import Geography
+        from sedona.spark.sql.types import GeographyType
+
+        srids = [4326, 1, 0]
+        values = [
+            (
+                index,
+                Geography(
+                    wkb.loads(struct.pack("<BIidd", 1, 0x20000001, srid, 1.0, 2.0))
+                ),
+            )
+            for index, srid in enumerate(srids)
+        ] + [(3, None)]
+        schema = StructType(
+            [
+                StructField("id", IntegerType(), False),
+                StructField("g", GeographyType(), True),
+            ]
+        )
+        source = self.spark.createDataFrame(values, schema)
+        path = str(tmp_path / "geography.parquet")
+        source.write.parquet(path)
+        restored = self.spark.read.parquet(path)
+        assert isinstance(restored.schema["g"].dataType, GeographyType)
+        assert restored.selectExpr("id", "ST_SRID(ST_GeogToGeometry(g))").orderBy(
+            "id"
+        ).collect() == [
+            (0, 4326),
+            (1, 1),
+            (2, 0),
+            (3, None),
+        ]
+        rows = restored.orderBy("id").collect()
+        assert rows[3].g is None
+        for row, srid in zip(rows, srids):
+            assert isinstance(row.g, Geography)
+            assert list(row.g.geometry.coords) == [(1.0, 2.0)]
+            assert GeographyType().serialize(row.g) == struct.pack(
+                "<iBI2d", srid, 1, 1, 1.0, 2.0
+            )

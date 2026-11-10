@@ -18,11 +18,10 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
-import org.apache.sedona.common.S2Geography.GeographyWKBSerializer
 import org.apache.sedona.common.geography.{Functions => GeographyFunctions}
 import org.apache.sedona.core.spatialOperator.{SpatialPredicate, SpatialPredicateEvaluators}
 import org.apache.sedona.core.spatialOperator.SpatialPredicateEvaluators.SpatialPredicateEvaluator
-import org.apache.sedona.sql.utils.{GeometrySerializer, RasterSerializer}
+import org.apache.sedona.sql.utils.{GeographySerializer, GeometrySerializer, RasterSerializer}
 
 import scala.collection.JavaConverters._
 import org.apache.spark.broadcast.Broadcast
@@ -308,7 +307,7 @@ case class BroadcastIndexJoinExec(
           if (serialized == null) {
             (null, row)
           } else {
-            val geog = GeographyWKBSerializer.deserialize(serialized)
+            val geog = GeographySerializer.deserialize(serialized)
             val radius = boundDistance.eval(row).asInstanceOf[Double]
             val baseEnvelope = JoinedGeometry.geographyToEnvelopeGeometry(geog)
             val shape = if (streamSideExpands) {
@@ -365,7 +364,7 @@ case class BroadcastIndexJoinExec(
           if (serialized == null) {
             (null, row)
           } else {
-            val geog = GeographyWKBSerializer.deserialize(serialized)
+            val geog = GeographySerializer.deserialize(serialized)
             val shape = JoinedGeometry.geographyToEnvelopeGeometry(geog)
             shape.setUserData(GeographyJoinShape(geog, row))
             (shape, row)

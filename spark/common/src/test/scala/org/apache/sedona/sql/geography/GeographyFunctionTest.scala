@@ -364,7 +364,8 @@ class GeographyFunctionTest extends TestBaseScala {
       var hasExpectedMessage = false
       while (cause != null) {
         hasExpectedMessage ||= Option(cause.getMessage)
-          .exists(_.contains("same SRID"))
+          .exists(message =>
+            message.contains("same SRID") && message.contains("4326") && message.contains("3857"))
         cause = cause.getCause
       }
       assertTrue(hasExpectedMessage)

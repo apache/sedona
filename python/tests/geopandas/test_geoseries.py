@@ -8078,14 +8078,25 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         )
 
         mixed_dimension = GeoSeries([MultiPoint([Point(0, 0), Point(1, 1, 2)])])
-        normalized_dimension = GeoSeries(
-            [shapely.from_wkt("MULTIPOINT Z ((0 0 NaN), (1 1 2))")]
-        )
+        # Build the explicit XYZ reference in the JVM: GEOS < 3.12 can drop
+        # a NaN Z dimension while parsing the same WKT in Shapely.
+        normalized_dimension = GeoSeries.from_wkt(["MULTIPOINT Z ((0 0 NaN), (1 1 2))"])
 
-        # Shapely's homogeneous multi-geometry encoding selects one layout
-        # before the value reaches the JVM, promoting the XY child to XYZ/NaN.
+        # Shapely WKB preserves each point's layout. The old compact SQL
+        # serializer promoted the XY child to XYZ/NaN; public WKB does not.
+        assert [
+            len(point.coords[0])
+            for point in mixed_dimension.to_geopandas().iloc[0].geoms
+        ] == [2, 3]
         self.check_pd_series_equal(
             mixed_dimension.geom_equals_identical(normalized_dimension, align=False),
+            pd.Series([False], dtype=bool),
+        )
+        self.check_pd_series_equal(
+            normalized_dimension.geom_equals_identical(
+                GeoSeries.from_wkt(["MULTIPOINT Z ((0 0 NaN), (1 1 2))"]),
+                align=False,
+            ),
             pd.Series([True], dtype=bool),
         )
 
