@@ -3002,13 +3002,19 @@ def ST_DBSCAN(
     @param geometry: Geometry column or name
     :type geometry: ColumnOrName
     @param epsilon: the distance between two points to be considered neighbors
-    :type epsilon: ColumnOrName
+    :type epsilon: Union[ColumnOrName, float]
     @param min_pts: the number of neighbors a point should have to form a cluster
-    :type min_pts: ColumnOrName
+    :type min_pts: Union[ColumnOrName, int]
     @param use_spheroid: whether to use spheroid for distance calculation
-    :type use_spheroid: ColumnOrName
+    :type use_spheroid: Union[ColumnOrName, bool]
     @param include_outliers: whether to include noise points. If omitted or set to None, the value of spark.sedona.dbscan.includeOutliers is used.
+    :type include_outliers: Optional[Union[ColumnOrName, bool]]
+    @param is_core_column_name: name of the field indicating whether the point is a core point. Defaults to "isCore".
+    :type is_core_column_name: Union[ColumnOrName, str]
+    @param cluster_column_name: name of the field containing the cluster ID. Defaults to "cluster".
+    :type cluster_column_name: Union[ColumnOrName, str]
     @return: A struct indicating the cluster to which the point belongs and whether it is a core point
+    :rtype: Column
     """
 
     if isinstance(epsilon, float):
