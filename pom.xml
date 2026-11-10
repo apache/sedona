@@ -687,6 +687,13 @@
                         </licenseHeader>
                     </java>
                     <scala>
+                        <includes>
+                            <include>src/main/scala/**/*.scala</include>
+                            <include>src/test/scala/**/*.scala</include>
+                            <include>src/main/scala/**/*.sc</include>
+                            <include>src/test/scala/**/*.sc</include>
+                            <include>spark/shared/src/main/**/*.scala</include>
+                        </includes>
                         <scalafmt>
                             <version>3.7.5</version>
                             <file>tools/maven/scalafmt.conf</file>
