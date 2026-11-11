@@ -3115,7 +3115,13 @@ def ST_DBSCAN(
     :param min_pts: Minimum number of neighbors a point must have to form a cluster.
     :type min_pts: Union[ColumnOrName, int]
     :param use_spheroid: Whether to use ST_DistanceSpheroid instead of ST_Distance as the distance metric. Default is False.
-    :type use_spheroid: Optional[Union[ColumnOrName, bool]], optional
+    :type use_spheroid: Union[ColumnOrName, bool]
+    :param include_outliers: whether to include noise points. If omitted or set to None, the value of spark.sedona.dbscan.includeOutliers is used.
+    :type include_outliers: Optional[Union[ColumnOrName, bool]]
+    :param is_core_column_name: name of the field indicating whether the point is a core point. Defaults to "isCore".
+    :type is_core_column_name: Union[ColumnOrName, str]
+    :param cluster_column_name: name of the field containing the cluster ID. Defaults to "cluster".
+    :type cluster_column_name: Union[ColumnOrName, str]
     :return: Struct with the cluster the point belongs to and whether it is a core point.
     :rtype: Column
     """

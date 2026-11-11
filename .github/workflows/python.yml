@@ -168,7 +168,7 @@ jobs:
           SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
           export SPARK_HOME
           uv pip install "pyspark[connect]==${{ matrix.spark }}" --reinstall
-          uv run pytest -v tests/sql/test_dataframe_api.py
+          uv run pytest -v tests/sql/test_dataframe_api.py tests/stats/test_dbscan.py
       - name: Run Spark Connect-only tests
         # pyspark-client is the Spark Connect-only distribution (Spark 4.0+): no RDD API, no JVM.
         # sedona.spark must import there; the tests under tests/connect_only skip everywhere else.
