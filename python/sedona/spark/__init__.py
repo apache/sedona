@@ -52,6 +52,8 @@ from sedona.spark.sql.types import (
     GeometryType,
     GeographyType,
     RasterType,
+    is_geography_type,
+    is_geometry_type,
 )
 from sedona.spark.stac import Client
 from sedona.spark.stac.collection_client import CollectionClient
