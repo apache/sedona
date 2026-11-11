@@ -16,7 +16,11 @@
 # under the License.
 import re
 import pyspark.pandas as ps
-from pyspark.pandas.internal import SPARK_DEFAULT_INDEX_NAME, InternalFrame
+from pyspark.pandas.internal import (
+    SPARK_DEFAULT_INDEX_NAME,
+    InternalFrame,
+    InternalField,
+)
 from pyspark.pandas.utils import scol_for
 from pyspark.sql.functions import expr
 
@@ -217,10 +221,22 @@ def _frame_join(
         if col != SPARK_DEFAULT_INDEX_NAME
     ]
 
+    from sedona.spark.sql.types import USES_NATIVE_SPATIAL_TYPES
+
+    if USES_NATIVE_SPATIAL_TYPES:
+        from sedona.spark.geopandas._native import internal_field
+    else:
+        internal_field = InternalField.from_struct_field
+
     internal = InternalFrame(
         spark_frame=result_df,
         index_spark_columns=[scol_for(result_df, SPARK_DEFAULT_INDEX_NAME)],
         data_spark_columns=data_spark_columns,
+        data_fields=[
+            internal_field(result_df.schema[name])
+            for name in result_df.columns
+            if name != SPARK_DEFAULT_INDEX_NAME
+        ],
     )
     return GeoDataFrame(ps.DataFrame(internal))
 

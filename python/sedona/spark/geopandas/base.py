@@ -56,6 +56,15 @@ class GeoFrame(metaclass=ABCMeta):
             return display(self)
         return super().__repr__()
 
+    @property
+    def index(self):
+        index = super().index
+        if USES_NATIVE_SPATIAL_TYPES:
+            from sedona.spark.geopandas._native import native_index
+
+            return native_index(index)
+        return index
+
     def head(self, n=5):
         result = super().head(n)
         if USES_NATIVE_SPATIAL_TYPES:

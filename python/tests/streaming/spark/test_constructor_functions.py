@@ -25,11 +25,12 @@ from pyspark.sql.types import Row, StructField, StructType
 from shapely import wkb, wkt
 from tests import tests_resource
 from tests.streaming.spark.cases_builder import SuiteContainer
-from tests.test_base import TestBase
+from tests.test_base import TestBase, spatial_values_to_shapely
 
-from sedona.spark.sql.types import GeometryType
+from sedona.spark.sql.types import LegacyGeometryType
 
-SCHEMA = StructType([StructField("geom", GeometryType())])
+# This checked-in plain-Parquet fixture contains a legacy UDT geometry column.
+SCHEMA = StructType([StructField("geom", LegacyGeometryType())])
 
 
 SEDONA_LISTED_SQL_FUNCTIONS = [
@@ -516,14 +517,18 @@ class TestConstructorFunctions(TestBase):
             .start()
         )
 
-        streaming_query.processAllAvailable()
+        try:
+            streaming_query.processAllAvailable()
 
-        # then result should be as expected
-        transform_query = "result" if not transform else f"{transform}(result)"
-        queryResult = self.spark.sql(
-            f"select {transform_query} from {random_table_name}"
-        ).collect()[0][0]
-        if type(queryResult) is float and type(expected_result) is float:
-            assert math.isclose(queryResult, expected_result, rel_tol=1e-9)
-        else:
-            assert queryResult == expected_result
+            # then result should be as expected
+            transform_query = "result" if not transform else f"{transform}(result)"
+            queryResult = self.spark.sql(
+                f"select {transform_query} from {random_table_name}"
+            ).collect()[0][0]
+            if type(queryResult) is float and type(expected_result) is float:
+                assert math.isclose(queryResult, expected_result, rel_tol=1e-9)
+            else:
+                assert spatial_values_to_shapely(queryResult) == expected_result
+        finally:
+            streaming_query.stop()
+            self.spark.catalog.dropTempView(random_table_name)

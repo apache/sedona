@@ -24,6 +24,7 @@ from tests import (
     world_map_raster_input_location,
 )
 from tests.test_base import TestBase
+from sedona.spark.sql.types import to_shapely
 
 from sedona.spark import SedonaKepler
 
@@ -49,7 +50,10 @@ class TestVisualization(TestBase):
             "select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable"
         )
         polygon_gdf = gpd.GeoDataFrame(
-            data=polygon_df.toPandas(), geometry="countyshape"
+            data=polygon_df.toPandas().assign(
+                countyshape=lambda pdf: pdf["countyshape"].map(to_shapely)
+            ),
+            geometry="countyshape",
         )
         polygon_gdf_renamed = polygon_gdf.rename_geometry("geometry")
 
@@ -92,7 +96,10 @@ class TestVisualization(TestBase):
             "select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable"
         )
         polygon_gdf = gpd.GeoDataFrame(
-            data=polygon_df.toPandas(), geometry="countyshape"
+            data=polygon_df.toPandas().assign(
+                countyshape=lambda pdf: pdf["countyshape"].map(to_shapely)
+            ),
+            geometry="countyshape",
         )
         polygon_gdf_renamed = polygon_gdf.rename_geometry("geometry")
 
@@ -297,10 +304,18 @@ class TestVisualization(TestBase):
         SedonaKepler.add_df(sedona_kepler_map, point_df, name="data_2")
 
         polygon_gdf = gpd.GeoDataFrame(
-            data=polygon_df.toPandas(), geometry="countyshape"
+            data=polygon_df.toPandas().assign(
+                countyshape=lambda pdf: pdf["countyshape"].map(to_shapely)
+            ),
+            geometry="countyshape",
         )
         polygon_gdf_renamed = polygon_gdf.rename_geometry("geometry")
-        point_gdf = gpd.GeoDataFrame(data=point_df.toPandas(), geometry="arealandmark")
+        point_gdf = gpd.GeoDataFrame(
+            data=point_df.toPandas().assign(
+                arealandmark=lambda pdf: pdf["arealandmark"].map(to_shapely)
+            ),
+            geometry="arealandmark",
+        )
         point_gdf_renamed = point_gdf.rename_geometry("geometry")
 
         kepler_map = KeplerGl(config=config)

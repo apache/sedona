@@ -23,7 +23,7 @@ from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import StructField, StructType
 from shapely import wkt
 
-from sedona.spark.sql.types import GeometryType
+from sedona.spark.sql.types import geometry_type, to_shapely, to_spark_geometry
 
 data_path = path.abspath(path.dirname(__file__))
 
@@ -70,8 +70,10 @@ def create_sample_lines(number_of_lines: int) -> List:
 
 def resource_file_to_dataframe(spark: SparkSession, file_path: str) -> DataFrame:
     geometries = load_from_resources(data_path, file_path)
-    schema = StructType([StructField("geom", GeometryType(), True)])
-    return spark.createDataFrame([[el] for el in geometries], schema=schema)
+    schema = StructType([StructField("geom", geometry_type(), True)])
+    return spark.createDataFrame(
+        [[to_spark_geometry(el)] for el in geometries], schema=schema
+    )
 
 
 def load_from_resources(data_path: str, file_path: str) -> List:

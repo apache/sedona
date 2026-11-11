@@ -336,3 +336,129 @@ def test_geometry_display_preserves_format_and_limits_collection(
         assert_geodataframe_equal(head.to_geopandas(), local.head(5))
     else:
         assert_geoseries_equal(head.to_geopandas(), local["shape"].head(5))
+
+
+@pytest.mark.parametrize("crs", [None, "EPSG:4326"])
+def test_geoparquet_declared_crs_roundtrip(native_geopandas, tmp_path, crs):
+    from geopandas.testing import assert_geodataframe_equal
+
+    expected = gpd.GeoDataFrame({"geometry": [Point(1, 2), None]}, crs=crs)
+    source = native_geopandas.GeoDataFrame(expected)
+    path = tmp_path / "roundtrip.parquet"
+    source.to_parquet(str(path), index=False)
+    assert_geodataframe_equal(gpd.read_parquet(path), expected)
+    assert source.geometry.spark.data_type == spark_types.GeometryType("ANY")
+
+
+@pytest.mark.parametrize("declared_crs", [None, "EPSG:4326"])
+def test_geoparquet_rejects_srid_metadata_mismatch_without_relabeling(
+    native_geopandas, tmp_path, declared_crs
+):
+    from sedona.spark.geopandas._crs import with_crs_metadata
+
+    source = native_geopandas.GeoDataFrame(
+        {"geometry": [shapely.set_srid(Point(1, 2), 3857), None]}
+    )
+    geometry = source.geometry
+    source._update_geometry_field(
+        geometry, with_crs_metadata(geometry._internal.data_fields[0], declared_crs)
+    )
+    with pytest.raises(Exception, match="(?i)srid|crs"):
+        source.to_parquet(str(tmp_path / "mismatch.parquet"))
+    assert shapely.get_srid(source.to_geopandas().geometry.iloc[0]) == 3857
+
+
+def test_geoparquet_rejects_any_without_declared_crs(native_geopandas, tmp_path):
+    frame = TestBase.spark.sql(
+        "SELECT CAST(ST_Point(1D, 2D) AS GEOMETRY(ANY)) AS geometry"
+    )
+    source = native_geopandas.GeoDataFrame(frame, geometry="geometry")
+    with pytest.raises(Exception, match="fixed native geometry CRS"):
+        source.to_parquet(str(tmp_path / "unknown.parquet"))
+
+
+def test_index_and_iloc_preserve_duplicate_multiindex_and_nulls(native_geopandas):
+    from geopandas.testing import assert_geoseries_equal
+
+    index = pd.MultiIndex.from_tuples(
+        [("a", 1), ("a", 1), ("b", 2)], names=["group", "row"]
+    )
+    expected = gpd.GeoSeries([Point(1, 2), None, Point(3, 4)], index=index, crs=4326)
+    source = native_geopandas.GeoSeries(expected)
+    assert source.index.to_pandas().equals(index)
+    assert source.iloc[0].equals(expected.iloc[0])
+    assert shapely.get_srid(source.iloc[0]) == 4326
+    assert source.iloc[1] is None
+    assert_geoseries_equal(source.iloc[:2].to_geopandas(), expected.iloc[:2])
+    source.index.names = ["new_group", "new_row"]
+    assert source.to_geopandas().index.names == ["new_group", "new_row"]
+
+
+def test_set_geometry_refreshes_native_type_before_alignment(native_geopandas):
+    import pyspark.pandas as ps
+    from sedona.spark.sql import st_functions as stf
+
+    source = native_geopandas.GeoDataFrame(
+        TestBase.spark.range(2).selectExpr(
+            "ST_Point(CAST(id AS DOUBLE), 2D) AS geometry"
+        ),
+        geometry="geometry",
+    )
+    result = source.set_geometry("geometry", crs=4326)
+    assert result.geometry.spark.data_type == spark_types.GeometryType("ANY")
+    column = result.geometry.spark.column
+    actual_type = (
+        result._internal.spark_frame.select(column.alias("g")).schema["g"].dataType
+    )
+    assert actual_type == result.geometry.spark.data_type
+    target = native_geopandas.GeoDataFrame({"value": [1, 2]})
+    with ps.option_context("compute.ops_on_diff_frames", True):
+        target["shape"] = result.geometry
+    assert (
+        target._internal.spark_frame.select(
+            stf.ST_SRID(target["shape"].spark.column)
+        ).collect()[0][0]
+        == 4326
+    )
+    assert source.geometry.spark.data_type == spark_types.GeometryType(0)
+
+
+@pytest.mark.parametrize("multiindex", [False, True])
+def test_same_anchor_renamed_geometry_appends_with_crs(native_geopandas, multiindex):
+    import pyspark.pandas as ps
+    from geopandas.testing import assert_geodataframe_equal
+
+    index = (
+        pd.MultiIndex.from_tuples(
+            [("a", 1), ("a", 1), ("b", 2)], names=["group", "row"]
+        )
+        if multiindex
+        else pd.Index([1, 1, 2], name="row")
+    )
+    local = gpd.GeoDataFrame(
+        {"geometry": [Point(1, 2), None, Point(3, 4)], "value": [11, 12, 13]},
+        index=index,
+        crs=4326,
+    )
+    expected = local.set_geometry(local.geometry.rename("new"), crs=3857)
+    source = native_geopandas.GeoDataFrame(local)
+    with ps.option_context("compute.ops_on_diff_frames", False):
+        result = source.set_geometry(source.geometry.rename("new"), crs=3857)
+    assert result.active_geometry_name == "new"
+    assert len(result) == 3
+    assert_geodataframe_equal(result.to_geopandas(), expected)
+    assert_geodataframe_equal(source.to_geopandas(), local)
+
+
+def test_iloc_assignment_preserves_duplicate_index_and_nulls(native_geopandas):
+    from geopandas.testing import assert_geoseries_equal
+
+    index = pd.Index([1, 1, 2], name="row")
+    expected = gpd.GeoSeries([Point(1, 2), None, Point(3, 4)], index=index, crs=4326)
+    source = native_geopandas.GeoSeries(expected)
+    source.iloc[0] = None
+    expected.iloc[0] = None
+    replacement = shapely.set_srid(Point(5, 6), 4326)
+    source.iloc[-1] = replacement
+    expected.iloc[-1] = replacement
+    assert_geoseries_equal(source.to_geopandas(), expected)

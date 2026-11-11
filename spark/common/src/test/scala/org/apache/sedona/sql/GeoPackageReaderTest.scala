@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql
 
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import io.minio.{MakeBucketArgs, MinioClient, PutObjectArgs}
 import org.apache.sedona.sql.datasources.geopackage.connection.{FileSystemUtils, GeoPackageConnectionManager}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
@@ -46,7 +47,7 @@ class GeoPackageReaderTest extends TestBaseScala with Matchers {
   val expectedFeatureSchema = StructType(
     Seq(
       StructField("id", IntegerType, true),
-      StructField("geometry", GeometryUDT(), true),
+      StructField("geometry", SpatialTypeSupport.geometryType, true),
       StructField("text", StringType, true),
       StructField("real", DoubleType, true),
       StructField("boolean", BooleanType, true),
@@ -140,7 +141,8 @@ class GeoPackageReaderTest extends TestBaseScala with Matchers {
 
       df.count() shouldEqual 4
 
-      val firstElement = df.collectAsList().get(0).toSeq
+      val firstRow = df.collectAsList().get(0)
+      val firstElement = firstRow.toSeq.updated(1, firstRow.getJtsGeometry(1))
 
       val expectedValues = Seq(
         1,
@@ -168,7 +170,8 @@ class GeoPackageReaderTest extends TestBaseScala with Matchers {
 
       df.count() shouldEqual 3
 
-      val firstElement = df.collectAsList().get(0).toSeq
+      val firstRow = df.collectAsList().get(0)
+      val firstElement = firstRow.toSeq.updated(1, firstRow.getJtsGeometry(1))
 
       firstElement should contain theSameElementsAs Seq(
         1,
@@ -191,7 +194,7 @@ class GeoPackageReaderTest extends TestBaseScala with Matchers {
       df.count shouldEqual 3
       df.schema shouldEqual expectedFeatureSchema
 
-      df.select("geometry").collectAsList().get(0).toSeq should contain theSameElementsAs Seq(
+      Seq(df.select("geometry").first().getJtsGeometry(0)) should contain theSameElementsAs Seq(
         wktReader.read(POLYGON_1))
     }
 

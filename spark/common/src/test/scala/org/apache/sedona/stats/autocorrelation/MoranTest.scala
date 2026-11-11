@@ -34,6 +34,7 @@ class MoranTest extends TestBaseScala with AutoCorrelationFixtures {
         .withColumn(
           "weights",
           expr("transform(weights, w -> struct(w.neighbor, w.value/size(weights) AS value))"))
+        .drop("geometry")
 
       weights.cache().count()
 
@@ -53,6 +54,7 @@ class MoranTest extends TestBaseScala with AutoCorrelationFixtures {
         .withColumn(
           "weights",
           expr("transform(weights, w -> struct(w.neighbor, w.value/size(weights) AS value))"))
+        .drop("geometry")
 
       weights.cache().count()
 
@@ -73,6 +75,7 @@ class MoranTest extends TestBaseScala with AutoCorrelationFixtures {
         .withColumn(
           "weights",
           expr("transform(weights, w -> struct(w.neighbor, w.value/size(weights) AS value))"))
+        .drop("geometry")
 
       val moranResult = Moran.getGlobal(weights, idColumn = "id")
 
@@ -147,6 +150,7 @@ class MoranTest extends TestBaseScala with AutoCorrelationFixtures {
         .withColumn(
           "weights",
           expr("transform(weights, w -> struct(w.neighbor, w.value/size(weights) AS value))"))
+        .drop("geometry")
 
       weights.cache().count()
 
@@ -163,6 +167,7 @@ class MoranTest extends TestBaseScala with AutoCorrelationFixtures {
         .withColumn(
           "weights",
           expr("transform(weights, w -> struct(w.neighbor, w.value/size(weights) AS value))"))
+        .drop("geometry")
 
       weights.cache().count()
 

@@ -20,9 +20,10 @@ from typing import Iterable, Union
 
 
 import pyspark
-from pyspark.sql import DataFrame
+from pyspark.sql import DataFrame, Row
 
 from sedona.spark import *
+from sedona.spark.sql.types import to_shapely, to_spark_geometry
 from sedona.spark.utils.decorators import classproperty
 
 SPARK_REMOTE = os.getenv("SPARK_REMOTE")
@@ -133,10 +134,14 @@ class TestBase:
         When comparing geometries with Z or M dimensions, this function will ignore `tolerance` and check for exact equality.
         """
         expected_geom = (
-            wkt.loads(left_geom) if isinstance(left_geom, str) else left_geom
+            wkt.loads(left_geom)
+            if isinstance(left_geom, str)
+            else to_shapely(left_geom)
         )
         actual_geom = (
-            wkt.loads(right_geom) if isinstance(right_geom, str) else right_geom
+            wkt.loads(right_geom)
+            if isinstance(right_geom, str)
+            else to_shapely(right_geom)
         )
 
         # Note: only shapely >= 2.1.0 supports Z and M dimensions
@@ -163,6 +168,44 @@ class TestBase:
                 raise ValueError(
                     f"Geometry equality check failed for {left_geom} and {right_geom}"
                 )
+
+
+def spatial_values_to_shapely(value):
+    """Normalize collected spatial values without changing the surrounding data."""
+    if isinstance(value, Row):
+        return Row(
+            **{
+                key: spatial_values_to_shapely(item)
+                for key, item in value.asDict().items()
+            }
+        )
+    if isinstance(value, list):
+        return [spatial_values_to_shapely(item) for item in value]
+    if isinstance(value, tuple):
+        return tuple(spatial_values_to_shapely(item) for item in value)
+    if isinstance(value, dict):
+        return {key: spatial_values_to_shapely(item) for key, item in value.items()}
+    return to_shapely(value)
+
+
+def spatial_values_to_spark(value):
+    """Adapt Shapely input fixtures to the runtime's default spatial values."""
+    if isinstance(value, BaseGeometry):
+        return to_spark_geometry(value)
+    if isinstance(value, Row):
+        return Row(
+            **{
+                key: spatial_values_to_spark(item)
+                for key, item in value.asDict().items()
+            }
+        )
+    if isinstance(value, list):
+        return [spatial_values_to_spark(item) for item in value]
+    if isinstance(value, tuple):
+        return tuple(spatial_values_to_spark(item) for item in value)
+    if isinstance(value, dict):
+        return {key: spatial_values_to_spark(item) for key, item in value.items()}
+    return value
 
 
 def has_zm(geom: BaseGeometry):

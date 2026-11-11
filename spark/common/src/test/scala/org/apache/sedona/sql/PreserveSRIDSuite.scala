@@ -18,9 +18,9 @@
  */
 package org.apache.sedona.sql
 
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.sedona.common.Constructors
 import org.apache.spark.sql.{DataFrame, Row}
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types.{StructField, StructType}
 import org.locationtech.jts.geom.Geometry
 import org.scalatest.prop.TableDrivenPropertyChecks
@@ -29,6 +29,8 @@ import scala.collection.mutable
 
 class PreserveSRIDSuite extends TestBaseScala with TableDrivenPropertyChecks {
   private var testDf: DataFrame = _
+  private val fixtureSrid = if (SpatialTypeSupport.usesNativeTypes) 4326 else 1000
+  private val replacementSrid = if (SpatialTypeSupport.usesNativeTypes) 4269 else 2000
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -127,15 +129,18 @@ class PreserveSRIDSuite extends TestBaseScala with TableDrivenPropertyChecks {
       ("ST_ApproximateMedialAxis(geom1)", 1000))
 
     forAll(testCases) { case (expression: String, srid: Int) =>
-      it(s"$expression") {
-        testDf.selectExpr(expression).collect().foreach { row =>
-          val value = row.getAs[AnyRef](0)
-          value match {
-            case geom: Geometry => assert(geom.getSRID == srid)
-            case geoms: mutable.WrappedArray[Geometry] =>
-              geoms.foreach(geom => assert(geom.getSRID == srid))
-            case _ => fail(s"Unexpected result: $value")
-          }
+      val query =
+        expression.replace("1000", fixtureSrid.toString).replace("2000", replacementSrid.toString)
+      val expectedSrid =
+        if (srid == 1000) fixtureSrid else if (srid == 2000) replacementSrid else srid
+      it(query) {
+        val result = testDf.selectExpr(query)
+        result.collect().foreach { row =>
+          val geometries =
+            if (SpatialTypeSupport.isGeometry(result.schema(0).dataType))
+              Seq(row.getJtsGeometry(0))
+            else row.getJtsGeometries(0)
+          geometries.foreach(geometry => assert(geometry.getSRID == expectedSrid))
         }
       }
     }
@@ -146,27 +151,31 @@ class PreserveSRIDSuite extends TestBaseScala with TableDrivenPropertyChecks {
 
     val schema = StructType(
       Seq(
-        StructField("geom1", GeometryUDT()),
-        StructField("geom2", GeometryUDT()),
-        StructField("geom3", GeometryUDT()),
-        StructField("geom4", GeometryUDT()),
-        StructField("geom5", GeometryUDT()),
-        StructField("geom6", GeometryUDT())))
-    val geom1 = Constructors.geomFromWKT("POLYGON ((0 0, 1 0, 0.5 0.5, 1 1, 0 1, 0 0))", 1000)
+        StructField("geom1", SpatialTypeSupport.geometryType),
+        StructField("geom2", SpatialTypeSupport.geometryType),
+        StructField("geom3", SpatialTypeSupport.geometryType),
+        StructField("geom4", SpatialTypeSupport.geometryType),
+        StructField("geom5", SpatialTypeSupport.geometryType),
+        StructField("geom6", SpatialTypeSupport.geometryType)))
+    val geom1 =
+      Constructors.geomFromWKT("POLYGON ((0 0, 1 0, 0.5 0.5, 1 1, 0 1, 0 0))", fixtureSrid)
     val geom2 =
-      Constructors.geomFromWKT("MULTILINESTRING ((0 0, 0 1), (0 1, 1 1), (1 1, 1 0))", 1000)
-    val geom3 = Constructors.geomFromWKT("LINESTRING (0 0, 0 1, 1 1, 1 0)", 1000)
+      Constructors.geomFromWKT(
+        "MULTILINESTRING ((0 0, 0 1), (0 1, 1 1), (1 1, 1 0))",
+        fixtureSrid)
+    val geom3 = Constructors.geomFromWKT("LINESTRING (0 0, 0 1, 1 1, 1 0)", fixtureSrid)
     val geom4 = Constructors.geomFromWKT(
       "POLYGON (( 30 10, 40 40, 20 40, 10 20, 30 10 ), ( 20 30, 35 35, 30 20, 20 30 ))",
-      1000)
+      fixtureSrid)
     val geom5 = Constructors.geomFromWKT(
       """GEOMETRYCOLLECTION (LINESTRING (2 0, 2 1, 2 2),
         |LINESTRING (2 2, 2 3, 2 4), LINESTRING (0 2, 1 2, 2 2),
         |LINESTRING (2 2, 3 2, 4 2), LINESTRING (0 2, 1 3, 2 4),
         |LINESTRING (2 4, 3 3, 4 2))""".stripMargin,
-      1000)
-    val geom6 = Constructors.geomFromWKT("POINT (1 2)", 1000)
-    val rows = Seq(Row(geom1, geom2, geom3, geom4, geom5, geom6))
+      fixtureSrid)
+    val geom6 = Constructors.geomFromWKT("POINT (1 2)", fixtureSrid)
+    val geometries = Seq(geom1, geom2, geom3, geom4, geom5, geom6)
+    val rows = Seq(Row.fromSeq(geometries.map(SpatialTypeSupport.externalGeometry)))
     sparkSession.createDataFrame(rows.asJava, schema)
   }
 }

@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql
 
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.catalyst.expressions.{EmptyRow, Literal}
@@ -440,14 +441,22 @@ class predicateTestScala extends TestBaseScala {
         "POINT Z (1 2 3)",
         "POINT M (1 2 3)",
         "GEOMETRYCOLLECTION (POINT (1 2), LINESTRING Z (0 0 1, 1 1 2))")
+      val supportedWkts = if (SpatialTypeSupport.usesNativeTypes) {
+        val mixed = wkts.last
+        val error = intercept[Exception] {
+          sparkSession.sql(s"SELECT ST_GeomFromWKT('$mixed')").collect()
+        }
+        assert(error.toString.contains("WKB_PARSE_ERROR"))
+        wkts.dropRight(1)
+      } else wkts
       // Materialize the geometries, so the comparison reads them back from stored buffers.
       sparkSession
-        .createDataFrame(wkts.map(Tuple1(_)))
+        .createDataFrame(supportedWkts.map(Tuple1(_)))
         .toDF("wkt")
         .selectExpr("wkt", "ST_GeomFromWKT(wkt) AS geom")
-        .cache()
+        .transform(materializeSpatialFrame)
         .createOrReplaceTempView("stored_geometries")
-      for (wkt <- wkts) {
+      for (wkt <- supportedWkts) {
         val result = sparkSession
           .sql(s"""
             SELECT
@@ -557,7 +566,21 @@ class predicateTestScala extends TestBaseScala {
         ("POINT (1 2)", 0, null, 0, None),
         (null, 0, null, 0, None))
 
-      val stored = cases.zipWithIndex
+      val indexedCases = cases.zipWithIndex
+      val supportedCases = if (SpatialTypeSupport.usesNativeTypes) {
+        val (rejected, supported) = indexedCases.partition { case ((left, _, right, _, _), _) =>
+          Seq(left, right).exists(wkt =>
+            wkt != null && wkt.startsWith("LINESTRING") && wkt.contains("NaN"))
+        }
+        rejected.foreach { case ((left, _, _, _, _), _) =>
+          val error = intercept[Exception] {
+            sparkSession.sql(s"SELECT ST_GeomFromWKT('$left')").collect()
+          }
+          assert(error.toString.contains("WKB_PARSE_ERROR"))
+        }
+        supported
+      } else indexedCases
+      val stored = supportedCases
         .map { case ((lw, ls, rw, rs, _), id) => (id, lw, ls, rw, rs) }
         .toDF("id", "lw", "ls", "rw", "rs")
         .selectExpr(
@@ -568,7 +591,7 @@ class predicateTestScala extends TestBaseScala {
           "rs",
           "ST_GeomFromWKT(lw, ls) AS a",
           "ST_GeomFromWKT(rw, rs) AS b")
-        .cache()
+        .transform(materializeSpatialFrame)
       try {
         val rows = stored
           .selectExpr(
@@ -576,7 +599,7 @@ class predicateTestScala extends TestBaseScala {
             "ST_EqualsIdentical(a, b)",
             "ST_EqualsIdentical(ST_GeomFromWKT(lw, ls), ST_GeomFromWKT(rw, rs))")
           .collect()
-        assert(rows.length == cases.length)
+        assert(rows.length == supportedCases.length)
         rows.foreach { row =>
           val id = row.getInt(0)
           (1 until row.length).foreach { i =>

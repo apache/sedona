@@ -26,7 +26,10 @@ from shapely import wkt
 import sedona.spark.geopandas as sgpd
 from sedona.spark.geopandas import GeoSeries
 from sedona.spark.sql import st_functions as stf
-from tests.geopandas.test_geopandas_base import TestGeopandasBase
+from tests.geopandas.test_geopandas_base import (
+    spark_frame_to_pandas_api,
+    TestGeopandasBase,
+)
 
 
 def _assert_geoseries_equal_with_nan_xy(actual, expected, nan_xy):
@@ -161,10 +164,13 @@ class TestPointsFromXY(TestGeopandasBase):
         ]
 
     def test_points_from_xy_null_is_nan_coordinate_not_missing_geometry(self):
-        psdf = self.spark.createDataFrame(
-            [(0, None, 2.0), (1, 3.0, None), (2, None, None)],
-            "id long, x double, y double",
-        ).pandas_api(index_col="id")
+        psdf = spark_frame_to_pandas_api(
+            self.spark.createDataFrame(
+                [(0, None, 2.0), (1, 3.0, None), (2, None, None)],
+                "id long, x double, y double",
+            ),
+            index_col="id",
+        )
 
         result = sgpd.points_from_xy(psdf["x"], psdf["y"])
 

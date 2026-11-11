@@ -16,12 +16,18 @@
 # under the License.
 
 import re
+import pytest
 
 from pyspark.sql.functions import col, expr, lit
 from sedona.spark.sql import st_constructors as stc
 from sedona.spark.sql import st_functions as stf
 from sedona.spark.sql import st_predicates as stp
 from tests.test_base import TestBase
+from sedona.spark.sql.types import (
+    USES_NATIVE_SPATIAL_TYPES,
+    geography_type,
+    to_shapely,
+)
 
 
 def _parse_point_xy(wkt):
@@ -314,8 +320,13 @@ class TestGeographyPythonSerde(TestBase):
 
         source = self.spark.sql("SELECT ST_GeogFromWKT('POINT (1 2)', 4326) AS g")
         value = source.first()[0]
-        assert isinstance(value, Geography)
-        assert list(value.geometry.coords) == [(1.0, 2.0)]
+        if USES_NATIVE_SPATIAL_TYPES:
+            from pyspark.sql.types import Geography as NativeGeography
+
+            assert isinstance(value, NativeGeography)
+        else:
+            assert isinstance(value, Geography)
+        assert list(to_shapely(value).coords) == [(1.0, 2.0)]
         restored = self.spark.createDataFrame([(value,)], source.schema)
         assert (
             restored.selectExpr("ST_AsEWKT(g)").first()[0] == "SRID=4326; POINT (1 2)"
@@ -323,13 +334,15 @@ class TestGeographyPythonSerde(TestBase):
 
     def test_geography_python_udf_preserves_srid_and_null(self):
         from pyspark.sql.functions import udf
-        from sedona.spark.sql.types import GeographyType
 
         source = self.spark.sql(
             "SELECT id, IF(id = 0, ST_GeogFromWKT('POINT (1 2)', 4269), NULL) AS g "
             "FROM range(2)"
         )
-        identity = udf(lambda value: value, GeographyType())
+        if USES_NATIVE_SPATIAL_TYPES:
+            # PySpark's fixed-CRS mapper does not recognize the JVM's OGC:CRS83 name.
+            source = source.select("id", col("g").cast(geography_type()).alias("g"))
+        identity = udf(lambda value: value, geography_type())
         restored = source.select("id", identity("g").alias("g"))
         assert restored.selectExpr("id", "ST_AsEWKT(g)").orderBy("id").collect() == [
             (0, "SRID=4269; POINT (1 2)"),
@@ -340,7 +353,7 @@ class TestGeographyPythonSerde(TestBase):
         import struct
         from shapely import wkb
         from sedona.spark.core.geom.geography import Geography
-        from sedona.spark.sql.types import GeographyType
+        from sedona.spark.sql.types import LegacyGeographyType as GeographyType
 
         point = struct.pack("<BIidd", 1, 0x20000001, 4326, 1.0, 2.0)
         python_value = Geography(wkb.loads(point))
@@ -358,7 +371,7 @@ class TestGeographyPythonSerde(TestBase):
         from pyspark.sql.types import IntegerType, StructField, StructType
         from shapely import wkb
         from sedona.spark.core.geom.geography import Geography
-        from sedona.spark.sql.types import GeographyType
+        from sedona.spark.sql.types import LegacyGeographyType as GeographyType
 
         srids = [4326, 1, 0]
         values = [
@@ -376,19 +389,31 @@ class TestGeographyPythonSerde(TestBase):
                 StructField("g", GeographyType(), True),
             ]
         )
-        source = self.spark.createDataFrame(values, schema)
+        source = self.spark.createDataFrame(
+            values, schema, verifySchema=not USES_NATIVE_SPATIAL_TYPES
+        )
         path = str(tmp_path / "geography.parquet")
         source.write.parquet(path)
         restored = self.spark.read.parquet(path)
         assert isinstance(restored.schema["g"].dataType, GeographyType)
-        assert restored.selectExpr("id", "ST_SRID(ST_GeogToGeometry(g))").orderBy(
-            "id"
-        ).collect() == [
+        expected_srids = [
             (0, 4326),
             (1, 1),
             (2, 0),
             (3, None),
         ]
+        converted = restored
+        if USES_NATIVE_SPATIAL_TYPES:
+            with pytest.raises(Exception, match="ST_INVALID_SRID_VALUE.*1"):
+                restored.where("id = 1").selectExpr("ST_GeogToGeometry(g)").collect()
+            converted = restored.where("id != 1")
+            expected_srids = [value for value in expected_srids if value[0] != 1]
+        assert (
+            converted.selectExpr("id", "ST_SRID(ST_GeogToGeometry(g))")
+            .orderBy("id")
+            .collect()
+            == expected_srids
+        )
         rows = restored.orderBy("id").collect()
         assert rows[3].g is None
         for row, srid in zip(rows, srids):

@@ -18,6 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.io.stac
 
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
@@ -316,7 +317,7 @@ class StacDataSourceTest extends TestBaseScala {
       StructField("type", StringType, nullable = false),
       StructField("id", StringType, nullable = false),
       StructField("bbox", ArrayType(DoubleType, containsNull = true), nullable = true),
-      StructField("geometry", new GeometryUDT(), nullable = true),
+      StructField("geometry", SpatialTypeSupport.geometryType, nullable = true),
       StructField("title", StringType, nullable = true),
       StructField("description", StringType, nullable = true),
       StructField("datetime", TimestampType, nullable = true),

@@ -34,6 +34,7 @@
 
     <properties>
         <maven.deploy.skip>false</maven.deploy.skip>
+        <hadoop.minicluster.artifact>hadoop-minicluster</hadoop.minicluster.artifact>
     </properties>
 
     <dependencies>
@@ -219,7 +220,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-minicluster</artifactId>
+            <artifactId>${hadoop.minicluster.artifact}</artifactId>
             <version>${hadoop.version}</version>
             <scope>test</scope>
             <exclusions>
@@ -402,7 +403,30 @@
                     <value>4.2</value>
                 </property>
             </activation>
+            <properties>
+                <!-- The shaded fixture keeps Hadoop's Jersey 2 server separate from Spark's Jersey 3. -->
+                <hadoop.minicluster.artifact>hadoop-client-minicluster</hadoop.minicluster.artifact>
+            </properties>
             <dependencies>
+                <dependency>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-client</artifactId>
+                    <exclusions>
+                        <exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion>
+                    </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-client-api</artifactId>
+                    <version>${hadoop.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-client-runtime</artifactId>
+                    <version>${hadoop.version}</version>
+                    <scope>test</scope>
+                </dependency>
                 <dependency>
                     <groupId>org.apache.spark</groupId>
                     <artifactId>spark-sql-api_${scala.compat.version}</artifactId>
@@ -410,23 +434,7 @@
                     <scope>provided</scope>
                 </dependency>
             </dependencies>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <excludes>
-                                <!-- Hadoop MiniDFS starts a Jersey 2/javax WebHDFS server,
-                                     incompatible with Spark 4.2's Jersey 3/jakarta classes.
-                                     Keep this HDFS fixture on the older-runtime matrices;
-                                     native shapefile data-source tests run in spark-4.2. -->
-                                <exclude>**/ShapefileReaderTest.java</exclude>
-                            </excludes>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
+
         </profile>
     </profiles>
 </project>

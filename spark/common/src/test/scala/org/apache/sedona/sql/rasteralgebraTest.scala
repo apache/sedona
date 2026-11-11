@@ -389,7 +389,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
     it("Passed RS_Envelope with raster") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
-      val result = df.selectExpr("RS_Envelope(RS_FromGeoTiff(content))").first().get(0)
+      val result = df.selectExpr("RS_Envelope(RS_FromGeoTiff(content))").first().getJtsGeometry(0)
       assert(result != null)
       assert(result.isInstanceOf[Geometry])
     }
@@ -1722,7 +1722,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     it("Passed RS_ConvexHull with raster") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       val result =
-        df.selectExpr("RS_ConvexHull(RS_FromGeoTiff(content))").first().getAs[Geometry](0)
+        df.selectExpr("RS_ConvexHull(RS_FromGeoTiff(content))").first().getJtsGeometry(0)
       val coordinates = result.getCoordinates
 
       val expectedCoordOne = new Coordinate(-13095817.809482181, 4021262.7487925636)
@@ -2101,7 +2101,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .sql(
           s"SELECT RS_PixelAsPoint(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize), 2, 1)")
         .first()
-        .getAs[Geometry](0)
+        .getJtsGeometry(0)
       val expectedX = 127.19
       val expectedY = -12
       val actualCoordinates = result.getCoordinate
@@ -2120,9 +2120,12 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .sql(
           s"SELECT RS_PixelAsPoints(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize), 1)")
         .first()
-        .getList(0)
+        .getList[Row](0)
       val expected = "[POINT (127.19 -12),0.0,2,1]"
-      assertEquals(expected, result.get(1).toString)
+      val pixel = result.get(1)
+      assertEquals(
+        expected,
+        Row.fromSeq(pixel.toSeq.updated(0, pixel.getJtsGeometry(0))).toString)
     }
 
     it("Passed RS_PixelAsPoints with raster") {
@@ -2168,10 +2171,13 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .sql(
           s"SELECT RS_PixelAsPolygons(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize), 1)")
         .first()
-        .getList(0)
+        .getList[Row](0)
       val expected =
         "[POLYGON ((127.19 -20, 131.19 -20, 131.19 -24, 127.19 -24, 127.19 -20)),0.0,2,3]"
-      assertEquals(expected, result.get(11).toString)
+      val pixel = result.get(11)
+      assertEquals(
+        expected,
+        Row.fromSeq(pixel.toSeq.updated(0, pixel.getJtsGeometry(0))).toString)
     }
 
     it("Passed RS_PixelAsPolygons with raster") {
@@ -2216,9 +2222,12 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .sql(
           s"SELECT RS_PixelAsCentroids(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize), 1)")
         .first()
-        .getList(0)
+        .getList[Row](0)
       val expected = "[POINT (253.5 -215.5),0.0,2,3]"
-      assertEquals(expected, result.get(25).toString)
+      val pixel = result.get(25)
+      assertEquals(
+        expected,
+        Row.fromSeq(pixel.toSeq.updated(0, pixel.getJtsGeometry(0))).toString)
     }
 
     it("Passed RS_PixelAsCentroids with raster") {
@@ -2254,7 +2263,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       df = df.selectExpr("RS_FromGeoTiff(content) as raster")
       val result =
-        df.selectExpr("RS_RasterToWorldCoord(raster, 1, 1)").first().get(0).asInstanceOf[Geometry]
+        df.selectExpr("RS_RasterToWorldCoord(raster, 1, 1)").first().getJtsGeometry(0)
       val actualCoordinate = result.getCoordinate
       assertEquals(-13095817.809482181, actualCoordinate.x, 0.5d)
       assertEquals(4021262.7487925636, actualCoordinate.y, 0.5d)

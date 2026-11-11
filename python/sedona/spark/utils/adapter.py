@@ -24,6 +24,7 @@ from sedona.spark.core.enums.spatial import SpatialType
 from sedona.spark.core.spatialOperator.rdd import SedonaPairRDD, SedonaRDD
 from sedona.spark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.spark.utils.meta import MultipleMeta
+from sedona.spark.sql.types import to_spark_geometry
 
 
 class Adapter(metaclass=MultipleMeta):
@@ -139,9 +140,9 @@ class Adapter(metaclass=MultipleMeta):
         """
         spatial_pair_rdd_mapped = spatialPairRDD.map(
             lambda x: [
-                x[0].geom,
+                to_spark_geometry(x[0].geom),
                 *x[0].getUserData().split("\t"),
-                x[1].geom,
+                to_spark_geometry(x[1].geom),
                 *x[1].getUserData().split("\t"),
             ]
         )

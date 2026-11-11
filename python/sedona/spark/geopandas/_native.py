@@ -24,7 +24,13 @@ import shapely
 from geopandas.array import GeometryDtype
 from pyproj import CRS
 from shapely.geometry.base import BaseGeometry
-from pyspark.pandas.internal import InternalField, NATURAL_ORDER_COLUMN_NAME
+from pyspark.pandas.internal import (
+    InternalField,
+    InternalFrame,
+    NATURAL_ORDER_COLUMN_NAME,
+)
+from pyspark.pandas.namespace import _get_index_map
+from pyspark.sql.types import ArrayType
 from pyspark.pandas.utils import scol_for
 
 from sedona.spark.sql.st_constructors import ST_GeomFromWKB
@@ -34,19 +40,56 @@ from sedona.spark.geopandas._crs import with_crs_metadata
 from pyspark.sql import functions as F
 
 
+def internal_field(field):
+    """Describe spatial values explicitly instead of asking Arrow to infer them."""
+    data_type = field.dataType
+    while isinstance(data_type, ArrayType):
+        data_type = data_type.elementType
+    if isinstance(data_type, GeometryType):
+        return InternalField(np.dtype("object"), field)
+    return InternalField.from_struct_field(field)
+
+
+def from_spark(frame, index_col=None):
+    """Wrap a Spark frame without inferring native geometry through Arrow."""
+    indexes, index_names = _get_index_map(frame, index_col)
+    index_columns = (
+        []
+        if index_col is None
+        else ([index_col] if isinstance(index_col, str) else list(index_col))
+    )
+    names = [
+        name
+        for name in frame.columns
+        if name not in index_columns and name != NATURAL_ORDER_COLUMN_NAME
+    ]
+    return ps.DataFrame(
+        InternalFrame(
+            spark_frame=frame,
+            index_spark_columns=indexes,
+            index_names=index_names,
+            data_spark_columns=[scol_for(frame, name) for name in names],
+            data_fields=[internal_field(frame.schema[name]) for name in names],
+        )
+    )
+
+
 class NativeScalarSeries(ps.Series):
     """Collect a scalar column without reading native geometry in its anchor."""
 
     def _to_internal_pandas(self):
         # Keep the shared anchor during distributed operations. Project only
         # when collecting, since pandas-on-Spark cannot restore native geometry.
-        return self._internal.to_pandas_frame.iloc[:, 0]
+        return to_pandas(self._internal).iloc[:, 0]
 
     def __repr__(self):
         return display(self)
 
 
 class _NativeDisplayFrame(ps.DataFrame):
+    def _to_pandas(self):
+        return self._to_internal_pandas().copy()
+
     def _to_internal_pandas(self):
         return to_pandas(self._internal)
 
@@ -192,9 +235,18 @@ def to_pandas(internal):
         )
     ):
         if isinstance(field.spark_type, GeometryType):
-            geometry_positions.append(position)
-            column = F.struct(
-                ST_AsBinary(column).alias("wkb"), ST_SRID(column).alias("srid")
+            geometry_positions.append((position, False))
+            column = _geometry_struct(column)
+        elif isinstance(field.spark_type, ArrayType) and isinstance(
+            field.spark_type.elementType, GeometryType
+        ):
+            geometry_positions.append((position, True))
+            column = F.when(
+                column.isNotNull(),
+                F.struct(
+                    F.transform(column, ST_AsBinary).alias("wkb"),
+                    F.transform(column, ST_SRID).alias("srid"),
+                ),
             )
         columns.append(column.alias(name))
     projected = internal.spark_frame.select(
@@ -214,7 +266,7 @@ def to_pandas(internal):
         data_fields=fields,
     )
     local = converted.to_pandas_frame
-    for position in geometry_positions:
+    for position, is_array in geometry_positions:
 
         def decode(value):
             if value is None or value["wkb"] is None:
@@ -223,5 +275,211 @@ def to_pandas(internal):
                 shapely.from_wkb(bytes(value["wkb"])), int(value["srid"])
             )
 
-        local.isetitem(position, local.iloc[:, position].map(decode))
+        if is_array:
+            local.isetitem(
+                position,
+                local.iloc[:, position].map(
+                    lambda values: (
+                        None
+                        if values is None
+                        else [
+                            decode({"wkb": wkb, "srid": srid})
+                            for wkb, srid in zip(values["wkb"], values["srid"])
+                        ]
+                    )
+                ),
+            )
+        else:
+            local.isetitem(position, local.iloc[:, position].map(decode))
     return local
+
+
+def fixed_srid(column, srid):
+    """Declare a fixed native CRS only after validating every existing SRID."""
+    checked = F.when(
+        column.isNull() | (ST_SRID(column) == F.lit(srid)), column
+    ).otherwise(
+        F.raise_error(
+            F.lit("Native geometry SRID does not match the declared CRS " + str(srid))
+        )
+    )
+    # Spark does not cast ANY geometry to a fixed CRS. This identity operation
+    # becomes fixed-typed, but its guard prevents any change to a stored SRID.
+    return ST_SetSRID(checked, srid)
+
+
+def _geometry_struct(column):
+    return F.struct(ST_AsBinary(column).alias("wkb"), ST_SRID(column).alias("srid"))
+
+
+def _encode_geometry_columns(internal):
+    columns = [
+        (
+            _geometry_struct(column)
+            if isinstance(field.spark_type, GeometryType)
+            else column
+        ).alias(name, metadata=field.metadata)
+        for column, name, field in zip(
+            internal.data_spark_columns,
+            internal.data_spark_column_names,
+            internal.data_fields,
+        )
+    ]
+    projected = internal.spark_frame.select(
+        *internal.index_spark_columns,
+        *columns,
+        scol_for(internal.spark_frame, NATURAL_ORDER_COLUMN_NAME),
+    )
+    return internal.copy(
+        spark_frame=projected,
+        data_spark_columns=[
+            scol_for(projected, name) for name in internal.data_spark_column_names
+        ],
+        data_fields=[
+            field.copy(spark_type=projected.schema[name].dataType)
+            for name, field in zip(
+                internal.data_spark_column_names, internal.data_fields
+            )
+        ],
+    )
+
+
+def assign_geometry(frame, key, series):
+    """Align geometry with ordinary WKB/SRID structs, then restore native values."""
+    from pyspark.pandas.series import first_series
+
+    fields = dict(zip(frame._internal.column_labels, frame._internal.data_fields))
+    label = ps.DataFrame._index_normalized_label(
+        frame._internal.column_labels_level, key
+    )[0]
+    fields[label] = series._internal.data_fields[0]
+    aligned = ps.DataFrame(_encode_geometry_columns(frame._internal))
+    aligned[key] = first_series(
+        ps.DataFrame(_encode_geometry_columns(series._internal))
+    )
+    return _restore_geometry_columns(aligned._internal, fields)
+
+
+def _restore_geometry_columns(internal, fields):
+    columns = []
+    restored_fields = []
+    for label, name, column, field in zip(
+        internal.column_labels,
+        internal.data_spark_column_names,
+        internal.data_spark_columns,
+        internal.data_fields,
+    ):
+        original = fields.get(label)
+        if original is not None and isinstance(original.spark_type, GeometryType):
+            column = ST_SetSRID(ST_GeomFromWKB(column["wkb"]), column["srid"])
+            if original.spark_type.srid != GeometryType.MIXED_SRID:
+                column = fixed_srid(column, original.spark_type.srid)
+            field = original.copy(name=name, nullable=True)
+        columns.append(column.alias(name, metadata=field.metadata))
+        restored_fields.append(field)
+    return internal.with_new_columns(columns, data_fields=restored_fields)
+
+
+class _NativeIndexCollection:
+    def equals(self, other):
+        if not isinstance(other, ps.Index):
+            return False
+
+        def plain(index):
+            internal = index._psdf._internal.copy(
+                column_labels=[], data_spark_columns=[], data_fields=[]
+            )
+            return ps.DataFrame(internal).index
+
+        return plain(self).equals(plain(other))
+
+    def _to_internal_pandas(self):
+        internal = self._psdf._internal.copy(
+            column_labels=[],
+            data_spark_columns=[],
+            data_fields=[],
+        )
+        return internal.to_pandas_frame.index
+
+
+class _NativeIndex(_NativeIndexCollection, ps.Index):
+    pass
+
+
+class _NativeMultiIndex(_NativeIndexCollection, ps.MultiIndex):
+    pass
+
+
+class _NativeDatetimeIndex(_NativeIndexCollection, ps.DatetimeIndex):
+    pass
+
+
+class _NativeTimedeltaIndex(_NativeIndexCollection, ps.TimedeltaIndex):
+    pass
+
+
+class _NativeCategoricalIndex(_NativeIndexCollection, ps.CategoricalIndex):
+    pass
+
+
+def native_index(index):
+    index_type = {
+        ps.Index: _NativeIndex,
+        ps.MultiIndex: _NativeMultiIndex,
+        ps.DatetimeIndex: _NativeDatetimeIndex,
+        ps.TimedeltaIndex: _NativeTimedeltaIndex,
+        ps.CategoricalIndex: _NativeCategoricalIndex,
+    }.get(type(index))
+    if index_type is None:
+        return index
+    result = object.__new__(index_type)
+    result._anchor = index._anchor
+    return result
+
+
+class NativeGeometryILoc:
+    """Keep positional selection distributed and decode collected scalar values."""
+
+    def __init__(self, series):
+        self._series = series
+
+    def __getitem__(self, key):
+        from pyspark.pandas.series import first_series
+        from sedona.spark.geopandas.geoseries import GeoSeries
+
+        if isinstance(key, (int, np.integer)):
+            encoded = first_series(
+                ps.DataFrame(_encode_geometry_columns(self._series._internal))
+            )
+            value = encoded.iloc[key]
+            if value is None or value["wkb"] is None:
+                return None
+            return shapely.set_srid(
+                shapely.from_wkb(bytes(value["wkb"])), int(value["srid"])
+            )
+        selected = ps.Series.iloc.fget(self._series)[key]
+        return GeoSeries(selected) if isinstance(selected, ps.Series) else selected
+
+    def __setitem__(self, key, value):
+        from sedona.spark.geopandas.geoseries import _geometry_literal
+
+        original = self._series._anchor._internal
+        fields = dict(zip(original.column_labels, original.data_fields))
+        encoded = ps.DataFrame(_encode_geometry_columns(original))
+        encoded_series = encoded._psser_for(self._series._column_label)
+        if isinstance(value, BaseGeometry):
+            value = _geometry_struct(_geometry_literal(value))
+            if isinstance(key, (int, np.integer)):
+                # pandas-on-Spark rejects Column values for a scalar indexer.
+                # A one-position selection retains the same row assignment.
+                key = [int(key)]
+        elif isinstance(value, ps.Series) and isinstance(
+            value.spark.data_type, GeometryType
+        ):
+            value = ps.DataFrame(_encode_geometry_columns(value._internal))._psser_for(
+                value._column_label
+            )
+        encoded_series.iloc[key] = value
+        restored = _restore_geometry_columns(encoded_series._anchor._internal, fields)
+        self._series._update_internal_frame(restored, check_same_anchor=False)
+        self._series._sindex = None

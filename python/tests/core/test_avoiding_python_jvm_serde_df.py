@@ -28,7 +28,7 @@ from sedona.spark.core.spatialOperator.join_params import JoinParams
 from sedona.spark.core.spatialOperator.join_query_raw import JoinQueryRaw
 from sedona.spark.core.spatialOperator.range_query_raw import RangeQueryRaw
 from sedona.spark.core.SpatialRDD import CircleRDD
-from sedona.spark.sql.types import GeometryType
+from sedona.spark.sql.types import geometry_type, to_shapely, to_spark_geometry
 from sedona.spark.utils.adapter import Adapter
 
 bank_csv_path = os.path.join(tests_resource, "small/points.csv")
@@ -148,8 +148,8 @@ class TestOmitPythonJvmSerdeToDf(TestBase):
 
         assert pois_within_areas_with_default_column_names.schema == StructType(
             [
-                StructField("leftgeometry", GeometryType()),
-                StructField("rightgeometry", GeometryType()),
+                StructField("leftgeometry", geometry_type()),
+                StructField("rightgeometry", geometry_type()),
             ]
         )
 
@@ -203,7 +203,7 @@ class TestOmitPythonJvmSerdeToDf(TestBase):
 
         raw_geometries = self.__row_to_list(df_without_column_names.collect())
 
-        assert [point[0].wkt for point in raw_geometries] == [
+        assert [to_shapely(point[0]).wkt for point in raw_geometries] == [
             "POINT (9 8)",
             "POINT (4 3)",
             "POINT (12 1)",
@@ -211,7 +211,7 @@ class TestOmitPythonJvmSerdeToDf(TestBase):
         ]
         assert df_without_column_names.count() == 4
         assert df_without_column_names.schema == StructType(
-            [StructField("geometry", GeometryType())]
+            [StructField("geometry", geometry_type())]
         )
 
         df = Adapter.toDf(result, self.spark, ["poi_id", "poi_name"])

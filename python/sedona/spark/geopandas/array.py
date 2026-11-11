@@ -44,7 +44,7 @@ from pyspark.sql.types import (
 from sedona.spark.geopandas._crs import with_crs_metadata
 from sedona.spark.sql import st_constructors as stc
 from sedona.spark.sql import st_functions as stf
-from sedona.spark.sql.types import geometry_type
+from sedona.spark.sql.types import geometry_type, USES_NATIVE_SPATIAL_TYPES
 
 
 def _is_distributed_series(value: Any) -> bool:
@@ -114,6 +114,10 @@ def _distributed_points_from_xy(
     normalized_crs = CRS.from_user_input(crs) if crs is not None else None
     if normalized_crs is not None:
         point = stf.ST_SetSRID(point, normalized_crs.to_epsg() or 0)
+
+    if USES_NATIVE_SPATIAL_TYPES:
+        # Keep per-value SRIDs without PySpark's narrower fixed-CRS JSON mapper.
+        point = point.cast(geometry_type())
 
     source_internal = source._internal
     source_sdf = source_internal.spark_frame

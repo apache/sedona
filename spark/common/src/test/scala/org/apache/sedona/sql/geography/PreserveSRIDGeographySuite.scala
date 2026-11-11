@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql.geography
 
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.sedona.common.S2Geography.Geography
 import org.apache.sedona.common.geography.Constructors
 import org.apache.sedona.sql.TestBaseScala
@@ -86,12 +87,17 @@ class PreserveSRIDGeographySuite extends TestBaseScala with TableDrivenPropertyC
 
     forAll(testCases) { case (expression: String, srid: Int) =>
       it(s"$expression") {
-        testDf.selectExpr(expression).collect().foreach { row =>
-          val value = row.getAs[AnyRef](0)
-          value match {
-            case geog: Geography => assert(geog.getSRID == srid)
-            case geom: Geometry => assert(geom.getSRID == srid)
-            case _ => fail(s"Unexpected result: $value")
+        if (SpatialTypeSupport.usesNativeTypes && srid == 1000) {
+          val error = intercept[Exception](testDf.selectExpr(expression).collect())
+          assert(error.toString.contains("SRID"))
+        } else {
+          val result = testDf.selectExpr(expression)
+          val isGeometry = SpatialTypeSupport.isGeometry(result.schema(0).dataType)
+          result.collect().foreach { row =>
+            val actualSrid =
+              if (isGeometry) row.getJtsGeometry(0).getSRID
+              else row.getSedonaGeography(0).getSRID
+            assert(actualSrid == srid)
           }
         }
       }

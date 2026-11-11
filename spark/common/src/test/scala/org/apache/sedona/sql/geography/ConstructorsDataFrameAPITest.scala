@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql.geography
 
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.sedona.common.S2Geography.{Geography, WKBReader}
 import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.sql.functions.{col, lit}
@@ -35,7 +36,7 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
       Seq(Array[Byte](1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 36, 64, 0, 0, 0, 0, 0, 0, 46, 64))
 
     val df = wkbSeq.toDF("wkb").select(st_constructors.ST_GeogFromWKB(col("wkb")))
-    val actualResult = df.take(1)(0).get(0).asInstanceOf[Geography].toString()
+    val actualResult = df.take(1)(0).getSedonaGeography(0).toString()
     val expectedResult = "POINT (10 15)"
     assert(actualResult == expectedResult)
   }
@@ -45,7 +46,7 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
       Array[Byte](1, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, -124, -42, 0, -64, 0, 0, 0, 0, -128, -75,
         -42, -65, 0, 0, 0, 96, -31, -17, -9, -65, 0, 0, 0, -128, 7, 93, -27, -65))
     val df = wkbSeq.toDF("wkb").select(st_constructors.ST_GeogFromWKB(col("wkb")))
-    val actualResult = df.take(1)(0).get(0).asInstanceOf[Geography].toString()
+    val actualResult = df.take(1)(0).getSedonaGeography(0).toString()
     val expectedResult =
       "LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)"
     assert(actualResult == expectedResult)
@@ -57,10 +58,21 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
     val array = WKBReader.hexToBytes(hexStr)
     val wkbSeq = Seq[Array[Byte]](array)
     val df = wkbSeq.toDF("wkb").select(st_constructors.ST_GeogFromWKB(col("wkb")))
-    val actualResult = df.take(1)(0).get(0).asInstanceOf[Geography].toEWKT()
+    val actualResult = if (SpatialTypeSupport.usesNativeTypes) {
+      val error = intercept[Exception](df.collect())
+      assert(error.toString.contains("WKB_PARSE_ERROR"))
+      wkbSeq
+        .toDF("wkb")
+        .select(st_constructors.ST_GeogFromEWKB(col("wkb")))
+        .first()
+        .getSedonaGeography(0)
+        .toEWKT()
+    } else df.take(1)(0).getSedonaGeography(0).toEWKT()
     val expectedResult =
       "GEOMETRYCOLLECTION (POINT (0 1), POINT (0 1), POINT (2 3), LINESTRING (2 3, 4 5), LINESTRING (0 1, 2 3), LINESTRING (4 5, 6 7), POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0), (1 1, 1 9, 9 9, 9 1, 1 1)), POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0), (1 1, 1 9, 9 9, 9 1, 1 1)), POLYGON ((-9 0, -9 10, -1 10, -1 0, -9 0)))"
-    assert(actualResult == expectedResult)
+    val expectedEWKT =
+      if (SpatialTypeSupport.usesNativeTypes) "SRID=4326; " + expectedResult else expectedResult
+    assert(actualResult == expectedEWKT)
   }
 
   it("passed ST_GeogFromEWKB") {
@@ -69,11 +81,11 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
         0, 0, -128, -75, -42, -65, 0, 0, 0, 96, -31, -17, -9, -65, 0, 0, 0, -128, 7, 93, -27,
         -65))
     val df = wkbSeq.toDF("wkb") select (st_constructors.ST_GeogFromEWKB("wkb"))
-    val actualResult = df.take(1)(0).get(0).asInstanceOf[Geography].toEWKT()
+    val actualResult = df.take(1)(0).getSedonaGeography(0).toEWKT()
     val expectedResult = {
       "SRID=4326; LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)"
     }
-    assert(df.take(1)(0).get(0).asInstanceOf[Geography].getSRID == 4326)
+    assert(df.take(1)(0).getSedonaGeography(0).getSRID == 4326)
     assert(actualResult == expectedResult)
   }
 
@@ -81,7 +93,7 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
     val df = sparkSession
       .sql("SELECT 'SRID=4269;POINT(0.0 1.0)' AS wkt")
       .select(st_constructors.ST_GeogFromEWKT("wkt"))
-    val actualResult = df.take(1)(0).get(0).asInstanceOf[Geography]
+    val actualResult = df.take(1)(0).getSedonaGeography(0)
     assert(actualResult.toEWKT() == "SRID=4269; POINT (0 1)")
     assert(actualResult.getSRID == 4269)
   }
@@ -91,7 +103,7 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
       .sql("SELECT '9q9j8ue2v71y5zzy0s4q' AS geohash")
       .select(st_constructors.ST_GeogFromGeoHash("geohash", 16))
     val actualResult =
-      df.take(1)(0).get(0).asInstanceOf[Geography].toText(new PrecisionModel(1e6))
+      df.take(1)(0).getSedonaGeography(0).toText(new PrecisionModel(1e6))
     var expectedWkt =
       "POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))"
     assertEquals(expectedWkt, actualResult)
@@ -109,7 +121,7 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
       .select(st_constructors.ST_GeogFromWKT(col("wkt"), lit(4326)).as("geog"))
       .select(st_constructors.ST_GeogToGeometry(col("geog")).as("geom"))
 
-    val geom = df.head().getAs[Geometry]("geom")
+    val geom = df.head().getJtsGeometry("geom")
     assert(geom.getGeometryType == "MultiPolygon")
 
     // WKB-backed conversion preserves the submitted shell and hole coordinate order.
@@ -134,7 +146,15 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
       .sql(s"SELECT '$wkt' AS wkt")
       .select(st_constructors.ST_GeomFromWKT(col("wkt")).as("geom"))
       .select(st_constructors.ST_GeomToGeography(col("geom")).as("geog"))
-    val geog = df.head().getAs[Geography]("geog")
+    val geog = if (SpatialTypeSupport.usesNativeTypes) {
+      val error = intercept[Exception](df.collect())
+      assert(error.toString.contains("ST_INVALID_SRID_VALUE"))
+      sparkSession
+        .sql(s"SELECT ST_GeomToGeography(ST_GeomFromWKT('$wkt', 4326)) AS geog")
+        .first()
+        .getSedonaGeography("geog")
+    } else df.head().getSedonaGeography("geog")
+    assertEquals(if (SpatialTypeSupport.usesNativeTypes) 4326 else 0, geog.getSRID)
     assertEquals(wkt, geog.toString)
   }
 
@@ -142,7 +162,7 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
     val df = sparkSession
       .sql("SELECT 'POINT (0.0 1.0)' AS wkt")
       .select(st_constructors.ST_GeogFromText(col("wkt"), lit(4326)).as("g"))
-    val geog = df.first().get(0).asInstanceOf[Geography]
+    val geog = df.first().getSedonaGeography(0)
     assertEquals("POINT (0 1)", geog.toString(new PrecisionModel(PrecisionModel.FIXED)))
     assertEquals(4326, geog.getSRID)
   }
@@ -151,9 +171,9 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
     val df = sparkSession
       .sql("SELECT 'POINT (3 4)' AS wkt")
       .select(st_constructors.ST_GeogFromText(col("wkt")).as("g"))
-    val geog = df.first().get(0).asInstanceOf[Geography]
+    val geog = df.first().getSedonaGeography(0)
     assertEquals("POINT (3 4)", geog.toString(new PrecisionModel(PrecisionModel.FIXED)))
-    assertEquals(0, geog.getSRID)
+    assertEquals(if (SpatialTypeSupport.usesNativeTypes) 4326 else 0, geog.getSRID)
   }
 
   it("passed ST_GeogCollFromText with srid") {
@@ -161,7 +181,7 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
     val df = sparkSession
       .sql(s"SELECT '$wkt' AS wkt")
       .select(st_constructors.ST_GeogCollFromText(col("wkt"), lit(4326)).as("g"))
-    val geog = df.first().get(0).asInstanceOf[Geography]
+    val geog = df.first().getSedonaGeography(0)
     assertEquals(4326, geog.getSRID)
     assertEquals("GEOMETRYCOLLECTION", geog.toString.takeWhile(_ != ' '))
   }
@@ -171,8 +191,8 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
     val df = sparkSession
       .sql(s"SELECT '$wkt' AS wkt")
       .select(st_constructors.ST_GeogCollFromText(col("wkt")).as("g"))
-    val geog = df.first().get(0).asInstanceOf[Geography]
-    assertEquals(0, geog.getSRID)
+    val geog = df.first().getSedonaGeography(0)
+    assertEquals(if (SpatialTypeSupport.usesNativeTypes) 4326 else 0, geog.getSRID)
     assertEquals("GEOMETRYCOLLECTION", geog.toString.takeWhile(_ != ' '))
   }
 

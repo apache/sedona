@@ -20,6 +20,7 @@ import os.path
 
 from tests import tests_resource
 from tests.test_base import TestBase
+from sedona.spark.sql.types import to_shapely
 
 
 class TestShapefile(TestBase):
@@ -30,7 +31,7 @@ class TestShapefile(TestBase):
         rows = df.take(100)
         for row in rows:
             assert len(row) == 1
-            assert row["geometry"].geom_type in ("Polygon", "MultiPolygon")
+            assert to_shapely(row["geometry"]).geom_type in ("Polygon", "MultiPolygon")
 
     def test_read_osm_pois(self):
         input_location = os.path.join(
@@ -41,7 +42,7 @@ class TestShapefile(TestBase):
         rows = df.take(100)
         for row in rows:
             assert len(row) == 5
-            assert row["geometry"].geom_type == "Point"
+            assert to_shapely(row["geometry"]).geom_type == "Point"
             assert isinstance(row["osm_id"], str)
             assert isinstance(row["fclass"], str)
             assert isinstance(row["name"], str)
@@ -59,7 +60,7 @@ class TestShapefile(TestBase):
         rows = df.take(100)
         for row in rows:
             assert len(row) == 6
-            assert row["geom"].geom_type == "Point"
+            assert to_shapely(row["geom"]).geom_type == "Point"
             assert isinstance(row["fid"], int)
             assert isinstance(row["osm_id"], str)
             assert isinstance(row["fclass"], str)

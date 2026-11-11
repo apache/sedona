@@ -295,7 +295,25 @@ object SpatialTypeSupport {
           else literalSrid(4, GeometryType.apply)
         case "ST_GeomFromWKT" | "ST_GeomFromText" | "ST_GeometryFromText" =>
           literalSrid(1, GeometryType.apply)
-        case "ST_Buffer" | "ST_Reverse" | "ST_Normalize" | "ST_Force2D" =>
+        case "ST_Buffer" =>
+          original.headOption.map(_.dataType) match {
+            case Some(inputType: GeometryType) =>
+              // Spheroidal buffering assigns WGS84 to SRID 0, while planar buffering
+              // and spheroidal buffering of a known nonzero CRS preserve the input SRID.
+              expression.children.lift(2) match {
+                case None | Some(Literal(false, BooleanType)) => inputType
+                case Some(Literal(true, BooleanType)) =>
+                  geometrySrid(inputType)
+                    .map(srid => GeometryType(if (srid == 0) 4326 else srid))
+                    .getOrElse(default)
+                case Some(flag)
+                    if flag.dataType == BooleanType && geometrySrid(inputType).exists(_ != 0) =>
+                  inputType
+                case _ => default
+              }
+            case _ => default
+          }
+        case "ST_Reverse" | "ST_Normalize" | "ST_Force2D" =>
           original.headOption
             .map(_.dataType)
             .filter(_.isInstanceOf[GeometryType])

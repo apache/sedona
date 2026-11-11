@@ -203,6 +203,27 @@ def _to_file(
         spark_df = spark_df.drop(SPARK_DEFAULT_INDEX_NAME)
 
     if spark_fmt == "geoparquet":
+        from sedona.spark.sql.types import USES_NATIVE_SPATIAL_TYPES
+        from sedona.spark.geopandas._crs import read_crs_metadata
+
+        if USES_NATIVE_SPATIAL_TYPES:
+            from sedona.spark.geopandas._native import fixed_srid
+
+            for column_name, field in zip(
+                internal.data_spark_column_names, internal.data_fields
+            ):
+                if not isinstance(field.spark_type, GeometryType):
+                    continue
+                has_crs_metadata, column_crs = read_crs_metadata(field)
+                if has_crs_metadata:
+                    srid = column_crs.to_epsg() if column_crs is not None else 0
+                    if srid is None:
+                        raise ValueError(
+                            "Native GeoParquet requires a supported EPSG CRS"
+                        )
+                    spark_df = spark_df.withColumn(
+                        column_name, fixed_srid(scol_for(spark_df, column_name), srid)
+                    )
         writer = spark_df.write.format("geoparquet")
 
         # A CRS assigned on a frame lives in column metadata, not necessarily in the
@@ -327,8 +348,23 @@ def read_file(filename: str, format: Union[str, None] = None, **kwargs):
         sdf = sdf.orderBy(SPARK_DEFAULT_INDEX_NAME)
         index_spark_columns = [scol_for(sdf, SPARK_DEFAULT_INDEX_NAME)]
 
-    internal = InternalFrame(spark_frame=sdf, index_spark_columns=index_spark_columns)
-    result = GeoDataFrame(ps.DataFrame(internal))
+    from sedona.spark.sql.types import USES_NATIVE_SPATIAL_TYPES
+
+    if USES_NATIVE_SPATIAL_TYPES:
+        from sedona.spark.geopandas._native import from_spark
+
+        wrapped = from_spark(
+            sdf,
+            index_col=SPARK_DEFAULT_INDEX_NAME if index_spark_columns else None,
+        )
+        if index_spark_columns:
+            wrapped = ps.DataFrame(wrapped._internal.copy(index_names=[None]))
+        result = GeoDataFrame(wrapped)
+    else:
+        internal = InternalFrame(
+            spark_frame=sdf, index_spark_columns=index_spark_columns
+        )
+        result = GeoDataFrame(ps.DataFrame(internal))
 
     # Most readers use "geometry", but formats such as GeoPackage retain the
     # source geometry column name (for example, "geom"). Selecting the sole

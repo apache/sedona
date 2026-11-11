@@ -156,11 +156,6 @@ jobs:
         run: |
           PY_SITE=$(cd python; uv run python -c "import site; print(site.getsitepackages()[0])")
           find spark-shaded/target -name 'sedona-*.jar' -exec cp {} "${PY_SITE}/pyspark/jars/" \;
-      - name: Run native pure Python boundary tests
-        if: ${{ startsWith(matrix.spark, '4.2.') }}
-        run: |
-          cd python
-          uv run pytest -v tests/utils/test_native_python_values.py tests/utils/test_geometry_sql_serde.py tests/utils/test_geography_sql_serde.py
       - name: Run tests
         env:
           SPARK_VERSION: ${{ matrix.spark }}
@@ -168,13 +163,8 @@ jobs:
           cd python
           SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
           export SPARK_HOME
-          if [[ "${SPARK_VERSION}" == 4.2.* ]]; then
-            uv run pytest -v tests/sql/test_native_spatial.py tests/geopandas/test_native_spatial.py
-          else
-            uv run pytest -v tests
-          fi
+          uv run pytest -v tests
       - name: Run basic tests without rasterio
-        if: ${{ !startsWith(matrix.spark, '4.2.') }}
         run: |
           cd python
           SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
@@ -193,7 +183,7 @@ jobs:
           export SPARK_HOME
           if [[ "${SPARK_VERSION}" == 4.2.* ]]; then
             # Connect extras were installed before adding the freshly built Sedona jar.
-            uv run pytest -v tests/sql/test_native_spatial.py
+            uv run pytest -v tests/sql/test_dataframe_api.py tests/sql/test_native_spatial.py
           else
             uv pip install "pyspark[connect]==${{ matrix.spark }}" --reinstall
             uv run pytest -v tests/sql/test_dataframe_api.py

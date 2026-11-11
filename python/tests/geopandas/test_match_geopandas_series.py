@@ -21,6 +21,7 @@ import warnings
 import pytest
 import numpy as np
 import pandas as pd
+from sedona.spark.sql.types import USES_NATIVE_SPATIAL_TYPES
 import geopandas as gpd
 import pyspark.pandas as ps
 import pyspark
@@ -231,7 +232,8 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
     def test_area(self):
         area = self.g1.area
         assert area is not None
-        assert type(area) is ps.Series
+        assert isinstance(area, ps.Series)
+        assert not isinstance(area, GeoSeries)
         assert area.count() == 2
 
         for geom in self.geoms:
@@ -284,7 +286,8 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
     def test_buffer_then_area(self):
         area = self.g1.buffer(0.2).area
         assert area is not None
-        assert type(area) is ps.Series
+        assert isinstance(area, ps.Series)
+        assert not isinstance(area, GeoSeries)
         assert area.count() == 2
 
     @pytest.mark.skip(
@@ -916,6 +919,11 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                 "POINT EMPTY",
                 None,
             ]
+            if USES_NATIVE_SPATIAL_TYPES:
+                for wkt in wkts[:2]:
+                    with pytest.raises(Exception, match="WKB_PARSE_ERROR"):
+                        GeoSeries.from_wkt([wkt]).has_z.to_pandas()
+                wkts = wkts[2:]
             sgpd_result = GeoSeries.from_wkt(wkts).has_z
             gpd_result = gpd.GeoSeries.from_wkt(wkts).has_z
             self.check_pd_series_equal(sgpd_result, gpd_result)
@@ -937,6 +945,10 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             "POINT EMPTY",
             None,
         ]
+        if USES_NATIVE_SPATIAL_TYPES:
+            with pytest.raises(Exception, match="WKB_PARSE_ERROR"):
+                GeoSeries.from_wkt([wkts[4]]).has_m.to_pandas()
+            del wkts[4]
         sgpd_result = GeoSeries.from_wkt(wkts).has_m
         gpd_result = gpd.GeoSeries.from_wkt(wkts).has_m
         self.check_pd_series_equal(sgpd_result, gpd_result)
@@ -2420,6 +2432,14 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             name="case",
         )
 
+        if USES_NATIVE_SPATIAL_TYPES:
+            with pytest.raises(Exception, match="WKB_PARSE_ERROR.*Invalid coordinate"):
+                GeoSeries.from_wkt([left_wkts[4]]).geom_equals_identical(
+                    GeoSeries.from_wkt([right_wkts[4]]), align=False
+                ).to_pandas()
+            del left_wkts[4]
+            del right_wkts[4]
+            index = index.delete(4)
         left_geometries = shapely.from_wkt(left_wkts)
         right_geometries = shapely.from_wkt(right_wkts)
         sgpd_result = GeoSeries(

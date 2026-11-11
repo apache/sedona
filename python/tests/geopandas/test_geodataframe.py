@@ -34,9 +34,14 @@ import shapely
 from sedona.spark.geopandas import GeoDataFrame, GeoSeries
 from sedona.spark.geopandas._crs import read_crs_metadata
 from sedona.spark.sql import st_functions as stf
-from tests.geopandas.test_geopandas_base import TestGeopandasBase
+from tests.geopandas.test_geopandas_base import (
+    pandas_frame_with_geometry,
+    spark_frame_to_pandas_api,
+    TestGeopandasBase,
+)
 import pyspark.pandas as ps
 import pandas as pd
+from sedona.spark.sql.types import geometry_type, USES_NATIVE_SPATIAL_TYPES
 import geopandas as gpd
 import sedona.spark.geopandas as sgpd
 import pytest
@@ -442,9 +447,11 @@ class TestGeoDataFrame(TestGeopandasBase):
 
     def test_local_frame_preserves_unknown_distributed_geometry_crs(self):
         raw_geometry = GeoSeries(
-            self.spark.range(1)
-            .selectExpr("ST_SetSRID(ST_Point(0D, 0D), 3857) AS geometry")
-            .pandas_api()["geometry"]
+            spark_frame_to_pandas_api(
+                self.spark.range(1).selectExpr(
+                    "ST_SetSRID(ST_Point(0D, 0D), 3857) AS geometry"
+                )
+            )["geometry"]
         )
 
         with ps.option_context("compute.ops_on_diff_frames", True):
@@ -502,8 +509,10 @@ class TestGeoDataFrame(TestGeopandasBase):
     # These need to be defined inside the function to ensure Sedona's Geometry UDTs have been registered
     def test_constructor_pandas_on_spark(self):
         for obj in [
-            ps.DataFrame([Point(x, x) for x in range(3)]),
-            ps.Series([Point(x, x) for x in range(3)]),
+            pandas_frame_with_geometry(pd.DataFrame([Point(x, x) for x in range(3)])),
+            pandas_frame_with_geometry(
+                pd.DataFrame({"geometry": [Point(x, x) for x in range(3)]})
+            )["geometry"],
             GeoSeries([Point(x, x) for x in range(3)]),
             GeoDataFrame([Point(x, x) for x in range(3)]),
         ]:
@@ -548,8 +557,8 @@ class TestGeoDataFrame(TestGeopandasBase):
         data = {"geometry": [Point(x, x) for x in range(3)], "id": [1, 2, 3]}
         index = [1, 2, 3]
         result = GeoDataFrame(data, index=index).to_spark_pandas()
-        ps_df = ps.DataFrame(data, index=index)
-        assert_frame_equal(result.to_pandas(), ps_df.to_pandas())
+        assert isinstance(result, ps.DataFrame)
+        assert_frame_equal(result.to_pandas(), pd.DataFrame(data, index=index))
 
     def test_to_wkt_and_wkb_distributed(self):
         index = pd.MultiIndex.from_tuples(
@@ -892,10 +901,7 @@ class TestGeoDataFrame(TestGeopandasBase):
 
         # Assert the geometry column has the correct type and is not nullable
         geometry_field = schema["geometry1"]
-        assert (
-            geometry_field.dataType.typeName() == "geometrytype"
-            or geometry_field.dataType.typeName() == "binary"
-        )
+        assert geometry_field.dataType == geometry_type()
         assert not geometry_field.nullable
 
         # Assert non-geometry columns are present with correct types
@@ -919,25 +925,17 @@ class TestGeoDataFrame(TestGeopandasBase):
         schema = df._internal.spark_frame.schema
         # Assert both geometry columns have the correct type
         geometry_field1 = schema["geometry1"]
-        assert (
-            geometry_field1.dataType.typeName() == "geometrytype"
-            or geometry_field1.dataType.typeName() == "binary"
-        )
+        assert geometry_field1.dataType == geometry_type()
         assert not geometry_field1.nullable
 
         geometry_field2 = schema["geometry2"]
-        assert (
-            geometry_field2.dataType.typeName() == "geometrytype"
-            or geometry_field2.dataType.typeName() == "binary"
-        )
+        assert geometry_field2.dataType == geometry_type()
         assert not geometry_field2.nullable
 
         # Check non-geometry column
         attribute_field = schema["attribute"]
-        assert (
-            attribute_field.dataType.typeName() != "geometrytype"
-            and attribute_field.dataType.typeName() != "binary"
-        )
+        assert attribute_field.dataType != geometry_type()
+        assert attribute_field.dataType.typeName() != "binary"
 
     def test_copy(self):
         df = GeoDataFrame(
@@ -1285,7 +1283,8 @@ class TestGeoDataFrame(TestGeopandasBase):
 
         area_series = df.area
 
-        assert type(area_series) is ps.Series
+        assert isinstance(area_series, ps.Series)
+        assert not isinstance(area_series, GeoSeries)
 
         # Check the actual area values
         area_values = area_series.to_list()

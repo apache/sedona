@@ -165,21 +165,9 @@ jobs:
               mvn_args+=("${SKIP_TESTS}")
           fi
           if [[ "${SPARK_VERSION}" == 4.2.* ]]; then
-              # Compile/package the complete native reactor before testing its boundaries.
+              # Installation tests need the packaged artifact before the full reactor test run.
               mvn "${mvn_args[@]}" -DskipTests
-              native_args=(-q "-Dspark=${SPARK_COMPAT_VERSION}" "-Dscala=${SCALA_VERSION:0:4}" "-Dspark.version=${SPARK_VERSION}")
-              # The shared suite includes explicit UDT controls and registration/metadata contracts.
-              suites=org.apache.sedona.sql.UDF.NativeFunctionRegistrationTest
-              suites+=,org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetNativeCrsTest
-              suites+=,org.apache.sedona.sql.SpatialIOBoundaryCompatibilityTest
-              suites+=,org.apache.sedona.sql.SqlGeometrySerializerSuite
-              suites+=,org.apache.sedona.sql.SpatialAdapterBoundaryTest
-              suites+=,org.apache.spark.sql.sedona_sql.strategy.join.LegacyGeographyDistanceJoinSuite
-              suites+=,org.apache.sedona.sql.SpatialTestValuesTest
-              suites+=,org.apache.sedona.sql.KnnShapeBindingTest
-              mvn "${native_args[@]}" -pl spark/common test "-Dsuites=${suites}"
-              # Do not pass -Dsuites here: discover every native version-module suite.
-              mvn "${native_args[@]}" -pl spark/spark-4.2 test
+              mvn -q install "-Dspark=${SPARK_COMPAT_VERSION}" "-Dscala=${SCALA_VERSION:0:4}" "-Dspark.version=${SPARK_VERSION}"
           else
               mvn "${mvn_args[@]}"
           fi

@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql
 
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.sedona.common.geometryObjects.Box2D
 import org.apache.sedona.spark.SedonaContext
 import org.apache.spark.sql.DataFrame
@@ -49,7 +50,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
       coordinates(4) = coordinates(0)
       val geometryFactory = new GeometryFactory()
       geometryFactory.createPolygon(coordinates)
-      assert(boundary.take(1)(0).get(0) == geometryFactory.createPolygon(coordinates))
+      assert(boundary.take(1)(0).getJtsGeometry(0) == geometryFactory.createPolygon(coordinates))
     }
 
     it("Passed ST_Envelope_aggr with empty geometries returns null") {
@@ -65,7 +66,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
         "SELECT ST_GeomFromWKT(wkt) as geom FROM VALUES ('POINT EMPTY'), ('POINT (1 2)'), ('POINT (3 4)') AS t(wkt)")
       mixedDf.createOrReplaceTempView("mixeddf")
       val result = sparkSession.sql("SELECT ST_Envelope_Aggr(mixeddf.geom) FROM mixeddf")
-      val envelope = result.take(1)(0).get(0).asInstanceOf[Geometry]
+      val envelope = result.take(1)(0).getJtsGeometry(0)
       assert(envelope != null)
       assert(!envelope.isEmpty)
       val env = envelope.getEnvelopeInternal
@@ -129,7 +130,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
         "select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
       var union = sparkSession.sql("select ST_Union_Aggr(polygondf.polygonshape) from polygondf")
-      assert(union.take(1)(0).get(0).asInstanceOf[Geometry].getArea == 10100)
+      assert(union.take(1)(0).getJtsGeometry(0).getArea == 10100)
     }
 
     it("Measured ST_Union_aggr wall time") {
@@ -140,7 +141,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
       df.createOrReplaceTempView("geometry_table_for_measuring_union_aggr")
 
       // cache the table to eliminate the time of table scan
-      df.cache()
+      if (!SpatialTypeSupport.usesNativeTypes) df.cache()
       sparkSession
         .sql("select count(*) from geometry_table_for_measuring_union_aggr")
         .take(1)(0)
@@ -151,7 +152,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
       val unionOptimized =
         sparkSession.sql(
           "SELECT ST_Union_Aggr(geom) AS union_geom FROM geometry_table_for_measuring_union_aggr")
-      assert(unionOptimized.take(1)(0).get(0).asInstanceOf[Geometry].getArea > 0)
+      assert(unionOptimized.take(1)(0).getJtsGeometry(0).getArea > 0)
       val endTimeOptimized = System.currentTimeMillis()
       val durationOptimized = endTimeOptimized - startTimeOptimized
 
@@ -174,8 +175,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
       val intersectionDF =
         sparkSession.sql("select ST_Intersection_Aggr(polygon) from two_polygons")
 
-      assertResult(0.0034700160226227607)(
-        intersectionDF.take(1)(0).get(0).asInstanceOf[Geometry].getArea)
+      assertResult(0.0034700160226227607)(intersectionDF.take(1)(0).getJtsGeometry(0).getArea)
     }
 
     it("Passed ST_Intersection_aggr no intersection gives empty polygon") {
@@ -193,7 +193,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
       val intersectionDF =
         sparkSession.sql("select ST_Intersection_Aggr(polygon) from two_polygons_no_intersection")
 
-      assertResult(0.0)(intersectionDF.take(1)(0).get(0).asInstanceOf[Geometry].getArea)
+      assertResult(0.0)(intersectionDF.take(1)(0).getJtsGeometry(0).getArea)
     }
 
     it("Passed ST_Collect_Agg with points") {
@@ -208,7 +208,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
         .createOrReplaceTempView("points_table")
 
       val collectDF = sparkSession.sql("SELECT ST_Collect_Agg(geom) FROM points_table")
-      val result = collectDF.take(1)(0).get(0).asInstanceOf[Geometry]
+      val result = collectDF.take(1)(0).getJtsGeometry(0)
 
       assert(result.getGeometryType == "MultiPoint")
       assert(result.getNumGeometries == 3)
@@ -225,7 +225,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
         .createOrReplaceTempView("polygons_table")
 
       val collectDF = sparkSession.sql("SELECT ST_Collect_Agg(geom) FROM polygons_table")
-      val result = collectDF.take(1)(0).get(0).asInstanceOf[Geometry]
+      val result = collectDF.take(1)(0).getJtsGeometry(0)
 
       assert(result.getGeometryType == "MultiPolygon")
       assert(result.getNumGeometries == 2)
@@ -245,7 +245,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
         .createOrReplaceTempView("mixed_geom_table")
 
       val collectDF = sparkSession.sql("SELECT ST_Collect_Agg(geom) FROM mixed_geom_table")
-      val result = collectDF.take(1)(0).get(0).asInstanceOf[Geometry]
+      val result = collectDF.take(1)(0).getJtsGeometry(0)
 
       assert(result.getGeometryType == "GeometryCollection")
       assert(result.getNumGeometries == 3)
@@ -269,9 +269,9 @@ class aggregateFunctionTestScala extends TestBaseScala {
       val results = collectDF.collect()
 
       // Group 1 should have 2 points
-      assert(results(0).getAs[Geometry]("collected").getNumGeometries == 2)
+      assert(results(0).getJtsGeometry("collected").getNumGeometries == 2)
       // Group 2 should have 3 points
-      assert(results(1).getAs[Geometry]("collected").getNumGeometries == 3)
+      assert(results(1).getJtsGeometry("collected").getNumGeometries == 3)
     }
 
     it("Passed ST_Collect_Agg preserves duplicates unlike ST_Union_Aggr") {
@@ -287,7 +287,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
 
       val collectDF =
         sparkSession.sql("SELECT ST_Collect_Agg(geom) FROM duplicate_polygons_table")
-      val result = collectDF.take(1)(0).get(0).asInstanceOf[Geometry]
+      val result = collectDF.take(1)(0).getJtsGeometry(0)
 
       // ST_Collect_Agg should preserve both polygons
       assert(result.getNumGeometries == 2)
@@ -307,7 +307,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
         .createOrReplaceTempView("points_with_null_table")
 
       val collectDF = sparkSession.sql("SELECT ST_Collect_Agg(geom) FROM points_with_null_table")
-      val result = collectDF.take(1)(0).get(0).asInstanceOf[Geometry]
+      val result = collectDF.take(1)(0).getJtsGeometry(0)
 
       // Should only have 2 points (nulls are skipped)
       assert(result.getNumGeometries == 2)
@@ -334,7 +334,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
       coordinates(4) = coordinates(0)
       val geometryFactory = new GeometryFactory()
       geometryFactory.createPolygon(coordinates)
-      assert(boundary.take(1)(0).get(0) == geometryFactory.createPolygon(coordinates))
+      assert(boundary.take(1)(0).getJtsGeometry(0) == geometryFactory.createPolygon(coordinates))
     }
 
     it("Passed ST_Intersection_Agg alias") {
@@ -349,7 +349,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
 
       val intersectionDF =
         sparkSession.sql("SELECT ST_Intersection_Agg(geom) FROM intersecting_polygons")
-      val result = intersectionDF.take(1)(0).get(0).asInstanceOf[Geometry]
+      val result = intersectionDF.take(1)(0).getJtsGeometry(0)
 
       // The intersection of the two squares should be a 1x1 square with area 1.0
       assertResult(1.0)(result.getArea)
@@ -359,7 +359,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
       val polygonDf = createPolygonDataFrame(100)
       polygonDf.createOrReplaceTempView("polygondf_union_alias")
       val unionDF = sparkSession.sql("SELECT ST_Union_Agg(geom) FROM polygondf_union_alias")
-      val result = unionDF.take(1)(0).get(0).asInstanceOf[Geometry]
+      val result = unionDF.take(1)(0).getJtsGeometry(0)
       assert(result.getArea > 0)
     }
 
@@ -376,7 +376,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
 
       val unionDF =
         sparkSession.sql("SELECT ST_Union_Aggr(geom) FROM polygons_with_null_for_union")
-      val result = unionDF.take(1)(0).get(0).asInstanceOf[Geometry]
+      val result = unionDF.take(1)(0).getJtsGeometry(0)
 
       // Should union the 2 non-null polygons (total area = 2.0)
       assert(result.getArea == 2.0)
@@ -395,7 +395,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
 
       val envelopeDF =
         sparkSession.sql("SELECT ST_Envelope_Aggr(geom) FROM points_with_null_for_envelope")
-      val result = envelopeDF.take(1)(0).get(0).asInstanceOf[Geometry]
+      val result = envelopeDF.take(1)(0).getJtsGeometry(0)
 
       // Should create envelope from the 2 non-null points
       assert(result.getGeometryType == "Polygon")
@@ -419,7 +419,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
 
       val intersectionDF = sparkSession.sql(
         "SELECT ST_Intersection_Aggr(geom) FROM polygons_with_null_for_intersection")
-      val result = intersectionDF.take(1)(0).get(0).asInstanceOf[Geometry]
+      val result = intersectionDF.take(1)(0).getJtsGeometry(0)
 
       // Should intersect the 2 non-null polygons (intersection area = 4.0)
       assert(result.getArea == 4.0)

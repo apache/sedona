@@ -18,6 +18,7 @@
 from shapely.geometry import Polygon
 from tests import csv_point_input_location, union_polygon_input_location
 from tests.test_base import TestBase
+from sedona.spark.sql.types import to_shapely
 
 
 class TestConstructors(TestBase):
@@ -40,9 +41,9 @@ class TestConstructors(TestBase):
             FROM VALUES (CAST(NULL AS STRING)), ('POINT EMPTY') AS t(wkt)
             """)
         df.createOrReplaceTempView("empty_extent_input")
-        result = self.spark.sql(
-            "SELECT ST_Extent(geom) FROM empty_extent_input"
-        ).first()[0]
+        result = to_shapely(
+            self.spark.sql("SELECT ST_Extent(geom) FROM empty_extent_input").first()[0]
+        )
         assert result is None
 
     def test_st_envelope_aggr(self):
@@ -72,7 +73,7 @@ class TestConstructors(TestBase):
 
         polygon = Polygon(coordinates)
 
-        assert boundary.take(1)[0][0] == polygon
+        assert to_shapely(boundary.take(1)[0][0]) == polygon
 
     def test_st_union_aggr(self):
         polygon_csv_df = (
@@ -93,7 +94,7 @@ class TestConstructors(TestBase):
             "select ST_Union_Aggr(polygondf.polygonshape) from polygondf"
         )
 
-        assert union.take(1)[0][0].area == 10100
+        assert to_shapely(union.take(1)[0][0]).area == 10100
 
     def test_st_collect_aggr_points(self):
         self.spark.sql("""
@@ -104,9 +105,11 @@ class TestConstructors(TestBase):
             )) AS geom
             """).createOrReplaceTempView("points_table")
 
-        result = self.spark.sql("SELECT ST_Collect_Agg(geom) FROM points_table").take(
-            1
-        )[0][0]
+        result = to_shapely(
+            self.spark.sql("SELECT ST_Collect_Agg(geom) FROM points_table").take(1)[0][
+                0
+            ]
+        )
 
         assert result.geom_type == "MultiPoint"
         assert len(result.geoms) == 3
@@ -119,9 +122,11 @@ class TestConstructors(TestBase):
             )) AS geom
             """).createOrReplaceTempView("polygons_table")
 
-        result = self.spark.sql("SELECT ST_Collect_Agg(geom) FROM polygons_table").take(
-            1
-        )[0][0]
+        result = to_shapely(
+            self.spark.sql("SELECT ST_Collect_Agg(geom) FROM polygons_table").take(1)[
+                0
+            ][0]
+        )
 
         assert result.geom_type == "MultiPolygon"
         assert len(result.geoms) == 2
@@ -136,9 +141,11 @@ class TestConstructors(TestBase):
             )) AS geom
             """).createOrReplaceTempView("mixed_geom_table")
 
-        result = self.spark.sql(
-            "SELECT ST_Collect_Agg(geom) FROM mixed_geom_table"
-        ).take(1)[0][0]
+        result = to_shapely(
+            self.spark.sql("SELECT ST_Collect_Agg(geom) FROM mixed_geom_table").take(1)[
+                0
+            ][0]
+        )
 
         assert result.geom_type == "GeometryCollection"
         assert len(result.geoms) == 3
@@ -152,9 +159,11 @@ class TestConstructors(TestBase):
             )) AS geom
             """).createOrReplaceTempView("duplicate_polygons_table")
 
-        result = self.spark.sql(
-            "SELECT ST_Collect_Agg(geom) FROM duplicate_polygons_table"
-        ).take(1)[0][0]
+        result = to_shapely(
+            self.spark.sql(
+                "SELECT ST_Collect_Agg(geom) FROM duplicate_polygons_table"
+            ).take(1)[0][0]
+        )
 
         # ST_Collect_Agg should preserve both polygons
         assert len(result.geoms) == 2
@@ -185,7 +194,7 @@ class TestConstructors(TestBase):
         ]
 
         polygon = Polygon(coordinates)
-        assert boundary.take(1)[0][0].equals(polygon)
+        assert to_shapely(boundary.take(1)[0][0]).equals(polygon)
 
     def test_st_intersection_agg_alias(self):
         self.spark.sql("""
@@ -199,7 +208,7 @@ class TestConstructors(TestBase):
             "SELECT ST_Intersection_Agg(polygondf_alias.countyshape) FROM polygondf_alias"
         )
 
-        result = intersection.take(1)[0][0]
+        result = to_shapely(intersection.take(1)[0][0])
         # The intersection of the two polygons should be a square from (2,2) to (4,4) with area 4
         assert result.area == 4.0
 
@@ -215,6 +224,6 @@ class TestConstructors(TestBase):
             "SELECT ST_Union_Agg(polygondf_union_alias.countyshape) FROM polygondf_union_alias"
         )
 
-        result = union.take(1)[0][0]
+        result = to_shapely(union.take(1)[0][0])
         # Two overlapping 2x2 squares with 1x1 overlap: area = 4 + 4 - 1 = 7
         assert result.area == 7.0

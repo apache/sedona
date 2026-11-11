@@ -21,7 +21,7 @@ package org.apache.spark.sql.sedona_sql.expressions
 import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.lit
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.locationtech.jts.geom.Geometry
 import org.scalatest.Matchers
 
@@ -37,7 +37,7 @@ class InternalCoverageValidationFunctions extends TestBaseScala with Matchers {
       val invalidEdges = coverageSource
         .selectExpr(s"$functionName(target, matching_adjacent, 0.0) AS invalid_edges")
         .first()
-        .getAs[Geometry]("invalid_edges")
+        .getJtsGeometry("invalid_edges")
       invalidEdges.isEmpty should be(true)
     }
 
@@ -48,8 +48,8 @@ class InternalCoverageValidationFunctions extends TestBaseScala with Matchers {
           s"$functionName(target, overlapping_adjacent, 0.0) AS invalid")
         .first()
 
-      val valid = row.getAs[Geometry]("valid")
-      val invalid = row.getAs[Geometry]("invalid")
+      val valid = row.getJtsGeometry("valid")
+      val invalid = row.getJtsGeometry("invalid")
       valid.isEmpty should be(true)
       valid.getGeometryType should equal("LineString")
       invalid.isEmpty should be(false)
@@ -63,8 +63,8 @@ class InternalCoverageValidationFunctions extends TestBaseScala with Matchers {
           s"$functionName(target, ARRAY(target, target), 0.0) AS duplicate")
         .first()
 
-      row.getAs[Geometry]("self").isEmpty should be(true)
-      row.getAs[Geometry]("duplicate").isEmpty should be(false)
+      row.getJtsGeometry("self").isEmpty should be(true)
+      row.getJtsGeometry("duplicate").isEmpty should be(false)
     }
 
     it("accepts zero and an explicit gap width") {
@@ -72,10 +72,10 @@ class InternalCoverageValidationFunctions extends TestBaseScala with Matchers {
         s"$functionName(target, across_gap_adjacent, 0.0) AS zero_width",
         s"$functionName(target, across_gap_adjacent, gap_width) AS explicit_width")
 
-      result.schema.fields.foreach(_.dataType should equal(GeometryUDT()))
+      result.schema.fields.foreach(_.dataType should equal(SpatialTypeSupport.geometryType))
       val row = result.first()
-      row.getAs[Geometry]("zero_width").isEmpty should be(true)
-      row.getAs[Geometry]("explicit_width").isEmpty should be(false)
+      row.getJtsGeometry("zero_width").isEmpty should be(true)
+      row.getJtsGeometry("explicit_width").isEmpty should be(false)
     }
 
     it("propagates null arguments and ignores null array members") {
@@ -87,7 +87,7 @@ class InternalCoverageValidationFunctions extends TestBaseScala with Matchers {
         .first()
 
       row.isNullAt(row.fieldIndex("null_target")) should be(true)
-      row.getAs[Geometry]("null_member").isEmpty should be(true)
+      row.getJtsGeometry("null_member").isEmpty should be(true)
       row.isNullAt(row.fieldIndex("null_gap_width")) should be(true)
     }
 

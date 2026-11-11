@@ -32,7 +32,18 @@ from shapely.geometry import (
 from tests import tests_resource
 from tests.test_base import TestBase
 
-from sedona.spark.sql.types import GeometryType
+from sedona.spark.sql.types import geometry_type, to_spark_geometry, to_shapely
+from shapely.geometry.base import BaseGeometry
+
+
+def _spark_rows(data):
+    return [
+        [
+            to_spark_geometry(value) if isinstance(value, BaseGeometry) else value
+            for value in row
+        ]
+        for row in data
+    ]
 
 
 class TestsSerializers(TestBase):
@@ -43,11 +54,14 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom_from", GeometryType(), True),
-                t.StructField("geom_to", GeometryType(), True),
+                t.StructField("geom_from", geometry_type(), True),
+                t.StructField("geom_to", geometry_type(), True),
             ]
         )
-        self.spark.createDataFrame(data, schema).createOrReplaceTempView("points")
+        self.spark.createDataFrame(
+            _spark_rows(data),
+            schema,
+        ).createOrReplaceTempView("points")
 
         distance = self.spark.sql(
             "select st_distance(geom_from, geom_to) from points"
@@ -62,12 +76,17 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom", GeometryType(), True),
+                t.StructField("geom", geometry_type(), True),
             ]
         )
-        m_point_out = self.spark.createDataFrame(data, schema).collect()[0][1]
+        m_point_out = self.spark.createDataFrame(
+            _spark_rows(data),
+            schema,
+        ).collect()[
+            0
+        ][1]
 
-        assert m_point_out == multipoint
+        assert to_shapely(m_point_out) == multipoint
 
     def test_linestring_serialization(self):
         linestring = LineString([(0.0, 1.0), (1, 1), (12.0, 1.0)])
@@ -76,11 +95,14 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom", GeometryType(), True),
+                t.StructField("geom", geometry_type(), True),
             ]
         )
 
-        self.spark.createDataFrame(data, schema).createOrReplaceTempView("line")
+        self.spark.createDataFrame(
+            _spark_rows(data),
+            schema,
+        ).createOrReplaceTempView("line")
 
         length = self.spark.sql("select st_length(geom) from line").collect()[0][0]
         assert length == 12.0
@@ -92,13 +114,14 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom", GeometryType(), True),
+                t.StructField("geom", geometry_type(), True),
             ]
         )
 
-        self.spark.createDataFrame(data, schema).createOrReplaceTempView(
-            "multilinestring"
-        )
+        self.spark.createDataFrame(
+            _spark_rows(data),
+            schema,
+        ).createOrReplaceTempView("multilinestring")
 
         length = self.spark.sql(
             "select st_length(geom) from multilinestring"
@@ -116,11 +139,14 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom", GeometryType(), True),
+                t.StructField("geom", geometry_type(), True),
             ]
         )
 
-        self.spark.createDataFrame(data, schema).createOrReplaceTempView("polygon")
+        self.spark.createDataFrame(
+            _spark_rows(data),
+            schema,
+        ).createOrReplaceTempView("polygon")
 
         length = self.spark.sql("select st_area(geom) from polygon").collect()[0][0]
         assert length == 3.75
@@ -130,6 +156,8 @@ class TestsSerializers(TestBase):
             os.path.join(tests_resource, "shapefiles/gis_osm_pois_free_1/")
         )
         gdf = gdf.replace(pd.NA, "")
+        gdf = pd.DataFrame(gdf)
+        gdf["geometry"] = gdf["geometry"].map(to_spark_geometry)
         print(self.spark.createDataFrame(gdf).toPandas())
 
     def test_multipolygon_serialization(self):
@@ -147,11 +175,17 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom", GeometryType(), True),
+                t.StructField("geom", geometry_type(), True),
             ]
         )
-        self.spark.createDataFrame(data, schema).show(1, False)
-        self.spark.createDataFrame(data, schema).createOrReplaceTempView("polygon")
+        self.spark.createDataFrame(
+            _spark_rows(data),
+            schema,
+        ).show(1, False)
+        self.spark.createDataFrame(
+            _spark_rows(data),
+            schema,
+        ).createOrReplaceTempView("polygon")
         length = self.spark.sql("select st_area(geom) from polygon").collect()[0][0]
         assert length == 4.75
 
@@ -161,10 +195,13 @@ class TestsSerializers(TestBase):
         schema = t.StructType(
             [
                 t.StructField("id", IntegerType(), True),
-                t.StructField("geom", GeometryType(), True),
+                t.StructField("geom", geometry_type(), True),
             ]
         )
-        self.spark.createDataFrame(data, schema).createOrReplaceTempView("points")
+        self.spark.createDataFrame(
+            _spark_rows(data),
+            schema,
+        ).createOrReplaceTempView("points")
 
         count = self.spark.sql("select count(*) from points").collect()[0][0]
         assert count == 1

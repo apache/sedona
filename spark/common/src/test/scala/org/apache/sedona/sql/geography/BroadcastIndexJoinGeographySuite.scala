@@ -224,7 +224,7 @@ class BroadcastIndexJoinGeographySuite extends TestBaseScala {
 
   private lazy val pointsLeftDf = {
     import sparkSession.implicits._
-    Seq((0, "POINT(0 0)"), (1, "POINT(1 1)"), (2, "POINT(2 2)"), (3, "POINT(99 99)"))
+    Seq((0, "POINT(0 0)"), (1, "POINT(1 1)"), (2, "POINT(2 2)"), (3, "POINT(99 80)"))
       .toDF("id_l", "wkt")
       .selectExpr("id_l", "ST_GeogFromWKT(wkt, 4326) AS geog_l")
   }

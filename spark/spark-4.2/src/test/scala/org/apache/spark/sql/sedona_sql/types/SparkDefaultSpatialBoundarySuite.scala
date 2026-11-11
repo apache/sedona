@@ -25,12 +25,12 @@ import org.apache.sedona.common.Functions
 import org.apache.sedona.common.S2Geography.{Geography, WKBGeography}
 import org.apache.spark.{SparkIllegalArgumentException, SparkRuntimeException}
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{LeafExpression, Literal}
+import org.apache.spark.sql.catalyst.expressions.{BoundReference, Cast, GenericInternalRow, LeafExpression, Literal}
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.{Geometry => NativeGeometry, Geography => NativeGeography}
 import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, GeographyUDT}
-import org.apache.spark.sql.sedona_sql.expressions.{SerdeAware, ST_Reverse}
-import org.apache.spark.sql.types.{DataType, GeometryType, GeographyType}
+import org.apache.spark.sql.sedona_sql.expressions.{SerdeAware, ST_Buffer, ST_Reverse}
+import org.apache.spark.sql.types.{BooleanType, DataType, GeometryType, GeographyType}
 import org.apache.spark.unsafe.types.BinaryView
 import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory, PrecisionModel}
 import org.locationtech.jts.geom.impl.PackedCoordinateSequenceFactory
@@ -190,6 +190,75 @@ class SparkDefaultSpatialBoundarySuite extends AnyFunSuite {
     assert(SpatialTypeSupport.deserializeGeometry(reversed, GeometryType(4326)).getSRID == 4326)
     val wrongType = NativeSpatialResult(input, GeometryType(3857))
     intercept[SparkRuntimeException](wrongType.eval(InternalRow.empty))
+  }
+
+  test("buffer result CRS follows literal spheroidal flags and the planar default") {
+    Seq(0, 4326, 3857).foreach { srid =>
+      val inputType = GeometryType(srid)
+      val source =
+        Literal(SpatialTypeSupport.serializeGeometry(point(srid), inputType), inputType)
+      Seq(Seq.empty, Seq(Literal(false)), Seq(Literal(true))).foreach { flag =>
+        val result =
+          SpatialTypeSupport.adaptFunction(ST_Buffer.apply)(Seq(source, Literal(1d)) ++ flag)
+        val expectedSrid = if (flag == Seq(Literal(true)) && srid == 0) 4326 else srid
+        assert(result.dataType == GeometryType(expectedSrid))
+        val geometry =
+          SpatialTypeSupport.deserializeGeometry(result.eval(InternalRow.empty), result.dataType)
+        assert(geometry.getSRID == expectedSrid)
+        assert(geometry.getGeometryType == "Polygon")
+        assert(!geometry.isEmpty)
+      }
+    }
+  }
+
+  test("buffer result CRS supports per-row spheroidal flags and nulls") {
+    Seq(GeometryType(0), GeometryType(4326), GeometryType("ANY")).foreach { inputType =>
+      val result = SpatialTypeSupport.adaptFunction(ST_Buffer.apply)(
+        Seq(
+          BoundReference(0, inputType, nullable = true),
+          Literal(1d),
+          BoundReference(1, BooleanType, nullable = true)))
+      val expectedType = if (inputType == GeometryType(4326)) inputType else GeometryType("ANY")
+      assert(result.dataType == expectedType)
+      val srids = if (inputType.isMixedSrid) Seq(0, 4326) else Seq(inputType.srid)
+      srids.foreach { srid =>
+        val source = SpatialTypeSupport.serializeGeometry(point(srid), inputType)
+        Seq[Any](false, true, null).foreach { flag =>
+          val value = result.eval(new GenericInternalRow(Array[Any](source, flag)))
+          if (flag == null) assert(value == null)
+          else {
+            val geometry = SpatialTypeSupport.deserializeGeometry(value, result.dataType)
+            val expectedSrid = if (flag == true && srid == 0) 4326 else srid
+            assert(geometry.getSRID == expectedSrid)
+            assert(!geometry.isEmpty)
+          }
+        }
+      }
+      assert(result.eval(new GenericInternalRow(Array[Any](null, true))) == null)
+    }
+  }
+
+  test("buffer result CRS defers foldable Boolean flags and preserves ANSI cast errors") {
+    Seq(0, 4326).foreach { srid =>
+      val inputType = GeometryType(srid)
+      val source =
+        Literal(SpatialTypeSupport.serializeGeometry(point(srid), inputType), inputType)
+      Seq("false", "true").foreach { flag =>
+        val result = SpatialTypeSupport.adaptFunction(ST_Buffer.apply)(
+          Seq(source, Literal(1d), Cast(Literal(flag), BooleanType, ansiEnabled = true)))
+        assert(result.dataType == (if (srid == 0) GeometryType("ANY") else inputType))
+        val geometry =
+          SpatialTypeSupport.deserializeGeometry(result.eval(InternalRow.empty), result.dataType)
+        assert(geometry.getSRID == (if (flag == "true" && srid == 0) 4326 else srid))
+      }
+    }
+    val source =
+      Literal(SpatialTypeSupport.serializeGeometry(point(0), GeometryType(0)), GeometryType(0))
+    val invalidFlag = SpatialTypeSupport.adaptFunction(ST_Buffer.apply)(
+      Seq(source, Literal(1d), Cast(Literal("invalid"), BooleanType, ansiEnabled = true)))
+    assert(invalidFlag.dataType == GeometryType("ANY"))
+    val error = intercept[Exception] { invalidFlag.eval(InternalRow.empty) }
+    assert(error.getMessage.contains("CAST_INVALID_INPUT"))
   }
 
   test("native input adapters expose computational objects and unwrap only planar geometry") {

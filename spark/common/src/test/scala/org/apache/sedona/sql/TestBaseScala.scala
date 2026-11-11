@@ -28,7 +28,7 @@ import org.apache.sedona.common.Predicates.dWithin
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
 import org.apache.sedona.spark.SedonaContext
 import org.apache.spark.SparkContext
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.locationtech.jts.geom._
 import org.locationtech.jts.io.WKTReader
@@ -44,6 +44,30 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   Logger.getLogger("com").setLevel(Level.WARN)
   Logger.getLogger("akka").setLevel(Level.WARN)
   Logger.getLogger("org.apache.sedona.core").setLevel(Level.WARN)
+
+  /** Access semantic spatial values across Spark's external SQL representations. */
+  protected implicit class SpatialTestRow(row: Row) {
+    def getJtsGeometry(ordinal: Int): Geometry = SpatialTestValues.geometry(row, ordinal)
+
+    def getJtsGeometry(name: String): Geometry = SpatialTestValues.geometry(row, name)
+
+    def getJtsGeometries(ordinal: Int): scala.collection.Seq[Geometry] =
+      row.getSeq[Any](ordinal).map(SpatialTestValues.geometry).toSeq
+
+    def getSedonaGeography(ordinal: Int): org.apache.sedona.common.S2Geography.Geography =
+      SpatialTestValues.geography(row, ordinal)
+
+    def getSedonaGeography(name: String): org.apache.sedona.common.S2Geography.Geography =
+      SpatialTestValues.geography(row, name)
+  }
+
+  protected def materializeSpatialFrame(frame: DataFrame): DataFrame = {
+    if (SpatialTypeSupport.usesNativeTypes) {
+      // Spark's cached-batch serializer cannot cache native geometry. These small fixtures
+      // still cross the external SQL boundary and are read back from a scan-backed relation.
+      sparkSession.createDataFrame(sc.parallelize(frame.collect().toSeq), frame.schema)
+    } else frame.cache()
+  }
 
   // Default Spark configurations
   def defaultSparkConfig: Map[String, String] = Map(

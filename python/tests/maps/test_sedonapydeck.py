@@ -21,6 +21,7 @@ import geopandas as gpd
 import pydeck as pdk
 from tests import chicago_crimes_input_location, google_buildings_input_location
 from tests.test_base import TestBase
+from sedona.spark.sql.types import to_shapely
 
 from sedona.spark import SedonaPyDeck
 
@@ -40,7 +41,10 @@ class TestVisualization(TestBase):
             "SELECT confidence, latitude, longitude, ST_GeomFromWKT(geometry) as geometry from buildings_table"
         )
         buildings_gdf = gpd.GeoDataFrame(
-            data=buildings_df.toPandas(), geometry="geometry"
+            data=buildings_df.toPandas().assign(
+                geometry=lambda pdf: pdf["geometry"].map(to_shapely)
+            ),
+            geometry="geometry",
         )
         fill_color = SedonaPyDeck._create_default_fill_color_(
             gdf=buildings_gdf, plot_col="confidence"
@@ -78,7 +82,10 @@ class TestVisualization(TestBase):
             "SELECT confidence, latitude, longitude, ST_GeomFromWKT(geometry) as geometry from buildings_table"
         )
         buildings_gdf = gpd.GeoDataFrame(
-            data=buildings_df.toPandas(), geometry="geometry"
+            data=buildings_df.toPandas().assign(
+                geometry=lambda pdf: pdf["geometry"].map(to_shapely)
+            ),
+            geometry="geometry",
         )
         polygon_layer = pdk.Layer(
             "GeoJsonLayer",  # `type` positional argument is here
@@ -113,7 +120,10 @@ class TestVisualization(TestBase):
             "Year from crimes_table"
         )
         chicago_crimes_gdf = gpd.GeoDataFrame(
-            data=chicago_crimes_df.toPandas(), geometry="geometry"
+            data=chicago_crimes_df.toPandas().assign(
+                geometry=lambda pdf: pdf["geometry"].map(to_shapely)
+            ),
+            geometry="geometry",
         )
         SedonaPyDeck._create_coord_column_(chicago_crimes_gdf, geometry_col="geometry")
         layer = pdk.Layer(
@@ -151,7 +161,10 @@ class TestVisualization(TestBase):
             "20))) as geometry, Description, Year from crimes_table"
         )
         chicago_crimes_gdf = gpd.GeoDataFrame(
-            data=chicago_crimes_df.toPandas(), geometry="geometry"
+            data=chicago_crimes_df.toPandas().assign(
+                geometry=lambda pdf: pdf["geometry"].map(to_shapely)
+            ),
+            geometry="geometry",
         )
         SedonaPyDeck._create_coord_column_(chicago_crimes_gdf, geometry_col="geometry")
         color_range = [

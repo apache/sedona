@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql.geography
 
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.sedona.common.S2Geography.{Geography, WKBGeography}
 import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.sql.functions.{col, lit}
@@ -43,7 +44,7 @@ class GeographyFunctionTest extends TestBaseScala {
       val row = sparkSession
         .sql("SELECT ST_GeogFromWKT('POINT (1 2)', 4326) AS geog")
         .first()
-      val geog = row.get(0).asInstanceOf[Geography]
+      val geog = row.getSedonaGeography(0)
       assertTrue(geog.isInstanceOf[WKBGeography])
       assertEquals(4326, geog.getSRID)
       assertEquals("POINT (1 2)", geog.toString)
@@ -53,7 +54,7 @@ class GeographyFunctionTest extends TestBaseScala {
       val row = sparkSession
         .sql("SELECT ST_GeogFromEWKT('SRID=4269;POINT (1 2)') AS geog")
         .first()
-      val geog = row.get(0).asInstanceOf[Geography]
+      val geog = row.getSedonaGeography(0)
       assertEquals(4269, geog.getSRID)
     }
 
@@ -61,16 +62,17 @@ class GeographyFunctionTest extends TestBaseScala {
       val row = sparkSession
         .sql("SELECT ST_GeogFromWKB(ST_AsBinary(ST_GeomFromWKT('POINT (30 10)'))) AS geog")
         .first()
-      val geog = row.get(0).asInstanceOf[Geography]
+      val geog = row.getSedonaGeography(0)
       assertTrue(geog.isInstanceOf[WKBGeography])
       assertEquals("POINT (30 10)", geog.toString)
     }
 
     it("ST_GeomToGeography and ST_GeogToGeometry round-trip") {
+      val srid = if (SpatialTypeSupport.usesNativeTypes) 4326 else 0
       val row = sparkSession
-        .sql("""
+        .sql(s"""
           SELECT ST_AsText(ST_GeogToGeometry(
-            ST_GeomToGeography(ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))'))
+            ST_GeomToGeography(ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', $srid))
           )) AS wkt
         """)
         .first()
@@ -86,8 +88,8 @@ class GeographyFunctionTest extends TestBaseScala {
             ST_GeomToGeography(ST_GeomFromWKT('POLYGON EMPTY', 4326)) AS empty_polygon
         """)
         .first()
-      val point = row.getAs[Geography](0)
-      val emptyPolygon = row.getAs[Geography](1)
+      val point = row.getSedonaGeography(0)
+      val emptyPolygon = row.getSedonaGeography(1)
       assertEquals("SRID=4326; POINT (1 2)", point.toEWKT)
       assertEquals("SRID=4326; POLYGON EMPTY", emptyPolygon.toEWKT)
     }
@@ -109,7 +111,7 @@ class GeographyFunctionTest extends TestBaseScala {
         .sql(
           "SELECT ST_Centroid(ST_GeogFromWKT('POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))', 4326)) AS c")
         .first()
-      val centroid = row.get(0).asInstanceOf[Geography]
+      val centroid = row.getSedonaGeography(0)
       val point = new WKTReader().read(centroid.toString).asInstanceOf[Point]
       // Spherical area-weighted centroid of a 2x2° square at origin is ~(1, 1) with an
       // O(d^2/R^2) spherical correction; 5e-3° is well within that band.
@@ -191,13 +193,16 @@ class GeographyFunctionTest extends TestBaseScala {
     it("ST_ConvexHull uses spherical Geography semantics") {
       val pointHull = sparkSession
         .sql("SELECT ST_ConvexHull(ST_GeogFromWKT('MULTIPOINT ((1 2), (1 2))', 4326)) AS hull")
-      assertTrue(pointHull.schema("hull").dataType.isInstanceOf[GeographyUDT])
-      assertEquals("POINT (1 2)", pointHull.first().getAs[Geography](0).toString)
+      assertTrue(SpatialTypeSupport.isGeography(pointHull.schema("hull").dataType))
+      assertTrue(
+        SpatialTypeSupport.isNativeGeography(
+          pointHull.schema("hull").dataType) == SpatialTypeSupport.usesNativeTypes)
+      assertEquals("POINT (1 2)", pointHull.first().getSedonaGeography(0).toString)
 
       val lineHull = sparkSession
         .sql("SELECT ST_ConvexHull(ST_GeogFromWKT('LINESTRING (0 0, 0 1, 0 2)', 4326)) AS hull")
         .first()
-        .getAs[Geography](0)
+        .getSedonaGeography(0)
       assertEquals(
         "ST_LineString",
         org.apache.sedona.common.geography.Functions.geometryType(lineHull))
@@ -213,7 +218,7 @@ class GeographyFunctionTest extends TestBaseScala {
           ) AS hull
         """)
         .first()
-        .getAs[Geography](0)
+        .getSedonaGeography(0)
       assertEquals(
         "ST_Polygon",
         org.apache.sedona.common.geography.Functions.geometryType(polygonHull))
@@ -222,7 +227,7 @@ class GeographyFunctionTest extends TestBaseScala {
       val emptyLineHull = sparkSession
         .sql("SELECT ST_ConvexHull(ST_GeogFromWKT('LINESTRING EMPTY', 4326)) AS hull")
         .first()
-        .getAs[Geography](0)
+        .getSedonaGeography(0)
       assertEquals("LINESTRING EMPTY", emptyLineHull.toString)
       assertEquals(4326, emptyLineHull.getSRID)
     }
@@ -235,8 +240,13 @@ class GeographyFunctionTest extends TestBaseScala {
           ST_GeogFromWKT('POINT (3 4)', 4326)
         )) AS collected
       """)
-      assertTrue(arrayResult.schema("collected").dataType.isInstanceOf[GeographyUDT])
-      assertEquals("MULTIPOINT ((1 2), (3 4))", arrayResult.first().getAs[Geography](0).toString)
+      assertTrue(SpatialTypeSupport.isGeography(arrayResult.schema("collected").dataType))
+      assertTrue(
+        SpatialTypeSupport.isNativeGeography(
+          arrayResult.schema("collected").dataType) == SpatialTypeSupport.usesNativeTypes)
+      assertEquals(
+        "MULTIPOINT ((1 2), (3 4))",
+        arrayResult.first().getSedonaGeography(0).toString)
 
       val mixedShapeResult = sparkSession
         .sql("""
@@ -246,7 +256,7 @@ class GeographyFunctionTest extends TestBaseScala {
           ) AS collected
         """)
         .first()
-        .getAs[Geography](0)
+        .getSedonaGeography(0)
       assertEquals(
         "ST_GeometryCollection",
         org.apache.sedona.common.geography.Functions.geometryType(mixedShapeResult))
@@ -260,7 +270,7 @@ class GeographyFunctionTest extends TestBaseScala {
           )) AS collected
         """)
         .first()
-        .getAs[Geography](0)
+        .getSedonaGeography(0)
       assertEquals(2, org.apache.sedona.common.geography.Functions.numGeometries(withEmptyLine))
     }
 
@@ -327,9 +337,12 @@ class GeographyFunctionTest extends TestBaseScala {
         GROUP BY customer_id
       """)
 
-      assertTrue(aggregate.schema("collected").dataType.isInstanceOf[GeographyUDT])
+      assertTrue(SpatialTypeSupport.isGeography(aggregate.schema("collected").dataType))
+      assertTrue(
+        SpatialTypeSupport.isNativeGeography(
+          aggregate.schema("collected").dataType) == SpatialTypeSupport.usesNativeTypes)
       val row = aggregate.first()
-      val collected = row.getAs[Geography]("collected")
+      val collected = row.getSedonaGeography("collected")
       assertEquals(3, org.apache.sedona.common.geography.Functions.numGeometries(collected))
       assertEquals(4326, collected.getSRID)
       assertTrue(row.getAs[Double]("hull_area") > 6e9)
@@ -342,7 +355,10 @@ class GeographyFunctionTest extends TestBaseScala {
           SELECT ST_GeogFromWKT(NULL, 4326) AS geog
         )
       """)
-      assertTrue(allNull.schema("collected").dataType.isInstanceOf[GeographyUDT])
+      assertTrue(SpatialTypeSupport.isGeography(allNull.schema("collected").dataType))
+      assertTrue(
+        SpatialTypeSupport.isNativeGeography(
+          allNull.schema("collected").dataType) == SpatialTypeSupport.usesNativeTypes)
       assertTrue(allNull.first().isNullAt(0))
     }
 
@@ -354,7 +370,7 @@ class GeographyFunctionTest extends TestBaseScala {
             FROM (
               SELECT ST_GeogFromWKT('POINT (0 0)', 4326) AS geog
               UNION ALL
-              SELECT ST_GeogFromWKT('POINT (1 1)', 3857) AS geog
+              SELECT ST_GeogFromWKT('POINT (1 1)', 4269) AS geog
             )
           """)
           .collect()
@@ -365,7 +381,7 @@ class GeographyFunctionTest extends TestBaseScala {
       while (cause != null) {
         hasExpectedMessage ||= Option(cause.getMessage)
           .exists(message =>
-            message.contains("same SRID") && message.contains("4326") && message.contains("3857"))
+            message.contains("same SRID") && message.contains("4326") && message.contains("4269"))
         cause = cause.getCause
       }
       assertTrue(hasExpectedMessage)
@@ -421,11 +437,11 @@ class GeographyFunctionTest extends TestBaseScala {
         .first()
       assertEquals("LINESTRING (12 34, 12 34)", coincident.getString(0))
       assertEquals("SRID=4326; LINESTRING (12 34, 12 34)", coincident.getString(1))
-      val centroid = coincident.getAs[Geography](2)
+      val centroid = coincident.getSedonaGeography(2)
       assertEquals(4326, centroid.getSRID)
       assertEquals("POINT (12 34)", centroid.toString)
       Seq(3, 4).foreach { index =>
-        val envelope = coincident.getAs[Geography](index)
+        val envelope = coincident.getSedonaGeography(index)
         assertEquals(4326, envelope.getSRID)
         assertEquals("POINT (12 34)", envelope.toString)
       }
@@ -435,7 +451,7 @@ class GeographyFunctionTest extends TestBaseScala {
       assertEquals(0.0, coincident.getDouble(8), 0.0)
       assertEquals(0.0, coincident.getDouble(9), 0.0)
       assertEquals("LINESTRING (12 34, 12 34, 13 34)", coincident.getString(10))
-      val geography = coincident.getAs[Geography](11)
+      val geography = coincident.getSedonaGeography(11)
       assertEquals("LINESTRING (12 34, 12 34)", geography.toString)
       assertEquals("SRID=4326; LINESTRING (12 34, 12 34)", geography.toEWKT)
 
@@ -459,19 +475,20 @@ class GeographyFunctionTest extends TestBaseScala {
     }
 
     it("ST_MakeLine skips empty geography inputs") {
+      val srid = if (SpatialTypeSupport.usesNativeTypes) 4269 else 3857
       val row = sparkSession
-        .sql("""
+        .sql(s"""
           SELECT
             ST_AsText(ST_MakeLine(
-              ST_GeogFromWKT('POINT EMPTY', 3857),
+              ST_GeogFromWKT('POINT EMPTY', $srid),
               ST_GeogFromWKT('POINT (12 34)', 4326)
             )) AS empty_first,
             ST_AsText(ST_MakeLine(
               ST_GeogFromWKT('POINT (12 34)', 4326),
-              ST_GeogFromWKT('LINESTRING EMPTY', 3857)
+              ST_GeogFromWKT('LINESTRING EMPTY', $srid)
             )) AS empty_second,
             ST_AsEWKT(ST_MakeLine(
-              ST_GeogFromWKT('POINT EMPTY', 3857),
+              ST_GeogFromWKT('POINT EMPTY', $srid),
               ST_GeogFromWKT('LINESTRING EMPTY', 4326)
             )) AS both_empty
         """)
@@ -479,27 +496,31 @@ class GeographyFunctionTest extends TestBaseScala {
 
       assertEquals("LINESTRING (12 34, 12 34)", row.getString(0))
       assertEquals("LINESTRING (12 34, 12 34)", row.getString(1))
-      assertEquals("SRID=3857; LINESTRING EMPTY", row.getString(2))
+      assertEquals(s"SRID=$srid; LINESTRING EMPTY", row.getString(2))
     }
 
     it("ST_Intersection returns Geography and feeds spherical ST_Area") {
-      val result = sparkSession.sql("""
+      val srid = if (SpatialTypeSupport.usesNativeTypes) 4269 else 3857
+      val result = sparkSession.sql(s"""
         SELECT
           overlap,
           ST_GeometryType(overlap) AS overlap_type,
           ST_Area(overlap) AS overlap_area
         FROM (
           SELECT ST_Intersection(
-            ST_GeogFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))', 3857),
+            ST_GeogFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))', $srid),
             ST_GeogFromWKT('POLYGON ((5 5, 15 5, 15 15, 5 15, 5 5))', 4326)
           ) AS overlap
         )
       """)
 
-      assertTrue(result.schema("overlap").dataType.isInstanceOf[GeographyUDT])
+      assertTrue(SpatialTypeSupport.isGeography(result.schema("overlap").dataType))
+      assertTrue(
+        SpatialTypeSupport.isNativeGeography(
+          result.schema("overlap").dataType) == SpatialTypeSupport.usesNativeTypes)
       val row = result.first()
-      val overlap = row.getAs[Geography](0)
-      assertEquals(3857, overlap.getSRID)
+      val overlap = row.getSedonaGeography(0)
+      assertEquals(srid, overlap.getSRID)
       assertEquals("ST_Polygon", row.getString(1))
       assertEquals(3.071055126726233e11, row.getDouble(2), 1e5)
     }
@@ -911,7 +932,7 @@ class GeographyFunctionTest extends TestBaseScala {
     it("ST_Buffer result survives the GeographyUDT round-trip") {
       val df = sparkSession
         .sql("SELECT ST_Buffer(ST_GeogFromWKT('POINT(0 0)', 4326), 500) AS buf")
-      val geog = df.first().get(0).asInstanceOf[Geography]
+      val geog = df.first().getSedonaGeography(0)
       assertTrue(geog.isInstanceOf[WKBGeography])
       assertEquals(4326, geog.getSRID)
     }
@@ -938,7 +959,7 @@ class GeographyFunctionTest extends TestBaseScala {
         .sql("SELECT 'POINT(0 0)' AS wkt")
         .select(st_constructors.ST_GeogFromWKT(col("wkt"), lit(4326)).as("g"))
         .select(st_functions.ST_Buffer(col("g"), lit(1000.0)).as("buf"))
-      val geog = df.first().get(0).asInstanceOf[Geography]
+      val geog = df.first().getSedonaGeography(0)
       assertTrue(geog.isInstanceOf[WKBGeography])
       assertTrue(geog.toString.startsWith("POLYGON"))
     }
@@ -974,7 +995,7 @@ class GeographyFunctionTest extends TestBaseScala {
           st_constructors.ST_GeogFromWKT(col("wkt_a"), lit(4326)).as("a"),
           st_constructors.ST_GeogFromWKT(col("wkt_b"), lit(4326)).as("b"))
         .select(st_functions.ST_MakeLine(col("a"), col("b")).as("line"))
-      val line = df.first().get(0).asInstanceOf[Geography]
+      val line = df.first().getSedonaGeography(0)
       assertTrue(line.isInstanceOf[WKBGeography])
       assertEquals("LINESTRING (0 0, 1 0)", line.toString)
     }
@@ -987,8 +1008,11 @@ class GeographyFunctionTest extends TestBaseScala {
           st_constructors.ST_GeogFromWKT(col("wkt_b"), lit(4326)).as("b"))
         .select(st_functions.ST_Intersection(col("a"), col("b")).as("intersection"))
 
-      assertTrue(df.schema("intersection").dataType.isInstanceOf[GeographyUDT])
-      assertEquals("POINT (0 0)", df.first().getAs[Geography](0).toString)
+      assertTrue(SpatialTypeSupport.isGeography(df.schema("intersection").dataType))
+      assertTrue(
+        SpatialTypeSupport.isNativeGeography(
+          df.schema("intersection").dataType) == SpatialTypeSupport.usesNativeTypes)
+      assertEquals("POINT (0 0)", df.first().getSedonaGeography(0).toString)
     }
 
     it("ST_Contains via DataFrame API") {
@@ -1039,7 +1063,7 @@ class GeographyFunctionTest extends TestBaseScala {
     it("Geography survives DataFrame collect") {
       val df = sparkSession
         .sql("SELECT ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326) AS geog")
-      val geog = df.first().get(0).asInstanceOf[Geography]
+      val geog = df.first().getSedonaGeography(0)
       assertTrue(geog.isInstanceOf[WKBGeography])
       assertEquals(4326, geog.getSRID)
       assertTrue(geog.toString.contains("POLYGON"))
