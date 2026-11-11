@@ -65,7 +65,6 @@ jobs:
           - spark: 4.2.0
             scala: 2.13.18
             jdk: '17'
-            nativeSpatial: true
             skipLibPostalTests: 'true'
           - spark: 4.1.1
             scala: 2.13.17
@@ -149,7 +148,6 @@ jobs:
           SEDONA_SKIP_LIBPOSTAL_TESTS: ${{ matrix.skipLibPostalTests }}
           FLINK_VERSION: ${{ matrix.flinkVersion }}
           PYTHONPATH: ${{ github.workspace }}/python
-          NATIVE_SPATIAL: ${{ matrix.nativeSpatial }}
         run: |
           SPARK_COMPAT_VERSION="${SPARK_VERSION:0:3}"
 
@@ -166,7 +164,7 @@ jobs:
           if [[ -n "${SKIP_TESTS}" ]]; then
               mvn_args+=("${SKIP_TESTS}")
           fi
-          if [[ "${NATIVE_SPATIAL}" == "true" ]]; then
+          if [[ "${SPARK_VERSION}" == 4.2.* ]]; then
               # Compile/package the complete native reactor before testing its boundaries.
               mvn "${mvn_args[@]}" -DskipTests
               native_args=(-q "-Dspark=${SPARK_COMPAT_VERSION}" "-Dscala=${SCALA_VERSION:0:4}" "-Dspark.version=${SPARK_VERSION}")
