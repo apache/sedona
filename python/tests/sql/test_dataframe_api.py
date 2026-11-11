@@ -2151,6 +2151,34 @@ class TestDataFrameAPI(TestBase):
 
     @pytest.mark.skipif(
         os.getenv("SPARK_REMOTE") is not None and pyspark.__version__ < "4.0.0",
+        reason="DBSCAN requires checkpoint directory which is not available in Spark Connect mode before Spark 4.0.0",
+    )
+    @pytest.mark.parametrize(
+        "configured,include_outliers,expected_count",
+        [("false", None, 2), ("true", None, 3), ("false", True, 3), ("true", False, 2)],
+    )
+    def test_dbscan_include_outliers_config(
+        self, configured, include_outliers, expected_count
+    ):
+        key = "spark.sedona.dbscan.includeOutliers"
+        prior = self.spark.conf.get(key, "true")
+        try:
+            self.spark.conf.set(key, configured)
+            df = self.spark.createDataFrame(
+                [(1, 0.0), (2, 0.5), (3, 10.0)], ["id", "x"]
+            ).selectExpr("id", "ST_Point(x, 0.0) AS geometry")
+            options = (
+                {}
+                if include_outliers is None
+                else {"include_outliers": include_outliers}
+            )
+            rows = df.select(ST_DBSCAN("geometry", 1.0, 2, **options)).collect()
+            assert len(rows) == expected_count
+        finally:
+            self.spark.conf.set(key, prior)
+
+    @pytest.mark.skipif(
+        os.getenv("SPARK_REMOTE") is not None and pyspark.__version__ < "4.0.0",
         reason="LOF requires checkpoint directory which is not available in Spark Connect mode before Spark 4.0.0",
     )
     def test_lof(self):

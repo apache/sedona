@@ -22,9 +22,9 @@ import org.apache.sedona.stats.Weighting.{addBinaryDistanceBandColumn, addWeight
 import org.apache.sedona.stats.clustering.DBSCAN.dbscan
 import org.apache.sedona.stats.hotspotDetection.GetisOrd.gLocal
 import org.apache.sedona.stats.outlierDetection.LocalOutlierFactor.localOutlierFactor
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, Row}
 import org.apache.spark.sql.functions.{col, expr, lit}
-import org.apache.spark.sql.types.LongType
+import org.apache.spark.sql.types.{BooleanType, LongType, StructField, StructType}
 import org.apache.spark.sql.sedona_sql.expressions.st_functions.{ST_DBSCAN, ST_LocalOutlierFactor}
 
 class GeoStatsSuite extends TestBaseScala {
@@ -109,6 +109,46 @@ class GeoStatsSuite extends TestBaseScala {
     assert(sqlDf.join(functionDf, "id").count() == getData.count())
   }
 
+  it("test dbscan can exclude outliers") {
+    val sqlDf = getData
+      .withColumn("sql_results", expr("ST_DBSCAN(geometry, 0.5, 4, false, false)"))
+      .select(
+        col("id"),
+        col("sql_results.cluster").as("cluster"),
+        col("sql_results.isCore").as("isCore"))
+
+    val functionDf =
+      dbscan(getData, 0.5, 4, includeOutliers = false)
+        .select(col("id"), col("cluster"), col("isCore"))
+
+    assert(sqlDf.join(functionDf, "id").count() == 8)
+    assert(sqlDf.filter(col("cluster") === -1L).count() == 0)
+  }
+
+  it("test dbscan with custom result field names") {
+    val sqlDf = getData
+      .withColumn(
+        "sql_results",
+        expr("ST_DBSCAN(geometry, 1.0, 4, false, true, 'isCoreLabel', 'clusterLabel')"))
+      .select(col("id"), col("sql_results"))
+
+    val functionDf =
+      dbscan(
+        getData,
+        1.0,
+        4,
+        useSpheroid = false,
+        includeOutliers = true,
+        isCoreColumnName = "isCoreLabel",
+        clusterColumnName = "clusterLabel")
+        .select(col("id"), col("clusterLabel"), col("isCoreLabel"))
+
+    assert(
+      sqlDf.schema("sql_results").dataType == StructType(
+        Seq(StructField("isCoreLabel", BooleanType), StructField("clusterLabel", LongType))))
+    assert(sqlDf.join(functionDf, "id").count() == getData.count())
+  }
+
   it("test dbscan function with distance column") {
     val sqlDf = getData
       .withColumn("sql_results", expr("ST_DBSCAN(geometry, 1.0, 4, true)"))
@@ -157,13 +197,10 @@ class GeoStatsSuite extends TestBaseScala {
   }
 
   it("test dbscan with geom literal") {
-    val error = intercept[IllegalArgumentException] {
-      spark.sql("SELECT ST_DBSCAN(ST_GeomFromWKT('POINT(0.0 1.1)'), 1.0, 4, false)").collect()
-    }
-    assert(
-      error
-        .asInstanceOf[IllegalArgumentException]
-        .getMessage == "geometry argument must be a named reference to an existing column")
+    val result = spark
+      .sql("SELECT ST_DBSCAN(ST_GeomFromWKT('POINT(0.0 1.1)'), 1.0, 4, false)")
+      .collect()
+    assert(result.toSeq == Seq(Row(Row(false, -1L))))
   }
 
   it("test dbscan with minPts variable") {

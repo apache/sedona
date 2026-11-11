@@ -23,9 +23,48 @@ sedona and graphframes to support large scale datasets and various, heterogeneou
 
 from typing import Optional
 
-from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import DataFrame
+from pyspark.sql import functions as f
+
+from sedona.spark.sql.types import GeometryType
 
 ID_COLUMN_NAME = "__id"
+DBSCAN_RESULT_PREFIX = "sedona_dbscan"
+
+
+def _temporary_column_name(dataframe) -> str:
+    suffix = 0
+    candidate = f"__{DBSCAN_RESULT_PREFIX}__"
+    while candidate in dataframe.columns:
+        suffix += 1
+        candidate = f"__{DBSCAN_RESULT_PREFIX}_{suffix}__"
+    return candidate
+
+
+def _column(name: str):
+    return f.col("`" + name.replace("`", "``") + "`")
+
+
+def _get_geometry_column_name(dataframe: DataFrame, geometry: Optional[str]) -> str:
+    if geometry is not None:
+        return geometry
+
+    geometry_fields = [
+        field.name
+        for field in dataframe.schema.fields
+        if isinstance(field.dataType, GeometryType)
+    ]
+    if not geometry_fields:
+        raise ValueError(
+            "No GeometryType column found. Provide a dataframe containing a geometry column."
+        )
+    if len(geometry_fields) == 1:
+        return geometry_fields[0]
+    if "geometry" in geometry_fields:
+        return "geometry"
+    raise ValueError(
+        "Multiple GeometryType columns found. Provide the column name as an argument."
+    )
 
 
 def dbscan(
@@ -58,17 +97,32 @@ def dbscan(
     Returns:
         A PySpark DataFrame containing the cluster label for each row
     """
-    sedona = SparkSession.getActiveSession()
-
-    result_df = sedona._jvm.org.apache.sedona.stats.clustering.DBSCAN.dbscan(
-        dataframe._jdf,
-        float(epsilon),
-        min_pts,
-        geometry,
-        include_outliers,
-        use_spheroid,
-        is_core_column_name,
-        cluster_column_name,
+    geometry = _get_geometry_column_name(dataframe, geometry)
+    dbscan_result = _temporary_column_name(dataframe)
+    result_df = (
+        dataframe.withColumn(
+            dbscan_result,
+            f.call_function(
+                "ST_DBSCAN",
+                _column(geometry),
+                f.lit(float(epsilon)),
+                f.lit(min_pts),
+                f.lit(use_spheroid),
+                f.lit(include_outliers),
+                f.lit(is_core_column_name),
+                f.lit(cluster_column_name),
+                # Keep all input columns available for DBSCAN's row IDs.
+                f.struct(*[_column(name) for name in dataframe.columns]),
+            ),
+        )
+        .withColumn(
+            is_core_column_name, _column(dbscan_result).getField(is_core_column_name)
+        )
+        .withColumn(
+            cluster_column_name, _column(dbscan_result).getField(cluster_column_name)
+        )
+        .drop(dbscan_result)
     )
-
-    return DataFrame(result_df, sedona)
+    if not include_outliers:
+        result_df = result_df.filter(_column(cluster_column_name) != -1)
+    return result_df

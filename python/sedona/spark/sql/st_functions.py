@@ -3101,7 +3101,10 @@ def ST_DBSCAN(
     geometry: ColumnOrName,
     epsilon: Union[ColumnOrName, float],
     min_pts: Union[ColumnOrName, int],
-    use_spheroid: Optional[Union[ColumnOrName, bool]] = False,
+    use_spheroid: Union[ColumnOrName, bool] = False,
+    include_outliers: Optional[Union[ColumnOrName, bool]] = None,
+    is_core_column_name: Union[ColumnOrName, str] = "isCore",
+    cluster_column_name: Union[ColumnOrName, str] = "cluster",
 ) -> Column:
     """Perform DBSCAN clustering on the given geometry column.
 
@@ -3112,7 +3115,13 @@ def ST_DBSCAN(
     :param min_pts: Minimum number of neighbors a point must have to form a cluster.
     :type min_pts: Union[ColumnOrName, int]
     :param use_spheroid: Whether to use ST_DistanceSpheroid instead of ST_Distance as the distance metric. Default is False.
-    :type use_spheroid: Optional[Union[ColumnOrName, bool]], optional
+    :type use_spheroid: Union[ColumnOrName, bool]
+    :param include_outliers: whether to include noise points. If omitted or set to None, the value of spark.sedona.dbscan.includeOutliers is used.
+    :type include_outliers: Optional[Union[ColumnOrName, bool]]
+    :param is_core_column_name: name of the field indicating whether the point is a core point. Defaults to "isCore".
+    :type is_core_column_name: Union[ColumnOrName, str]
+    :param cluster_column_name: name of the field containing the cluster ID. Defaults to "cluster".
+    :type cluster_column_name: Union[ColumnOrName, str]
     :return: Struct with the cluster the point belongs to and whether it is a core point.
     :rtype: Column
     """
@@ -3126,7 +3135,27 @@ def ST_DBSCAN(
     if isinstance(use_spheroid, bool):
         use_spheroid = lit(use_spheroid)
 
-    return _call_st_function("ST_DBSCAN", (geometry, epsilon, min_pts, use_spheroid))
+    if isinstance(include_outliers, bool):
+        include_outliers = lit(include_outliers)
+
+    if isinstance(is_core_column_name, str):
+        is_core_column_name = lit(is_core_column_name)
+
+    if isinstance(cluster_column_name, str):
+        cluster_column_name = lit(cluster_column_name)
+
+    return _call_st_function(
+        "ST_DBSCAN",
+        (
+            geometry,
+            epsilon,
+            min_pts,
+            use_spheroid,
+            include_outliers,
+            is_core_column_name,
+            cluster_column_name,
+        ),
+    )
 
 
 @validate_argument_types

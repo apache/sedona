@@ -23,20 +23,60 @@ import org.apache.sedona.stats.Weighting.{addBinaryDistanceBandColumn, addWeight
 import org.apache.sedona.stats.clustering.DBSCAN.dbscan
 import org.apache.sedona.stats.hotspotDetection.GetisOrd.gLocal
 import org.apache.sedona.stats.outlierDetection.LocalOutlierFactor.localOutlierFactor
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.catalyst.expressions.{Attribute, Expression}
+import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.sql.catalyst.expressions.{Alias, Attribute, AttributeReference, Expression, Literal}
+import org.apache.spark.sql.execution.{ProjectExec, SparkPlan}
 import org.apache.spark.sql.functions.{col, struct}
+import org.apache.spark.sql.sedona_sql.DataFrameShims
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
+import org.apache.spark.unsafe.types.UTF8String
 
 private[apache] case class ST_DBSCAN(children: Seq[Expression])
     extends DataframePhysicalFunction {
 
+  private lazy val materializedGeometryName =
+    "__sedona_dbscan_geometry_" + java.util.UUID.randomUUID().toString.replace("-", "")
+
+  override protected def getInputName(i: Int, fieldName: String): String = {
+    if (i == 0 && !children.head.isInstanceOf[AttributeReference]) materializedGeometryName
+    else super.getInputName(i, fieldName)
+  }
+
+  override def execute(plan: SparkPlan, resultAttrs: Seq[Attribute]): RDD[InternalRow] = {
+    children.head match {
+      case _: AttributeReference => super.execute(plan, resultAttrs)
+      case geometry =>
+        val projected = ProjectExec(plan.output :+ Alias(geometry, geometryColumnName)(), plan)
+        transformDataframe(
+          DataFrameShims.createDataFrame(sparkSession, projected.execute(), projected.schema),
+          resultAttrs)
+          .drop(geometryColumnName)
+          .queryExecution
+          .toRdd
+    }
+  }
+
+  private def isCoreColumnName: String =
+    if (children.length > 5) getScalarValue[UTF8String](5, "isCoreColumnName").toString
+    else "isCore"
+
+  private def clusterColumnName: String =
+    if (children.length > 6) getScalarValue[UTF8String](6, "clusterColumnName").toString
+    else "cluster"
+
   override def dataType: DataType =
-    StructType(Seq(StructField("isCore", BooleanType), StructField("cluster", LongType)))
+    StructType(
+      Seq(StructField(isCoreColumnName, BooleanType), StructField(clusterColumnName, LongType)))
 
   override def inputTypes: Seq[AbstractDataType] =
-    Seq(GeometryUDT(), DoubleType, IntegerType, BooleanType)
+    Seq(GeometryUDT(), DoubleType, IntegerType, BooleanType, BooleanType, StringType, StringType)
+      .take(children.length) ++
+      // Referencing the original attributes prevents column pruning from changing
+      // the row values used by DBSCAN to generate record IDs.
+      (if (children.length > 7) Seq(children(7).dataType) else Seq.empty)
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression =
     copy(children = newChildren)
@@ -51,16 +91,24 @@ private[apache] case class ST_DBSCAN(children: Seq[Expression])
       !dataframe.columns.contains("__cluster"),
       "__cluster is a  reserved name by the dbscan algorithm. Please rename the columns before calling the ST_DBSCAN function.")
 
+    val includeOutliers: Boolean = children.lift(4) match {
+      case None | Some(Literal(null, _)) =>
+        SedonaConf.fromActiveSession().getDBSCANIncludeOutliers
+      case _ => getScalarValue[Boolean](4, "includeOutliers")
+    }
+
     val ret = dbscan(
       dataframe,
       getScalarValue[Double](1, "epsilon"),
       getScalarValue[Int](2, "minPts"),
       geometryColumnName,
-      SedonaConf.fromActiveSession().getDBSCANIncludeOutliers,
+      includeOutliers,
       getScalarValue[Boolean](3, "useSpheroid"),
       "__isCore",
       "__cluster")
-      .withColumn(getResultName(resultAttrs), struct(col("__isCore"), col("__cluster")))
+      .withColumn(
+        getResultName(resultAttrs),
+        struct(col("__isCore").as(isCoreColumnName), col("__cluster").as(clusterColumnName)))
       .drop("__isCore", "__cluster")
 
     ret

@@ -1170,6 +1170,23 @@ object st_functions {
   def ST_DBSCAN(geom: Column, epsilon: Column, minPoints: Column, useSpheroid: Column): Column =
     wrapExpression[ST_DBSCAN](geom, epsilon, minPoints, useSpheroid)
 
+  def ST_DBSCAN(
+      geom: Column,
+      epsilon: Column,
+      minPoints: Column,
+      useSpheroid: Column,
+      includeOutliers: Column,
+      isCoreColumnName: Column,
+      clusterColumnName: Column): Column =
+    wrapExpression[ST_DBSCAN](
+      geom,
+      epsilon,
+      minPoints,
+      useSpheroid,
+      includeOutliers,
+      isCoreColumnName,
+      clusterColumnName)
+
   def ST_LocalOutlierFactor(geom: Column, k: Column, useSpheroid: Column): Column =
     wrapExpression[ST_LocalOutlierFactor](geom, k, useSpheroid)
 
