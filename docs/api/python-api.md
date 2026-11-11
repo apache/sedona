@@ -35,6 +35,8 @@ This example assumes a DataFrame named `df` with a geometry column named `geomet
 
 Since v2.0.0, `is_geometry_type` and `is_geography_type` recognize both Sedona UDTs and Spark native spatial types when those classes are available in PySpark. They inspect schema type instances without requiring a Spark session or changing the column's representation.
 
+Both helpers are available from `sedona.spark`, `sedona.spark.sql` and `sedona.spark.sql.types`.
+
 ```python
 from sedona.spark import is_geography_type, is_geometry_type
 

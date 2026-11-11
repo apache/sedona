@@ -19,6 +19,7 @@ import pytest
 from pyspark.sql import types as spark_types
 
 import sedona.spark as sedona
+import sedona.spark.sql as sedona_sql
 from sedona.spark.sql import types
 
 
@@ -78,5 +79,6 @@ def test_rejects_non_spatial_schema_types(kind, value):
 
 
 @pytest.mark.parametrize("name", ["is_geometry_type", "is_geography_type"])
-def test_predicates_are_exported_from_sedona_spark(name):
-    assert getattr(sedona, name) is getattr(types, name)
+@pytest.mark.parametrize("module", [sedona, sedona_sql])
+def test_predicates_are_exported_from_public_packages(name, module):
+    assert getattr(module, name) is getattr(types, name)
