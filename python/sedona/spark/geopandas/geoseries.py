@@ -85,7 +85,6 @@ from sedona.spark.geopandas.sindex import SpatialIndex
 from packaging.version import parse as parse_version
 
 from pyspark.pandas.internal import (
-    SPARK_DEFAULT_INDEX_NAME,  # __index_level_0__
     NATURAL_ORDER_COLUMN_NAME,
     SPARK_DEFAULT_SERIES_NAME,  # '0'
 )

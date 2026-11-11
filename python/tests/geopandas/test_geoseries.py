@@ -828,6 +828,85 @@ class TestGeoSeries(TestGeopandasBase):
         gpd_df = gpd.GeoSeries(data, index=index, crs=crs)
         assert_geoseries_equal(result, gpd_df)
 
+    @pytest.mark.parametrize("multiindex", [False, True], ids=["index", "multiindex"])
+    @pytest.mark.parametrize(
+        ("source_name", "result_name", "expected_name"),
+        [
+            (None, None, "geometry"),
+            ("shape", None, "shape"),
+            ("shape", "renamed", "renamed"),
+        ],
+    )
+    def test_to_geoframe_preserves_axes_values_and_name(
+        self, multiindex, source_name, result_name, expected_name
+    ):
+        from geopandas.testing import assert_geodataframe_equal, assert_geoseries_equal
+
+        index = (
+            pd.MultiIndex.from_tuples(
+                [("b", 2), ("a", 1), ("b", 2)], names=["group", "feature_id"]
+            )
+            if multiindex
+            else pd.Index([7, 2, 7], name="feature_id")
+        )
+        local = gpd.GeoSeries(
+            [Point(1, 2), None, Point(3, 4)],
+            index=index,
+            name=source_name,
+            crs="EPSG:3857",
+        )
+        source = GeoSeries(local)
+
+        result = source.to_geoframe(name=result_name)
+
+        expected = gpd.GeoDataFrame(
+            {expected_name: local}, geometry=expected_name, crs=local.crs
+        )
+        assert result.geometry.name == expected_name
+        assert_geodataframe_equal(result.to_geopandas(), expected)
+        assert_geoseries_equal(source.to_geopandas(), local)
+
+    def test_to_geoframe_preserves_all_null_crs_metadata(self):
+        from geopandas.testing import assert_geodataframe_equal
+
+        index = pd.MultiIndex.from_tuples(
+            [("a", 1), ("a", 1)], names=["group", "feature_id"]
+        )
+        local = gpd.GeoSeries([None, None], index=index, name="shape", crs="EPSG:4326")
+        source = GeoSeries(local)
+
+        result = source.to_geoframe()
+
+        expected = gpd.GeoDataFrame({"shape": local}, geometry="shape", crs=local.crs)
+        assert_geodataframe_equal(result.to_geopandas(), expected)
+        assert source.crs.to_epsg() == 4326
+        assert result.crs.to_epsg() == 4326
+        assert source.to_geopandas().index.equals(local.index)
+
+    def test_to_geoframe_preserves_lazy_geometry_expression(self):
+        from geopandas.testing import assert_geodataframe_equal, assert_geoseries_equal
+
+        index = pd.MultiIndex.from_tuples(
+            [("a", 1), ("a", 1), ("b", 2)], names=["group", "feature_id"]
+        )
+        local = gpd.GeoSeries(
+            [LineString([(0, 0), (2, 4)]), None, Point(3, 4)],
+            index=index,
+            name="source",
+            crs="EPSG:3857",
+        )
+        source = GeoSeries(local)
+        transformed = GeoSeries(source.centroid.rename("pending"))
+
+        result = transformed.to_geoframe(name="centroid")
+
+        expected = gpd.GeoDataFrame(
+            {"centroid": local.centroid}, geometry="centroid", crs=local.crs
+        )
+        assert_geodataframe_equal(result.to_geopandas(), expected)
+        assert_geoseries_equal(source.to_geopandas(), local)
+        assert transformed.name == "pending"
+
     def test_to_spark_pandas(self):
         data = [Point(x, x) for x in range(3)]
         index = [1, 2, 3]
@@ -4210,8 +4289,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         assert actual.iloc[2] == []
         assert all(value is None for value in actual.iloc[3:])
 
-        # Check GeoDataFrame delegation separately; GeoSeries.to_geoframe()
-        # does not currently accept a MultiIndex.
+        # Check GeoDataFrame delegation separately on a single-level index.
         delegated_index = pd.Index(
             ["holes", "no-holes", "point", "null"],
             name="feature_id",
