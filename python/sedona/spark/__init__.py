@@ -52,6 +52,8 @@ from sedona.spark.sql.types import (
     GeometryType,
     GeographyType,
     RasterType,
+    is_geography_type,
+    is_geometry_type,
     geometry_type,
     geography_type,
     to_spark_geometry,

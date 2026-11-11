@@ -240,6 +240,60 @@ def to_shapely(value):
     return value
 
 
+try:  # PySpark >= 4.1
+    from pyspark.sql.types import GeographyType as SparkGeographyType
+    from pyspark.sql.types import GeometryType as SparkGeometryType
+except ImportError:  # PySpark < 4.1
+    SparkGeographyType = None
+    SparkGeometryType = None
+
+
+def is_geometry_type(data_type) -> bool:
+    """Return whether a schema type represents geometry.
+
+    Recognizes Sedona's geometry UDT and Spark's native ``GeometryType``
+    when available. This check does not require an active Spark session.
+
+    Parameters
+    ----------
+    data_type : pyspark.sql.types.DataType
+        The data type to check, such as ``df.schema["geom"].dataType``.
+
+    Returns
+    -------
+    bool
+        Whether the type represents a geometry column.
+
+    .. versionadded:: 2.0.0
+    """
+    if isinstance(data_type, (GeometryType, LegacyGeometryType)):
+        return True
+    return SparkGeometryType is not None and isinstance(data_type, SparkGeometryType)
+
+
+def is_geography_type(data_type) -> bool:
+    """Return whether a schema type represents geography.
+
+    Recognizes Sedona's geography UDT and Spark's native ``GeographyType``
+    when available. This check does not require an active Spark session.
+
+    Parameters
+    ----------
+    data_type : pyspark.sql.types.DataType
+        The data type to check, such as ``df.schema["geog"].dataType``.
+
+    Returns
+    -------
+    bool
+        Whether the type represents a geography column.
+
+    .. versionadded:: 2.0.0
+    """
+    if isinstance(data_type, (GeographyType, LegacyGeographyType)):
+        return True
+    return SparkGeographyType is not None and isinstance(data_type, SparkGeographyType)
+
+
 class Box2DType(UserDefinedType):
     """Spark SQL type of Sedona ``box2d`` columns, such as the result of ``ST_Box2D``.
 

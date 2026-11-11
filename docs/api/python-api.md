@@ -30,3 +30,20 @@ df.select(ST_Length("geometry").alias("length"))
 ```
 
 This example assumes a DataFrame named `df` with a geometry column named `geometry` and a Spark session configured with Sedona. See the [Python installation guide](../setup/install-python.md) for setup instructions and the [DataFrame API guide](sql/DataFrameAPI.md) for argument conventions and more examples.
+
+## Recognizing spatial column types
+
+Since v2.0.0, `is_geometry_type` and `is_geography_type` recognize both Sedona UDTs and Spark native spatial types when those classes are available in PySpark. They inspect schema type instances without requiring a Spark session or changing the column's representation.
+
+```python
+from sedona.spark import is_geography_type, is_geometry_type
+
+geometry_columns = [
+    field.name for field in df.schema.fields if is_geometry_type(field.dataType)
+]
+geography_columns = [
+    field.name for field in df.schema.fields if is_geography_type(field.dataType)
+]
+```
+
+The predicates distinguish geometry from geography. Arrays and structs containing spatial values are not themselves spatial column types. `LegacyGeometryType` and `LegacyGeographyType` in `sedona.spark.sql.types` explicitly name Sedona's UDTs; the predicates recognize these too. These helpers do not enable native spatial support or change the existing `GeometryType` and `GeographyType` defaults.
