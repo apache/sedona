@@ -29,7 +29,7 @@ from pyspark.sql import functions as F
 from sedona.spark.geopandas import GeoDataFrame
 from sedona.spark.geopandas._crs import warn_crs_mismatch, with_crs_metadata
 from sedona.spark.sql import st_functions as stf
-from sedona.spark.sql.types import GeometryType
+from sedona.spark.sql.types import is_geometry_type
 
 
 def _prepare_side(frame, prefix):
@@ -42,7 +42,7 @@ def _prepare_side(frame, prefix):
         zip(internal.data_spark_columns, internal.data_fields)
     ):
         # Resolve source CRS before filtering: an empty result cannot infer it from SRIDs.
-        if isinstance(field.spark_type, GeometryType) or i == position:
+        if is_geometry_type(field.spark_type) or i == position:
             field = with_crs_metadata(field, frame[internal.column_labels[i][0]].crs)
         columns.append(column.alias(f"{prefix}_{i}", metadata=field.metadata))
     projected = internal.spark_frame.select(

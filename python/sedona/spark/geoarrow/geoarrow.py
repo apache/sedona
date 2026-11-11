@@ -31,6 +31,7 @@ from sedona.spark.sql.types import (
     GeometryType,
     USES_NATIVE_SPATIAL_TYPES,
     geometry_type,
+    is_geometry_type,
     to_spark_geometry,
 )
 from pyspark.sql.pandas.types import (
@@ -60,7 +61,7 @@ def dataframe_to_arrow(df, crs=None):
     """
     import pyarrow as pa
 
-    col_is_geometry = [isinstance(f.dataType, GeometryType) for f in df.schema.fields]
+    col_is_geometry = [is_geometry_type(f.dataType) for f in df.schema.fields]
 
     if not any(col_is_geometry):
         return dataframe_to_arrow_raw(df)

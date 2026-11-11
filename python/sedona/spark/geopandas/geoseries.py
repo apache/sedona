@@ -53,6 +53,7 @@ from pyspark.sql.types import (
 from sedona.spark.sql.types import (
     GeometryType,
     geometry_type,
+    is_geometry_type,
     USES_NATIVE_SPATIAL_TYPES,
 )
 from sedona.spark.sql.functions import sedona_vectorized_udf, SedonaUDFType
@@ -69,6 +70,7 @@ from pyspark.sql import functions as F
 import shapely
 from shapely.geometry.base import BaseGeometry
 
+from sedona.spark.geopandas._geometry import geometry_srid, geometry_wkb
 from sedona.spark.geopandas._crs import (
     NO_CRS_OVERRIDE,
     read_crs_metadata,
@@ -809,7 +811,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         # Ensure we're storing geometry types.
         if (
-            not isinstance(self.spark.data_type, GeometryType)
+            not is_geometry_type(self.spark.data_type)
             and self.spark.data_type != NullType()
         ):
             raise TypeError(
@@ -890,7 +892,9 @@ class GeoSeries(GeoFrame, pspd.Series):
             return metadata_crs
 
         # F.first is non-deterministic, but it doesn't matter because all non-null values should be the same.
-        spark_col = stf.ST_SRID(F.first(self.spark.column, ignorenulls=True))
+        spark_col = geometry_srid(
+            F.first(self.spark.column, ignorenulls=True), self.spark.data_type
+        )
 
         # Set this to avoid error complaining that we don't have a groupby column.
         tmp_series = self._query_geometry_column(
@@ -5984,7 +5988,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         dtype: object
 
         """
-        spark_expr = stf.ST_AsBinary(self.spark.column)
+        spark_expr = geometry_wkb(self.spark.column, self.spark.data_type)
 
         if hex:
             spark_expr = F.hex(spark_expr)
