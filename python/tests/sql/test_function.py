@@ -2440,6 +2440,95 @@ class TestPredicateJoin(TestBase):
         ).first()[0]
         assert null_parent is None
 
+    def test_st_h3_to_children(self):
+        parent = 601041811137363967
+        children = self.spark.sql(f"SELECT ST_H3ToChildren({parent}, 6)").first()[0]
+        assert isinstance(children, list)
+        assert len(children) == len(set(children)) == 7
+        assert all(isinstance(child, int) for child in children)
+        parents = self.spark.createDataFrame([(child,) for child in children], ["cell"])
+        assert all(
+            row[0] == parent
+            for row in parents.selectExpr("ST_H3ToParent(cell, 5)").collect()
+        )
+        assert self.spark.sql(f"SELECT ST_H3ToChildren({parent}, 5)").first()[0] == [
+            parent
+        ]
+        nulls = self.spark.sql(f"""
+            SELECT ST_H3ToChildren(CAST(NULL AS BIGINT), 6),
+                   ST_H3ToChildren({parent}, CAST(NULL AS INT)),
+                   ST_H3ToChildren(CAST(NULL AS BIGINT), CAST(NULL AS INT))
+        """).first()
+        assert all(value is None for value in nulls)
+
+    def test_st_h3_to_center_child(self):
+        parent = 601041811137363967
+        child, same, ancestor = self.spark.sql(f"""
+            SELECT ST_H3ToCenterChild({parent}, 6),
+                   ST_H3ToCenterChild({parent}, 5),
+                   ST_H3ToParent(ST_H3ToCenterChild({parent}, 15), 5)
+        """).first()
+        assert child == 605545409825210367
+        assert same == ancestor == parent
+        nulls = self.spark.sql(f"""
+            SELECT ST_H3ToCenterChild(CAST(NULL AS BIGINT), 6),
+                   ST_H3ToCenterChild({parent}, CAST(NULL AS INT)),
+                   ST_H3ToCenterChild(CAST(NULL AS BIGINT), CAST(NULL AS INT))
+        """).first()
+        assert all(value is None for value in nulls)
+
+    def test_st_h3_compact(self):
+        parent = 601041811137363967
+        original, compacted, restored = self.spark.sql(f"""
+            SELECT cells, ST_H3Compact(cells),
+                   ST_H3Uncompact(ST_H3Compact(cells), 7)
+            FROM (SELECT ST_H3ToChildren({parent}, 7) AS cells)
+        """).first()
+        assert compacted == [parent]
+        assert len(restored) == len(original) == 49
+        assert set(restored) == set(original)
+        singleton, empty, nulls = self.spark.sql(f"""
+            SELECT ST_H3Compact(array({parent})),
+                   ST_H3Compact(CAST(array() AS ARRAY<BIGINT>)),
+                   ST_H3Compact(CAST(NULL AS ARRAY<BIGINT>))
+        """).first()
+        assert singleton == [parent]
+        assert empty == []
+        assert nulls is None
+
+    def test_st_h3_uncompact(self):
+        parent = 601041811137363967
+        children = self.spark.sql(f"SELECT ST_H3ToChildren({parent}, 6)").first()[0]
+        # Mix a resolution 6 child with a sibling's resolution 7 descendants.
+        mixed = [children[0]] + self.spark.sql(
+            f"SELECT ST_H3ToChildren({children[1]}, 7)"
+        ).first()[0]
+        result = self.spark.sql(
+            f"SELECT ST_H3Uncompact(array({','.join(map(str, mixed))}), 7)"
+        ).first()[0]
+        expected = (
+            self.spark.sql(f"SELECT ST_H3ToChildren({children[0]}, 7)").first()[0]
+            + mixed[1:]
+        )
+        assert len(result) == len(set(result)) == 14
+        assert set(result) == set(expected)
+        unchanged = self.spark.sql(
+            f"SELECT ST_H3Uncompact(array({parent}), 5)"
+        ).first()[0]
+        assert unchanged == [parent]
+        assert (
+            self.spark.sql(
+                "SELECT ST_H3Uncompact(CAST(array() AS ARRAY<BIGINT>), 6)"
+            ).first()[0]
+            == []
+        )
+        nulls = self.spark.sql(f"""
+            SELECT ST_H3Uncompact(CAST(NULL AS ARRAY<BIGINT>), 6),
+                   ST_H3Uncompact(array({parent}), CAST(NULL AS INT)),
+                   ST_H3Uncompact(CAST(NULL AS ARRAY<BIGINT>), CAST(NULL AS INT))
+        """).first()
+        assert all(value is None for value in nulls)
+
     def test_st_h3_togeom(self):
         df = self.spark.sql("""
         SELECT

@@ -38,24 +38,45 @@ else:
     raster_serde = None
     SedonaRaster = None
 
-from sedona.spark.utils import geometry_serde
+from sedona.spark.utils.geometry_sql_serde import (
+    deserialize_geometry,
+    serialize_geometry,
+)
 from sedona.spark.core.geom.geography import Geography
 from sedona.spark.core.geom.box2d import Box2D
 from sedona.spark.core.geom.box3d import Box3D
+from sedona.spark.utils.geography_sql_serde import (
+    deserialize_geography,
+    serialize_geography,
+)
 
 
 class GeometryType(UserDefinedType):
+    """Spark SQL type of Sedona geometry columns.
+
+    Geometry values are Shapely geometries in Python: ``DataFrame.collect()``
+    returns Shapely geometry objects, and Shapely geometries passed to
+    ``createDataFrame`` are stored as geometries. Use ``GeometryType()`` in a
+    schema to declare a geometry column.
+
+    Examples
+    --------
+    >>> from pyspark.sql.types import StructField, StructType
+    >>> from shapely.geometry import Point
+    >>> from sedona.spark.sql.types import GeometryType
+    >>> schema = StructType([StructField("geom", GeometryType())])
+    >>> df = sedona.createDataFrame([(Point(1, 2),)], schema)  # doctest: +SKIP
+    """
 
     @classmethod
     def sqlType(cls):
         return BinaryType()
 
     def serialize(self, obj):
-        return geometry_serde.serialize(obj)
+        return serialize_geometry(obj)
 
     def deserialize(self, datum):
-        geom, offset = geometry_serde.deserialize(datum)
-        return geom
+        return deserialize_geometry(datum)
 
     @classmethod
     def module(cls):
@@ -70,17 +91,23 @@ class GeometryType(UserDefinedType):
 
 
 class GeographyType(UserDefinedType):
+    """Spark SQL type of Sedona geography columns.
+
+    Geography values are :class:`sedona.spark.core.geom.geography.Geography`
+    objects in Python, which hold a Shapely geometry in their ``geometry``
+    attribute. ``DataFrame.collect()`` returns them, and ``Geography`` objects
+    passed to ``createDataFrame`` are stored as geographies.
+    """
 
     @classmethod
     def sqlType(cls):
         return BinaryType()
 
     def serialize(self, obj):
-        return geometry_serde.serialize(obj.geometry)
+        return serialize_geography(obj)
 
     def deserialize(self, datum):
-        geom, offset = geometry_serde.deserialize(datum)
-        return Geography(geom)
+        return deserialize_geography(datum)
 
     @classmethod
     def module(cls):
@@ -95,6 +122,12 @@ class GeographyType(UserDefinedType):
 
 
 class Box2DType(UserDefinedType):
+    """Spark SQL type of Sedona ``box2d`` columns, such as the result of ``ST_Box2D``.
+
+    Values are :class:`sedona.spark.core.geom.box2d.Box2D` objects in Python, with
+    ``xmin``, ``ymin``, ``xmax`` and ``ymax`` attributes. A column of this type is
+    stored as a struct of those four doubles.
+    """
 
     @classmethod
     def sqlType(cls):
@@ -126,6 +159,12 @@ class Box2DType(UserDefinedType):
 
 
 class Box3DType(UserDefinedType):
+    """Spark SQL type of Sedona ``box3d`` columns, such as the result of ``ST_Box3D``.
+
+    Values are :class:`sedona.spark.core.geom.box3d.Box3D` objects in Python, with
+    ``xmin``, ``ymin``, ``zmin``, ``xmax``, ``ymax`` and ``zmax`` attributes. A
+    column of this type is stored as a struct of those six doubles.
+    """
 
     @classmethod
     def sqlType(cls):
@@ -159,6 +198,14 @@ class Box3DType(UserDefinedType):
 
 
 class RasterType(UserDefinedType):
+    """Spark SQL type of Sedona raster columns.
+
+    Raster values are :class:`sedona.spark.raster.SedonaRaster` objects in
+    Python, which ``DataFrame.collect()`` and Python UDFs receive. Converting
+    raster values requires ``rasterio``; without it, they raise
+    ``NotImplementedError``. Only in-db rasters can be converted back to a
+    raster column, for example when a UDF returns one.
+    """
 
     @classmethod
     def sqlType(cls):

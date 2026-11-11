@@ -573,6 +573,14 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         Column labels to use for the resulting frame.
     index : Index or array-like, optional
         Index to use for the resulting frame.
+    dtype : dtype, optional
+        Data type to force, passed to the pandas-on-Spark ``DataFrame``
+        constructor. If None, the data types are inferred.
+    copy : bool, default False
+        Whether to copy the input data, passed to the pandas-on-Spark
+        ``DataFrame`` constructor.
+    **kwargs
+        Accepted for compatibility with GeoPandas and ignored.
 
     Examples
     --------
@@ -1192,7 +1200,8 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         Parameters
         ----------
-        col : new geometry column label
+        col : str
+            New name for the geometry column.
         inplace : boolean, default False
             Modify the GeoDataFrame in place (without creating a new object)
 
@@ -1350,6 +1359,25 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
     @property
     def crs(self):
+        """
+        The Coordinate Reference System (CRS) of the active geometry column.
+
+        Setting this property assigns the CRS to the active geometry column,
+        replacing any existing CRS, without transforming the coordinates. The
+        value can be anything accepted by
+        :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
+        such as an authority string (eg "EPSG:4326") or a WKT string.
+
+        Returns
+        -------
+        pyproj.CRS or None
+            The CRS of the active geometry column, or None if it has no CRS.
+
+        See Also
+        --------
+        GeoDataFrame.set_crs : assign CRS
+        GeoDataFrame.to_crs : re-project to another CRS
+        """
         return self.geometry.crs
 
     @crs.setter
@@ -2233,27 +2261,24 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         include_z: bool | None = None,
     ):
         """Encode a GeoDataFrame to GeoArrow format.
-        See https://geoarrow.org/ for details on the GeoArrow specification.
-        This function returns a generic Arrow data object implementing
-        the `Arrow PyCapsule Protocol`_ (i.e. having an ``__arrow_c_stream__``
-        method). This object can then be consumed by your Arrow implementation
-        of choice that supports this protocol.
-        .. _Arrow PyCapsule Protocol: https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html
 
-        Note: Requires geopandas versions >= 1.0.0 to use with Sedona.
+        See https://geoarrow.org/ for details on the GeoArrow specification.
+        This function returns a generic Arrow data object implementing the
+        `Arrow PyCapsule Protocol <https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html>`_
+        (i.e. having an ``__arrow_c_stream__`` method). This object can then be
+        consumed by your Arrow implementation of choice that supports this protocol.
+
+        Requires GeoPandas 1.0.0 or later.
 
         Parameters
         ----------
         index : bool, default None
             If ``True``, always include the dataframe's index(es) as columns
-            in the file output.
-            If ``False``, the index(es) will not be written to the file.
-            If ``None``, the index(ex) will be included as columns in the file
-            output except `RangeIndex` which is stored as metadata only.
-
-            Note: Unlike in geopandas, ``None`` will include the index in the column because Sedona always
-            converts `RangeIndex` into a general `Index`.
-
+            in the output.
+            If ``False``, the index(es) will not be included.
+            If ``None``, the index(es) are included as columns. Unlike GeoPandas,
+            this also applies to a ``RangeIndex``, because Sedona always converts
+            it into a general ``Index``.
         geometry_encoding : {'WKB', 'geoarrow' }, default 'WKB'
             The GeoArrow encoding to use for the data conversion.
         interleaved : bool, default True
@@ -2324,7 +2349,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         Any geometry columns present are serialized to WKB format in the file.
 
-        Note: Feather is a single-file format with no distributed writer, so this
+        Feather is a single-file format with no distributed writer, so this
         collects the entire GeoDataFrame to the driver and delegates to GeoPandas.
         It should only be used if the resulting GeoDataFrame is expected to be small.
 
@@ -2333,15 +2358,14 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         Parameters
         ----------
         path : str, path object
+            Local file path to write to.
         index : bool, default None
             If ``True``, always include the dataframe's index(es) as columns
             in the file output.
             If ``False``, the index(es) will not be written to the file.
-            If ``None``, the index(ex) will be included as columns in the file
-            output except `RangeIndex` which is stored as metadata only.
-
-            Note: Unlike in geopandas, ``None`` will include the index in the column because Sedona always
-            converts `RangeIndex` into a general `Index`.
+            If ``None``, the index(es) are written as columns. Unlike GeoPandas,
+            this also applies to a ``RangeIndex``, because Sedona always converts
+            it into a general ``Index``.
         compression : {'zstd', 'lz4', 'uncompressed'}, optional
             Name of the compression to use. Use ``"uncompressed"`` for no
             compression. By default uses LZ4 if available, otherwise uncompressed.
@@ -2394,6 +2418,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         Parameters
         ----------
+        *args
+            Positional arguments passed to :meth:`geopandas.GeoDataFrame.plot`,
+            in the order of the options below.
         column : str, np.array, pd.Series, pd.Index (default None)
             The name of the dataframe column, np.array, pd.Series, or pd.Index
             to be plotted. If np.array, pd.Series, or pd.Index are used then it
@@ -2492,6 +2519,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             Style options to be passed on to the actual plot function, such
             as ``edgecolor``, ``facecolor``, ``linewidth``, ``markersize``,
             ``alpha``.
+        **kwargs
+            Keyword arguments passed to :meth:`geopandas.GeoDataFrame.plot`,
+            including the options above.
 
         Returns
         -------
@@ -3067,6 +3097,31 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         Ties follow ``spark.sedona.join.knn.includeTieBreakers``; all GeoPandas
         equidistant rows are not guaranteed. See
         :func:`sedona.spark.geopandas.sjoin_nearest` for the full restrictions.
+
+        Parameters
+        ----------
+        right : GeoDataFrame
+            Distributed point frame searched for the nearest neighbor of each row.
+        how : str, default 'inner'
+            Only inner joins are supported.
+        max_distance : float, optional
+            Positive finite distance in CRS units. Filters nearest results; it
+            does not reduce the KNN search radius.
+        lsuffix : str, default 'left'
+            Suffix for overlapping column names from this frame. Only the
+            default is supported.
+        rsuffix : str, default 'right'
+            Suffix for overlapping column names from ``right``. Only the
+            default is supported.
+        distance_col : str, optional
+            New output column for the distance. Must not replace an input column.
+        exclusive : bool, default False
+            Only False is supported; equal points can match at distance zero.
+
+        Returns
+        -------
+        GeoDataFrame
+            Nearest matches, with no guaranteed row order.
         """
         from sedona.spark.geopandas.tools.sjoin_nearest import sjoin_nearest
 

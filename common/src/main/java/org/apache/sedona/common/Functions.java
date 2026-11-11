@@ -2078,6 +2078,68 @@ public class Functions {
   }
 
   /**
+   * Returns the children of an H3 cell at the requested resolution.
+   *
+   * @param cell the H3 cell
+   * @param resolution the resolution of the child cells, between the input cell's resolution and 15
+   * @return the child H3 cells, or the input cell when the resolutions are equal
+   */
+  public static Long[] h3ToChildren(long cell, int resolution) {
+    return H3Utils.h3.cellToChildren(cell, resolution).toArray(new Long[0]);
+  }
+
+  /**
+   * Returns the center child of an H3 cell at the requested resolution.
+   *
+   * @param cell the H3 cell
+   * @param resolution the resolution of the center child, between the input cell's resolution and
+   *     15
+   * @return the center child H3 cell, or the input cell when the resolutions are equal
+   */
+  public static long h3ToCenterChild(long cell, int resolution) {
+    return H3Utils.h3.cellToCenterChild(cell, resolution);
+  }
+
+  /**
+   * Compacts H3 cells by recursively replacing complete child sets with their parents.
+   *
+   * @param cells unique H3 cells at the same resolution
+   * @return the compacted H3 cells, which may have different resolutions
+   */
+  public static Long[] h3Compact(long[] cells) {
+    return H3Utils.h3
+        .compactCells(Arrays.stream(cells).boxed().collect(Collectors.toList()))
+        .toArray(new Long[0]);
+  }
+
+  /**
+   * Expands a collection of H3 cells to the requested resolution.
+   *
+   * @param cells the H3 cells, which may have different resolutions
+   * @param resolution the target resolution, at least that of every input cell and at most 15
+   * @return the H3 cells at the target resolution
+   */
+  public static Long[] h3Uncompact(long[] cells, int resolution) {
+    return H3Utils.h3
+        .uncompactCells(Arrays.stream(cells).boxed().collect(Collectors.toList()), resolution)
+        .toArray(new Long[0]);
+  }
+
+  /**
+   * Returns the H3 cell center in longitude/latitude order, with SRID 0 as in h3ToGeom.
+   *
+   * @param cell H3 cell index
+   * @return the center point in degrees
+   * @throws IllegalArgumentException if cell is not a valid H3 cell index
+   */
+  public static Geometry h3ToPoint(long cell) {
+    if (!H3Utils.h3.isValidCell(cell)) {
+      throw new IllegalArgumentException("Invalid H3 cell index: " + cell);
+    }
+    return new GeometryFactory().createPoint(H3Utils.cellToCoordinate(cell));
+  }
+
+  /**
    * gets the polygon for each h3 index provided
    *
    * @param cells: the set of cells
@@ -3110,27 +3172,33 @@ public class Functions {
               geom1.getSRID(), geom2.getSRID()));
     }
 
-    LineString line = (LineString) geom1;
-    Point point = (Point) geom2;
+    CoordinateSequence coordinates = ((LineString) geom1).getCoordinateSequence();
+    Coordinate target = geom2.getCoordinate();
 
-    // Find the closest point on the line to the input point
-    Coordinate closestPoint = DistanceOp.nearestPoints(line, point)[0];
+    // Find the segment closest to the point, keeping the first one along the line on a tie, so a
+    // stationary track (a zero-length segment) keeps the measure of its first vertex
+    LineSegment segment = new LineSegment();
+    int closestIndex = 0;
+    double closestFraction = 0;
+    double closestDistance = Double.POSITIVE_INFINITY;
+    for (int i = 0; i < coordinates.size() - 1; i++) {
+      segment.setCoordinates(coordinates.getCoordinate(i), coordinates.getCoordinate(i + 1));
+      double distance = segment.distance(target);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestIndex = i;
+        closestFraction =
+            segment.getLength() == 0
+                ? 0
+                : Math.max(0, Math.min(1, segment.projectionFactor(target)));
+      }
+    }
 
-    // Use LengthIndexedLine to extract the index at the closest point
-    LengthIndexedLine indexedLine = new LengthIndexedLine(line);
-    double index = indexedLine.indexOf(closestPoint);
-
-    // Extract the point at that index and compute its length fraction
-    double totalLength = indexedLine.getEndIndex();
-    double fractionAlongLine = index / totalLength;
-
-    // Get the start and end coordinates of the line
-    Geometry start = line.getStartPoint();
-    Geometry end = line.getEndPoint();
-
-    // Interpolate the M value
-    return fractionAlongLine * (end.getCoordinate().getM() - start.getCoordinate().getM())
-        + start.getCoordinate().getM();
+    // Interpolate the M value between the two vertices of that segment. Measures need not be
+    // proportional to length, so the line's first and last measures alone are not enough.
+    double startM = coordinates.getM(closestIndex);
+    double endM = coordinates.getM(closestIndex + 1);
+    return startM + closestFraction * (endM - startM);
   }
 
   /**

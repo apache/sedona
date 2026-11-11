@@ -206,6 +206,31 @@ def _generate_vrt_xml(
 
 
 class SedonaRaster(ABC):
+    """A raster value from a Sedona raster column.
+
+    ``DataFrame.collect()`` and Python UDFs receive raster column values as
+    ``SedonaRaster`` objects. Read the pixels with :meth:`as_numpy` or
+    :meth:`as_rasterio`, and the georeferencing with :attr:`affine_trans` and
+    :attr:`crs_wkt`. Call :meth:`close`, or use the raster as a context manager,
+    to release the resources it holds.
+
+    Sedona creates these objects when it reads a raster value; you do not
+    construct them yourself.
+
+    Parameters
+    ----------
+    width : int
+        Width of the raster in pixels.
+    height : int
+        Height of the raster in pixels.
+    bands_meta : list of SampleDimension
+        Metadata of each band.
+    affine_trans : AffineTransform
+        Transform from pixel coordinates to world coordinates.
+    crs_wkt : str
+        CRS of the raster as a WKT string.
+    """
+
     _width: int
     _height: int
     _bands_meta: List[SampleDimension]
@@ -297,7 +322,24 @@ class SedonaRaster(ABC):
     ) -> "SedonaRaster":
         """Replace pixel data, preserving spatial metadata.
 
-        Only supported on InDbSedonaRaster.
+        Only supported on in-db rasters (``InDbSedonaRaster``); other rasters
+        raise ``TypeError``.
+
+        Parameters
+        ----------
+        new_data : np.ndarray
+            New pixel data, of shape (height, width) for a single band or
+            (bands, height, width). Height and width must match this raster;
+            the band count and dtype may differ.
+        nodata : float or sequence of float, optional
+            NODATA value of the output bands: a scalar for every band, or one
+            value per band. Use ``float('nan')`` for a band without NODATA. When
+            omitted, the output bands inherit NODATA from the source bands.
+
+        Returns
+        -------
+        SedonaRaster
+            A new raster with the given pixel data and the same spatial metadata.
         """
         raise TypeError(f"with_bands() is not supported on {type(self).__name__}.")
 

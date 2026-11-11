@@ -27,6 +27,10 @@ import java.nio.{ByteBuffer, ByteOrder}
 import java.util.EnumSet
 
 class GeometryReaderTest extends AnyFunSuite {
+  test("extractWKB returns null for a NULL geometry") {
+    assert(GeometryReader.extractWKB(null) == null)
+  }
+
   test("extractWKB retains an empty geometry's declared layout and GeoPackage SRID") {
     val factory = new GeometryFactory()
     Seq((3, 0), (3, 1), (4, 1)).foreach { case (dimension, measures) =>

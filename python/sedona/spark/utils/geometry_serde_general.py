@@ -502,7 +502,7 @@ def deserialize_polygon(geom_buffer: GeometryBuffer) -> Polygon:
 
 
 def serialize_multi_polygon(geom: MultiPolygon) -> bytes:
-    coords_for = lambda x: [y for y in list(x)]
+    coords_for = lambda x: [*list(x)]
     polygons = [
         [coords_for(polygon.exterior.coords)]
         + [coords_for(ring.coords) for ring in polygon.interiors]

@@ -19,15 +19,24 @@ from sedona.spark.maps.SedonaMapUtils import SedonaMapUtils
 
 
 class SedonaUtils:
+    """Notebook display helpers for Sedona DataFrames."""
+
     @classmethod
     def display_image(cls, df):
         """Display raster images in a Jupyter notebook.
 
         Accepts DataFrames with either:
+
         - A raster column (GridCoverage2D) — auto-applies RS_AsImage
         - An HTML image column from RS_AsImage() — renders directly
 
         Falls back to the SedonaMapUtils HTML table path for other DataFrames.
+
+        Parameters
+        ----------
+        df : pyspark.sql.DataFrame
+            The DataFrame to display. All of its rows are collected to the
+            driver, so limit large DataFrames first.
         """
         from IPython.display import HTML, display
 

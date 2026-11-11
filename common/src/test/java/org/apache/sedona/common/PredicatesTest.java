@@ -44,6 +44,7 @@ import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.locationtech.jts.geom.impl.CoordinateArraySequenceFactory;
 import org.locationtech.jts.geom.impl.PackedCoordinateSequenceFactory;
 import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKBWriter;
 
 public class PredicatesTest extends TestBase {
 
@@ -594,6 +595,22 @@ public class PredicatesTest extends TestBase {
     assertFalse(
         Predicates.equalsIdentical(
             geomFromEWKT("MULTIPOINT((0 0))"), geomFromEWKT("GEOMETRYCOLLECTION(POINT(0 0))")));
+  }
+
+  @Test
+  public void testEqualsIdenticalComparesTaggedAllNaNZFromWKT() throws ParseException {
+    Geometry xy = Constructors.geomFromWKT("POINT (1 2)", 0);
+    Geometry z = Constructors.geomFromWKT("POINT Z (1 2 NaN)", 0);
+    assertFalse(Predicates.equalsIdentical(xy, z));
+    assertFalse(
+        Predicates.equalsIdentical(
+            GeometrySerializer.deserialize(GeometrySerializer.serialize(xy)), z));
+    Geometry zFromWkb = Constructors.geomFromWKB(new WKBWriter(3, true).write(z));
+    assertTrue(Predicates.equalsIdentical(zFromWkb, z));
+    assertFalse(
+        Predicates.equalsIdentical(
+            Constructors.geomFromWKT("POINT EMPTY", 0),
+            Constructors.geomFromWKT("POINT Z EMPTY", 0)));
   }
 
   @Test

@@ -18,11 +18,18 @@
  */
 package org.apache.sedona.sql.utils
 
-import org.apache.sedona.common.geometrySerde
+import java.nio.{ByteBuffer, ByteOrder}
+import java.util.Arrays
+
+import org.apache.sedona.common.geometrySerde.{GeometrySerializer => LayoutPolicy}
+import org.apache.spark.sql.sedona_sql.types.PublicWkbHeaderAdapter
+import org.datasyslab.jts.io.{WKBReader, WKBWriter}
 import org.locationtech.jts.geom.{Geometry, GeometryFactory}
+import org.locationtech.jts.io.{ByteOrderValues, ParseException}
 
 /**
- * SerDe using the WKB reader and writer objects
+ * SQL geometry transport: a signed little-endian int32 SRID followed by ISO WKB. RDD/index
+ * serializers use their separate compact format.
  */
 object GeometrySerializer {
 
@@ -32,17 +39,39 @@ object GeometrySerializer {
    * @param geometry
    *   JTS geometry
    * @return
-   *   Array of bites represents this geometry
+   *   SRID-prefixed ISO WKB preserving coordinate dimensions
    */
   def serialize(geometry: Geometry): Array[Byte] = {
-    geometrySerde.GeometrySerializer.serialize(geometry)
+    if (geometry == null) return null
+    validateLayout(geometry)
+    val writer = new WKBWriter(4, ByteOrderValues.LITTLE_ENDIAN, false)
+    writer.setPreserveCoordinateDimensions(true)
+    val wkb = PublicWkbHeaderAdapter.toIsoWkb(writer.write(geometry))
+    ByteBuffer
+      .allocate(Integer.BYTES + wkb.length)
+      .order(ByteOrder.LITTLE_ENDIAN)
+      .putInt(geometry.getSRID)
+      .put(wkb)
+      .array()
+  }
+
+  // Preserve the existing layout contract without using compact byte serialization.
+  // General collections have independent member layouts; polygons and multipart values do not.
+  private def validateLayout(geometry: Geometry): Unit = {
+    if (geometry != null) {
+      if (geometry.getGeometryType == "GeometryCollection") {
+        (0 until geometry.getNumGeometries).foreach(i => validateLayout(geometry.getGeometryN(i)))
+      } else {
+        LayoutPolicy.getCoordinateType(geometry)
+      }
+    }
   }
 
   /**
-   * Given ArrayData returns Geometry
+   * Given SRID-prefixed ISO WKB bytes returns Geometry
    *
    * @param value
-   *   ArrayData
+   *   SRID-prefixed ISO WKB bytes
    * @return
    *   JTS geometry
    */
@@ -50,6 +79,18 @@ object GeometrySerializer {
     if (value == null) {
       return new GeometryFactory().createGeometryCollection()
     }
-    geometrySerde.GeometrySerializer.deserialize(value)
+    if (value.length < Integer.BYTES) {
+      throw new IllegalArgumentException("Truncated spatial SRID header")
+    }
+    val srid = ByteBuffer.wrap(value).order(ByteOrder.LITTLE_ENDIAN).getInt
+    try {
+      // The byte-array reader bounds declared counts by payload size; its stream entry point does not.
+      WKBReader
+        .forDeclaredDimensions(srid)
+        .read(Arrays.copyOfRange(value, Integer.BYTES, value.length))
+    } catch {
+      case e: ParseException =>
+        throw new IllegalArgumentException("Invalid serialized Geometry", e)
+    }
   }
 }

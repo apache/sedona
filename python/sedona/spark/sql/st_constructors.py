@@ -110,6 +110,8 @@ def ST_GeomFromText(
 
     :param wkt: WKT string column to generate from.
     :type wkt: ColumnOrName
+    :param srid: SRID to set on the geometry, as an integer or integer column. Defaults to 0 (unknown).
+    :type srid: Optional[ColumnOrNameOrNumber], optional
     :return: Geometry column representing the WKT string.
     :rtype: Column
     """
@@ -127,6 +129,8 @@ def ST_GeometryFromText(
 
     :param wkt: WKT string column to generate from.
     :type wkt: ColumnOrName
+    :param srid: SRID to set on the geometry, as an integer or integer column. Defaults to 0 (unknown).
+    :type srid: Optional[ColumnOrNameOrNumber], optional
     :return: Geometry column representing the WKT string.
     :rtype: Column
     """
@@ -168,6 +172,8 @@ def ST_GeomFromWKT(
 
     :param wkt: WKT string column to generate from.
     :type wkt: ColumnOrName
+    :param srid: SRID to set on the geometry, as an integer or integer column. Defaults to 0 (unknown).
+    :type srid: Optional[ColumnOrNameOrNumber], optional
     :return: Geometry column representing the WKT string.
     :rtype: Column
     """
@@ -184,6 +190,8 @@ def ST_GeogFromWKT(
 
     :param wkt: WKT string column to generate from.
     :type wkt: ColumnOrName
+    :param srid: SRID to set on the geography, as an integer or integer column. Defaults to 0 (unknown).
+    :type srid: Optional[ColumnOrNameOrNumber], optional
     :return: Geography column representing the WKT string.
     :rtype: Column
     """
@@ -201,6 +209,8 @@ def ST_GeogFromText(
 
     :param wkt: WKT string column to generate from.
     :type wkt: ColumnOrName
+    :param srid: SRID to set on the geography, as an integer or integer column. Defaults to 0 (unknown).
+    :type srid: Optional[ColumnOrNameOrNumber], optional
     :return: Geography column representing the WKT string.
     :rtype: Column
     """
@@ -217,6 +227,8 @@ def ST_GeogFromWKB(
 
     :param wkb: WKB binary column to generate from.
     :type wkb: ColumnOrName
+    :param srid: SRID to set on the geography, as an integer or integer column.
+    :type srid: Optional[ColumnOrNameOrNumber], optional
     :return: Geography column representing the WKB binary.
     :rtype: Column
     """
@@ -393,14 +405,14 @@ def ST_PointM(
     m: ColumnOrNameOrNumber,
     srid: Optional[ColumnOrNameOrNumber] = None,
 ) -> Column:
-    """Generates a 3D point geometry column from numeric values.
+    """Generates a point geometry column with an M coordinate from numeric values.
 
     :param x: Either a number or numeric column representing the X coordinate of a point.
     :type x: ColumnOrNameOrNumber
     :param y: Either a number or numeric column representing the Y coordinate of a point.
     :type y: ColumnOrNameOrNumber
-    :param z: Either a number or numeric column representing the Z coordinate of a point, if None then a 2D point is generated, defaults to None
-    :type z: ColumnOrNameOrNumber
+    :param m: Either a number or numeric column representing the M coordinate of a point.
+    :type m: ColumnOrNameOrNumber
     :param srid: The srid of the point. Defaults to 0 (unknown).
     :type srid: Optional[ColumnOrNameOrNumber], optional
     :return: Point geometry column generated from the coordinate values.
@@ -685,6 +697,8 @@ def ST_MPolyFromText(
 
     :param wkt: multiPolygon WKT string column to generate from.
     :type wkt: ColumnOrName
+    :param srid: SRID to set on the geometry, as an integer or integer column. Defaults to 0 (unknown).
+    :type srid: Optional[ColumnOrNameOrNumber], optional
     :return: multiPolygon geometry generated from the wkt column.
     :rtype: Column
     """
@@ -701,6 +715,8 @@ def ST_MLineFromText(
 
     :param wkt: multiLineString WKT string column to generate from.
     :type wkt: ColumnOrName
+    :param srid: SRID to set on the geometry, as an integer or integer column. Defaults to 0 (unknown).
+    :type srid: Optional[ColumnOrNameOrNumber], optional
     :return: multiLineString geometry generated from the wkt column.
     :rtype: Column
     """
@@ -745,9 +761,9 @@ def ST_GeomCollFromText(
     return _call_constructor_function("ST_GeomCollFromText", args)
 
 
-# Automatically populate __all__
+# Export the functions defined in this module. Imported helpers, such as lit, stay out of star imports.
 __all__ = [
     name
     for name, obj in inspect.getmembers(sys.modules[__name__])
-    if inspect.isfunction(obj)
+    if inspect.isfunction(obj) and obj.__module__ == __name__
 ]

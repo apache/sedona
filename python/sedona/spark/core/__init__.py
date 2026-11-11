@@ -16,6 +16,16 @@
 # under the License.
 
 from sedona.spark.core.geom.envelope import Envelope
-from sedona.spark.core.spatialOperator import RangeQueryRaw
 
 __all__ = ["Envelope", "RangeQueryRaw"]
+
+
+def __getattr__(name):
+    # RangeQueryRaw is RDD API and drives the JVM. Imported eagerly here it would make everything
+    # under sedona.spark.core, the pure-Python geometries and enums included, need a JVM-backed
+    # PySpark; pyspark-client (Spark Connect only) has none. Resolved on first use instead.
+    if name == "RangeQueryRaw":
+        from sedona.spark.core.spatialOperator import RangeQueryRaw
+
+        return RangeQueryRaw
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

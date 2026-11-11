@@ -31,6 +31,20 @@ except ImportError:
 
 @attr.s
 class SedonaContext:
+    """
+    Entry point for using Sedona from PySpark.
+
+    ``SedonaContext.builder`` returns a ``SparkSession`` builder configured with
+    Sedona's Kryo serializer, and ``SedonaContext.create`` registers Sedona's
+    spatial types, functions and optimizations on a ``SparkSession``.
+
+    Examples
+    --------
+    >>> from sedona.spark import SedonaContext
+    >>> config = SedonaContext.builder().getOrCreate()  # doctest: +SKIP
+    >>> sedona = SedonaContext.create(config)  # doctest: +SKIP
+    """
+
     @classmethod
     def create(cls, spark: SparkSession) -> SparkSession:
         """

@@ -298,6 +298,10 @@ object st_functions {
   def ST_H3KRing(cell: Long, k: Integer, exactRing: Boolean): Column =
     wrapExpression[ST_H3KRing](cell, k, exactRing)
 
+  def ST_H3ToPoint(cell: Column): Column = wrapExpression[ST_H3ToPoint](cell)
+
+  def ST_H3ToPoint(cell: Long): Column = wrapExpression[ST_H3ToPoint](cell)
+
   def ST_H3ToGeom(cellIds: Column): Column = wrapExpression[ST_H3ToGeom](cellIds)
 
   def ST_H3ToGeom(cellIds: Array[Long]): Column = wrapExpression[ST_H3ToGeom](cellIds)
@@ -310,6 +314,37 @@ object st_functions {
 
   def ST_H3ToParent(cell: Long, resolution: Integer): Column =
     wrapExpression[ST_H3ToParent](cell, resolution)
+
+  def ST_H3ToChildren(cell: Column, resolution: Column): Column =
+    wrapExpression[ST_H3ToChildren](cell, resolution)
+
+  def ST_H3ToChildren(cell: Column, resolution: Integer): Column =
+    wrapExpression[ST_H3ToChildren](cell, resolution)
+
+  def ST_H3ToChildren(cell: Long, resolution: Integer): Column =
+    wrapExpression[ST_H3ToChildren](cell, resolution)
+
+  def ST_H3ToCenterChild(cell: Column, resolution: Column): Column =
+    wrapExpression[ST_H3ToCenterChild](cell, resolution)
+
+  def ST_H3ToCenterChild(cell: Column, resolution: Integer): Column =
+    wrapExpression[ST_H3ToCenterChild](cell, resolution)
+
+  def ST_H3ToCenterChild(cell: Long, resolution: Integer): Column =
+    wrapExpression[ST_H3ToCenterChild](cell, resolution)
+
+  def ST_H3Uncompact(cells: Column, resolution: Column): Column =
+    wrapExpression[ST_H3Uncompact](cells, resolution)
+
+  def ST_H3Uncompact(cells: Column, resolution: Integer): Column =
+    wrapExpression[ST_H3Uncompact](cells, resolution)
+
+  def ST_H3Uncompact(cells: Array[Long], resolution: Integer): Column =
+    wrapExpression[ST_H3Uncompact](cells, resolution)
+
+  def ST_H3Compact(cells: Column): Column = wrapExpression[ST_H3Compact](cells)
+
+  def ST_H3Compact(cells: Array[Long]): Column = wrapExpression[ST_H3Compact](cells)
 
   def ST_HilbertDistance(
       geometry: Column,

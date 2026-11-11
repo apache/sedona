@@ -2004,10 +2004,91 @@ class TestDataFrameAPI(TestBase):
         for future in futures:
             future.result()
 
+    def test_st_h3_to_point(self):
+        cell = 617700169958293503
+        df = self.spark.createDataFrame([(cell,), (None,)], "cell long")
+        rows = df.select(
+            stf.ST_H3ToPoint("cell"),
+            stf.ST_H3ToPoint(f.col("cell")),
+            stf.ST_H3ToPoint(cell),
+        ).collect()
+        for point in rows[0]:
+            assert point.geom_type == "Point"
+            assert abs(point.x + 122.41845932318309) < 1e-10
+            assert abs(point.y - 37.776702349435695) < 1e-10
+        assert rows[1][0] is None
+        assert rows[1][1] is None
+        assert rows[1][2] == rows[0][2]
+
     def test_st_h3_to_parent(self):
         df = self.spark.createDataFrame([(614552609325318143,)], ["cell"])
         parent = df.select(stf.ST_H3ToParent("cell", 5)).first()[0]
         assert parent == 601041811137363967
+
+    def test_st_h3_to_children(self):
+        parent = 601041811137363967
+        df = self.spark.createDataFrame([(parent, 6)], ["cell", "resolution"])
+        by_name, by_column, by_literal = df.select(
+            stf.ST_H3ToChildren("cell", 6),
+            stf.ST_H3ToChildren(f.col("cell"), f.col("resolution")),
+            stf.ST_H3ToChildren(parent, 6),
+        ).first()
+        assert len(by_name) == len(set(by_name)) == 7
+        assert by_name == by_column == by_literal
+        assert df.select(stf.ST_H3ToChildren("cell", 5)).first()[0] == [parent]
+
+    def test_st_h3_to_center_child(self):
+        parent = 601041811137363967
+        df = self.spark.createDataFrame([(parent, 6)], ["cell", "resolution"])
+        by_name, by_column, by_literal = df.select(
+            stf.ST_H3ToCenterChild("cell", 6),
+            stf.ST_H3ToCenterChild(f.col("cell"), f.col("resolution")),
+            stf.ST_H3ToCenterChild(parent, 6),
+        ).first()
+        assert by_name == by_column == by_literal == 605545409825210367
+        assert df.select(stf.ST_H3ToCenterChild("cell", 5)).first()[0] == parent
+        nullable = self.spark.createDataFrame(
+            [(None, 6), (parent, None), (None, None)], "cell long, resolution int"
+        )
+        assert all(
+            row[0] is None
+            for row in nullable.select(
+                stf.ST_H3ToCenterChild("cell", "resolution")
+            ).collect()
+        )
+
+    def test_st_h3_compact(self):
+        parent = 601041811137363967
+        children = self.spark.sql(f"SELECT ST_H3ToChildren({parent}, 6)").first()[0]
+        df = self.spark.createDataFrame([(children,)], ["cells"])
+        by_name, by_column, by_literal = df.select(
+            stf.ST_H3Compact("cells"),
+            stf.ST_H3Compact(f.col("cells")),
+            stf.ST_H3Compact(children),
+        ).first()
+        assert by_name == by_column == by_literal == [parent]
+        assert df.select(stf.ST_H3Compact([])).first()[0] == []
+        assert df.select(stf.ST_H3Compact([parent])).first()[0] == [parent]
+        nullable = self.spark.createDataFrame([(None,), ([],)], "cells array<long>")
+        assert [
+            row[0] for row in nullable.select(stf.ST_H3Compact("cells")).collect()
+        ] == [
+            None,
+            [],
+        ]
+
+    def test_st_h3_uncompact(self):
+        parent = 601041811137363967
+        df = self.spark.createDataFrame([([parent], 6)], ["cells", "resolution"])
+        by_name, by_column, by_literal = df.select(
+            stf.ST_H3Uncompact("cells", 6),
+            stf.ST_H3Uncompact(f.col("cells"), f.col("resolution")),
+            stf.ST_H3Uncompact([parent], 6),
+        ).first()
+        assert len(by_name) == len(set(by_name)) == 7
+        assert by_name == by_column == by_literal
+        assert df.select(stf.ST_H3Uncompact("cells", 5)).first()[0] == [parent]
+        assert df.select(stf.ST_H3Uncompact([], 6)).first()[0] == []
 
     def test_coverage_validation_catalog_calls(self):
         rows = self.spark.createDataFrame(

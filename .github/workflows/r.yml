@@ -125,40 +125,43 @@ jobs:
           _R_CHECK_FORCE_SUGGESTS_: false
       - name: Install apache.sedona from source
         run: Rscript -e 'install.packages("./R/", repos = NULL, type = "source")'
-      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: 'temurin'
           java-version: ${{ matrix.java }}
           cache: 'maven'
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.11'
       - name: Install PySpark
         run: |
-          pip3 install pyspark==${SPARK_VERSION}
+          pip3 install "pyspark==${SPARK_VERSION}"
       - name: Download JAI libraries
         run: |
           PYSPARK_PATH=$(python3 -c "import pyspark; print(pyspark.__path__[0])")
-          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_core/${JAI_CORE_VERSION}/jai_core-${JAI_CORE_VERSION}.jar
-          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_codec/${JAI_CODEC_VERSION}/jai_codec-${JAI_CODEC_VERSION}.jar
-          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_imageio/${JAI_IMAGEIO_VERSION}/jai_imageio-${JAI_IMAGEIO_VERSION}.jar
-          mv -v jai_core-${JAI_CORE_VERSION}.jar ${PYSPARK_PATH}/jars
-          mv -v jai_codec-${JAI_CODEC_VERSION}.jar ${PYSPARK_PATH}/jars
-          mv -v jai_imageio-${JAI_IMAGEIO_VERSION}.jar ${PYSPARK_PATH}/jars
-          echo "PYSPARK_PATH=${PYSPARK_PATH}" >> $GITHUB_ENV
+          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 "https://repo.osgeo.org/repository/release/javax/media/jai_core/${JAI_CORE_VERSION}/jai_core-${JAI_CORE_VERSION}.jar"
+          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 "https://repo.osgeo.org/repository/release/javax/media/jai_codec/${JAI_CODEC_VERSION}/jai_codec-${JAI_CODEC_VERSION}.jar"
+          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 "https://repo.osgeo.org/repository/release/javax/media/jai_imageio/${JAI_IMAGEIO_VERSION}/jai_imageio-${JAI_IMAGEIO_VERSION}.jar"
+          mv -v "jai_core-${JAI_CORE_VERSION}.jar" "${PYSPARK_PATH}/jars"
+          mv -v "jai_codec-${JAI_CODEC_VERSION}.jar" "${PYSPARK_PATH}/jars"
+          mv -v "jai_imageio-${JAI_IMAGEIO_VERSION}.jar" "${PYSPARK_PATH}/jars"
+          echo "PYSPARK_PATH=${PYSPARK_PATH}" >> "$GITHUB_ENV"
       - name: Build Sedona libraries
         run: |
-          SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
-          mvn -q clean install -DskipTests -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dgeotools
+          SPARK_COMPAT_VERSION="${SPARK_VERSION:0:3}"
+          mvn -q clean install -DskipTests -Dspark="${SPARK_COMPAT_VERSION}" -Dscala="${SCALA_VERSION:0:4}" -Dgeotools
       - name: Copy Sedona JARs to PySpark
         run: |
-          find spark-shaded/target -name sedona-*.jar -exec cp {} ${PYSPARK_PATH}/jars/ \;
+          find spark-shaded/target -name 'sedona-*.jar' -exec cp {} "${PYSPARK_PATH}/jars/" \;
       - name: Run tests
         run: |
           # Set SPARK_HOME to PySpark path
-          export SPARK_HOME=${PYSPARK_PATH}
+          export SPARK_HOME="${PYSPARK_PATH}"
 
-          if [[ "${SPARK_VERSION:0:3}" < "3.3" ]]; then
+          spark_major="${SPARK_VERSION%%.*}"
+          spark_minor_rest="${SPARK_VERSION#*.}"
+          spark_minor="${spark_minor_rest%%.*}"
+          if (( spark_major < 3 || (spark_major == 3 && spark_minor < 3) )); then
             case "$HADOOP_VERSION" in
               3)
                 export HADOOP_VERSION=3.2
@@ -175,7 +178,7 @@ jobs:
           NOT_CRAN='true' Rscript testthat.R
         shell: bash
         timeout-minutes: 30
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure()
         with:
           name: Worker logs

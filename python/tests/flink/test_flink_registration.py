@@ -34,7 +34,7 @@ def test_register(table_env):
         .collect()
     )
 
-    assert 1 == len([el for el in result])
+    assert 1 == len([*result])
 
 
 def test_register_udf(table_env):
@@ -61,7 +61,7 @@ def test_register_udf(table_env):
         .collect()
     )
 
-    items = [el for el in result]
+    items = [*result]
     area = items[0][0]
 
     assert 3.12 < area < 3.14

@@ -19,10 +19,9 @@
 package org.apache.spark.sql.sedona_sql.strategy.join
 
 import org.apache.sedona.common.Constructors
-import org.apache.sedona.common.S2Geography.GeographyWKBSerializer
 import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.sedona.core.utils.SedonaConf
-import org.apache.sedona.sql.utils.{GeometrySerializer, RasterSerializer}
+import org.apache.sedona.sql.utils.{GeographySerializer, GeometrySerializer, RasterSerializer}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeRow}
@@ -80,7 +79,7 @@ trait TraitJoinQueryBase {
           if (geogBytes == null) {
             None
           } else {
-            val geog = GeographyWKBSerializer.deserialize(geogBytes)
+            val geog = GeographySerializer.deserialize(geogBytes)
             val shape = JoinedGeometry.geographyToEnvelopeGeometry(geog)
             shape.setUserData(GeographyJoinShape(geog, x.copy))
             Some(shape)
@@ -223,7 +222,7 @@ trait TraitJoinQueryBase {
         if (geogBytes == null) {
           None
         } else {
-          val geog = GeographyWKBSerializer.deserialize(geogBytes)
+          val geog = GeographySerializer.deserialize(geogBytes)
           val distance = boundRadius.eval(x).asInstanceOf[Double]
           val baseEnvelope = JoinedGeometry.geographyToEnvelopeGeometry(geog)
           val expandedEnvelope =

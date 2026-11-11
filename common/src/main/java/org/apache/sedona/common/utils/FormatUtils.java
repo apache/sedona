@@ -27,9 +27,9 @@ import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.common.enums.GeometryType;
 import org.apache.sedona.common.jts2geojson.GeoJSONReader;
 import org.datasyslab.jts.io.WKBReader;
+import org.datasyslab.jts.io.WKTReader;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.operation.valid.IsValidOp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +56,7 @@ public class FormatUtils<T extends Geometry> implements Serializable {
   protected transient GeometryFactory factory = new GeometryFactory();
 
   protected transient GeoJSONReader geoJSONReader = new GeoJSONReader();
-  protected transient WKTReader wktReader = new WKTReader();
+  protected transient WKTReader wktReader = WKTReader.forDeclaredDimensions();
   /** Allow mapping of invalid geometries. */
   public boolean allowTopologicallyInvalidGeometries;
   // For some unknown reasons, the wkb reader cannot be used in transient variable like the wkt
@@ -137,7 +137,7 @@ public class FormatUtils<T extends Geometry> implements Serializable {
       throws IOException, ClassNotFoundException {
     inputStream.defaultReadObject();
     factory = new GeometryFactory();
-    wktReader = new WKTReader();
+    wktReader = WKTReader.forDeclaredDimensions();
     geoJSONReader = new GeoJSONReader();
   }
 

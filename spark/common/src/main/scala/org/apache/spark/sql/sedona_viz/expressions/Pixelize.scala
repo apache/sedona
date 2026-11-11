@@ -23,7 +23,7 @@ import com.esotericsoftware.kryo.io.Output
 import org.apache.commons.io.output.ByteArrayOutputStream
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.sedona.viz.core.Serde.PixelSerializer
-import org.apache.sedona.viz.utils.{ColorizeOption, RasterizationUtils}
+import org.apache.sedona.viz.utils.{ColorizeOption, Pixel, RasterizationUtils}
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
@@ -50,94 +50,7 @@ case class ST_Pixelize(inputExpressions: Seq[Expression])
     val boundary = GeometrySerializer
       .deserialize(inputExpressions(3).eval(input).asInstanceOf[Array[Byte]])
       .getEnvelopeInternal
-    val reverseCoordinate = false
-    val pixels = inputGeometry match {
-      case geometry: LineString => {
-        RasterizationUtils.FindPixelCoordinates(
-          resolutionX,
-          resolutionY,
-          boundary,
-          inputGeometry.asInstanceOf[LineString],
-          reverseCoordinate)
-      }
-      case geometry: Polygon => {
-        RasterizationUtils.FindPixelCoordinates(
-          resolutionX,
-          resolutionY,
-          boundary,
-          inputGeometry.asInstanceOf[Polygon],
-          reverseCoordinate)
-      }
-      case geometry: Point => {
-        RasterizationUtils.FindPixelCoordinates(
-          resolutionX,
-          resolutionY,
-          boundary,
-          inputGeometry.asInstanceOf[Point],
-          ColorizeOption.NORMAL,
-          reverseCoordinate)
-      }
-      case geometry: MultiLineString => {
-        var manyPixels =
-          RasterizationUtils.FindPixelCoordinates(
-            resolutionX,
-            resolutionY,
-            boundary,
-            geometry.getGeometryN(0).asInstanceOf[LineString],
-            reverseCoordinate)
-        for (i <- 1 to geometry.getNumGeometries - 1) {
-          manyPixels.addAll(
-            RasterizationUtils.FindPixelCoordinates(
-              resolutionX,
-              resolutionY,
-              boundary,
-              geometry.getGeometryN(i).asInstanceOf[LineString],
-              reverseCoordinate))
-        }
-        manyPixels
-      }
-      case geometry: MultiPolygon => {
-        var manyPixels =
-          RasterizationUtils.FindPixelCoordinates(
-            resolutionX,
-            resolutionY,
-            boundary,
-            geometry.getGeometryN(0).asInstanceOf[Polygon],
-            reverseCoordinate)
-        for (i <- 1 to geometry.getNumGeometries - 1) {
-          manyPixels.addAll(
-            RasterizationUtils.FindPixelCoordinates(
-              resolutionX,
-              resolutionY,
-              boundary,
-              geometry.getGeometryN(i).asInstanceOf[Polygon],
-              reverseCoordinate))
-        }
-        manyPixels
-      }
-      case geometry: MultiPoint => {
-        var manyPixels =
-          RasterizationUtils.FindPixelCoordinates(
-            resolutionX,
-            resolutionY,
-            boundary,
-            geometry.getGeometryN(0).asInstanceOf[Point],
-            ColorizeOption.NORMAL,
-            reverseCoordinate)
-        for (i <- 1 to geometry.getNumGeometries - 1) {
-          manyPixels.addAll(
-            RasterizationUtils.FindPixelCoordinates(
-              resolutionX,
-              resolutionY,
-              boundary,
-              geometry.getGeometryN(i).asInstanceOf[Point],
-              ColorizeOption.NORMAL,
-              reverseCoordinate))
-        }
-        manyPixels
-      }
-    }
-    assert(pixels.size() > 0)
+    val pixels = Pixelizer.pixelize(inputGeometry, resolutionX, resolutionY, boundary)
 
     return new GenericArrayData(
       pixels.asScala
@@ -159,5 +72,84 @@ case class ST_Pixelize(inputExpressions: Seq[Expression])
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
+  }
+}
+
+private[expressions] object Pixelizer {
+
+  private val reverseCoordinate = false
+
+  /**
+   * Converts a geometry to the pixels it covers on a resolutionX by resolutionY grid laid over
+   * the boundary. Collections, including the Multi* types, are converted member by member. An
+   * empty geometry covers no pixels.
+   *
+   * Lines and polygon rings are traced segment by segment with Bresenham's algorithm, which draws
+   * a segment's start pixel but not its end pixel, so a segment whose two ends fall in the same
+   * pixel draws nothing. When every vertex of a line or polygon falls in one pixel, nothing at
+   * all is drawn, so the geometry is given the single pixel that contains it instead.
+   */
+  def pixelize(
+      geometry: Geometry,
+      resolutionX: Int,
+      resolutionY: Int,
+      boundary: Envelope): java.util.List[(Pixel, java.lang.Double)] = {
+    if (geometry.isEmpty) {
+      return new java.util.ArrayList[(Pixel, java.lang.Double)]()
+    }
+    geometry match {
+      case point: Point =>
+        RasterizationUtils.FindPixelCoordinates(
+          resolutionX,
+          resolutionY,
+          boundary,
+          point,
+          ColorizeOption.NORMAL,
+          reverseCoordinate)
+      case line: LineString =>
+        orContainingPixel(
+          RasterizationUtils
+            .FindPixelCoordinates(resolutionX, resolutionY, boundary, line, reverseCoordinate),
+          line,
+          resolutionX,
+          resolutionY,
+          boundary)
+      case polygon: Polygon =>
+        orContainingPixel(
+          RasterizationUtils
+            .FindPixelCoordinates(resolutionX, resolutionY, boundary, polygon, reverseCoordinate),
+          polygon,
+          resolutionX,
+          resolutionY,
+          boundary)
+      case collection: GeometryCollection =>
+        val pixels = new java.util.ArrayList[(Pixel, java.lang.Double)]()
+        for (i <- 0 until collection.getNumGeometries) {
+          pixels.addAll(pixelize(collection.getGeometryN(i), resolutionX, resolutionY, boundary))
+        }
+        pixels
+    }
+  }
+
+  /**
+   * A non-empty line or polygon traces to no pixels only when all of its vertices fall in the
+   * same pixel. Return that pixel rather than nothing.
+   */
+  private def orContainingPixel(
+      traced: java.util.List[(Pixel, java.lang.Double)],
+      geometry: Geometry,
+      resolutionX: Int,
+      resolutionY: Int,
+      boundary: Envelope): java.util.List[(Pixel, java.lang.Double)] = {
+    if (!traced.isEmpty) {
+      return traced
+    }
+    RasterizationUtils.FindPixelCoordinates(
+      resolutionX,
+      resolutionY,
+      boundary,
+      geometry.getFactory.createPoint(geometry.getCoordinate),
+      ColorizeOption.NORMAL,
+      reverseCoordinate)
   }
 }

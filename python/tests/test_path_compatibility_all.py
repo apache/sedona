@@ -68,6 +68,8 @@ class TestPathCompatibilityAll(TestBase):
         assert add_binary_distance_band_column is not None
         assert add_weighted_distance_band_column is not None
         assert local_outlier_factor is not None
+        assert Moran is not None
+        assert MoranResult is not None
 
     def test_util_imports(self):
         # Test utility imports

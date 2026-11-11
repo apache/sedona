@@ -16,11 +16,14 @@
 # under the License.
 
 import struct
-from typing import List, Union
+from typing import TYPE_CHECKING, List, Union
 
 import attr
-from pyspark import SparkContext
 from shapely.wkb import loads
+
+if TYPE_CHECKING:
+    # An annotation only; pyspark-client (Spark Connect only) has no SparkContext.
+    from pyspark import SparkContext
 
 DOUBLE_SIZE = 8
 INT_SIZE = 4
@@ -97,7 +100,7 @@ class BinaryParser:
             raise UnicodeEncodeError
         return encoded_string
 
-    def read_kryo_string(self, length: int, sc: SparkContext) -> str:
+    def read_kryo_string(self, length: int, sc: "SparkContext") -> str:
         array_length = length - self.current_index
         byte_array = sc._gateway.new_array(sc._jvm.Byte, array_length)
 

@@ -1016,6 +1016,21 @@ class TestGeoSeries(TestGeopandasBase):
         ],
         ids=["wkt", "wkb"],
     )
+    def test_wkt_wkb_keyword_arguments(self, constructor, value):
+        assert constructor([value], name="geom").name == "geom"
+        with pytest.raises(
+            TypeError, match="Unsupported GeoSeries.from_wk[tb] arguments: dtype"
+        ):
+            constructor([value], dtype="geometry")
+
+    @pytest.mark.parametrize(
+        "constructor,value",
+        [
+            (GeoSeries.from_wkt, "POINT (1 1)"),
+            (GeoSeries.from_wkb, Point(1, 1).wkb),
+        ],
+        ids=["wkt", "wkb"],
+    )
     def test_wkt_wkb_from_renamed_pandas_on_spark_series(self, constructor, value):
         source = ps.Series([value], name="source")
         source.rename("renamed", inplace=True)
@@ -5358,7 +5373,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = source.scale(xfact=2, yfact=3, zfact=4, origin=origin)
 
         line = result.to_geopandas().iloc[0]
-        assert list(line.coords) == pytest.approx(expected_coordinates)
+        assert list(line.coords) == [pytest.approx(c) for c in expected_coordinates]
 
     def test_scale_2d_stays_2d_with_3d_parameters(self):
         geoms = [
@@ -5530,9 +5545,9 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         clamped = source.skew(180, 180, origin=(0, 0)).to_geopandas().iloc[0]
 
         expected = [(0.0, 0.0), (6.0, 5.1547005383792515)]
-        assert list(degrees.coords) == pytest.approx(expected)
-        assert list(radians.coords) == pytest.approx(expected)
-        assert list(numpy_bool_radians.coords) == pytest.approx(expected)
+        assert list(degrees.coords) == [pytest.approx(c) for c in expected]
+        assert list(radians.coords) == [pytest.approx(c) for c in expected]
+        assert list(numpy_bool_radians.coords) == [pytest.approx(c) for c in expected]
         assert list(clamped.coords) == [(0.0, 0.0), (2.0, 4.0)]
 
     @pytest.mark.parametrize(
@@ -5585,7 +5600,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         line = result.to_geopandas().iloc[0]
         assert line.has_z
-        assert list(line.coords) == pytest.approx([(2, 2, 3), (9, 9, 9)])
+        assert list(line.coords) == [pytest.approx(c) for c in [(2, 2, 3), (9, 9, 9)]]
         assert [coordinate[2] for coordinate in line.coords] == [3.0, 9.0]
 
     def test_skew_2d_stays_2d_with_3d_origin(self):
@@ -8039,11 +8054,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             ]
         )
 
-        # JTS cannot distinguish empty XY and XYZ sequences. M and ZM sequence
-        # metadata is explicit, so the GeometryUDT serializers retain it.
+        # WKT tagged Z, M or ZM keeps that layout, even for empty geometries.
         self.check_pd_series_equal(
             empty_2d.geom_equals_identical(empty_dimensional, align=False),
-            pd.Series([True, True, True, False, False], dtype=bool),
+            pd.Series([False, False, False, False, False], dtype=bool),
         )
 
         nan_first_z = GeoSeries.from_wkt(["LINESTRING Z (0 0 NaN, 1 1 2)"])
@@ -8057,21 +8071,32 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         all_nan_z = GeoSeries.from_wkt(["LINESTRING Z (0 0 NaN, 1 1 NaN)"])
 
-        # An all-NaN Z sequence remains indistinguishable from ordinary XY in JTS.
+        # A tagged Z keeps the XYZ layout even when every Z value is NaN.
         self.check_pd_series_equal(
             all_nan_z.geom_equals_identical(two_dimensional, align=False),
-            pd.Series([True], dtype=bool),
+            pd.Series([False], dtype=bool),
         )
 
         mixed_dimension = GeoSeries([MultiPoint([Point(0, 0), Point(1, 1, 2)])])
-        normalized_dimension = GeoSeries(
-            [shapely.from_wkt("MULTIPOINT Z ((0 0 NaN), (1 1 2))")]
-        )
+        # Build the explicit XYZ reference in the JVM: GEOS < 3.12 can drop
+        # a NaN Z dimension while parsing the same WKT in Shapely.
+        normalized_dimension = GeoSeries.from_wkt(["MULTIPOINT Z ((0 0 NaN), (1 1 2))"])
 
-        # Shapely's homogeneous multi-geometry encoding selects one layout
-        # before the value reaches the JVM, promoting the XY child to XYZ/NaN.
+        # Shapely WKB preserves each point's layout. The old compact SQL
+        # serializer promoted the XY child to XYZ/NaN; public WKB does not.
+        assert [
+            len(point.coords[0])
+            for point in mixed_dimension.to_geopandas().iloc[0].geoms
+        ] == [2, 3]
         self.check_pd_series_equal(
             mixed_dimension.geom_equals_identical(normalized_dimension, align=False),
+            pd.Series([False], dtype=bool),
+        )
+        self.check_pd_series_equal(
+            normalized_dimension.geom_equals_identical(
+                GeoSeries.from_wkt(["MULTIPOINT Z ((0 0 NaN), (1 1 2))"]),
+                align=False,
+            ),
             pd.Series([True], dtype=bool),
         )
 

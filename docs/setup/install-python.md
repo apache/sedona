@@ -35,6 +35,8 @@ pip install apache-sedona
 pip install "apache-sedona[spark]"
 ```
 
+* With Spark 4.0 and later, the client of a Spark Connect server can be [`pyspark-client`](https://pypi.org/project/pyspark-client/), the Spark Connect-only distribution of PySpark, instead of `pyspark`. `sedona.spark` imports there without a JVM; the RDD API (`SpatialRDD`, its readers, the spatial queries and `Adapter`) is not available. See [Start a Spark Connect server](cluster.md#start-a-spark-connect-server).
+
 * Installing from Sedona Python source
 
 Clone Sedona GitHub source code and run the following command

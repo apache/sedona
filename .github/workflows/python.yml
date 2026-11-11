@@ -82,15 +82,15 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: 'zulu'
           java-version: '${{ matrix.java }}'
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ matrix.python }}
       - name: Install uv
-        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
       - name: Cache Maven packages
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -101,8 +101,8 @@ jobs:
           SPARK_VERSION: ${{ matrix.spark }}
           SCALA_VERSION: ${{ matrix.scala }}
         run: |
-          SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
-          mvn -q clean install -DskipTests -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dgeotools
+          SPARK_COMPAT_VERSION="${SPARK_VERSION:0:3}"
+          mvn -q clean install -DskipTests -Dspark="${SPARK_COMPAT_VERSION}" -Dscala="${SCALA_VERSION:0:4}" -Dgeotools
       - name: Setup Python build environment
         env:
           SPARK_VERSION: ${{ matrix.spark }}
@@ -121,7 +121,7 @@ jobs:
             uv add "pyspark==${SPARK_VERSION}; python_version >= '3.10'"
           else
             # Install specific pyspark version matching matrix
-            uv add pyspark==${SPARK_VERSION}
+            uv add "pyspark==${SPARK_VERSION}"
             # pyspark 3.5 still uses NumPy APIs removed in NumPy 2 (np.float_, np.string_, ...)
             uv add --dev "numpy<2"
           fi
@@ -133,28 +133,30 @@ jobs:
         run: cd python; uv pip install -e .
       - name: Prepare Sedona Spark Dependencies
         run: |
-          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_core/${JAI_CORE_VERSION}/jai_core-${JAI_CORE_VERSION}.jar
-          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_codec/${JAI_CODEC_VERSION}/jai_codec-${JAI_CODEC_VERSION}.jar
-          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_imageio/${JAI_IMAGEIO_VERSION}/jai_imageio-${JAI_IMAGEIO_VERSION}.jar
+          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 "https://repo.osgeo.org/repository/release/javax/media/jai_core/${JAI_CORE_VERSION}/jai_core-${JAI_CORE_VERSION}.jar"
+          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 "https://repo.osgeo.org/repository/release/javax/media/jai_codec/${JAI_CODEC_VERSION}/jai_codec-${JAI_CODEC_VERSION}.jar"
+          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 "https://repo.osgeo.org/repository/release/javax/media/jai_imageio/${JAI_IMAGEIO_VERSION}/jai_imageio-${JAI_IMAGEIO_VERSION}.jar"
 
           PY_SITE=$(cd python; uv run python -c "import site; print(site.getsitepackages()[0])")
           echo "Python site-packages: $PY_SITE"
-          mv -v jai_core-${JAI_CORE_VERSION}.jar ${PY_SITE}/pyspark/jars
-          mv -v jai_codec-${JAI_CODEC_VERSION}.jar ${PY_SITE}/pyspark/jars
-          mv -v jai_imageio-${JAI_IMAGEIO_VERSION}.jar ${PY_SITE}/pyspark/jars
+          mv -v "jai_core-${JAI_CORE_VERSION}.jar" "${PY_SITE}/pyspark/jars"
+          mv -v "jai_codec-${JAI_CODEC_VERSION}.jar" "${PY_SITE}/pyspark/jars"
+          mv -v "jai_imageio-${JAI_IMAGEIO_VERSION}.jar" "${PY_SITE}/pyspark/jars"
       - name: Copy Sedona Spark JARs
         run: |
           PY_SITE=$(cd python; uv run python -c "import site; print(site.getsitepackages()[0])")
-          find spark-shaded/target -name sedona-*.jar -exec cp {} ${PY_SITE}/pyspark/jars/ \;
+          find spark-shaded/target -name 'sedona-*.jar' -exec cp {} "${PY_SITE}/pyspark/jars/" \;
       - name: Run tests
         run: |
           cd python
-          export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
+          SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
+          export SPARK_HOME
           uv run pytest -v tests
       - name: Run basic tests without rasterio
         run: |
           cd python
-          export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
+          SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
+          export SPARK_HOME
           uv remove rasterio --optional all
           uv remove rasterio --dev
           uv sync
@@ -163,6 +165,17 @@ jobs:
         run: |
           cd python
           export SPARK_REMOTE=local
-          export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
+          SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
+          export SPARK_HOME
           uv pip install "pyspark[connect]==${{ matrix.spark }}" --reinstall
-          uv run pytest -v tests/sql/test_dataframe_api.py tests/stats/test_dbscan.py
+          uv run pytest -v tests/sql/test_dataframe_api.py
+      - name: Run Spark Connect-only tests
+        # pyspark-client is the Spark Connect-only distribution (Spark 4.0+): no RDD API, no JVM.
+        # sedona.spark must import there; the tests under tests/connect_only skip everywhere else.
+        if: ${{ !startsWith(matrix.spark, '3.') }}
+        run: |
+          cd python
+          uv pip uninstall pyspark
+          uv pip install "pyspark-client==${{ matrix.spark }}"
+          uv run --no-sync python -c "from pyspark.util import is_remote_only; assert is_remote_only()"
+          uv run --no-sync pytest -v tests/connect_only

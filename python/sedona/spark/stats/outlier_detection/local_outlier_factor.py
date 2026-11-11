@@ -30,9 +30,9 @@ def local_outlier_factor(
     k: int = 20,
     geometry: Optional[str] = None,
     handle_ties: bool = False,
-    use_spheroid=False,
+    use_spheroid: bool = False,
     result_column_name: str = "lof",
-):
+) -> DataFrame:
     """Annotates a dataframe with a column containing the local outlier factor for each data record.
 
     The dataframe should contain at least one GeometryType column. Rows must be unique. If one geometry column is

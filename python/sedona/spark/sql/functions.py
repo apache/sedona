@@ -22,7 +22,10 @@ from enum import Enum
 import pandas as pd
 
 from sedona.spark.sql.types import GeometryType
-from sedona.spark.utils import geometry_serde
+from sedona.spark.utils.geometry_sql_serde import (
+    deserialize_geometry,
+    serialize_geometry,
+)
 from pyspark.sql.udf import UserDefinedFunction
 from pyspark.sql.types import DataType
 from shapely.geometry.base import BaseGeometry
@@ -93,15 +96,13 @@ def _apply_shapely_series_udf(
     def apply(series: pd.Series) -> pd.Series:
         applied = series.apply(
             lambda x: (
-                fn(geometry_serde.deserialize(x)[0])
+                fn(deserialize_geometry(x))
                 if deserialize_geom and x is not None
                 else fn(x)
             )
         )
 
-        return applied.apply(
-            lambda x: geometry_serde.serialize(x) if serialize_geom else x
-        )
+        return applied.apply(lambda x: serialize_geometry(x) if serialize_geom else x)
 
     udf = UserDefinedFunction(
         apply, return_type, "SedonaPandasArrowUDF", evalType=SEDONA_SCALAR_EVAL_TYPE
@@ -120,9 +121,7 @@ def _apply_geo_series_udf(
         if deserialize_geom:
             series_data = gpd.GeoSeries(
                 series.apply(
-                    lambda x: (
-                        geometry_serde.deserialize(x)[0] if x is not None else None
-                    )
+                    lambda x: (deserialize_geometry(x) if x is not None else None)
                 )
             )
 
@@ -131,7 +130,7 @@ def _apply_geo_series_udf(
             # GeoSeries.apply retains geometry dtype for empty or all-null
             # results, which Arrow cannot convert to the binary storage type.
             return pd.Series(
-                [geometry_serde.serialize(geom) for geom in result],
+                [serialize_geometry(geom) for geom in result],
                 index=result.index,
                 dtype=object,
             )
@@ -144,13 +143,13 @@ def _apply_geo_series_udf(
 
 def deserialize_geometry_if_geom(data):
     if isinstance(data, BaseGeometry):
-        return geometry_serde.deserialize(data)[0]
+        return deserialize_geometry(data)
 
     return data
 
 
 def serialize_to_geometry_if_geom(data, return_type: DataType):
     if isinstance(return_type, GeometryType):
-        return geometry_serde.serialize(data)
+        return serialize_geometry(data)
 
     return data

@@ -34,6 +34,8 @@ trait VizTestBase extends TestBaseScala {
   val pointInputLocation = resourceFolder + "arealm.csv"
 
   override def beforeAll(): Unit = {
+    // Registers Sedona's SQL functions, which these suites use alongside the viz functions.
+    super.beforeAll()
     SedonaVizRegistrator.registerAll(sparkSession)
     getPoint().createOrReplaceTempView("pointtable")
     getPolygon().createOrReplaceTempView("usdata")

@@ -1718,6 +1718,15 @@ private[apache] case class ST_H3KRing(inputExpressions: Seq[Expression])
   }
 }
 
+private[apache] case class ST_H3ToPoint(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.h3ToPoint _)
+    with FoldableExpression {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 private[apache] case class ST_H3ToGeom(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.h3ToGeom _)
     with FoldableExpression {
@@ -1729,6 +1738,38 @@ private[apache] case class ST_H3ToGeom(inputExpressions: Seq[Expression])
 
 private[apache] case class ST_H3ToParent(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.h3ToParent _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_H3ToChildren(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.h3ToChildren _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_H3ToCenterChild(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.h3ToCenterChild _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_H3Compact(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.h3Compact _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_H3Uncompact(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.h3Uncompact _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

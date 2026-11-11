@@ -31,6 +31,10 @@ from sedona.spark.maps.SedonaMapUtils import SedonaMapUtils
 
 
 class SedonaPyDeck:
+    """Plot Sedona DataFrames on pydeck maps in a Jupyter notebook.
+
+    Requires the ``pydeck`` package, installed with ``apache-sedona[pydeck-map]``.
+    """
 
     # User Facing APIs
     @classmethod
@@ -127,14 +131,16 @@ class SedonaPyDeck:
     ):
         """
         Create a pydeck map with a GeoJsonLayer added for plotting given geometries.
-        :param line_color:
+
         :param df: SedonaDataFrame with polygons
         :param fill_color: Optional color for the plotted polygons
+        :param line_color: Optional color for the outlines of the plotted geometries
         :param elevation_col: Optional column/numeric value to determine elevation for plotted polygons
         :param initial_view_state: optional initial view state of the pydeck map
         :param map_style: optional map_style of the pydeck map
         :param map_provider: optional map_provider of the pydeck map
         :param api_keys: Optional dictionary of API keys for Map providers
+        :param stroked: Whether to draw the outlines of the polygons
         :return: A pydeck map with a GeoJsonLayer map added
         """
         pdk = _try_import_pydeck()
@@ -187,12 +193,14 @@ class SedonaPyDeck:
     ):
         """
         Create a pydeck map with a scatterplot layer
-        :param radius_scale:
-        :param radius_max_pixels:
-        :param radius_min_pixels:
-        :param radius_col:
+
         :param df: SedonaDataFrame to plot
         :param fill_color: color of the points
+        :param radius_col: Column holding the radius of each point in meters, or a
+            number to use as the radius of every point
+        :param radius_min_pixels: Minimum radius of a point on screen, in pixels
+        :param radius_max_pixels: Maximum radius of a point on screen, in pixels
+        :param radius_scale: Multiplier applied to every radius
         :param initial_view_state: optional initial view state of a pydeck map
         :param map_style: optional map_style to be added to the pydeck map
         :param map_provider: optional map_provider to be added to the pydeck map
@@ -243,6 +251,7 @@ class SedonaPyDeck:
     ):
         """
         Create a pydeck map with a heatmap layer added
+
         :param df: SedonaDataFrame to be used to plot the heatmap
         :param color_range: Optional color_range for the heatmap
         :param weight: Optional column to determine weight of each point while plotting the heatmap
