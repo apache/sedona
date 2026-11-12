@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql
 
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.sedona.common.enums.FileDataSplitter
 import org.apache.sedona.core.enums.{GridType, IndexType}
 import org.apache.sedona.core.formatMapper.EarthdataHDFPointMapper
@@ -46,7 +47,7 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen {
       var spatialRDD = Adapter.toSpatialRdd(spatialDf, "arealandmark")
       spatialRDD.analyze()
       val resultDf = Adapter.toDf(spatialRDD, sparkSession)
-      assert(resultDf.schema(0).dataType == GeometryUDT)
+      assert(resultDf.schema(0).dataType == SpatialTypeSupport.geometryType)
     }
 
     it("Read CSV point at a different column id into a SpatialRDD") {
@@ -189,18 +190,18 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen {
 
       val joinResultPairRDD = JoinQuery.SpatialJoinQueryFlat(pointRDD, polygonRDD, true, true)
       val joinResultDf = Adapter.toDf(joinResultPairRDD, sparkSession)
-      assert(joinResultDf.schema(0).dataType == GeometryUDT)
-      assert(joinResultDf.schema(1).dataType == GeometryUDT)
+      assert(joinResultDf.schema(0).dataType == SpatialTypeSupport.geometryType)
+      assert(joinResultDf.schema(1).dataType == SpatialTypeSupport.geometryType)
       assert(joinResultDf.schema(0).name == "leftgeometry")
       assert(joinResultDf.schema(1).name == "rightgeometry")
       import scala.jdk.CollectionConverters._
       val joinResultDf2 =
         Adapter.toDf(joinResultPairRDD, polygonRDD.fieldNames.asScala.toSeq, List(), sparkSession)
-      assert(joinResultDf2.schema(0).dataType == GeometryUDT)
+      assert(joinResultDf2.schema(0).dataType == SpatialTypeSupport.geometryType)
       assert(joinResultDf2.schema(0).name == "leftgeometry")
       assert(joinResultDf2.schema(1).name == "abc")
       assert(joinResultDf2.schema(2).name == "def")
-      assert(joinResultDf2.schema(3).dataType == GeometryUDT)
+      assert(joinResultDf2.schema(3).dataType == SpatialTypeSupport.geometryType)
       assert(joinResultDf2.schema(3).name == "rightgeometry")
     }
 
@@ -236,8 +237,8 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen {
       var joinResultPairRDD = JoinQuery.DistanceJoinQueryFlat(pointRDD, circleRDD, true, true)
 
       var joinResultDf = Adapter.toDf(joinResultPairRDD, sparkSession)
-      assert(joinResultDf.schema(0).dataType == GeometryUDT)
-      assert(joinResultDf.schema(1).dataType == GeometryUDT)
+      assert(joinResultDf.schema(0).dataType == SpatialTypeSupport.geometryType)
+      assert(joinResultDf.schema(1).dataType == SpatialTypeSupport.geometryType)
       assert(joinResultDf.schema(0).name == "leftgeometry")
       assert(joinResultDf.schema(1).name == "rightgeometry")
     }
@@ -290,7 +291,7 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen {
       for (_ <- 1 to 5) {
         val rows = df.collect
         assert(rows.length == 1)
-        val geom = rows(0).get(0).asInstanceOf[Point]
+        val geom = rows(0).getJtsGeometry(0).asInstanceOf[Point]
         assert(geom.getX == 40.7128)
         assert(geom.getY == -74.006)
         assert(rows(0).get(1).asInstanceOf[String] == "attr1")
@@ -306,7 +307,7 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen {
           1.23 as exampledouble,
           234 as exampleint
 
-        union
+        union all
 
         select
           ST_PointFromText('40.7128,-74.0060', ',') as geom,
@@ -378,7 +379,7 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen {
           named_struct('structtext', 'spark', 'structint', 5, 'structbool', false) as examplestruct
         from polygontable
 
-        union
+        union all
 
         -- Test that nulls can be properly encoded
         select
@@ -513,9 +514,29 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen {
       // valid external type for schema of <current data type>"
       println(joinResultDf.show(1))
 
-      assert(
-        joinResultDf.schema == resultWithoutSchema.schema,
-        s"Schema of\n$schema\ndoes not match result from supplying field names\n${joinResultDf.schema}!")
+      assert(joinResultDf.schema == schema)
+      val inferredSchema = StructType(schema.fields.map { field =>
+        if (field.dataType == GeometryUDT) field.copy(dataType = SpatialTypeSupport.geometryType)
+        else field
+      })
+      assert(resultWithoutSchema.schema == inferredSchema)
+      val explicitRows = joinResultDf.collect()
+      val inferredRows = resultWithoutSchema.collect()
+      assert(explicitRows.length == inferredRows.length)
+      explicitRows.zip(inferredRows).foreach { case (explicitRow, inferredRow) =>
+        schema.fields.indices.foreach { index =>
+          if (schema(index).dataType == GeometryUDT) {
+            val expected = explicitRow.getJtsGeometry(index)
+            val actual = inferredRow.getJtsGeometry(index)
+            assert(actual.equalsExact(expected))
+            assert(actual.getSRID == expected.getSRID)
+          } else if (schema(index).name == "userdata") {
+            // Field names preserve the original token; an explicit schema converts it to SQL null.
+            assert(explicitRow.isNullAt(index))
+            assert(inferredRow.getString(index) == "null")
+          } else assert(explicitRow.get(index) == inferredRow.get(index))
+        }
+      }
     }
 
     it("can convert spatial pair RDD with user data to a valid Dataframe") {
@@ -545,7 +566,7 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen {
         for (row <- rows) {
           assert(row.get(1).asInstanceOf[String] == "attr1")
           assert(row.get(2).asInstanceOf[String] == "attr2")
-          val pt = row.get(3).asInstanceOf[Point]
+          val pt = row.getJtsGeometry(3).asInstanceOf[Point]
           assert(pt.getX == 40.7128)
           assert(pt.getY == -74.006)
           assert(row.get(4).asInstanceOf[String] == "attr1")

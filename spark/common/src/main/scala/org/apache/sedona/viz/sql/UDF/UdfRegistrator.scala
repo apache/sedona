@@ -20,9 +20,17 @@ package org.apache.sedona.viz.sql.UDF
 
 import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.expressions.ExpressionInfo
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.{SQLContext, SparkSession}
 
 object UdfRegistrator {
+
+  private def functionIdentifier(name: String, namespace: String): FunctionIdentifier =
+    if (SpatialTypeSupport.usesNativeTypes) {
+      FunctionIdentifier(name, Some(namespace), Some("system"))
+    } else {
+      FunctionIdentifier(name)
+    }
 
   def registerAll(sqlContext: SQLContext): Unit = {
     registerAll(sqlContext.sparkSession)
@@ -30,13 +38,13 @@ object UdfRegistrator {
 
   def registerAll(sparkSession: SparkSession): Unit = {
     Catalog.expressions.foreach(f => {
-      val functionIdentifier = FunctionIdentifier(f.getClass.getSimpleName.dropRight(1))
+      val identifier = functionIdentifier(f.getClass.getSimpleName.dropRight(1), "builtin")
       val expressionInfo = new ExpressionInfo(
         f.getClass.getCanonicalName,
-        functionIdentifier.database.orNull,
-        functionIdentifier.funcName)
+        identifier.database.orNull,
+        identifier.funcName)
       sparkSession.sessionState.functionRegistry
-        .registerFunction(functionIdentifier, expressionInfo, f)
+        .registerFunction(identifier, expressionInfo, SpatialTypeSupport.adaptFunction(f))
     })
     Catalog.aggregateExpressions.foreach(f =>
       sparkSession.udf.register(f.getClass.getSimpleName, f))
@@ -45,9 +53,9 @@ object UdfRegistrator {
   def dropAll(sparkSession: SparkSession): Unit = {
     Catalog.expressions.foreach(f =>
       sparkSession.sessionState.functionRegistry.dropFunction(
-        FunctionIdentifier(f.getClass.getSimpleName.dropRight(1))))
+        functionIdentifier(f.getClass.getSimpleName.dropRight(1), "builtin")))
     Catalog.aggregateExpressions.foreach(f =>
       sparkSession.sessionState.functionRegistry.dropFunction(
-        FunctionIdentifier(f.getClass.getSimpleName)))
+        functionIdentifier(f.getClass.getSimpleName, "session")))
   }
 }

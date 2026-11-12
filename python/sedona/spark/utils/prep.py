@@ -49,7 +49,10 @@ def assign_all() -> bool:
 
 
 def assign_udt_shapely_objects(geoms: List[type(BaseGeometry)]) -> bool:
-    from sedona.spark.sql.types import GeometryType
+    from sedona.spark.sql.types import GeometryType, USES_NATIVE_SPATIAL_TYPES
+
+    if USES_NATIVE_SPATIAL_TYPES:
+        return True
 
     for geom in geoms:
         geom.__UDT__ = GeometryType()
@@ -62,7 +65,10 @@ def assign_user_data_to_shapely_objects(geoms: List[type(BaseGeometry)]) -> bool
 
 
 def assign_udt_geography():
-    from sedona.spark.sql.types import GeographyType
+    from sedona.spark.sql.types import GeographyType, USES_NATIVE_SPATIAL_TYPES
+
+    if USES_NATIVE_SPATIAL_TYPES:
+        return
 
     Geography.__UDT__ = GeographyType()
 

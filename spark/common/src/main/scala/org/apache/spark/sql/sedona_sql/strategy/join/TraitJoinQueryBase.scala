@@ -19,15 +19,20 @@
 package org.apache.spark.sql.sedona_sql.strategy.join
 
 import org.apache.sedona.common.Constructors
+import org.apache.sedona.common.geography.{Constructors => GeographyConstructors}
+import org.apache.sedona.common.S2Geography.{Geography, WKBGeography, WKBWriter => GeographyWKBWriter}
 import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.sedona.core.utils.SedonaConf
-import org.apache.sedona.sql.utils.{GeographySerializer, GeometrySerializer, RasterSerializer}
+import org.apache.sedona.sql.utils.{GeometrySerializer, RasterSerializer}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeRow}
 import org.apache.spark.sql.execution.SparkPlan
 import org.apache.spark.sql.sedona_sql.UDT.{Box2DUDT, Box3DUDT, RasterUDT}
+import org.apache.spark.sql.sedona_sql.expressions.SerdeAware
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.locationtech.jts.geom.{Geometry, GeometryFactory}
+import org.locationtech.jts.io.ByteOrderValues
 
 trait TraitJoinQueryBase {
   self: SparkPlan =>
@@ -62,11 +67,11 @@ trait TraitJoinQueryBase {
   }
 
   /**
-   * Builds a SpatialRDD from a column of GeographyUDT bytes. Each row becomes a JTS geometry
-   * whose envelope is the Geography's lat/lng bounding rectangle (full-longitude when the
-   * rectangle wraps the antimeridian). The Geography object is carried alongside the original row
-   * in `userData` via [[GeographyJoinShape]] so the join executor can perform S2-based predicate
-   * refinement and emit the row.
+   * Builds a SpatialRDD from a geography column. Each row becomes a JTS geometry whose envelope
+   * is the Geography's lat/lng bounding rectangle (full-longitude when the rectangle wraps the
+   * antimeridian). The Geography object is carried alongside the original row in `userData` via
+   * [[GeographyJoinShape]] so the join executor can perform S2-based predicate refinement and
+   * emit the row.
    */
   def toGeographySpatialRDD(
       rdd: RDD[UnsafeRow],
@@ -75,11 +80,10 @@ trait TraitJoinQueryBase {
     spatialRdd.setRawSpatialRDD(
       rdd
         .flatMap { x =>
-          val geogBytes = shapeExpression.eval(x).asInstanceOf[Array[Byte]]
-          if (geogBytes == null) {
+          val geog = TraitJoinQueryBase.shapeToGeography(shapeExpression, x)
+          if (geog == null) {
             None
           } else {
-            val geog = GeographySerializer.deserialize(geogBytes)
             val shape = JoinedGeometry.geographyToEnvelopeGeometry(geog)
             shape.setUserData(GeographyJoinShape(geog, x.copy))
             Some(shape)
@@ -106,9 +110,8 @@ trait TraitJoinQueryBase {
       }
     } else {
       rdd.map { row =>
-        val geom =
-          GeometrySerializer.deserialize(shapeExpression.eval(row).asInstanceOf[Array[Byte]])
-        val shape = JoinedGeometryRaster.geometryToWGS84Envelope(geom)
+        val geometry = TraitJoinQueryBase.shapeToGeometryOrEmpty(shapeExpression, row)
+        val shape = JoinedGeometryRaster.geometryToWGS84Envelope(geometry)
         shape.setUserData(row.copy)
         shape
       }
@@ -157,17 +160,9 @@ trait TraitJoinQueryBase {
       boundRadius: Expression): SpatialRDD[Geometry] = {
     val spatialRdd = new SpatialRDD[Geometry]
     val expandedRdd = rdd.map { row =>
-      val serialized = shapeExpression.eval(row).asInstanceOf[Array[Byte]]
+      val envelope = TraitJoinQueryBase.shapeToWGS84Envelope(shapeExpression, row)
       val baseShape =
-        if (serialized == null) {
-          new GeometryFactory().createGeometryCollection()
-        } else if (shapeExpression.dataType.isInstanceOf[RasterUDT]) {
-          val raster = RasterSerializer.deserialize(serialized)
-          JoinedGeometryRaster.rasterToWGS84Envelope(raster)
-        } else {
-          val geom = GeometrySerializer.deserialize(serialized)
-          JoinedGeometryRaster.geometryToWGS84Envelope(geom)
-        }
+        if (envelope == null) new GeometryFactory().createGeometryCollection() else envelope
       val distance = boundRadius.eval(row).asInstanceOf[Double]
       val expanded = expandRasterFilterEnvelope(baseShape, distance)
       expanded.setUserData(row.copy)
@@ -218,11 +213,10 @@ trait TraitJoinQueryBase {
     val spatialRdd = new SpatialRDD[Geometry]
     spatialRdd.setRawSpatialRDD(rdd
       .flatMap { x =>
-        val geogBytes = shapeExpression.eval(x).asInstanceOf[Array[Byte]]
-        if (geogBytes == null) {
+        val geog = TraitJoinQueryBase.shapeToGeography(shapeExpression, x)
+        if (geog == null) {
           None
         } else {
-          val geog = GeographySerializer.deserialize(geogBytes)
           val distance = boundRadius.eval(x).asInstanceOf[Double]
           val baseEnvelope = JoinedGeometry.geographyToEnvelopeGeometry(geog)
           val expandedEnvelope =
@@ -254,8 +248,8 @@ object TraitJoinQueryBase {
    * the closed rectangular polygon implied by their `(xmin, ymin, xmax, ymax)` bounds; Box3D
    * columns are projected to their XY footprint (`xmin, ymin, xmax, ymax`) and the Z axis is
    * re-checked per candidate pair by the scalar Box3D predicate that `JoinQueryDetector` folds
-   * into the join's `extraCondition`. All other shape columns are deserialised from the Sedona
-   * geometry binary form.
+   * into the join's `extraCondition`. Geometry and geography inputs use their typed computational
+   * boundaries.
    *
    * Producing a JTS rectangle here lets the rest of the join machinery — partitioner, R-tree
    * `IndexBuilder`, refine evaluator — stay shape-agnostic. JTS already short-circuits
@@ -274,11 +268,27 @@ object TraitJoinQueryBase {
    * the row or substitute an empty geometry.
    */
   def shapeToGeometry(shapeExpression: Expression, row: InternalRow): Geometry = {
-    val evaluated = shapeExpression.eval(row)
+    // Only unwrap native geometry adapters. A native Geography is not a JTS Geometry.
+    val direct = SpatialTypeSupport.unwrapGeometryInput(shapeExpression)
+    if (SpatialTypeSupport.isGeometry(direct.dataType)) {
+      return direct match {
+        case aware: SerdeAware =>
+          val geometry = aware.evalWithoutSerialization(row).asInstanceOf[Geometry]
+          // Join payloads mutate userData. Own the result even if an expression reuses it.
+          if (geometry == null) null else geometry.copy()
+        case _ => SpatialTypeSupport.deserializeGeometry(direct.eval(row), direct.dataType)
+      }
+    }
+    if (SpatialTypeSupport.isGeography(direct.dataType)) {
+      val geography = shapeToGeography(direct, row)
+      return if (geography == null) null
+      else GeographyConstructors.geogToGeometry(geography).copy()
+    }
+    val evaluated = direct.eval(row)
     if (evaluated == null) {
       null
     } else
-      shapeExpression.dataType match {
+      direct.dataType match {
         case _: Box2DUDT =>
           val box = evaluated.asInstanceOf[InternalRow]
           val xmin = box.getDouble(0)
@@ -317,6 +327,41 @@ object TraitJoinQueryBase {
         case _ =>
           GeometrySerializer.deserialize(evaluated.asInstanceOf[Array[Byte]])
       }
+  }
+
+  /** Evaluate an S2 join input without an unnecessary SQL-byte round trip. */
+  def shapeToGeography(shapeExpression: Expression, row: InternalRow): Geography = {
+    require(
+      SpatialTypeSupport.isGeography(shapeExpression.dataType),
+      "Expected a geography join input")
+    val direct = SpatialTypeSupport.unwrapGeographyInput(shapeExpression)
+    direct match {
+      case aware: SerdeAware =>
+        aware.evalWithoutSerialization(row) match {
+          case null => null
+          case wkb: WKBGeography =>
+            // Join indexes outlive the input row; a computed binary input may reuse its buffer.
+            WKBGeography.fromWKB(wkb.getWKBBytes.clone(), wkb.getSRID)
+          case geography: Geography =>
+            // S2 function results may also be reused. Snapshot public WKB without a SQL wrapper.
+            WKBGeography.fromWKB(
+              new GeographyWKBWriter(2, ByteOrderValues.BIG_ENDIAN, false).write(geography),
+              geography.getSRID)
+        }
+      case _ => SpatialTypeSupport.deserializeGeography(direct.eval(row), direct.dataType)
+    }
+  }
+
+  /** The raster payload format is unchanged; geometry inputs use their typed boundary. */
+  def shapeToWGS84Envelope(shapeExpression: Expression, row: InternalRow): Geometry = {
+    if (shapeExpression.dataType.isInstanceOf[RasterUDT]) {
+      val bytes = shapeExpression.eval(row).asInstanceOf[Array[Byte]]
+      if (bytes == null) null
+      else JoinedGeometryRaster.rasterToWGS84Envelope(RasterSerializer.deserialize(bytes))
+    } else {
+      val geometry = shapeToGeometry(shapeExpression, row)
+      if (geometry == null) null else JoinedGeometryRaster.geometryToWGS84Envelope(geometry)
+    }
   }
 
   /**

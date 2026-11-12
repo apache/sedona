@@ -19,7 +19,8 @@
 package org.apache.sedona.sql.datasources.geopackage.model
 
 import org.apache.sedona.sql.datasources.geopackage.model.TableType.TableType
-import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, RasterUDT}
+import org.apache.spark.sql.sedona_sql.UDT.RasterUDT
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.types._
 
 case class GeoPackageField(name: String, dataType: String, isNullable: Boolean) {
@@ -41,14 +42,14 @@ case class GeoPackageField(name: String, dataType: String, isNullable: Boolean) 
       case GeoPackageType.INTEGER | GeoPackageType.INT | GeoPackageType.SMALLINT |
           GeoPackageType.TINY_INT | GeoPackageType.MEDIUMINT =>
         StructField(name, IntegerType)
-      case GeoPackageType.POINT => StructField(name, GeometryUDT())
-      case GeoPackageType.LINESTRING => StructField(name, GeometryUDT())
-      case GeoPackageType.POLYGON => StructField(name, GeometryUDT())
-      case GeoPackageType.GEOMETRY => StructField(name, GeometryUDT())
-      case GeoPackageType.MULTIPOINT => StructField(name, GeometryUDT())
-      case GeoPackageType.MULTILINESTRING => StructField(name, GeometryUDT())
-      case GeoPackageType.MULTIPOLYGON => StructField(name, GeometryUDT())
-      case GeoPackageType.GEOMETRYCOLLECTION => StructField(name, GeometryUDT())
+      case GeoPackageType.POINT => StructField(name, SpatialTypeSupport.geometryType)
+      case GeoPackageType.LINESTRING => StructField(name, SpatialTypeSupport.geometryType)
+      case GeoPackageType.POLYGON => StructField(name, SpatialTypeSupport.geometryType)
+      case GeoPackageType.GEOMETRY => StructField(name, SpatialTypeSupport.geometryType)
+      case GeoPackageType.MULTIPOINT => StructField(name, SpatialTypeSupport.geometryType)
+      case GeoPackageType.MULTILINESTRING => StructField(name, SpatialTypeSupport.geometryType)
+      case GeoPackageType.MULTIPOLYGON => StructField(name, SpatialTypeSupport.geometryType)
+      case GeoPackageType.GEOMETRYCOLLECTION => StructField(name, SpatialTypeSupport.geometryType)
       case GeoPackageType.REAL => StructField(name, DoubleType)
       case GeoPackageType.BOOLEAN => StructField(name, BooleanType)
       case GeoPackageType.DATE => StructField(name, DateType)

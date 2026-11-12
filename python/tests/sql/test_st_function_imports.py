@@ -50,8 +50,10 @@ class TestStFunctionImport(TestBase):
         from pyspark.sql.types import UserDefinedType
 
         from sedona.spark import GeometryType
+        from sedona.spark.sql.types import USES_NATIVE_SPATIAL_TYPES, geometry_type
 
-        assert isinstance(GeometryType(), UserDefinedType)
+        assert isinstance(geometry_type(), GeometryType)
+        assert isinstance(geometry_type(), UserDefinedType) != USES_NATIVE_SPATIAL_TYPES
 
 
 @pytest.mark.parametrize("module_name", DATAFRAME_API_MODULES)

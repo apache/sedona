@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql
 
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.sedona.common.geometryObjects.Box2D
 import org.apache.sedona.core.formatMapper.GeoJsonReader
 import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader
@@ -123,10 +124,17 @@ class constructorTestScala extends TestBaseScala with Matchers {
     }
 
     it("Passed ST_MakeEnvelope") {
+      val srid = if (SpatialTypeSupport.usesNativeTypes) 4326 else 1111
+      if (SpatialTypeSupport.usesNativeTypes) {
+        val error = intercept[Exception] {
+          sparkSession.sql("SELECT ST_MakeEnvelope(1.234, 2.234, 3.345, 3.345, 1111)").collect()
+        }
+        assert(error.toString.contains("ST_INVALID_SRID_VALUE"))
+      }
       var polygonDF = sparkSession.sql(
-        "select ST_MakeEnvelope(double(1.234),double(2.234),double(3.345),double(3.345), 1111) as geom")
+        s"select ST_MakeEnvelope(double(1.234),double(2.234),double(3.345),double(3.345), $srid) as geom")
       assert(polygonDF.count() == 1)
-      assert(1111 == polygonDF.selectExpr("ST_SRID(geom)").first().getInt(0))
+      assert(srid == polygonDF.selectExpr("ST_SRID(geom)").first().getInt(0))
 
       polygonDF = sparkSession.sql(
         "select ST_MakeEnvelope(double(1.234),double(2.234),double(3.345),double(3.345))")
@@ -234,7 +242,7 @@ class constructorTestScala extends TestBaseScala with Matchers {
         if (expectedPoints(i) == null) {
           assert(rows(i).isNullAt(0))
         } else {
-          assert(rows(i).getAs[Geometry](0).toString == expectedPoints(i))
+          assert(rows(i).getJtsGeometry(0).toString == expectedPoints(i))
         }
       }
 
@@ -254,13 +262,23 @@ class constructorTestScala extends TestBaseScala with Matchers {
       }
 
       val ewkb = "0020000001000007D03FF00000000000004000000000000000"
-      var geom = sparkSession.sql(s"SELECT ST_PointFromWKB('$ewkb')").first().getAs[Geometry](0)
+      var geom = sparkSession.sql(s"SELECT ST_PointFromWKB('$ewkb')").first().getJtsGeometry(0)
       assert(geom.toString == "POINT (1 2)")
       assert(geom.getSRID == 2000)
-      geom = sparkSession.sql(s"SELECT ST_PointFromWKB('$ewkb', 1000)").first().getAs[Geometry](0)
+      val overrideSrid = if (SpatialTypeSupport.usesNativeTypes) 4326 else 1000
+      if (SpatialTypeSupport.usesNativeTypes) {
+        val error = intercept[Exception] {
+          sparkSession.sql(s"SELECT ST_PointFromWKB('$ewkb', 1000)").collect()
+        }
+        assert(error.toString.contains("ST_INVALID_SRID_VALUE"))
+      }
+      geom = sparkSession
+        .sql(s"SELECT ST_PointFromWKB('$ewkb', $overrideSrid)")
+        .first()
+        .getJtsGeometry(0)
       assert(geom.toString == "POINT (1 2)")
-      assert(geom.getSRID == 1000)
-      geom = sparkSession.sql(s"SELECT ST_PointFromWKB('$ewkb', 0)").first().getAs[Geometry](0)
+      assert(geom.getSRID == overrideSrid)
+      geom = sparkSession.sql(s"SELECT ST_PointFromWKB('$ewkb', 0)").first().getJtsGeometry(0)
       assert(geom.toString == "POINT (1 2)")
       assert(geom.getSRID == 0)
 
@@ -415,7 +433,7 @@ class constructorTestScala extends TestBaseScala with Matchers {
       val wkt = sparkSession.sql(s"""
            |SELECT ST_GeomFromWkt($multipolygon)
            |""".stripMargin)
-      assert(wkt.first().getAs[Geometry](0).getGeometryType === "MultiPolygon")
+      assert(wkt.first().getJtsGeometry(0).getGeometryType === "MultiPolygon")
     }
 
     it("Passed ST_LineFromWKB") {
@@ -439,7 +457,7 @@ class constructorTestScala extends TestBaseScala with Matchers {
         if (expectedPoints(i) == null) {
           assert(rows(i).isNullAt(0))
         } else {
-          assert(rows(i).getAs[Geometry](0).toString == expectedPoints(i))
+          assert(rows(i).getJtsGeometry(0).toString == expectedPoints(i))
         }
       }
 
@@ -488,7 +506,7 @@ class constructorTestScala extends TestBaseScala with Matchers {
         if (expectedPoints(i) == null) {
           assert(rows(i).isNullAt(0))
         } else {
-          assert(rows(i).getAs[Geometry](0).toString == expectedPoints(i))
+          assert(rows(i).getJtsGeometry(0).toString == expectedPoints(i))
         }
       }
 
@@ -536,7 +554,7 @@ class constructorTestScala extends TestBaseScala with Matchers {
         sparkSession.sql("SELECT ST_GeomFromWKB(rawWKBTable.wkb) as countyshape from rawWKBTable")
       val expectedGeom =
         "LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)"
-      assert(geometries.first().getAs[Geometry](0).toString.equals(expectedGeom))
+      assert(geometries.first().getJtsGeometry(0).toString.equals(expectedGeom))
       // null input
       val nullGeom = sparkSession.sql("SELECT ST_GeomFromWKB(null)")
       assert(nullGeom.first().isNullAt(0))
@@ -567,7 +585,7 @@ class constructorTestScala extends TestBaseScala with Matchers {
         "SELECT ST_GeomFromEWKB(rawWKBTable.wkb) as countyshape from rawWKBTable")
       val expectedGeom =
         "LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)"
-      assert(geometries.first().getAs[Geometry](0).toString.equals(expectedGeom))
+      assert(geometries.first().getJtsGeometry(0).toString.equals(expectedGeom))
       // null input
       val nullGeom = sparkSession.sql("SELECT ST_GeomFromEWKB(null)")
       assert(nullGeom.first().isNullAt(0))
@@ -600,7 +618,7 @@ class constructorTestScala extends TestBaseScala with Matchers {
       val gml = sparkSession.sql(s"""
            |SELECT ST_GeomFromGML($linestring)
            |""".stripMargin)
-      assert(gml.first().getAs[Geometry](0).isInstanceOf[LineString])
+      assert(gml.first().getJtsGeometry(0).isInstanceOf[LineString])
     }
 
     it("Passed ST_GeomFromKML") {
@@ -612,7 +630,7 @@ class constructorTestScala extends TestBaseScala with Matchers {
       val kml = sparkSession.sql(s"""
            |SELECT ST_GeomFromKML($linestring)
            |""".stripMargin)
-      assert(kml.first().getAs[Geometry](0).isInstanceOf[LineString])
+      assert(kml.first().getJtsGeometry(0).isInstanceOf[LineString])
     }
 
     it("Passed GeoJsonReader to DataFrame") {
@@ -659,12 +677,12 @@ class constructorTestScala extends TestBaseScala with Matchers {
       val baseDf =
         sparkSession.sql("SELECT 'MULTIPOINT ((10 10), (20 20), (30 30))' as geom, 4326 as srid")
       var actual =
-        baseDf.selectExpr("ST_MPointFromText(geom)").first().get(0).asInstanceOf[Geometry].toText
+        baseDf.selectExpr("ST_MPointFromText(geom)").first().getJtsGeometry(0).toText
       val expected = "MULTIPOINT ((10 10), (20 20), (30 30))"
       assert(expected.equals(actual))
 
       val actualGeom =
-        baseDf.selectExpr("ST_MPointFromText(geom, srid)").first().get(0).asInstanceOf[Geometry]
+        baseDf.selectExpr("ST_MPointFromText(geom, srid)").first().getJtsGeometry(0)
       actual = actualGeom.toText
       assert(expected.equals(actual))
       val actualSrid = actualGeom.getSRID
@@ -677,15 +695,14 @@ class constructorTestScala extends TestBaseScala with Matchers {
       var actual = baseDf
         .selectExpr("ST_GeomCollFromText(geom)")
         .first()
-        .get(0)
-        .asInstanceOf[Geometry]
+        .getJtsGeometry(0)
         .toText
       val expected =
         "GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))"
       assert(expected.equals(actual))
 
       val actualGeom =
-        baseDf.selectExpr("ST_GeomCollFromText(geom, srid)").first().get(0).asInstanceOf[Geometry]
+        baseDf.selectExpr("ST_GeomCollFromText(geom, srid)").first().getJtsGeometry(0)
       actual = actualGeom.toText
       assert(expected.equals(actual))
       val actualSrid = actualGeom.getSRID

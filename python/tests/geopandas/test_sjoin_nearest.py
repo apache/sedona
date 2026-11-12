@@ -280,7 +280,10 @@ class TestSpatialJoinNearest(TestGeopandasBase):
         )
 
     @pytest.mark.parametrize("max_distance", [None, 0.5])
-    def test_secondary_geometry_retains_its_crs_on_empty_results(self, max_distance):
+    @pytest.mark.parametrize("explicit_udt", [False, True])
+    def test_secondary_geometry_retains_its_crs_on_empty_results(
+        self, max_distance, explicit_udt
+    ):
         left = self.convert(gpd.GeoDataFrame(geometry=[Point(0, 0)], crs=3857))
         # Raw Spark columns carry SRIDs without GeoPandas CRS metadata. An
         # empty output must retain the secondary column's source CRS too.
@@ -293,6 +296,23 @@ class TestSpatialJoinNearest(TestGeopandasBase):
             ),
             geometry="geometry",
         )
+        if explicit_udt:
+            from pyspark.sql import types as T
+            from sedona.spark.sql import types
+
+            primary = shapely.set_srid(Point(1, 0), 3857)
+            secondary = shapely.set_srid(Point(-73, 40), 4326)
+            source = self.spark.createDataFrame(
+                [(types.to_spark_geometry(primary), secondary)],
+                T.StructType(
+                    [
+                        T.StructField("geometry", types.geometry_type()),
+                        T.StructField("secondary", types.LegacyGeometryType()),
+                    ]
+                ),
+                verifySchema=False,
+            )
+            right = sgpd.GeoDataFrame(source, geometry="geometry")
         actual = self.nearest(left, right, max_distance=max_distance)
         assert actual.crs.to_epsg() == 3857
         assert actual["secondary"].crs.to_epsg() == 4326

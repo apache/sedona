@@ -21,7 +21,6 @@ package org.apache.spark.sql.sedona_sql.strategy.join
 import org.apache.sedona.common.geography.{Functions => GeographyFunctions}
 import org.apache.sedona.core.spatialOperator.{SpatialPredicate, SpatialPredicateEvaluators}
 import org.apache.sedona.core.spatialOperator.SpatialPredicateEvaluators.SpatialPredicateEvaluator
-import org.apache.sedona.sql.utils.{GeographySerializer, GeometrySerializer, RasterSerializer}
 
 import scala.collection.JavaConverters._
 import org.apache.spark.broadcast.Broadcast
@@ -303,11 +302,10 @@ case class BroadcastIndexJoinExec(
         // envelope to ensure the index returns all candidates within `d`.
         val streamSideExpands = broadcast.distance.isEmpty
         streamResultsRaw.map(row => {
-          val serialized = boundStreamShape.eval(row).asInstanceOf[Array[Byte]]
-          if (serialized == null) {
+          val geog = TraitJoinQueryBase.shapeToGeography(boundStreamShape, row)
+          if (geog == null) {
             (null, row)
           } else {
-            val geog = GeographySerializer.deserialize(serialized)
             val radius = boundDistance.eval(row).asInstanceOf[Double]
             val baseEnvelope = JoinedGeometry.geographyToEnvelopeGeometry(geog)
             val shape = if (streamSideExpands) {
@@ -323,17 +321,10 @@ case class BroadcastIndexJoinExec(
         val boundDistance =
           BindReferences.bindReference(distanceExpression, streamed.output)
         streamResultsRaw.map(row => {
-          val serialized = boundStreamShape.eval(row).asInstanceOf[Array[Byte]]
-          if (serialized == null) {
+          val baseShape = TraitJoinQueryBase.shapeToWGS84Envelope(boundStreamShape, row)
+          if (baseShape == null) {
             (null, row)
           } else {
-            val baseShape = if (boundStreamShape.dataType.isInstanceOf[RasterUDT]) {
-              val raster = RasterSerializer.deserialize(serialized)
-              JoinedGeometryRaster.rasterToWGS84Envelope(raster)
-            } else {
-              val geom = GeometrySerializer.deserialize(serialized)
-              JoinedGeometryRaster.geometryToWGS84Envelope(geom)
-            }
             val radius = boundDistance.eval(row).asInstanceOf[Double]
             // Treat `radius` as meters; mid-latitude rasters get a tight Haversine bound while
             // polar / antimeridian footprints fall back to a world envelope so the R-tree filter
@@ -360,11 +351,10 @@ case class BroadcastIndexJoinExec(
         })
       case _ if geographyShape =>
         streamResultsRaw.map(row => {
-          val serialized = boundStreamShape.eval(row).asInstanceOf[Array[Byte]]
-          if (serialized == null) {
+          val geog = TraitJoinQueryBase.shapeToGeography(boundStreamShape, row)
+          if (geog == null) {
             (null, row)
           } else {
-            val geog = GeographySerializer.deserialize(serialized)
             val shape = JoinedGeometry.geographyToEnvelopeGeometry(geog)
             shape.setUserData(GeographyJoinShape(geog, row))
             (shape, row)
@@ -373,16 +363,7 @@ case class BroadcastIndexJoinExec(
       case _ =>
         streamResultsRaw.map(row => {
           val shape = if (isRasterPredicate) {
-            // Raster path keeps the legacy bytes-only handling — Box2D doesn't apply here.
-            val serializedObject = boundStreamShape.eval(row).asInstanceOf[Array[Byte]]
-            if (serializedObject == null) null
-            else if (boundStreamShape.dataType.isInstanceOf[RasterUDT]) {
-              val raster = RasterSerializer.deserialize(serializedObject)
-              JoinedGeometryRaster.rasterToWGS84Envelope(raster)
-            } else {
-              val geom = GeometrySerializer.deserialize(serializedObject)
-              JoinedGeometryRaster.geometryToWGS84Envelope(geom)
-            }
+            TraitJoinQueryBase.shapeToWGS84Envelope(boundStreamShape, row)
           } else {
             TraitJoinQueryBase.shapeToGeometry(boundStreamShape, row)
           }

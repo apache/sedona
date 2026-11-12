@@ -23,6 +23,7 @@ from pyspark.sql import functions as F
 from sedona.spark.sql import st_aggregates as sta
 from sedona.spark.sql import st_constructors as stc
 from sedona.spark.sql import st_functions as stf
+from sedona.spark.sql.types import to_shapely
 
 SHAPELY_LT_20 = parse_version(shapely.__version__) < parse_version("2.0.0")
 
@@ -120,7 +121,7 @@ def collect(x, multi=False):
         )
 
     if count == 1 and (is_multi or not multi):
-        return metadata["__collect_single_geometry__"]
+        return to_shapely(metadata["__collect_single_geometry__"])
 
     if geometry_type_name not in {"Point", "LineString", "Polygon"}:
         raise KeyError(geometry_type_name)
@@ -143,4 +144,4 @@ def collect(x, multi=False):
             f"Can't create Multi{geometry_type_name} with empty component"
         )
 
-    return metadata["__collect_geometry__"]
+    return to_shapely(metadata["__collect_geometry__"])

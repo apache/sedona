@@ -22,6 +22,7 @@ from pyspark.sql.functions import expr
 from shapely.geometry import Point, Polygon, LineString, box
 
 from tests.test_base import TestBase
+from sedona.spark.sql.types import to_spark_geometry
 from sedona.spark.geopandas import GeoSeries
 from sedona.spark.geopandas.sindex import SpatialIndex
 from packaging.version import parse as parse_version
@@ -74,7 +75,7 @@ class TestSpatialIndex(TestBase):
     def test_construct_from_pyspark_dataframe(self):
         # Construct from PySparkDataFrame
         df = self.spark.createDataFrame(
-            [(Point(x, x),) for x in range(5)], ["geometry"]
+            [(to_spark_geometry(Point(x, x)),) for x in range(5)], ["geometry"]
         )
         sindex = SpatialIndex(df, column_name="geometry")
         result = sindex.query(Point(2, 2))

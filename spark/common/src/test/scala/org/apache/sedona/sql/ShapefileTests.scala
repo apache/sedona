@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql
 
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.commons.io.FileUtils
 import org.apache.log4j.{AppenderSkeleton, Level, Logger}
 import org.apache.log4j.spi.LoggingEvent
@@ -73,7 +74,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
         .format("shapefile")
         .load(resourceFolder + "shapefiles/gis_osm_pois_free_1")
       val schema = shapefileDf.schema
-      assert(schema.find(_.name == "geometry").get.dataType == GeometryUDT)
+      assert(schema.find(_.name == "geometry").get.dataType == SpatialTypeSupport.geometryType)
       assert(schema.find(_.name == "osm_id").get.dataType == StringType)
       assert(schema.find(_.name == "code").get.dataType == LongType)
       assert(schema.find(_.name == "fclass").get.dataType == StringType)
@@ -82,7 +83,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
       assert(shapefileDf.count == 12873)
 
       shapefileDf.collect().foreach { row =>
-        val geom = row.getAs[Geometry]("geometry")
+        val geom = row.getJtsGeometry("geometry")
         assert(geom.isInstanceOf[Point])
         assert(geom.getSRID == 4326)
         assert(row.getAs[String]("osm_id").nonEmpty)
@@ -93,13 +94,13 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
 
       // with projection, selecting geometry and attribute fields
       shapefileDf.select("geometry", "code").take(10).foreach { row =>
-        assert(row.getAs[Geometry]("geometry").isInstanceOf[Point])
+        assert(row.getJtsGeometry("geometry").isInstanceOf[Point])
         assert(row.getAs[Long]("code") > 0)
       }
 
       // with projection, selecting geometry fields
       shapefileDf.select("geometry").take(10).foreach { row =>
-        assert(row.getAs[Geometry]("geometry").isInstanceOf[Point])
+        assert(row.getJtsGeometry("geometry").isInstanceOf[Point])
       }
 
       // with projection, selecting attribute fields
@@ -113,7 +114,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
         .selectExpr("ST_Buffer(geometry, 0.001) AS geom", "code", "osm_id as id")
         .take(10)
         .foreach { row =>
-          assert(row.getAs[Geometry]("geom").isInstanceOf[Polygon])
+          assert(row.getJtsGeometry("geom").isInstanceOf[Polygon])
           assert(row.getAs[Long]("code") > 0)
           assert(row.getAs[String]("id").nonEmpty)
         }
@@ -124,7 +125,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
         .format("shapefile")
         .load(resourceFolder + "shapefiles/dbf")
       val schema = shapefileDf.schema
-      assert(schema.find(_.name == "geometry").get.dataType == GeometryUDT)
+      assert(schema.find(_.name == "geometry").get.dataType == SpatialTypeSupport.geometryType)
       assert(schema.find(_.name == "STATEFP").get.dataType == StringType)
       assert(schema.find(_.name == "COUNTYFP").get.dataType == StringType)
       assert(schema.find(_.name == "COUNTYNS").get.dataType == StringType)
@@ -138,7 +139,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
       assert(shapefileDf.count() == 3220)
 
       shapefileDf.collect().foreach { row =>
-        val geom = row.getAs[Geometry]("geometry")
+        val geom = row.getJtsGeometry("geometry")
         assert(geom.getSRID == 0)
         assert(geom.isInstanceOf[Polygon] || geom.isInstanceOf[MultiPolygon])
         assert(row.getAs[String]("STATEFP").nonEmpty)
@@ -158,7 +159,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
         .format("shapefile")
         .load(resourceFolder + "shapefiles/multipleshapefiles")
       val schema = shapefileDf.schema
-      assert(schema.find(_.name == "geometry").get.dataType == GeometryUDT)
+      assert(schema.find(_.name == "geometry").get.dataType == SpatialTypeSupport.geometryType)
       assert(schema.find(_.name == "STATEFP").get.dataType == StringType)
       assert(schema.find(_.name == "COUNTYFP").get.dataType == StringType)
       assert(schema.find(_.name == "COUNTYNS").get.dataType == StringType)
@@ -177,7 +178,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
         .format("shapefile")
         .load(resourceFolder + "shapefiles/missing")
       val schema = shapefileDf.schema
-      assert(schema.find(_.name == "geometry").get.dataType == GeometryUDT)
+      assert(schema.find(_.name == "geometry").get.dataType == SpatialTypeSupport.geometryType)
       assert(schema.find(_.name == "id").get.dataType == LongType)
       assert(schema.find(_.name == "a").get.dataType == StringType)
       assert(schema.find(_.name == "b").get.dataType == StringType)
@@ -218,11 +219,11 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
         .format("shapefile")
         .load(resourceFolder + "shapefiles/unsupported")
       val schema = shapefileDf.schema
-      assert(schema.find(_.name == "geometry").get.dataType == GeometryUDT)
+      assert(schema.find(_.name == "geometry").get.dataType == SpatialTypeSupport.geometryType)
       val rows = shapefileDf.collect()
       assert(rows.length == 10)
       rows.foreach { row =>
-        assert(row.getAs[Geometry]("geometry") == null)
+        assert(row.getJtsGeometry("geometry") == null)
         assert(!row.isNullAt(row.fieldIndex("id")))
       }
     }
@@ -232,12 +233,12 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
         .format("shapefile")
         .load(resourceFolder + "shapefiles/bad_shx")
       val schema = shapefileDf.schema
-      assert(schema.find(_.name == "geometry").get.dataType == GeometryUDT)
+      assert(schema.find(_.name == "geometry").get.dataType == SpatialTypeSupport.geometryType)
       assert(schema.find(_.name == "field_1").get.dataType == LongType)
       var rows = shapefileDf.collect()
       assert(rows.length == 2)
       rows.foreach { row =>
-        val geom = row.getAs[Geometry]("geometry")
+        val geom = row.getJtsGeometry("geometry")
         if (geom == null) {
           assert(row.getAs[Long]("field_1") == 3)
         } else {
@@ -260,7 +261,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
       rows = shapefileDf.collect()
       assert(rows.length == 2)
       rows.foreach { row =>
-        val geom = row.getAs[Geometry]("geometry")
+        val geom = row.getJtsGeometry("geometry")
         if (geom == null) {
           assert(row.getAs[Long]("field_1") == 3)
         } else {
@@ -293,7 +294,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
         .format("shapefile")
         .load(resourceFolder + "shapefiles/contains_null_geom")
       val schema = shapefileDf.schema
-      assert(schema.find(_.name == "geometry").get.dataType == GeometryUDT)
+      assert(schema.find(_.name == "geometry").get.dataType == SpatialTypeSupport.geometryType)
       assert(schema.find(_.name == "fInt").get.dataType == LongType)
       assert(schema.find(_.name == "fFloat").get.dataType.isInstanceOf[DecimalType])
       assert(schema.find(_.name == "fString").get.dataType == StringType)
@@ -304,7 +305,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
         val fInt = row.getAs[Long]("fInt")
         val fFloat = row.getAs[java.math.BigDecimal]("fFloat").doubleValue()
         val fString = row.getAs[String]("fString")
-        val geom = row.getAs[Geometry]("geometry")
+        val geom = row.getJtsGeometry("geometry")
         if (fInt == 2 || fInt == 5) {
           assert(geom == null)
         } else {
@@ -322,7 +323,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
         .format("shapefile")
         .load(resourceFolder + "shapefiles/datatypes")
       val schema = shapefileDf.schema
-      assert(schema.find(_.name == "geometry").get.dataType == GeometryUDT)
+      assert(schema.find(_.name == "geometry").get.dataType == SpatialTypeSupport.geometryType)
       assert(schema.find(_.name == "id").get.dataType == LongType)
       assert(schema.find(_.name == "aInt").get.dataType == LongType)
       assert(schema.find(_.name == "aUnicode").get.dataType == StringType)
@@ -334,7 +335,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
       val rows = shapefileDf.collect()
       assert(rows.length == 9)
       rows.foreach { row =>
-        val geom = row.getAs[Geometry]("geometry")
+        val geom = row.getJtsGeometry("geometry")
         assert(geom.isInstanceOf[Point])
         assert(geom.getSRID == 4269)
         val idIndex = row.fieldIndex("id")
@@ -368,7 +369,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
         .format("shapefile")
         .load(resourceFolder + "shapefiles/datatypes/datatypes1.shp")
       val schema = shapefileDf.schema
-      assert(schema.find(_.name == "geometry").get.dataType == GeometryUDT)
+      assert(schema.find(_.name == "geometry").get.dataType == SpatialTypeSupport.geometryType)
       assert(schema.find(_.name == "id").get.dataType == LongType)
       assert(schema.find(_.name == "aInt").get.dataType == LongType)
       assert(schema.find(_.name == "aUnicode").get.dataType == StringType)
@@ -379,7 +380,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
       val rows = shapefileDf.collect()
       assert(rows.length == 5)
       rows.foreach { row =>
-        assert(row.getAs[Geometry]("geometry").isInstanceOf[Point])
+        assert(row.getJtsGeometry("geometry").isInstanceOf[Point])
         val idIndex = row.fieldIndex("id")
         if (row.isNullAt(idIndex)) {
           assert(row.isNullAt(row.fieldIndex("aInt")))
@@ -402,7 +403,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
         .format("shapefile")
         .load(resourceFolder + "shapefiles/datatypes/datatypes2.*")
       val schema = shapefileDf.schema
-      assert(schema.find(_.name == "geometry").get.dataType == GeometryUDT)
+      assert(schema.find(_.name == "geometry").get.dataType == SpatialTypeSupport.geometryType)
       assert(schema.find(_.name == "id").get.dataType == LongType)
       assert(schema.find(_.name == "aInt").get.dataType == LongType)
       assert(schema.find(_.name == "aUnicode").get.dataType == StringType)
@@ -412,7 +413,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
       val rows = shapefileDf.collect()
       assert(rows.length == 4)
       rows.foreach { row =>
-        assert(row.getAs[Geometry]("geometry").isInstanceOf[Point])
+        assert(row.getJtsGeometry("geometry").isInstanceOf[Point])
         val id = row.getAs[Long]("id")
         assert(row.getAs[Long]("aInt") == id)
         assert(row.getAs[String]("aUnicode") == s"测试$id")
@@ -436,7 +437,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
       val rows = shapefileDf.collect()
       assert(rows.length == 12873)
       rows.foreach { row =>
-        val geom = row.getAs[Geometry]("geometry")
+        val geom = row.getJtsGeometry("geometry")
         assert(geom.isInstanceOf[Point])
         assert(geom.getSRID == 0)
         assert(row.getAs[String]("osm_id").nonEmpty)
@@ -455,13 +456,13 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
         .format("shapefile")
         .load(temporaryLocation)
       val schema = shapefileDf.schema
-      assert(schema.find(_.name == "geometry").get.dataType == GeometryUDT)
+      assert(schema.find(_.name == "geometry").get.dataType == SpatialTypeSupport.geometryType)
       assert(schema.length == 1)
 
       val rows = shapefileDf.collect()
       assert(rows.length == 12873)
       rows.foreach { row =>
-        val geom = row.getAs[Geometry]("geometry")
+        val geom = row.getJtsGeometry("geometry")
         assert(geom.isInstanceOf[Point])
       }
     }
@@ -511,7 +512,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
       val rows = shapefileDf.collect()
       assert(rows.length == 4)
       rows.foreach { row =>
-        assert(row.getAs[Geometry]("geometry").isInstanceOf[Point])
+        assert(row.getJtsGeometry("geometry").isInstanceOf[Point])
         val id = row.getAs[Long]("id")
         assert(row.getAs[Long]("aInt") == id)
         assert(row.getAs[String]("aUnicode") == s"测试$id")
@@ -550,7 +551,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
       val rows = shapefileDf.collect()
       assert(rows.length == 9)
       rows.foreach { row =>
-        assert(row.getAs[Geometry]("geometry").isInstanceOf[Point])
+        assert(row.getJtsGeometry("geometry").isInstanceOf[Point])
         val id = row.getAs[Long]("id")
         assert(row.getAs[Long]("aInt") == id)
         if (id < 10) {
@@ -567,7 +568,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
       val filteredRows = shapefileDf.where("part = 2").collect()
       assert(filteredRows.length == 4)
       filteredRows.foreach { row =>
-        assert(row.getAs[Geometry]("geometry").isInstanceOf[Point])
+        assert(row.getJtsGeometry("geometry").isInstanceOf[Point])
         assert(row.getAs[Int]("part") == 2)
         val id = row.getAs[Long]("id")
         assert(id > 10)
@@ -607,7 +608,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
       val rows = shapefileDf.collect()
       assert(rows.length == 9)
       rows.foreach { row =>
-        assert(row.getAs[Geometry]("geometry").isInstanceOf[Point])
+        assert(row.getJtsGeometry("geometry").isInstanceOf[Point])
         val id = row.getAs[Long]("id")
         assert(row.getAs[Long]("aInt") == id)
         if (id > 0) {
@@ -622,7 +623,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
         .option("geometry.name", "geom")
         .load(resourceFolder + "shapefiles/gis_osm_pois_free_1")
       val schema = shapefileDf.schema
-      assert(schema.find(_.name == "geom").get.dataType == GeometryUDT)
+      assert(schema.find(_.name == "geom").get.dataType == SpatialTypeSupport.geometryType)
       assert(schema.find(_.name == "osm_id").get.dataType == StringType)
       assert(schema.find(_.name == "code").get.dataType == LongType)
       assert(schema.find(_.name == "fclass").get.dataType == StringType)
@@ -631,7 +632,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
       val rows = shapefileDf.collect()
       assert(rows.length == 12873)
       rows.foreach { row =>
-        val geom = row.getAs[Geometry]("geom")
+        val geom = row.getJtsGeometry("geom")
         assert(geom.isInstanceOf[Point])
         assert(row.getAs[String]("osm_id").nonEmpty)
         assert(row.getAs[Long]("code") > 0)
@@ -657,14 +658,14 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
         .load(resourceFolder + "shapefiles/datatypes")
         .select("id", "fid", "geometry", "aUnicode")
       val schema = shapefileDf.schema
-      assert(schema.find(_.name == "geometry").get.dataType == GeometryUDT)
+      assert(schema.find(_.name == "geometry").get.dataType == SpatialTypeSupport.geometryType)
       assert(schema.find(_.name == "id").get.dataType == LongType)
       assert(schema.find(_.name == "fid").get.dataType == LongType)
       assert(schema.find(_.name == "aUnicode").get.dataType == StringType)
       val rows = shapefileDf.collect()
       assert(rows.length == 9)
       rows.foreach { row =>
-        val geom = row.getAs[Geometry]("geometry")
+        val geom = row.getJtsGeometry("geometry")
         assert(geom.isInstanceOf[Point])
         val id = row.getAs[Long]("id")
         if (id > 0) {
@@ -684,14 +685,14 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
         .load(resourceFolder + "shapefiles/datatypes")
         .select("id", "fid", "g", "aUnicode")
       val schema = shapefileDf.schema
-      assert(schema.find(_.name == "g").get.dataType == GeometryUDT)
+      assert(schema.find(_.name == "g").get.dataType == SpatialTypeSupport.geometryType)
       assert(schema.find(_.name == "id").get.dataType == LongType)
       assert(schema.find(_.name == "fid").get.dataType == LongType)
       assert(schema.find(_.name == "aUnicode").get.dataType == StringType)
       val rows = shapefileDf.collect()
       assert(rows.length == 9)
       rows.foreach { row =>
-        val geom = row.getAs[Geometry]("g")
+        val geom = row.getJtsGeometry("g")
         assert(geom.isInstanceOf[Point])
         val id = row.getAs[Long]("id")
         if (id > 0) {
@@ -741,7 +742,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
       val rows = shapefileDf.collect()
       assert(rows.length == 4)
       rows.foreach { row =>
-        assert(row.getAs[Geometry]("geometry").isInstanceOf[Point])
+        assert(row.getJtsGeometry("geometry").isInstanceOf[Point])
         val id = row.getAs[Long]("id")
         assert(row.getAs[Long]("aInt") == id)
         assert(row.getAs[String]("aUnicode") == s"测试$id")
@@ -764,7 +765,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
       val rows = shapefileDf.collect()
       assert(rows.length == 12873)
       rows.foreach { row =>
-        val geom = row.getAs[Geometry]("geometry")
+        val geom = row.getJtsGeometry("geometry")
         assert(geom.isInstanceOf[Point])
         assert(row.getAs[String]("osm_id").nonEmpty)
         assert(row.isNullAt(row.fieldIndex("code2")))
@@ -795,7 +796,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
           .format("shapefile")
           .load(shapeTypeDir.getAbsolutePath)
         val schema = shapefileDf.schema
-        assert(schema.find(_.name == "geometry").get.dataType == GeometryUDT)
+        assert(schema.find(_.name == "geometry").get.dataType == SpatialTypeSupport.geometryType)
         val rows = shapefileDf.collect()
         assert(rows.length > 0)
 
@@ -804,7 +805,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
         val rowsMap = mutable.Map[String, Geometry]()
         rows.foreach { row =>
           val id = row.getAs[String]("id")
-          val geom = row.getAs[Geometry]("geometry")
+          val geom = row.getJtsGeometry("geometry")
           val wkt = wktWriter.write(geom)
           assert(wkt.startsWith(expectedWktPrefix))
           assert(geom != null)

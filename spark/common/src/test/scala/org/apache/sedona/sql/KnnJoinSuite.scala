@@ -443,19 +443,26 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
     }
 
     it("KNN Join with exact algorithms should not fail with null geometries") {
-      val df1 = sparkSession.sql(
-        "SELECT ST_GeomFromText(col1) as geom1 from values ('POINT (0.0 0.0)'), (null)")
-      val df2 = sparkSession.sql("SELECT ST_Point(0.0, 0.0) as geom2")
-      df1.cache()
-      df2.cache()
+      val queries = sparkSession
+        .createDataFrame(sc.parallelize(Seq(Tuple1("POINT (0.0 0.0)"), Tuple1(null: String))))
+        .toDF("wkt")
+      val objects = sparkSession
+        .createDataFrame(sc.parallelize(Seq(Tuple1("POINT (0.0 0.0)"))))
+        .toDF("wkt")
+      val df1 = queries.selectExpr("ST_GeomFromWKT(wkt) AS geom1")
+      val df2 = objects.selectExpr("ST_GeomFromWKT(wkt) AS geom2")
       df1.join(df2, expr("ST_KNN(geom1, geom2, 1)")).count() should be(1)
     }
 
     it("KNN Join with exact algorithms should not fail with empty geometries") {
-      val df1 = sparkSession.sql("SELECT ST_GeomFromText('POINT EMPTY') as geom1")
-      val df2 = sparkSession.sql("SELECT ST_Point(0.0, 0.0) as geom2")
-      df1.cache()
-      df2.cache()
+      val queries = sparkSession
+        .createDataFrame(sc.parallelize(Seq(Tuple1("POINT EMPTY"))))
+        .toDF("wkt")
+      val objects = sparkSession
+        .createDataFrame(sc.parallelize(Seq(Tuple1("POINT (0.0 0.0)"))))
+        .toDF("wkt")
+      val df1 = queries.selectExpr("ST_GeomFromWKT(wkt) AS geom1")
+      val df2 = objects.selectExpr("ST_GeomFromWKT(wkt) AS geom2")
       df1.join(df2, expr("ST_KNN(geom1, geom2, 1)")).count() should be(0)
     }
 

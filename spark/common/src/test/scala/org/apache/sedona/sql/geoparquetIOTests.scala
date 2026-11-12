@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql
 
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.commons.io.FileUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
@@ -25,7 +26,7 @@ import org.apache.parquet.hadoop.ParquetFileReader
 import org.apache.parquet.hadoop.util.HadoopInputFile
 import org.apache.spark.SparkException
 import org.apache.spark.scheduler.{SparkListener, SparkListenerTaskEnd}
-import org.apache.spark.sql.AnalysisException
+import org.apache.spark.sql.{AnalysisException, DataFrame}
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.SaveMode
 import org.apache.spark.sql.execution.datasources.geoparquet.{Covering, GeoParquetMetaData, GeometryFieldMetaData}
@@ -70,6 +71,27 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
     finally FileUtils.deleteDirectory(dir)
   }
 
+  private def readLegacyGeoParquet(path: String): DataFrame = {
+    val schema = StructType(sparkSession.read.parquet(path).schema.fields.map { field =>
+      if (field.name == "geometry") field.copy(dataType = GeometryUDT()) else field
+    })
+    sparkSession.read.format("geoparquet").schema(schema).load(path)
+  }
+
+  private def assertNativeCrsRejected(path: String): Unit = {
+    if (SpatialTypeSupport.usesNativeTypes) {
+      val error = intercept[Exception] {
+        sparkSession.read.format("geoparquet").load(path).collect()
+      }
+      val messages = Iterator
+        .iterate[Throwable](error)(_.getCause)
+        .takeWhile(_ != null)
+        .flatMap(cause => Option(cause.getMessage))
+        .mkString("\n")
+      assert(messages.contains("cannot be represented by a Spark native SRID"))
+    }
+  }
+
   describe("GeoParquet IO tests") {
     it("GEOPARQUET Test example1 i.e. naturalearth_lowers dataset's Read and Write") {
       val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation1)
@@ -81,7 +103,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       assert(rows.getAs[Double]("gdp_md_est") == 8374.0)
       assert(
         rows
-          .getAs[Geometry]("geometry")
+          .getJtsGeometry("geometry")
           .toString == "MULTIPOLYGON (((180 -16.067132663642447, 180 -16.555216566639196, 179.36414266196414 -16.801354076946883, 178.72505936299711 -17.01204167436804, 178.59683859511713 -16.639150000000004, 179.0966093629971 -16.433984277547403, 179.4135093629971 -16.379054277547404, 180 -16.067132663642447)), ((178.12557 -17.50481, 178.3736 -17.33992, 178.71806 -17.62846, 178.55271 -18.15059, 177.93266000000003 -18.28799, 177.38146 -18.16432, 177.28504 -17.72465, 177.67087 -17.381140000000002, 178.12557 -17.50481)), ((-179.79332010904864 -16.020882256741224, -179.9173693847653 -16.501783135649397, -180 -16.555216566639196, -180 -16.067132663642447, -179.79332010904864 -16.020882256741224)))")
       df.write
         .format("geoparquet")
@@ -93,7 +115,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val newrows = df2.collect()(0)
       assert(
         newrows
-          .getAs[Geometry]("geometry")
+          .getJtsGeometry("geometry")
           .toString == "MULTIPOLYGON (((180 -16.067132663642447, 180 -16.555216566639196, 179.36414266196414 -16.801354076946883, 178.72505936299711 -17.01204167436804, 178.59683859511713 -16.639150000000004, 179.0966093629971 -16.433984277547403, 179.4135093629971 -16.379054277547404, 180 -16.067132663642447)), ((178.12557 -17.50481, 178.3736 -17.33992, 178.71806 -17.62846, 178.55271 -18.15059, 177.93266000000003 -18.28799, 177.38146 -18.16432, 177.28504 -17.72465, 177.67087 -17.381140000000002, 178.12557 -17.50481)), ((-179.79332010904864 -16.020882256741224, -179.9173693847653 -16.501783135649397, -180 -16.555216566639196, -180 -16.067132663642447, -179.79332010904864 -16.020882256741224)))")
       // The endianness of the WKB should be system native.
       val df2Binary = sparkSession.read.parquet(geoparquetoutputlocation + "/gp_sample1.parquet")
@@ -106,51 +128,48 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       }
     }
     it("GEOPARQUET Test example2 i.e. naturalearth_citie dataset's Read and Write") {
-      val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation2)
+      assertNativeCrsRejected(geoparquetdatalocation2)
+      val df = readLegacyGeoParquet(geoparquetdatalocation2)
       val rows = df.collect()(0)
       assert(rows.getAs[String]("name") == "Vatican City")
       assert(
         rows
-          .getAs[Geometry]("geometry")
+          .getJtsGeometry("geometry")
           .toString == "POINT (12.453386544971766 41.903282179960115)")
       df.write
         .format("geoparquet")
         .mode(SaveMode.Overwrite)
         .save(geoparquetoutputlocation + "/gp_sample2.parquet")
-      val df2 = sparkSession.read
-        .format("geoparquet")
-        .load(geoparquetoutputlocation + "/gp_sample2.parquet")
+      val df2 = readLegacyGeoParquet(geoparquetoutputlocation + "/gp_sample2.parquet")
       val newrows = df2.collect()(0)
       assert(newrows.getAs[String]("name") == "Vatican City")
       assert(
         newrows
-          .getAs[Geometry]("geometry")
+          .getJtsGeometry("geometry")
           .toString == "POINT (12.453386544971766 41.903282179960115)")
     }
     it("GEOPARQUET Test example3 i.e. nybb dataset's Read and Write") {
-      val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation3)
+      assertNativeCrsRejected(geoparquetdatalocation3)
+      val df = readLegacyGeoParquet(geoparquetdatalocation3)
       val rows = df.collect()(0)
       assert(rows.getAs[Long]("BoroCode") == 5)
       assert(rows.getAs[String]("BoroName") == "Staten Island")
       assert(rows.getAs[Double]("Shape_Leng") == 330470.010332)
       assert(rows.getAs[Double]("Shape_Area") == 1.62381982381e9)
-      assert(rows.getAs[Geometry]("geometry").toString.startsWith("MULTIPOLYGON (((970217.022"))
+      assert(rows.getJtsGeometry("geometry").toString.startsWith("MULTIPOLYGON (((970217.022"))
       df.write
         .format("geoparquet")
         .mode(SaveMode.Overwrite)
         .save(geoparquetoutputlocation + "/gp_sample3.parquet")
-      val df2 = sparkSession.read
-        .format("geoparquet")
-        .load(geoparquetoutputlocation + "/gp_sample3.parquet")
+      val df2 = readLegacyGeoParquet(geoparquetoutputlocation + "/gp_sample3.parquet")
       val newrows = df2.collect()(0)
-      assert(
-        newrows.getAs[Geometry]("geometry").toString.startsWith("MULTIPOLYGON (((970217.022"))
+      assert(newrows.getJtsGeometry("geometry").toString.startsWith("MULTIPOLYGON (((970217.022"))
     }
     it("GEOPARQUET Test example-1.0.0-beta.1.parquet") {
       val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation4)
       val count = df.count()
       val rows = df.collect()
-      assert(rows(0).getAs[AnyRef]("geometry").isInstanceOf[Geometry])
+      assert(rows(0).getJtsGeometry("geometry").isInstanceOf[Geometry])
       assert(count == rows.length)
 
       val geoParquetSavePath = geoparquetoutputlocation + "/gp_sample4.parquet"
@@ -158,7 +177,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
       val newRows = df2.select(df.columns.map(col(_)): _*).collect()
       assert(rows.length == newRows.length)
-      assert(newRows(0).getAs[AnyRef]("geometry").isInstanceOf[Geometry])
+      assert(newRows(0).getJtsGeometry("geometry").isInstanceOf[Geometry])
       assert(rows sameElements newRows)
 
       val parquetFiles =
@@ -184,7 +203,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation5)
       val count = df.count()
       val rows = df.collect()
-      assert(rows(0).getAs[AnyRef]("geometry").isInstanceOf[Geometry])
+      assert(rows(0).getJtsGeometry("geometry").isInstanceOf[Geometry])
       assert(count == rows.length)
 
       val geoParquetSavePath = geoparquetoutputlocation + "/gp_sample5.parquet"
@@ -192,7 +211,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
       val newRows = df2.select(df.columns.map(col(_)): _*).collect()
       assert(rows.length == newRows.length)
-      assert(newRows(0).getAs[AnyRef]("geometry").isInstanceOf[Geometry])
+      assert(newRows(0).getJtsGeometry("geometry").isInstanceOf[Geometry])
       assert(rows sameElements newRows)
     }
 
@@ -237,12 +256,18 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
 
       // Read GeoParquet with multiple geometry columns
       val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
-      assert(df2.schema.fields(1).dataType.isInstanceOf[GeometryUDT])
-      assert(df2.schema.fields(2).dataType.isInstanceOf[GeometryUDT])
+      assert(SpatialTypeSupport.isGeometry(df2.schema.fields(1).dataType))
+      assert(
+        SpatialTypeSupport.isNativeGeometry(
+          df2.schema.fields(1).dataType) == SpatialTypeSupport.usesNativeTypes)
+      assert(SpatialTypeSupport.isGeometry(df2.schema.fields(2).dataType))
+      assert(
+        SpatialTypeSupport.isNativeGeometry(
+          df2.schema.fields(2).dataType) == SpatialTypeSupport.usesNativeTypes)
       val rows = df2.collect()
       assert(testData.length == rows.length)
-      assert(rows(0).getAs[AnyRef]("g0").isInstanceOf[Geometry])
-      assert(rows(0).getAs[AnyRef]("g1").isInstanceOf[Geometry])
+      assert(rows(0).getJtsGeometry("g0").isInstanceOf[Geometry])
+      assert(rows(0).getJtsGeometry("g1").isInstanceOf[Geometry])
     }
 
     it("GeoParquet read without a path should say that no path was given") {
@@ -288,7 +313,10 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val geoParquetSavePath = geoparquetoutputlocation + "/empty.parquet"
       df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)
       val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
-      assert(df2.schema.fields(1).dataType.isInstanceOf[GeometryUDT])
+      assert(SpatialTypeSupport.isGeometry(df2.schema.fields(1).dataType))
+      assert(
+        SpatialTypeSupport.isNativeGeometry(
+          df2.schema.fields(1).dataType) == SpatialTypeSupport.usesNativeTypes)
       assert(0 == df2.count())
 
       validateGeoParquetMetadata(geoParquetSavePath) { geo =>
@@ -333,7 +361,10 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
       val geomField = df2.schema.fields(1)
       assert(geomField.name == "geom_column")
-      assert(geomField.dataType.isInstanceOf[GeometryUDT])
+      assert(SpatialTypeSupport.isGeometry(geomField.dataType))
+      assert(
+        SpatialTypeSupport.isNativeGeometry(
+          geomField.dataType) == SpatialTypeSupport.usesNativeTypes)
       assert(0 == df2.count())
     }
 
@@ -348,12 +379,15 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
       val geomField = df2.schema.fields(1)
       assert(geomField.name == "geomColumn")
-      assert(geomField.dataType.isInstanceOf[GeometryUDT])
+      assert(SpatialTypeSupport.isGeometry(geomField.dataType))
+      assert(
+        SpatialTypeSupport.isNativeGeometry(
+          geomField.dataType) == SpatialTypeSupport.usesNativeTypes)
       assert(0 == df2.count())
     }
 
     it("GeoParquet save should write user specified version and crs to geo metadata") {
-      val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation4)
+      val df = readLegacyGeoParquet(geoparquetdatalocation4)
       // This CRS is taken from https://proj.org/en/9.3/specifications/projjson.html#geographiccrs
       // with slight modification.
       val projjson =
@@ -657,7 +691,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       }
       // Round-trip: read back and verify SRID is preserved (omitted CRS -> 4326)
       val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
-      val geoms = df2.select("geometry").collect().map(_.getAs[Geometry](0))
+      val geoms = df2.select("geometry").collect().map(_.getJtsGeometry(0))
       geoms.foreach { g =>
         assert(g.getSRID == 4326, s"Expected SRID 4326 after round-trip, got ${g.getSRID}")
       }
@@ -689,7 +723,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       }
       // Round-trip: read back and verify SRID is preserved
       val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
-      val geoms = df2.select("geometry").collect().map(_.getAs[Geometry](0))
+      val geoms = df2.select("geometry").collect().map(_.getJtsGeometry(0))
       geoms.foreach { g =>
         assert(g.getSRID == 32632, s"Expected SRID 32632 after round-trip, got ${g.getSRID}")
       }
@@ -773,7 +807,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
     }
 
     it("GeoParquet read should set SRID from PROJJSON CRS with EPSG identifier") {
-      val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation4)
+      val df = readLegacyGeoParquet(geoparquetdatalocation4)
       val projjson =
         """
           |{
@@ -819,7 +853,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         .mode("overwrite")
         .save(geoParquetSavePath)
       val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
-      val geoms = df2.select("geometry").collect().map(_.getAs[Geometry](0))
+      val geoms = df2.select("geometry").collect().map(_.getJtsGeometry(0))
       assert(geoms.nonEmpty)
       geoms.foreach { geom =>
         assert(geom.getSRID == 6318, s"Expected SRID 6318, got ${geom.getSRID}")
@@ -835,7 +869,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         .mode("overwrite")
         .save(geoParquetSavePath)
       val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
-      val geoms = df2.select("geometry").collect().map(_.getAs[Geometry](0))
+      val geoms = df2.select("geometry").collect().map(_.getJtsGeometry(0))
       assert(geoms.nonEmpty)
       geoms.foreach { geom =>
         assert(geom.getSRID == 4326, s"Expected SRID 4326 for omitted CRS, got ${geom.getSRID}")
@@ -843,7 +877,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
     }
 
     it("GeoParquet read should set SRID 0 when CRS is null") {
-      val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation4)
+      val df = readLegacyGeoParquet(geoparquetdatalocation4)
       val geoParquetSavePath = geoparquetoutputlocation + "/gp_srid_null.parquet"
       df.write
         .format("geoparquet")
@@ -851,7 +885,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         .mode("overwrite")
         .save(geoParquetSavePath)
       val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
-      val geoms = df2.select("geometry").collect().map(_.getAs[Geometry](0))
+      val geoms = df2.select("geometry").collect().map(_.getJtsGeometry(0))
       assert(geoms.nonEmpty)
       geoms.foreach { geom =>
         assert(geom.getSRID == 0, s"Expected SRID 0 for null CRS, got ${geom.getSRID}")
@@ -859,7 +893,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
     }
 
     it("GeoParquet read should set SRID 0 for CRS without EPSG identifier") {
-      val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation4)
+      val df = readLegacyGeoParquet(geoparquetdatalocation4)
       // A PROJJSON without the "id" field
       val projjsonNoId =
         """
@@ -901,8 +935,9 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         .option("geoparquet.crs", projjsonNoId)
         .mode("overwrite")
         .save(geoParquetSavePath)
-      val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
-      val geoms = df2.select("geometry").collect().map(_.getAs[Geometry](0))
+      assertNativeCrsRejected(geoParquetSavePath)
+      val df2 = readLegacyGeoParquet(geoParquetSavePath)
+      val geoms = df2.select("geometry").collect().map(_.getJtsGeometry(0))
       assert(geoms.nonEmpty)
       geoms.foreach { geom =>
         assert(geom.getSRID == 0, s"Expected SRID 0 for CRS without id, got ${geom.getSRID}")
@@ -954,8 +989,8 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
       val rows = df2.collect()
       assert(rows.length == 1)
-      val g0 = rows(0).getAs[Geometry](rows(0).fieldIndex("g0"))
-      val g1 = rows(0).getAs[Geometry](rows(0).fieldIndex("g1"))
+      val g0 = rows(0).getJtsGeometry("g0")
+      val g1 = rows(0).getJtsGeometry("g1")
       assert(g0.getSRID == 4326, s"Expected g0 SRID 4326, got ${g0.getSRID}")
       assert(g1.getSRID == 32632, s"Expected g1 SRID 32632, got ${g1.getSRID}")
     }
@@ -1477,7 +1512,11 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val e = intercept[IllegalArgumentException] {
         df.write.mode("overwrite").format("geoparquet").save(testPath)
       }
-      assert(e.getMessage.contains("GeoParquet requires at least one geometry column"))
+      val expectedMessage =
+        if (SpatialTypeSupport.usesNativeTypes)
+          "GeoParquet native geometry columns must be at the root of the schema"
+        else "GeoParquet requires at least one geometry column"
+      assert(e.getMessage.contains(expectedMessage))
     }
 
     it("should handle deeply nested arrays with geometry UDT") {

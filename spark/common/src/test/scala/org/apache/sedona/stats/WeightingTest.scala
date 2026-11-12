@@ -78,8 +78,8 @@ class WeightingTest extends TestBaseScala {
         .addDistanceBandColumn(getData(), 1.0)
         .select(
           f.col("id"),
-          f.array_sort(
-            f.transform(f.col("weights"), w => w("neighbor")("id")).as("neighbor_ids")))
+          f.array_sort(f.transform(f.col("weights"), w => w("neighbor")("id")))
+            .as("neighbor_ids"))
 
       hasOptimizationTurnedOn(actualDf)
 
@@ -117,25 +117,27 @@ class WeightingTest extends TestBaseScala {
           binary = false)
         .select(
           f.col("id"),
-          f.transform(f.col("weights"), w => w("neighbor")("id")).as("neighbor_ids"))
+          f.array_sort(f.transform(f.col("weights"), w => w("neighbor")("id")))
+            .as("neighbor_ids"))
 
       hasOptimizationTurnedOn(actualDfWithZeroDistanceNeighbors)
 
       assertDataFramesEqual(
         actualDfWithZeroDistanceNeighbors,
         sparkSession.createDataFrame(
-          Seq(Neighbors(0, Seq(2, 1)), Neighbors(1, Seq(2, 0)), Neighbors(2, Seq(1, 0)))))
+          Seq(Neighbors(0, Seq(1, 2)), Neighbors(1, Seq(0, 2)), Neighbors(2, Seq(0, 1)))))
 
       val actualDfWithoutZeroDistanceNeighbors = Weighting
         .addDistanceBandColumn(getDupedData(), 1.1)
         .select(
           f.col("id"),
-          f.transform(f.col("weights"), w => w("neighbor")("id")).as("neighbor_ids"))
+          f.array_sort(f.transform(f.col("weights"), w => w("neighbor")("id")))
+            .as("neighbor_ids"))
 
       assertDataFramesEqual(
         actualDfWithoutZeroDistanceNeighbors,
         sparkSession.createDataFrame(
-          Seq(Neighbors(0, Seq(2)), Neighbors(1, Seq(2)), Neighbors(2, Seq(1, 0)))))
+          Seq(Neighbors(0, Seq(2)), Neighbors(1, Seq(2)), Neighbors(2, Seq(0, 1)))))
 
     }
 

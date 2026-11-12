@@ -21,8 +21,9 @@ package org.apache.spark.sql.sedona_sql.optimization
 import org.apache.spark.sql.catalyst.expressions.Cast
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.catalyst.rules.Rule
-import org.apache.spark.sql.sedona_sql.UDT.{Box3DUDT, GeometryUDT}
+import org.apache.spark.sql.sedona_sql.UDT.Box3DUDT
 import org.apache.spark.sql.sedona_sql.expressions.ST_Box3D
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 
 /**
  * Analyzer rule that resolves Catalyst casts from Geometry to Box3D. Spark's `Cast.canCast`
@@ -43,8 +44,8 @@ class Box3DCastResolutionRule extends Rule[LogicalPlan] {
   override def apply(plan: LogicalPlan): LogicalPlan = plan.transformAllExpressions {
     case c: Cast
         if c.child.resolved
-          && c.child.dataType.isInstanceOf[GeometryUDT]
+          && SpatialTypeSupport.isGeometry(c.child.dataType)
           && c.dataType.isInstanceOf[Box3DUDT] =>
-      ST_Box3D(Seq(c.child))
+      SpatialTypeSupport.adaptFunction(ST_Box3D.apply)(Seq(c.child))
   }
 }

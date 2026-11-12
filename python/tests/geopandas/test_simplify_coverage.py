@@ -31,7 +31,10 @@ from shapely.geometry import MultiPolygon, Polygon, box
 from shapely.ops import unary_union
 
 from sedona.spark.geopandas import GeoDataFrame, GeoSeries
-from tests.geopandas.test_geopandas_base import TestGeopandasBase
+from tests.geopandas.test_geopandas_base import (
+    spark_frame_to_pandas_api,
+    TestGeopandasBase,
+)
 
 
 class TestSimplifyCoverage(TestGeopandasBase):
@@ -43,7 +46,7 @@ class TestSimplifyCoverage(TestGeopandasBase):
             "ST_Point(cos(2*pi()*i/10000), sin(2*pi()*i/10000)) END))) geometry",
         )
         original = rows.selectExpr("ST_AsBinary(geometry) wkb").first().wkb
-        source = GeoSeries(rows.pandas_api(index_col="id")["geometry"])
+        source = GeoSeries(spark_frame_to_pandas_api(rows, index_col="id")["geometry"])
 
         result = source.simplify_coverage(0, simplify_boundary=False)
         internal = result._internal.resolved_copy
@@ -109,7 +112,7 @@ class TestSimplifyCoverage(TestGeopandasBase):
         rows = self.spark.createDataFrame(
             [(0, "POLYGON EMPTY"), (1, None)], "id long, wkt string"
         ).selectExpr("id", "ST_GeomFromWKT(wkt) geometry")
-        source = GeoSeries(rows.pandas_api(index_col="id")["geometry"])
+        source = GeoSeries(spark_frame_to_pandas_api(rows, index_col="id")["geometry"])
 
         result = source.simplify_coverage(0.1).to_geopandas()
 
@@ -137,7 +140,7 @@ class TestSimplifyCoverage(TestGeopandasBase):
         assert (
             rows.selectExpr("ST_NumGeometries(geometry) members").first().members == 3
         )
-        source = GeoSeries(rows.pandas_api(index_col="id")["geometry"])
+        source = GeoSeries(spark_frame_to_pandas_api(rows, index_col="id")["geometry"])
 
         result = source.simplify_coverage(0)
         internal = result._internal.resolved_copy

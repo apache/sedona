@@ -23,6 +23,7 @@ import org.apache.parquet.hadoop.ParquetFileWriter
 import org.apache.spark.sql.{AnalysisException, SparkSession}
 import org.apache.spark.sql.execution.datasources.geoparquet.internal.PortableSQLConf
 import org.apache.spark.sql.types.StructType
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 
 import scala.language.existentials
 
@@ -66,7 +67,30 @@ object GeoParquetUtils {
           .orElse(filesByType.data.headOption)
           .toSeq
       }
-    GeoParquetFileFormat.mergeSchemasInParallel(parameters, filesToTouch, sparkSession)
+    val geometrySchema = if (SpatialTypeSupport.usesNativeTypes && !isLegacyMode(parameters)) {
+      val geometryFiles = if (filesByType.data.nonEmpty) filesByType.data else filesToTouch
+      GeoParquetFileFormat.mergeGeometrySchemasInParallel(parameters, geometryFiles, sparkSession)
+    } else None
+    val inferred =
+      GeoParquetFileFormat.mergeSchemasInParallel(parameters, filesToTouch, sparkSession)
+    geometrySchema match {
+      case None => inferred
+      case Some(geometryFields) =>
+        val resolver = sparkSession.sessionState.conf.resolver
+        inferred.map(schema =>
+          StructType(schema.fields.map { field =>
+            geometryFields.fields.find(geometry => resolver(geometry.name, field.name)) match {
+              case Some(geometry)
+                  if field.dataType == org.apache.spark.sql.types.BinaryType ||
+                    SpatialTypeSupport.isGeometry(field.dataType) =>
+                field.copy(dataType = geometry.dataType)
+              case Some(_) =>
+                throw new IllegalArgumentException(
+                  s"Incompatible GeoParquet geometry column '${field.name}'")
+              case None => field
+            }
+          }))
+    }
   }
 
   case class FileTypes(

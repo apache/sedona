@@ -66,7 +66,7 @@ class geojsonIOTests extends TestBaseScala with BeforeAndAfterAll {
       val dfW =
         sparkSession.read.format("geojson").load(geojsonoutputlocation + "/geojson_write.json")
       dfW.collect().foreach { row =>
-        val geom = row.getAs[Geometry]("geometry")
+        val geom = row.getJtsGeometry("geometry")
         assert(geom.isInstanceOf[Point])
         val properties = row.getAs[GenericRowWithSchema]("properties")
         properties.getAs("text").toString.startsWith("test")
@@ -194,7 +194,7 @@ class geojsonIOTests extends TestBaseScala with BeforeAndAfterAll {
       val dfW =
         sparkSession.read.format("geojson").load(geojsonoutputlocation + "/geojson_write.json")
       dfW.collect().foreach { row =>
-        val geom = row.getAs[Geometry]("geometry")
+        val geom = row.getJtsGeometry("geometry")
         assert(geom.isInstanceOf[Point])
         val properties = row.getAs[GenericRowWithSchema]("properties")
         properties.getAs("text").toString.startsWith("test")
@@ -262,7 +262,7 @@ class geojsonIOTests extends TestBaseScala with BeforeAndAfterAll {
       val dfW =
         sparkSession.read.format("geojson").load(geojsonoutputlocation + "/geojson_write.json")
       dfW.collect().foreach { row =>
-        val geom = row.getAs[Geometry]("geometry")
+        val geom = row.getJtsGeometry("geometry")
         assert(geom.isInstanceOf[Point])
         val properties = row.getAs[GenericRowWithSchema]("properties")
         properties.getAs("text_outer").toString.startsWith("test_outer")
@@ -302,7 +302,7 @@ class geojsonIOTests extends TestBaseScala with BeforeAndAfterAll {
       val dfW =
         sparkSession.read.format("geojson").load(geojsonoutputlocation + "/geojson_write.json")
       dfW.collect().foreach { row =>
-        val geom = row.getAs[Geometry]("geometry")
+        val geom = row.getJtsGeometry("geometry")
         assert(geom.isInstanceOf[Point])
         assert(row.getAs[String]("test_outer").startsWith("test_outer"))
         val properties = row.getAs[GenericRowWithSchema]("properties")
@@ -328,7 +328,8 @@ class geojsonIOTests extends TestBaseScala with BeforeAndAfterAll {
       assert(rowsR.getAs[GenericRowWithSchema]("properties").getString(5) == "Core Item")
       assert(
         rowsR
-          .getAs[Polygon]("geometry")
+          .getJtsGeometry("geometry")
+          .asInstanceOf[Polygon]
           .toString == "POLYGON ((172.91173669923782 1.3438851951615003, 172.95469614953714 1.3438851951615003, 172.95469614953714 1.3690476620161975, 172.91173669923782 1.3690476620161975, 172.91173669923782 1.3438851951615003))")
 
       dfR.write
@@ -343,7 +344,10 @@ class geojsonIOTests extends TestBaseScala with BeforeAndAfterAll {
       assert(
         rowsR.getAs[GenericRowWithSchema]("properties") == rowsW.getAs[GenericRowWithSchema](
           "properties"))
-      assert(rowsR.getAs[Polygon]("geometry") == rowsW.getAs[Polygon]("geometry"))
+      assert(
+        rowsR.getJtsGeometry("geometry").asInstanceOf[Polygon] == rowsW
+          .getJtsGeometry("geometry")
+          .asInstanceOf[Polygon])
       assert(rowsR.getAs[String]("type") == rowsW.getAs[String]("type"))
     }
     it("GeoJSON Test - Read and Write MultilineString geometry") {
@@ -362,7 +366,8 @@ class geojsonIOTests extends TestBaseScala with BeforeAndAfterAll {
       assert(rowsR.getAs[GenericRowWithSchema]("properties").getString(5) == "Core Item")
       assert(
         rowsR
-          .getAs[MultiLineString]("geometry")
+          .getJtsGeometry("geometry")
+          .asInstanceOf[MultiLineString]
           .toString == "MULTILINESTRING ((170 45, 180 45), (-180 45, -170 45))")
 
       dfR.write
@@ -377,7 +382,10 @@ class geojsonIOTests extends TestBaseScala with BeforeAndAfterAll {
       assert(
         rowsR.getAs[GenericRowWithSchema]("properties") == rowsW.getAs[GenericRowWithSchema](
           "properties"))
-      assert(rowsR.getAs[MultiLineString]("geometry") == rowsW.getAs[MultiLineString]("geometry"))
+      assert(
+        rowsR.getJtsGeometry("geometry").asInstanceOf[MultiLineString] == rowsW
+          .getJtsGeometry("geometry")
+          .asInstanceOf[MultiLineString])
       assert(rowsR.getAs[String]("type") == rowsW.getAs[String]("type"))
     }
     it("GeoJSON Test - feature collection test") {
@@ -385,26 +393,26 @@ class geojsonIOTests extends TestBaseScala with BeforeAndAfterAll {
         sparkSession.read.format("geojson").option("multiLine", true).load(geojsondatalocation2)
       val rowsR = dfR.collect()(0)
 
-      assert(rowsR.getAs[Seq[Row]]("features")(0).get(0).toString == "POINT (102 0.5)")
+      assert(rowsR.getAs[Seq[Row]]("features")(0).getJtsGeometry(0).toString == "POINT (102 0.5)")
       assert(
         rowsR
           .getAs[Seq[Row]]("features")(1)
-          .get(0)
+          .getJtsGeometry(0)
           .toString == "LINESTRING (102 0, 103 1, 104 0, 105 1)")
       assert(
         rowsR
           .getAs[Seq[Row]]("features")(2)
-          .get(0)
+          .getJtsGeometry(0)
           .toString == "POLYGON ((100 0, 101 0, 101 1, 100 1, 100 0))")
       assert(
         rowsR
           .getAs[Seq[Row]]("features")(3)
-          .get(0)
+          .getJtsGeometry(0)
           .toString == "MULTILINESTRING ((170 45, 180 45), (-180 45, -170 45))")
       assert(
         rowsR
           .getAs[Seq[Row]]("features")(4)
-          .get(0)
+          .getJtsGeometry(0)
           .toString == "MULTIPOLYGON (((180 40, 180 50, 170 50, 170 40, 180 40)), ((-170 40, -170 50, -180 50, -180 40, -170 40)))")
 
       val df = dfR.select(explode(col("features")).alias("feature")).selectExpr("feature.*")
@@ -418,17 +426,20 @@ class geojsonIOTests extends TestBaseScala with BeforeAndAfterAll {
         sparkSession.read.format("geojson").load(geojsonoutputlocation + "/geojson_write.json")
       val rowsW = dfW.collect()
       assert(rowsW.length == 6)
-      assert(rowsW(0).getAs("geometry").toString == "POINT (102 0.5)")
-      assert(rowsW(1).getAs("geometry").toString == "LINESTRING (102 0, 103 1, 104 0, 105 1)")
+      assert(rowsW(0).getJtsGeometry("geometry").toString == "POINT (102 0.5)")
       assert(
-        rowsW(2).getAs("geometry").toString == "POLYGON ((100 0, 101 0, 101 1, 100 1, 100 0))")
+        rowsW(1).getJtsGeometry("geometry").toString == "LINESTRING (102 0, 103 1, 104 0, 105 1)")
+      assert(
+        rowsW(2)
+          .getJtsGeometry("geometry")
+          .toString == "POLYGON ((100 0, 101 0, 101 1, 100 1, 100 0))")
       assert(
         rowsW(3)
-          .getAs("geometry")
+          .getJtsGeometry("geometry")
           .toString == "MULTILINESTRING ((170 45, 180 45), (-180 45, -170 45))")
       assert(
         rowsW(4)
-          .getAs("geometry")
+          .getJtsGeometry("geometry")
           .toString == "MULTIPOLYGON (((180 40, 180 50, 170 50, 170 40, 180 40)), ((-170 40, -170 50, -180 50, -180 40, -170 40)))")
     }
     it("GeoJSON Test - read and write single line STAC item") {
@@ -438,7 +449,8 @@ class geojsonIOTests extends TestBaseScala with BeforeAndAfterAll {
       assert(rowsR.getAs[String]("stac_version") == "1.0.0")
       assert(
         rowsR
-          .getAs[Polygon]("geometry")
+          .getJtsGeometry("geometry")
+          .asInstanceOf[Polygon]
           .toString == "POLYGON ((172.91173669923782 1.3438851951615003, 172.95469614953714 1.3438851951615003, 172.95469614953714 1.3690476620161975, 172.91173669923782 1.3690476620161975, 172.91173669923782 1.3438851951615003))")
 
       dfR.write
@@ -454,7 +466,10 @@ class geojsonIOTests extends TestBaseScala with BeforeAndAfterAll {
         rowsR.getAs[GenericRowWithSchema]("assets") == rowsW.getAs[GenericRowWithSchema](
           "assets"))
       assert(rowsR.getAs[String]("stac_version") == rowsW.getAs[String]("stac_version"))
-      assert(rowsR.getAs[Polygon]("geometry") == rowsW.getAs[Polygon]("geometry"))
+      assert(
+        rowsR.getJtsGeometry("geometry").asInstanceOf[Polygon] == rowsW
+          .getJtsGeometry("geometry")
+          .asInstanceOf[Polygon])
     }
   }
 

@@ -29,7 +29,7 @@ from pyspark.sql import functions as F
 from sedona.spark.geopandas import GeoDataFrame
 from sedona.spark.geopandas._crs import warn_crs_mismatch, with_crs_metadata
 from sedona.spark.sql import st_functions as stf
-from sedona.spark.sql.types import GeometryType
+from sedona.spark.sql.types import is_geometry_type
 
 
 def _prepare_side(frame, prefix):
@@ -42,7 +42,7 @@ def _prepare_side(frame, prefix):
         zip(internal.data_spark_columns, internal.data_fields)
     ):
         # Resolve source CRS before filtering: an empty result cannot infer it from SRIDs.
-        if isinstance(field.spark_type, GeometryType) or i == position:
+        if is_geometry_type(field.spark_type) or i == position:
             field = with_crs_metadata(field, frame[internal.column_labels[i][0]].crs)
         columns.append(column.alias(f"{prefix}_{i}", metadata=field.metadata))
     projected = internal.spark_frame.select(
@@ -247,15 +247,19 @@ def sjoin_nearest(
         output_names.append("__nearest_distance")
         output_labels.append(distance_col)
     result = joined.select("__nearest_l_index", *output_names)
+    from sedona.spark.sql.types import USES_NATIVE_SPATIAL_TYPES
+
+    if USES_NATIVE_SPATIAL_TYPES:
+        from sedona.spark.geopandas._native import internal_field
+    else:
+        internal_field = InternalField.from_struct_field
+
     internal = InternalFrame(
         spark_frame=result,
         index_spark_columns=[scol_for(result, "__nearest_l_index")],
         index_names=[result_index_name],
         column_labels=[(label,) for label in output_labels],
         data_spark_columns=[scol_for(result, name) for name in output_names],
-        data_fields=[
-            InternalField.from_struct_field(result.schema[name])
-            for name in output_names
-        ],
+        data_fields=[internal_field(result.schema[name]) for name in output_names],
     )
     return GeoDataFrame(ps.DataFrame(internal), geometry=left_df.active_geometry_name)

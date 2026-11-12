@@ -20,6 +20,7 @@ package org.apache.sedona.sql
 
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
+import org.apache.spark.sql.sedona_sql.UDT.GeographyUDT
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.types.{IntegerType, StructField, StructType}
 import org.locationtech.jts.geom.{Coordinate, CoordinateXYZM, Geometry, GeometryFactory, LineString, Point, PrecisionModel}
@@ -76,6 +77,20 @@ class SpatialTestValuesTest extends AnyFunSuite {
     assert(emptyResult.getSRID == 3857)
     assert(emptyResult.getCoordinateSequence.getDimension == 4)
     assert(emptyResult.getCoordinateSequence.getMeasures == 1)
+  }
+
+  test("geography result access preserves legacy identity, nulls, and named fields") {
+    val geography =
+      org.apache.sedona.common.geography.Constructors.geogFromWKT("POINT (1 2)", 4326)
+    val schema = StructType(Seq(StructField("geog", GeographyUDT())))
+    val row = new GenericRowWithSchema(Array[Any](geography), schema)
+    assert(SpatialTestValues.geography(geography) eq geography)
+    assert(SpatialTestValues.geography(row, 0) eq geography)
+    assert(SpatialTestValues.geography(row, "geog") eq geography)
+    assert(SpatialTestValues.geography(null) == null)
+    assert(SpatialTestValues.geography(Row(null), 0) == null)
+    intercept[IllegalArgumentException](SpatialTestValues.geography("POINT (1 2)"))
+    intercept[IllegalArgumentException](SpatialTestValues.geography(Array[Byte](1, 2, 3)))
   }
 
   test("geometry result access does not reinterpret binary or scalar values") {

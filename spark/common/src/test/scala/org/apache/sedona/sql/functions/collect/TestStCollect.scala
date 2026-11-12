@@ -20,6 +20,7 @@ package org.apache.sedona.sql.functions.collect
 
 import org.apache.sedona.sql.{GeometrySample, TestBaseScala}
 import org.apache.spark.sql.functions.expr
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.scalatest.GivenWhenThen
 import org.scalatest.matchers.should.Matchers
 
@@ -28,7 +29,7 @@ class TestStCollect extends TestBaseScala with GeometrySample with GivenWhenThen
   import sparkSession.implicits._
 
   describe("st collect workflow") {
-    it("should require a collection for mixed XY and declared empty or NaN Z members") {
+    it("should validate collection layouts for mixed XY and declared empty or NaN Z members") {
       val cases = Seq(
         ("POINT (1 2)", "POINT Z EMPTY"),
         ("LINESTRING (0 0, 1 1)", "LINESTRING Z EMPTY"),
@@ -39,11 +40,13 @@ class TestStCollect extends TestBaseScala with GeometrySample with GivenWhenThen
           .write(wktReader.read(zWkt.replace("NaN", "9")))
         if (zWkt.contains("NaN")) java.nio.ByteBuffer.wrap(zBytes).putDouble(21, Double.NaN)
         val zHex = org.locationtech.jts.io.WKBWriter.toHex(zBytes)
+        val constructor =
+          if (SpatialTypeSupport.usesNativeTypes) "ST_GeomFromEWKB" else "ST_GeomFromWKB"
         val inputs = Seq((xyWkt, zHex))
           .toDF("xyWkt", "zHex")
-          .selectExpr("ST_GeomFromWKT(xyWkt) AS xy", "ST_GeomFromWKB(unhex(zHex)) AS z")
+          .selectExpr("ST_GeomFromWKT(xyWkt) AS xy", s"$constructor(unhex(zHex)) AS z")
           .repartition(1)
-          .cache()
+        if (!SpatialTypeSupport.usesNativeTypes) inputs.cache()
         try {
           assert(inputs.count() == 1)
           val rows = inputs.selectExpr("xy AS geom").union(inputs.selectExpr("z AS geom"))
@@ -62,20 +65,33 @@ class TestStCollect extends TestBaseScala with GeometrySample with GivenWhenThen
             inputs.selectExpr("ST_Collect(ST_ForceCollection(xy), ST_ForceCollection(z))"),
             rows.selectExpr("ST_Collect_Agg(ST_ForceCollection(geom))"))
           collections.foreach { query =>
-            val geometry = query.collect()(0).getAs[org.locationtech.jts.geom.Geometry](0)
-            assert(geometry.getGeometryType == "GeometryCollection")
-            val dimensions = (0 until geometry.getNumGeometries).map { i =>
-              val member = geometry.getGeometryN(i).getGeometryN(0)
-              member match {
-                case point: org.locationtech.jts.geom.Point =>
-                  point.getCoordinateSequence.getDimension
-                case line: org.locationtech.jts.geom.LineString =>
-                  line.getCoordinateSequence.getDimension
-                case polygon: org.locationtech.jts.geom.Polygon =>
-                  polygon.getExteriorRing.getCoordinateSequence.getDimension
+            if (SpatialTypeSupport.usesNativeTypes) {
+              val error = intercept[Exception] { query.collect() }
+              val causes =
+                Iterator.iterate(error: Throwable)(_.getCause).takeWhile(_ != null).toSeq
+              assert(
+                causes.exists { cause =>
+                  val message = Option(cause.getMessage).getOrElse("")
+                  message.contains("WKB_PARSE_ERROR") && message.contains(
+                    "Invalid or unsupported type 7")
+                },
+                error.toString)
+            } else {
+              val geometry = query.collect()(0).getJtsGeometry(0)
+              assert(geometry.getGeometryType == "GeometryCollection")
+              val dimensions = (0 until geometry.getNumGeometries).map { i =>
+                val member = geometry.getGeometryN(i).getGeometryN(0)
+                member match {
+                  case point: org.locationtech.jts.geom.Point =>
+                    point.getCoordinateSequence.getDimension
+                  case line: org.locationtech.jts.geom.LineString =>
+                    line.getCoordinateSequence.getDimension
+                  case polygon: org.locationtech.jts.geom.Polygon =>
+                    polygon.getExteriorRing.getCoordinateSequence.getDimension
+                }
               }
+              assert(dimensions.sorted == Seq(2, 3))
             }
-            assert(dimensions.sorted == Seq(2, 3))
           }
         } finally {
           inputs.unpersist()

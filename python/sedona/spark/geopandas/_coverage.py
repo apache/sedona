@@ -31,7 +31,7 @@ from pyspark.sql import functions as F
 from pyspark.sql.types import LongType
 from pyspark.sql.utils import is_remote
 
-from sedona.spark.sql.types import GeometryType
+from sedona.spark.sql.types import GeometryType, USES_NATIVE_SPATIAL_TYPES
 
 
 class _Checkpoints:
@@ -49,10 +49,21 @@ class _Checkpoints:
         self._paths = {}
 
     def save(self, frame):
-        saved = frame.checkpoint(eager=True)
+        saved = frame.checkpoint(eager=False)
         # Use the raw LogicalRDD, not DataFrame.rdd (which adds a Python RDD).
-        path = saved._jdf.queryExecution().analyzed().rdd().getCheckpointFile().get()
+        rdd = saved._jdf.queryExecution().analyzed().rdd()
+        # Ask Spark for this RDD's exact path before materialization: a failed
+        # native-value validation can otherwise leave a partial checkpoint.
+        path = (
+            self._context._jvm.org.apache.spark.rdd.ReliableRDDCheckpointData.checkpointPath(
+                self._context._jsc.sc(), rdd.id()
+            )
+            .get()
+            .toString()
+        )
         self._paths[id(saved)] = path
+        rdd.doCheckpoint()
+        self._paths[id(saved)] = rdd.getCheckpointFile().get()
         return saved
 
     def keep(self, frame):
@@ -64,7 +75,7 @@ class _Checkpoints:
         self._delete(path)
 
     def _delete(self, path):
-        # Paths originate only from successfully completed checkpoints above.
+        # Paths belong only to the exact RDDs registered by this invocation.
         # Do not mask a validation or Spark failure if storage cleanup fails.
         try:
             jpath = self._context._jvm.org.apache.hadoop.fs.Path(path)
@@ -305,6 +316,12 @@ def _rebuild(occ: DataFrame, original: DataFrame) -> DataFrame:
         "THEN element_at(_parts, 1)._polygon "
         "ELSE ST_Collect(transform(_parts, p -> p._polygon)) END END"
     )
+    if USES_NATIVE_SPATIAL_TYPES:
+        from sedona.spark.geopandas._native import fixed_srid
+
+        data_type = original.schema["geom"].dataType
+        if data_type.srid != GeometryType.MIXED_SRID:
+            result = fixed_srid(result, data_type.srid)
     rebuilt = assembled.select("id", result.alias("geom"))
     joined = original.alias("original").join(rebuilt.alias("rebuilt"), "id", "left")
     return joined.select(

@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql
 
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import com.sun.net.httpserver.HttpServer
 import java.net.InetSocketAddress
 import java.nio.charset.StandardCharsets
@@ -49,7 +50,7 @@ class CRSTransformProj4Test extends TestBaseScala {
       val result = sparkSession
         .sql("SELECT ST_Transform(ST_SetSRID(ST_GeomFromWKT('POINT (-122.4194 37.7749)'), 4326), 'EPSG:4326', 'EPSG:3857')")
         .first()
-        .getAs[Geometry](0)
+        .getJtsGeometry(0)
 
       assertNotNull(result)
       assertEquals(3857, result.getSRID)
@@ -62,7 +63,7 @@ class CRSTransformProj4Test extends TestBaseScala {
       val result = sparkSession
         .sql("SELECT ST_Transform(ST_SetSRID(ST_GeomFromWKT('POINT (-122.4194 37.7749)'), 4326), 'EPSG:3857')")
         .first()
-        .getAs[Geometry](0)
+        .getJtsGeometry(0)
 
       assertNotNull(result)
       assertEquals(3857, result.getSRID)
@@ -74,7 +75,7 @@ class CRSTransformProj4Test extends TestBaseScala {
       val result = sparkSession
         .sql("SELECT ST_Transform(ST_GeomFromWKT('POINT (-122.4194 37.7749)'), 'EPSG:4326', 'EPSG:32610')")
         .first()
-        .getAs[Geometry](0)
+        .getJtsGeometry(0)
 
       assertNotNull(result)
       assertEquals(32610, result.getSRID)
@@ -87,7 +88,7 @@ class CRSTransformProj4Test extends TestBaseScala {
       val result = sparkSession
         .sql("SELECT ST_Transform(ST_Point(1272691.622, 6404578.16), 'epsg:3021', 'epsg:3006')")
         .first()
-        .getAs[Geometry](0)
+        .getJtsGeometry(0)
 
       assertNotNull(result)
       assertEquals(3006, result.getSRID)
@@ -106,13 +107,13 @@ class CRSTransformProj4Test extends TestBaseScala {
             ST_Transform(ST_Point(-98.0, 27.0), 'EPSG:4267', 'EPSG:4326')""")
         .first()
 
-      val nad27 = row.getAs[Geometry](0)
+      val nad27 = row.getJtsGeometry(0)
       assertEquals(4267, nad27.getSRID)
       assertEquals(-97.88703650736258, nad27.getCoordinate.x, 1e-9)
       assertEquals(26.765822655699218, nad27.getCoordinate.y, 1e-9)
 
       // No grid file is loaded, so the EPSG:4267 Helmert shift (-8,160,176) is used.
-      val wgs84 = row.getAs[Geometry](1)
+      val wgs84 = row.getJtsGeometry(1)
       assertEquals(4326, wgs84.getSRID)
       assertEquals(-98.00030416754218, wgs84.getCoordinate.x, 1e-9)
       assertEquals(27.000326243662016, wgs84.getCoordinate.y, 1e-9)
@@ -127,7 +128,7 @@ class CRSTransformProj4Test extends TestBaseScala {
             'EPSG:4326',
             '$projString')""")
         .first()
-        .getAs[Geometry](0)
+        .getJtsGeometry(0)
 
       assertNotNull(result)
       // Web Mercator coordinates
@@ -143,7 +144,7 @@ class CRSTransformProj4Test extends TestBaseScala {
             '+proj=longlat +datum=WGS84 +no_defs',
             '$projString')""")
         .first()
-        .getAs[Geometry](0)
+        .getJtsGeometry(0)
 
       assertNotNull(result)
       // UTM Zone 10N coordinates
@@ -163,7 +164,7 @@ class CRSTransformProj4Test extends TestBaseScala {
             '$sourceWkt',
             '$targetWkt')""")
         .first()
-        .getAs[Geometry](0)
+        .getJtsGeometry(0)
 
       assertNotNull(result)
       // Validated against cs2cs: 332705.18, 6655205.48
@@ -181,7 +182,7 @@ class CRSTransformProj4Test extends TestBaseScala {
             '$wkt2',
             'EPSG:3857')""")
         .first()
-        .getAs[Geometry](0)
+        .getJtsGeometry(0)
 
       assertNotNull(result)
       assertEquals(3857, result.getSRID)
@@ -199,7 +200,7 @@ class CRSTransformProj4Test extends TestBaseScala {
             '$projJson',
             'EPSG:3857')""")
         .first()
-        .getAs[Geometry](0)
+        .getJtsGeometry(0)
 
       assertNotNull(result)
       assertEquals(3857, result.getSRID)
@@ -218,7 +219,7 @@ class CRSTransformProj4Test extends TestBaseScala {
               'EPSG:4326',
               '$projString')""")
           .first()
-          .getAs[Geometry](0)
+          .getJtsGeometry(0)
 
         assertNotNull(result)
         assertTrue(result.isValid)
@@ -235,7 +236,7 @@ class CRSTransformProj4Test extends TestBaseScala {
             'EPSG:3857',
             'EPSG:4326')""")
         .first()
-        .getAs[Geometry](0)
+        .getJtsGeometry(0)
 
       assertNotNull(result)
       assertEquals(4326, result.getSRID)
@@ -250,7 +251,7 @@ class CRSTransformProj4Test extends TestBaseScala {
         .sql("SELECT ST_GeomFromWKT('POINT (-122.4194 37.7749)') as geom")
         .selectExpr("ST_Transform(geom, 'EPSG:4326', 'EPSG:3857') as transformed")
 
-      val result = df.first().getAs[Geometry](0)
+      val result = df.first().getJtsGeometry(0)
       assertNotNull(result)
       assertEquals(3857, result.getSRID)
     }
@@ -265,7 +266,7 @@ class CRSTransformProj4Test extends TestBaseScala {
         .select(ST_SetSRID($"geom", lit(4326)).as("geom"))
         .select(ST_Transform($"geom", lit("EPSG:3857")).as("geom"))
 
-      val result = df.first().getAs[Geometry](0)
+      val result = df.first().getJtsGeometry(0)
       assertNotNull(result)
       assertEquals(3857, result.getSRID)
       assertEquals(-13627665.27, result.getCoordinate.x, COORD_TOLERANCE)
@@ -277,7 +278,7 @@ class CRSTransformProj4Test extends TestBaseScala {
         .sql("SELECT ST_Point(-122.4194, 37.7749) AS geom")
         .select(ST_Transform($"geom", lit("EPSG:4326"), lit("EPSG:3857")).as("geom"))
 
-      val result = df.first().getAs[Geometry](0)
+      val result = df.first().getJtsGeometry(0)
       assertNotNull(result)
       assertEquals(3857, result.getSRID)
       assertEquals(-13627665.27, result.getCoordinate.x, COORD_TOLERANCE)
@@ -292,7 +293,7 @@ class CRSTransformProj4Test extends TestBaseScala {
         .select(ST_SetSRID($"geom", lit(4326)).as("geom"))
         .select(ST_Transform($"geom", lit(projString)).as("geom"))
 
-      val result = df.first().getAs[Geometry](0)
+      val result = df.first().getJtsGeometry(0)
       assertNotNull(result)
       assertEquals(-13627665.27, result.getCoordinate.x, COORD_TOLERANCE)
       assertEquals(4547675.35, result.getCoordinate.y, COORD_TOLERANCE)
@@ -310,7 +311,7 @@ class CRSTransformProj4Test extends TestBaseScala {
 
       val df = pointDf.select(ST_Transform($"geom", lit(projJson), lit("EPSG:3857")).as("geom"))
 
-      val result = df.first().getAs[Geometry](0)
+      val result = df.first().getJtsGeometry(0)
       assertNotNull(result)
       assertEquals(3857, result.getSRID)
       assertEquals(-13627665.27, result.getCoordinate.x, COORD_TOLERANCE)
@@ -326,7 +327,7 @@ class CRSTransformProj4Test extends TestBaseScala {
             'EPSG:4326',
             'EPSG:3857')""")
         .first()
-        .getAs[Geometry](0)
+        .getJtsGeometry(0)
 
       assertNotNull(result)
       assertEquals("LineString", result.getGeometryType)
@@ -341,7 +342,7 @@ class CRSTransformProj4Test extends TestBaseScala {
             'EPSG:4326',
             'EPSG:3857')""")
         .first()
-        .getAs[Geometry](0)
+        .getJtsGeometry(0)
 
       assertNotNull(result)
       assertEquals("Polygon", result.getGeometryType)
@@ -355,7 +356,7 @@ class CRSTransformProj4Test extends TestBaseScala {
             'EPSG:4326',
             'EPSG:3857')""")
         .first()
-        .getAs[Geometry](0)
+        .getJtsGeometry(0)
 
       assertNotNull(result)
       assertEquals("MultiPoint", result.getGeometryType)
@@ -370,7 +371,7 @@ class CRSTransformProj4Test extends TestBaseScala {
             'EPSG:4326',
             'EPSG:3857')""")
         .first()
-        .getAs[Geometry](0)
+        .getJtsGeometry(0)
 
       assertNotNull(result)
       assertEquals("GeometryCollection", result.getGeometryType)
@@ -386,7 +387,7 @@ class CRSTransformProj4Test extends TestBaseScala {
         val result = sparkSession
           .sql("SELECT ST_Transform(ST_GeomFromWKT('POINT (-122.4194 37.7749)'), 'EPSG:4326', 'EPSG:3857')")
           .first()
-          .getAs[Geometry](0)
+          .getJtsGeometry(0)
 
         assertNotNull(result)
         assertEquals(-13627665.27, result.getCoordinate.x, COORD_TOLERANCE)
@@ -398,7 +399,7 @@ class CRSTransformProj4Test extends TestBaseScala {
         val result = sparkSession
           .sql("SELECT ST_Transform(ST_GeomFromWKT('POINT (-122.4194 37.7749)'), 'EPSG:4326', 'EPSG:3857')")
           .first()
-          .getAs[Geometry](0)
+          .getJtsGeometry(0)
 
         assertNotNull(result)
         assertEquals(-13627665.27, result.getCoordinate.x, COORD_TOLERANCE)
@@ -410,7 +411,7 @@ class CRSTransformProj4Test extends TestBaseScala {
         val result = sparkSession
           .sql("SELECT ST_Transform(ST_GeomFromWKT('POINT (-122.4194 37.7749)'), 'EPSG:4326', 'EPSG:3857')")
           .first()
-          .getAs[Geometry](0)
+          .getJtsGeometry(0)
 
         assertNotNull(result)
         // GeoTools should produce similar results (within tolerance)
@@ -423,12 +424,12 @@ class CRSTransformProj4Test extends TestBaseScala {
       val resultLenientTrue = sparkSession
         .sql("SELECT ST_Transform(ST_GeomFromWKT('POINT (-122.4194 37.7749)'), 'EPSG:4326', 'EPSG:3857', true)")
         .first()
-        .getAs[Geometry](0)
+        .getJtsGeometry(0)
 
       val resultLenientFalse = sparkSession
         .sql("SELECT ST_Transform(ST_GeomFromWKT('POINT (-122.4194 37.7749)'), 'EPSG:4326', 'EPSG:3857', false)")
         .first()
-        .getAs[Geometry](0)
+        .getJtsGeometry(0)
 
       assertNotNull(resultLenientTrue)
       assertNotNull(resultLenientFalse)
@@ -445,7 +446,7 @@ class CRSTransformProj4Test extends TestBaseScala {
         val result = sparkSession
           .sql("SELECT ST_Transform(ST_GeomFromWKT('POINT (-122.4194 37.7749)'), 'EPSG:4326', 'EPSG:3857', false)")
           .first()
-          .getAs[Geometry](0)
+          .getJtsGeometry(0)
 
         assertNotNull(result)
         assertEquals(-13627665.27, result.getCoordinate.x, COORD_TOLERANCE)
@@ -457,7 +458,7 @@ class CRSTransformProj4Test extends TestBaseScala {
         val result = sparkSession
           .sql("SELECT ST_Transform(ST_GeomFromWKT('POINT (-122.4194 37.7749)'), 'EPSG:4326', 'EPSG:3857', false)")
           .first()
-          .getAs[Geometry](0)
+          .getJtsGeometry(0)
 
         assertNotNull(result)
         // GeoTools should produce similar results
@@ -472,7 +473,7 @@ class CRSTransformProj4Test extends TestBaseScala {
       val result = sparkSession
         .sql("SELECT ST_Transform(ST_GeomFromWKT('POINT (-122.4194 37.7749)'), 'EPSG:4326', 'EPSG:4326')")
         .first()
-        .getAs[Geometry](0)
+        .getJtsGeometry(0)
 
       assertNotNull(result)
       assertEquals(4326, result.getSRID)
@@ -484,7 +485,7 @@ class CRSTransformProj4Test extends TestBaseScala {
       val result = sparkSession
         .sql("SELECT ST_Transform(ST_GeomFromWKT('POINT EMPTY'), 'EPSG:4326', 'EPSG:3857')")
         .first()
-        .getAs[Geometry](0)
+        .getJtsGeometry(0)
 
       assertNotNull(result)
       assertTrue(result.isEmpty)
@@ -596,7 +597,7 @@ class CRSTransformProj4Test extends TestBaseScala {
             '$etrs89WithGrid',
             '$osgb36')""")
         .first()
-        .getAs[Geometry](0)
+        .getJtsGeometry(0)
       val coldTime = (System.nanoTime() - startCold) / 1e6
 
       println(f"First transform (cold, loads ~15MB grid): $coldTime%.2f ms")
@@ -615,7 +616,7 @@ class CRSTransformProj4Test extends TestBaseScala {
               '$etrs89WithGrid',
               '$osgb36')""")
           .first()
-          .getAs[Geometry](0)
+          .getJtsGeometry(0)
 
         if (result != null) {
           val xShift = Math.abs(result.getCoordinate.x - tp.etrsLon)
@@ -688,7 +689,7 @@ class CRSTransformProj4Test extends TestBaseScala {
               '$etrs89WithGrid',
               '$osgb36')""")
           .first()
-          .getAs[Geometry](0)
+          .getJtsGeometry(0)
         (
           tp.pointId,
           osgbResult.getCoordinate.x,
@@ -710,7 +711,7 @@ class CRSTransformProj4Test extends TestBaseScala {
             '$osgb36WithGrid',
             '$etrs89')""")
         .first()
-        .getAs[Geometry](0)
+        .getJtsGeometry(0)
       val firstTime = (System.nanoTime() - startFirst) / 1e6
 
       println(f"First transform (grid cached, new CRS): $firstTime%.2f ms")
@@ -727,7 +728,7 @@ class CRSTransformProj4Test extends TestBaseScala {
                 '$osgb36WithGrid',
                 '$etrs89')""")
           .first()
-          .getAs[Geometry](0)
+          .getJtsGeometry(0)
 
         if (result != null) {
           val xShift = Math.abs(result.getCoordinate.x - osgbLon)
@@ -788,7 +789,7 @@ class CRSTransformProj4Test extends TestBaseScala {
               '$osgb36WithGrid',
               '$etrs89')""")
           .first()
-          .getAs[Geometry](0)
+          .getJtsGeometry(0)
 
         if (result != null) {
           val xError = Math.abs(result.getCoordinate.x - tp.etrsLon)
@@ -838,7 +839,7 @@ class CRSTransformProj4Test extends TestBaseScala {
             '$etrs89WithGrid',
             '$osgb36')""")
         .first()
-        .getAs[Geometry](0)
+        .getJtsGeometry(0)
       val downloadTime = (System.nanoTime() - startDownload) / 1e6
 
       println(f"First transform (downloads ~15MB grid): $downloadTime%.2f ms")
@@ -867,7 +868,7 @@ class CRSTransformProj4Test extends TestBaseScala {
               '$etrs89WithGrid',
               '$osgb36')""")
           .first()
-          .getAs[Geometry](0)
+          .getJtsGeometry(0)
 
         if (result != null) {
           val xShiftPt = Math.abs(result.getCoordinate.x - tp.etrsLon)
@@ -903,7 +904,7 @@ class CRSTransformProj4Test extends TestBaseScala {
       val result = sparkSession
         .sql("SELECT ST_Transform(ST_SetSRID(ST_GeomFromWKT('POINT (-122.4194 37.7749)'), 4326), 'EPSG:4326', 'EPSG:3857')")
         .first()
-        .getAs[Geometry](0)
+        .getJtsGeometry(0)
 
       assertNotNull(result)
       assertEquals(3857, result.getSRID)
@@ -920,7 +921,7 @@ class CRSTransformProj4Test extends TestBaseScala {
         val result = sparkSession
           .sql("SELECT ST_Transform(ST_SetSRID(ST_GeomFromWKT('POINT (-122.4194 37.7749)'), 4326), 'EPSG:4326', 'EPSG:3857')")
           .first()
-          .getAs[Geometry](0)
+          .getJtsGeometry(0)
 
         // Should succeed via built-in fallback
         assertNotNull(result)
@@ -942,7 +943,7 @@ class CRSTransformProj4Test extends TestBaseScala {
         val result = sparkSession
           .sql("SELECT ST_Transform(ST_SetSRID(ST_GeomFromWKT('POINT (-122.4194 37.7749)'), 4326), 'EPSG:4326', 'EPSG:3857')")
           .first()
-          .getAs[Geometry](0)
+          .getJtsGeometry(0)
 
         assertNotNull(result)
 
@@ -992,13 +993,21 @@ class CRSTransformProj4Test extends TestBaseScala {
       sparkSession.conf.set("spark.sedona.crs.url.pathTemplate", "/epsg/{code}.json")
       sparkSession.conf.set("spark.sedona.crs.url.format", "proj")
       try {
-        val result = sparkSession
-          .sql("SELECT ST_Transform(ST_SetSRID(ST_GeomFromWKT('POINT (-122.4194 37.7749)'), 4326), 'EPSG:4326', 'EPSG:990001')")
-          .first()
-          .getAs[Geometry](0)
+        val sql =
+          "SELECT ST_Transform(ST_SetSRID(ST_GeomFromWKT('POINT (-122.4194 37.7749)'), 4326), 'EPSG:4326', 'EPSG:990001')"
+        val result = if (SpatialTypeSupport.usesNativeTypes) {
+          val error = intercept[Exception](sparkSession.sql(sql).collect())
+          assert(error.toString.contains("SRID"))
+          // Spark requires an allowed native SRID; the equivalent PROJ definition has SRID 0.
+          sparkSession
+            .sql(
+              s"SELECT ST_Transform(ST_GeomFromWKT('POINT (-122.4194 37.7749)', 4326), 'EPSG:4326', '$weirdMercator')")
+            .first()
+            .getJtsGeometry(0)
+        } else sparkSession.sql(sql).first().getJtsGeometry(0)
 
-        assertNotNull("Transform to fake EPSG:990001 should succeed via URL provider", result)
-        assertEquals(990001, result.getSRID)
+        assertNotNull("The configured CRS definition should transform the geometry", result)
+        assertEquals(if (SpatialTypeSupport.usesNativeTypes) 0 else 990001, result.getSRID)
         // Standard Web Mercator: x = -13627665.27, y = 4547675.35
         // Our weird definition adds +x_0=10000000, +y_0=20000000
         assertEquals(-3627665.27, result.getCoordinate.x, COORD_TOLERANCE)

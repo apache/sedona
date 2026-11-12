@@ -50,7 +50,12 @@ from pyspark.sql.types import (
     StructType,
     TimestampType,
 )
-from sedona.spark.sql.types import GeometryType
+from sedona.spark.sql.types import (
+    GeometryType,
+    geometry_type,
+    is_geometry_type,
+    USES_NATIVE_SPATIAL_TYPES,
+)
 from sedona.spark.sql.functions import sedona_vectorized_udf, SedonaUDFType
 
 from sedona.spark.sql import st_aggregates as sta
@@ -65,6 +70,7 @@ from pyspark.sql import functions as F
 import shapely
 from shapely.geometry.base import BaseGeometry
 
+from sedona.spark.geopandas._geometry import geometry_srid, geometry_wkb
 from sedona.spark.geopandas._crs import (
     NO_CRS_OVERRIDE,
     read_crs_metadata,
@@ -523,6 +529,22 @@ def _not_implemented_error(method_name: str, additional_info: str = "") -> str:
     return base_message + workaround
 
 
+def _geometry_literal(value):
+    """Construct scalar geometry with Spark's public native WKB contract."""
+    if USES_NATIVE_SPATIAL_TYPES:
+        from sedona.spark.sql.types import to_spark_geometry
+
+        value = to_spark_geometry(value)
+        wkb = None if value is None else bytes(value.wkb)
+        geometry = stc.ST_GeomFromWKB(F.lit(wkb).cast("binary"))
+        if value is not None and value.srid != 0:
+            geometry = stf.ST_SetSRID(geometry, value.srid)
+        return geometry.cast(geometry_type())
+    return stc.ST_GeomFromWKB(
+        F.lit(None if value is None else value.wkb).cast("binary")
+    )
+
+
 class GeoSeries(GeoFrame, pspd.Series):
     """
     A pandas-on-Spark Series for geometric/spatial operations.
@@ -592,6 +614,29 @@ class GeoSeries(GeoFrame, pspd.Series):
     geopandas.GeoSeries : The GeoPandas equivalent
     sedona.spark.geopandas.GeoDataFrame : DataFrame with geometry column
     """
+
+    @property
+    def iloc(self):
+        if USES_NATIVE_SPATIAL_TYPES:
+            from sedona.spark.geopandas._native import NativeGeometryILoc
+
+            return NativeGeometryILoc(self)
+        return super().iloc
+
+    def _to_internal_pandas(self):
+        if USES_NATIVE_SPATIAL_TYPES:
+            from sedona.spark.geopandas._native import to_pandas
+
+            return to_pandas(self._internal).iloc[:, 0].rename(self.name)
+        return super()._to_internal_pandas()
+
+    def count(self, axis=None, numeric_only=False):
+        if USES_NATIVE_SPATIAL_TYPES:
+            # The boolean projection retains Series axis/argument validation.
+            return self._query_geometry_column(
+                F.when(self.spark.column.isNotNull(), F.lit(True)), returns_geom=False
+            ).count(axis=axis, numeric_only=numeric_only)
+        return super().count(axis=axis, numeric_only=numeric_only)
 
     def __getitem__(self, key: Any) -> Any:
         return pspd.Series.__getitem__(self, key)
@@ -717,7 +762,7 @@ class GeoSeries(GeoFrame, pspd.Series):
                 dtype=dtype,
                 name=name,
                 copy=copy,
-                fastpath=fastpath,
+                **({} if USES_NATIVE_SPATIAL_TYPES else {"fastpath": fastpath}),
             )
         else:
             if isinstance(data, pd.Series):
@@ -739,7 +784,14 @@ class GeoSeries(GeoFrame, pspd.Series):
 
             pd_series = pd_series.astype(object)
 
-            if (
+            if USES_NATIVE_SPATIAL_TYPES:
+                from sedona.spark.geopandas._native import from_pandas
+
+                ps_series = first_series(from_pandas(pd_series.to_frame(), {0: crs}))
+                if pd_series.name is None:
+                    ps_series = ps_series.rename(None)
+                super().__init__(data=ps_series._anchor, index=ps_series._col_label)
+            elif (
                 not pd_series.empty
                 and pd_series.isna().iloc[0]
                 and any(isinstance(value, BaseGeometry) for value in pd_series)
@@ -758,7 +810,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         # Ensure we're storing geometry types.
         if (
-            self.spark.data_type != GeometryType()
+            not is_geometry_type(self.spark.data_type)
             and self.spark.data_type != NullType()
         ):
             raise TypeError(
@@ -839,7 +891,9 @@ class GeoSeries(GeoFrame, pspd.Series):
             return metadata_crs
 
         # F.first is non-deterministic, but it doesn't matter because all non-null values should be the same.
-        spark_col = stf.ST_SRID(F.first(self.spark.column, ignorenulls=True))
+        spark_col = geometry_srid(
+            F.first(self.spark.column, ignorenulls=True), self.spark.data_type
+        )
 
         # Set this to avoid error complaining that we don't have a groupby column.
         tmp_series = self._query_geometry_column(
@@ -965,7 +1019,13 @@ class GeoSeries(GeoFrame, pspd.Series):
         # 0 indicates no SRID in Sedona.
         new_epsg = (crs.to_epsg() or 0) if crs is not None else 0
 
-        spark_col = stf.ST_SetSRID(self.spark.column, new_epsg)
+        source_geometry = self.spark.column
+        if USES_NATIVE_SPATIAL_TYPES and isinstance(self.spark.data_type, NullType):
+            source_geometry = source_geometry.cast(geometry_type())
+        spark_col = stf.ST_SetSRID(source_geometry, new_epsg)
+        if USES_NATIVE_SPATIAL_TYPES:
+            # Keep per-value SRIDs without requiring PySpark's fixed-CRS mapper.
+            spark_col = spark_col.cast(GeometryType("ANY"))
         result = self._query_geometry_column(
             spark_col,
             keep_name=True,
@@ -1068,6 +1128,11 @@ class GeoSeries(GeoFrame, pspd.Series):
                 nullable=schema_field.nullable,
             )
 
+        if USES_NATIVE_SPATIAL_TYPES:
+            from sedona.spark.geopandas._native import internal_field
+        else:
+            internal_field = InternalField.from_struct_field
+
         result_column_label = self._column_label if keep_name else None
         internal = self._internal.copy(
             spark_frame=sdf,
@@ -1077,11 +1142,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             column_labels=[result_column_label],
             data_spark_columns=[scol_for(sdf, rename)],
             data_fields=[
-                (
-                    result_field
-                    if returns_geom
-                    else InternalField.from_struct_field(sdf.schema[rename])
-                )
+                result_field if returns_geom else internal_field(sdf.schema[rename])
             ],
             column_label_names=(
                 self._internal.column_label_names if keep_name else [None]
@@ -1089,7 +1150,15 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
         ps_series = first_series(PandasOnSparkDataFrame(internal))
 
-        return GeoSeries(ps_series) if returns_geom else ps_series
+        if returns_geom:
+            return GeoSeries(ps_series)
+        if USES_NATIVE_SPATIAL_TYPES:
+            from sedona.spark.geopandas._native import NativeScalarSeries
+
+            return NativeScalarSeries(
+                data=ps_series._anchor, index=ps_series._column_label
+            )
+        return ps_series
 
     def _expand_geometry_array(
         self,
@@ -1133,7 +1202,12 @@ class GeoSeries(GeoFrame, pspd.Series):
         """
         Same as `to_geopandas()`, without issuing the advice log for internal usage.
         """
-        pd_series = self._to_internal_pandas()
+        if USES_NATIVE_SPATIAL_TYPES:
+            from sedona.spark.geopandas._native import to_pandas
+
+            pd_series = to_pandas(self._internal).iloc[:, 0].rename(self.name)
+        else:
+            pd_series = self._to_internal_pandas()
         return gpd.GeoSeries(
             pd_series.array,
             index=pd_series.index,
@@ -1151,6 +1225,12 @@ class GeoSeries(GeoFrame, pspd.Series):
             A Series with the same index and geometry values, without the
             GeoSeries spatial methods.
         """
+        if USES_NATIVE_SPATIAL_TYPES:
+            from sedona.spark.geopandas._native import NativeScalarSeries
+
+            return NativeScalarSeries(
+                data=pspd.DataFrame(self._internal), index=self._column_label
+            )
         return pspd.Series(pspd.DataFrame(self._psdf._internal))
 
     # ============================================================================
@@ -1320,7 +1400,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             scol_for(source_sdf, NATURAL_ORDER_COLUMN_NAME),
         )
 
-        empty_neighbors = F.array().cast(ArrayType(GeometryType(), containsNull=False))
+        empty_neighbors = F.array().cast(ArrayType(geometry_type(), containsNull=False))
         geometry = scol_for(geometry_source, geometry_name)
         nonempty_source = geometry_source.where(
             F.coalesce(
@@ -1347,12 +1427,23 @@ class GeoSeries(GeoFrame, pspd.Series):
         # value and the multiset of physical candidate geometries. Validate each
         # distinct target value once, but retain duplicates on the candidate side
         # so duplicate coverage members remain observable as overlaps.
+        target_key_name = "__coverage_target_key__"
         targets = active_source.select(
             scol_for(active_source, geometry_name).alias(
                 target_geometry_name, metadata=geometry_field.metadata
             ),
             scol_for(active_source, polygonal_shape_name).alias(target_shape_name),
-        ).dropDuplicates([target_geometry_name])
+        )
+        if USES_NATIVE_SPATIAL_TYPES:
+            targets = targets.withColumn(
+                target_key_name,
+                F.struct(
+                    stf.ST_AsBinary(F.col(target_geometry_name)),
+                    stf.ST_SRID(F.col(target_geometry_name)),
+                ),
+            ).dropDuplicates([target_key_name])
+        else:
+            targets = targets.dropDuplicates([target_geometry_name])
         candidates = active_source.select(
             scol_for(active_source, geometry_name).alias(neighbor_geometry_name),
             scol_for(active_source, polygonal_shape_name).alias(neighbor_shape_name),
@@ -1368,11 +1459,21 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
         pairs = targets.join(candidates, spatial_condition, "inner")
 
-        diagnostics = pairs.groupBy(target_geometry_name).agg(
-            F.collect_list(scol_for(pairs, neighbor_geometry_name)).alias(
-                neighbors_name
-            ),
-        )
+        if USES_NATIVE_SPATIAL_TYPES:
+            diagnostics = pairs.groupBy(target_key_name).agg(
+                F.first(scol_for(pairs, target_geometry_name)).alias(
+                    target_geometry_name
+                ),
+                F.collect_list(scol_for(pairs, neighbor_geometry_name)).alias(
+                    neighbors_name
+                ),
+            )
+        else:
+            diagnostics = pairs.groupBy(target_geometry_name).agg(
+                F.collect_list(scol_for(pairs, neighbor_geometry_name)).alias(
+                    neighbors_name
+                ),
+            )
         diagnostics = diagnostics.withColumn(gap_width_name, F.lit(gap_width))
         diagnostics = diagnostics.withColumn(
             diagnostic_edges_name,
@@ -1383,18 +1484,23 @@ class GeoSeries(GeoFrame, pspd.Series):
         ).select(
             target_geometry_name,
             diagnostic_edges_name,
+            *([target_key_name] if USES_NATIVE_SPATIAL_TYPES else []),
         )
 
         # Join the geometry-keyed diagnostics onto one final evaluation of the
         # source carrying index and ordering columns. Normal GeometryUDT equality
         # compares the exact represented value and maps one diagnostic back to
         # every physical duplicate row.
-        validation_rows = source.join(
-            diagnostics,
-            scol_for(source, geometry_name)
-            == scol_for(diagnostics, target_geometry_name),
-            "left",
-        )
+        if USES_NATIVE_SPATIAL_TYPES:
+            match = F.struct(
+                stf.ST_AsBinary(scol_for(source, geometry_name)),
+                stf.ST_SRID(scol_for(source, geometry_name)),
+            ) == scol_for(diagnostics, target_key_name)
+        else:
+            match = scol_for(source, geometry_name) == scol_for(
+                diagnostics, target_geometry_name
+            )
+        validation_rows = source.join(diagnostics, match, "left")
         validation_rows = validation_rows.withColumn(
             neighbors_name, empty_neighbors
         ).withColumn(gap_width_name, F.lit(gap_width))
@@ -1611,7 +1717,7 @@ class GeoSeries(GeoFrame, pspd.Series):
                 f"__index_level_{level}__"
                 for level in range(len(source_internal.index_spark_columns))
             ]
-            other_geometry = stc.ST_GeomFromWKB(F.lit(other.wkb))
+            other_geometry = _geometry_literal(other)
             distance_columns = []
             if same_anchor_distance:
                 distance_data_type = distance.spark.data_type
@@ -2052,7 +2158,7 @@ class GeoSeries(GeoFrame, pspd.Series):
                 ),
             ),
         ).getItem(0)
-        requested_extent = stc.ST_GeomFromWKB(F.lit(extend_to.envelope.wkb))
+        requested_extent = _geometry_literal(extend_to.envelope)
         # JTS treats extendTo as a hard clip. GeoPandas only enlarges the
         # default Voronoi extent, so combine both envelopes before calling it.
         effective_extent = stf.ST_Envelope(
@@ -2758,7 +2864,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             raise ImportError("transform requires Shapely 2.0 or newer")
 
         @sedona_vectorized_udf(
-            return_type=GeometryType(), udf_type=SedonaUDFType.GEO_SERIES
+            return_type=geometry_type(), udf_type=SedonaUDFType.GEO_SERIES
         )
         def transform_batch(batch: gpd.GeoSeries) -> gpd.GeoSeries:
             return gpd.GeoSeries(
@@ -3012,9 +3118,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         spark_expr = sta.ST_Union_Aggr(self.spark.column)
         tmp = self._query_geometry_column(spark_expr, returns_geom=False, is_aggr=True)
 
-        ps_series = tmp.take([0])
-        geom = ps_series.iloc[0]
-        return geom
+        return tmp.to_pandas().iloc[0]
 
     def intersection_all(self) -> BaseGeometry:
         if self._is_empty():
@@ -3024,9 +3128,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         spark_expr = sta.ST_Intersection_Aggr(self.spark.column)
         tmp = self._query_geometry_column(spark_expr, returns_geom=False, is_aggr=True)
 
-        ps_series = tmp.take([0])
-        geom = ps_series.iloc[0]
-        return geom
+        return tmp.to_pandas().iloc[0]
 
     def crosses(self, other, align=None) -> pspd.Series:
         other_series, extended = self._make_series_of_val(other)
@@ -3240,7 +3342,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
         if isinstance(other, BaseGeometry):
-            other_geometry = stc.ST_GeomFromWKB(F.lit(other.wkb))
+            other_geometry = _geometry_literal(other)
             spark_expr = stp.ST_EqualsExact(
                 self.spark.column, other_geometry, tolerance
             )
@@ -3309,7 +3411,7 @@ class GeoSeries(GeoFrame, pspd.Series):
                     other_wkt = other_wkt.replace("LINEARRING", "LINESTRING", 1)
                 other_geometry = stc.ST_GeomFromWKT(F.lit(other_wkt))
             else:
-                other_geometry = stc.ST_GeomFromWKB(F.lit(other.wkb))
+                other_geometry = _geometry_literal(other)
             spark_expr = stp.ST_EqualsIdentical(
                 self.spark.column,
                 other_geometry,
@@ -3403,7 +3505,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     def shared_paths(self, other, align=None) -> "GeoSeries":
         if isinstance(other, BaseGeometry):
-            other_geometry = stc.ST_GeomFromWKB(F.lit(other.wkb))
+            other_geometry = _geometry_literal(other)
             # A standalone Shapely geometry carries no SRID. When CRS metadata
             # is available, use its scalar SRID so Catalyst can fold this whole
             # literal expression instead of copying the geometry for every row.
@@ -5005,8 +5107,39 @@ class GeoSeries(GeoFrame, pspd.Series):
         # With spark.sql.exchange.reuse enabled (the default), Spark shares this
         # shuffle within the query without a user-managed cache.
         row = "__fillna_row__"
-        shared = positional_join.select(F.struct("*").alias(row)).repartition(row)
-        aligned = shared.select(f"{row}.*")
+        if USES_NATIVE_SPATIAL_TYPES:
+            packed = positional_join.select(
+                F.struct(
+                    *[
+                        (
+                            F.struct(
+                                stf.ST_AsBinary(F.col(name)).alias("wkb"),
+                                stf.ST_SRID(F.col(name)).alias("srid"),
+                            )
+                            if name in ("L", "R")
+                            else F.col(name)
+                        ).alias(name)
+                        for name in positional_join.columns
+                    ]
+                ).alias(row)
+            )
+            shared = packed.repartition(row)
+            represented = shared.select(f"{row}.*")
+            aligned = represented.select(
+                *[
+                    (
+                        stf.ST_SetSRID(
+                            stc.ST_GeomFromWKB(F.col(name)["wkb"]), F.col(name)["srid"]
+                        )
+                        if name in ("L", "R")
+                        else F.col(name)
+                    ).alias(name)
+                    for name in positional_join.columns
+                ]
+            )
+        else:
+            shared = positional_join.select(F.struct("*").alias(row)).repartition(row)
+            aligned = shared.select(f"{row}.*")
         status = aligned.agg(
             F.count(F.col(left_present)).alias("left_count"),
             F.count(F.col(right_present)).alias("right_count"),
@@ -5326,10 +5459,10 @@ class GeoSeries(GeoFrame, pspd.Series):
 
                     value = GeometryCollection()
 
-            if limit is not None:
-                replacement = stc.ST_GeomFromWKB(
-                    F.lit(value.wkb if value is not None else None).cast("binary")
-                )
+            if value is None and USES_NATIVE_SPATIAL_TYPES:
+                result = self._query_geometry_column(self.spark.column, keep_name=True)
+            elif limit is not None:
+                replacement = _geometry_literal(value)
                 result = self._fillna_with_limit(replacement, limit)
             else:
                 other, extended = self._make_series_of_val(value)
@@ -5854,7 +5987,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         dtype: object
 
         """
-        spark_expr = stf.ST_AsBinary(self.spark.column)
+        spark_expr = geometry_wkb(self.spark.column, self.spark.data_type)
 
         if hex:
             spark_expr = F.hex(spark_expr)

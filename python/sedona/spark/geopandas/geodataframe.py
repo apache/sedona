@@ -40,7 +40,7 @@ from pyspark.pandas.internal import (
     NATURAL_ORDER_COLUMN_NAME,
     SPARK_INDEX_NAME_FORMAT,
 )
-from pyspark.pandas.utils import scol_for
+from pyspark.pandas.utils import same_anchor, scol_for
 from pyspark.sql.column import Column
 from pyspark.sql import functions as F
 from pyspark.sql.types import (
@@ -59,6 +59,7 @@ from pyspark.sql.types import (
 )
 from pyspark.pandas.utils import log_advice
 
+from sedona.spark.geopandas._geometry import geometry_wkb
 from sedona.spark.geopandas._crs import (
     copy_crs_metadata,
     read_crs_metadata,
@@ -70,7 +71,11 @@ from sedona.spark.geopandas.base import GeoFrame
 from sedona.spark.sql import st_aggregates as sta
 from sedona.spark.sql import st_constructors as stc
 from sedona.spark.sql import st_functions as stf
-from sedona.spark.sql.types import GeometryType
+from sedona.spark.sql.types import (
+    GeometryType,
+    USES_NATIVE_SPATIAL_TYPES,
+    is_geometry_type,
+)
 
 from pandas.api.extensions import register_extension_dtype
 from geopandas.geodataframe import crs_mismatch_error
@@ -649,6 +654,86 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
     sedona.spark.geopandas.GeoSeries : Series with geometry data
     """
 
+    def _to_pandas(self):
+        if USES_NATIVE_SPATIAL_TYPES:
+            return self._to_internal_pandas().copy()
+        return super()._to_pandas()
+
+    def count(self, axis=None, numeric_only=False):
+        if not USES_NATIVE_SPATIAL_TYPES:
+            return super().count(axis=axis, numeric_only=numeric_only)
+        from pyspark.sql.types import BooleanType, StructField
+
+        columns, fields, labels = [], [], []
+        for label, name, column, field in zip(
+            self._internal.column_labels,
+            self._internal.data_spark_column_names,
+            self._internal.data_spark_columns,
+            self._internal.data_fields,
+        ):
+            if isinstance(field.spark_type, GeometryType):
+                if numeric_only:
+                    continue
+                column = F.when(column.isNotNull(), F.lit(True)).alias(name)
+                field = InternalField(
+                    np.dtype("bool"), StructField(name, BooleanType(), True)
+                )
+            columns.append(column)
+            fields.append(field)
+            labels.append(label)
+        frame = pspd.DataFrame(
+            self._internal.copy(
+                data_spark_columns=columns, data_fields=fields, column_labels=labels
+            )
+        )
+        return frame.count(axis=axis, numeric_only=numeric_only)
+
+    def __setitem__(self, key, value):
+        if (
+            USES_NATIVE_SPATIAL_TYPES
+            and isinstance(value, pspd.Series)
+            and not same_anchor(self, value)
+        ):
+            if any(
+                isinstance(field.spark_type, GeometryType)
+                for field in self._internal.data_fields + value._internal.data_fields
+            ):
+                from sedona.spark.geopandas._native import assign_geometry
+
+                self._update_internal_frame(
+                    assign_geometry(self, key, value), anchor_force_disconnect=True
+                )
+                return
+        return super().__setitem__(key, value)
+
+    def _to_internal_pandas(self):
+        if USES_NATIVE_SPATIAL_TYPES:
+            from sedona.spark.geopandas._native import to_pandas
+
+            return to_pandas(self._internal)
+        return super()._to_internal_pandas()
+
+    def _repr_html_(self):
+        if USES_NATIVE_SPATIAL_TYPES:
+            from sedona.spark.geopandas._native import display
+
+            return display(self, html=True)
+        return super()._repr_html_()
+
+    def _psser_for(self, label):
+        series = super()._psser_for(label)
+        if (
+            USES_NATIVE_SPATIAL_TYPES
+            and not is_geometry_type(series.spark.data_type)
+            and not isinstance(series.spark.data_type, NullType)
+        ):
+            from sedona.spark.geopandas._native import NativeScalarSeries
+
+            if not isinstance(series, NativeScalarSeries):
+                series = NativeScalarSeries(data=self, index=label)
+                self._pssers[label] = series
+        return series
+
     def __getitem__(self, key: Any) -> Any:
         """
         Get item from GeoDataFrame by key.
@@ -756,7 +841,10 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
 
         elif isinstance(data, (PandasOnSparkDataFrame, SparkDataFrame)):
+            if USES_NATIVE_SPATIAL_TYPES and isinstance(data, SparkDataFrame):
+                from sedona.spark.geopandas._native import from_spark
 
+                data = from_spark(data)
             super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
         elif isinstance(data, PandasOnSparkSeries):
 
@@ -802,13 +890,27 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 pd_df = pd_df.copy()
             pd_df[geom_type_cols] = pd_df[geom_type_cols].astype(object)
 
-            # Initialize the parent class pyspark DataFrame with the pandas DataFrame.
-            super().__init__(
-                data=pd_df,
-                index=index,
-                dtype=dtype,
-                copy=copy,
-            )
+            if USES_NATIVE_SPATIAL_TYPES:
+                from sedona.spark.geopandas._native import from_pandas
+
+                geometry_columns = dict(local_geometry_crs)
+                if geometry is not None and pd.api.types.is_hashable(geometry):
+                    for position, label in enumerate(pd_df.columns):
+                        if label == geometry:
+                            geometry_columns[position] = (
+                                crs
+                                if crs is not None
+                                else geometry_columns.get(position)
+                            )
+                super().__init__(from_pandas(pd_df, geometry_columns))
+            else:
+                # Initialize the parent class with the pandas DataFrame.
+                super().__init__(
+                    data=pd_df,
+                    index=index,
+                    dtype=dtype,
+                    copy=copy,
+                )
 
         # Set geometry column name
         if isinstance(data, (GeoDataFrame, gpd.GeoDataFrame)):
@@ -842,13 +944,15 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                     existing_geometry._internal.data_spark_column_names[0]
                 )
                 geometry_field = geometry_field.copy(name=geometry_column_name)
+                geometry_column = stf.ST_SetSRID(
+                    existing_geometry.spark.column, new_epsg
+                )
+                if USES_NATIVE_SPATIAL_TYPES:
+                    geometry_column = geometry_column.cast(GeometryType("ANY"))
                 self._update_internal_frame(
                     self._internal.with_new_spark_column(
                         existing_geometry._column_label,
-                        stf.ST_SetSRID(
-                            existing_geometry.spark.column,
-                            new_epsg,
-                        ).alias(
+                        geometry_column.alias(
                             geometry_column_name,
                             metadata=geometry_field.metadata,
                         ),
@@ -1141,7 +1245,27 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         # This operation throws a warning to the user asking them to set pspd.set_option('compute.ops_on_diff_frames', True)
         # to allow operations on different frames. We pass these warnings on to the user so they must manually set it themselves.
-        if crs is not None:
+        if (
+            USES_NATIVE_SPATIAL_TYPES
+            and crs is not None
+            and isinstance(level, sgpd.GeoSeries)
+            and same_anchor(frame, level)
+        ):
+            if level._column_label not in frame._internal.column_labels:
+                frame[geo_column_name] = level
+                level = frame[geo_column_name]
+            normalized_crs = CRS.from_user_input(crs)
+            column = stf.ST_SetSRID(level.spark.column, normalized_crs.to_epsg() or 0)
+            if USES_NATIVE_SPATIAL_TYPES:
+                column = column.cast(GeometryType("ANY"))
+            frame._update_geometry_field(
+                level,
+                with_crs_metadata(level._internal.data_fields[0], normalized_crs),
+                column,
+            )
+            level = frame[geo_column_name]
+            new_series = False
+        elif crs is not None:
             level.set_crs(crs, inplace=True, allow_override=True)
             new_series = True
 
@@ -1150,7 +1274,14 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             # Assignment casts GeoSeries back into pspd.Series and can drop
             # custom field metadata. Restore only the CRS marker from the
             # normalized source Series on the assigned column.
-            frame[geo_column_name] = level
+            if USES_NATIVE_SPATIAL_TYPES and not same_anchor(frame, level):
+                from sedona.spark.geopandas._native import assign_geometry
+
+                frame._update_internal_frame(
+                    assign_geometry(frame, geo_column_name, level)
+                )
+            else:
+                frame[geo_column_name] = level
             assigned_geometry = frame[geo_column_name]
             if isinstance(assigned_geometry, sgpd.GeoSeries):
                 frame._update_geometry_field(
@@ -1283,15 +1414,28 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         return self._to_geopandas()
 
     def _to_geopandas(self) -> gpd.GeoDataFrame:
-        pd_df = self._internal.to_pandas_frame
+        if USES_NATIVE_SPATIAL_TYPES:
+            from sedona.spark.geopandas._native import to_pandas
+
+            pd_df = to_pandas(self._internal)
+        else:
+            pd_df = self._internal.to_pandas_frame
 
         for col_name in pd_df.columns:
             series: pspd.Series = self[col_name]
-            if isinstance(series, sgpd.GeoSeries):
+            if isinstance(series, sgpd.GeoSeries) and (
+                not USES_NATIVE_SPATIAL_TYPES
+                or is_geometry_type(series.spark.data_type)
+            ):
                 # Use _to_geopandas instead of to_geopandas to avoid logging extra warnings
-                pd_df[col_name] = series._to_geopandas()
+                pd_df[col_name] = (
+                    gpd.GeoSeries(pd_df[col_name], crs=series.crs)
+                    if USES_NATIVE_SPATIAL_TYPES
+                    else series._to_geopandas()
+                )
             else:
-                pd_df[col_name] = series._to_pandas()
+                if not USES_NATIVE_SPATIAL_TYPES:
+                    pd_df[col_name] = series._to_pandas()
 
         result = gpd.GeoDataFrame(
             pd_df,
@@ -1306,6 +1450,10 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         """
         Convert the GeoDataFrame to a Spark Pandas DataFrame.
         """
+        if USES_NATIVE_SPATIAL_TYPES:
+            from sedona.spark.geopandas._native import _NativeDisplayFrame
+
+            return _NativeDisplayFrame(self._internal)
         return pspd.DataFrame(self._internal)
 
     def copy(self, deep=False) -> GeoDataFrame:
@@ -1973,10 +2121,10 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
     def _serialize_geometry_columns(
         self,
-        serializer: Callable[[Column], Column],
+        serializer: Callable[[Column, DataType], Column],
         output_type: DataType,
     ) -> pspd.DataFrame:
-        """Apply a native serializer to every geometry-typed column."""
+        """Apply a serializer to every native or UDT geometry column."""
         # Resolve pending index/data expressions onto one Spark frame before
         # building the serializer projection.
         internal = self._internal.resolved_copy
@@ -1990,10 +2138,10 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             internal.data_spark_column_names,
             internal.data_fields,
         ):
-            is_geometry = isinstance(field.spark_type, GeometryType)
+            is_geometry = is_geometry_type(field.spark_type)
             geometry_columns.append(is_geometry)
             serialized_columns.append(
-                serializer(spark_column).alias(spark_name)
+                serializer(spark_column, field.spark_type).alias(spark_name)
                 if is_geometry
                 else spark_column
             )
@@ -2062,6 +2210,11 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         field = field.copy(name=geometry_column_name)
         if geometry_column is None:
             geometry_column = geometry.spark.column
+        if USES_NATIVE_SPATIAL_TYPES:
+            actual = self._internal.spark_frame.select(
+                geometry_column.alias(geometry_column_name)
+            ).schema[geometry_column_name]
+            field = field.copy(spark_type=actual.dataType, nullable=actual.nullable)
         self._update_internal_frame(
             self._internal.with_new_spark_column(
                 geometry._column_label,
@@ -2125,6 +2278,8 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                         spark_column,
                         normalized_crs.to_epsg() or 0,
                     )
+                    if USES_NATIVE_SPATIAL_TYPES:
+                        spark_column = spark_column.cast(GeometryType("ANY"))
                 field = with_crs_metadata(field, target_crs).copy(name=spark_name)
                 spark_column = spark_column.alias(spark_name, metadata=field.metadata)
             output_columns.append(spark_column)
@@ -2208,9 +2363,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         """
         self._validate_serialization_kwargs("to_wkb", kwargs)
         serializer, output_type = (
-            (lambda geometry: F.hex(stf.ST_AsBinary(geometry)), StringType())
+            (lambda geometry, dtype: F.hex(geometry_wkb(geometry, dtype)), StringType())
             if hex
-            else (stf.ST_AsBinary, BinaryType())
+            else (geometry_wkb, BinaryType())
         )
         return self._serialize_geometry_columns(serializer, output_type)
 
@@ -2250,7 +2405,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         GeoSeries.to_wkt
         """
         self._validate_serialization_kwargs("to_wkt", kwargs)
-        return self._serialize_geometry_columns(stf.ST_AsText, StringType())
+        return self._serialize_geometry_columns(
+            lambda geometry, dtype: stf.ST_AsText(geometry), StringType()
+        )
 
     def to_arrow(
         self,

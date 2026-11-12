@@ -29,6 +29,26 @@ from shapely.geometry.base import BaseGeometry
 from pandas.testing import assert_index_equal
 
 
+def spark_frame_to_pandas_api(frame, index_col=None):
+    from sedona.spark.sql.types import USES_NATIVE_SPATIAL_TYPES
+
+    if USES_NATIVE_SPATIAL_TYPES:
+        from sedona.spark.geopandas._native import from_spark
+
+        return from_spark(frame, index_col=index_col)
+    return frame.pandas_api(index_col=index_col)
+
+
+def pandas_frame_with_geometry(frame):
+    from sedona.spark.sql.types import USES_NATIVE_SPATIAL_TYPES
+
+    if USES_NATIVE_SPATIAL_TYPES:
+        from sedona.spark.geopandas._native import from_pandas
+
+        return from_pandas(frame)
+    return ps.from_pandas(frame)
+
+
 class TestGeopandasBase(TestBase):
     # -----------------------------------------------------------------------------
     # # Utils

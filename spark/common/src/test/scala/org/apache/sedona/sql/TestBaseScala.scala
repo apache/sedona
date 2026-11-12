@@ -28,7 +28,8 @@ import org.apache.sedona.common.Predicates.dWithin
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
 import org.apache.sedona.spark.SedonaContext
 import org.apache.spark.SparkContext
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.locationtech.jts.geom._
 import org.locationtech.jts.io.WKTReader
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
@@ -44,14 +45,37 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   Logger.getLogger("akka").setLevel(Level.WARN)
   Logger.getLogger("org.apache.sedona.core").setLevel(Level.WARN)
 
+  /** Access semantic spatial values across Spark's external SQL representations. */
+  protected implicit class SpatialTestRow(row: Row) {
+    def getJtsGeometry(ordinal: Int): Geometry = SpatialTestValues.geometry(row, ordinal)
+
+    def getJtsGeometry(name: String): Geometry = SpatialTestValues.geometry(row, name)
+
+    def getJtsGeometries(ordinal: Int): scala.collection.Seq[Geometry] =
+      row.getSeq[Any](ordinal).map(SpatialTestValues.geometry).toSeq
+
+    def getSedonaGeography(ordinal: Int): org.apache.sedona.common.S2Geography.Geography =
+      SpatialTestValues.geography(row, ordinal)
+
+    def getSedonaGeography(name: String): org.apache.sedona.common.S2Geography.Geography =
+      SpatialTestValues.geography(row, name)
+  }
+
+  protected def materializeSpatialFrame(frame: DataFrame): DataFrame = {
+    if (SpatialTypeSupport.usesNativeTypes) {
+      // Spark's cached-batch serializer cannot cache native geometry. These small fixtures
+      // still cross the external SQL boundary and are read back from a scan-backed relation.
+      sparkSession.createDataFrame(sc.parallelize(frame.collect().toSeq), frame.schema)
+    } else frame.cache()
+  }
+
   // Default Spark configurations
   def defaultSparkConfig: Map[String, String] = Map(
     "spark.sql.warehouse.dir" -> (System.getProperty("user.dir") + "/target/"),
     "sedona.join.autoBroadcastJoinThreshold" -> "-1",
     "spark.kryoserializer.buffer.max" -> "64m",
-    // Disable Spark 4.1+ native geospatial functions that shadow Sedona's ST functions.
-    // This config is ignored on Spark versions that don't have it.
-    "spark.sql.geospatial.enabled" -> "false")
+    // Spark 4.2 owns the native spatial built-ins; older runtimes retain Sedona ownership.
+    "spark.sql.geospatial.enabled" -> SpatialTypeSupport.usesNativeTypes.toString)
 
   // Method to be overridden by subclasses to provide additional configurations
   def sparkConfig: Map[String, String] = defaultSparkConfig

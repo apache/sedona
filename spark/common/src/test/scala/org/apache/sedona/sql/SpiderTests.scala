@@ -34,7 +34,7 @@ class SpiderTests extends TestBaseScala with BeforeAndAfterAll {
       assert(spiderDf.count() == 100)
       spiderDf.collect().foreach { row =>
         assert(row.getAs[Long]("id") >= 0)
-        assert(row.getAs[Geometry]("geometry").isInstanceOf[Point])
+        assert(row.getJtsGeometry("geometry").isInstanceOf[Point])
       }
     }
 
@@ -135,8 +135,8 @@ class SpiderTests extends TestBaseScala with BeforeAndAfterAll {
         .load()
       assert(spiderDf.count() == 100)
       spiderDf.collect().foreach { row =>
-        assert(row.getAs[Geometry]("geometry").isInstanceOf[Polygon])
-        val geom = row.getAs[Geometry]("geometry")
+        assert(row.getJtsGeometry("geometry").isInstanceOf[Polygon])
+        val geom = row.getJtsGeometry("geometry")
         assert(geom.getNumPoints >= 6 && geom.getNumPoints <= 11)
       }
 
@@ -147,8 +147,8 @@ class SpiderTests extends TestBaseScala with BeforeAndAfterAll {
         .load()
       assert(spiderDf2.count() == 100)
       spiderDf2.collect().foreach { row =>
-        assert(row.getAs[Geometry]("geometry").isInstanceOf[Polygon])
-        val geom = row.getAs[Geometry]("geometry")
+        assert(row.getJtsGeometry("geometry").isInstanceOf[Polygon])
+        val geom = row.getJtsGeometry("geometry")
         assert(geom.getNumPoints == 5)
         assert(geom.isRectangle)
       }
@@ -169,7 +169,7 @@ class SpiderTests extends TestBaseScala with BeforeAndAfterAll {
         .load()
       assert(spiderDf.count() == 100)
       spiderDf.collect().foreach { row =>
-        val geom = row.getAs[Geometry]("geometry")
+        val geom = row.getJtsGeometry("geometry")
         // check if the geometry is transformed correctly
         // the transformed geometry should be a rectangle within region [10, 12] x [20, 22]
         val centroid = geom.getCentroid
@@ -192,7 +192,7 @@ class SpiderTests extends TestBaseScala with BeforeAndAfterAll {
       assert(records.length == 1000)
       // verify the distribution of the data
       val numPoints = records.count { row =>
-        val geom = row.getAs[Geometry]("geometry").getCentroid
+        val geom = row.getJtsGeometry("geometry").getCentroid
         Math.abs(geom.getX - geom.getY) < 0.000001
       }
       // With seed 42, exactly 676 of the 1000 generated points lie on the diagonal,
@@ -215,7 +215,7 @@ class SpiderTests extends TestBaseScala with BeforeAndAfterAll {
       assert(spiderDf.select("id").distinct().count() == 1000)
       // verify the distribution of the data
       val geometries: Array[Geometry] = spiderDf.collect().map { row =>
-        row.getAs[Geometry]("geometry")
+        row.getJtsGeometry("geometry")
       }
       var totalArea = 0.0
       val bounds = new Envelope(0, 1, 0, 1)
@@ -302,7 +302,7 @@ class SpiderTests extends TestBaseScala with BeforeAndAfterAll {
       assert(spiderDf.count() == 1000)
       // verify the distribution of the data
       val geometries: Array[Geometry] = spiderDf.collect().map { row =>
-        row.getAs[Geometry]("geometry")
+        row.getJtsGeometry("geometry")
       }
       var totalArea = 0.0
       val bounds = new Envelope(10, 12, 20, 22)

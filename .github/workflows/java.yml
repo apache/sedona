@@ -62,6 +62,10 @@ jobs:
       fail-fast: true
       matrix:
         include:
+          - spark: 4.2.0
+            scala: 2.13.18
+            jdk: '17'
+            skipLibPostalTests: 'true'
           - spark: 4.1.1
             scala: 2.13.17
             jdk: '17'
@@ -160,7 +164,13 @@ jobs:
           if [[ -n "${SKIP_TESTS}" ]]; then
               mvn_args+=("${SKIP_TESTS}")
           fi
-          mvn "${mvn_args[@]}"
+          if [[ "${SPARK_VERSION}" == 4.2.* ]]; then
+              # Installation tests need the packaged artifact before the full reactor test run.
+              mvn "${mvn_args[@]}" -DskipTests
+              mvn -q install "-Dspark=${SPARK_COMPAT_VERSION}" "-Dscala=${SCALA_VERSION:0:4}" "-Dspark.version=${SPARK_VERSION}"
+          else
+              mvn "${mvn_args[@]}"
+          fi
       - run: mkdir staging
       - run: cp spark-shaded/target/sedona-*.jar staging
       - run: |

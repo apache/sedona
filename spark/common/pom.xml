@@ -34,6 +34,7 @@
 
     <properties>
         <maven.deploy.skip>false</maven.deploy.skip>
+        <hadoop.minicluster.artifact>hadoop-minicluster</hadoop.minicluster.artifact>
     </properties>
 
     <dependencies>
@@ -219,7 +220,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-minicluster</artifactId>
+            <artifactId>${hadoop.minicluster.artifact}</artifactId>
             <version>${hadoop.version}</version>
             <scope>test</scope>
             <exclusions>
@@ -393,6 +394,47 @@
                     <scope>provided</scope>
                 </dependency>
             </dependencies>
+        </profile>
+        <profile>
+            <id>sedona-spark-4.2</id>
+            <activation>
+                <property>
+                    <name>spark</name>
+                    <value>4.2</value>
+                </property>
+            </activation>
+            <properties>
+                <!-- The shaded fixture keeps Hadoop's Jersey 2 server separate from Spark's Jersey 3. -->
+                <hadoop.minicluster.artifact>hadoop-client-minicluster</hadoop.minicluster.artifact>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-client</artifactId>
+                    <exclusions>
+                        <exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion>
+                    </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-client-api</artifactId>
+                    <version>${hadoop.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-client-runtime</artifactId>
+                    <version>${hadoop.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.spark</groupId>
+                    <artifactId>spark-sql-api_${scala.compat.version}</artifactId>
+                    <version>${spark.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+
         </profile>
     </profiles>
 </project>

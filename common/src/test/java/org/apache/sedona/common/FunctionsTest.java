@@ -5563,6 +5563,67 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void testAddMeasurePreservesCoordinateLayout() throws ParseException {
+    String[] wkts = {
+      "LINESTRING (0 0, 3 0, 3 4)",
+      "LINESTRING M (0 0 99, 3 0 99, 3 4 99)",
+      "LINESTRING Z (0 0 1, 3 0 5, 3 4 9)",
+      "LINESTRING ZM (0 0 1 99, 3 0 5 99, 3 4 9 99)"
+    };
+    for (int i = 0; i < wkts.length; i++) {
+      LineString source = (LineString) Constructors.geomFromEWKT("SRID=4326;" + wkts[i]);
+      LineString measured = (LineString) Functions.addMeasure(source, 10, 17);
+      CoordinateSequence coordinates = measured.getCoordinateSequence();
+      boolean hasZ = i >= 2;
+      assertEquals(hasZ ? 4 : 3, coordinates.getDimension());
+      assertEquals(1, coordinates.getMeasures());
+      assertEquals(hasZ, coordinates.hasZ());
+      assertEquals(source.getSRID(), measured.getSRID());
+      assertEquals(10, coordinates.getM(0), 0);
+      assertEquals(13, coordinates.getM(1), 0);
+      assertEquals(17, coordinates.getM(2), 0);
+      for (int j = 0; j < coordinates.size(); j++) {
+        assertEquals(source.getCoordinateSequence().getX(j), coordinates.getX(j), 0);
+        assertEquals(source.getCoordinateSequence().getY(j), coordinates.getY(j), 0);
+        if (hasZ) {
+          assertEquals(source.getCoordinateSequence().getZ(j), coordinates.getZ(j), 0);
+        }
+      }
+    }
+
+    MultiLineString multi =
+        (MultiLineString)
+            Constructors.geomFromEWKT(
+                "SRID=4326;MULTILINESTRING M ((0 0 99, 10 0 99), (0 1 99, 10 1 99))");
+    MultiLineString measured = (MultiLineString) Functions.addMeasure(multi, 0, 20);
+    assertEquals(multi.getSRID(), measured.getSRID());
+    for (int i = 0; i < measured.getNumGeometries(); i++) {
+      CoordinateSequence coordinates =
+          ((LineString) measured.getGeometryN(i)).getCoordinateSequence();
+      assertEquals(3, coordinates.getDimension());
+      assertEquals(1, coordinates.getMeasures());
+      assertFalse(coordinates.hasZ());
+      assertEquals(i * 10, coordinates.getM(0), 0);
+      assertEquals((i + 1) * 10, coordinates.getM(1), 0);
+    }
+  }
+
+  @Test
+  public void testAddMeasureWithDefaultJtsCoordinates() {
+    // JTS's default XY coordinates carry a NaN Z slot, not an actual Z dimension.
+    LineString source =
+        GEOMETRY_FACTORY.createLineString(
+            new Coordinate[] {new Coordinate(0, 0), new Coordinate(3, 4)});
+    CoordinateSequence measured =
+        ((LineString) Functions.addMeasure(source, 0, 5)).getCoordinateSequence();
+    assertEquals(3, measured.getDimension());
+    assertEquals(1, measured.getMeasures());
+    assertFalse(measured.hasZ());
+    assertEquals(0, measured.getM(0), 0);
+    assertEquals(5, measured.getM(1), 0);
+  }
+
+  @Test
   public void voronoiPolygons() {
     MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0, 0, 2, 2));
     Geometry actual1 = Functions.voronoiPolygons(multiPoint, 0, null);

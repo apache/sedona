@@ -15,6 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import pytest
+
 from tests import (
     area_lm_point_input_location,
     csv_point_input_location,
@@ -23,6 +25,7 @@ from tests import (
     mixed_wkt_geometry_input_location,
 )
 from tests.test_base import TestBase
+from sedona.spark.sql.types import USES_NATIVE_SPATIAL_TYPES
 
 
 class TestConstructors(TestBase):
@@ -193,11 +196,14 @@ class TestConstructors(TestBase):
         assert row[2] == "LINESTRING (1 5, 4 5)"
 
     def test_st_make_envelope(self):
-        polygonDF = self.spark.sql(
-            "select ST_MakeEnvelope(double(1.234),double(2.234),double(3.345),double(3.345), 1111) as geom"
-        )
+        query = "select ST_MakeEnvelope(double(1.234),double(2.234),double(3.345),double(3.345), {}) as geom"
+        if USES_NATIVE_SPATIAL_TYPES:
+            with pytest.raises(Exception, match="ST_INVALID_SRID_VALUE.*1111"):
+                self.spark.sql(query.format(1111)).collect()
+        srid = 4326 if USES_NATIVE_SPATIAL_TYPES else 1111
+        polygonDF = self.spark.sql(query.format(srid))
         assert polygonDF.count() == 1
-        assert 1111 == polygonDF.selectExpr("ST_SRID(geom)").first()[0]
+        assert srid == polygonDF.selectExpr("ST_SRID(geom)").first()[0]
 
         polygonDF = self.spark.sql(
             "select ST_MakeEnvelope(double(1.234),double(2.234),double(3.345),double(3.345))"
@@ -262,8 +268,13 @@ class TestConstructors(TestBase):
 
         polygon_wkb_df.createOrReplaceTempView("polygontable")
         polygon_wkb_df.show()
+        wkb_column = (
+            "unhex(polygontable._c0)"
+            if USES_NATIVE_SPATIAL_TYPES
+            else "polygontable._c0"
+        )
         polygon_df = self.spark.sql(
-            "select ST_GeomFromWKB(polygontable._c0) as countyshape from polygontable"
+            f"select ST_GeomFromWKB({wkb_column}) as countyshape from polygontable"
         )
         polygon_df.show(10)
         assert polygon_df.count() == 100

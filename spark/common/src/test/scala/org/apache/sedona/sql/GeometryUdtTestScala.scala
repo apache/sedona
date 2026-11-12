@@ -18,10 +18,11 @@
  */
 package org.apache.sedona.sql
 
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, Row}
 import org.apache.spark.sql.functions.expr
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.sql.types.{DataType, StructType}
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
+import org.apache.spark.sql.types.{DataType, DoubleType, StructField, StructType}
 import org.junit.rules.TemporaryFolder
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.io.WKTReader
@@ -35,9 +36,14 @@ class GeometryUdtTestScala extends TestBaseScala with BeforeAndAfter {
   var dataFrame: DataFrame = _
 
   before {
-    dataFrame = Seq(Tuple2(47.636, 9.389))
-      .toDF("latitude", "longitude")
-      .withColumn("point", expr("ST_Point(longitude, latitude)"))
+    val schema = StructType(
+      Seq(
+        StructField("latitude", DoubleType),
+        StructField("longitude", DoubleType),
+        StructField("point", GeometryUDT())))
+    val rows =
+      sc.parallelize(Seq(Row(47.636, 9.389, new WKTReader().read("POINT (9.389 47.636)"))))
+    dataFrame = sparkSession.createDataFrame(rows, schema)
   }
 
   describe("GeometryUDT Test") {
@@ -50,11 +56,20 @@ class GeometryUdtTestScala extends TestBaseScala with BeforeAndAfter {
         if (wkt.contains("NaN")) {
           java.nio.ByteBuffer.wrap(wkb).putDouble(21, Double.NaN)
         }
-        val hex = org.locationtech.jts.io.WKBWriter.toHex(wkb)
-        val geometry = sparkSession
-          .sql(s"SELECT ST_SetSRID(ST_GeomFromWKB(unhex('$hex')), 4326)")
-          .collect()(0)
-          .getAs[Geometry](0)
+        val geometry = if (SpatialTypeSupport.usesNativeTypes) {
+          val input = org.datasyslab.jts.io.WKBReader.forDeclaredDimensions(4326).read(wkb)
+          val schema = StructType(Seq(StructField("geometry", GeometryUDT())))
+          sparkSession
+            .createDataFrame(sc.parallelize(Seq(Row(input))), schema)
+            .first()
+            .getAs[Geometry](0)
+        } else {
+          val hex = org.locationtech.jts.io.WKBWriter.toHex(wkb)
+          sparkSession
+            .sql(s"SELECT ST_SetSRID(ST_GeomFromWKB(unhex('$hex')), 4326)")
+            .first()
+            .getAs[Geometry](0)
+        }
         val sequence = geometry match {
           case point: org.locationtech.jts.geom.Point => point.getCoordinateSequence
           case line: org.locationtech.jts.geom.LineString => line.getCoordinateSequence

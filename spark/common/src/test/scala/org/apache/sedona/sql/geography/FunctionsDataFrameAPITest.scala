@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql.geography
 
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.sedona.common.S2Geography.Geography
 import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.sql.functions.{col, lit}
@@ -37,7 +38,7 @@ class FunctionsDataFrameAPITest extends TestBaseScala {
       .select(st_functions.ST_Envelope(col("geog"), split = true))
       .as("env")
 
-    val env = df.first().get(0).asInstanceOf[Geography]
+    val env = df.first().getSedonaGeography(0)
     val expectedWKT =
       "POLYGON ((-180 -63.3, 180 -63.3, 180 -90, -180 -90, -180 -63.3))";
     assertEquals(expectedWKT, env.toString(new PrecisionModel(PrecisionModel.FIXED)))
@@ -54,24 +55,31 @@ class FunctionsDataFrameAPITest extends TestBaseScala {
       .select(st_functions.ST_Envelope(col("geog"), split = false))
       .as("env")
 
-    val env = df.first().get(0).asInstanceOf[Geography]
+    val env = df.first().getSedonaGeography(0)
     val expectedWKT =
       "POLYGON ((177.3 -18.3, -179.8 -18.3, -179.8 -16, 177.3 -16, 177.3 -18.3))";
     assertEquals(expectedWKT, env.toString(new PrecisionModel(PrecisionModel.FIXED)))
   }
 
   it("ST_Envelope preserves empty Geography") {
+    val srid = if (SpatialTypeSupport.usesNativeTypes) 4326 else 3857
+    if (SpatialTypeSupport.usesNativeTypes) {
+      val error = intercept[Exception] {
+        sparkSession.sql("SELECT ST_GeogFromWKT('POINT EMPTY', 3857)").collect()
+      }
+      assert(error.toString.contains("ST_INVALID_SRID_VALUE"))
+    }
     Seq("POINT EMPTY", "LINESTRING EMPTY", "POLYGON EMPTY", "GEOMETRYCOLLECTION EMPTY").foreach {
       wkt =>
         Seq(false, true).foreach { split =>
           val df = sparkSession
             .sql(s"SELECT '$wkt' AS wkt")
-            .select(st_constructors.ST_GeogFromWKT(col("wkt"), lit(3857)).as("geog"))
+            .select(st_constructors.ST_GeogFromWKT(col("wkt"), lit(srid)).as("geog"))
             .select(st_functions.ST_Envelope(col("geog"), split).as("env"))
 
-          val env = df.first().getAs[Geography]("env")
+          val env = df.first().getSedonaGeography("env")
           assertEquals(wkt, env.toString)
-          assertEquals(3857, env.getSRID)
+          assertEquals(srid, env.getSRID)
         }
     }
   }
@@ -112,7 +120,7 @@ class FunctionsDataFrameAPITest extends TestBaseScala {
       .sql("SELECT 'POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))' AS wkt")
       .select(st_constructors.ST_GeogFromWKT(col("wkt"), lit(4326)).as("g"))
       .select(st_functions.ST_Centroid(col("g")).as("c"))
-    val centroid = df.first().get(0).asInstanceOf[Geography]
+    val centroid = df.first().getSedonaGeography(0)
     assertTrue(centroid.toString.startsWith("POINT"))
   }
 

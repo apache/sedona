@@ -23,6 +23,7 @@ import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
 import java.nio.ByteOrder;
 import java.util.*;
 import org.apache.sedona.common.Functions;
+import org.apache.sedona.common.geometrySerde.GeometrySerializer;
 import org.datasyslab.jts.io.WKTWriter;
 import org.locationtech.jts.algorithm.Angle;
 import org.locationtech.jts.algorithm.distance.DiscreteFrechetDistance;
@@ -580,6 +581,7 @@ public class GeomUtils {
 
   private static Geometry addMeasure(LineString geom, double measureStart, double measureEnd) {
     Coordinate[] coordinates = geom.getCoordinates();
+    boolean hasZ = GeometrySerializer.getCoordinateType(geom).hasZ;
     double totalLength = geom.getLength();
     CoordinateList newCoordinates = new CoordinateList();
 
@@ -600,7 +602,10 @@ public class GeomUtils {
         measure = 0.0;
       }
 
-      CoordinateXYZM newCoordinate = new CoordinateXYZM(c2.getX(), c2.getY(), c2.getZ(), measure);
+      Coordinate newCoordinate =
+          hasZ
+              ? new CoordinateXYZM(c2.getX(), c2.getY(), c2.getZ(), measure)
+              : new CoordinateXYM(c2.getX(), c2.getY(), measure);
       newCoordinates.add(newCoordinate);
     }
 

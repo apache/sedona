@@ -23,6 +23,7 @@ import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.catalyst.rules.Rule
 import org.apache.spark.sql.sedona_sql.UDT.{Box2DUDT, GeometryUDT}
 import org.apache.spark.sql.sedona_sql.expressions.{ST_Box2D, ST_GeomFromBox2D}
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 
 /**
  * Analyzer rule that resolves Catalyst casts between Sedona UDTs that Spark's stock cast resolver
@@ -44,14 +45,20 @@ class Box2DCastResolutionRule extends Rule[LogicalPlan] {
   override def apply(plan: LogicalPlan): LogicalPlan = plan.transformAllExpressions {
     case c: Cast
         if c.child.resolved
-          && c.child.dataType.isInstanceOf[GeometryUDT]
+          && SpatialTypeSupport.isGeometry(c.child.dataType)
           && c.dataType.isInstanceOf[Box2DUDT] =>
-      ST_Box2D(Seq(c.child))
+      SpatialTypeSupport.adaptFunction(ST_Box2D.apply)(Seq(c.child))
 
     case c: Cast
         if c.child.resolved
           && c.child.dataType.isInstanceOf[Box2DUDT]
-          && c.dataType.isInstanceOf[GeometryUDT] =>
-      ST_GeomFromBox2D(Seq(c.child))
+          && SpatialTypeSupport.isGeometry(c.dataType) =>
+      if (c.dataType.isInstanceOf[GeometryUDT]) {
+        ST_GeomFromBox2D(Seq(c.child))
+      } else {
+        val geometry = SpatialTypeSupport.adaptFunction(ST_GeomFromBox2D.apply)(Seq(c.child))
+        // Retain the requested native SRID type and let Spark enforce its cast contract.
+        c.copy(child = geometry)
+      }
   }
 }

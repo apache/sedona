@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql.geography
 
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.sedona.common.S2Geography.Geography
 import org.apache.sedona.sql.TestBaseScala
 import org.junit.Assert.assertEquals
@@ -35,7 +36,7 @@ class ConstructorsTest extends TestBaseScala {
     var precision = 16;
     var row =
       sparkSession.sql(s"SELECT ST_GeogFromGeoHash('$geohash','$precision') AS geog").first()
-    var geoStr = row.get(0).asInstanceOf[Geography].toText(new PrecisionModel(1e6))
+    var geoStr = row.getSedonaGeography(0).toText(new PrecisionModel(1e6))
     var expectedWkt =
       "POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))"
     assertEquals(expectedWkt, geoStr)
@@ -43,7 +44,7 @@ class ConstructorsTest extends TestBaseScala {
     geohash = "s00twy01mt"
     precision = 4;
     row = sparkSession.sql(s"SELECT ST_GeogFromGeoHash('$geohash','$precision') AS geog").first()
-    geoStr = row.get(0).asInstanceOf[Geography].toText(new PrecisionModel(1e6))
+    geoStr = row.getSedonaGeography(0).toText(new PrecisionModel(1e6))
     expectedWkt =
       "POLYGON ((0.703125 0.8789062, 1.0546875 0.8789062, 1.0546875 1.0546875, 0.703125 1.0546875, 0.703125 0.8789062))"
     assertEquals(expectedWkt, geoStr)
@@ -54,8 +55,8 @@ class ConstructorsTest extends TestBaseScala {
     val wktExpected = "LINESTRING (1 2, 3 4, 5 6)"
     val row = sparkSession.sql(s"SELECT ST_GeogFromWKT('$wkt', 4326) AS geog").first()
     // Write output with precisionModel
-    val geoStr = row.get(0).asInstanceOf[Geography].toString()
-    val geog = row.get(0).asInstanceOf[Geography]
+    val geoStr = row.getSedonaGeography(0).toString()
+    val geog = row.getSedonaGeography(0)
     assert(geog.getSRID == 4326)
     assert(geog.isInstanceOf[Geography])
     assert(geoStr == wktExpected)
@@ -66,8 +67,8 @@ class ConstructorsTest extends TestBaseScala {
     val wktExpected = "LINESTRING (1 2, 3 4, 5 6)"
     val row = sparkSession.sql(s"SELECT ST_GeogFromText('$wkt', 4326) AS geog").first()
     // Write output with precisionModel
-    val geoStr = row.get(0).asInstanceOf[Geography].toString()
-    val geog = row.get(0).asInstanceOf[Geography]
+    val geoStr = row.getSedonaGeography(0).toString()
+    val geog = row.getSedonaGeography(0)
     assert(geog.getSRID == 4326)
     assert(geog.isInstanceOf[Geography])
     assert(geoStr == wktExpected)
@@ -77,9 +78,9 @@ class ConstructorsTest extends TestBaseScala {
     val wkt = "LINESTRING (1 2, 3 4, 5 6)"
     val row = sparkSession.sql(s"SELECT ST_GeogFromWKT('$wkt') AS geog").first()
     // Write output with precisionModel
-    val geoStr = row.get(0).asInstanceOf[Geography].toString()
-    val geog = row.get(0).asInstanceOf[Geography]
-    assert(geog.getSRID == 0)
+    val geoStr = row.getSedonaGeography(0).toString()
+    val geog = row.getSedonaGeography(0)
+    assert(geog.getSRID == (if (SpatialTypeSupport.usesNativeTypes) 4326 else 0))
     assert(geog.isInstanceOf[Geography])
     assert(geoStr == wkt)
   }
@@ -90,8 +91,7 @@ class ConstructorsTest extends TestBaseScala {
     var actual = baseDf
       .selectExpr("ST_GeogCollFromText(geom)")
       .first()
-      .get(0)
-      .asInstanceOf[Geography]
+      .getSedonaGeography(0)
       .toString()
     val expected =
       "GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((35 15, 45 15, 40 25, 35 15), (30 10, 40 20, 30 20, 30 10)))"
@@ -115,7 +115,7 @@ class ConstructorsTest extends TestBaseScala {
     val pointDf =
       sparkSession.sql("select ST_GeogFromEWKT('SRID=4269;POINT(-71.064544 42.28787)')")
     assert(pointDf.count() == 1)
-    assert(pointDf.first().getAs[Geography](0).getSRID == 4269)
+    assert(pointDf.first().getSedonaGeography(0).getSRID == 4269)
   }
 
   it("Passed ST_GeogFromWKB") {
@@ -133,7 +133,7 @@ class ConstructorsTest extends TestBaseScala {
     assert(
       geometries
         .first()
-        .getAs[Geography](0)
+        .getSedonaGeography(0)
         .toString(new PrecisionModel(1e16))
         .equals(expectedGeom))
     // null input
@@ -166,8 +166,8 @@ class ConstructorsTest extends TestBaseScala {
     val expectedGeog = {
       "SRID=4326; LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)"
     }
-    assert(geography.first().getAs[Geography](0).getSRID == 4326)
-    assert(geography.first().getAs[Geography](0).toEWKT().equals(expectedGeog))
+    assert(geography.first().getSedonaGeography(0).getSRID == 4326)
+    assert(geography.first().getSedonaGeography(0).toEWKT().equals(expectedGeog))
   }
 
   it("Passed ST_GeogToGeometry polygon") {
@@ -177,7 +177,7 @@ class ConstructorsTest extends TestBaseScala {
         SELECT
         ST_GeogToGeometry(ST_GeogFromWKT('$wkt')) AS geom
         """)
-    val geom = df.first().getAs[Geometry](0)
+    val geom = df.first().getJtsGeometry(0)
     // WKB-backed conversion preserves the submitted shell and hole coordinate order.
     val expected =
       "POLYGON ((0 0, 95 20, 95 85, 10 85, 0 0), " + "(20 30, 35 25, 30 40, 20 30), " + "(50 50, 65 50, 65 65, 50 65, 50 50), " + "(25 60, 35 58, 38 66, 30 72, 22 66, 25 60))"
@@ -197,7 +197,7 @@ class ConstructorsTest extends TestBaseScala {
         SELECT
         ST_GeogToGeometry(ST_GeogFromWKT('$wkt', 4326)) AS geom
         """)
-    val geom = df.first().getAs[Geometry](0)
+    val geom = df.first().getJtsGeometry(0)
     // WKB-backed conversion preserves the submitted shell and hole coordinate order.
     val expected = "MULTIPOLYGON (((10 10, 70 10, 70 70, 10 70, 10 10), " +
       "(20 20, 60 20, 60 60, 20 60, 20 20)), " + "((30 30, 50 30, 50 50, 30 50, 30 30), " +
@@ -216,7 +216,7 @@ class ConstructorsTest extends TestBaseScala {
         SELECT
         ST_GeogToGeometry(ST_GeogFromWKT('$wkt', 4326)) AS geom
         """)
-    var geom = df.first().getAs[Geometry](0)
+    var geom = df.first().getJtsGeometry(0)
     val writer = new WKTWriter()
     writer.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED))
     var gotGeom = writer.write(geom)
@@ -229,7 +229,7 @@ class ConstructorsTest extends TestBaseScala {
         SELECT
         ST_GeogToGeometry(ST_GeogFromWKT('$wkt', 4326)) AS geom
         """)
-    geom = df.first().getAs[Geometry](0)
+    geom = df.first().getJtsGeometry(0)
     gotGeom = writer.write(geom)
     assertEquals(wkt, gotGeom)
     assertEquals(4326, geom.getSRID)
@@ -238,11 +238,12 @@ class ConstructorsTest extends TestBaseScala {
 
   it("Passed ST_GeomToGeography multilinestring") {
     var wkt = "MULTILINESTRING " + "((90 90, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))"
+    val srid = if (SpatialTypeSupport.usesNativeTypes) 4326 else 0
     var df = sparkSession.sql(s"""
         SELECT
-        ST_GeomToGeography(ST_GeomFromWKT('$wkt')) AS geog
+        ST_GeomToGeography(ST_GeomFromWKT('$wkt', $srid)) AS geog
         """)
-    var geog = df.first().getAs[Geography](0)
+    var geog = df.first().getSedonaGeography(0)
     assertEquals(wkt, geog.toString)
   }
 }

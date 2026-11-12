@@ -24,11 +24,12 @@ import pytest
 from pyspark.sql import Row
 from pyspark.sql import functions as f
 from shapely.geometry.base import BaseGeometry
-from tests.test_base import TestBase
+from tests.test_base import TestBase, spatial_values_to_shapely
 
 from sedona.spark.core.geom.box2d import Box2D
 from sedona.spark.core.geom.box3d import Box3D
 from sedona.spark.core.geom.geography import Geography
+from sedona.spark.sql.types import USES_NATIVE_SPATIAL_TYPES, to_shapely
 from sedona.spark.sql import st_aggregates as sta
 from sedona.spark.sql import st_constructors as stc
 from sedona.spark.sql import st_functions as stf
@@ -1948,6 +1949,13 @@ class TestDataFrameAPI(TestBase):
     ):
         args = [arg() if isinstance(arg, Callable) else arg for arg in args]
 
+        if USES_NATIVE_SPATIAL_TYPES and func is stc.ST_MakeEnvelope and len(args) == 5:
+            with pytest.raises(Exception, match="ST_INVALID_SRID_VALUE.*1111"):
+                base_df.select(func(*args).alias("geom")).collect()
+            args[-1] = f.lit(4326)
+            if post_process == "ST_SRID(geom)":
+                expected_result = 4326
+
         if len(args) == 1:
             df = base_df.select(func(args[0]).alias("geom"))
         else:
@@ -1956,13 +1964,13 @@ class TestDataFrameAPI(TestBase):
         if post_process:
             df = df.selectExpr(f"{post_process} AS geom")
 
-        actual_result = df.collect()[0][0]
+        actual_result = spatial_values_to_shapely(df.collect()[0][0])
 
         if isinstance(actual_result, BaseGeometry):
             self.assert_geometry_almost_equal(expected_result, actual_result)
             return
         elif isinstance(actual_result, Geography):
-            # self.assert_geometry_almost_equal(expected_result, actual_result.geometry)
+            self.assert_geometry_almost_equal(expected_result, actual_result.geometry)
             return
         elif isinstance(actual_result, (bytes, bytearray)):
             actual_result = actual_result.hex()
@@ -2012,7 +2020,7 @@ class TestDataFrameAPI(TestBase):
             stf.ST_H3ToPoint(f.col("cell")),
             stf.ST_H3ToPoint(cell),
         ).collect()
-        for point in rows[0]:
+        for point in map(to_shapely, rows[0]):
             assert point.geom_type == "Point"
             assert abs(point.x + 122.41845932318309) < 1e-10
             assert abs(point.y - 37.776702349435695) < 1e-10
@@ -2124,7 +2132,7 @@ class TestDataFrameAPI(TestBase):
         )
 
         actual = {
-            row.kind: row.edges
+            row.kind: to_shapely(row.edges)
             for row in rows.select(
                 "kind",
                 f.expr(

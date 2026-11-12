@@ -27,7 +27,13 @@ from pyspark.sql import DataFrame
 from pyspark.sql.functions import col
 from pyspark.sql.types import StructType, StructField, DataType, ArrayType, MapType
 
-from sedona.spark.sql.types import GeometryType
+from sedona.spark.sql.types import (
+    GeometryType,
+    USES_NATIVE_SPATIAL_TYPES,
+    geometry_type,
+    is_geometry_type,
+    to_spark_geometry,
+)
 from pyspark.sql.pandas.types import (
     from_arrow_type,
 )
@@ -55,7 +61,7 @@ def dataframe_to_arrow(df, crs=None):
     """
     import pyarrow as pa
 
-    col_is_geometry = [isinstance(f.dataType, GeometryType) for f in df.schema.fields]
+    col_is_geometry = [is_geometry_type(f.dataType) for f in df.schema.fields]
 
     if not any(col_is_geometry):
         return dataframe_to_arrow_raw(df)
@@ -104,6 +110,9 @@ def dataframe_to_arrow(df, crs=None):
 
 def dataframe_to_arrow_raw(df):
     """Backport of toArrow() (available in Spark 4.0)"""
+    if USES_NATIVE_SPATIAL_TYPES:
+        return df.toArrow()
+
     from pyspark.sql.dataframe import DataFrame
 
     assert isinstance(df, DataFrame)
@@ -299,7 +308,15 @@ def infer_schema(gdf: "gpd.GeoDataFrame") -> StructType:
         spark_schema.append(StructField(field.name, spark_type, True))
 
     for index, geom_field in geom_fields:
-        spark_schema.insert(index, StructField(geom_field, GeometryType(), True))
+        data_type = geometry_type()
+        if USES_NATIVE_SPATIAL_TYPES and gdf[geom_field].crs is not None:
+            srid = gdf[geom_field].crs.to_epsg()
+            if srid is None:
+                raise ValueError(
+                    f"Native geometry column {geom_field!r} requires an EPSG CRS"
+                )
+            data_type = GeometryType(srid)
+        spark_schema.insert(index, StructField(geom_field, data_type, True))
 
     return StructType(spark_schema)
 
@@ -308,11 +325,12 @@ def infer_schema(gdf: "gpd.GeoDataFrame") -> StructType:
 # https://github.com/apache/spark/blob/3515b207c41d78194d11933cd04bddc21f8418dd/python/pyspark/sql/pandas/conversion.py#L632
 def create_spatial_dataframe(spark: SparkSession, gdf: "gpd.GeoDataFrame") -> DataFrame:
     """
-    Create a Spark DataFrame from a GeoPandas GeoDataFrame, transferring the data with Arrow.
+    Create a Spark DataFrame from a GeoPandas GeoDataFrame.
 
-    This is faster than ``spark.createDataFrame(gdf)`` for large GeoDataFrames.
-    Geometry columns become Sedona geometry columns, and the other columns get the
-    Spark types of their Arrow types.
+    Older runtimes use Sedona's Arrow transfer path. Spark 4.2+ receives native
+    geometry values through ``createDataFrame`` and its configured transport.
+    Geometry columns retain their geometry schema, and other columns use the
+    Spark types corresponding to their Arrow types.
 
     :param spark: The Spark session.
     :param gdf: The GeoPandas GeoDataFrame to convert. It must have at least one
@@ -323,6 +341,29 @@ def create_spatial_dataframe(spark: SparkSession, gdf: "gpd.GeoDataFrame") -> Da
     from pyspark.sql.pandas.types import (
         to_arrow_type,
     )
+
+    if USES_NATIVE_SPATIAL_TYPES:
+        import pandas as pd
+
+        schema = infer_schema(gdf)
+        local = pd.DataFrame(gdf).copy()
+        for field in schema.fields:
+            if isinstance(field.dataType, GeometryType):
+                import shapely
+
+                values = []
+                for value in local[field.name]:
+                    if value is not None and field.dataType.srid != -1:
+                        srid = field.dataType.srid
+                        if int(shapely.get_srid(value)) not in (0, srid):
+                            raise ValueError(
+                                f"Geometry SRID conflicts with column {field.name!r} CRS"
+                            )
+                        value = shapely.set_srid(value, srid)
+                    values.append(to_spark_geometry(value))
+                local[field.name] = pd.Series(values, index=local.index, dtype=object)
+        # Let Spark serialize its native values for both Classic and Connect.
+        return spark.createDataFrame(local, schema)
 
     def reader_func(temp_filename):
         return spark._jvm.PythonSQLUtils.readArrowStreamFromFile(temp_filename)

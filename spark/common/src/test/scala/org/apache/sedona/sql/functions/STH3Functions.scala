@@ -51,7 +51,7 @@ class STH3Functions extends TestBaseScala with Matchers with GeometrySample with
         .toDF("cell")
         .selectExpr("ST_H3ToPoint(cell)")
         .collect()
-      assert(rows(0).getAs[org.locationtech.jts.geom.Geometry](0).getSRID == 0)
+      assert(rows(0).getJtsGeometry(0).getSRID == 0)
       assert(rows(1).isNullAt(0))
       assert(sparkSession.sql("SELECT ST_H3ToPoint(CAST(NULL AS BIGINT))").first().isNullAt(0))
     }

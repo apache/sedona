@@ -30,10 +30,11 @@ from shapely.geometry import (
 from shapely.wkt import loads as wkt_loads
 from tests.test_base import TestBase
 
-from sedona.spark.sql.types import GeometryType
+from sedona.spark.sql.types import geometry_type, to_shapely, to_spark_geometry
 
 
 def _assert_serde_geometry_equal(expected, actual):
+    actual = to_shapely(actual)
     assert expected.equals(actual)
     if isinstance(expected, (MultiPoint, MultiLineString, MultiPolygon)):
         # Topological equality ignores empty members, including empty points
@@ -62,10 +63,10 @@ class TestGeometrySerde(TestBase):
     def test_spark_empty_geometry_dimensions(self, wkt):
         geometry = wkt_loads(wkt)
         actual = self.spark.createDataFrame(
-            [(geometry,)], StructType().add("geom", GeometryType())
+            [(to_spark_geometry(geometry),)], StructType().add("geom", geometry_type())
         ).first()[0]
 
-        assert actual.wkb == geometry.wkb
+        assert to_shapely(actual).wkb == geometry.wkb
 
     @pytest.mark.parametrize(
         "geom",
@@ -132,9 +133,9 @@ class TestGeometrySerde(TestBase):
     )
     def test_spark_serde(self, geom):
         returned_geom = TestGeometrySerde.spark.createDataFrame(
-            [(geom,)], StructType().add("geom", GeometryType())
+            [(to_spark_geometry(geom),)], StructType().add("geom", geometry_type())
         ).take(1)[0][0]
-        assert geom.equals_exact(returned_geom, 1e-6)
+        assert geom.equals_exact(to_shapely(returned_geom), 1e-6)
 
     @pytest.mark.parametrize(
         "geom",
@@ -145,12 +146,13 @@ class TestGeometrySerde(TestBase):
     )
     def test_linearring_spark_serde(self, geom):
         returned_geom = TestGeometrySerde.spark.createDataFrame(
-            [(geom,)], StructType().add("geom", GeometryType())
+            [(to_spark_geometry(geom),)], StructType().add("geom", geometry_type())
         ).take(1)[0][0]
+        returned_geom = to_shapely(returned_geom)
         # Shapely < 2.0.0 returns an empty GeometryCollection instead
         if not geom.is_empty:
             assert isinstance(returned_geom, LineString)
-        assert geom.equals(returned_geom)
+        assert geom.equals(to_shapely(returned_geom))
 
     @pytest.mark.parametrize(
         "wkt",
@@ -199,15 +201,17 @@ class TestGeometrySerde(TestBase):
     )
     def test_spark_serde_compatibility_with_scala(self, wkt):
         geom = wkt_loads(wkt)
-        schema = StructType().add("geom", GeometryType())
-        returned_geom = TestGeometrySerde.spark.createDataFrame([(geom,)], schema).take(
-            1
-        )[0][0]
+        schema = StructType().add("geom", geometry_type())
+        returned_geom = TestGeometrySerde.spark.createDataFrame(
+            [(to_spark_geometry(geom),)], schema
+        ).take(1)[0][0]
         _assert_serde_geometry_equal(geom, returned_geom)
 
         # serialized by python, deserialized by scala
         returned_wkt = (
-            TestGeometrySerde.spark.createDataFrame([(geom,)], schema)
+            TestGeometrySerde.spark.createDataFrame(
+                [(to_spark_geometry(geom),)], schema
+            )
             .selectExpr("ST_AsText(geom)")
             .take(1)[0][0]
         )
@@ -245,7 +249,7 @@ class TestGeometrySerde(TestBase):
             .take(1)[0]
         )
         assert n_dims == 4
-        assert geom.equals(returned_geom)
+        assert geom.equals(to_shapely(returned_geom))
 
     @pytest.mark.parametrize(
         "wkt",
@@ -272,4 +276,4 @@ class TestGeometrySerde(TestBase):
         )
         assert n_dims == 3
         assert z_min is None
-        assert geom.equals(returned_geom)
+        assert geom.equals(to_shapely(returned_geom))

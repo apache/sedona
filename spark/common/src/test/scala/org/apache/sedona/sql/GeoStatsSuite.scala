@@ -222,7 +222,7 @@ class GeoStatsSuite extends TestBaseScala {
       .withColumn(
         "someWeights",
         expr(
-          "array_sort(ST_BinaryDistanceBandColumn(geometry, 1.0, true, true, false, struct(id, geometry)))"))
+          "array_sort(transform(ST_BinaryDistanceBandColumn(geometry, 1.0, true, true, false, struct(id, geometry)), w -> struct(w.neighbor.id, ST_AsEWKB(w.neighbor.geometry), w.value)))"))
 
     val resultsDf = addBinaryDistanceBandColumn(
       weightedDf,
@@ -230,7 +230,10 @@ class GeoStatsSuite extends TestBaseScala {
       true,
       true,
       savedAttributes = Seq("id", "geometry"))
-      .withColumn("weights", expr("array_sort(weights)"))
+      .withColumn(
+        "weights",
+        expr(
+          "array_sort(transform(weights, w -> struct(w.neighbor.id, ST_AsEWKB(w.neighbor.geometry), w.value)))"))
       .where("someWeights = weights")
 
     assert(resultsDf.count == weightedDf.count())
@@ -241,7 +244,7 @@ class GeoStatsSuite extends TestBaseScala {
       .withColumn(
         "someWeights",
         expr(
-          "array_sort(ST_WeightedDistanceBandColumn(geometry, 1.0, -1.0, true, true, 1.0, false, struct(id, geometry)))"))
+          "array_sort(transform(ST_WeightedDistanceBandColumn(geometry, 1.0, -1.0, true, true, 1.0, false, struct(id, geometry)), w -> struct(w.neighbor.id, ST_AsEWKB(w.neighbor.geometry), w.value)))"))
 
     val resultsDf = addWeightedDistanceBandColumn(
       weightedDf,
@@ -251,7 +254,10 @@ class GeoStatsSuite extends TestBaseScala {
       true,
       savedAttributes = Seq("id", "geometry"),
       selfWeight = 1.0)
-      .withColumn("weights", expr("array_sort(weights)"))
+      .withColumn(
+        "weights",
+        expr(
+          "array_sort(transform(weights, w -> struct(w.neighbor.id, ST_AsEWKB(w.neighbor.geometry), w.value)))"))
       .where("someWeights = weights")
 
     assert(resultsDf.count == weightedDf.count())

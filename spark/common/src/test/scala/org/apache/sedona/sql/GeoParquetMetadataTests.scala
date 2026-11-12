@@ -101,9 +101,11 @@ class GeoParquetMetadataTests extends TestBaseScala with BeforeAndAfterAll {
     }
 
     it("Read GeoParquet with null CRS") {
-      val df = sparkSession.read
-        .format("geoparquet")
-        .load(geoparquetdatalocation + "/example-1.0.0-beta.1.parquet")
+      val path = geoparquetdatalocation + "/example-1.0.0-beta.1.parquet"
+      val schema = StructType(sparkSession.read.parquet(path).schema.fields.map { field =>
+        if (field.name == "geometry") field.copy(dataType = GeometryUDT()) else field
+      })
+      val df = sparkSession.read.format("geoparquet").schema(schema).load(path)
       val geoParquetSavePath = geoparquetoutputlocation + "/gp_crs_null.parquet"
       df.write
         .format("geoparquet")

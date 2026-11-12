@@ -30,6 +30,7 @@ from shapely.geometry import (
 )
 from tests import tests_resource
 from tests.test_base import TestBase
+from sedona.spark.sql.types import to_shapely, to_spark_geometry
 
 
 class TestGeometryConvert(TestBase):
@@ -51,57 +52,69 @@ class TestGeometryConvert(TestBase):
         geom_area = self.spark.sql(
             "SELECT st_area(st_geomFromWKT(_c0)) as area from counties"
         ).collect()[0][0]
-        polygon_shapely = self.spark.sql(
-            "SELECT st_geomFromWKT(_c0) from counties"
-        ).collect()[0][0]
+        polygon_shapely = to_shapely(
+            self.spark.sql("SELECT st_geomFromWKT(_c0) from counties").collect()[0][0]
+        )
         assert geom_area == polygon_shapely.area
 
     def test_polygon_with_holes_deserialization(self):
-        geom = self.spark.sql(
-            """select st_geomFromWKT('POLYGON ((35 10, 45 45, 15 40, 10 20, 35 10),
+        geom = to_shapely(
+            self.spark.sql(
+                """select st_geomFromWKT('POLYGON ((35 10, 45 45, 15 40, 10 20, 35 10),
 (20 30, 35 35, 30 20, 20 30))') as geom"""
-        ).collect()[0][0]
+            ).collect()[0][0]
+        )
 
         assert geom.area == 675.0
         assert type(geom) == Polygon
 
     def test_multipolygon_with_holes_deserialization(self):
-        geom = self.spark.sql(
-            """select st_geomFromWKT('MULTIPOLYGON (((40 40, 20 45, 45 30, 40 40)),
+        geom = to_shapely(
+            self.spark.sql(
+                """select st_geomFromWKT('MULTIPOLYGON (((40 40, 20 45, 45 30, 40 40)),
 ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),
 (30 20, 20 15, 20 25, 30 20)))')"""
-        ).collect()[0][0]
+            ).collect()[0][0]
+        )
         assert type(geom) == MultiPolygon
 
         assert geom.area == 712.5
 
     def test_point_deserialization(self):
-        geom = self.spark.sql(
-            """SELECT st_geomfromtext('POINT(-6.0 52.0)') as geom"""
-        ).collect()[0][0]
+        geom = to_shapely(
+            self.spark.sql(
+                """SELECT st_geomfromtext('POINT(-6.0 52.0)') as geom"""
+            ).collect()[0][0]
+        )
         assert geom.wkt == Point(-6.0, 52.0).wkt
 
     def test_multipoint_deserialization(self):
-        geom = self.spark.sql(
-            """select st_geomFromWKT('MULTIPOINT(1 2, -2 3)') as geom"""
-        ).collect()[0][0]
+        geom = to_shapely(
+            self.spark.sql(
+                """select st_geomFromWKT('MULTIPOINT(1 2, -2 3)') as geom"""
+            ).collect()[0][0]
+        )
 
         assert geom.wkt == MultiPoint([(1, 2), (-2, 3)]).wkt
 
     def test_linestring_deserialization(self):
-        geom = self.spark.sql(
-            """select st_geomFromWKT('LINESTRING (30 10, 10 30, 40 40)')"""
-        ).collect()[0][0]
+        geom = to_shapely(
+            self.spark.sql(
+                """select st_geomFromWKT('LINESTRING (30 10, 10 30, 40 40)')"""
+            ).collect()[0][0]
+        )
 
         assert type(geom) == LineString
 
         assert geom.wkt == LineString([(30, 10), (10, 30), (40, 40)]).wkt
 
     def test_multilinestring_deserialization(self):
-        geom = self.spark.sql(
-            """SELECT st_geomFromWKT('MULTILINESTRING ((10 10, 20 20, 10 40),
+        geom = to_shapely(
+            self.spark.sql(
+                """SELECT st_geomFromWKT('MULTILINESTRING ((10 10, 20 20, 10 40),
                         (40 40, 30 30, 40 20, 30 10))') as geom"""
-        ).collect()[0][0]
+            ).collect()[0][0]
+        )
 
         assert type(geom) == MultiLineString
         assert (
@@ -115,10 +128,10 @@ class TestGeometryConvert(TestBase):
         )
 
     def test_geometry_collection_deserialization(self):
-        geom = self.spark.sql("""SELECT st_geomFromWKT('GEOMETRYCOLLECTION (
+        geom = to_shapely(self.spark.sql("""SELECT st_geomFromWKT('GEOMETRYCOLLECTION (
                 MULTILINESTRING((1 2, 3 4), (5 6, 7 8)),
                 MULTILINESTRING((1 2, 3 4), (5 6, 7 8), (9 10, 11 12)),
-                POINT(10 20))') as geom""").collect()[0][0]
+                POINT(10 20))') as geom""").collect()[0][0])
 
         assert type(geom) == GeometryCollection
         assert (
@@ -140,6 +153,8 @@ class TestGeometryConvert(TestBase):
         )
         gdf = gdf.replace(pd.NA, "")
 
+        gdf = pd.DataFrame(gdf)
+        gdf["geometry"] = gdf["geometry"].map(to_spark_geometry)
         self.spark.createDataFrame(gdf).show()
 
     def test_to_geopandas(self):
@@ -156,8 +171,11 @@ class TestGeometryConvert(TestBase):
         )
 
         gdf = counties_geom.toPandas()
+        gdf["geometry"] = gdf["geometry"].map(to_shapely)
         print(gpd.GeoDataFrame(gdf, geometry="geometry"))
 
     def test_null_deserializer(self):
-        result = self.spark.sql("select st_geomfromwkt(null)").collect()[0][0]
+        result = to_shapely(
+            self.spark.sql("select st_geomfromwkt(null)").collect()[0][0]
+        )
         assert result is None

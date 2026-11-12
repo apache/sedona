@@ -25,7 +25,7 @@ from tests.test_base import TestBase
 
 from sedona.spark.core.enums import FileDataSplitter
 from sedona.spark.core.SpatialRDD import PointRDD
-from sedona.spark.sql.types import GeometryType
+from sedona.spark.sql.types import geometry_type, to_shapely, to_spark_geometry
 
 point_input_path = os.path.join(tests_resource, "arealm-small.csv")
 
@@ -50,13 +50,15 @@ class TestSpatialRDDToDataFrame(TestBase):
         ]
         schema = StructType(
             [
-                StructField("geom", GeometryType(), False),
+                StructField("geom", geometry_type(), False),
                 StructField("id_1", StringType(), False),
                 StructField("id_2", IntegerType(), False),
             ]
         )
 
-        rdd_data = self.spark.sparkContext.parallelize(point_data)
+        rdd_data = self.spark.sparkContext.parallelize(point_data).map(
+            lambda row: [to_spark_geometry(row[0]), *row[1:]]
+        )
         df = self.spark.createDataFrame(rdd_data, schema, verifySchema=False)
         df.show()
         df.printSchema()
@@ -72,13 +74,13 @@ class TestSpatialRDDToDataFrame(TestBase):
         )
 
         raw_spatial_rdd = spatial_rdd.rawSpatialRDD.map(
-            lambda x: [x.geom, *x.getUserData().split("\t")]
+            lambda x: [to_spark_geometry(x.geom), *x.getUserData().split("\t")]
         )
 
         self.spark.createDataFrame(raw_spatial_rdd).show()
 
         schema = StructType(
-            [StructField("geom", GeometryType()), StructField("name", StringType())]
+            [StructField("geom", geometry_type()), StructField("name", StringType())]
         )
 
         spatial_rdd_with_schema = self.spark.createDataFrame(
@@ -88,5 +90,6 @@ class TestSpatialRDDToDataFrame(TestBase):
         spatial_rdd_with_schema.show()
 
         assert (
-            spatial_rdd_with_schema.take(1)[0][0].wkt == "POINT (32.324142 -88.331492)"
+            to_shapely(spatial_rdd_with_schema.take(1)[0][0]).wkt
+            == "POINT (32.324142 -88.331492)"
         )

@@ -15,6 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import pyspark
+
 from pyspark.sql.types import (
     BinaryType,
     DoubleType,
@@ -121,9 +123,122 @@ class GeographyType(UserDefinedType):
         return "org.apache.spark.sql.sedona_sql.UDT.GeographyUDT"
 
 
-# Explicit UDT aliases remain valid when native types are available in PySpark.
-LegacyGeometryType = GeometryType
-LegacyGeographyType = GeographyType
+# Spark 4.1 has preliminary spatial types, but Sedona's native integration
+# starts in 4.2. Older Spark keeps its existing Shapely/Sedona UDT contract.
+USES_NATIVE_SPATIAL_TYPES = tuple(
+    int(part) for part in pyspark.__version__.split(".")[:2]
+) >= (4, 2)
+
+if USES_NATIVE_SPATIAL_TYPES:
+
+    class LegacyGeometryType(GeometryType):
+        """Explicit Sedona geometry UDT for native Spark schema resolution."""
+
+    class LegacyGeographyType(GeographyType):
+        """Explicit Sedona geography UDT for native Spark schema resolution."""
+
+    from pyspark.sql.types import GeographyType, GeometryType
+else:
+    # Older Spark requires each value's registered __UDT__ to equal its schema.
+    LegacyGeometryType = GeometryType
+    LegacyGeographyType = GeographyType
+
+
+def geometry_type():
+    """Default geometry schema, allowing per-row SRIDs on Spark 4.2+."""
+    return GeometryType("ANY") if USES_NATIVE_SPATIAL_TYPES else GeometryType()
+
+
+def geography_type():
+    """Default geography schema, allowing supported per-row SRIDs on Spark 4.2+."""
+    return GeographyType("ANY") if USES_NATIVE_SPATIAL_TYPES else GeographyType()
+
+
+def _native_wkb(geometry):
+    import shapely
+
+    if not hasattr(shapely, "to_wkb"):
+        raise ImportError("Spark 4.2 spatial conversion requires Shapely 2 or later")
+    return shapely.to_wkb(
+        geometry,
+        flavor="iso",
+        include_srid=False,
+        output_dimension=(
+            4 if hasattr(shapely, "has_m") and shapely.geos_version >= (3, 12, 0) else 3
+        ),
+    )
+
+
+def to_spark_geometry(geometry):
+    """Convert Shapely to Spark's native value, preserving dimensions and SRID.
+
+    Use this for ``createDataFrame`` and Python UDF results on Spark 4.2+.
+    ``collect`` returns Spark Geometry values there; call ``to_shapely`` to
+    obtain Shapely values. Older Spark accepts and returns Shapely directly.
+    Native conversion requires Shapely 2+. ``None`` is preserved.
+    """
+    if geometry is None or not USES_NATIVE_SPATIAL_TYPES:
+        return geometry
+    from pyspark.sql.types import Geometry
+
+    if isinstance(geometry, Geometry):
+        return geometry
+    wkb = _native_wkb(geometry)
+    import shapely
+
+    return Geometry.fromWKB(wkb, int(shapely.get_srid(geometry)))
+
+
+def to_spark_geography(geometry):
+    """Convert Shapely or Sedona Geography to Spark's native geography value.
+
+    An unset Shapely SRID (0) becomes Spark geography's default 4326 on 4.2+.
+    Other SRIDs are preserved for Spark's JVM boundary to validate. Older
+    runtimes retain Sedona's Geography wrapper and SRID. Use an ANY schema
+    where PySpark's CRS mapping cannot represent a supported non-default SRID.
+    This conversion does not change Sedona's S2 computation semantics.
+    """
+    if geometry is None:
+        return None
+    if isinstance(geometry, Geography):
+        if not USES_NATIVE_SPATIAL_TYPES:
+            return geometry
+        geometry = geometry.geometry
+    if not USES_NATIVE_SPATIAL_TYPES:
+        return Geography(geometry)
+    from pyspark.sql.types import Geography as NativeGeography
+
+    if isinstance(geometry, NativeGeography):
+        return geometry
+    wkb = _native_wkb(geometry)
+    import shapely
+
+    srid = int(shapely.get_srid(geometry)) or 4326
+    return NativeGeography.fromWKB(wkb, srid)
+
+
+def to_shapely(value):
+    """Convert native/Sedona spatial values to Shapely, retaining SRID.
+
+    Shapely values and ``None`` pass through. Native conversion needs Shapely 2+.
+    """
+    if isinstance(value, Geography):
+        return value.geometry
+    if USES_NATIVE_SPATIAL_TYPES:
+        from pyspark.sql.types import Geography as NativeGeography, Geometry
+
+        if isinstance(value, (Geometry, NativeGeography)):
+            import shapely
+
+            if not hasattr(shapely, "from_wkb"):
+                raise ImportError(
+                    "Spark 4.2 spatial conversion requires Shapely 2 or later"
+                )
+            return shapely.set_srid(
+                shapely.from_wkb(bytes(value.getBytes())), value.getSrid()
+            )
+    return value
+
 
 try:  # PySpark >= 4.1
     from pyspark.sql.types import GeographyType as SparkGeographyType

@@ -349,7 +349,7 @@ class predicateJoinTestScala extends TestBaseScala {
       pointDf.createOrReplaceTempView("pointdf")
 
       // Join with a singleton dataframe is essentially a range query
-      val polygon = polygonDf.first().getAs[Geometry]("polygonshape")
+      val polygon = polygonDf.first().getJtsGeometry("polygonshape")
       val rangeQueryDf = sparkSession.sql(
         s"select * from pointdf where ST_Intersects(pointdf.pointshape, ST_GeomFromWKT('${polygon.toString}'))")
       val rangeQueryCount = rangeQueryDf.count()

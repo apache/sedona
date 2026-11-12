@@ -37,7 +37,12 @@ from sedona.spark.geopandas._crs import read_crs_metadata
 from sedona.spark.geopandas.geoseries import _to_bool
 from sedona.spark.sql import st_constructors as stc
 from sedona.spark.sql import st_functions as stf
-from tests.geopandas.test_geopandas_base import TestGeopandasBase
+from sedona.spark.sql.types import USES_NATIVE_SPATIAL_TYPES, to_shapely
+from tests.geopandas.test_geopandas_base import (
+    pandas_frame_with_geometry,
+    spark_frame_to_pandas_api,
+    TestGeopandasBase,
+)
 from shapely import wkt
 from shapely.geometry import (
     Point,
@@ -153,10 +158,13 @@ class TestGeoSeries(TestGeopandasBase):
         assert s.count() == 0
 
     def test_to_bool_fills_nullable_boolean_series(self):
-        nullable = self.spark.createDataFrame(
-            [(0, True), (1, None), (2, False)],
-            "id long, value boolean",
-        ).pandas_api(index_col="id")["value"]
+        nullable = spark_frame_to_pandas_api(
+            self.spark.createDataFrame(
+                [(0, True), (1, None), (2, False)],
+                "id long, value boolean",
+            ),
+            index_col="id",
+        )["value"]
 
         self.check_pd_series_equal(
             _to_bool(nullable),
@@ -321,7 +329,7 @@ class TestGeoSeries(TestGeopandasBase):
             stc.ST_GeomFromWKT("wkt").alias("source_geometry"),
         )
         source = GeoSeries(
-            source_frame.pandas_api(index_col=["group", "feature_id"])[
+            spark_frame_to_pandas_api(source_frame, index_col=["group", "feature_id"])[
                 "source_geometry"
             ],
             crs="EPSG:3857",
@@ -526,7 +534,9 @@ class TestGeoSeries(TestGeopandasBase):
             row_id,
             geometry.alias("geometry"),
         )
-        source = GeoSeries(source_frame.pandas_api(index_col="id")["geometry"])
+        source = GeoSeries(
+            spark_frame_to_pandas_api(source_frame, index_col="id")["geometry"]
+        )
 
         actual = source.invalid_coverage_edges().to_geopandas().sort_index()
 
@@ -564,7 +574,9 @@ class TestGeoSeries(TestGeopandasBase):
             F.create_map(F.lit("id"), row_id).alias("feature"),
             geometry.alias("geometry"),
         )
-        source = GeoSeries(source_frame.pandas_api(index_col="feature")["geometry"])
+        source = GeoSeries(
+            spark_frame_to_pandas_api(source_frame, index_col="feature")["geometry"]
+        )
 
         result = source.invalid_coverage_edges()
         actual = result._internal.spark_frame.select(
@@ -599,7 +611,7 @@ class TestGeoSeries(TestGeopandasBase):
         )
         source_frame = rows.select(geometry.alias("geometry"))
         with ps.option_context("compute.default_index_type", "sequence"):
-            source = GeoSeries(source_frame.pandas_api()["geometry"])
+            source = GeoSeries(spark_frame_to_pandas_api(source_frame)["geometry"])
 
         targets = source.to_geopandas().sort_index()
         actual = source.invalid_coverage_edges().to_geopandas().sort_index()
@@ -640,7 +652,7 @@ class TestGeoSeries(TestGeopandasBase):
         source_frame = rows.select(geometry.alias("geometry"))
 
         with ps.option_context("compute.default_index_type", "distributed-sequence"):
-            source = GeoSeries(source_frame.pandas_api()["geometry"])
+            source = GeoSeries(spark_frame_to_pandas_api(source_frame)["geometry"])
 
         result = source.invalid_coverage_edges()
         index_column = result._internal.index_spark_columns[0]
@@ -786,13 +798,13 @@ class TestGeoSeries(TestGeopandasBase):
 
     def test_constructor_leading_null_preserves_embedded_srid(self):
         from shapely import wkb
-        from sedona.spark.sql.types import GeometryType
+        from sedona.spark.sql.types import geometry_type
 
         _ = self.spark
         point = wkb.loads(wkb.dumps(Point(1, 2, 3), srid=4326))
         result = GeoSeries([None, point])
 
-        assert result.spark.data_type == GeometryType()
+        assert result.spark.data_type == geometry_type()
         assert result.crs is None
         assert result.spark.transform(stf.ST_SRID).to_pandas().dropna().tolist() == [
             4326
@@ -800,7 +812,9 @@ class TestGeoSeries(TestGeopandasBase):
         assert result.spark.transform(stf.ST_Z).to_pandas().dropna().tolist() == [3]
 
     def test_constructor_pandas_on_spark(self):
-        obj = ps.Series([Point(x, x) for x in range(3)])
+        obj = pandas_frame_with_geometry(
+            pd.DataFrame({"geometry": [Point(x, x) for x in range(3)]})
+        )["geometry"]
         sgpd_series = GeoSeries(obj)
         assert isinstance(sgpd_series, sgpd.GeoSeries)
 
@@ -898,8 +912,8 @@ class TestGeoSeries(TestGeopandasBase):
         index = [1, 2, 3]
         crs = "EPSG:3857"
         result = GeoSeries(data, index=index, crs=crs).to_spark_pandas()
-        ps_df = ps.Series(data, index=index)
-        self.check_pd_series_equal(result, ps_df.to_pandas())
+        assert isinstance(result, ps.Series)
+        self.check_pd_series_equal(result, pd.Series(data, index=index))
 
     def test_sindex(self):
         s = GeoSeries([Point(x, x) for x in range(5)])
@@ -2041,7 +2055,9 @@ class TestGeoSeries(TestGeopandasBase):
             F.when(row_id % 3 == 0, stc.ST_Point(row_id, F.lit(0))).alias("geometry"),
             replacement_column.alias("replacement"),
         )
-        frame = GeoDataFrame(rows.pandas_api(index_col="id"), geometry="geometry")
+        frame = GeoDataFrame(
+            spark_frame_to_pandas_api(rows, index_col="id"), geometry="geometry"
+        )
         expected = gpd.GeoSeries(
             [Point(i, 0) if i % 3 == 0 else None for i in range(24)],
             index=pd.Index(range(24), name="id"),
@@ -2065,7 +2081,9 @@ class TestGeoSeries(TestGeopandasBase):
                     right_index, replacement_column.alias("replacement")
                 )
                 replacement = GeoSeries(
-                    replacement_rows.pandas_api(index_col="id")["replacement"]
+                    spark_frame_to_pandas_api(replacement_rows, index_col="id")[
+                        "replacement"
+                    ]
                 )
 
         result = frame.geometry.fillna(replacement, limit=5)
@@ -2076,10 +2094,39 @@ class TestGeoSeries(TestGeopandasBase):
             # Validation and filling share an exchange, which is only visible
             # in the executed plan, not in the logical tree's repeated inputs.
             result._internal.spark_frame.collect()
-            executed = query.executedPlan()
-            if executed.nodeName() == "AdaptiveSparkPlan":
-                executed = executed.executedPlan()
-            physical = executed.toString()
+            seen = set()
+
+            def final_plan_nodes(node):
+                name = node.nodeName()
+                if name == "AdaptiveSparkPlan":
+                    yield from final_plan_nodes(node.executedPlan())
+                    return
+                if name.endswith("QueryStage"):
+                    yield from final_plan_nodes(node.plan())
+                    return
+                identity = (node.getClass().getName(), node.id())
+                if identity in seen:
+                    return
+                seen.add(identity)
+                # Codegen wrappers do not represent additional operations.
+                if node.getClass().getSimpleName() not in (
+                    "WholeStageCodegenExec",
+                    "InputAdapter",
+                ):
+                    yield node
+                if name in ("ReusedExchange", "ReusedSubquery"):
+                    return
+                for children in (node.children(), node.subqueries()):
+                    for position in range(children.size()):
+                        yield from final_plan_nodes(children.apply(position))
+
+            # Nested adaptive subqueries print both initial and final plans.
+            # Inspect only executed nodes, including subqueries, so discarded
+            # input scans cannot inflate the work counted here.
+            physical = "\n".join(
+                node.simpleString(1000)
+                for node in final_plan_nodes(query.executedPlan())
+            )
             assert physical.count("Range (") == 2
             assert physical.count("FullOuter") == 1
             assert "ReusedExchange" in physical
@@ -3610,33 +3657,46 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = s.to_geoframe().has_z
         self.check_pd_series_equal(df_result, expected)
 
-        mixed = GeoSeries.from_wkt(
-            [
-                "GEOMETRYCOLLECTION (POINT (0 0), POINT Z (1 1 2))",
-                (
-                    "GEOMETRYCOLLECTION (POINT (0 0), "
-                    "GEOMETRYCOLLECTION (POINT Z (1 1 2)))"
-                ),
-                "POINT EMPTY",
-                None,
-            ]
+        mixed_wkts = [
+            "GEOMETRYCOLLECTION (POINT (0 0), POINT Z (1 1 2))",
+            (
+                "GEOMETRYCOLLECTION (POINT (0 0), "
+                "GEOMETRYCOLLECTION (POINT Z (1 1 2)))"
+            ),
+        ]
+        if USES_NATIVE_SPATIAL_TYPES:
+            # Native WKB requires a consistent layout throughout a collection.
+            for mixed_wkt in mixed_wkts:
+                with pytest.raises(Exception, match="WKB_PARSE_ERROR"):
+                    GeoSeries.from_wkt([mixed_wkt]).has_z.to_pandas()
+        else:
+            self.check_pd_series_equal(
+                GeoSeries.from_wkt(mixed_wkts).has_z,
+                pd.Series([True, True]),
+            )
+        self.check_pd_series_equal(
+            GeoSeries.from_wkt(["POINT EMPTY", None]).has_z,
+            pd.Series([False, False]),
         )
-        mixed_expected = pd.Series([True, True, False, False])
-        self.check_pd_series_equal(mixed.has_z, mixed_expected)
 
     def test_has_m(self):
-        s = GeoSeries.from_wkt(
-            [
-                "POINT (0 1)",
-                "POINT Z (0 1 2)",
-                "POINT M (0 1 2)",
-                "POINT ZM (0 1 2 3)",
-                "GEOMETRYCOLLECTION (POINT (0 0), POINT M (1 1 2))",
-                "POINT EMPTY",
-                None,
-            ]
-        )
-        expected = pd.Series([False, False, True, True, True, False, False])
+        wkts = [
+            "POINT (0 1)",
+            "POINT Z (0 1 2)",
+            "POINT M (0 1 2)",
+            "POINT ZM (0 1 2 3)",
+            "GEOMETRYCOLLECTION (POINT (0 0), POINT M (1 1 2))",
+            "POINT EMPTY",
+            None,
+        ]
+        expected_values = [False, False, True, True, True, False, False]
+        if USES_NATIVE_SPATIAL_TYPES:
+            with pytest.raises(Exception, match="WKB_PARSE_ERROR"):
+                GeoSeries.from_wkt([wkts[4]]).has_m.to_pandas()
+            del wkts[4]
+            del expected_values[4]
+        s = GeoSeries.from_wkt(wkts)
+        expected = pd.Series(expected_values)
 
         result = s.has_m
         self.check_pd_series_equal(result, expected)
@@ -4441,12 +4501,40 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             ),
         )
 
-        spark_frame = row_wise._internal.spark_frame
+        plan_source = GeoDataFrame(
+            spark_frame_to_pandas_api(
+                self.spark.range(4).selectExpr(
+                    "ST_Buffer(ST_Point(CAST(id AS DOUBLE), 0D), 1D) AS geometry",
+                    "CAST(id AS DOUBLE) / 10 AS tolerance",
+                )
+            ),
+            geometry="geometry",
+        )
+        spark_frame = plan_source.geometry.maximum_inscribed_circle(
+            tolerance=plan_source["tolerance"]
+        )._internal.spark_frame
         if hasattr(spark_frame, "_jdf"):
-            optimized_plan = (
-                spark_frame._jdf.queryExecution().optimizedPlan().toString()
-            )
-            assert optimized_plan.lower().count("st_maximuminscribedcircle") == 1
+            optimized = spark_frame._jdf.queryExecution().optimizedPlan()
+
+            def walk(node):
+                yield node
+                children = node.children()
+                for position in range(children.size()):
+                    yield from walk(children.apply(position))
+
+            # Native result wrappers retain their child's display name. Count
+            # actual algorithm expressions, not occurrences of that name.
+            calls = 0
+            for node in walk(optimized):
+                expressions = node.expressions()
+                for position in range(expressions.size()):
+                    calls += sum(
+                        expression.getClass().getSimpleName()
+                        == "ST_MaximumInscribedCircle"
+                        for expression in walk(expressions.apply(position))
+                    )
+            assert calls == 1
+            optimized_plan = optimized.toString()
             assert "BatchEvalPython" not in optimized_plan
             assert "ArrowEvalPython" not in optimized_plan
             assert "PythonUDF" not in optimized_plan
@@ -5093,7 +5181,11 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
                 F.col("geometry"),
                 encoding.cast("long").alias(NATURAL_ORDER_COLUMN_NAME),
             )
-            return GeoSeries(spark_frame.pandas_api(index_col="feature_id")["geometry"])
+            return GeoSeries(
+                spark_frame_to_pandas_api(spark_frame, index_col="feature_id")[
+                    "geometry"
+                ]
+            )
 
         for rng_factory in (
             lambda: np.random.default_rng(0),
@@ -5110,7 +5202,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             )
             ordered_wkb = [
                 [
-                    row.geometry.wkb
+                    bytes(row.geometry.wkb)
                     for row in result._internal.spark_frame.select(
                         result.spark.column.alias("geometry"),
                         scol_for(
@@ -7869,6 +7961,21 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             ],
             name="case",
         )
+        valid_positions = list(range(len(index)))
+        if USES_NATIVE_SPATIAL_TYPES:
+            for position in [7, 8]:
+                with pytest.raises(
+                    Exception, match="WKB_PARSE_ERROR.*Invalid coordinate"
+                ):
+                    GeoSeries.from_wkt([left_wkts[position]]).geom_equals_identical(
+                        GeoSeries.from_wkt([right_wkts[position]]), align=False
+                    ).to_pandas()
+            valid_positions = [
+                position for position in valid_positions if position not in (7, 8)
+            ]
+            left_wkts = [left_wkts[position] for position in valid_positions]
+            right_wkts = [right_wkts[position] for position in valid_positions]
+            index = index.take(valid_positions)
         left = GeoSeries(shapely.from_wkt(left_wkts), index=index, name="left")
         right = GeoSeries(shapely.from_wkt(right_wkts), index=index, name="right")
 
@@ -7877,23 +7984,41 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         self.check_pd_series_equal(
             result,
             pd.Series(
-                [
-                    True,
-                    False,
-                    True,
-                    False,
-                    False,
-                    True,
-                    False,
-                    True,
-                    False,
-                    False,
-                    False,
-                    False,
-                    True,
-                    False,
-                    False,
-                ],
+                (
+                    [
+                        True,
+                        False,
+                        True,
+                        False,
+                        False,
+                        True,
+                        False,
+                        True,
+                        False,
+                        False,
+                        False,
+                        False,
+                        True,
+                        False,
+                        False,
+                    ]
+                    if not USES_NATIVE_SPATIAL_TYPES
+                    else [
+                        True,
+                        False,
+                        True,
+                        False,
+                        False,
+                        True,
+                        False,
+                        False,
+                        False,
+                        False,
+                        True,
+                        False,
+                        False,
+                    ]
+                ),
                 index=index,
                 dtype=bool,
             ),
@@ -8142,34 +8267,52 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         two_dimensional = GeoSeries.from_wkt(["LINESTRING (0 0, 1 1)"])
 
         # A later non-NaN Z now establishes and preserves the XYZ layout.
-        self.check_pd_series_equal(
-            nan_first_z.geom_equals_identical(two_dimensional, align=False),
-            pd.Series([False], dtype=bool),
-        )
+        if USES_NATIVE_SPATIAL_TYPES:
+            with pytest.raises(Exception, match="WKB_PARSE_ERROR.*Invalid coordinate"):
+                nan_first_z.geom_equals_identical(
+                    two_dimensional, align=False
+                ).to_pandas()
+        else:
+            self.check_pd_series_equal(
+                nan_first_z.geom_equals_identical(two_dimensional, align=False),
+                pd.Series([False], dtype=bool),
+            )
 
         all_nan_z = GeoSeries.from_wkt(["LINESTRING Z (0 0 NaN, 1 1 NaN)"])
 
         # A tagged Z keeps the XYZ layout even when every Z value is NaN.
-        self.check_pd_series_equal(
-            all_nan_z.geom_equals_identical(two_dimensional, align=False),
-            pd.Series([False], dtype=bool),
-        )
+        if USES_NATIVE_SPATIAL_TYPES:
+            with pytest.raises(Exception, match="WKB_PARSE_ERROR.*Invalid coordinate"):
+                all_nan_z.geom_equals_identical(
+                    two_dimensional, align=False
+                ).to_pandas()
+        else:
+            self.check_pd_series_equal(
+                all_nan_z.geom_equals_identical(two_dimensional, align=False),
+                pd.Series([False], dtype=bool),
+            )
 
         mixed_dimension = GeoSeries([MultiPoint([Point(0, 0), Point(1, 1, 2)])])
         # Build the explicit XYZ reference in the JVM: GEOS < 3.12 can drop
         # a NaN Z dimension while parsing the same WKT in Shapely.
         normalized_dimension = GeoSeries.from_wkt(["MULTIPOINT Z ((0 0 NaN), (1 1 2))"])
 
-        # Shapely WKB preserves each point's layout. The old compact SQL
-        # serializer promoted the XY child to XYZ/NaN; public WKB does not.
-        assert [
-            len(point.coords[0])
-            for point in mixed_dimension.to_geopandas().iloc[0].geoms
-        ] == [2, 3]
-        self.check_pd_series_equal(
-            mixed_dimension.geom_equals_identical(normalized_dimension, align=False),
-            pd.Series([False], dtype=bool),
-        )
+        if USES_NATIVE_SPATIAL_TYPES:
+            with pytest.raises(Exception, match="WKB_PARSE_ERROR"):
+                mixed_dimension.to_geopandas()
+        else:
+            # Shapely WKB preserves each point's layout. The old compact SQL
+            # serializer promoted the XY child to XYZ/NaN; public WKB does not.
+            assert [
+                len(point.coords[0])
+                for point in mixed_dimension.to_geopandas().iloc[0].geoms
+            ] == [2, 3]
+            self.check_pd_series_equal(
+                mixed_dimension.geom_equals_identical(
+                    normalized_dimension, align=False
+                ),
+                pd.Series([False], dtype=bool),
+            )
         self.check_pd_series_equal(
             normalized_dimension.geom_equals_identical(
                 GeoSeries.from_wkt(["MULTIPOINT Z ((0 0 NaN), (1 1 2))"]),
@@ -8410,9 +8553,11 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         def raw_series(srid):
             return GeoSeries(
-                self.spark.range(1)
-                .selectExpr(f"ST_SetSRID(ST_Point(0D, 0D), {srid}) AS geometry")
-                .pandas_api()["geometry"]
+                spark_frame_to_pandas_api(
+                    self.spark.range(1).selectExpr(
+                        f"ST_SetSRID(ST_Point(0D, 0D), {srid}) AS geometry"
+                    )
+                )["geometry"]
             )
 
         left = raw_series(4326)
@@ -8544,7 +8689,7 @@ class TestGeoSeriesTransform(TestGeopandasBase):
             [(0, "SRID=4326;POINT (1 2)"), (1, "SRID=3857;POINT (3 4)")],
             "id long, ewkt string",
         ).selectExpr("id", "ST_GeomFromEWKT(ewkt) AS geometry")
-        source = GeoSeries(frame.pandas_api(index_col="id")["geometry"])
+        source = GeoSeries(spark_frame_to_pandas_api(frame, index_col="id")["geometry"])
 
         result = source.transform(lambda coords: coords + [2, -1])
         rows = (
@@ -8587,7 +8732,7 @@ class TestGeoSeriesTransform(TestGeopandasBase):
             [(0, f"SRID={srid};{geometry_wkt}")],
             "id long, ewkt string",
         ).selectExpr("id", "ST_GeomFromEWKT(ewkt) AS geometry")
-        source = GeoSeries(frame.pandas_api(index_col="id")["geometry"])
+        source = GeoSeries(spark_frame_to_pandas_api(frame, index_col="id")["geometry"])
 
         result = source.transform(lambda coords: coords + [2, -1])
         row = result._internal.spark_frame.select(
@@ -8595,10 +8740,11 @@ class TestGeoSeriesTransform(TestGeopandasBase):
             result.spark.column.alias("geometry"),
         ).first()
         assert row.srid == srid
-        assert len(row.geometry.geoms) == 3
-        assert row.geometry.geoms[0].is_empty
-        assert row.geometry.geoms[2].is_empty
-        assert row.geometry.wkb == wkt.loads(expected_wkt).wkb
+        geometry = to_shapely(row.geometry)
+        assert len(geometry.geoms) == 3
+        assert geometry.geoms[0].is_empty
+        assert geometry.geoms[2].is_empty
+        assert geometry.wkb == wkt.loads(expected_wkt).wkb
 
     @pytest.mark.parametrize("include_z", [False, True])
     def test_transform_dimensions(self, include_z):
@@ -8644,7 +8790,7 @@ class TestGeoSeriesTransform(TestGeopandasBase):
             .selectExpr("id", "ST_Point(CAST(id AS DOUBLE), 2D) AS geometry")
             .repartition(partitions)
         )
-        source = GeoSeries(frame.pandas_api(index_col="id")["geometry"])
+        source = GeoSeries(spark_frame_to_pandas_api(frame, index_col="id")["geometry"])
 
         def nonlinear(coords):
             # The callback must run on workers, including schema construction.

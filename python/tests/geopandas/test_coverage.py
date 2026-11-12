@@ -17,6 +17,7 @@
 
 import os
 
+from sedona.spark.sql.types import USES_NATIVE_SPATIAL_TYPES
 import pytest
 from pyspark.sql import functions as F
 
@@ -201,7 +202,15 @@ def test_validation_failure_cleans_owned_checkpoints(spark, tmp_path, wkt, messa
     source = spark.createDataFrame([(0, wkt)], "id long, wkt string").selectExpr(
         "id", "ST_GeomFromWKT(wkt) geom"
     )
-    with pytest.raises(ValueError, match=message):
+    native_invalid_coordinate = USES_NATIVE_SPATIAL_TYPES and "Infinity" in wkt
+    with pytest.raises(
+        Exception if native_invalid_coordinate else ValueError,
+        match=(
+            "WKB_PARSE_ERROR.*Invalid coordinate"
+            if native_invalid_coordinate
+            else message
+        ),
+    ):
         simplify_coverage(source, 0.3, False)
     assert not list(tmp_path.glob("*/rdd-*"))
     assert sentinel.read_text() == "keep"
@@ -301,8 +310,16 @@ def test_rejects_dimensions_hidden_by_first_nan_ordinate(
         [(0, wkt)],
         "id long, wkt string",
     ).selectExpr("id", "ST_GeomFromWKT(wkt) geom")
-    assert source.selectExpr("ST_IsValid(geom) valid").first().valid
-    with pytest.raises(ValueError, match="valid 2D"):
+    if not USES_NATIVE_SPATIAL_TYPES:
+        assert source.selectExpr("ST_IsValid(geom) valid").first().valid
+    with pytest.raises(
+        Exception if USES_NATIVE_SPATIAL_TYPES else ValueError,
+        match=(
+            "WKB_PARSE_ERROR.*Invalid coordinate"
+            if USES_NATIVE_SPATIAL_TYPES
+            else "valid 2D"
+        ),
+    ):
         simplify_coverage(source, 0.0, False)
     assert not list(tmp_path.glob("*/rdd-*"))
 
@@ -352,7 +369,15 @@ def test_rejects_empty_interior_rings(spark, tmp_path, wkt):
     source = spark.createDataFrame([(0, wkt)], "id long, wkt string").selectExpr(
         "id", "ST_GeomFromWKT(wkt) geom"
     )
-    assert source.selectExpr("ST_IsValid(geom) valid").first().valid
-    with pytest.raises(ValueError, match="empty interior rings"):
+    if not USES_NATIVE_SPATIAL_TYPES:
+        assert source.selectExpr("ST_IsValid(geom) valid").first().valid
+    with pytest.raises(
+        Exception if USES_NATIVE_SPATIAL_TYPES else ValueError,
+        match=(
+            "WKB_PARSE_ERROR.*Too few points in ring"
+            if USES_NATIVE_SPATIAL_TYPES
+            else "empty interior rings"
+        ),
+    ):
         simplify_coverage(source, 0.0, True)
     assert not list(tmp_path.glob("*/rdd-*"))

@@ -20,6 +20,7 @@ package org.apache.sedona.sql.ogc
 
 import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.sql.functions.expr
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.scalatest.BeforeAndAfterAll
 
 /**
@@ -27,13 +28,15 @@ import org.scalatest.BeforeAndAfterAll
  * for SQL.
  */
 class GeometryTypesAndFunctionsTestScala extends TestBaseScala with BeforeAndAfterAll {
+  private val fixtureSrid = if (SpatialTypeSupport.usesNativeTypes) 4326 else 101
+
   override def beforeAll(): Unit = {
     super.beforeAll()
     sparkSession
       .createDataFrame(
         Seq((119, "Route 75", 4, "MULTILINESTRING((10 48, 10 21, 10 0), (16 0,16 23,16 48))")))
       .toDF("fid", "name", "num_lanes", "centerlines")
-      .withColumn("centerlines", expr("ST_GeomFromWKT(centerlines, 101)"))
+      .withColumn("centerlines", expr(s"ST_GeomFromWKT(centerlines, $fixtureSrid)"))
       .createOrReplaceTempView("divided_routes")
 
     // A possible bug in the test specification, INSERT specifies 'BLUE LAKE' but test use 'Blue Lake'.
@@ -45,7 +48,7 @@ class GeometryTypesAndFunctionsTestScala extends TestBaseScala with BeforeAndAft
             "Blue Lake",
             "POLYGON((52 18,66 23,73 9,48 6,52 18), (59 18,67 18,67 13,59 13,59 18))")))
       .toDF("fid", "name", "shore")
-      .withColumn("shore", expr("ST_GeomFromWKT(shore, 101)"))
+      .withColumn("shore", expr(s"ST_GeomFromWKT(shore, $fixtureSrid)"))
       .createOrReplaceTempView("lakes")
 
     sparkSession
@@ -55,7 +58,7 @@ class GeometryTypesAndFunctionsTestScala extends TestBaseScala with BeforeAndAft
           "Green Forest",
           "MULTIPOLYGON(((28 26,28 0,84 0,84 42,28 26),(52 18,66 23,73 9,48 6,52 18)), ((59 18,67 18,67 13,59 13,59 18)))")))
       .toDF("fid", "name", "boundary")
-      .withColumn("boundary", expr("ST_GeomFromWKT(boundary, 101)"))
+      .withColumn("boundary", expr(s"ST_GeomFromWKT(boundary, $fixtureSrid)"))
       .createOrReplaceTempView("forests")
 
     sparkSession
@@ -64,7 +67,7 @@ class GeometryTypesAndFunctionsTestScala extends TestBaseScala with BeforeAndAft
           (111, "Cam Stream", "LINESTRING( 38 48, 44 41, 41 36, 44 31, 52 18 )"),
           (112, null, "LINESTRING( 76 0, 78 4, 73 9 )")))
       .toDF("fid", "name", "centerline")
-      .withColumn("centerline", expr("ST_GeomFromWKT(centerline, 101)"))
+      .withColumn("centerline", expr(s"ST_GeomFromWKT(centerline, $fixtureSrid)"))
       .createOrReplaceTempView("streams")
 
     sparkSession
@@ -74,7 +77,7 @@ class GeometryTypesAndFunctionsTestScala extends TestBaseScala with BeforeAndAft
         "Stock Pond",
         "MULTIPOLYGON( ( ( 24 44, 22 42, 24 40, 24 44) ), ( ( 26 44, 26 40, 28 42, 26 44) ) )")))
       .toDF("fid", "name", "type", "shores")
-      .withColumn("shores", expr("ST_GeomFromWKT(shores, 101)"))
+      .withColumn("shores", expr(s"ST_GeomFromWKT(shores, $fixtureSrid)"))
       .createOrReplaceTempView("ponds")
 
     sparkSession
@@ -83,7 +86,7 @@ class GeometryTypesAndFunctionsTestScala extends TestBaseScala with BeforeAndAft
           (117, "Ashton", "POLYGON((62 48, 84 48, 84 30, 56 30, 56 34, 62 48))"),
           (118, "Goose Island", "POLYGON((67 13, 67 18, 59 18, 59 13, 67 13))")))
       .toDF("fid", "name", "boundary")
-      .withColumn("boundary", expr("ST_GeomFromWKT(boundary, 101)"))
+      .withColumn("boundary", expr(s"ST_GeomFromWKT(boundary, $fixtureSrid)"))
       .createOrReplaceTempView("named_places")
 
     sparkSession
@@ -94,7 +97,7 @@ class GeometryTypesAndFunctionsTestScala extends TestBaseScala with BeforeAndAft
         (105, "Main Street", null, 4, "LINESTRING( 70 38, 84 42 )"),
         (106, "Dirt Road by Green Forest", null, 1, "LINESTRING( 28 26, 28 0 )")))
       .toDF("fid", "name", "aliases", "num_lanes", "centerline")
-      .withColumn("centerline", expr("ST_GeomFromWKT(centerline, 101)"))
+      .withColumn("centerline", expr(s"ST_GeomFromWKT(centerline, $fixtureSrid)"))
       .createOrReplaceTempView("road_segments")
 
     sparkSession
@@ -106,18 +109,27 @@ class GeometryTypesAndFunctionsTestScala extends TestBaseScala with BeforeAndAft
           "POINT(64 33)",
           "POLYGON((66 34, 62 34, 62 32, 66 32, 66 34) )")))
       .toDF("fid", "address", "position", "footprint")
-      .withColumn("position", expr("ST_GeomFromWKT(position, 101)"))
-      .withColumn("footprint", expr("ST_GeomFromWKT(footprint, 101)"))
+      .withColumn("position", expr(s"ST_GeomFromWKT(position, $fixtureSrid)"))
+      .withColumn("footprint", expr(s"ST_GeomFromWKT(footprint, $fixtureSrid)"))
       .createOrReplaceTempView("buildings")
 
     sparkSession
       .createDataFrame(Seq((110, "Cam Bridge", "POINT( 44 31 )")))
       .toDF("fid", "name", "position")
-      .withColumn("position", expr("ST_GeomFromWKT(position, 101)"))
+      .withColumn("position", expr(s"ST_GeomFromWKT(position, $fixtureSrid)"))
       .createOrReplaceTempView("bridges")
   }
 
   describe("Sedona-SQL OGC Geometry types and functions") {
+    it("validates the fixture SRID on native geometry types") {
+      if (SpatialTypeSupport.usesNativeTypes) {
+        val error = intercept[Exception] {
+          sparkSession.sql("SELECT ST_GeomFromWKT('POINT (1 2)', 101)").collect()
+        }
+        assert(error.toString.contains("ST_INVALID_SRID_VALUE"))
+      }
+    }
+
     ignore("T1-T5") {
       // Tests T1-T5 should be implemented for completeness.
       // The tests do insert and select on srid and geometry_columns tables and should pass on any SQL implementation.
@@ -183,7 +195,7 @@ class GeometryTypesAndFunctionsTestScala extends TestBaseScala with BeforeAndAft
           |""".stripMargin)
         .first()
         .getInt(0)
-      assert(actual == 101)
+      assert(actual == fixtureSrid)
     }
     it("T11") {
       val actual = sparkSession
@@ -480,9 +492,16 @@ class GeometryTypesAndFunctionsTestScala extends TestBaseScala with BeforeAndAft
       assert(actual == 8.00)
     }
     it("T37") {
+      val comparisonSrid = if (SpatialTypeSupport.usesNativeTypes) {
+        val error = intercept[Exception] {
+          sparkSession.sql("SELECT ST_GeomFromText('POINT (1 2)', 1)").collect()
+        }
+        assert(error.toString.contains("ST_INVALID_SRID_VALUE"))
+        4269
+      } else 1
       val actual = sparkSession
-        .sql("""
-          |SELECT ST_Equals(boundary,ST_GeomFromText('POLYGON( ( 67 13, 67 18, 59 18, 59 13, 67 13) )',1))
+        .sql(s"""
+          |SELECT ST_Equals(boundary,ST_GeomFromText('POLYGON( ( 67 13, 67 18, 59 18, 59 13, 67 13) )',$comparisonSrid))
           |FROM named_places
           |WHERE name = 'Goose Island';
           |""".stripMargin)

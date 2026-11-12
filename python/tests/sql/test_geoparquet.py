@@ -28,7 +28,8 @@ from tests import (
     legacy_parquet_input_location,
     plain_parquet_input_location,
 )
-from tests.test_base import TestBase
+from tests.test_base import TestBase, spatial_values_to_spark
+from sedona.spark.sql.types import to_shapely
 
 
 class TestGeoParquet(TestBase):
@@ -39,7 +40,7 @@ class TestGeoParquet(TestBase):
             [3, Point(1, 1), LineString([(1, 2), (3, 4), (5, 6)])],
         ]
         df = self.spark.createDataFrame(
-            data=test_data, schema=["id", "g0", "g1"]
+            data=spatial_values_to_spark(test_data), schema=["id", "g0", "g1"]
         ).repartition(1)
         geoparquet_save_path = os.path.join(tmp_path, "test.parquet")
         df.write.format("geoparquet").save(geoparquet_save_path)
@@ -62,7 +63,7 @@ class TestGeoParquet(TestBase):
         df2 = self.spark.read.format("geoparquet").load(geoparquet_save_path2)
         assert df2.count() == 2
         row = df2.collect()[0]
-        assert isinstance(row["g"], BaseGeometry)
+        assert isinstance(to_shapely(row["g"]), BaseGeometry)
 
     def test_load_geoparquet_with_spatial_filter(self):
         df = (

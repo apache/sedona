@@ -38,6 +38,8 @@ There are two ways to use a Scala or Java library with Apache Spark. You can use
 
 Please refer to [Sedona Maven Central coordinates](maven-coordinates.md) to select the corresponding Sedona packages for your Spark version.
 
+For Spark 4.2, use the Scala 2.13 `sedona-spark-4.2_2.13` or `sedona-spark-shaded-4.2_2.13` artifact from a Sedona version providing that module. Read the [native spatial type contract and limitations](sql-geometry-serialization.md#spark-42-native-types), including migration of persisted UDT values.
+
     * Local mode: test Sedona without setting up a cluster
     ```
     ./bin/spark-shell --packages org.apache.sedona:sedona-spark-shaded-3.5_2.12:{{ sedona.current_version }},org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}

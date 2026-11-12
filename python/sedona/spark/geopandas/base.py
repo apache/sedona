@@ -39,6 +39,7 @@ from pyspark.pandas._typing import (
 from pyspark.sql import Column
 
 from sedona.spark.geopandas._typing import GeoFrameLike
+from sedona.spark.sql.types import USES_NATIVE_SPATIAL_TYPES
 
 bool_type = bool
 
@@ -47,6 +48,30 @@ class GeoFrame(metaclass=ABCMeta):
     """
     A base class for both GeoDataFrame and GeoSeries.
     """
+
+    def __repr__(self):
+        if USES_NATIVE_SPATIAL_TYPES:
+            from sedona.spark.geopandas._native import display
+
+            return display(self)
+        return super().__repr__()
+
+    @property
+    def index(self):
+        index = super().index
+        if USES_NATIVE_SPATIAL_TYPES:
+            from sedona.spark.geopandas._native import native_index
+
+            return native_index(index)
+        return index
+
+    def head(self, n=5):
+        result = super().head(n)
+        if USES_NATIVE_SPATIAL_TYPES:
+            result = type(self)(result)
+            if isinstance(self, ps.DataFrame):
+                result._geometry_column_name = self._geometry_column_name
+        return result
 
     @property
     def sindex(self) -> "SpatialIndex":
