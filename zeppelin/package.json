@@ -21,6 +21,9 @@
     "zeppelin-tabledata": "*",
     "zeppelin-vis": "*"
   },
+  "overrides": {
+    "lodash": "^4.17.21"
+  },
   "helium": {
     "type": "VISUALIZATION",
     "icon": "<i class='fa fa-globe'></i>"

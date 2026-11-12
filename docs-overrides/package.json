@@ -55,6 +55,9 @@
     "not dead"
   ],
   "overrides": {
-    "@babel/runtime": "^7.26.10"
+    "@babel/runtime": "^7.26.10",
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^9.0.7"
+    }
   }
 }
