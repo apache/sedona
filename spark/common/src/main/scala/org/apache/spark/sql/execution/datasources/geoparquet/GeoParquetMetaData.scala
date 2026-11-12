@@ -226,6 +226,11 @@ object GeoParquetMetaData {
     }
   }
 
+  /** SRID of a CRS given as an `authority:code` pair, 0 unless it names an EPSG code. */
+  private[geoparquet] def identifierSrid(authority: String, code: String): Int =
+    identifierSrid(
+      JObject(JField("authority", JString(authority)), JField("code", JString(code))))
+
   private def positiveInt(value: JValue): Int = {
     value match {
       case JInt(code) if code.isValidInt && code > 0 => code.toInt
