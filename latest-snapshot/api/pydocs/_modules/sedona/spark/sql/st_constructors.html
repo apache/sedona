@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.st_constructors &mdash; Apache Sedona Python Documentation</title>
@@ -405,7 +404,7 @@
 
 <span class="sd">    :param wkt: WKT string column to generate from.</span>
 <span class="sd">    :type wkt: ColumnOrName</span>
-<span class="sd">    :param srid: SRID to set on the geography, as an integer or integer column. Defaults to 0 (unknown).</span>
+<span class="sd">    :param srid: SRID to set on the geography, as an integer or integer column. Defaults to 4326 on Spark 4.2+, or 0 (unknown) on older Spark.</span>
 <span class="sd">    :type srid: Optional[ColumnOrNameOrNumber], optional</span>
 <span class="sd">    :return: Geography column representing the WKT string.</span>
 <span class="sd">    :rtype: Column</span>
@@ -424,7 +423,7 @@
 
 <span class="sd">    :param wkt: WKT string column to generate from.</span>
 <span class="sd">    :type wkt: ColumnOrName</span>
-<span class="sd">    :param srid: SRID to set on the geography, as an integer or integer column. Defaults to 0 (unknown).</span>
+<span class="sd">    :param srid: SRID to set on the geography, as an integer or integer column. Defaults to 4326 on Spark 4.2+, or 0 (unknown) on older Spark.</span>
 <span class="sd">    :type srid: Optional[ColumnOrNameOrNumber], optional</span>
 <span class="sd">    :return: Geography column representing the WKT string.</span>
 <span class="sd">    :rtype: Column</span>

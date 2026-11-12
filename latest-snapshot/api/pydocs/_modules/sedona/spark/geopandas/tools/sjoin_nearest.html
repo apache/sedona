@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.tools.sjoin_nearest &mdash; Apache Sedona Python Documentation</title>
@@ -244,7 +243,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoDataFrame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._crs</span><span class="w"> </span><span class="kn">import</span> <span class="n">warn_crs_mismatch</span><span class="p">,</span> <span class="n">with_crs_metadata</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">st_functions</span> <span class="k">as</span> <span class="n">stf</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_geometry_type</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_prepare_side</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
@@ -257,7 +256,7 @@
         <span class="nb">zip</span><span class="p">(</span><span class="n">internal</span><span class="o">.</span><span class="n">data_spark_columns</span><span class="p">,</span> <span class="n">internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">)</span>
     <span class="p">):</span>
         <span class="c1"># Resolve source CRS before filtering: an empty result cannot infer it from SRIDs.</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">spark_type</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">)</span> <span class="ow">or</span> <span class="n">i</span> <span class="o">==</span> <span class="n">position</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">is_geometry_type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">spark_type</span><span class="p">)</span> <span class="ow">or</span> <span class="n">i</span> <span class="o">==</span> <span class="n">position</span><span class="p">:</span>
             <span class="n">field</span> <span class="o">=</span> <span class="n">with_crs_metadata</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="n">internal</span><span class="o">.</span><span class="n">column_labels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
         <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">metadata</span><span class="p">))</span>
     <span class="n">projected</span> <span class="o">=</span> <span class="n">internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
@@ -462,16 +461,20 @@
         <span class="n">output_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"__nearest_distance"</span><span class="p">)</span>
         <span class="n">output_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">distance_col</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">joined</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"__nearest_l_index"</span><span class="p">,</span> <span class="o">*</span><span class="n">output_names</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span>
+
+    <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._native</span><span class="w"> </span><span class="kn">import</span> <span class="n">internal_field</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">internal_field</span> <span class="o">=</span> <span class="n">InternalField</span><span class="o">.</span><span class="n">from_struct_field</span>
+
     <span class="n">internal</span> <span class="o">=</span> <span class="n">InternalFrame</span><span class="p">(</span>
         <span class="n">spark_frame</span><span class="o">=</span><span class="n">result</span><span class="p">,</span>
         <span class="n">index_spark_columns</span><span class="o">=</span><span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s2">"__nearest_l_index"</span><span class="p">)],</span>
         <span class="n">index_names</span><span class="o">=</span><span class="p">[</span><span class="n">result_index_name</span><span class="p">],</span>
         <span class="n">column_labels</span><span class="o">=</span><span class="p">[(</span><span class="n">label</span><span class="p">,)</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">output_labels</span><span class="p">],</span>
         <span class="n">data_spark_columns</span><span class="o">=</span><span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">output_names</span><span class="p">],</span>
-        <span class="n">data_fields</span><span class="o">=</span><span class="p">[</span>
-            <span class="n">InternalField</span><span class="o">.</span><span class="n">from_struct_field</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
-            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">output_names</span>
-        <span class="p">],</span>
+        <span class="n">data_fields</span><span class="o">=</span><span class="p">[</span><span class="n">internal_field</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="n">name</span><span class="p">])</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">output_names</span><span class="p">],</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">ps</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">internal</span><span class="p">),</span> <span class="n">geometry</span><span class="o">=</span><span class="n">left_df</span><span class="o">.</span><span class="n">active_geometry_name</span><span class="p">)</span></div>
 </pre></div>

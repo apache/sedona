@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geoarrow.geoarrow &mdash; Apache Sedona Python Documentation</title>
@@ -242,7 +241,13 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">col</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructType</span><span class="p">,</span> <span class="n">StructField</span><span class="p">,</span> <span class="n">DataType</span><span class="p">,</span> <span class="n">ArrayType</span><span class="p">,</span> <span class="n">MapType</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">GeometryType</span><span class="p">,</span>
+    <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">,</span>
+    <span class="n">geometry_type</span><span class="p">,</span>
+    <span class="n">is_geometry_type</span><span class="p">,</span>
+    <span class="n">to_spark_geometry</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.pandas.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">from_arrow_type</span><span class="p">,</span>
 <span class="p">)</span>
@@ -270,7 +275,7 @@
 <span class="sd">    """</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
 
-    <span class="n">col_is_geometry</span> <span class="o">=</span> <span class="p">[</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">dataType</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">fields</span><span class="p">]</span>
+    <span class="n">col_is_geometry</span> <span class="o">=</span> <span class="p">[</span><span class="n">is_geometry_type</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">dataType</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">fields</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">col_is_geometry</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">dataframe_to_arrow_raw</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
@@ -319,6 +324,9 @@
 
 <div class="viewcode-block" id="dataframe_to_arrow_raw"><a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.dataframe_to_arrow_raw">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">dataframe_to_arrow_raw</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Backport of toArrow() (available in Spark 4.0)"""</span>
+    <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">toArrow</span><span class="p">()</span>
+
     <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.dataframe</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span>
 
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">DataFrame</span><span class="p">)</span>
@@ -514,7 +522,15 @@
         <span class="n">spark_schema</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">StructField</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">spark_type</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
 
     <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">geom_field</span> <span class="ow">in</span> <span class="n">geom_fields</span><span class="p">:</span>
-        <span class="n">spark_schema</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">StructField</span><span class="p">(</span><span class="n">geom_field</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">(),</span> <span class="kc">True</span><span class="p">))</span>
+        <span class="n">data_type</span> <span class="o">=</span> <span class="n">geometry_type</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span> <span class="ow">and</span> <span class="n">gdf</span><span class="p">[</span><span class="n">geom_field</span><span class="p">]</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">srid</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[</span><span class="n">geom_field</span><span class="p">]</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">srid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"Native geometry column </span><span class="si">{</span><span class="n">geom_field</span><span class="si">!r}</span><span class="s2"> requires an EPSG CRS"</span>
+                <span class="p">)</span>
+            <span class="n">data_type</span> <span class="o">=</span> <span class="n">GeometryType</span><span class="p">(</span><span class="n">srid</span><span class="p">)</span>
+        <span class="n">spark_schema</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">StructField</span><span class="p">(</span><span class="n">geom_field</span><span class="p">,</span> <span class="n">data_type</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">StructType</span><span class="p">(</span><span class="n">spark_schema</span><span class="p">)</span></div>
 
@@ -523,11 +539,12 @@
 <span class="c1"># https://github.com/apache/spark/blob/3515b207c41d78194d11933cd04bddc21f8418dd/python/pyspark/sql/pandas/conversion.py#L632</span>
 <div class="viewcode-block" id="create_spatial_dataframe"><a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.create_spatial_dataframe">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">create_spatial_dataframe</span><span class="p">(</span><span class="n">spark</span><span class="p">:</span> <span class="n">SparkSession</span><span class="p">,</span> <span class="n">gdf</span><span class="p">:</span> <span class="s2">"gpd.GeoDataFrame"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""</span>
-<span class="sd">    Create a Spark DataFrame from a GeoPandas GeoDataFrame, transferring the data with Arrow.</span>
+<span class="sd">    Create a Spark DataFrame from a GeoPandas GeoDataFrame.</span>
 
-<span class="sd">    This is faster than ``spark.createDataFrame(gdf)`` for large GeoDataFrames.</span>
-<span class="sd">    Geometry columns become Sedona geometry columns, and the other columns get the</span>
-<span class="sd">    Spark types of their Arrow types.</span>
+<span class="sd">    Older runtimes use Sedona's Arrow transfer path. Spark 4.2+ receives native</span>
+<span class="sd">    geometry values through ``createDataFrame`` and its configured transport.</span>
+<span class="sd">    Geometry columns retain their geometry schema, and other columns use the</span>
+<span class="sd">    Spark types corresponding to their Arrow types.</span>
 
 <span class="sd">    :param spark: The Spark session.</span>
 <span class="sd">    :param gdf: The GeoPandas GeoDataFrame to convert. It must have at least one</span>
@@ -538,6 +555,29 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.pandas.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
         <span class="n">to_arrow_type</span><span class="p">,</span>
     <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+        <span class="n">schema</span> <span class="o">=</span> <span class="n">infer_schema</span><span class="p">(</span><span class="n">gdf</span><span class="p">)</span>
+        <span class="n">local</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">gdf</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">dataType</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">):</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">shapely</span>
+
+                <span class="n">values</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">local</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">dataType</span><span class="o">.</span><span class="n">srid</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                        <span class="n">srid</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">dataType</span><span class="o">.</span><span class="n">srid</span>
+                        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">shapely</span><span class="o">.</span><span class="n">get_srid</span><span class="p">(</span><span class="n">value</span><span class="p">))</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">srid</span><span class="p">):</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                                <span class="sa">f</span><span class="s2">"Geometry SRID conflicts with column </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> CRS"</span>
+                            <span class="p">)</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">set_srid</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">srid</span><span class="p">)</span>
+                    <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">to_spark_geometry</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                <span class="n">local</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">local</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+        <span class="c1"># Let Spark serialize its native values for both Classic and Connect.</span>
+        <span class="k">return</span> <span class="n">spark</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span><span class="n">local</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">reader_func</span><span class="p">(</span><span class="n">temp_filename</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">spark</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">PythonSQLUtils</span><span class="o">.</span><span class="n">readArrowStreamFromFile</span><span class="p">(</span><span class="n">temp_filename</span><span class="p">)</span>

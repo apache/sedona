@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.utils.adapter &mdash; Apache Sedona Python Documentation</title>
@@ -239,6 +238,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.spatialOperator.rdd</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaPairRDD</span><span class="p">,</span> <span class="n">SedonaRDD</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.SpatialRDD.spatial_rdd</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpatialRDD</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.utils.meta</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultipleMeta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_spark_geometry</span>
 
 
 <div class="viewcode-block" id="Adapter"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.adapter.Adapter">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Adapter</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">MultipleMeta</span><span class="p">):</span>
@@ -354,9 +354,9 @@
 <span class="sd">        """</span>
         <span class="n">spatial_pair_rdd_mapped</span> <span class="o">=</span> <span class="n">spatialPairRDD</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
             <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">[</span>
-                <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">geom</span><span class="p">,</span>
+                <span class="n">to_spark_geometry</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">geom</span><span class="p">),</span>
                 <span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getUserData</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="p">),</span>
-                <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">geom</span><span class="p">,</span>
+                <span class="n">to_spark_geometry</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">geom</span><span class="p">),</span>
                 <span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">getUserData</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="p">),</span>
             <span class="p">]</span>
         <span class="p">)</span>

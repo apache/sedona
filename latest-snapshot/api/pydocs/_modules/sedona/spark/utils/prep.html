@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.utils.prep &mdash; Apache Sedona Python Documentation</title>
@@ -264,7 +263,10 @@
 
 
 <div class="viewcode-block" id="assign_udt_shapely_objects"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.prep.assign_udt_shapely_objects">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">assign_udt_shapely_objects</span><span class="p">(</span><span class="n">geoms</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">type</span><span class="p">(</span><span class="n">BaseGeometry</span><span class="p">)])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span><span class="p">,</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span>
+
+    <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">for</span> <span class="n">geom</span> <span class="ow">in</span> <span class="n">geoms</span><span class="p">:</span>
         <span class="n">geom</span><span class="o">.</span><span class="n">__UDT__</span> <span class="o">=</span> <span class="n">GeometryType</span><span class="p">()</span>
@@ -277,7 +279,10 @@
 
 
 <div class="viewcode-block" id="assign_udt_geography"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.prep.assign_udt_geography">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">assign_udt_geography</span><span class="p">():</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeographyType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeographyType</span><span class="p">,</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span>
+
+    <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+        <span class="k">return</span>
 
     <span class="n">Geography</span><span class="o">.</span><span class="n">__UDT__</span> <span class="o">=</span> <span class="n">GeographyType</span><span class="p">()</span></div>
 

@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.tools.sjoin &mdash; Apache Sedona Python Documentation</title>
@@ -231,7 +230,11 @@
 <span class="c1"># under the License.</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pyspark.pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ps</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.internal</span><span class="w"> </span><span class="kn">import</span> <span class="n">SPARK_DEFAULT_INDEX_NAME</span><span class="p">,</span> <span class="n">InternalFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.internal</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">SPARK_DEFAULT_INDEX_NAME</span><span class="p">,</span>
+    <span class="n">InternalFrame</span><span class="p">,</span>
+    <span class="n">InternalField</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">scol_for</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">expr</span>
 
@@ -432,10 +435,22 @@
         <span class="k">if</span> <span class="n">col</span> <span class="o">!=</span> <span class="n">SPARK_DEFAULT_INDEX_NAME</span>
     <span class="p">]</span>
 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span>
+
+    <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._native</span><span class="w"> </span><span class="kn">import</span> <span class="n">internal_field</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">internal_field</span> <span class="o">=</span> <span class="n">InternalField</span><span class="o">.</span><span class="n">from_struct_field</span>
+
     <span class="n">internal</span> <span class="o">=</span> <span class="n">InternalFrame</span><span class="p">(</span>
         <span class="n">spark_frame</span><span class="o">=</span><span class="n">result_df</span><span class="p">,</span>
         <span class="n">index_spark_columns</span><span class="o">=</span><span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">result_df</span><span class="p">,</span> <span class="n">SPARK_DEFAULT_INDEX_NAME</span><span class="p">)],</span>
         <span class="n">data_spark_columns</span><span class="o">=</span><span class="n">data_spark_columns</span><span class="p">,</span>
+        <span class="n">data_fields</span><span class="o">=</span><span class="p">[</span>
+            <span class="n">internal_field</span><span class="p">(</span><span class="n">result_df</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">result_df</span><span class="o">.</span><span class="n">columns</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="n">SPARK_DEFAULT_INDEX_NAME</span>
+        <span class="p">],</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">ps</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">internal</span><span class="p">))</span>
 

@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geodataframe &mdash; Apache Sedona Python Documentation</title>
@@ -255,7 +254,7 @@
     <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">,</span>
     <span class="n">SPARK_INDEX_NAME_FORMAT</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">scol_for</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">same_anchor</span><span class="p">,</span> <span class="n">scol_for</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.column</span><span class="w"> </span><span class="kn">import</span> <span class="n">Column</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">functions</span> <span class="k">as</span> <span class="n">F</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -274,6 +273,7 @@
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_advice</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">geometry_wkb</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._crs</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">copy_crs_metadata</span><span class="p">,</span>
     <span class="n">read_crs_metadata</span><span class="p">,</span>
@@ -285,7 +285,11 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">st_aggregates</span> <span class="k">as</span> <span class="n">sta</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">st_constructors</span> <span class="k">as</span> <span class="n">stc</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">st_functions</span> <span class="k">as</span> <span class="n">stf</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">GeometryType</span><span class="p">,</span>
+    <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">,</span>
+    <span class="n">is_geometry_type</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pandas.api.extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_extension_dtype</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">geopandas.geodataframe</span><span class="w"> </span><span class="kn">import</span> <span class="n">crs_mismatch_error</span>
@@ -864,6 +868,86 @@
 <span class="sd">    sedona.spark.geopandas.GeoSeries : Series with geometry data</span>
 <span class="sd">    """</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_to_pandas</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_internal_pandas</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_to_pandas</span><span class="p">()</span>
+
+<div class="viewcode-block" id="GeoDataFrame.count"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.count">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">numeric_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">numeric_only</span><span class="o">=</span><span class="n">numeric_only</span><span class="p">)</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">BooleanType</span><span class="p">,</span> <span class="n">StructField</span>
+
+        <span class="n">columns</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">column_labels</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_spark_column_names</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_spark_columns</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">spark_type</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">numeric_only</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">column</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">column</span><span class="o">.</span><span class="n">isNotNull</span><span class="p">(),</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">True</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">field</span> <span class="o">=</span> <span class="n">InternalField</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">"bool"</span><span class="p">),</span> <span class="n">StructField</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">BooleanType</span><span class="p">(),</span> <span class="kc">True</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">column</span><span class="p">)</span>
+            <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+            <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span>
+                <span class="n">data_spark_columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">data_fields</span><span class="o">=</span><span class="n">fields</span><span class="p">,</span> <span class="n">column_labels</span><span class="o">=</span><span class="n">labels</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">frame</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">numeric_only</span><span class="o">=</span><span class="n">numeric_only</span><span class="p">)</span></div>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">USES_NATIVE_SPATIAL_TYPES</span>
+            <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="n">same_anchor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
+                <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">spark_type</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_fields</span> <span class="o">+</span> <span class="n">value</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_fields</span>
+            <span class="p">):</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._native</span><span class="w"> </span><span class="kn">import</span> <span class="n">assign_geometry</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_update_internal_frame</span><span class="p">(</span>
+                    <span class="n">assign_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span> <span class="n">anchor_force_disconnect</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">)</span>
+                <span class="k">return</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_to_internal_pandas</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._native</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_pandas</span>
+
+            <span class="k">return</span> <span class="n">to_pandas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_to_internal_pandas</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_repr_html_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._native</span><span class="w"> </span><span class="kn">import</span> <span class="n">display</span>
+
+            <span class="k">return</span> <span class="n">display</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">html</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_repr_html_</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_psser_for</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_psser_for</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">USES_NATIVE_SPATIAL_TYPES</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_geometry_type</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">data_type</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">data_type</span><span class="p">,</span> <span class="n">NullType</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._native</span><span class="w"> </span><span class="kn">import</span> <span class="n">NativeScalarSeries</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">NativeScalarSeries</span><span class="p">):</span>
+                <span class="n">series</span> <span class="o">=</span> <span class="n">NativeScalarSeries</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_pssers</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">series</span>
+        <span class="k">return</span> <span class="n">series</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Get item from GeoDataFrame by key.</span>
@@ -971,7 +1055,10 @@
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="n">PandasOnSparkDataFrame</span><span class="p">,</span> <span class="n">SparkDataFrame</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">SparkDataFrame</span><span class="p">):</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._native</span><span class="w"> </span><span class="kn">import</span> <span class="n">from_spark</span>
 
+                <span class="n">data</span> <span class="o">=</span> <span class="n">from_spark</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">PandasOnSparkSeries</span><span class="p">):</span>
 
@@ -1017,13 +1104,27 @@
                 <span class="n">pd_df</span> <span class="o">=</span> <span class="n">pd_df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="n">pd_df</span><span class="p">[</span><span class="n">geom_type_cols</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd_df</span><span class="p">[</span><span class="n">geom_type_cols</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
 
-            <span class="c1"># Initialize the parent class pyspark DataFrame with the pandas DataFrame.</span>
-            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-                <span class="n">data</span><span class="o">=</span><span class="n">pd_df</span><span class="p">,</span>
-                <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
-                <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
-                <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">,</span>
-            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._native</span><span class="w"> </span><span class="kn">import</span> <span class="n">from_pandas</span>
+
+                <span class="n">geometry_columns</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">local_geometry_crs</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">geometry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_hashable</span><span class="p">(</span><span class="n">geometry</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pd_df</span><span class="o">.</span><span class="n">columns</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">label</span> <span class="o">==</span> <span class="n">geometry</span><span class="p">:</span>
+                            <span class="n">geometry_columns</span><span class="p">[</span><span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                                <span class="n">crs</span>
+                                <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                                <span class="k">else</span> <span class="n">geometry_columns</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+                            <span class="p">)</span>
+                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">pd_df</span><span class="p">,</span> <span class="n">geometry_columns</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Initialize the parent class with the pandas DataFrame.</span>
+                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+                    <span class="n">data</span><span class="o">=</span><span class="n">pd_df</span><span class="p">,</span>
+                    <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
+                    <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+                    <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">,</span>
+                <span class="p">)</span>
 
         <span class="c1"># Set geometry column name</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">)):</span>
@@ -1057,13 +1158,15 @@
                     <span class="n">existing_geometry</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_spark_column_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="p">)</span>
                 <span class="n">geometry_field</span> <span class="o">=</span> <span class="n">geometry_field</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">geometry_column_name</span><span class="p">)</span>
+                <span class="n">geometry_column</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_SetSRID</span><span class="p">(</span>
+                    <span class="n">existing_geometry</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">,</span> <span class="n">new_epsg</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+                    <span class="n">geometry_column</span> <span class="o">=</span> <span class="n">geometry_column</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">GeometryType</span><span class="p">(</span><span class="s2">"ANY"</span><span class="p">))</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_update_internal_frame</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">with_new_spark_column</span><span class="p">(</span>
                         <span class="n">existing_geometry</span><span class="o">.</span><span class="n">_column_label</span><span class="p">,</span>
-                        <span class="n">stf</span><span class="o">.</span><span class="n">ST_SetSRID</span><span class="p">(</span>
-                            <span class="n">existing_geometry</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">,</span>
-                            <span class="n">new_epsg</span><span class="p">,</span>
-                        <span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span>
+                        <span class="n">geometry_column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span>
                             <span class="n">geometry_column_name</span><span class="p">,</span>
                             <span class="n">metadata</span><span class="o">=</span><span class="n">geometry_field</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
                         <span class="p">),</span>
@@ -1356,7 +1459,27 @@
 
         <span class="c1"># This operation throws a warning to the user asking them to set pspd.set_option('compute.ops_on_diff_frames', True)</span>
         <span class="c1"># to allow operations on different frames. We pass these warnings on to the user so they must manually set it themselves.</span>
-        <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">USES_NATIVE_SPATIAL_TYPES</span>
+            <span class="ow">and</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">sgpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="n">same_anchor</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">level</span><span class="o">.</span><span class="n">_column_label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">frame</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">column_labels</span><span class="p">:</span>
+                <span class="n">frame</span><span class="p">[</span><span class="n">geo_column_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">level</span>
+                <span class="n">level</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">geo_column_name</span><span class="p">]</span>
+            <span class="n">normalized_crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
+            <span class="n">column</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_SetSRID</span><span class="p">(</span><span class="n">level</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">,</span> <span class="n">normalized_crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+                <span class="n">column</span> <span class="o">=</span> <span class="n">column</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">GeometryType</span><span class="p">(</span><span class="s2">"ANY"</span><span class="p">))</span>
+            <span class="n">frame</span><span class="o">.</span><span class="n">_update_geometry_field</span><span class="p">(</span>
+                <span class="n">level</span><span class="p">,</span>
+                <span class="n">with_crs_metadata</span><span class="p">(</span><span class="n">level</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">normalized_crs</span><span class="p">),</span>
+                <span class="n">column</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">geo_column_name</span><span class="p">]</span>
+            <span class="n">new_series</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">elif</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">level</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">allow_override</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="n">new_series</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -1365,7 +1488,14 @@
             <span class="c1"># Assignment casts GeoSeries back into pspd.Series and can drop</span>
             <span class="c1"># custom field metadata. Restore only the CRS marker from the</span>
             <span class="c1"># normalized source Series on the assigned column.</span>
-            <span class="n">frame</span><span class="p">[</span><span class="n">geo_column_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">level</span>
+            <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">same_anchor</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._native</span><span class="w"> </span><span class="kn">import</span> <span class="n">assign_geometry</span>
+
+                <span class="n">frame</span><span class="o">.</span><span class="n">_update_internal_frame</span><span class="p">(</span>
+                    <span class="n">assign_geometry</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">geo_column_name</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">frame</span><span class="p">[</span><span class="n">geo_column_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">level</span>
             <span class="n">assigned_geometry</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">geo_column_name</span><span class="p">]</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">assigned_geometry</span><span class="p">,</span> <span class="n">sgpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">):</span>
                 <span class="n">frame</span><span class="o">.</span><span class="n">_update_geometry_field</span><span class="p">(</span>
@@ -1498,15 +1628,28 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_geopandas</span><span class="p">()</span></div>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_to_geopandas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
-        <span class="n">pd_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">to_pandas_frame</span>
+        <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._native</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_pandas</span>
+
+            <span class="n">pd_df</span> <span class="o">=</span> <span class="n">to_pandas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pd_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">to_pandas_frame</span>
 
         <span class="k">for</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">pd_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
             <span class="n">series</span><span class="p">:</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">sgpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">sgpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="ow">not</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span>
+                <span class="ow">or</span> <span class="n">is_geometry_type</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">data_type</span><span class="p">)</span>
+            <span class="p">):</span>
                 <span class="c1"># Use _to_geopandas instead of to_geopandas to avoid logging extra warnings</span>
-                <span class="n">pd_df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">_to_geopandas</span><span class="p">()</span>
+                <span class="n">pd_df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">(</span><span class="n">pd_df</span><span class="p">[</span><span class="n">col_name</span><span class="p">],</span> <span class="n">crs</span><span class="o">=</span><span class="n">series</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span>
+                    <span class="k">else</span> <span class="n">series</span><span class="o">.</span><span class="n">_to_geopandas</span><span class="p">()</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">pd_df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">_to_pandas</span><span class="p">()</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+                    <span class="n">pd_df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">_to_pandas</span><span class="p">()</span>
 
         <span class="n">result</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span>
             <span class="n">pd_df</span><span class="p">,</span>
@@ -1521,6 +1664,10 @@
 <span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Convert the GeoDataFrame to a Spark Pandas DataFrame.</span>
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._native</span><span class="w"> </span><span class="kn">import</span> <span class="n">_NativeDisplayFrame</span>
+
+            <span class="k">return</span> <span class="n">_NativeDisplayFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeoDataFrame.copy"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.copy">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeoDataFrame</span><span class="p">:</span>
@@ -2188,10 +2335,10 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_serialize_geometry_columns</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">serializer</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Column</span><span class="p">],</span> <span class="n">Column</span><span class="p">],</span>
+        <span class="n">serializer</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Column</span><span class="p">,</span> <span class="n">DataType</span><span class="p">],</span> <span class="n">Column</span><span class="p">],</span>
         <span class="n">output_type</span><span class="p">:</span> <span class="n">DataType</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Apply a native serializer to every geometry-typed column."""</span>
+<span class="w">        </span><span class="sd">"""Apply a serializer to every native or UDT geometry column."""</span>
         <span class="c1"># Resolve pending index/data expressions onto one Spark frame before</span>
         <span class="c1"># building the serializer projection.</span>
         <span class="n">internal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">resolved_copy</span>
@@ -2205,10 +2352,10 @@
             <span class="n">internal</span><span class="o">.</span><span class="n">data_spark_column_names</span><span class="p">,</span>
             <span class="n">internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">,</span>
         <span class="p">):</span>
-            <span class="n">is_geometry</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">spark_type</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">)</span>
+            <span class="n">is_geometry</span> <span class="o">=</span> <span class="n">is_geometry_type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">spark_type</span><span class="p">)</span>
             <span class="n">geometry_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">is_geometry</span><span class="p">)</span>
             <span class="n">serialized_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">serializer</span><span class="p">(</span><span class="n">spark_column</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">spark_name</span><span class="p">)</span>
+                <span class="n">serializer</span><span class="p">(</span><span class="n">spark_column</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">spark_type</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">spark_name</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">is_geometry</span>
                 <span class="k">else</span> <span class="n">spark_column</span>
             <span class="p">)</span>
@@ -2277,6 +2424,11 @@
         <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">geometry_column_name</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">geometry_column</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">geometry_column</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span>
+        <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+            <span class="n">actual</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+                <span class="n">geometry_column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">geometry_column_name</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="n">geometry_column_name</span><span class="p">]</span>
+            <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">spark_type</span><span class="o">=</span><span class="n">actual</span><span class="o">.</span><span class="n">dataType</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="n">actual</span><span class="o">.</span><span class="n">nullable</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_internal_frame</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">with_new_spark_column</span><span class="p">(</span>
                 <span class="n">geometry</span><span class="o">.</span><span class="n">_column_label</span><span class="p">,</span>
@@ -2340,6 +2492,8 @@
                         <span class="n">spark_column</span><span class="p">,</span>
                         <span class="n">normalized_crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">,</span>
                     <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+                        <span class="n">spark_column</span> <span class="o">=</span> <span class="n">spark_column</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">GeometryType</span><span class="p">(</span><span class="s2">"ANY"</span><span class="p">))</span>
                 <span class="n">field</span> <span class="o">=</span> <span class="n">with_crs_metadata</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">target_crs</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">spark_name</span><span class="p">)</span>
                 <span class="n">spark_column</span> <span class="o">=</span> <span class="n">spark_column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">spark_name</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
             <span class="n">output_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spark_column</span><span class="p">)</span>
@@ -2423,9 +2577,9 @@
 <span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_validate_serialization_kwargs</span><span class="p">(</span><span class="s2">"to_wkb"</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
         <span class="n">serializer</span><span class="p">,</span> <span class="n">output_type</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="p">(</span><span class="k">lambda</span> <span class="n">geometry</span><span class="p">:</span> <span class="n">F</span><span class="o">.</span><span class="n">hex</span><span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_AsBinary</span><span class="p">(</span><span class="n">geometry</span><span class="p">)),</span> <span class="n">StringType</span><span class="p">())</span>
+            <span class="p">(</span><span class="k">lambda</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">F</span><span class="o">.</span><span class="n">hex</span><span class="p">(</span><span class="n">geometry_wkb</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)),</span> <span class="n">StringType</span><span class="p">())</span>
             <span class="k">if</span> <span class="nb">hex</span>
-            <span class="k">else</span> <span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_AsBinary</span><span class="p">,</span> <span class="n">BinaryType</span><span class="p">())</span>
+            <span class="k">else</span> <span class="p">(</span><span class="n">geometry_wkb</span><span class="p">,</span> <span class="n">BinaryType</span><span class="p">())</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_serialize_geometry_columns</span><span class="p">(</span><span class="n">serializer</span><span class="p">,</span> <span class="n">output_type</span><span class="p">)</span></div>
 
@@ -2465,7 +2619,9 @@
 <span class="sd">        GeoSeries.to_wkt</span>
 <span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_validate_serialization_kwargs</span><span class="p">(</span><span class="s2">"to_wkt"</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_serialize_geometry_columns</span><span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_AsText</span><span class="p">,</span> <span class="n">StringType</span><span class="p">())</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_serialize_geometry_columns</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">geometry</span><span class="p">),</span> <span class="n">StringType</span><span class="p">()</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeoDataFrame.to_arrow"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_arrow">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_arrow</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>

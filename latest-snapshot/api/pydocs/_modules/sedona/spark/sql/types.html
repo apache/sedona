@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.types &mdash; Apache Sedona Python Documentation</title>
@@ -230,6 +229,8 @@
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyspark</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">BinaryType</span><span class="p">,</span>
     <span class="n">DoubleType</span><span class="p">,</span>
@@ -334,6 +335,177 @@
 <div class="viewcode-block" id="GeographyType.scalaUDT"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeographyType.scalaUDT">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">scalaUDT</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">"org.apache.spark.sql.sedona_sql.UDT.GeographyUDT"</span></div></div>
+
+
+<span class="c1"># Spark 4.1 has preliminary spatial types, but Sedona's native integration</span>
+<span class="c1"># starts in 4.2. Older Spark keeps its existing Shapely/Sedona UDT contract.</span>
+<span class="n">USES_NATIVE_SPATIAL_TYPES</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+    <span class="nb">int</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">pyspark</span><span class="o">.</span><span class="n">__version__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[:</span><span class="mi">2</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+
+<div class="viewcode-block" id="LegacyGeometryType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.LegacyGeometryType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">LegacyGeometryType</span><span class="p">(</span><span class="n">GeometryType</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Explicit Sedona geometry UDT for native Spark schema resolution."""</span></div>
+
+<div class="viewcode-block" id="LegacyGeographyType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.LegacyGeographyType">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">LegacyGeographyType</span><span class="p">(</span><span class="n">GeographyType</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Explicit Sedona geography UDT for native Spark schema resolution."""</span></div>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeographyType</span><span class="p">,</span> <span class="n">GeometryType</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="c1"># Older Spark requires each value's registered __UDT__ to equal its schema.</span>
+    <span class="n">LegacyGeometryType</span> <span class="o">=</span> <span class="n">GeometryType</span>
+    <span class="n">LegacyGeographyType</span> <span class="o">=</span> <span class="n">GeographyType</span>
+
+
+<div class="viewcode-block" id="geometry_type"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.geometry_type">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">geometry_type</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""Default geometry schema, allowing per-row SRIDs on Spark 4.2+."""</span>
+    <span class="k">return</span> <span class="n">GeometryType</span><span class="p">(</span><span class="s2">"ANY"</span><span class="p">)</span> <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span> <span class="k">else</span> <span class="n">GeometryType</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="geography_type"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.geography_type">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">geography_type</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""Default geography schema, allowing supported per-row SRIDs on Spark 4.2+."""</span>
+    <span class="k">return</span> <span class="n">GeographyType</span><span class="p">(</span><span class="s2">"ANY"</span><span class="p">)</span> <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span> <span class="k">else</span> <span class="n">GeographyType</span><span class="p">()</span></div>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_native_wkb</span><span class="p">(</span><span class="n">geometry</span><span class="p">):</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">shapely</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">shapely</span><span class="p">,</span> <span class="s2">"to_wkb"</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">"Spark 4.2 spatial conversion requires Shapely 2 or later"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">shapely</span><span class="o">.</span><span class="n">to_wkb</span><span class="p">(</span>
+        <span class="n">geometry</span><span class="p">,</span>
+        <span class="n">flavor</span><span class="o">=</span><span class="s2">"iso"</span><span class="p">,</span>
+        <span class="n">include_srid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">output_dimension</span><span class="o">=</span><span class="p">(</span>
+            <span class="mi">4</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">shapely</span><span class="p">,</span> <span class="s2">"has_m"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">shapely</span><span class="o">.</span><span class="n">geos_version</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">else</span> <span class="mi">3</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+
+
+<div class="viewcode-block" id="to_spark_geometry"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.to_spark_geometry">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">to_spark_geometry</span><span class="p">(</span><span class="n">geometry</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Convert Shapely to Spark's native value, preserving dimensions and SRID.</span>
+
+<span class="sd">    Use this for ``createDataFrame`` and Python UDF results on Spark 4.2+.</span>
+<span class="sd">    ``collect`` returns Spark Geometry values there; call ``to_shapely`` to</span>
+<span class="sd">    obtain Shapely values. Older Spark accepts and returns Shapely directly.</span>
+<span class="sd">    Native conversion requires Shapely 2+. ``None`` is preserved.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">geometry</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">geometry</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geometry</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">Geometry</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">geometry</span>
+    <span class="n">wkb</span> <span class="o">=</span> <span class="n">_native_wkb</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">shapely</span>
+
+    <span class="k">return</span> <span class="n">Geometry</span><span class="o">.</span><span class="n">fromWKB</span><span class="p">(</span><span class="n">wkb</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">shapely</span><span class="o">.</span><span class="n">get_srid</span><span class="p">(</span><span class="n">geometry</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="to_spark_geography"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.to_spark_geography">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">to_spark_geography</span><span class="p">(</span><span class="n">geometry</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Convert Shapely or Sedona Geography to Spark's native geography value.</span>
+
+<span class="sd">    An unset Shapely SRID (0) becomes Spark geography's default 4326 on 4.2+.</span>
+<span class="sd">    Other SRIDs are preserved for Spark's JVM boundary to validate. Older</span>
+<span class="sd">    runtimes retain Sedona's Geography wrapper and SRID. Use an ANY schema</span>
+<span class="sd">    where PySpark's CRS mapping cannot represent a supported non-default SRID.</span>
+<span class="sd">    This conversion does not change Sedona's S2 computation semantics.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">geometry</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">Geography</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">geometry</span>
+        <span class="n">geometry</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">geometry</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Geography</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geography</span> <span class="k">as</span> <span class="n">NativeGeography</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">NativeGeography</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">geometry</span>
+    <span class="n">wkb</span> <span class="o">=</span> <span class="n">_native_wkb</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">shapely</span>
+
+    <span class="n">srid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">shapely</span><span class="o">.</span><span class="n">get_srid</span><span class="p">(</span><span class="n">geometry</span><span class="p">))</span> <span class="ow">or</span> <span class="mi">4326</span>
+    <span class="k">return</span> <span class="n">NativeGeography</span><span class="o">.</span><span class="n">fromWKB</span><span class="p">(</span><span class="n">wkb</span><span class="p">,</span> <span class="n">srid</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="to_shapely"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.to_shapely">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">to_shapely</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Convert native/Sedona spatial values to Shapely, retaining SRID.</span>
+
+<span class="sd">    Shapely values and ``None`` pass through. Native conversion needs Shapely 2+.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Geography</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">geometry</span>
+    <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geography</span> <span class="k">as</span> <span class="n">NativeGeography</span><span class="p">,</span> <span class="n">Geometry</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="n">Geometry</span><span class="p">,</span> <span class="n">NativeGeography</span><span class="p">)):</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">shapely</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">shapely</span><span class="p">,</span> <span class="s2">"from_wkb"</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+                    <span class="s2">"Spark 4.2 spatial conversion requires Shapely 2 or later"</span>
+                <span class="p">)</span>
+            <span class="k">return</span> <span class="n">shapely</span><span class="o">.</span><span class="n">set_srid</span><span class="p">(</span>
+                <span class="n">shapely</span><span class="o">.</span><span class="n">from_wkb</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">getBytes</span><span class="p">())),</span> <span class="n">value</span><span class="o">.</span><span class="n">getSrid</span><span class="p">()</span>
+            <span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span></div>
+
+
+<span class="k">try</span><span class="p">:</span>  <span class="c1"># PySpark &gt;= 4.1</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeographyType</span> <span class="k">as</span> <span class="n">SparkGeographyType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span> <span class="k">as</span> <span class="n">SparkGeometryType</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># PySpark &lt; 4.1</span>
+    <span class="n">SparkGeographyType</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">SparkGeometryType</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<div class="viewcode-block" id="is_geometry_type"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.is_geometry_type">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">is_geometry_type</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return whether a schema type represents geometry.</span>
+
+<span class="sd">    Recognizes Sedona's geometry UDT and Spark's native ``GeometryType``</span>
+<span class="sd">    when available. This check does not require an active Spark session.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data_type : pyspark.sql.types.DataType</span>
+<span class="sd">        The data type to check, such as ``df.schema["geom"].dataType``.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        Whether the type represents a geometry column.</span>
+
+<span class="sd">    .. versionadded:: 2.0.0</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="p">(</span><span class="n">GeometryType</span><span class="p">,</span> <span class="n">LegacyGeometryType</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">SparkGeometryType</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">SparkGeometryType</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="is_geography_type"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.is_geography_type">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">is_geography_type</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return whether a schema type represents geography.</span>
+
+<span class="sd">    Recognizes Sedona's geography UDT and Spark's native ``GeographyType``</span>
+<span class="sd">    when available. This check does not require an active Spark session.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data_type : pyspark.sql.types.DataType</span>
+<span class="sd">        The data type to check, such as ``df.schema["geog"].dataType``.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        Whether the type represents a geography column.</span>
+
+<span class="sd">    .. versionadded:: 2.0.0</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="p">(</span><span class="n">GeographyType</span><span class="p">,</span> <span class="n">LegacyGeographyType</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">SparkGeographyType</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">SparkGeographyType</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Box2DType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.Box2DType">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Box2DType</span><span class="p">(</span><span class="n">UserDefinedType</span><span class="p">):</span>

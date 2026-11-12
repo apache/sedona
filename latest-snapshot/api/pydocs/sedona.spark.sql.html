@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -601,7 +600,7 @@ This is an alias of ST_GeogFromWKT.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>wkt</strong> (<em>ColumnOrName</em>) – WKT string column to generate from.</p></li>
-<li><p><strong>srid</strong> (<em>Optional</em><em>[</em><em>ColumnOrNameOrNumber</em><em>]</em><em>, </em><em>optional</em>) – SRID to set on the geography, as an integer or integer column. Defaults to 0 (unknown).</p></li>
+<li><p><strong>srid</strong> (<em>Optional</em><em>[</em><em>ColumnOrNameOrNumber</em><em>]</em><em>, </em><em>optional</em>) – SRID to set on the geography, as an integer or integer column. Defaults to 4326 on Spark 4.2+, or 0 (unknown) on older Spark.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -641,7 +640,7 @@ This is an alias of ST_GeogFromWKT.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>wkt</strong> (<em>ColumnOrName</em>) – WKT string column to generate from.</p></li>
-<li><p><strong>srid</strong> (<em>Optional</em><em>[</em><em>ColumnOrNameOrNumber</em><em>]</em><em>, </em><em>optional</em>) – SRID to set on the geography, as an integer or integer column. Defaults to 0 (unknown).</p></li>
+<li><p><strong>srid</strong> (<em>Optional</em><em>[</em><em>ColumnOrNameOrNumber</em><em>]</em><em>, </em><em>optional</em>) – SRID to set on the geography, as an integer or integer column. Defaults to 4326 on Spark 4.2+, or 0 (unknown) on older Spark.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -5499,6 +5498,18 @@ is no corresponding one).</p>
 
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sedona.spark.sql.types.LegacyGeographyType">
+<span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.types.</span></span><span class="sig-name descname"><span class="pre">LegacyGeographyType</span></span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#LegacyGeographyType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.LegacyGeographyType" title="Permalink to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#sedona.spark.sql.types.GeographyType" title="sedona.spark.sql.types.GeographyType"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeographyType</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sedona.spark.sql.types.LegacyGeometryType">
+<span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.types.</span></span><span class="sig-name descname"><span class="pre">LegacyGeometryType</span></span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#LegacyGeometryType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.LegacyGeometryType" title="Permalink to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#sedona.spark.sql.types.GeometryType" title="sedona.spark.sql.types.GeometryType"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeometryType</span></code></a></p>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="sedona.spark.sql.types.RasterType">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.types.</span></span><span class="sig-name descname"><span class="pre">RasterType</span></span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#RasterType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.RasterType" title="Permalink to this definition"></a></dt>
@@ -5547,6 +5558,86 @@ is no corresponding one).</p>
 <dd><p>Underlying SQL storage type for this UDT.</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sedona.spark.sql.types.geography_type">
+<span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.types.</span></span><span class="sig-name descname"><span class="pre">geography_type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#geography_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.geography_type" title="Permalink to this definition"></a></dt>
+<dd><p>Default geography schema, allowing supported per-row SRIDs on Spark 4.2+.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sedona.spark.sql.types.geometry_type">
+<span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.types.</span></span><span class="sig-name descname"><span class="pre">geometry_type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#geometry_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.geometry_type" title="Permalink to this definition"></a></dt>
+<dd><p>Default geometry schema, allowing per-row SRIDs on Spark 4.2+.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sedona.spark.sql.types.is_geography_type">
+<span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.types.</span></span><span class="sig-name descname"><span class="pre">is_geography_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#is_geography_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.is_geography_type" title="Permalink to this definition"></a></dt>
+<dd><p>Return whether a schema type represents geography.</p>
+<p>Recognizes Sedona’s geography UDT and Spark’s native <code class="docutils literal notranslate"><span class="pre">GeographyType</span></code>
+when available. This check does not require an active Spark session.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data_type</strong> (<a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.types.DataType.html#pyspark.sql.types.DataType" title="(in PySpark vmaster)"><em>pyspark.sql.types.DataType</em></a>) – The data type to check, such as <code class="docutils literal notranslate"><span class="pre">df.schema[&quot;geog&quot;].dataType</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>bool</em> – Whether the type represents a geography column.</p></li>
+<li><p><em>.. versionadded:: 2.0.0</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sedona.spark.sql.types.is_geometry_type">
+<span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.types.</span></span><span class="sig-name descname"><span class="pre">is_geometry_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#is_geometry_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.is_geometry_type" title="Permalink to this definition"></a></dt>
+<dd><p>Return whether a schema type represents geometry.</p>
+<p>Recognizes Sedona’s geometry UDT and Spark’s native <code class="docutils literal notranslate"><span class="pre">GeometryType</span></code>
+when available. This check does not require an active Spark session.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data_type</strong> (<a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.types.DataType.html#pyspark.sql.types.DataType" title="(in PySpark vmaster)"><em>pyspark.sql.types.DataType</em></a>) – The data type to check, such as <code class="docutils literal notranslate"><span class="pre">df.schema[&quot;geom&quot;].dataType</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>bool</em> – Whether the type represents a geometry column.</p></li>
+<li><p><em>.. versionadded:: 2.0.0</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sedona.spark.sql.types.to_shapely">
+<span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.types.</span></span><span class="sig-name descname"><span class="pre">to_shapely</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#to_shapely"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.to_shapely" title="Permalink to this definition"></a></dt>
+<dd><p>Convert native/Sedona spatial values to Shapely, retaining SRID.</p>
+<p>Shapely values and <code class="docutils literal notranslate"><span class="pre">None</span></code> pass through. Native conversion needs Shapely 2+.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sedona.spark.sql.types.to_spark_geography">
+<span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.types.</span></span><span class="sig-name descname"><span class="pre">to_spark_geography</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#to_spark_geography"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.to_spark_geography" title="Permalink to this definition"></a></dt>
+<dd><p>Convert Shapely or Sedona Geography to Spark’s native geography value.</p>
+<p>An unset Shapely SRID (0) becomes Spark geography’s default 4326 on 4.2+.
+Other SRIDs are preserved for Spark’s JVM boundary to validate. Older
+runtimes retain Sedona’s Geography wrapper and SRID. Use an ANY schema
+where PySpark’s CRS mapping cannot represent a supported non-default SRID.
+This conversion does not change Sedona’s S2 computation semantics.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sedona.spark.sql.types.to_spark_geometry">
+<span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.types.</span></span><span class="sig-name descname"><span class="pre">to_spark_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#to_spark_geometry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.to_spark_geometry" title="Permalink to this definition"></a></dt>
+<dd><p>Convert Shapely to Spark’s native value, preserving dimensions and SRID.</p>
+<p>Use this for <code class="docutils literal notranslate"><span class="pre">createDataFrame</span></code> and Python UDF results on Spark 4.2+.
+<code class="docutils literal notranslate"><span class="pre">collect</span></code> returns Spark Geometry values there; call <code class="docutils literal notranslate"><span class="pre">to_shapely</span></code> to
+obtain Shapely values. Older Spark accepts and returns Shapely directly.
+Native conversion requires Shapely 2+. <code class="docutils literal notranslate"><span class="pre">None</span></code> is preserved.</p>
 </dd></dl>
 
 </section>

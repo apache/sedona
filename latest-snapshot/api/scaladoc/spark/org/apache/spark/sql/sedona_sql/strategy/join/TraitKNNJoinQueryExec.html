@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.strategy.join.TraitKNNJoinQueryExec</title>
@@ -951,11 +950,11 @@ answer. Mid-latitude rasters retain the tight Haversine bound.
         <span class="name">toGeographySpatialRDD</span><span class="params">(<span name="rdd">rdd: <span class="extype" name="org.apache.spark.rdd.RDD">RDD</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.UnsafeRow">UnsafeRow</span>]</span>, <span name="shapeExpression">shapeExpression: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>)</span><span class="result">: <a href="../../../../../sedona/core/spatialRDD/SpatialRDD.html" class="extype" name="org.apache.sedona.core.spatialRDD.SpatialRDD">SpatialRDD</a>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">Builds a SpatialRDD from a column of GeographyUDT bytes.</p><div class="fullcomment"><div class="comment cmt"><p>Builds a SpatialRDD from a column of GeographyUDT bytes. Each row becomes a JTS geometry
-whose envelope is the Geography's lat/lng bounding rectangle (full-longitude when the
-rectangle wraps the antimeridian). The Geography object is carried alongside the original row
-in <code>userData</code> via <a href="GeographyJoinShape.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.GeographyJoinShape">GeographyJoinShape</a> so the join executor can perform S2-based predicate
-refinement and emit the row.
+      <p class="shortcomment cmt">Builds a SpatialRDD from a geography column.</p><div class="fullcomment"><div class="comment cmt"><p>Builds a SpatialRDD from a geography column. Each row becomes a JTS geometry whose envelope
+is the Geography's lat/lng bounding rectangle (full-longitude when the rectangle wraps the
+antimeridian). The Geography object is carried alongside the original row in <code>userData</code> via
+<a href="GeographyJoinShape.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.GeographyJoinShape">GeographyJoinShape</a> so the join executor can perform S2-based predicate refinement and
+emit the row.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TraitJoinQueryBase.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase">TraitJoinQueryBase</a></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase#toSpatialRDD" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toSpatialRDD(rdd:org.apache.spark.rdd.RDD[org.apache.spark.sql.catalyst.expressions.UnsafeRow],shapeExpression:org.apache.spark.sql.catalyst.expressions.Expression):org.apache.sedona.core.spatialRDD.SpatialRDD[org.locationtech.jts.geom.Geometry]"></a><a id="toSpatialRDD(RDD[UnsafeRow],Expression):SpatialRDD[Geometry]"></a>

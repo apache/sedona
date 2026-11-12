@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase</title>
@@ -583,6 +582,22 @@
                 <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase#shapeToGeography" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="shapeToGeography(shapeExpression:org.apache.spark.sql.catalyst.expressions.Expression,row:org.apache.spark.sql.catalyst.InternalRow):org.apache.sedona.common.S2Geography.Geography"></a><a id="shapeToGeography(Expression,InternalRow):Geography"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/TraitJoinQueryBase$.html#shapeToGeography(shapeExpression:org.apache.spark.sql.catalyst.expressions.Expression,row:org.apache.spark.sql.catalyst.InternalRow):org.apache.sedona.common.S2Geography.Geography" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">shapeToGeography</span><span class="params">(<span name="shapeExpression">shapeExpression: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="row">row: <span class="extype" name="org.apache.spark.sql.catalyst.InternalRow">InternalRow</span></span>)</span><span class="result">: <span class="extype" name="org.apache.sedona.common.S2Geography.Geography">Geography</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Evaluate an S2 join input without an unnecessary SQL-byte round trip.</p>
     </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase#shapeToGeometry" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="shapeToGeometry(shapeExpression:org.apache.spark.sql.catalyst.expressions.Expression,row:org.apache.spark.sql.catalyst.InternalRow):org.locationtech.jts.geom.Geometry"></a><a id="shapeToGeometry(Expression,InternalRow):Geometry"></a>
       <span class="permalink">
@@ -602,8 +617,8 @@
 the closed rectangular polygon implied by their <code>(xmin, ymin, xmax, ymax)</code> bounds; Box3D
 columns are projected to their XY footprint (<code>xmin, ymin, xmax, ymax</code>) and the Z axis is
 re-checked per candidate pair by the scalar Box3D predicate that <code>JoinQueryDetector</code> folds
-into the join's <code>extraCondition</code>. All other shape columns are deserialised from the Sedona
-geometry binary form.</p><p>Producing a JTS rectangle here lets the rest of the join machinery — partitioner, R-tree
+into the join's <code>extraCondition</code>. Geometry and geography inputs use their typed computational
+boundaries.</p><p>Producing a JTS rectangle here lets the rest of the join machinery — partitioner, R-tree
 <code>IndexBuilder</code>, refine evaluator — stay shape-agnostic. JTS already short-circuits
 rectangle-rectangle predicates (<code>Polygon.isRectangle</code> triggers <code>RectangleIntersects</code> /
 <code>RectangleContains</code>), so a Box2D-on-Box2D <code>ST_Intersects</code> join naturally pays only the
@@ -635,6 +650,22 @@ the partitioned-RDD path where each row must carry a non-null geometry so the or
 <code>UnsafeRow</code> survives to outer-join output; spatial predicates against the empty geometry
 produce no matches, matching the legacy <code>GeometrySerializer.deserialize(null)</code> behaviour.
 </p></div></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase#shapeToWGS84Envelope" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="shapeToWGS84Envelope(shapeExpression:org.apache.spark.sql.catalyst.expressions.Expression,row:org.apache.spark.sql.catalyst.InternalRow):org.locationtech.jts.geom.Geometry"></a><a id="shapeToWGS84Envelope(Expression,InternalRow):Geometry"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/TraitJoinQueryBase$.html#shapeToWGS84Envelope(shapeExpression:org.apache.spark.sql.catalyst.expressions.Expression,row:org.apache.spark.sql.catalyst.InternalRow):org.locationtech.jts.geom.Geometry" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">shapeToWGS84Envelope</span><span class="params">(<span name="shapeExpression">shapeExpression: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="row">row: <span class="extype" name="org.apache.spark.sql.catalyst.InternalRow">InternalRow</span></span>)</span><span class="result">: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">The raster payload format is unchanged; geometry inputs use their typed boundary.</p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

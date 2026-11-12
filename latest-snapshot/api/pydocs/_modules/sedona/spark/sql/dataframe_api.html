@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.dataframe_api &mdash; Apache Sedona Python Documentation</title>
@@ -278,6 +277,21 @@
         <span class="n">args</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Column</span><span class="p">,</span> <span class="n">ConnectColumn</span><span class="p">)</span>
     <span class="p">):</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">args</span><span class="p">]</span>
+
+    <span class="c1"># Spark owns these functions on native runtimes, including their validation</span>
+    <span class="c1"># and Connect dispatch. Do not invoke the Sedona JVM counterpart.</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span>
+
+    <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span> <span class="ow">and</span> <span class="n">function_name</span> <span class="ow">in</span> <span class="p">{</span>
+        <span class="s2">"ST_AsBinary"</span><span class="p">,</span>
+        <span class="s2">"ST_GeomFromWKB"</span><span class="p">,</span>
+        <span class="s2">"ST_GeogFromWKB"</span><span class="p">,</span>
+        <span class="s2">"ST_SRID"</span><span class="p">,</span>
+        <span class="s2">"ST_SetSRID"</span><span class="p">,</span>
+    <span class="p">}:</span>
+        <span class="k">if</span> <span class="n">function_name</span> <span class="o">==</span> <span class="s2">"ST_GeogFromWKB"</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">st_setsrid</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">st_geogfromwkb</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">function_name</span><span class="o">.</span><span class="n">lower</span><span class="p">())(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
 
     <span class="c1"># in spark-connect environments use connect API</span>
     <span class="k">if</span> <span class="n">is_remote</span><span class="p">():</span>

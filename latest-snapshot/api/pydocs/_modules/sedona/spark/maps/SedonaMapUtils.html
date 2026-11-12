@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.maps.SedonaMapUtils &mdash; Apache Sedona Python Documentation</title>
@@ -232,7 +231,7 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_geometry_type</span><span class="p">,</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geoarrow.geoarrow</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataframe_to_arrow</span>
 
 
@@ -271,7 +270,16 @@
             <span class="n">data_pyarrow</span> <span class="o">=</span> <span class="n">dataframe_to_arrow</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
             <span class="n">geo_df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="o">.</span><span class="n">from_arrow</span><span class="p">(</span><span class="n">data_pyarrow</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">geo_df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">toPandas</span><span class="p">(),</span> <span class="n">geometry</span><span class="o">=</span><span class="n">geometry_col</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">shapely</span><span class="w"> </span><span class="kn">import</span> <span class="n">from_wkb</span>
+
+                <span class="n">local</span> <span class="o">=</span> <span class="n">dataframe_to_arrow</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">schema</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">is_geometry_type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">dataType</span><span class="p">):</span>
+                        <span class="n">local</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">local</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">from_wkb</span><span class="p">)</span>
+                <span class="n">geo_df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">local</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">geometry_col</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">geo_df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">toPandas</span><span class="p">(),</span> <span class="n">geometry</span><span class="o">=</span><span class="n">geometry_col</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">geometry_col</span> <span class="o">!=</span> <span class="s2">"geometry"</span> <span class="ow">and</span> <span class="n">rename</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">geo_df</span><span class="o">.</span><span class="n">rename_geometry</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">geo_df</span>
@@ -292,7 +300,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">__get_geometry_col__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">schema</span>
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">dataType</span> <span class="o">==</span> <span class="n">GeometryType</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">is_geometry_type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">dataType</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span>
 
     <span class="nd">@classmethod</span>

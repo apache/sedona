@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.functions &mdash; Apache Sedona Python Documentation</title>
@@ -236,7 +235,14 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">GeometryType</span><span class="p">,</span>
+    <span class="n">GeographyType</span><span class="p">,</span>
+    <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">,</span>
+    <span class="n">to_shapely</span><span class="p">,</span>
+    <span class="n">to_spark_geometry</span><span class="p">,</span>
+    <span class="n">to_spark_geography</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.utils.geometry_sql_serde</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">deserialize_geometry</span><span class="p">,</span>
     <span class="n">serialize_geometry</span><span class="p">,</span>
@@ -290,6 +296,9 @@
             <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">annotation</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">):</span>
                 <span class="n">deserialize_geom</span> <span class="o">=</span> <span class="kc">True</span>
 
+        <span class="k">if</span> <span class="n">USES_NATIVE_SPATIAL_TYPES</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_apply_native_series_udf</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">return_type</span><span class="p">,</span> <span class="n">udf_type</span><span class="p">,</span> <span class="n">deserialize_geom</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">udf_type</span> <span class="o">==</span> <span class="n">SedonaUDFType</span><span class="o">.</span><span class="n">SHAPELY_SCALAR</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">_apply_shapely_series_udf</span><span class="p">(</span>
                 <span class="n">fn</span><span class="p">,</span> <span class="n">return_type</span><span class="p">,</span> <span class="n">serialize_geom</span><span class="p">,</span> <span class="n">deserialize_geom</span>
@@ -303,6 +312,36 @@
         <span class="k">raise</span> <span class="n">InvalidSedonaUDFType</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Invalid UDF type: </span><span class="si">{</span><span class="n">udf_type</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">apply_fn</span></div>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_apply_native_series_udf</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">return_type</span><span class="p">,</span> <span class="n">udf_type</span><span class="p">,</span> <span class="n">deserialize_geom</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Use Spark's pandas UDF transport for its own native spatial values."""</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">pandas_udf</span><span class="p">,</span> <span class="n">PandasUDFType</span>
+
+    <span class="k">if</span> <span class="n">udf_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">SedonaUDFType</span><span class="o">.</span><span class="n">SHAPELY_SCALAR</span><span class="p">,</span> <span class="n">SedonaUDFType</span><span class="o">.</span><span class="n">GEO_SERIES</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">InvalidSedonaUDFType</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Invalid UDF type: </span><span class="si">{</span><span class="n">udf_type</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply</span><span class="p">(</span><span class="n">series</span><span class="p">):</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">to_shapely</span><span class="p">)</span> <span class="k">if</span> <span class="n">deserialize_geom</span> <span class="k">else</span> <span class="n">series</span>
+        <span class="k">if</span> <span class="n">udf_type</span> <span class="o">==</span> <span class="n">SedonaUDFType</span><span class="o">.</span><span class="n">GEO_SERIES</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="k">if</span> <span class="n">deserialize_geom</span> <span class="k">else</span> <span class="n">values</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">return_type</span><span class="p">,</span> <span class="p">(</span><span class="n">GeometryType</span><span class="p">,</span> <span class="n">GeographyType</span><span class="p">)):</span>
+            <span class="n">convert</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">to_spark_geometry</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">return_type</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">)</span>
+                <span class="k">else</span> <span class="n">to_spark_geography</span>
+            <span class="p">)</span>
+            <span class="c1"># Empty/all-null GeoSeries retain geometry dtype after map(). Spark</span>
+            <span class="c1"># native values need an ordinary object Series at its Arrow boundary.</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">convert</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">output</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">output</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">output</span>
+
+    <span class="k">return</span> <span class="n">pandas_udf</span><span class="p">(</span><span class="n">apply</span><span class="p">,</span> <span class="n">return_type</span><span class="p">,</span> <span class="n">PandasUDFType</span><span class="o">.</span><span class="n">SCALAR</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_apply_shapely_series_udf</span><span class="p">(</span>

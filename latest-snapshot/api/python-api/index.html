@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5575,6 +5574,25 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#recognizing-spatial-column-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recognizing spatial column types
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -5628,6 +5646,19 @@
 <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">ST_Length</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"length"</span><span class="p">))</span>
 </code></pre></div>
 <p>This example assumes a DataFrame named <code>df</code> with a geometry column named <code>geometry</code> and a Spark session configured with Sedona. See the <a href="../../setup/install-python/">Python installation guide</a> for setup instructions and the <a href="../sql/DataFrameAPI/">DataFrame API guide</a> for argument conventions and more examples.</p>
+<h2 id="recognizing-spatial-column-types">Recognizing spatial column types<a class="headerlink" href="#recognizing-spatial-column-types" title="Permanent link">&para;</a></h2>
+<p>Since v2.0.0, <code>is_geometry_type</code> and <code>is_geography_type</code> recognize both Sedona UDTs and Spark native spatial types when those classes are available in PySpark. They inspect schema type instances without requiring a Spark session or changing the column's representation.</p>
+<p>Both helpers are available from <code>sedona.spark</code>, <code>sedona.spark.sql</code> and <code>sedona.spark.sql.types</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_geography_type</span><span class="p">,</span> <span class="n">is_geometry_type</span>
+
+<span class="n">geometry_columns</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">fields</span> <span class="k">if</span> <span class="n">is_geometry_type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">dataType</span><span class="p">)</span>
+<span class="p">]</span>
+<span class="n">geography_columns</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">fields</span> <span class="k">if</span> <span class="n">is_geography_type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">dataType</span><span class="p">)</span>
+<span class="p">]</span>
+</code></pre></div>
+<p>The predicates distinguish geometry from geography. Arrays and structs containing spatial values are not themselves spatial column types. <code>LegacyGeometryType</code> and <code>LegacyGeographyType</code> in <code>sedona.spark.sql.types</code> explicitly name Sedona's UDTs; the predicates recognize these too. These helpers do not enable native spatial support or change the existing <code>GeometryType</code> and <code>GeographyType</code> defaults.</p>
 
 
 
@@ -5648,7 +5679,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 10, 2026 03:45:51 UTC">September 10, 2026 03:45:51</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="November 11, 2026 20:21:31 UTC">November 11, 2026 20:21:31</span>
   </span>
 
     

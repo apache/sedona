@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -225,10 +224,11 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="sedona.spark.geoarrow.geoarrow.create_spatial_dataframe">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.geoarrow.geoarrow.</span></span><span class="sig-name descname"><span class="pre">create_spatial_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.SparkSession.html#pyspark.sql.SparkSession" title="(in PySpark vmaster)"><span class="pre">SparkSession</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">gdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">gpd.GeoDataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrame.html#pyspark.sql.DataFrame" title="(in PySpark vmaster)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geoarrow/geoarrow.html#create_spatial_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geoarrow.geoarrow.create_spatial_dataframe" title="Permalink to this definition"></a></dt>
-<dd><p>Create a Spark DataFrame from a GeoPandas GeoDataFrame, transferring the data with Arrow.</p>
-<p>This is faster than <code class="docutils literal notranslate"><span class="pre">spark.createDataFrame(gdf)</span></code> for large GeoDataFrames.
-Geometry columns become Sedona geometry columns, and the other columns get the
-Spark types of their Arrow types.</p>
+<dd><p>Create a Spark DataFrame from a GeoPandas GeoDataFrame.</p>
+<p>Older runtimes use Sedona’s Arrow transfer path. Spark 4.2+ receives native
+geometry values through <code class="docutils literal notranslate"><span class="pre">createDataFrame</span></code> and its configured transport.
+Geometry columns retain their geometry schema, and other columns use the
+Spark types corresponding to their Arrow types.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
