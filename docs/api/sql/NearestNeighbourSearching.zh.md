@@ -44,6 +44,63 @@ Sedona 通过提供地理空间 k 近邻（kNN）连接方法来支持对地理�
 spark.sedona.join.knn.includeTieBreakers=true
 ```
 
+### Geography 上的 ST_KNN
+
+格式：`ST_KNN(R: Geography, S: Geography, k: Integer)`
+
+起始版本：`v2.0.0`
+
+`ST_KNN` 也接受 [Geography](geography/Geography-Functions.md) 列。与上文相同，R 是查询侧，S 是对象侧。每一条查询行会与距离它最近的 `k` 条对象行连接。
+
+邻居按 [ST_Distance](geography/Geography-Functions/ST_Distance.md) 对两个 geography 返回的距离排序，即两者在球面上的最短距离，单位为米。由此带来三点不同：
+
+- 没有 `use_spheroid` 参数。Geography 始终在球面上度量，因此只有三参数形式接受 geography。
+- 线和面不会被替换为质心。到一个面的距离是到该面上最近点的距离；当查询对象位于面内时，距离为零。
+- 跨越反子午线（±180° 经线）以及极点附近的邻居都能被正确找到。
+
+两个参数都必须是 geography。如果要把 geography 与 geometry 连接，请先用 [ST_GeomToGeography](geography/Geography-Constructors/ST_GeomToGeography.md) 转换 geometry。
+
+Geography 上的 `ST_KNN` 连接以广播连接的方式执行，因此其中一侧必须能放入内存。两侧都可以被广播。请给较小的一侧加上广播提示，或者把 `sedona.join.autoBroadcastJoinThreshold` 设置得足够大，让 Sedona 自动广播它。如果两侧都没有被广播，查询规划会报错。仅支持内连接。
+
+本页的其他规则同样适用于 geography：NULL 和空的 geography 会被跳过；只有当 `spark.sedona.join.knn.includeTieBreakers` 为 `true` 时才返回并列的结果；`ON` 中的其他谓词作用于 `ST_KNN` 已选出的邻居。
+
+SQL 示例：
+
+```sql
+SELECT /*+ BROADCAST(a) */
+    s.name AS station,
+    a.name AS airport,
+    ROUND(ST_Distance(s.geog, a.geog) / 1000) AS km
+FROM stations AS s
+JOIN airports AS a
+ON ST_KNN(s.geog, a.geog, 1)
+ORDER BY station
+```
+
+使用下面两张表：
+
+```
+stations                              airports
+name          geog                    name    geog
+Suva          POINT (178.44 -18.14)   Apia    POINT (-171.76 -13.83)
+Longyearbyen  POINT (15.63 78.22)     Noumea  POINT (166.46 -22.27)
+                                      Alert   POINT (-62.35 82.50)
+                                      Tromso  POINT (18.96 69.65)
+```
+
+输出：
+
+```
++------------+-------+------+
+|station     |airport|km    |
++------------+-------+------+
+|Longyearbyen|Tromso |958.0 |
+|Suva        |Apia   |1152.0|
++------------+-------+------+
+```
+
+Apia 与 Suva 分别位于反子午线的两侧。按经纬度的度数看，它比 Noumea 远得多；但在球面上，它才是两者中较近的一个。
+
 ### 谓词下推注意事项：
 
 在 ST_KNN 之后对结果 DataFrame 施加的过滤条件，部分可能会被下推到 kNN 连接的对象侧。这意味着这些过滤会在 kNN 连接执行之前应用到对象侧的读取阶段。如果你希望过滤在 kNN 连接之后再生效，请先将 kNN 连接的结果物化，然后再应用过滤条件。

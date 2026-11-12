@@ -648,7 +648,9 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
                   condition,
                   Some(distance)))
 
-            // ST_KNN
+            // ST_KNN. The 3-argument form also accepts geographies, which are always ranked
+            // by their distance on the sphere; `planGeographyKNNJoin` plans that case. The
+            // 4-argument form is geometry-only: geography inputs are rejected at analysis time.
             case ST_KNN(Seq(leftShape, rightShape, k)) =>
               Some(
                 JoinQueryDetection(
@@ -659,7 +661,8 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
                   spatialPredicate = SpatialPredicate.KNN,
                   isGeography = false,
                   extraCondition,
-                  Some(k)))
+                  Some(k),
+                  geographyShape = isGeographyInput(leftShape) || isGeographyInput(rightShape)))
 
             case ST_KNN(Seq(leftShape, rightShape, k, useSpheroid)) =>
               val useSpheroidUnwrapped = useSpheroid.eval().asInstanceOf[Boolean]
@@ -681,7 +684,12 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
 
       val sedonaConf = new SedonaConf(sparkSession.conf)
 
-      if ((broadcastLeft || broadcastRight) && sedonaConf.getUseIndex) {
+      val geographyKNNDetection = queryDetection.filter(detection =>
+        detection.geographyShape && detection.spatialPredicate == SpatialPredicate.KNN)
+
+      if (geographyKNNDetection.isDefined) {
+        planGeographyKNNJoin(geographyKNNDetection.get, joinType, broadcastLeft, broadcastRight)
+      } else if ((broadcastLeft || broadcastRight) && sedonaConf.getUseIndex) {
         queryDetection match {
           case Some(detection) =>
             planBroadcastJoin(
@@ -828,6 +836,54 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
             "with join relations is not supported")
         Nil
     }
+  }
+
+  /**
+   * Plans ST_KNN over geographies as a broadcast join. ST_KNN cannot be evaluated one pair at a
+   * time, so unlike the other geography predicates it has no row-by-row fallback: a join that
+   * cannot be planned here is rejected with an error that says how to make it plannable.
+   */
+  private def planGeographyKNNJoin(
+      detection: JoinQueryDetection,
+      joinType: JoinType,
+      broadcastLeft: Boolean,
+      broadcastRight: Boolean): Seq[SparkPlan] = {
+    if (joinType != Inner) {
+      throw new UnsupportedOperationException(
+        s"ST_KNN on geography supports inner joins only, but the join type is $joinType")
+    }
+    if (!broadcastLeft && !broadcastRight) {
+      throw new UnsupportedOperationException(
+        "ST_KNN on geography requires a broadcast join. Add a broadcast hint to one side of " +
+          "the join, or raise sedona.join.autoBroadcastJoinThreshold so that the smaller side " +
+          "is broadcast automatically.")
+    }
+
+    val k = detection.distance.get
+    val kValue: Int = k.eval().asInstanceOf[Int]
+    require(kValue >= 1, "The number of neighbors (k) must be equal or greater than 1.")
+
+    // The first argument of ST_KNN is the query shape and the second is the object shape.
+    val queryShape = detection.leftShape
+    val objectShape = detection.rightShape
+    val querySide =
+      matchExpressionsToPlans(queryShape, objectShape, detection.left, detection.right) match {
+        case Some((_, _, false)) => LeftSide
+        case Some((_, _, true)) => RightSide
+        case None =>
+          throw new UnsupportedOperationException(
+            "The two geographies of ST_KNN must come from different sides of the join")
+      }
+
+    BroadcastGeographyKNNJoinExec(
+      planLater(detection.left),
+      planLater(detection.right),
+      queryShape,
+      objectShape,
+      broadcastSide = if (broadcastLeft) LeftSide else RightSide,
+      querySide,
+      k,
+      detection.extraCondition) :: Nil
   }
 
   private def planKNNJoin(
