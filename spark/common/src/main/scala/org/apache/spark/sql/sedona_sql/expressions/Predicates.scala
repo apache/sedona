@@ -19,6 +19,7 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.common.Predicates
+import org.apache.sedona.common.S2Geography.Geography
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
@@ -402,14 +403,27 @@ private[apache] case class ST_3DDWithin(inputExpressions: Seq[Expression])
  * Test if leftGeometry is one of the k nearest neighbors (KNN) of rightGeometry based on
  * approximate distance metric.
  *
+ * The geography overload takes no use_spheroid flag: geographies are always ranked by their
+ * distance on the sphere.
+ *
  * @param inputExpressions
  */
 private[apache] case class ST_KNN(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction3(Predicates.knn),
-      inferrableFunction4(Predicates.knn)) {
+      inferrableFunction4(Predicates.knn),
+      inferrableFunction3(GeographyKnnPredicate.knn)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
+}
+
+/**
+ * ST_KNN over geographies is only meaningful as a join condition, where the join strategy
+ * implements it. Like the geometry overloads, it cannot be evaluated one pair at a time.
+ */
+private object GeographyKnnPredicate {
+  def knn(query: Geography, neighbor: Geography, k: Int): Boolean =
+    throw new UnsupportedOperationException("KNN predicate is not supported")
 }
