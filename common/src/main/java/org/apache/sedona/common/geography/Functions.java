@@ -1199,7 +1199,12 @@ public class Functions {
     return Constructors.geogToGeometry(g);
   }
 
-  private static ShapeIndexGeography toShapeIndex(Geography g) {
+  /**
+   * The shapes that the distance and predicate functions of this class evaluate for a geography.
+   * Anything that prunes on behalf of those functions has to bound these shapes, and not another
+   * reading of the same geography.
+   */
+  static ShapeIndexGeography toShapeIndex(Geography g) {
     if (g instanceof WKBGeography) {
       return ((WKBGeography) g).getShapeIndexGeography();
     }

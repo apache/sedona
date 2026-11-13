@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.stream.Collectors;
 import org.apache.sedona.common.S2Geography.Geography;
@@ -98,7 +99,12 @@ public class GeographyKnnIndexTest {
   private static String randomPoint(Random random) {
     double lon = random.nextDouble() * 360 - 180;
     double lat = Math.toDegrees(Math.asin(random.nextDouble() * 2 - 1));
-    return "POINT(" + lon + " " + lat + ")";
+    return point(lon, lat);
+  }
+
+  /** WKT is written with a decimal point whatever the default locale of the JVM is. */
+  private static String point(double lon, double lat) {
+    return String.format(Locale.ROOT, "POINT(%.15f %.15f)", lon, lat);
   }
 
   /** A small square around a random centre that stays clear of the poles and the antimeridian. */
@@ -107,8 +113,12 @@ public class GeographyKnnIndexTest {
     double lat = random.nextDouble() * 160 - 80;
     double half = 0.05 + random.nextDouble() * 2;
     return String.format(
+        Locale.ROOT,
         "POLYGON((%1$f %3$f, %2$f %3$f, %2$f %4$f, %1$f %4$f, %1$f %3$f))",
-        lon - half, lon + half, lat - half, lat + half);
+        lon - half,
+        lon + half,
+        lat - half,
+        lat + half);
   }
 
   private static String[] generate(int count, java.util.function.Supplier<String> generator) {
@@ -203,6 +213,94 @@ public class GeographyKnnIndexTest {
     GeographyKnnIndex<Integer> objects = index("POINT(0 62)", "POINT(3 60)");
 
     assertEquals(Arrays.asList(1, 0), items(objects.nearest(geography("POINT(0 60)"), 2, false)));
+  }
+
+  @Test
+  public void findsAPolygonThatCoversMoreThanItsVerticesSuggest() {
+    // The ring runs along the equator, so the polygon is a hemisphere. Distance measures it as
+    // the northern one: the query near the north pole is inside it.
+    Geography hemisphere = geography("POLYGON((0 -1e-14,120 -1e-14,-120 -1e-14,0 -1e-14))");
+    Geography query = geography("POINT(0 89)");
+    assertEquals(0.0, Functions.distance(query, hemisphere), 0.0);
+
+    GeographyKnnIndex<Integer> objects =
+        GeographyKnnIndex.<Integer>builder()
+            .add(geography("POINT(0 88)"), 0)
+            .add(hemisphere, 1)
+            .build();
+    List<Neighbor<Integer>> neighbors = objects.nearest(query, 1, false);
+
+    assertEquals(Arrays.asList(1), items(neighbors));
+    assertEquals(0.0, neighbors.get(0).getDistance(), 0.0);
+  }
+
+  @Test
+  public void boundsCoverThePolesThatAPolygonContains() {
+    S2LatLngRect north = GeographyKnnIndex.bounds(geography("POLYGON((0 80,120 80,-120 80,0 80))"));
+    assertEquals(Math.PI / 2, north.latHi().radians(), 0.0);
+    assertTrue(north.lng().isFull());
+    assertEquals(80.0, north.latLo().degrees(), 1.0);
+
+    S2LatLngRect south =
+        GeographyKnnIndex.bounds(geography("POLYGON((0 -80,-120 -80,120 -80,0 -80))"));
+    assertEquals(-Math.PI / 2, south.latLo().radians(), 0.0);
+    assertTrue(south.lng().isFull());
+    assertEquals(-80.0, south.latHi().degrees(), 1.0);
+  }
+
+  @Test
+  public void indexesCollapsedPolygonsThatHaveADistance() {
+    // Rings that enclose no area still have edges, and distance measures to those edges.
+    String[] collapsed = {
+      "POLYGON((0 0, 1 1, 1 1, 0 0))",
+      "POLYGON((3 3, 3 3, 3 3, 3 3))",
+      "POLYGON((5 0, 6 0, 7 0, 5 0))"
+    };
+    Geography query = geography("POINT(0.5 0.5)");
+    for (String wkt : collapsed) {
+      Double distance = Functions.distance(query, geography(wkt));
+      assertTrue(wkt, distance != null && !distance.isInfinite() && !distance.isNaN());
+    }
+
+    assertEquals(3, index(collapsed).size());
+    assertAgreesWithBruteForce(collapsed, new String[] {"POINT(0.5 0.5)", "POINT(4 2)"}, 3);
+  }
+
+  @Test
+  public void agreesWithBruteForceNearTheAntipodeOfTheQuery() {
+    // Angles close to 180 degrees are where rectangle distances are least precise. The objects
+    // sit within centimeters to meters of the antipode, at distances that differ by less than
+    // that imprecision.
+    Random random = new Random(3);
+    for (int trial = 0; trial < 300; trial++) {
+      double lon = random.nextDouble() * 340 - 170;
+      double lat = random.nextDouble() * 160 - 80;
+      double spread = Math.pow(10, -3 - random.nextDouble() * 6);
+      double antipodeLon = lon > 0 ? lon - 180 : lon + 180;
+      String[] objects =
+          generate(
+              30,
+              () ->
+                  point(
+                      antipodeLon + (random.nextDouble() - 0.5) * spread,
+                      -lat + (random.nextDouble() - 0.5) * spread));
+      assertAgreesWithBruteForce(objects, new String[] {point(lon, lat)}, 3);
+    }
+  }
+
+  @Test
+  public void agreesWithBruteForceAQuarterOfTheSphereAway() {
+    // Every object on a meridian is about 90 degrees from a query on the equator a quarter turn
+    // away, which is where the distance to the side of a rectangle is least precise.
+    Random random = new Random(5);
+    for (int trial = 0; trial < 100; trial++) {
+      double lon = random.nextDouble() * 80 - 40;
+      double spread = Math.pow(10, -3 - random.nextDouble() * 6);
+      String[] objects = generate(200, () -> point(lon + 90, random.nextDouble() * 2 - 1));
+      String query =
+          point(lon + (random.nextDouble() - 0.5) * spread, (random.nextDouble() - 0.5) * spread);
+      assertAgreesWithBruteForce(objects, new String[] {query}, 3);
+    }
   }
 
   @Test

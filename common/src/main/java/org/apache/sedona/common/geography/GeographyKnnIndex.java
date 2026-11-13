@@ -20,7 +20,12 @@ package org.apache.sedona.common.geography;
 
 import com.google.common.geometry.R1Interval;
 import com.google.common.geometry.S1Interval;
+import com.google.common.geometry.S2EdgeUtil;
+import com.google.common.geometry.S2LatLng;
 import com.google.common.geometry.S2LatLngRect;
+import com.google.common.geometry.S2Point;
+import com.google.common.geometry.S2Shape;
+import com.google.common.geometry.S2ShapeUtil;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -52,11 +57,22 @@ import org.locationtech.jts.index.strtree.STRtree;
 public final class GeographyKnnIndex<T> {
 
   /**
-   * Rectangle distances and S2 distances are computed along different floating-point paths. The
-   * lower bound is reduced by this much (about 6 mm on the ground) so that rounding can never push
-   * it above the distance of a geography inside the rectangle.
+   * How much the distance between two rectangles is reduced before it is used as a lower bound,
+   * about 6 meters on the ground.
+   *
+   * <p>The rectangle distance and the distance between two geographies are computed along different
+   * floating-point paths, and both go through an arc sine that is ill-conditioned for some angles:
+   * near 180 degrees for the distance between two points or to the end of an edge, and near 90
+   * degrees for the distance to the inside of an edge. There a relative error of a few ulps in the
+   * argument becomes an absolute error of up to about 4e-8 radians in the angle, so the two values
+   * can disagree by about 1e-7 radians. The slack is ten times that, so that rounding can never
+   * push the bound above the distance of a geography inside the rectangle. It only costs a few
+   * extra distance computations for geographies within this margin of the k-th neighbour.
    */
-  private static final double LOWER_BOUND_SLACK_RADIANS = 1e-9;
+  private static final double LOWER_BOUND_SLACK_RADIANS = 1e-6;
+
+  private static final S2Point NORTH_POLE = new S2Point(0, 0, 1);
+  private static final S2Point SOUTH_POLE = new S2Point(0, 0, -1);
 
   private static final Comparator<Candidate> CANDIDATE_ORDER =
       Comparator.comparingDouble(candidate -> candidate.key);
@@ -187,17 +203,72 @@ public final class GeographyKnnIndex<T> {
   /**
    * The latitude / longitude bounding rectangle of a geography.
    *
-   * @return the rectangle, or null when the geography is null or empty
+   * <p>The rectangle covers the shapes that {@link Functions#distance(Geography, Geography)}
+   * measures, which is what makes it safe to prune with. It is computed from those shapes, edge by
+   * edge, and extended to a pole when a polygon contains that pole.
+   *
+   * @return the rectangle, or null when the geography is null or has nothing to measure a distance
+   *     to
    */
   public static S2LatLngRect bounds(Geography geography) {
     if (geography == null) {
       return null;
     }
-    if (geography instanceof WKBGeography && ((WKBGeography) geography).isEmpty()) {
-      return null;
+    if (geography instanceof WKBGeography) {
+      WKBGeography wkb = (WKBGeography) geography;
+      if (wkb.isEmpty()) {
+        return null;
+      }
+      if (wkb.isPoint()) {
+        // The same conversion as WKBGeography.extractPoint(), which distance uses for points.
+        S2Point point = S2LatLng.fromDegrees(wkb.getPointY(), wkb.getPointX()).toPoint();
+        return S2LatLngRect.fromPoint(new S2LatLng(point));
+      }
     }
-    S2LatLngRect rect = geography.region().getRectBound();
-    return rect.isEmpty() ? null : rect;
+
+    S2LatLngRect bound = S2LatLngRect.empty();
+    boolean containsNorthPole = false;
+    boolean containsSouthPole = false;
+    S2Shape.MutableEdge edge = new S2Shape.MutableEdge();
+    for (S2Shape shape : Functions.toShapeIndex(geography).shapeIndex.getShapes()) {
+      if (shape == null) {
+        continue;
+      }
+      for (int chain = 0; chain < shape.numChains(); chain++) {
+        // A bounder follows one chain of edges, including the way each edge bulges away from the
+        // straight line between its ends in latitude / longitude space.
+        S2EdgeUtil.RectBounder bounder = new S2EdgeUtil.RectBounder();
+        int length = shape.getChainLength(chain);
+        for (int offset = 0; offset < length; offset++) {
+          shape.getChainEdge(chain, offset, edge);
+          if (offset == 0) {
+            bounder.addPoint(edge.getStart());
+          }
+          if (!edge.getEnd().equalsPoint(edge.getStart())) {
+            bounder.addPoint(edge.getEnd());
+          }
+        }
+        if (length > 0) {
+          bound = bound.union(bounder.getBound());
+        }
+      }
+      if (shape.dimension() == 2) {
+        // The interior of a polygon reaches further than its edges only around a pole.
+        containsNorthPole |= S2ShapeUtil.containsBruteForce(shape, NORTH_POLE);
+        containsSouthPole |= S2ShapeUtil.containsBruteForce(shape, SOUTH_POLE);
+      }
+    }
+    if (containsNorthPole || containsSouthPole) {
+      double latLo = bound.isEmpty() ? Math.PI / 2 : bound.lat().lo();
+      double latHi = bound.isEmpty() ? -Math.PI / 2 : bound.lat().hi();
+      bound =
+          new S2LatLngRect(
+              new R1Interval(
+                  containsSouthPole ? -Math.PI / 2 : latLo,
+                  containsNorthPole ? Math.PI / 2 : latHi),
+              S1Interval.full());
+    }
+    return bound.isEmpty() ? null : bound;
   }
 
   /**
