@@ -18,6 +18,7 @@
 import pyspark
 import pyspark.sql.functions as f
 import pytest
+from pyspark.sql.types import BooleanType, LongType
 from sklearn.cluster import DBSCAN as sklearnDBSCAN
 from tests.test_base import TestBase
 
@@ -33,6 +34,61 @@ import os
     reason="DBSCAN requires checkpoint directory which is not available in Spark Connect mode before Spark 4.0.0",
 )
 class TestDBScan(TestBase):
+
+    @pytest.mark.parametrize(
+        "input_column,is_core_column_name,cluster_column_name",
+        [
+            ("__SEDONA_DBSCAN__", "isCore", "cluster"),
+            (None, "__sedona_dbscan__", "cluster"),
+            (None, "isCore", "__sedona_dbscan__"),
+        ],
+    )
+    def test_temporary_column_preserves_input_and_output_columns(
+        self, input_column, is_core_column_name, cluster_column_name
+    ):
+
+        def _get_column(rows, column_name):
+            return tuple(row[column_name] for row in rows)
+
+        key = "spark.sql.caseSensitive"
+        prior = self.spark.conf.get(key)
+        try:
+            self.spark.conf.set(key, "false")
+            df = self.spark.createDataFrame(
+                [(1, 0.0), (2, 0.5), (3, 10.0)], ["id", "x"]
+            ).selectExpr("id", "ST_Point(x, 0.0) AS geometry")
+            if input_column is not None:
+                df = df.withColumn(input_column, f.lit("user-value"))
+            input_rows = df.orderBy("id").collect()
+
+            result = dbscan(
+                df,
+                epsilon=1.0,
+                min_pts=2,
+                is_core_column_name=is_core_column_name,
+                cluster_column_name=cluster_column_name,
+            )
+            result_rows = result.orderBy("id").collect()
+
+            assert result.columns == df.columns + [
+                is_core_column_name,
+                cluster_column_name,
+            ]
+            for field in df.schema:
+                assert result.schema[field.name] == field
+                assert _get_column(result_rows, field.name) == _get_column(
+                    input_rows, field.name
+                )
+
+            assert result.schema[is_core_column_name].dataType == BooleanType()
+            assert result.schema[cluster_column_name].dataType == LongType()
+
+            clusters = _get_column(result_rows, cluster_column_name)
+            assert clusters[0] == clusters[1] != -1
+            assert clusters[2] == -1
+            assert _get_column(result_rows, is_core_column_name) == (True, True, False)
+        finally:
+            self.spark.conf.set(key, prior)
 
     def test_geometry_validation(self, sample_dataframe):
         ambiguous = sample_dataframe.withColumn("other", f.col("arealandmark"))

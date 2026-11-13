@@ -21,6 +21,7 @@ It identifies groups of data where enough records are close enough to each other
 sedona and graphframes to support large scale datasets and various, heterogeneous geometric feature types.
 """
 
+import uuid
 from typing import Optional
 
 from pyspark.sql import DataFrame
@@ -32,12 +33,14 @@ ID_COLUMN_NAME = "__id"
 DBSCAN_RESULT_PREFIX = "sedona_dbscan"
 
 
-def _temporary_column_name(dataframe) -> str:
-    suffix = 0
-    candidate = f"__{DBSCAN_RESULT_PREFIX}__"
-    while candidate in dataframe.columns:
-        suffix += 1
-        candidate = f"__{DBSCAN_RESULT_PREFIX}_{suffix}__"
+def _temporary_column_name(dataframe, is_core_column_name, cluster_column_name) -> str:
+    candidate = f"__{DBSCAN_RESULT_PREFIX}_{uuid.uuid4().hex}__"
+    case_insensitive_columns = [
+        c.lower()
+        for c in dataframe.columns + [is_core_column_name, cluster_column_name]
+    ]
+    while candidate in case_insensitive_columns:
+        candidate = f"__{DBSCAN_RESULT_PREFIX}_{uuid.uuid4().hex}__"
     return candidate
 
 
@@ -98,7 +101,9 @@ def dbscan(
         A PySpark DataFrame containing the cluster label for each row
     """
     geometry = _get_geometry_column_name(dataframe, geometry)
-    dbscan_result = _temporary_column_name(dataframe)
+    dbscan_result = _temporary_column_name(
+        dataframe, is_core_column_name, cluster_column_name
+    )
     result_df = (
         dataframe.withColumn(
             dbscan_result,
