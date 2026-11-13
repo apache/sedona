@@ -102,6 +102,31 @@ Here's how Sedona executes this query under the hood:
 
 Sedona queries on GeoParquet files can often be executed faster and more reliably than other file formats, like CSV.  CSV files don't store the schema in the file footer, don't support column pruning, and don't have row-group metadata for data skipping.
 
+### Read GeoParquet 2.0 files and Parquet geospatial types
+
+GeoParquet 2.0 stores each geometry column in the `GEOMETRY` or `GEOGRAPHY` logical type of the Parquet format. Since Sedona 2.0.0, the `geoparquet` reader on Spark 4.1 and later reads `GEOMETRY` columns as geometries, in files that carry GeoParquet metadata and in files that carry none. Files written by other engines with only the Parquet logical type therefore load the same way:
+
+```python
+df = sedona.read.format("geoparquet").load("/tmp/written-by-another-engine")
+```
+
+The SRID of each geometry comes from the `crs` property of the logical type:
+
+| `crs` property of the column | SRID |
+| --- | --- |
+| absent | 4326 (the Parquet default, OGC:CRS84) |
+| `EPSG:<code>` | the code |
+| `OGC:CRS84` | 4326 |
+| `srid:<identifier>` | the identifier, where `srid:0` means an unknown CRS |
+| inline PROJJSON | the EPSG code of its `id` |
+| `projjson:<key>` | the EPSG code of the `id` of the PROJJSON stored under that file metadata key |
+
+A CRS that names no EPSG code falls back to the `crs` of the GeoParquet metadata. If that also names none, the SRID is 0. On Spark 4.2 and later, where Sedona uses native Spark geometry types, such a column fails to load because the type has to name its SRID.
+
+`GEOGRAPHY` columns are read as binary columns that hold WKB. Convert them with `ST_GeogFromWKB`.
+
+Spark 3.5 and 4.0 ship a Parquet library that predates these logical types and cannot open such files.
+
 ## Inspect GeoParquet metadata
 
 Since v`1.5.1`, Sedona provides a Spark SQL data source `"geoparquet.metadata"` for inspecting GeoParquet metadata. The resulting dataframe contains

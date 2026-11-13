@@ -55,7 +55,7 @@ class GeoParquetToSparkSchemaConverter(
     parameters: Map[String, String]) {
 
   private val geoParquetMetaData: GeoParquetMetaData =
-    GeoParquetUtils.parseGeoParquetMetaData(keyValueMetaData, parameters)
+    GeoParquetUtils.parseGeoParquetMetaData(keyValueMetaData)
 
   /**
    * Cached SRID values per geometry column, computed once from CRS metadata to avoid repeated
@@ -112,6 +112,31 @@ class GeoParquetToSparkSchemaConverter(
   }
 
   /**
+   * Returns the SRID of the geometry column stored in `field`. A column of the GEOMETRY logical
+   * type carries its CRS on the type, which GeoParquet 2.0 makes the source of truth. A CRS there
+   * that names no EPSG code falls back to the GeoParquet metadata, as does a column stored as
+   * plain binary.
+   *
+   * @param field
+   *   Parquet field of the geometry column
+   * @param native
+   *   whether the column is read as a native Spark geometry, whose type must name the SRID. A
+   *   column read as GeometryUDT accepts a CRS without an EPSG code as SRID 0.
+   */
+  def geometrySrid(field: Type, native: Boolean = SpatialTypeSupport.usesNativeTypes): Int = {
+    val name = field.getName
+    ParquetGeospatialTypes.describe(field) match {
+      case Some(column) =>
+        val unknown = ParquetGeospatialTypes.isUnknownCrs(column.crs)
+        val declared = ParquetGeospatialTypes.crsToSrid(column.crs, keyValueMetaData)
+        val srid = if (declared != 0 || unknown) declared else getSrid(name)
+        if (native && srid == 0 && !unknown) GeoParquetNativeCrs.rejectUnrepresentable(name)
+        srid
+      case None => if (native) getNativeSrid(name) else getSrid(name)
+    }
+  }
+
+  /**
    * Returns true if TIMESTAMP_NTZ type is enabled in this ParquetToSparkSchemaConverter.
    */
   def isTimestampNTZEnabled(): Boolean = {
@@ -158,6 +183,7 @@ class GeoParquetToSparkSchemaConverter(
   private def convertPrimitiveField(field: PrimitiveType): DataType = {
     val typeName = field.getPrimitiveTypeName
     val originalType = field.getOriginalType
+    val geospatial = ParquetGeospatialTypes.describe(field)
 
     def typeString =
       if (originalType == null) s"$typeName" else s"$typeName ($originalType)"
@@ -226,10 +252,10 @@ class GeoParquetToSparkSchemaConverter(
       case BINARY =>
         originalType match {
           case UTF8 | ENUM | JSON => StringType
-          case null if isGeometryField(field.getName) =>
-            SpatialTypeSupport.geometryType(
-              if (SpatialTypeSupport.usesNativeTypes) getNativeSrid(field.getName)
-              else getSrid(field.getName))
+          case null if geospatial.exists(!_.isGeography) || isGeometryField(field.getName) =>
+            SpatialTypeSupport.geometryType(geometrySrid(field))
+          // GEOGRAPHY columns hold WKB. Keep the bytes rather than guess a string encoding.
+          case null if geospatial.isDefined => BinaryType
           case null if assumeBinaryIsString => StringType
           case null => BinaryType
           case BSON => BinaryType
