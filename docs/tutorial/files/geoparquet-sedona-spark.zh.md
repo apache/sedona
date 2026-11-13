@@ -278,14 +278,6 @@ df.write.format("geoparquet").option("geoparquet.version", "2.0.0").save(
 )
 ```
 
-在 Spark 4.1 上，写出时还需要给出几何列的 CRS，原因见下文。空的 `geoparquet.crs` 表示 OGC:CRS84：
-
-```python
-df.write.format("geoparquet").option("geoparquet.version", "2.0.0").option(
-    "geoparquet.crs", ""
-).save("/tmp/somewhere")
-```
-
 GeoParquet 2.0 文件与 GeoParquet 1.1 文件有以下区别：
 
 * 几何列带有 `GEOMETRY` 逻辑类型，CRS 是该类型的一个属性。GeoParquet 元数据会以 PROJJSON 重复给出 CRS。
@@ -307,7 +299,11 @@ Sedona 会用能够标识 CRS 的最短形式写出列的 `crs` 属性：
 
 Sedona 的 `geoparquet` 读取器会把 GeoParquet 2.0 文件的几何列读取为几何列。例外是在 Spark 4.2 及更高版本上，CRS 无法给出 SRID 的列，例如没有标识符的 PROJJSON。Sedona 无法为它推断出原生几何类型，因此读取会失败，除非你提供一个使用 Sedona 自己的几何类型的 schema，做法见读取 GeoParquet 2.0 文件一节。Spark 自带的 Parquet 读取器 `spark.read.parquet` 在 Spark 4.2 上返回什么，取决于写出文件时的列类型。对于原生几何列，它返回原生几何列。对于 `GeometryUDT` 列（在 Spark 4.1 上写出的几何列都是这种类型），它以二进制列返回 WKB，与读取 GeoParquet 1.1 文件时相同。
 
-在 Spark 4.1 上，SRID 属于每个几何对象而不属于列，因此写出 GeoParquet 2.0 时需要通过 `geoparquet.crs` 或 `geoparquet.crs.<column_name>` 给出每个几何列的 CRS。
+在 Spark 4.1 上，SRID 属于每个几何对象而不属于列，而 GeoParquet 2.0 的一列只有一个 CRS。Sedona 取每个文件中该列第一个几何对象的 SRID 作为列的 CRS；如果同一文件中另一个几何对象的 SRID 不同，写出会失败。SRID 为 0 的列，或在文件中没有任何几何对象的列，会以未知 CRS 写出。
+
+Sedona 必须在写出第一行之前知道 CRS，因此会把第一个几何对象之前的行暂存在内存中，每个文件最多 16 MB。`geoparquet.crs.lookahead.bytes` 可以修改这一上限。到达上限时仍未出现几何对象的列会以未知 CRS 写出，之后如果出现带 SRID 的几何对象，写出会失败。
+
+设置 `geoparquet.crs` 或 `geoparquet.crs.<column_name>` 可以自行指定 CRS。此时 Sedona 按给定值写出，不再与几何对象的 SRID 比较。
 
 Spark 3.5 和 4.0 自带的 Parquet 库早于 `GEOMETRY` 逻辑类型。Sedona 在这些版本上写出 GeoParquet 1.1，并拒绝把 `geoparquet.version` 设为 `2.0.0`。
 

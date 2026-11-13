@@ -116,6 +116,9 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
   // The CRS of the geometry columns for which it is known before the first row is written: the
   // columns of a native Spark type, and every geometry column of a GeoParquet 2 file.
   private var fixedColumnCrs: Map[Int, Option[JValue]] = Map.empty
+  // The SRID that FirstGeometryOutputWriter found for a GeometryUDT column of a GeoParquet 2 file,
+  // None when it found no geometry before it had to open the file.
+  private val firstGeometrySrids: mutable.Map[Int, Option[Int]] = mutable.Map.empty
   private val geoParquetColumnCoveringMap: mutable.Map[String, Covering] = mutable.Map.empty
   private val generatedCoveringColumnOrdinals: mutable.Map[Int, Int] = mutable.Map.empty
   private var geoParquetCoveringMode: String = GEOPARQUET_COVERING_MODE_AUTO
@@ -193,11 +196,22 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
           Some(ordinal -> GeoParquetNativeCrs.writeCrs(field.name, srid, explicit))
         case None if writesGeospatialTypes =>
           // The GEOMETRY logical type states the CRS in the Parquet schema, and a GeometryUDT
-          // column only has an SRID on each geometry.
-          Some(ordinal -> explicit.getOrElse(throw new IllegalArgumentException(
-            s"GeoParquet ${geoParquetVersion.get} states the CRS of column '${field.name}' in " +
-              "the Parquet schema, which is fixed before the first row is written. Set " +
-              s"$GEOPARQUET_CRS_KEY or $GEOPARQUET_CRS_KEY.${field.name} to the CRS of the column.")))
+          // column only has an SRID on each geometry. FirstGeometryOutputWriter looks it up.
+          Some(ordinal -> explicit.getOrElse {
+            val found =
+              configuration.get(GeoParquetWriteSupport.FIRST_GEOMETRY_SRID_KEY + ordinal)
+            if (found == null) {
+              throw new IllegalArgumentException(
+                s"GeoParquet ${geoParquetVersion.get} states the CRS of column '${field.name}' " +
+                  "in the Parquet schema, which is fixed before the first row is written. Set " +
+                  s"$GEOPARQUET_CRS_KEY or $GEOPARQUET_CRS_KEY.${field.name} to the CRS of the " +
+                  "column.")
+            }
+            val srid =
+              if (found == GeoParquetWriteSupport.NO_FIRST_GEOMETRY) None else Some(found.toInt)
+            firstGeometrySrids.put(ordinal, srid)
+            GeoParquetNativeCrs.writeCrs(field.name, srid.getOrElse(0), None)
+          })
         case None => None
       }
     }.toMap
@@ -542,6 +556,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
         val geospatialTypes = writesGeospatialTypes
         val wkbWriter = new WKBWriter(if (geospatialTypes) 4 else 3, byteOrder, false)
         wkbWriter.setPreserveCoordinateDimensions(true)
+        val firstGeometrySrid = rootOrdinal.flatMap(firstGeometrySrids.get)
         (row: SpecializedGetters, ordinal: Int) => {
           // A native geometry value of a 2.x file is stored as it is. It is ISO WKB of any of
           // the four coordinate layouts, and it keeps the layout that an empty multi-geometry
@@ -561,6 +576,15 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
               rootOrdinal.map(schema(_).name).getOrElse("<nested geometry>"),
               expectedSrid,
               geom.getSRID)
+          }
+          firstGeometrySrid.foreach { expected =>
+            if (geom.getSRID != expected.getOrElse(0)) {
+              throw GeoParquetWriteSupport.secondSrid(
+                geoParquetVersion.get,
+                schema(rootOrdinal.get).name,
+                expected,
+                geom.getSRID)
+            }
           }
           val nativeWkb = heldWkb.map(PublicWkbHeaderAdapter.toIsoWkb)
           // The writer marks a Z coordinate with the EWKB flag bit. GeoParquet asks for the WKB
@@ -820,6 +844,60 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
 }
 
 object GeoParquetWriteSupport {
+
+  /**
+   * Prefix of the configuration keys under which [[FirstGeometryOutputWriter]] passes the SRID of
+   * the first geometry of a column, followed by the ordinal of the column. The value is
+   * [[NO_FIRST_GEOMETRY]] when it found none.
+   */
+  private[geoparquet] val FIRST_GEOMETRY_SRID_KEY =
+    "org.apache.sedona.geoparquet.first-geometry-srid."
+  private[geoparquet] val NO_FIRST_GEOMETRY = "none"
+
+  /**
+   * Configuration key for the bytes of rows that a GeoParquet 2 write holds back while it waits
+   * for the first geometry of a GeometryUDT column.
+   */
+  val GEOPARQUET_CRS_LOOKAHEAD_KEY = "geoparquet.crs.lookahead.bytes"
+  val DEFAULT_CRS_LOOKAHEAD_BYTES: Long = 16L * 1024 * 1024
+
+  /**
+   * The ordinals of the geometry columns whose CRS a GeoParquet 2 write takes from the data:
+   * GeometryUDT columns that no CRS option covers. A native Spark geometry type names its SRID,
+   * and a GeoParquet 1 file states the CRS in metadata that is written after the last row.
+   */
+  def columnsWithoutCrs(schema: StructType, configuration: Configuration): Seq[Int] = {
+    val version = Option(configuration.get(GEOPARQUET_VERSION_KEY)).getOrElse(VERSION)
+    if (!GeoParquetMetaData.usesGeospatialTypes(version) ||
+      configuration.get(GEOPARQUET_CRS_KEY) != null) {
+      Seq.empty
+    } else {
+      schema.fields.toSeq.zipWithIndex.collect {
+        case (field, ordinal)
+            if SpatialTypeSupport.isGeometry(field.dataType) &&
+              SpatialTypeSupport.geometrySrid(field.dataType).isEmpty &&
+              configuration.get(GEOPARQUET_CRS_KEY + "." + field.name) == null =>
+          ordinal
+      }
+    }
+  }
+
+  private def secondSrid(
+      version: String,
+      column: String,
+      first: Option[Int],
+      second: Int): IllegalArgumentException = {
+    val found = first match {
+      case Some(srid) => s"The first geometry of column '$column' has SRID $srid"
+      case None =>
+        s"Column '$column' had no geometry in the first rows of the file, so its CRS was " +
+          "written as unknown"
+    }
+    new IllegalArgumentException(
+      s"$found, but another geometry has SRID $second. A GeoParquet $version column has a " +
+        "single CRS: give all its geometries the same SRID, or set " +
+        s"$GEOPARQUET_CRS_KEY or $GEOPARQUET_CRS_KEY.$column to state the CRS.")
+  }
 
   /** GeoParquet 2 needs the geospatial logical types of the Parquet library on the classpath. */
   def requireSupportedVersion(configuration: Configuration): Unit = {

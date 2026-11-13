@@ -283,14 +283,6 @@ df.write.format("geoparquet").option("geoparquet.version", "2.0.0").save(
 )
 ```
 
-On Spark 4.1 the write also needs the CRS of the geometry columns, for the reason given below. An empty `geoparquet.crs` stands for OGC:CRS84:
-
-```python
-df.write.format("geoparquet").option("geoparquet.version", "2.0.0").option(
-    "geoparquet.crs", ""
-).save("/tmp/somewhere")
-```
-
 A GeoParquet 2.0 file differs from a GeoParquet 1.1 file in these ways:
 
 * The geometry column carries the `GEOMETRY` logical type, and the CRS is a property of that type. The GeoParquet metadata repeats the CRS as PROJJSON.
@@ -312,7 +304,11 @@ On Spark 4.2 and later the CRS comes from the SRID of the column type.
 
 Sedona's `geoparquet` reader returns a geometry column for a GeoParquet 2.0 file. The exception is a column whose CRS gives no SRID, such as PROJJSON without an identifier, on Spark 4.2 and later. Sedona cannot infer a native geometry type for it, so the read fails unless you give a schema with Sedona's own geometry type, as the section on reading GeoParquet 2.0 files shows. What Spark's own Parquet reader, `spark.read.parquet`, returns on Spark 4.2 depends on the column the file was written from. For a native geometry column it returns a native geometry column. For a `GeometryUDT` column, which is every geometry column written on Spark 4.1, it returns the WKB as a binary column, as it does for a GeoParquet 1.1 file.
 
-On Spark 4.1 the SRID belongs to each geometry and not to the column, so a GeoParquet 2.0 write needs the CRS of every geometry column in `geoparquet.crs` or `geoparquet.crs.<column_name>`.
+On Spark 4.1 the SRID belongs to each geometry and not to the column, while a GeoParquet 2.0 column has a single CRS. Sedona takes it from the first geometry of the column in each file, and the write fails if another geometry in that file has a different SRID. A column with SRID 0, or without any geometry in the file, is written with an unknown CRS.
+
+Sedona has to know the CRS before it writes the first row, so it holds the rows before the first geometry in memory, up to 16 MB per file. `geoparquet.crs.lookahead.bytes` changes that limit. A column that has shown no geometry by then is written with an unknown CRS, and a later geometry with an SRID fails the write.
+
+Set `geoparquet.crs` or `geoparquet.crs.<column_name>` to state the CRS yourself. Sedona then writes it as given and does not compare it with the SRIDs of the geometries.
 
 Spark 3.5 and 4.0 ship a Parquet library that predates the `GEOMETRY` logical type. Sedona writes GeoParquet 1.1 on these versions and rejects `geoparquet.version` `2.0.0`.
 

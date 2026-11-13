@@ -29,14 +29,15 @@ import org.apache.parquet.hadoop.{ParquetFileReader, ParquetReader}
 import org.apache.parquet.hadoop.example.GroupReadSupport
 import org.apache.parquet.hadoop.metadata.{ColumnChunkMetaData, ParquetMetadata}
 import org.apache.parquet.hadoop.util.HadoopInputFile
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, Row}
 import org.apache.spark.sql.execution.datasources.geoparquet.{GeoParquetMetaData, ParquetGeospatialColumn, ParquetGeospatialTypes}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.types.{BinaryType, StructField, StructType}
-import org.locationtech.jts.geom.Geometry
 import org.json4s.{JArray, JDouble, JInt, JNothing, JNull, JString, JValue}
 import org.json4s.jackson.JsonMethods.{compact, parse, render}
+
+import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory}
 
 import scala.util.Try
 
@@ -107,6 +108,37 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
   private def point(srid: Int): DataFrame = sparkSession
     .sql(s"SELECT ST_SetSRID(ST_Point(1.0, 2.0), $srid) AS geometry")
     .coalesce(1)
+
+  private def pointWithSrid(srid: Int): Geometry = {
+    val point = new GeometryFactory().createPoint(new Coordinate(1, 2))
+    point.setSRID(srid)
+    point
+  }
+
+  /** One partition of GeometryUDT columns, where the SRID belongs to each geometry. */
+  private def udtColumns(names: Seq[String], rows: Seq[Geometry]*): DataFrame =
+    sparkSession.createDataFrame(
+      sparkSession.sparkContext.parallelize(rows.map(Row.fromSeq(_)), 1),
+      StructType(names.map(StructField(_, GeometryUDT()))))
+
+  private def udtColumn(geometries: Geometry*): DataFrame =
+    udtColumns(Seq("geometry"), geometries.map(Seq(_)): _*)
+
+  private def writeVersion2(df: DataFrame, path: String, options: (String, String)*): Unit =
+    df.write
+      .format("geoparquet")
+      .option("geoparquet.version", "2.0.0")
+      .options(options.toMap)
+      .save(path)
+
+  /** The SRID of each geometry read back from `path`, None for a null geometry. */
+  private def sridsIn(path: String, column: String = "geometry"): Seq[Option[Int]] =
+    sparkSession.read
+      .format("geoparquet")
+      .load(path)
+      .collect()
+      .map(row => Option(row.getJtsGeometry(column)).map(_.getSRID))
+      .toSeq
 
   describe("Reading Parquet native geospatial types") {
     if (libraryHasGeospatialTypes) {
@@ -277,20 +309,89 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
 
       Seq(4326 -> None, 3857 -> Some("EPSG:3857"), 0 -> Some("srid:0")).foreach {
         case (srid, crsProperty) =>
-          it(s"takes the CRS of a GEOMETRY column from a native Spark type with SRID $srid") {
-            withPath { path =>
-              val writer =
-                point(srid).write.format("geoparquet").option("geoparquet.version", "2.0.0")
-              if (SpatialTypeSupport.usesNativeTypes) {
-                writer.save(path)
+          it(s"takes the CRS of a GEOMETRY column from SRID $srid") {
+            // The SRID is part of a native Spark type and of each geometry of a GeometryUDT
+            Seq(point(srid), udtColumn(pointWithSrid(srid), pointWithSrid(srid))).foreach { df =>
+              withPath { path =>
+                writeVersion2(df, path)
                 assert(geometryColumn(footer(path)) == geometry(crsProperty))
-              } else {
-                // The SRID of a GeometryUDT column is only known per geometry
-                val error = intercept[Exception](writer.save(path))
-                assert(messages(error).contains("geoparquet.crs"))
+                assert(sridsIn(path).forall(_.contains(srid)))
               }
             }
           }
+      }
+
+      it("takes the CRS of a GeometryUDT column from its first geometry after null rows") {
+        withPath { path =>
+          writeVersion2(udtColumn(null, null, pointWithSrid(3857)), path)
+          assert(geometryColumn(footer(path)) == geometry(Some("EPSG:3857")))
+          assert(sridsIn(path) == Seq(None, None, Some(3857)))
+        }
+      }
+
+      it("takes the CRS of each GeometryUDT column from its own first geometry") {
+        withPath { path =>
+          val df = udtColumns(
+            Seq("geometry", "other"),
+            Seq(pointWithSrid(4326), null),
+            Seq(pointWithSrid(4326), pointWithSrid(3857)))
+          writeVersion2(df, path)
+          val schema = footer(path).getFileMetaData.getSchema
+          def crsOf(column: String): Option[String] = ParquetGeospatialTypes
+            .describe(schema.getType(schema.getFieldIndex(column)))
+            .flatMap(_.crs)
+          assert(crsOf("geometry").isEmpty)
+          assert(crsOf("other").contains("EPSG:3857"))
+          assert(sridsIn(path) == Seq(Some(4326), Some(4326)))
+          assert(sridsIn(path, "other") == Seq(None, Some(3857)))
+        }
+      }
+
+      it("fails when a GeometryUDT column holds a second SRID") {
+        withPath { path =>
+          val error = intercept[Exception] {
+            writeVersion2(udtColumn(pointWithSrid(4326), pointWithSrid(3857)), path)
+          }
+          val message = messages(error)
+          assert(message.contains("SRID 4326") && message.contains("SRID 3857"))
+          assert(message.contains("geoparquet.crs"))
+        }
+      }
+
+      it("writes an unknown CRS for a GeometryUDT column without geometries") {
+        Seq(udtColumn(null, null), udtColumn()).foreach { df =>
+          withPath { path =>
+            writeVersion2(df, path)
+            assert(geometryColumn(footer(path)) == geometry(Some("srid:0")))
+            assert(geoMetadata(footer(path)) \ "columns" \ "geometry" \ "crs" == JNull)
+          }
+        }
+      }
+
+      it("stops waiting for the first geometry when the rows held back reach the limit") {
+        val limit = "geoparquet.crs.lookahead.bytes" -> "1"
+        withPath { path =>
+          // The CRS is fixed as unknown after the first row, which geometries without an SRID fit
+          writeVersion2(udtColumn(null, pointWithSrid(0)), path, limit)
+          assert(geometryColumn(footer(path)) == geometry(Some("srid:0")))
+          assert(sridsIn(path) == Seq(None, Some(0)))
+        }
+        withPath { path =>
+          val error = intercept[Exception] {
+            writeVersion2(udtColumn(null, pointWithSrid(3857)), path, limit)
+          }
+          assert(messages(error).contains("geoparquet.crs"))
+        }
+      }
+
+      it("does not check the geometries of a GeometryUDT column against geoparquet.crs") {
+        withPath { path =>
+          writeVersion2(
+            udtColumn(pointWithSrid(4326), pointWithSrid(3857)),
+            path,
+            "geoparquet.crs" -> "")
+          assert(geometryColumn(footer(path)) == geometry(None))
+        }
       }
 
       it("writes geospatial statistics for the row groups of a GEOMETRY column") {
