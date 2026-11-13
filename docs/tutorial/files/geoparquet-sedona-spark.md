@@ -255,6 +255,37 @@ coordinates while reading or writing GeoParquet. You can use
 [`ST_FlipCoordinates`](../../api/sql/Geometry-Editors/ST_FlipCoordinates.md) when the
 coordinates themselves need to be swapped.
 
+## Write GeoParquet 2.0
+
+[GeoParquet 2.0](https://geoparquet.org/releases/v2.0.0/) stores each geometry column in the `GEOMETRY` logical type of the Parquet format. Since Sedona 2.0.0, set `geoparquet.version` to `2.0.0` to write such files on Spark 4.1 and later. The default version is `1.1.0`.
+
+```python
+df.write.format("geoparquet").option("geoparquet.version", "2.0.0").save(
+    "/tmp/somewhere"
+)
+```
+
+A GeoParquet 2.0 file differs from a GeoParquet 1.1 file in these ways:
+
+* The geometry column carries the `GEOMETRY` logical type, and the CRS is a property of that type. The GeoParquet metadata repeats the CRS as PROJJSON.
+* Each row group has geospatial statistics, a bounding box and the geometry types, which the Parquet library writes. Sedona therefore adds no covering column by default. `geoparquet.covering` and `geoparquet.covering.<column_name>` still declare a covering column that you provide.
+* Geometries are stored as ISO WKB, as the Parquet format requires.
+
+Sedona writes the `crs` property of the column in the shortest form that identifies the CRS:
+
+| CRS of the column | `crs` property of the column | `crs` in the GeoParquet metadata |
+| --- | --- | --- |
+| OGC:CRS84 (SRID 4326) | absent | absent |
+| a CRS with an identifier, such as EPSG:3857 | `EPSG:3857` | PROJJSON |
+| a CRS without an identifier | inline PROJJSON | PROJJSON |
+| unknown (SRID 0) | `srid:0` | `null` |
+
+On Spark 4.2 and later the CRS comes from the SRID of the column type. Spark's own Parquet reader, `spark.read.parquet`, reads the geometry column of these files as a native geometry column.
+
+On Spark 4.1 the SRID belongs to each geometry and not to the column, so a GeoParquet 2.0 write needs the CRS of every geometry column in `geoparquet.crs` or `geoparquet.crs.<column_name>`.
+
+Spark 3.5 and 4.0 ship a Parquet library that predates the `GEOMETRY` logical type. Sedona writes GeoParquet 1.1 on these versions and rejects `geoparquet.version` `2.0.0`.
+
 ## Save GeoParquet with Covering Metadata
 
 Since `v1.6.1`, Sedona supports writing the [`covering` field](https://github.com/opengeospatial/geoparquet/blob/v1.1.0/format-specs/geoparquet.md#covering) to geometry column metadata. The `covering` field specifies a bounding box column to help accelerate spatial data retrieval. The bounding box column should be a top-level struct column containing `xmin`, `ymin`, `xmax`, `ymax` columns. If the DataFrame you are writing contains such columns, you can specify `.option("geoparquet.covering.<geometryColumnName>", "<coveringColumnName>")` option to write `covering` metadata to GeoParquet files:

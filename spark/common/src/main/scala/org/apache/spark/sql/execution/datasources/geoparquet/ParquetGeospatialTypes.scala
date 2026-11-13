@@ -24,8 +24,8 @@ import scala.util.Try
 import scala.util.control.NonFatal
 
 import org.apache.parquet.schema.{LogicalTypeAnnotation, Type}
-import org.json4s.JValue
-import org.json4s.jackson.JsonMethods.parse
+import org.json4s.{JInt, JNothing, JNull, JString, JValue}
+import org.json4s.jackson.JsonMethods.{compact, parse, render}
 
 /**
  * A column annotated with the GEOMETRY or GEOGRAPHY logical type of the Parquet format.
@@ -126,6 +126,30 @@ object ParquetGeospatialTypes {
         "The Parquet library on the classpath has no GEOMETRY and GEOGRAPHY logical types; " +
           "they need parquet-java 1.16.0 or newer, which ships with Spark 4.1 and later")
     }
+  }
+
+  /**
+   * The `crs` property for a CRS as GeoParquet metadata holds it: None for OGC:CRS84, JSON null
+   * for an unknown CRS, PROJJSON otherwise. PROJJSON with an identifier becomes `authority:code`,
+   * the form that readers without a PROJJSON parser understand; the GeoParquet metadata of the
+   * file keeps the full definition. PROJJSON without one is written inline.
+   */
+  def crsProperty(crs: Option[JValue]): Option[String] = crs match {
+    case None => None
+    case Some(JNull) | Some(JNothing) => Some(UNKNOWN_CRS)
+    case Some(projjson) =>
+      val identifier = for {
+        authority <- identifierPart(projjson \ "id" \ "authority")
+        code <- identifierPart(projjson \ "id" \ "code")
+        if authorityCodeForm.pattern.matcher(s"$authority:$code").matches()
+      } yield s"$authority:$code"
+      identifier.orElse(Some(compact(render(projjson))))
+  }
+
+  private def identifierPart(value: JValue): Option[String] = value match {
+    case JString(text) => Some(text)
+    case JInt(number) => Some(number.toString)
+    case _ => None
   }
 
   /** Whether the `crs` property states that the CRS is undefined or unknown. */

@@ -142,4 +142,32 @@ class ParquetGeospatialTypesTest extends FunSuite {
       intercept[UnsupportedOperationException](ParquetGeospatialTypes.geography(None, "karney"))
     }
   }
+
+  test("a CRS becomes the shortest crs property that still identifies it") {
+    import org.json4s.JNull
+    import org.json4s.jackson.JsonMethods.parse
+    def property(projjson: String): Option[String] =
+      ParquetGeospatialTypes.crsProperty(Option(projjson).map(parse(_)))
+    assert(property(null).isEmpty)
+    assert(ParquetGeospatialTypes.crsProperty(Some(JNull)).contains("srid:0"))
+    assert(property(utm10n).contains("EPSG:32610"))
+    assert(
+      property("""{"type":"GeographicCRS","id":{"authority":"OGC","code":"CRS84"}}""")
+        .contains("OGC:CRS84"))
+    val localGrid = """{"type":"EngineeringCRS","name":"local grid"}"""
+    assert(property(localGrid).contains(localGrid))
+    // An identifier that is not a plain authority:code pair cannot be written in that form
+    val spaced = """{"name":"x","id":{"authority":"MY ORG","code":7}}"""
+    assert(property(spaced).contains(spaced))
+  }
+
+  test("only GeoParquet 2.x versions use the geospatial logical types") {
+    Seq("2.0.0", "2.1.0", " 2.0.0 ", "2").foreach { version =>
+      assert(GeoParquetMetaData.usesGeospatialTypes(version), version)
+    }
+    // Any other version string keeps the plain binary layout it has always had
+    Seq("1.0.0", "1.1.0", "10.9.8", "20.0.0", "", "two").foreach { version =>
+      assert(!GeoParquetMetaData.usesGeospatialTypes(version), version)
+    }
+  }
 }

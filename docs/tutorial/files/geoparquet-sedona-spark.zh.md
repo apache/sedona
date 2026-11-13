@@ -250,6 +250,37 @@ GeoParquet 以 `(x, y)` 顺序存储 WKB 坐标。根据 GeoParquet 1.1 规范�
 时不会重新排列几何坐标。如果坐标本身需要交换，可以使用
 [`ST_FlipCoordinates`](../../api/sql/Geometry-Editors/ST_FlipCoordinates.md)。
 
+## 写出 GeoParquet 2.0
+
+[GeoParquet 2.0](https://geoparquet.org/releases/v2.0.0/) 使用 Parquet 格式的 `GEOMETRY` 逻辑类型存储每个几何列。自 Sedona 2.0.0 起，在 Spark 4.1 及更高版本上，把 `geoparquet.version` 设为 `2.0.0` 即可写出这样的文件。默认版本为 `1.1.0`。
+
+```python
+df.write.format("geoparquet").option("geoparquet.version", "2.0.0").save(
+    "/tmp/somewhere"
+)
+```
+
+GeoParquet 2.0 文件与 GeoParquet 1.1 文件有以下区别：
+
+* 几何列带有 `GEOMETRY` 逻辑类型，CRS 是该类型的一个属性。GeoParquet 元数据会以 PROJJSON 重复给出 CRS。
+* 每个行组都带有地理空间统计信息，即边界框和几何类型，由 Parquet 库写出。因此 Sedona 默认不再添加 covering 列。`geoparquet.covering` 和 `geoparquet.covering.<column_name>` 仍可声明由你提供的 covering 列。
+* 几何对象按 Parquet 格式的要求以 ISO WKB 存储。
+
+Sedona 会用能够标识 CRS 的最短形式写出列的 `crs` 属性：
+
+| 列的 CRS | 列的 `crs` 属性 | GeoParquet 元数据中的 `crs` |
+| --- | --- | --- |
+| OGC:CRS84（SRID 4326） | 不设置 | 不设置 |
+| 带标识符的 CRS，例如 EPSG:3857 | `EPSG:3857` | PROJJSON |
+| 不带标识符的 CRS | 内联 PROJJSON | PROJJSON |
+| 未知（SRID 0） | `srid:0` | `null` |
+
+在 Spark 4.2 及更高版本上，CRS 来自列类型的 SRID。Spark 自带的 Parquet 读取器 `spark.read.parquet` 会把这些文件的几何列读取为原生几何列。
+
+在 Spark 4.1 上，SRID 属于每个几何对象而不属于列，因此写出 GeoParquet 2.0 时需要通过 `geoparquet.crs` 或 `geoparquet.crs.<column_name>` 给出每个几何列的 CRS。
+
+Spark 3.5 和 4.0 自带的 Parquet 库早于 `GEOMETRY` 逻辑类型。Sedona 在这些版本上写出 GeoParquet 1.1，并拒绝把 `geoparquet.version` 设为 `2.0.0`。
+
 ## 写出带 covering 元数据的 GeoParquet
 
 自 `v1.6.1` 起，Sedona 支持向几何列元数据写入 [`covering` 字段](https://github.com/opengeospatial/geoparquet/blob/v1.1.0/format-specs/geoparquet.md#covering)。该字段指定一列边界框列以加速空间数据检索。该边界框列必须是顶层结构体列，包含 `xmin`、`ymin`、`xmax`、`ymax` 四个子列。如果待写入的 DataFrame 已经包含这样的列，可通过 `.option("geoparquet.covering.<geometryColumnName>", "<coveringColumnName>")` 选项把 `covering` 元数据写入 GeoParquet：

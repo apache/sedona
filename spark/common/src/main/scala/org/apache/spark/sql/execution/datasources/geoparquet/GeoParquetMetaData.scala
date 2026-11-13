@@ -84,9 +84,18 @@ object GeoParquetMetaData {
   val VERSION = "1.1.0"
 
   /**
-   * Configuration key for overriding the version field in GeoParquet file metadata.
+   * Configuration key for the GeoParquet version to write. A 2.x version stores geometries in the
+   * Parquet GEOMETRY logical type. Any other value is written to the file metadata as given, with
+   * geometries in plain binary columns.
    */
   val GEOPARQUET_VERSION_KEY = "geoparquet.version"
+
+  /**
+   * Whether a file of this GeoParquet version stores its geometries in the geospatial logical
+   * types of the Parquet format, which is what GeoParquet 2 requires.
+   */
+  def usesGeospatialTypes(version: String): Boolean =
+    version.trim.takeWhile(_ != '.') == "2"
 
   /**
    * Configuration key for setting the CRS of the geometries in GeoParquet column metadata. This

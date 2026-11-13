@@ -50,6 +50,20 @@ class NativeGeoParquetCrsSuite extends FunSuite with BeforeAndAfterAll {
   }
   private def pointExpression(srid: Int): String = s"ST_GeomFromWKB(unhex('$point'), $srid)"
 
+  test("Spark's own Parquet reader reads the GEOMETRY column of a GeoParquet 2.0 file") {
+    for (srid <- Seq(4326, 3857, 0)) withPath { path =>
+      spark
+        .sql(s"SELECT ${pointExpression(srid)} AS geometry")
+        .write
+        .format("geoparquet")
+        .option("geoparquet.version", "2.0.0")
+        .save(path)
+      val result = spark.read.parquet(path)
+      assert(result.schema("geometry").dataType == GeometryType(srid))
+      assert(result.selectExpr("hex(ST_AsBinary(geometry))").head().getString(0) == point)
+    }
+  }
+
   test("fixed geometry CRS survives all-null and empty files") {
     for (srid <- Seq(0, 4326, 3857); empty <- Seq(false, true)) withPath { path =>
       val where = if (empty) " WHERE false" else ""
