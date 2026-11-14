@@ -94,6 +94,10 @@ public class SedonaConf implements Serializable {
 
   private JoinBuildSide joinBuildSide;
 
+  private boolean joinSpartitionDominantSideConfigured;
+
+  private boolean joinBuildSideConfigured;
+
   private long joinApproximateTotalCount;
 
   private Envelope datasetBoundary;
@@ -198,6 +202,10 @@ public class SedonaConf implements Serializable {
     this.joinSpartitionDominantSide =
         JoinSpartitionDominantSide.getJoinSpartitionDominantSide(
             getConfigValue(confGetter, "join.spatitionside", "left"));
+    // Whether the user chose the join sides. When they did not, the spatial join picks them from
+    // the sizes of the two sides instead of always using the default.
+    this.joinBuildSideConfigured = isConfigured(confGetter, "join.indexbuildside");
+    this.joinSpartitionDominantSideConfigured = isConfigured(confGetter, "join.spatitionside");
     this.fallbackPartitionNum =
         Integer.parseInt(getConfigValue(confGetter, "join.numpartition", "-1"));
     this.autoBroadcastJoinThreshold =
@@ -269,6 +277,12 @@ public class SedonaConf implements Serializable {
     }
   }
 
+  /** Whether either the {@code sedona.} or the {@code spark.sedona.} key is set. */
+  private boolean isConfigured(ConfGetter confGetter, String keySuffix) {
+    return confGetter.contains("sedona." + keySuffix)
+        || confGetter.contains("spark.sedona." + keySuffix);
+  }
+
   public boolean getUseIndex() {
     return useIndex;
   }
@@ -295,6 +309,19 @@ public class SedonaConf implements Serializable {
 
   public JoinSpartitionDominantSide getJoinSpartitionDominantSide() {
     return joinSpartitionDominantSide;
+  }
+
+  /** Whether the user set the join's index build side ({@code sedona.join.indexbuildside}). */
+  public boolean isJoinBuildSideConfigured() {
+    return joinBuildSideConfigured;
+  }
+
+  /**
+   * Whether the user set the join's spatial partitioning dominant side ({@code
+   * sedona.join.spatitionside}).
+   */
+  public boolean isJoinSpartitionDominantSideConfigured() {
+    return joinSpartitionDominantSideConfigured;
   }
 
   public int getFallbackPartitionNum() {
