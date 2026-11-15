@@ -56,11 +56,21 @@ public class GeoJSONReader {
   }
 
   Geometry convert(Point point, GeometryFactory factory) {
-    return factory.createPoint(convert(point.getCoordinates()));
+    double[] coordinates = point.getCoordinates();
+    if (coordinates.length == 0) return factory.createPoint();
+    return factory.createPoint(convert(coordinates));
   }
 
   Geometry convert(MultiPoint multiPoint, GeometryFactory factory) {
-    return factory.createMultiPointFromCoords(convert(multiPoint.getCoordinates()));
+    // An empty position [] is an empty member, the form PostGIS writes for one
+    double[][] positions = multiPoint.getCoordinates();
+    var points = new org.locationtech.jts.geom.Point[positions.length];
+    for (int i = 0; i < positions.length; i++)
+      points[i] =
+          positions[i].length == 0
+              ? factory.createPoint()
+              : factory.createPoint(convert(positions[i]));
+    return factory.createMultiPoint(points);
   }
 
   Geometry convert(LineString lineString, GeometryFactory factory) {
@@ -81,6 +91,8 @@ public class GeoJSONReader {
 
   org.locationtech.jts.geom.Polygon convertToPolygon(
       double[][][] coordinates, GeometryFactory factory) {
+    // An empty polygon can be written without any ring, as PostGIS and DuckDB write it
+    if (coordinates.length == 0) return factory.createPolygon();
     var shell = factory.createLinearRing(convert(coordinates[0]));
     if (coordinates.length > 1) {
       var size = coordinates.length - 1;

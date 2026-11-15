@@ -47,7 +47,8 @@ public class GeoJSONWriter {
   }
 
   org.wololo.geojson.Point convert(Point point) {
-    return new org.wololo.geojson.Point(convert(point.getCoordinate()));
+    double[] coordinates = point.isEmpty() ? new double[0] : convert(point.getCoordinate());
+    return new org.wololo.geojson.Point(coordinates);
   }
 
   org.wololo.geojson.MultiPoint convert(MultiPoint multiPoint) {
