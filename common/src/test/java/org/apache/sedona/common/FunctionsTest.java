@@ -3431,6 +3431,44 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void force4DIsThreadSafe() throws Exception {
+    // Concurrent calls on inputs with different dimensions must not affect each other.
+    Geometry xyzLine = Constructors.geomFromWKT("LINESTRING Z(0 1 3, 1 0 3, 2 0 3)", 0);
+    Geometry xymLine = Constructors.geomFromWKT("LINESTRING M(0 1 4, 1 0 4, 2 0 4)", 0);
+    String expectedZ = "LINESTRING ZM(0 1 3 7, 1 0 3 7, 2 0 3 7)";
+    String expectedM = "LINESTRING ZM(0 1 5 4, 1 0 5 4, 2 0 5 4)";
+    int threads = 8;
+    int iterations = 20000;
+    java.util.concurrent.ExecutorService pool =
+        java.util.concurrent.Executors.newFixedThreadPool(threads);
+    try {
+      List<java.util.concurrent.Future<Integer>> futures = new ArrayList<>();
+      for (int t = 0; t < threads; t++) {
+        boolean useZ = t % 2 == 0;
+        futures.add(
+            pool.submit(
+                () -> {
+                  int mismatches = 0;
+                  for (int i = 0; i < iterations; i++) {
+                    Geometry forced = Functions.force4D(useZ ? xyzLine : xymLine, 5, 7);
+                    if (!Functions.asWKT(forced).equals(useZ ? expectedZ : expectedM)) {
+                      mismatches++;
+                    }
+                  }
+                  return mismatches;
+                }));
+      }
+      int mismatches = 0;
+      for (java.util.concurrent.Future<Integer> future : futures) {
+        mismatches += future.get();
+      }
+      assertEquals(0, mismatches);
+    } finally {
+      pool.shutdownNow();
+    }
+  }
+
+  @Test
   public void force3DObject3DDefaultValue() {
     int expectedDims = 3;
     Polygon polygon =

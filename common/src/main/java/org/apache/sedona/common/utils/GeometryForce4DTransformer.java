@@ -24,8 +24,8 @@ import org.locationtech.jts.geom.util.GeometryTransformer;
 
 public class GeometryForce4DTransformer extends GeometryTransformer {
 
-  private static boolean hasZ;
-  private static boolean hasM;
+  private boolean hasZ;
+  private boolean hasM;
   private final double mValue;
   private final double zValue;
 
@@ -52,11 +52,11 @@ public class GeometryForce4DTransformer extends GeometryTransformer {
 
   public static Geometry transform(Geometry geometry, double zValue, double mValue) {
     if (geometry.getCoordinates().length == 0) return geometry;
-    hasZ = Functions.hasZ(geometry);
-    hasM = Functions.hasM(geometry);
-    if (hasZ && hasM) return geometry;
-
     GeometryForce4DTransformer transformer = new GeometryForce4DTransformer(zValue, mValue);
+    transformer.hasZ = Functions.hasZ(geometry);
+    transformer.hasM = Functions.hasM(geometry);
+    if (transformer.hasZ && transformer.hasM) return geometry;
+
     return transformer.transform(geometry);
   }
 }
