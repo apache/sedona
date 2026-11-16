@@ -3351,6 +3351,38 @@ public class FunctionsTest extends TestBase {
             "POLYGON M((0 0 3, 0 5 3, 5 0 3, 0 0 3), (1 1 3, 3 1 3, 1 3 3, 1 1 3))", 0);
     Geometry actualGeom = Functions.force3DM(geom, 10);
     assertTrue(Predicates.equals(geom, actualGeom));
+    assertEquals(Functions.asWKT(geom), Functions.asWKT(actualGeom));
+
+    // 4D XYZM geometry should retain M and drop Z
+    geom = Constructors.geomFromWKT("POINT ZM(1 2 3 4)", 0);
+    actualGeom = Functions.force3DM(geom, 10);
+    assertFalse(Functions.hasZ(actualGeom));
+    assertTrue(Functions.hasM(actualGeom));
+    assertEquals("POINT M(1 2 4)", Functions.asWKT(actualGeom));
+
+    geom = Constructors.geomFromWKT("POLYGON ZM((0 0 1 3, 0 5 1 3, 5 0 1 3, 0 0 1 3))", 0);
+    actualGeom = Functions.force3DM(geom, 10);
+    assertFalse(Functions.hasZ(actualGeom));
+    assertTrue(Functions.hasM(actualGeom));
+    assertEquals("POLYGON M((0 0 3, 0 5 3, 5 0 3, 0 0 3))", Functions.asWKT(actualGeom));
+
+    // 3D XYZ geometry should drop Z and add mValue
+    geom = Constructors.geomFromWKT("POINT Z(1 2 3)", 0);
+    actualGeom = Functions.force3DM(geom, 5);
+    assertFalse(Functions.hasZ(actualGeom));
+    assertTrue(Functions.hasM(actualGeom));
+    assertEquals("POINT M(1 2 5)", Functions.asWKT(actualGeom));
+
+    // Mixed-dimension GeometryCollection should keep existing M and fill missing M with mValue
+    geom =
+        Constructors.geomFromWKT(
+            "GEOMETRYCOLLECTION (POINT M(1 2 3), POINT ZM(4 5 6 7), POINT (8 9))", 0);
+    actualGeom = Functions.force3DM(geom, 10);
+    assertFalse(Functions.hasZ(actualGeom));
+    assertTrue(Functions.hasM(actualGeom));
+    assertEquals(
+        "GEOMETRYCOLLECTION M(POINT M(1 2 3), POINT M(4 5 7), POINT M(8 9 10))",
+        Functions.asWKT(actualGeom));
   }
 
   @Test
@@ -3427,6 +3459,16 @@ public class FunctionsTest extends TestBase {
     geom = Constructors.geomFromWKT("LINESTRING M(0 1 3, 1 0 3, 2 0 3)", 0);
     actual = Functions.asWKT(Functions.force4D(geom, 10, 10));
     expected = "LINESTRING ZM(0 1 10 3, 1 0 10 3, 2 0 10 3)";
+    assertEquals(expected, actual);
+
+    // Mixed-dimension GeometryCollection should keep existing Z/M and fill only what is missing
+    geom =
+        Constructors.geomFromWKT(
+            "GEOMETRYCOLLECTION (POINT Z(1 2 3), POINT M(4 5 6), POINT ZM(7 8 9 10), POINT (11 12))",
+            0);
+    actual = Functions.asWKT(Functions.force4D(geom, 20, 30));
+    expected =
+        "GEOMETRYCOLLECTION ZM(POINT ZM(1 2 3 30), POINT ZM(4 5 20 6), POINT ZM(7 8 9 10), POINT ZM(11 12 20 30))";
     assertEquals(expected, actual);
   }
 
