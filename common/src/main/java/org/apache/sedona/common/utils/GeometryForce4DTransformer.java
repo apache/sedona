@@ -18,15 +18,45 @@
  */
 package org.apache.sedona.common.utils;
 
-import org.apache.sedona.common.geometrySerde.CoordinateType;
-import org.locationtech.jts.geom.Geometry;
+import org.apache.sedona.common.Functions;
+import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.util.GeometryTransformer;
 
-public class GeometryForce4DTransformer extends GeometryForceTransformer {
+public class GeometryForce4DTransformer extends GeometryTransformer {
+
+  private boolean hasZ;
+  private boolean hasM;
+  private final double mValue;
+  private final double zValue;
+
   public GeometryForce4DTransformer(double zValue, double mValue) {
-    super(CoordinateType.XYZM, zValue, mValue);
+    this.zValue = zValue;
+    this.mValue = mValue;
+  }
+
+  @Override
+  protected CoordinateSequence transformCoordinates(CoordinateSequence coords, Geometry parent) {
+    CoordinateXYZM[] newCoords = new CoordinateXYZM[coords.size()];
+    for (int i = 0; i < coords.size(); i++) {
+      Coordinate coordinate = coords.getCoordinate(i);
+      newCoords[i] =
+          new CoordinateXYZM(
+              coordinate.getX(),
+              coordinate.getY(),
+              hasZ ? coordinate.getZ() : zValue,
+              hasM ? coordinate.getM() : mValue);
+    }
+
+    return createCoordinateSequence(newCoords);
   }
 
   public static Geometry transform(Geometry geometry, double zValue, double mValue) {
-    return new GeometryForce4DTransformer(zValue, mValue).transformIfNeeded(geometry);
+    if (geometry.getCoordinates().length == 0) return geometry;
+    GeometryForce4DTransformer transformer = new GeometryForce4DTransformer(zValue, mValue);
+    transformer.hasZ = Functions.hasZ(geometry);
+    transformer.hasM = Functions.hasM(geometry);
+    if (transformer.hasZ && transformer.hasM) return geometry;
+
+    return transformer.transform(geometry);
   }
 }

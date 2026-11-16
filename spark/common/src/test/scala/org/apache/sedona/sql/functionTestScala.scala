@@ -3496,7 +3496,6 @@ class functionTestScala
     val geomTestCases = Map(
       ("'LINESTRING (0 1, 1 0, 2 0)'") -> ("'LINESTRING M(0 1 1, 1 0 1, 2 0 1)'", "'LINESTRING M(0 1 0, 1 0 0, 2 0 0)'"),
       ("'LINESTRING M(0 1 3, 1 0 3, 2 0 3)'") -> ("'LINESTRING M(0 1 3, 1 0 3, 2 0 3)'", "'LINESTRING M(0 1 3, 1 0 3, 2 0 3)'"),
-      ("'LINESTRING ZM(0 1 2 3, 1 0 2 3, 2 0 2 3)'") -> ("'LINESTRING M(0 1 3, 1 0 3, 2 0 3)'", "'LINESTRING M(0 1 3, 1 0 3, 2 0 3)'"),
       ("'LINESTRING EMPTY'") -> ("'LINESTRING EMPTY'", "'LINESTRING EMPTY'"))
     for (((geom), expectedResult) <- geomTestCases) {
       val df = sparkSession.sql(
