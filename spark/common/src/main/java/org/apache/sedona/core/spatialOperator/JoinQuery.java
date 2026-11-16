@@ -99,18 +99,51 @@ public class JoinQuery {
     return input
         .groupBy(t -> GeomUtils.hashCode(t._1))
         .values()
-        .<U, List<T>>mapToPair(
-            t -> {
-              List<T> values = new ArrayList<T>();
-              Iterator<Tuple2<U, T>> it = t.iterator();
-              Tuple2<U, T> firstTpl = it.next();
-              U key = firstTpl._1;
-              values.add(firstTpl._2);
-              while (it.hasNext()) {
-                values.add(it.next()._2);
+        .<U, List<T>>flatMapToPair(
+            bucket -> {
+              // A hash identifies a bucket, not a geometry. Separate collisions within the bucket
+              // while preserving the first geometry and every match for each equivalent key.
+              Map<GeometryKey<U>, Tuple2<U, List<T>>> groups = new LinkedHashMap<>();
+              for (Tuple2<U, T> pair : bucket) {
+                GeometryKey<U> key = new GeometryKey<>(pair._1);
+                Tuple2<U, List<T>> group =
+                    groups.computeIfAbsent(key, k -> new Tuple2<>(k.geometry, new ArrayList<T>()));
+                group._2.add(pair._2);
               }
-              return new Tuple2<U, List<T>>(key, values);
+              return groups.values().iterator();
             });
+  }
+
+  /** Equality key used only within a hash bucket; it is never shuffled or returned to callers. */
+  private static final class GeometryKey<U extends Geometry> {
+    private final U geometry;
+
+    private GeometryKey(U geometry) {
+      this.geometry = geometry;
+    }
+
+    @Override
+    public int hashCode() {
+      return GeomUtils.hashCode(geometry);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+      if (this == other) {
+        return true;
+      }
+      if (!(other instanceof GeometryKey)) {
+        return false;
+      }
+      Geometry otherGeometry = ((GeometryKey<?>) other).geometry;
+      if (geometry == otherGeometry) {
+        return true;
+      }
+      return geometry.getClass() == otherGeometry.getClass()
+          && Objects.equals(geometry.getUserData(), otherGeometry.getUserData())
+          // Use equals(Object), not JTS's topological equals(Geometry) overload.
+          && geometry.equals((Object) otherGeometry);
+    }
   }
 
   private static <U extends Geometry, T extends Geometry> JavaPairRDD<U, Long> countGeometriesByKey(
