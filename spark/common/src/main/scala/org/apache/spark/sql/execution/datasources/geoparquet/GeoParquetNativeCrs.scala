@@ -24,12 +24,13 @@ import org.json4s.{JNull, JValue}
 private[geoparquet] object GeoParquetNativeCrs {
   def readSrid(column: String, crs: Option[JValue]): Int = {
     val srid = GeoParquetMetaData.extractSridFromCrs(crs)
-    if (srid == 0 && crs.exists(_ != JNull)) {
-      throw new IllegalArgumentException(
-        s"GeoParquet column '$column' has a CRS that cannot be represented by a Spark native SRID")
-    }
+    if (srid == 0 && crs.exists(_ != JNull)) rejectUnrepresentable(column)
     srid
   }
+
+  def rejectUnrepresentable(column: String): Nothing =
+    throw new IllegalArgumentException(
+      s"GeoParquet column '$column' has a CRS that cannot be represented by a Spark native SRID")
 
   def requireSrid(column: String, expected: Int, actual: Int): Unit = {
     if (expected != actual) {

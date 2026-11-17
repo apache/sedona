@@ -20,11 +20,13 @@ package org.apache.spark.sql.execution.datasources.geoparquet
 
 import org.apache.hadoop.fs.{FileStatus, Path}
 import org.apache.parquet.hadoop.ParquetFileWriter
+import org.apache.parquet.schema.{GroupType, MessageType}
 import org.apache.spark.sql.{AnalysisException, SparkSession}
 import org.apache.spark.sql.execution.datasources.geoparquet.internal.PortableSQLConf
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 
+import scala.collection.JavaConverters._
 import scala.language.existentials
 
 object GeoParquetUtils {
@@ -136,28 +138,47 @@ object GeoParquetUtils {
     parameters.getOrElse("legacyMode", "false").toBoolean
 
   /**
-   * Parse GeoParquet file metadata from Parquet file metadata. Legacy parquet files do not
-   * contain GeoParquet file metadata, so we'll simply return an empty GeoParquetMetaData object
-   * when legacy mode is enabled.
+   * Parse GeoParquet file metadata from Parquet file metadata. The `geo` entry is optional for a
+   * file that stores its geometries in the GEOMETRY and GEOGRAPHY logical types of the Parquet
+   * format, and legacy parquet files never have one, so an absent entry yields an empty
+   * GeoParquetMetaData object. Use [[requireGeoParquet]] to reject files that are not GeoParquet.
    * @param keyValueMetaData
    *   Parquet file metadata
-   * @param parameters
-   *   user provided parameters for reading GeoParquet files
    * @return
    *   GeoParquetMetaData object
    */
   def parseGeoParquetMetaData(
+      keyValueMetaData: java.util.Map[String, String]): GeoParquetMetaData =
+    GeoParquetMetaData
+      .parseKeyValueMetaData(keyValueMetaData)
+      .getOrElse(GeoParquetMetaData(None, "", Map.empty))
+
+  /**
+   * Fails unless the file is GeoParquet: it has GeoParquet metadata, or a column of the GEOMETRY
+   * or GEOGRAPHY logical type, which GeoParquet 2.0 readers accept without metadata. Legacy mode
+   * reads plain Parquet files and skips the check.
+   * @param keyValueMetaData
+   *   Parquet file metadata
+   * @param parquetSchema
+   *   schema of the Parquet file
+   * @param parameters
+   *   user provided parameters for reading GeoParquet files
+   */
+  def requireGeoParquet(
       keyValueMetaData: java.util.Map[String, String],
-      parameters: Map[String, String]): GeoParquetMetaData = {
-    val isLegacyMode = GeoParquetUtils.isLegacyMode(parameters)
-    GeoParquetMetaData.parseKeyValueMetaData(keyValueMetaData).getOrElse {
-      if (isLegacyMode) {
-        GeoParquetMetaData(None, "", Map.empty)
-      } else {
-        throw new IllegalArgumentException("GeoParquet file does not contain valid geo metadata")
-      }
+      parquetSchema: MessageType,
+      parameters: Map[String, String]): Unit = {
+    if (!isLegacyMode(parameters) && !keyValueMetaData.containsKey("geo") &&
+      !hasGeospatialColumn(parquetSchema)) {
+      throw new IllegalArgumentException("GeoParquet file does not contain valid geo metadata")
     }
   }
+
+  private def hasGeospatialColumn(group: GroupType): Boolean =
+    group.getFields.asScala.exists {
+      case nested: GroupType => hasGeospatialColumn(nested)
+      case field => ParquetGeospatialTypes.describe(field).isDefined
+    }
 }
 
 /**

@@ -90,6 +90,7 @@ class GeoParquetReadSupport(
       fileSchema: MessageType,
       readContext: ReadContext): RecordMaterializer[InternalRow] = {
     val parquetRequestedSchema = readContext.getRequestedSchema
+    GeoParquetUtils.requireGeoParquet(keyValueMetaData, fileSchema, parameters)
     new GeoParquetRecordMaterializer(
       parquetRequestedSchema,
       GeoParquetReadSupport.expandUDT(catalystRequestedSchema),

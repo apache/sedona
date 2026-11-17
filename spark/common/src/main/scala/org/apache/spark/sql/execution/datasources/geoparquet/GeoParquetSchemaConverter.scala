@@ -55,7 +55,7 @@ class GeoParquetToSparkSchemaConverter(
     parameters: Map[String, String]) {
 
   private val geoParquetMetaData: GeoParquetMetaData =
-    GeoParquetUtils.parseGeoParquetMetaData(keyValueMetaData, parameters)
+    GeoParquetUtils.parseGeoParquetMetaData(keyValueMetaData)
 
   /**
    * Cached SRID values per geometry column, computed once from CRS metadata to avoid repeated
@@ -112,6 +112,31 @@ class GeoParquetToSparkSchemaConverter(
   }
 
   /**
+   * Returns the SRID of the geometry column stored in `field`. A column of the GEOMETRY logical
+   * type carries its CRS on the type, which GeoParquet 2.0 makes the source of truth. A CRS there
+   * that names no EPSG code falls back to the GeoParquet metadata, as does a column stored as
+   * plain binary.
+   *
+   * @param field
+   *   Parquet field of the geometry column
+   * @param native
+   *   whether the column is read as a native Spark geometry, whose type must name the SRID. A
+   *   column read as GeometryUDT accepts a CRS without an EPSG code as SRID 0.
+   */
+  def geometrySrid(field: Type, native: Boolean = SpatialTypeSupport.usesNativeTypes): Int = {
+    val name = field.getName
+    ParquetGeospatialTypes.describe(field) match {
+      case Some(column) =>
+        val unknown = ParquetGeospatialTypes.isUnknownCrs(column.crs)
+        val declared = ParquetGeospatialTypes.crsToSrid(column.crs, keyValueMetaData)
+        val srid = if (declared != 0 || unknown) declared else getSrid(name)
+        if (native && srid == 0 && !unknown) GeoParquetNativeCrs.rejectUnrepresentable(name)
+        srid
+      case None => if (native) getNativeSrid(name) else getSrid(name)
+    }
+  }
+
+  /**
    * Returns true if TIMESTAMP_NTZ type is enabled in this ParquetToSparkSchemaConverter.
    */
   def isTimestampNTZEnabled(): Boolean = {
@@ -152,8 +177,34 @@ class GeoParquetToSparkSchemaConverter(
     case t: GroupType => convertGroupField(t.asGroupType())
   }
 
-  private def isGeometryField(fieldName: String): Boolean =
-    geoParquetMetaData.columns.contains(fieldName)
+  /**
+   * Whether `field` stores geometries. The logical type of the Parquet format decides for a
+   * column that has one, so a GEOGRAPHY column is not a geometry column even when the GeoParquet
+   * metadata lists it, as GeoParquet 2.0 does. A column without such a type is a geometry column
+   * when the GeoParquet metadata names it.
+   */
+  def isGeometryColumn(field: Type): Boolean =
+    ParquetGeospatialTypes.describe(field) match {
+      case Some(column) => !column.isGeography
+      case None => geoParquetMetaData.columns.contains(field.getName)
+    }
+
+  /**
+   * The Spark type of a column that stores geometries or geographies, None for any other field.
+   * Schema inference uses it to convert these columns alone, so that a column of a type this
+   * converter does not handle cannot fail a read that takes its type from elsewhere.
+   */
+  def geospatialType(field: Type): Option[DataType] = field match {
+    case primitive: PrimitiveType
+        if primitive.getPrimitiveTypeName == BINARY && primitive.getOriginalType == null =>
+      if (isGeometryColumn(primitive)) {
+        Some(SpatialTypeSupport.geometryType(geometrySrid(primitive)))
+      } else if (ParquetGeospatialTypes.describe(primitive).isDefined) {
+        // GEOGRAPHY columns hold WKB. Keep the bytes rather than guess a string encoding.
+        Some(BinaryType)
+      } else None
+    case _ => None
+  }
 
   private def convertPrimitiveField(field: PrimitiveType): DataType = {
     val typeName = field.getPrimitiveTypeName
@@ -226,12 +277,8 @@ class GeoParquetToSparkSchemaConverter(
       case BINARY =>
         originalType match {
           case UTF8 | ENUM | JSON => StringType
-          case null if isGeometryField(field.getName) =>
-            SpatialTypeSupport.geometryType(
-              if (SpatialTypeSupport.usesNativeTypes) getNativeSrid(field.getName)
-              else getSrid(field.getName))
-          case null if assumeBinaryIsString => StringType
-          case null => BinaryType
+          case null =>
+            geospatialType(field).getOrElse(if (assumeBinaryIsString) StringType else BinaryType)
           case BSON => BinaryType
           case DECIMAL => makeDecimalType()
           case _ => illegalType()

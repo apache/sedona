@@ -217,13 +217,12 @@ private[geoparquet] class GeoParquetRowConverter(
 
       case dt if SpatialTypeSupport.isGeometry(dt) =>
         // Compute SRID once per column converter, not per row
-        val srid = if (SpatialTypeSupport.isNativeGeometry(catalystType)) {
-          val sourceSrid = schemaConverter.getNativeSrid(parquetType.getName)
-          SpatialTypeSupport.geometrySrid(catalystType).foreach { targetSrid =>
-            GeoParquetNativeCrs.requireSrid(parquetType.getName, targetSrid, sourceSrid)
-          }
-          sourceSrid
-        } else schemaConverter.getSrid(parquetType.getName)
+        val srid = schemaConverter.geometrySrid(
+          parquetType,
+          native = SpatialTypeSupport.isNativeGeometry(catalystType))
+        SpatialTypeSupport.geometrySrid(catalystType).foreach { targetSrid =>
+          GeoParquetNativeCrs.requireSrid(parquetType.getName, targetSrid, srid)
+        }
         if (parquetType.isPrimitive) {
           new ParquetPrimitiveConverter(updater) {
             override def addBinary(value: Binary): Unit = {

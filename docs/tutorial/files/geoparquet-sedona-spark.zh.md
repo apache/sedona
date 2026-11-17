@@ -102,6 +102,34 @@ Sedona 在底层执行该查询的过程大致如下：
 
 得益于此，Sedona 在 GeoParquet 上的查询通常比在 CSV 等格式上更快、更稳定。CSV 既不在文件尾部存 schema，也不支持列裁剪，更没有用于数据跳过的 row-group 元数据。
 
+### 读取 GeoParquet 2.0 文件和 Parquet 地理空间类型
+
+GeoParquet 2.0 使用 Parquet 格式的 `GEOMETRY` 或 `GEOGRAPHY` 逻辑类型存储每个几何列。自 Sedona 2.0.0 起，在 Spark 4.1 及更高版本上，`geoparquet` 读取器会把 `GEOMETRY` 列读取为几何对象，无论文件是否带有 GeoParquet 元数据。因此，其他引擎只用 Parquet 逻辑类型写出的文件也可以用同样的方式加载：
+
+```python
+df = sedona.read.format("geoparquet").load("/tmp/written-by-another-engine")
+```
+
+每个几何对象的 SRID 来自逻辑类型的 `crs` 属性：
+
+| 列的 `crs` 属性 | SRID |
+| --- | --- |
+| 未设置 | 4326（Parquet 的默认值 OGC:CRS84） |
+| `EPSG:<code>` | 该代码 |
+| `OGC:CRS84` | 4326 |
+| 其他机构的 `<authority>:<code>`，例如 `ESRI:102100` | 在 Spark 4.2 及更高版本上为 Spark 赋予它的 SRID（此处为 102100）；在 Spark 4.1 上为 0 |
+| `srid:<identifier>` | 该标识符，其中 `srid:0` 表示 CRS 未知 |
+| 内联 PROJJSON | 按上述规则由其 `id` 得到的 SRID |
+| `projjson:<key>` | 文件元数据中该键下 PROJJSON 的 `id` 对应的 SRID |
+
+Spark 4.2 自带 EPSG 和 ESRI 坐标参考系的注册表，对于 EPSG 以外的机构，Sedona 会查询该注册表。Spark 4.1 没有这样的注册表。这类标识符的代码不会被直接当作 SRID，因为 SRID 代表 EPSG 代码，而其他机构可能用同一个数字表示不同的坐标系：`ESRI:4812` 不是 `EPSG:4812`，因此在任何 Spark 版本上都不会得到 SRID。`projjson:<key>` 中的 `<key>` 按原样查找，不做任何修改。
+
+如果 CRS 无法给出 SRID，则使用 GeoParquet 元数据中的 `crs`。如果它也无法给出，SRID 为 0。在 Spark 4.2 及更高版本上，Sedona 使用 Spark 原生几何类型，类型必须指明 SRID，因此这样的列会加载失败。
+
+`GEOGRAPHY` 列会被读取为保存 WKB 的二进制列，即使 GeoParquet 元数据列出了它们也是如此，可以用 `ST_GeogFromWKB` 转换。
+
+Spark 3.5 和 4.0 自带的 Parquet 库早于这些逻辑类型，无法打开此类文件。
+
 ## 检查 GeoParquet 元数据
 
 自 v`1.5.1` 起，Sedona 提供了一个 Spark SQL 数据源 `"geoparquet.metadata"`，可用于检查 GeoParquet 元数据。返回的 DataFrame 中包含每个输入文件的 “geo” 元数据。
