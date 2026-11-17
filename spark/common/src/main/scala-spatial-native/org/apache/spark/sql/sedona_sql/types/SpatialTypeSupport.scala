@@ -81,6 +81,13 @@ object SpatialTypeSupport {
     case native: GeometryType if !native.isMixedSrid => Some(native.srid)
     case _ => None
   }
+
+  /**
+   * The SRID that Spark's registry of coordinate reference systems gives to `crs`, an identifier
+   * such as `ESRI:102100` in the spelling Spark uses. None when the registry does not know it.
+   */
+  def registeredSrid(crs: String): Option[Int] =
+    scala.util.Try(GeometryType(crs)).toOption.filterNot(_.isMixedSrid).map(_.srid)
   def isNativeSpatial(dataType: DataType): Boolean =
     dataType.isInstanceOf[GeometryType] || dataType.isInstanceOf[GeographyType]
   def isGeometry(dataType: DataType): Boolean =

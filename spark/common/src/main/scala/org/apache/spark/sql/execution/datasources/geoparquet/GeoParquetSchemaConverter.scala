@@ -177,13 +177,38 @@ class GeoParquetToSparkSchemaConverter(
     case t: GroupType => convertGroupField(t.asGroupType())
   }
 
-  private def isGeometryField(fieldName: String): Boolean =
-    geoParquetMetaData.columns.contains(fieldName)
+  /**
+   * Whether `field` stores geometries. The logical type of the Parquet format decides for a
+   * column that has one, so a GEOGRAPHY column is not a geometry column even when the GeoParquet
+   * metadata lists it, as GeoParquet 2.0 does. A column without such a type is a geometry column
+   * when the GeoParquet metadata names it.
+   */
+  def isGeometryColumn(field: Type): Boolean =
+    ParquetGeospatialTypes.describe(field) match {
+      case Some(column) => !column.isGeography
+      case None => geoParquetMetaData.columns.contains(field.getName)
+    }
+
+  /**
+   * The Spark type of a column that stores geometries or geographies, None for any other field.
+   * Schema inference uses it to convert these columns alone, so that a column of a type this
+   * converter does not handle cannot fail a read that takes its type from elsewhere.
+   */
+  def geospatialType(field: Type): Option[DataType] = field match {
+    case primitive: PrimitiveType
+        if primitive.getPrimitiveTypeName == BINARY && primitive.getOriginalType == null =>
+      if (isGeometryColumn(primitive)) {
+        Some(SpatialTypeSupport.geometryType(geometrySrid(primitive)))
+      } else if (ParquetGeospatialTypes.describe(primitive).isDefined) {
+        // GEOGRAPHY columns hold WKB. Keep the bytes rather than guess a string encoding.
+        Some(BinaryType)
+      } else None
+    case _ => None
+  }
 
   private def convertPrimitiveField(field: PrimitiveType): DataType = {
     val typeName = field.getPrimitiveTypeName
     val originalType = field.getOriginalType
-    val geospatial = ParquetGeospatialTypes.describe(field)
 
     def typeString =
       if (originalType == null) s"$typeName" else s"$typeName ($originalType)"
@@ -252,12 +277,8 @@ class GeoParquetToSparkSchemaConverter(
       case BINARY =>
         originalType match {
           case UTF8 | ENUM | JSON => StringType
-          case null if geospatial.exists(!_.isGeography) || isGeometryField(field.getName) =>
-            SpatialTypeSupport.geometryType(geometrySrid(field))
-          // GEOGRAPHY columns hold WKB. Keep the bytes rather than guess a string encoding.
-          case null if geospatial.isDefined => BinaryType
-          case null if assumeBinaryIsString => StringType
-          case null => BinaryType
+          case null =>
+            geospatialType(field).getOrElse(if (assumeBinaryIsString) StringType else BinaryType)
           case BSON => BinaryType
           case DECIMAL => makeDecimalType()
           case _ => illegalType()

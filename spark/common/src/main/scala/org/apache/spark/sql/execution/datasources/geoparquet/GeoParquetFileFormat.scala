@@ -401,16 +401,10 @@ object GeoParquetFileFormat extends Logging {
           val keyValueMetaData = fileMetaData.getKeyValueMetaData
           val parquetSchema = fileMetaData.getSchema
           GeoParquetUtils.requireGeoParquet(keyValueMetaData, parquetSchema, parameters)
-          val metadata = GeoParquetUtils.parseGeoParquetMetaData(keyValueMetaData)
           val converter = new GeoParquetToSparkSchemaConverter(
             keyValueMetaData = keyValueMetaData,
             parameters = parameters)
-          // Geometry columns are those named by the GeoParquet metadata and those of the
-          // GEOMETRY logical type, which need no metadata.
-          val fields = parquetSchema.getFields.asScala.filter { field =>
-            ParquetGeospatialTypes.describe(field).exists(!_.isGeography) ||
-            metadata.columns.contains(field.getName)
-          }
+          val fields = parquetSchema.getFields.asScala.filter(converter.isGeometryColumn)
           StructType(fields.toSeq.sortBy(_.getName).map { field =>
             StructField(
               field.getName,
@@ -512,12 +506,12 @@ object GeoParquetFileFormat extends Logging {
       if (parquetSchema.containsField(field.name)) {
         val parquetField = parquetSchema.getType(parquetSchema.getFieldIndex(field.name))
         // A file written by Spark's own Parquet writer names Spark's spatial types here, which
-        // this build of Sedona may not use. The Parquet schema decides for such columns.
-        val converted = converter.convertFieldWithGeo(parquetField)
-        if (SpatialTypeSupport.isGeometry(converted) ||
-          ParquetGeospatialTypes.describe(parquetField).isDefined) {
-          field.copy(dataType = converted)
-        } else field
+        // this build of Sedona may not use. The Parquet schema decides for such columns and
+        // for no other column.
+        converter
+          .geospatialType(parquetField)
+          .map(dataType => field.copy(dataType = dataType))
+          .getOrElse(field)
       } else field
     }
     StructType(fields)

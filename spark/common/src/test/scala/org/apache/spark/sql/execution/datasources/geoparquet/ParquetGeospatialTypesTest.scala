@@ -22,11 +22,16 @@ import java.util.Collections
 
 import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName.BINARY
 import org.apache.parquet.schema.{LogicalTypeAnnotation, Types}
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.scalatest.FunSuite
 
 class ParquetGeospatialTypesTest extends FunSuite {
   private val noMetaData = Collections.emptyMap[String, String]()
   private val utm10n = """{"type":"ProjectedCRS","id":{"authority":"EPSG","code":32610}}"""
+  private val webMercator = """{"type":"ProjectedCRS","id":{"authority":"EPSG","code":3857}}"""
+
+  /** The SRID of a CRS that only Spark's registry knows, which Spark has since 4.2. */
+  private def registered(srid: Int): Int = if (SpatialTypeSupport.usesNativeTypes) srid else 0
 
   private def srid(crs: String, metaData: java.util.Map[String, String] = noMetaData): Int =
     ParquetGeospatialTypes.crsToSrid(Option(crs), metaData)
@@ -40,8 +45,22 @@ class ParquetGeospatialTypesTest extends FunSuite {
     assert(srid("epsg:3857") == 3857)
     assert(srid(" EPSG:3857 ") == 3857)
     assert(srid("OGC:CRS84") == 4326)
-    assert(srid("ESRI:102100") == 0)
     assert(srid("EPSG:Pseudo-Mercator") == 0)
+  }
+
+  test("other authorities resolve through Spark's CRS registry where Spark has one") {
+    assert(srid("ESRI:102100") == registered(102100))
+    assert(srid("esri:102100") == registered(102100))
+    assert(srid("OGC:CRS83") == registered(4269))
+    assert(
+      srid("""{"type":"ProjectedCRS","id":{"authority":"ESRI","code":102100}}""") ==
+        registered(102100))
+    assert(
+      srid("""{"type":"ProjectedCRS","id":{"authority":"ESRI","code":"102100"}}""") ==
+        registered(102100))
+    assert(srid("ESRI:999999999") == 0)
+    assert(srid("IAU_2015:49900") == 0)
+    assert(srid("ESRI:ANY") == 0)
   }
 
   test("srid:identifier is the SRID, in any case") {
@@ -63,6 +82,16 @@ class ParquetGeospatialTypesTest extends FunSuite {
     assert(srid("projjson:my_crs", Collections.singletonMap("my_crs", utm10n)) == 32610)
     assert(srid("projjson:my_crs") == 0)
     assert(srid("projjson:my_crs", null) == 0)
+  }
+
+  test("projjson:key names the file metadata entry exactly as written") {
+    val metaData = new java.util.HashMap[String, String]()
+    metaData.put(" utm", utm10n)
+    metaData.put("utm", webMercator)
+    assert(srid("projjson: utm", metaData) == 32610)
+    assert(srid("projjson:utm", metaData) == 3857)
+    assert(srid("projjson:utm ", metaData) == 0)
+    assert(srid("projjson: my_crs", Collections.singletonMap("my_crs", utm10n)) == 0)
   }
 
   test("text in no known form is an unknown CRS") {

@@ -131,6 +131,18 @@ class NativeGeoParquetCrsSuite extends FunSuite with BeforeAndAfterAll {
     }
   }
 
+  test("a CRS of another authority written by Spark's Parquet writer keeps its SRID") {
+    // Spark writes ESRI:102100 and OGC:CRS83 as the crs of these columns.
+    Seq(102100, 4269).foreach { srid =>
+      withPath { path =>
+        spark.sql(s"SELECT ${pointExpression(srid)} AS geometry").write.parquet(path)
+        val df = spark.read.format("geoparquet").load(path)
+        assert(df.schema("geometry").dataType == GeometryType(srid))
+        assert(df.selectExpr("ST_SRID(geometry)").head().getInt(0) == srid)
+      }
+    }
+  }
+
   test("separate geometry columns may use different fixed CRSs") {
     withPath { path =>
       spark

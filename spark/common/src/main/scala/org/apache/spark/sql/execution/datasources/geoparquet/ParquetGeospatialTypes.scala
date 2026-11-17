@@ -133,31 +133,36 @@ object ParquetGeospatialTypes {
     crs.exists(_.trim.equalsIgnoreCase(UNKNOWN_CRS))
 
   private val sridForm = "(?i)srid:(\\d+)".r
-  private val projjsonKeyForm = "(?i)projjson:(.+)".r
+  private val projjsonKeyForm = "(?is)projjson:(.+)".r
   private val authorityCodeForm = "([^:\\s]+):([^:\\s]+)".r
 
   /**
    * Resolves the `crs` property of a geospatial logical type to an SRID. The Parquet format
    * allows inline PROJJSON, `authority:code`, `srid:identifier` and `projjson:key`, where `key`
-   * names a file metadata entry that holds PROJJSON.
+   * names a file metadata entry that holds PROJJSON. The key is everything after the colon, so it
+   * is looked up as written, white space included.
    *
    * @return
-   *   4326 when the property is absent, the EPSG code when the CRS names one, and 0 when the CRS
-   *   is unknown or names no EPSG code
+   *   4326 when the property is absent, the EPSG code when the CRS names one, the SRID of Spark's
+   *   registry of coordinate reference systems when the CRS names another authority the registry
+   *   knows, and 0 for any other CRS
    */
   def crsToSrid(crs: Option[String], keyValueMetaData: java.util.Map[String, String]): Int = {
-    crs.map(_.trim) match {
+    crs match {
       case None => GeoParquetMetaData.DEFAULT_SRID
-      case Some(projjson) if projjson.startsWith("{") => projjsonToSrid(projjson)
-      case Some(sridForm(srid)) => Try(srid.toInt).getOrElse(0)
       case Some(projjsonKeyForm(key)) =>
         Option(keyValueMetaData)
-          .flatMap(m => Option(m.get(key.trim)))
+          .flatMap(m => Option(m.get(key)))
           .map(projjsonToSrid)
           .getOrElse(0)
-      case Some(authorityCodeForm(authority, code)) =>
-        GeoParquetMetaData.identifierSrid(authority, code)
-      case _ => 0
+      case Some(text) =>
+        text.trim match {
+          case projjson if projjson.startsWith("{") => projjsonToSrid(projjson)
+          case sridForm(srid) => Try(srid.toInt).getOrElse(0)
+          case authorityCodeForm(authority, code) =>
+            GeoParquetMetaData.identifierSrid(authority, code)
+          case _ => 0
+        }
     }
   }
 

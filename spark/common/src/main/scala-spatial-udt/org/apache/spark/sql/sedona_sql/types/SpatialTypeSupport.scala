@@ -34,6 +34,9 @@ object SpatialTypeSupport {
   def geometryType: DataType = GeometryUDT()
   def geometryType(srid: Int): DataType = geometryType
   def geometrySrid(dataType: DataType): Option[Int] = None
+
+  /** Spark has a registry of coordinate reference systems only where it has native types. */
+  def registeredSrid(crs: String): Option[Int] = None
   def isNativeGeometry(dataType: DataType): Boolean = false
   def isNativeGeography(dataType: DataType): Boolean = false
   def isNativeSpatial(dataType: DataType): Boolean = false

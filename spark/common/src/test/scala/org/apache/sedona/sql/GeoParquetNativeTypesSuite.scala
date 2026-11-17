@@ -29,6 +29,8 @@ import scala.util.Try
  * example file of the GeoParquet 2.0.0 release, the `spark-4.2-*` files come from Spark 4.2's own
  * Parquet writer, and the `crs-*` files come from parquet-java 1.17.0, one per form the Parquet
  * format allows for the CRS of a column. Each `crs-*` file holds three POINT (1 2) rows.
+ * `spark-4.2-geography-geo-metadata.parquet` is Spark's geography file with GeoParquet 2.0
+ * metadata added to its footer.
  */
 class GeoParquetNativeTypesSuite extends TestBaseScala {
   private val nativeFolder = resourceFolder + "geoparquet/native/"
@@ -37,6 +39,13 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
   private val libraryHasGeospatialTypes = Try(
     Class.forName(
       "org.apache.parquet.schema.LogicalTypeAnnotation$GeometryLogicalTypeAnnotation")).isSuccess
+
+  /**
+   * Spark 4.2 has a registry of EPSG and ESRI coordinate reference systems. Sedona asks it about
+   * authorities other than EPSG when it uses Spark's native spatial types; older Spark versions
+   * know no ESRI code, so the SRID stays unknown there.
+   */
+  private val esriSrid = if (SpatialTypeSupport.usesNativeTypes) 102100 else 0
 
   private def read(file: String) =
     sparkSession.read.format("geoparquet").load(nativeFolder + file)
@@ -68,6 +77,7 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
         "crs-srid.parquet" -> 32610,
         "crs-srid-0.parquet" -> 0,
         "crs-projjson-key.parquet" -> 32610,
+        "crs-esri.parquet" -> esriSrid,
         "spark-4.2-geometry-3857.parquet" -> 3857,
         "spark-4.2-geometry-srid-0.parquet" -> 0).foreach { case (file, srid) =>
         it(s"reads $file without GeoParquet metadata as geometry with SRID $srid") {
@@ -104,6 +114,13 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
 
       it("reads a GEOGRAPHY column as WKB") {
         val df = read("spark-4.2-geography.parquet")
+        assert(df.schema("geography").dataType == BinaryType)
+        val wkb = df.selectExpr("hex(geography)").collect().map(_.getString(0))
+        assert(wkb.toSeq == Seq.fill(3)("0101000000000000000000F03F0000000000000040"))
+      }
+
+      it("reads a GEOGRAPHY column as WKB when the GeoParquet metadata lists it") {
+        val df = read("spark-4.2-geography-geo-metadata.parquet")
         assert(df.schema("geography").dataType == BinaryType)
         val wkb = df.selectExpr("hex(geography)").collect().map(_.getString(0))
         assert(wkb.toSeq == Seq.fill(3)("0101000000000000000000F03F0000000000000040"))

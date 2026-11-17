@@ -39,6 +39,7 @@ import org.apache.spark.sql.types.IntegerType
 import org.apache.spark.sql.types.StructField
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.types.TimestampNTZType
+import org.apache.spark.sql.types.TimestampType
 import org.json4s.jackson.parseJson
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.io.WKTReader
@@ -1000,6 +1001,28 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         sparkSession.read.format("geoparquet").load(resourceFolder + "geoparquet/plain.parquet")
       }
       assert(e.getMessage.contains("does not contain valid geo metadata"))
+    }
+
+    it("GeoParquet schema inference converts only the geometry columns of the Parquet schema") {
+      // The schema Spark left in the file describes every other column. Converting the INT96
+      // column from the Parquet schema would fail with this setting.
+      val path = geoparquetoutputlocation + "/gp_int96.parquet"
+      withConf(Map("spark.sql.parquet.outputTimestampType" -> "INT96")) {
+        sparkSession
+          .sql("SELECT 7 AS id, TIMESTAMP '2025-01-02 03:04:05' AS instant, " +
+            "ST_Point(1.0, 2.0) AS geometry")
+          .coalesce(1)
+          .write
+          .format("geoparquet")
+          .mode("overwrite")
+          .save(path)
+      }
+      withConf(Map("spark.sql.parquet.int96AsTimestamp" -> "false")) {
+        val df = sparkSession.read.format("geoparquet").load(path)
+        assert(df.schema("instant").dataType == TimestampType)
+        assert(SpatialTypeSupport.isGeometry(df.schema("geometry").dataType))
+        assert(df.select("id").head().getInt(0) == 7)
+      }
     }
 
     it("GeoParquet load with spatial predicates") {
