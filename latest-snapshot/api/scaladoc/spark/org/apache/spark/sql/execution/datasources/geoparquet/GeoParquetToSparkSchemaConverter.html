@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetToSparkSchemaConverter</title>
@@ -246,6 +245,14 @@
                         <span class="separator"></span>
                         <a class="class" href="GeometryFieldMetaData.html" title="A case class that holds the metadata of geometry column in GeoParquet metadata"></a>
                         <a href="GeometryFieldMetaData.html" title="A case class that holds the metadata of geometry column in GeoParquet metadata">GeometryFieldMetaData</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="class" href="ParquetGeospatialColumn.html" title="A column annotated with the GEOMETRY or GEOGRAPHY logical type of the Parquet format."></a>
+                        <a href="ParquetGeospatialColumn.html" title="A column annotated with the GEOMETRY or GEOGRAPHY logical type of the Parquet format.">ParquetGeospatialColumn</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="object" href="ParquetGeospatialTypes$.html" title="The GEOMETRY and GEOGRAPHY logical types of the Parquet format, which GeoParquet 2.0 is built on."></a>
+                        <a href="ParquetGeospatialTypes$.html" title="The GEOMETRY and GEOGRAPHY logical types of the Parquet format, which GeoParquet 2.0 is built on.">ParquetGeospatialTypes</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
                         <a class="class" href="SparkToGeoParquetSchemaConverter.html" title="This converter class is used to convert Spark SQL StructType to Parquet MessageType."></a>
@@ -547,6 +554,48 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetToSparkSchemaConverter#geometrySrid" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="geometrySrid(field:org.apache.parquet.schema.Type,native:Boolean):Int"></a><a id="geometrySrid(Type,Boolean):Int"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetToSparkSchemaConverter.html#geometrySrid(field:org.apache.parquet.schema.Type,native:Boolean):Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">geometrySrid</span><span class="params">(<span name="field">field: <span class="extype" name="org.apache.parquet.schema.Type">Type</span></span>, <span name="native">native: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol"><span class="name"><a href="../../../../../../index.html">SpatialTypeSupport.usesNativeTypes</a></span></span></span>)</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns the SRID of the geometry column stored in <code>field</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the SRID of the geometry column stored in <code>field</code>. A column of the GEOMETRY logical
+type carries its CRS on the type, which GeoParquet 2.0 makes the source of truth. A CRS there
+that names no EPSG code falls back to the GeoParquet metadata, as does a column stored as
+plain binary.
+</p></div><dl class="paramcmts block"><dt class="param">field</dt><dd class="cmt"><p>
+  Parquet field of the geometry column</p></dd><dt class="param">native</dt><dd class="cmt"><p>
+  whether the column is read as a native Spark geometry, whose type must name the SRID. A
+  column read as GeometryUDT accepts a CRS without an EPSG code as SRID 0.</p></dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetToSparkSchemaConverter#geospatialType" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="geospatialType(field:org.apache.parquet.schema.Type):Option[org.apache.spark.sql.types.DataType]"></a><a id="geospatialType(Type):Option[DataType]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetToSparkSchemaConverter.html#geospatialType(field:org.apache.parquet.schema.Type):Option[org.apache.spark.sql.types.DataType]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">geospatialType</span><span class="params">(<span name="field">field: <span class="extype" name="org.apache.parquet.schema.Type">Type</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.types.DataType">DataType</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">The Spark type of a column that stores geometries or geographies, None for any other field.</p><div class="fullcomment"><div class="comment cmt"><p>The Spark type of a column that stores geometries or geographies, None for any other field.
+Schema inference uses it to convert these columns alone, so that a column of a type this
+converter does not handle cannot fail a read that takes its type from elsewhere.
+</p></div></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -643,6 +692,26 @@ result is served from a pre-computed cache to avoid repeated PROJJSON parsing.
       </span>
       
       
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetToSparkSchemaConverter#isGeometryColumn" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isGeometryColumn(field:org.apache.parquet.schema.Type):Boolean"></a><a id="isGeometryColumn(Type):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetToSparkSchemaConverter.html#isGeometryColumn(field:org.apache.parquet.schema.Type):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isGeometryColumn</span><span class="params">(<span name="field">field: <span class="extype" name="org.apache.parquet.schema.Type">Type</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Whether <code>field</code> stores geometries.</p><div class="fullcomment"><div class="comment cmt"><p>Whether <code>field</code> stores geometries. The logical type of the Parquet format decides for a
+column that has one, so a GEOGRAPHY column is not a geometry column even when the GeoParquet
+metadata lists it, as GeoParquet 2.0 does. A column without such a type is a geometry column
+when the GeoParquet metadata names it.
+</p></div></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">

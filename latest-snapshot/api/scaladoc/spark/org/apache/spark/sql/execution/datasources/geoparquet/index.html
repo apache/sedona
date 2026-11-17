@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.execution.datasources.geoparquet</title>
@@ -246,6 +245,14 @@
                         <span class="separator"></span>
                         <a class="class" href="GeometryFieldMetaData.html" title="A case class that holds the metadata of geometry column in GeoParquet metadata"></a>
                         <a href="GeometryFieldMetaData.html" title="A case class that holds the metadata of geometry column in GeoParquet metadata">GeometryFieldMetaData</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="class" href="ParquetGeospatialColumn.html" title="A column annotated with the GEOMETRY or GEOGRAPHY logical type of the Parquet format."></a>
+                        <a href="ParquetGeospatialColumn.html" title="A column annotated with the GEOMETRY or GEOGRAPHY logical type of the Parquet format.">ParquetGeospatialColumn</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="object" href="ParquetGeospatialTypes$.html" title="The GEOMETRY and GEOGRAPHY logical types of the Parquet format, which GeoParquet 2.0 is built on."></a>
+                        <a href="ParquetGeospatialTypes$.html" title="The GEOMETRY and GEOGRAPHY logical types of the Parquet format, which GeoParquet 2.0 is built on.">ParquetGeospatialTypes</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
                         <a class="class" href="SparkToGeoParquetSchemaConverter.html" title="This converter class is used to convert Spark SQL StructType to Parquet MessageType."></a>
@@ -540,6 +547,27 @@ argument.
   The CRS of the geometries in the file. None if crs metadata is absent, Some(JNull) if crs is
   null, Some(value) if the crs is present and not null.</p></dd><dt class="param">covering</dt><dd class="cmt"><p>
   Object containing bounding box column names to help accelerate spatial data retrieval</p></dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.ParquetGeospatialColumn" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ParquetGeospatialColumnextendsProductwithSerializable"></a><a id="ParquetGeospatialColumn:ParquetGeospatialColumn"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/ParquetGeospatialColumn.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="A column annotated with the GEOMETRY or GEOGRAPHY logical type of the Parquet format." href="ParquetGeospatialColumn.html"><span class="name">ParquetGeospatialColumn</span></a><span class="params">(<span name="isGeography">isGeography: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="crs">crs: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="edges">edges: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A column annotated with the GEOMETRY or GEOGRAPHY logical type of the Parquet format.</p><div class="fullcomment"><div class="comment cmt"><p>A column annotated with the GEOMETRY or GEOGRAPHY logical type of the Parquet format.
+</p></div><dl class="paramcmts block"><dt class="param">isGeography</dt><dd class="cmt"><p>
+  true for GEOGRAPHY, false for GEOMETRY</p></dd><dt class="param">crs</dt><dd class="cmt"><p>
+  the <code>crs</code> property of the logical type, None when the file leaves it out (OGC:CRS84)</p></dd><dt class="param">edges</dt><dd class="cmt"><p>
+  the edge interpolation algorithm of a GEOGRAPHY column in lower case, None when the file
+  leaves it out (spherical)</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.SparkToGeoParquetSchemaConverter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SparkToGeoParquetSchemaConverterextendsSparkToParquetSchemaConverter"></a><a id="SparkToGeoParquetSchemaConverter:SparkToGeoParquetSchemaConverter"></a>
       <span class="permalink">
@@ -660,6 +688,27 @@ argument.
       </span>
       
       
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.ParquetGeospatialTypes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ParquetGeospatialTypes"></a><a id="ParquetGeospatialTypes:ParquetGeospatialTypes"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/ParquetGeospatialTypes$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="The GEOMETRY and GEOGRAPHY logical types of the Parquet format, which GeoParquet 2.0 is built on." href="ParquetGeospatialTypes$.html"><span class="name">ParquetGeospatialTypes</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">The GEOMETRY and GEOGRAPHY logical types of the Parquet format, which GeoParquet 2.0 is built
+on.</p><div class="fullcomment"><div class="comment cmt"><p>The GEOMETRY and GEOGRAPHY logical types of the Parquet format, which GeoParquet 2.0 is built
+on. parquet-java has them since 1.16.0, the version Spark 4.1 ships. Sedona also compiles
+against the older parquet-java of Spark 3.5 and 4.0, so the types are reached by reflection and
+<a href="ParquetGeospatialTypes$.html#supported:Boolean" class="extmbr" name="org.apache.spark.sql.execution.datasources.geoparquet.ParquetGeospatialTypes#supported">supported</a> reflects the library found at run time.
+</p></div></div>
     </li>
               </ol>
             </div>

@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetUtils</title>
@@ -246,6 +245,14 @@
                         <span class="separator"></span>
                         <a class="class" href="GeometryFieldMetaData.html" title="A case class that holds the metadata of geometry column in GeoParquet metadata"></a>
                         <a href="GeometryFieldMetaData.html" title="A case class that holds the metadata of geometry column in GeoParquet metadata">GeometryFieldMetaData</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="class" href="ParquetGeospatialColumn.html" title="A column annotated with the GEOMETRY or GEOGRAPHY logical type of the Parquet format."></a>
+                        <a href="ParquetGeospatialColumn.html" title="A column annotated with the GEOMETRY or GEOGRAPHY logical type of the Parquet format.">ParquetGeospatialColumn</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="object" href="ParquetGeospatialTypes$.html" title="The GEOMETRY and GEOGRAPHY logical types of the Parquet format, which GeoParquet 2.0 is built on."></a>
+                        <a href="ParquetGeospatialTypes$.html" title="The GEOMETRY and GEOGRAPHY logical types of the Parquet format, which GeoParquet 2.0 is built on.">ParquetGeospatialTypes</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
                         <a class="class" href="SparkToGeoParquetSchemaConverter.html" title="This converter class is used to convert Spark SQL StructType to Parquet MessageType."></a>
@@ -636,9 +643,9 @@ format and set legacyMode to true.</p></div><dl class="paramcmts block"><dt clas
               
         </dd></dl></div>
     </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetUtils#parseGeoParquetMetaData" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="parseGeoParquetMetaData(keyValueMetaData:java.util.Map[String,String],parameters:Map[String,String]):org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData"></a><a id="parseGeoParquetMetaData(Map[String,String],Map[String,String]):GeoParquetMetaData"></a>
+      <a id="parseGeoParquetMetaData(keyValueMetaData:java.util.Map[String,String]):org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData"></a><a id="parseGeoParquetMetaData(Map[String,String]):GeoParquetMetaData"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetUtils$.html#parseGeoParquetMetaData(keyValueMetaData:java.util.Map[String,String],parameters:Map[String,String]):org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetUtils$.html#parseGeoParquetMetaData(keyValueMetaData:java.util.Map[String,String]):org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -647,15 +654,37 @@ format and set legacyMode to true.</p></div><dl class="paramcmts block"><dt clas
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">parseGeoParquetMetaData</span><span class="params">(<span name="keyValueMetaData">keyValueMetaData: <span class="extype" name="java.util.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="parameters">parameters: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="GeoParquetMetaData.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData">GeoParquetMetaData</a></span>
+        <span class="name">parseGeoParquetMetaData</span><span class="params">(<span name="keyValueMetaData">keyValueMetaData: <span class="extype" name="java.util.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="GeoParquetMetaData.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData">GeoParquetMetaData</a></span>
       </span>
       
-      <p class="shortcomment cmt">Parse GeoParquet file metadata from Parquet file metadata.</p><div class="fullcomment"><div class="comment cmt"><p>Parse GeoParquet file metadata from Parquet file metadata. Legacy parquet files do not
-contain GeoParquet file metadata, so we'll simply return an empty GeoParquetMetaData object
-when legacy mode is enabled.</p></div><dl class="paramcmts block"><dt class="param">keyValueMetaData</dt><dd class="cmt"><p>
-  Parquet file metadata</p></dd><dt class="param">parameters</dt><dd class="cmt"><p>
-  user provided parameters for reading GeoParquet files</p></dd><dt>returns</dt><dd class="cmt"><p>
+      <p class="shortcomment cmt">Parse GeoParquet file metadata from Parquet file metadata.</p><div class="fullcomment"><div class="comment cmt"><p>Parse GeoParquet file metadata from Parquet file metadata. The <code>geo</code> entry is optional for a
+file that stores its geometries in the GEOMETRY and GEOGRAPHY logical types of the Parquet
+format, and legacy parquet files never have one, so an absent entry yields an empty
+GeoParquetMetaData object. Use <a href="#requireGeoParquet(keyValueMetaData:java.util.Map[String,String],parquetSchema:org.apache.parquet.schema.MessageType,parameters:Map[String,String]):Unit" class="extmbr" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetUtils#requireGeoParquet">requireGeoParquet</a> to reject files that are not GeoParquet.</p></div><dl class="paramcmts block"><dt class="param">keyValueMetaData</dt><dd class="cmt"><p>
+  Parquet file metadata</p></dd><dt>returns</dt><dd class="cmt"><p>
   GeoParquetMetaData object</p></dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetUtils#requireGeoParquet" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="requireGeoParquet(keyValueMetaData:java.util.Map[String,String],parquetSchema:org.apache.parquet.schema.MessageType,parameters:Map[String,String]):Unit"></a><a id="requireGeoParquet(Map[String,String],MessageType,Map[String,String]):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetUtils$.html#requireGeoParquet(keyValueMetaData:java.util.Map[String,String],parquetSchema:org.apache.parquet.schema.MessageType,parameters:Map[String,String]):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">requireGeoParquet</span><span class="params">(<span name="keyValueMetaData">keyValueMetaData: <span class="extype" name="java.util.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="parquetSchema">parquetSchema: <span class="extype" name="org.apache.parquet.schema.MessageType">MessageType</span></span>, <span name="parameters">parameters: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Fails unless the file is GeoParquet: it has GeoParquet metadata, or a column of the GEOMETRY
+or GEOGRAPHY logical type, which GeoParquet 2.0 readers accept without metadata.</p><div class="fullcomment"><div class="comment cmt"><p>Fails unless the file is GeoParquet: it has GeoParquet metadata, or a column of the GEOMETRY
+or GEOGRAPHY logical type, which GeoParquet 2.0 readers accept without metadata. Legacy mode
+reads plain Parquet files and skips the check.</p></div><dl class="paramcmts block"><dt class="param">keyValueMetaData</dt><dd class="cmt"><p>
+  Parquet file metadata</p></dd><dt class="param">parquetSchema</dt><dd class="cmt"><p>
+  schema of the Parquet file</p></dd><dt class="param">parameters</dt><dd class="cmt"><p>
+  user provided parameters for reading GeoParquet files</p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1741,6 +1740,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Read GeoParquet files into Sedona DataFrame with Spark">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#read-geoparquet-20-files-and-parquet-geospatial-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Read GeoParquet 2.0 files and Parquet geospatial types
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -5801,6 +5817,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Read GeoParquet files into Sedona DataFrame with Spark">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#read-geoparquet-20-files-and-parquet-geospatial-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Read GeoParquet 2.0 files and Parquet geospatial types
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -6026,6 +6059,53 @@
 <li>It runs the query, skipping any columns that are not required.</li>
 </ol>
 <p>Sedona queries on GeoParquet files can often be executed faster and more reliably than other file formats, like CSV.  CSV files don't store the schema in the file footer, don't support column pruning, and don't have row-group metadata for data skipping.</p>
+<h3 id="read-geoparquet-20-files-and-parquet-geospatial-types">Read GeoParquet 2.0 files and Parquet geospatial types<a class="headerlink" href="#read-geoparquet-20-files-and-parquet-geospatial-types" title="Permanent link">&para;</a></h3>
+<p>GeoParquet 2.0 stores each geometry column in the <code>GEOMETRY</code> or <code>GEOGRAPHY</code> logical type of the Parquet format. Since Sedona 2.0.0, the <code>geoparquet</code> reader on Spark 4.1 and later reads <code>GEOMETRY</code> columns as geometries, in files that carry GeoParquet metadata and in files that carry none. Files written by other engines with only the Parquet logical type therefore load the same way:</p>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geoparquet"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/tmp/written-by-another-engine"</span><span class="p">)</span>
+</code></pre></div>
+<p>The SRID of each geometry comes from the <code>crs</code> property of the logical type:</p>
+<table>
+<thead>
+<tr>
+<th><code>crs</code> property of the column</th>
+<th>SRID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>absent</td>
+<td>4326 (the Parquet default, OGC:CRS84)</td>
+</tr>
+<tr>
+<td><code>EPSG:&lt;code&gt;</code></td>
+<td>the code</td>
+</tr>
+<tr>
+<td><code>OGC:CRS84</code></td>
+<td>4326</td>
+</tr>
+<tr>
+<td><code>&lt;authority&gt;:&lt;code&gt;</code> of another authority, such as <code>ESRI:102100</code></td>
+<td>on Spark 4.2 and later, the SRID Spark assigns to it (102100 here); 0 on Spark 4.1</td>
+</tr>
+<tr>
+<td><code>srid:&lt;identifier&gt;</code></td>
+<td>the identifier, where <code>srid:0</code> means an unknown CRS</td>
+</tr>
+<tr>
+<td>inline PROJJSON</td>
+<td>the SRID of its <code>id</code>, by the rules above</td>
+</tr>
+<tr>
+<td><code>projjson:&lt;key&gt;</code></td>
+<td>the SRID of the <code>id</code> of the PROJJSON stored under that file metadata key</td>
+</tr>
+</tbody>
+</table>
+<p>Spark 4.2 ships a registry of EPSG and ESRI coordinate reference systems, and Sedona asks it about authorities other than EPSG. Spark 4.1 has no such registry. The code of such an identifier is never used as the SRID on its own, because an SRID stands for an EPSG code and another authority can use the same number for a different system: <code>ESRI:4812</code> is not <code>EPSG:4812</code>, so it gives no SRID on any Spark version. The <code>&lt;key&gt;</code> of <code>projjson:&lt;key&gt;</code> is looked up exactly as written.</p>
+<p>A CRS that gives no SRID falls back to the <code>crs</code> of the GeoParquet metadata. If that also gives none, the SRID is 0. On Spark 4.2 and later, where Sedona uses native Spark geometry types, such a column fails to load because the type has to name its SRID.</p>
+<p><code>GEOGRAPHY</code> columns are read as binary columns that hold WKB, also when the GeoParquet metadata lists them. Convert them with <code>ST_GeogFromWKB</code>.</p>
+<p>Spark 3.5 and 4.0 ship a Parquet library that predates these logical types and cannot open such files.</p>
 <h2 id="inspect-geoparquet-metadata">Inspect GeoParquet metadata<a class="headerlink" href="#inspect-geoparquet-metadata" title="Permanent link">&para;</a></h2>
 <p>Since v<code>1.5.1</code>, Sedona provides a Spark SQL data source <code>"geoparquet.metadata"</code> for inspecting GeoParquet metadata. The resulting dataframe contains
 the "geo" metadata for each input file.</p>
@@ -6252,7 +6332,7 @@ ORDER BY geohash
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 23, 2026 05:13:18 UTC">September 23, 2026 05:13:18</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="November 17, 2026 08:55:29 UTC">November 17, 2026 08:55:29</span>
   </span>
 
     
