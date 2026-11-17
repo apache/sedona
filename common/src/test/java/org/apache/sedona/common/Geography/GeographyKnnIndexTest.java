@@ -161,6 +161,70 @@ public class GeographyKnnIndexTest {
   }
 
   @Test
+  public void agreesWithBruteForceOnLinesAndMultiPartGeographies() {
+    Random random = new Random(11);
+    String[] objects = new String[1200];
+    for (int i = 0; i < objects.length; i++) {
+      double lon = random.nextDouble() * 340 - 170;
+      double lat = random.nextDouble() * 150 - 75;
+      double d = 0.1 + random.nextDouble() * 3;
+      switch (i % 4) {
+        case 0:
+          objects[i] =
+              String.format(
+                  Locale.ROOT,
+                  "LINESTRING(%f %f, %f %f, %f %f)",
+                  lon,
+                  lat,
+                  lon + d,
+                  lat + d,
+                  lon + 2 * d,
+                  lat - d);
+          break;
+        case 1:
+          objects[i] =
+              String.format(
+                  Locale.ROOT, "MULTIPOINT((%f %f), (%f %f))", lon, lat, lon + 3 * d, lat + d);
+          break;
+        case 2:
+          objects[i] =
+              String.format(
+                  Locale.ROOT,
+                  "MULTIPOLYGON(((%1$f %2$f, %3$f %2$f, %3$f %4$f, %1$f %2$f)),"
+                      + " ((%5$f %2$f, %6$f %2$f, %6$f %4$f, %5$f %2$f)))",
+                  lon,
+                  lat,
+                  lon + d,
+                  lat + d,
+                  lon + 2 * d,
+                  lon + 3 * d);
+          break;
+        default:
+          objects[i] =
+              String.format(
+                  Locale.ROOT,
+                  "GEOMETRYCOLLECTION(POINT(%f %f), LINESTRING(%f %f, %f %f))",
+                  lon,
+                  lat,
+                  lon + d,
+                  lat,
+                  lon + d,
+                  lat + d);
+      }
+    }
+    String[] queries = new String[60];
+    for (int i = 0; i < queries.length; i++) {
+      double lon = random.nextDouble() * 340 - 170;
+      double lat = random.nextDouble() * 150 - 75;
+      queries[i] =
+          i % 2 == 0
+              ? point(lon, lat)
+              : String.format(Locale.ROOT, "LINESTRING(%f %f, %f %f)", lon, lat, lon + 2, lat + 1);
+    }
+    assertAgreesWithBruteForce(objects, queries, 5);
+  }
+
+  @Test
   public void agreesWithBruteForceForPolygonQueries() {
     Random random = new Random(11);
     assertAgreesWithBruteForce(
