@@ -145,8 +145,7 @@ object ParquetGeospatialTypes {
    * @return
    *   4326 when the property is absent, the EPSG code when the CRS names one, the SRID of Spark's
    *   registry of coordinate reference systems when the CRS names another authority the registry
-   *   knows, the code of an ESRI identifier on a Spark version without a registry, and 0 for any
-   *   other CRS
+   *   knows, and 0 for any other CRS
    */
   def crsToSrid(crs: Option[String], keyValueMetaData: java.util.Map[String, String]): Int = {
     crs match {

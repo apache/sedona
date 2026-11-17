@@ -40,6 +40,13 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
     Class.forName(
       "org.apache.parquet.schema.LogicalTypeAnnotation$GeometryLogicalTypeAnnotation")).isSuccess
 
+  /**
+   * Spark 4.2 has a registry of EPSG and ESRI coordinate reference systems. Sedona asks it about
+   * authorities other than EPSG when it uses Spark's native spatial types; older Spark versions
+   * know no ESRI code, so the SRID stays unknown there.
+   */
+  private val esriSrid = if (SpatialTypeSupport.usesNativeTypes) 102100 else 0
+
   private def read(file: String) =
     sparkSession.read.format("geoparquet").load(nativeFolder + file)
 
@@ -70,9 +77,7 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
         "crs-srid.parquet" -> 32610,
         "crs-srid-0.parquet" -> 0,
         "crs-projjson-key.parquet" -> 32610,
-        // ESRI:102100. Spark 4.2 has it in its registry of coordinate reference systems;
-        // on older Spark versions the code of an ESRI identifier is taken as the SRID.
-        "crs-esri.parquet" -> 102100,
+        "crs-esri.parquet" -> esriSrid,
         "spark-4.2-geometry-3857.parquet" -> 3857,
         "spark-4.2-geometry-srid-0.parquet" -> 0).foreach { case (file, srid) =>
         it(s"reads $file without GeoParquet metadata as geometry with SRID $srid") {
