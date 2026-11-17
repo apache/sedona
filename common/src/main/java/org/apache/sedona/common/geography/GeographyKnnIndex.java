@@ -36,6 +36,7 @@ import org.apache.sedona.common.S2Geography.WKBGeography;
 import org.apache.sedona.common.sphere.Haversine;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.index.strtree.AbstractNode;
+import org.locationtech.jts.index.strtree.Boundable;
 import org.locationtech.jts.index.strtree.ItemBoundable;
 import org.locationtech.jts.index.strtree.STRtree;
 
@@ -44,13 +45,13 @@ import org.locationtech.jts.index.strtree.STRtree;
  * ranked by {@link Functions#distance(Geography, Geography)}, the minimum distance on the sphere in
  * meters.
  *
- * <p>Every geography is indexed by its latitude / longitude bounding rectangle in an STRtree. The
- * tree is only used as a hierarchy of rectangles: the search orders and prunes its nodes by the
- * distance on the sphere between the query's rectangle and the node's rectangle, which never
- * exceeds the distance to any geography under that node. A planar distance between the same
- * rectangles would be wrong across the antimeridian and near the poles.
+ * <p>Every geography is stored in an STRtree under its latitude / longitude bounding rectangle. The
+ * search walks that tree, but orders and prunes its nodes by the distance on the sphere between
+ * rectangles: the planar distance the tree itself would use is wrong across the antimeridian and
+ * near the poles.
  *
- * <p>An index is immutable once built, so any number of threads can search it at the same time.
+ * <p>All geographies have to be added before the first search. After that, any number of threads
+ * can search the index at the same time.
  *
  * @param <T> the type of the item stored with each geography
  */
@@ -58,35 +59,29 @@ public final class GeographyKnnIndex<T> {
 
   /**
    * How much the distance between two rectangles is reduced before it is used as a lower bound,
-   * about 6 meters on the ground.
-   *
-   * <p>The rectangle distance and the distance between two geographies are computed along different
-   * floating-point paths, and both go through an arc sine that is ill-conditioned for some angles:
-   * near 180 degrees for the distance between two points or to the end of an edge, and near 90
-   * degrees for the distance to the inside of an edge. There a relative error of a few ulps in the
-   * argument becomes an absolute error of up to about 4e-8 radians in the angle, so the two values
-   * can disagree by about 1e-7 radians. The slack is ten times that, so that rounding can never
-   * push the bound above the distance of a geography inside the rectangle. It only costs a few
-   * extra distance computations for geographies within this margin of the k-th neighbour.
+   * about 6 meters on the ground. The rectangle distance and the distance between two geographies
+   * are rounded differently, and can disagree by about 1e-7 radians where the arc sine they both
+   * use is ill-conditioned (angles near 90 and 180 degrees). Without the slack that rounding can
+   * prune a true neighbour.
    */
   private static final double LOWER_BOUND_SLACK_RADIANS = 1e-6;
 
   private static final S2Point NORTH_POLE = new S2Point(0, 0, 1);
   private static final S2Point SOUTH_POLE = new S2Point(0, 0, -1);
 
-  private static final Comparator<Candidate> CANDIDATE_ORDER =
-      Comparator.comparingDouble(candidate -> candidate.key);
+  private final STRtree tree = new STRtree();
+  private int size = 0;
 
-  private final STRtree tree;
-  private final int size;
-
-  private GeographyKnnIndex(STRtree tree, int size) {
-    this.tree = tree;
-    this.size = size;
-  }
-
-  public static <T> Builder<T> builder() {
-    return new Builder<>();
+  /**
+   * Adds a geography and the item to return when it is found. A null or empty geography is skipped:
+   * it is nobody's neighbour.
+   */
+  public void add(Geography geography, T item) {
+    S2LatLngRect rect = bounds(geography);
+    if (rect != null) {
+      tree.insert(toEnvelope(rect), new Entry<>(geography, item));
+      size++;
+    }
   }
 
   /** The number of geographies in the index. */
@@ -101,10 +96,10 @@ public final class GeographyKnnIndex<T> {
   /**
    * Finds the k geographies nearest to the query, nearest first.
    *
-   * <p>This is a best-first search over a single priority queue that holds tree nodes and
-   * geographies keyed by a lower bound of their distance, and geographies whose exact distance is
-   * known keyed by that distance. A geography with a known distance that reaches the head of the
-   * queue is therefore the nearest one not yet returned.
+   * <p>This is a best-first search. One queue holds tree nodes and geographies under a lower bound
+   * of their distance, and geographies whose distance has been computed under that distance. A
+   * geography with a computed distance that reaches the head of the queue is the nearest one not
+   * yet returned, so a distance is only computed for geographies whose rectangle is near enough.
    *
    * @param query the geography to search around; a null or empty query has no neighbours
    * @param k the number of neighbours to return, at least 1
@@ -120,54 +115,35 @@ public final class GeographyKnnIndex<T> {
       return neighbors;
     }
 
-    PriorityQueue<Candidate> queue = new PriorityQueue<>(CANDIDATE_ORDER);
+    PriorityQueue<Candidate> queue =
+        new PriorityQueue<>(Comparator.comparingDouble(candidate -> candidate.distance));
     queue.add(new Candidate(0.0, tree.getRoot(), false));
     while (!queue.isEmpty()) {
       Candidate candidate = queue.poll();
       if (neighbors.size() >= k
-          && !(includeTies && candidate.key <= neighbors.get(k - 1).getDistance())) {
+          && !(includeTies && candidate.distance <= neighbors.get(k - 1).getDistance())) {
         // Nothing left in the queue is nearer than the k-th neighbour, or tied with it.
         break;
       }
       if (candidate.target instanceof AbstractNode) {
-        expand((AbstractNode) candidate.target, queryRect, queue);
+        for (Object child : ((AbstractNode) candidate.target).getChildBoundables()) {
+          Envelope envelope = (Envelope) ((Boundable) child).getBounds();
+          queue.add(new Candidate(lowerBound(queryRect, envelope), (Boundable) child, false));
+        }
+        continue;
+      }
+      @SuppressWarnings("unchecked")
+      Entry<T> entry = (Entry<T>) ((ItemBoundable) candidate.target).getItem();
+      if (candidate.isExact) {
+        neighbors.add(new Neighbor<>(candidate.distance, entry.item));
       } else {
-        @SuppressWarnings("unchecked")
-        Entry<T> entry = (Entry<T>) candidate.target;
-        if (candidate.exact) {
-          neighbors.add(new Neighbor<>(candidate.key, entry.item));
-        } else {
-          measure(query, entry, queue);
+        Double distance = Functions.distance(query, entry.geography);
+        if (distance != null && !distance.isNaN() && !distance.isInfinite()) {
+          queue.add(new Candidate(distance, candidate.target, true));
         }
       }
     }
     return neighbors;
-  }
-
-  /** Queues the children of a tree node, keyed by a lower bound of their distance. */
-  private static void expand(
-      AbstractNode node, S2LatLngRect queryRect, PriorityQueue<Candidate> queue) {
-    for (Object child : node.getChildBoundables()) {
-      if (child instanceof ItemBoundable) {
-        ItemBoundable item = (ItemBoundable) child;
-        queue.add(
-            new Candidate(
-                lowerBound(queryRect, (Envelope) item.getBounds()), item.getItem(), false));
-      } else {
-        AbstractNode childNode = (AbstractNode) child;
-        queue.add(
-            new Candidate(
-                lowerBound(queryRect, (Envelope) childNode.getBounds()), childNode, false));
-      }
-    }
-  }
-
-  /** Queues a geography again, keyed by its exact distance from the query. */
-  private static void measure(Geography query, Entry<?> entry, PriorityQueue<Candidate> queue) {
-    Double distance = Functions.distance(query, entry.geography);
-    if (distance != null && !distance.isNaN() && !distance.isInfinite()) {
-      queue.add(new Candidate(distance, entry, true));
-    }
   }
 
   /**
@@ -187,15 +163,11 @@ public final class GeographyKnnIndex<T> {
     sorted.addAll(a);
     sorted.addAll(b);
     sorted.sort(Comparator.comparingDouble(Neighbor::getDistance));
-    if (sorted.size() <= k) {
-      return sorted;
-    }
-    int end = k;
-    if (includeTies) {
-      double kthDistance = sorted.get(k - 1).getDistance();
-      while (end < sorted.size() && sorted.get(end).getDistance() <= kthDistance) {
-        end++;
-      }
+    int end = Math.min(k, sorted.size());
+    while (includeTies
+        && end < sorted.size()
+        && sorted.get(end).getDistance() <= sorted.get(k - 1).getDistance()) {
+      end++;
     }
     return new ArrayList<>(sorted.subList(0, end));
   }
@@ -203,9 +175,11 @@ public final class GeographyKnnIndex<T> {
   /**
    * The latitude / longitude bounding rectangle of a geography.
    *
-   * <p>The rectangle covers the shapes that {@link Functions#distance(Geography, Geography)}
-   * measures, which is what makes it safe to prune with. It is computed from those shapes, edge by
-   * edge, and extended to a pole when a polygon contains that pole.
+   * <p>The rectangle is computed from the shapes that {@link Functions#distance(Geography,
+   * Geography)} measures, which is what makes it safe to prune with: {@code
+   * geography.region().getRectBound()} reads some degenerate polygons differently from the distance
+   * function. Like the bound of an S2 loop, it follows every edge, and reaches a pole when a
+   * polygon contains that pole.
    *
    * @return the rectangle, or null when the geography is null or has nothing to measure a distance
    *     to
@@ -220,9 +194,8 @@ public final class GeographyKnnIndex<T> {
         return null;
       }
       if (wkb.isPoint()) {
-        // The same conversion as WKBGeography.extractPoint(), which distance uses for points.
-        S2Point point = S2LatLng.fromDegrees(wkb.getPointY(), wkb.getPointX()).toPoint();
-        return S2LatLngRect.fromPoint(new S2LatLng(point));
+        // Points are the common case and need no shapes. This is the point that distance uses.
+        return S2LatLngRect.fromPoint(S2LatLng.fromDegrees(wkb.getPointY(), wkb.getPointX()));
       }
     }
 
@@ -231,26 +204,16 @@ public final class GeographyKnnIndex<T> {
     boolean containsSouthPole = false;
     S2Shape.MutableEdge edge = new S2Shape.MutableEdge();
     for (S2Shape shape : Functions.toShapeIndex(geography).shapeIndex.getShapes()) {
-      if (shape == null) {
-        continue;
-      }
       for (int chain = 0; chain < shape.numChains(); chain++) {
-        // A bounder follows one chain of edges, including the way each edge bulges away from the
+        // A bounder follows one chain of edges, including the way an edge bulges away from the
         // straight line between its ends in latitude / longitude space.
         S2EdgeUtil.RectBounder bounder = new S2EdgeUtil.RectBounder();
-        int length = shape.getChainLength(chain);
-        for (int offset = 0; offset < length; offset++) {
+        for (int offset = 0; offset < shape.getChainLength(chain); offset++) {
           shape.getChainEdge(chain, offset, edge);
-          if (offset == 0) {
-            bounder.addPoint(edge.getStart());
-          }
-          if (!edge.getEnd().equalsPoint(edge.getStart())) {
-            bounder.addPoint(edge.getEnd());
-          }
+          bounder.addPoint(edge.getStart());
+          bounder.addPoint(edge.getEnd());
         }
-        if (length > 0) {
-          bound = bound.union(bounder.getBound());
-        }
+        bound = bound.union(bounder.getBound());
       }
       if (shape.dimension() == 2) {
         // The interior of a polygon reaches further than its edges only around a pole.
@@ -259,14 +222,11 @@ public final class GeographyKnnIndex<T> {
       }
     }
     if (containsNorthPole || containsSouthPole) {
-      double latLo = bound.isEmpty() ? Math.PI / 2 : bound.lat().lo();
-      double latHi = bound.isEmpty() ? -Math.PI / 2 : bound.lat().hi();
-      bound =
-          new S2LatLngRect(
-              new R1Interval(
-                  containsSouthPole ? -Math.PI / 2 : latLo,
-                  containsNorthPole ? Math.PI / 2 : latHi),
-              S1Interval.full());
+      R1Interval lat =
+          new R1Interval(
+              containsSouthPole ? -Math.PI / 2 : bound.lat().lo(),
+              containsNorthPole ? Math.PI / 2 : bound.lat().hi());
+      bound = new S2LatLngRect(lat, S1Interval.full());
     }
     return bound.isEmpty() ? null : bound;
   }
@@ -277,16 +237,19 @@ public final class GeographyKnnIndex<T> {
    * a planar envelope cannot wrap around.
    */
   public static Envelope toEnvelope(S2LatLngRect rect) {
-    double lngLo = -180.0;
-    double lngHi = 180.0;
-    if (!rect.lng().isInverted()) {
-      lngLo = rect.lngLo().degrees();
-      lngHi = rect.lngHi().degrees();
+    if (rect.lng().isInverted()) {
+      return new Envelope(-180.0, 180.0, rect.latLo().degrees(), rect.latHi().degrees());
     }
-    return new Envelope(lngLo, lngHi, rect.latLo().degrees(), rect.latHi().degrees());
+    return new Envelope(
+        rect.lngLo().degrees(),
+        rect.lngHi().degrees(),
+        rect.latLo().degrees(),
+        rect.latHi().degrees());
   }
 
-  private static S2LatLngRect toRect(Envelope envelope) {
+  /** A distance in meters that no geography inside {@code envelope} can be nearer than. */
+  private static double lowerBound(S2LatLngRect queryRect, Envelope envelope) {
+    // The reverse of toEnvelope, clamped because degrees do not convert back exactly.
     R1Interval lat =
         new R1Interval(
             Math.max(Math.toRadians(envelope.getMinY()), -Math.PI / 2),
@@ -297,54 +260,13 @@ public final class GeographyKnnIndex<T> {
             : new S1Interval(
                 Math.max(Math.toRadians(envelope.getMinX()), -Math.PI),
                 Math.min(Math.toRadians(envelope.getMaxX()), Math.PI));
-    return new S2LatLngRect(lat, lng);
-  }
-
-  /** A distance in meters that no geography inside {@code envelope} can be nearer than. */
-  private static double lowerBound(S2LatLngRect queryRect, Envelope envelope) {
-    double radians = queryRect.getDistance(toRect(envelope)).radians();
+    double radians = queryRect.getDistance(new S2LatLngRect(lat, lng)).radians();
     return Math.max(0.0, radians - LOWER_BOUND_SLACK_RADIANS) * Haversine.AVG_EARTH_RADIUS;
   }
 
   private static void requirePositive(int k) {
     if (k < 1) {
       throw new IllegalArgumentException("k must be at least 1, but is " + k);
-    }
-  }
-
-  /** Collects the geographies of a {@link GeographyKnnIndex}. A builder builds one index. */
-  public static final class Builder<T> {
-    private STRtree tree = new STRtree();
-    private int size = 0;
-
-    private Builder() {}
-
-    /**
-     * Adds a geography and the item to return when it is found. A null or empty geography is
-     * skipped: it is nobody's neighbour.
-     */
-    public Builder<T> add(Geography geography, T item) {
-      if (tree == null) {
-        throw new IllegalStateException("The index has already been built");
-      }
-      S2LatLngRect rect = bounds(geography);
-      if (rect != null) {
-        tree.insert(toEnvelope(rect), new Entry<>(geography, item));
-        size++;
-      }
-      return this;
-    }
-
-    public GeographyKnnIndex<T> build() {
-      if (tree == null) {
-        throw new IllegalStateException("The index has already been built");
-      }
-      if (size > 0) {
-        tree.build();
-      }
-      GeographyKnnIndex<T> index = new GeographyKnnIndex<>(tree, size);
-      tree = null;
-      return index;
     }
   }
 
@@ -383,18 +305,18 @@ public final class GeographyKnnIndex<T> {
   }
 
   /**
-   * An entry of the search queue. {@code target} is a tree node or an {@link Entry}. {@code key} is
-   * the exact distance in meters when {@code exact} is set, and a lower bound of it otherwise.
+   * An entry of the search queue: a tree node or a geography, under a lower bound of its distance
+   * in meters, or under the distance itself when {@code isExact} is set.
    */
   private static final class Candidate {
-    final double key;
-    final Object target;
-    final boolean exact;
+    final double distance;
+    final Boundable target;
+    final boolean isExact;
 
-    Candidate(double key, Object target, boolean exact) {
-      this.key = key;
+    Candidate(double distance, Boundable target, boolean isExact) {
+      this.distance = distance;
       this.target = target;
-      this.exact = exact;
+      this.isExact = isExact;
     }
   }
 }

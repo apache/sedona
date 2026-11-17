@@ -58,11 +58,11 @@ public class GeographyKnnIndexTest {
 
   /** Indexes the geographies under their position in the argument list. */
   private static GeographyKnnIndex<Integer> index(String... wkts) {
-    GeographyKnnIndex.Builder<Integer> builder = GeographyKnnIndex.builder();
+    GeographyKnnIndex<Integer> index = new GeographyKnnIndex<>();
     for (int i = 0; i < wkts.length; i++) {
-      builder.add(geography(wkts[i]), i);
+      index.add(geography(wkts[i]), i);
     }
-    return builder.build();
+    return index;
   }
 
   private static List<Integer> items(List<Neighbor<Integer>> neighbors) {
@@ -223,11 +223,9 @@ public class GeographyKnnIndexTest {
     Geography query = geography("POINT(0 89)");
     assertEquals(0.0, Functions.distance(query, hemisphere), 0.0);
 
-    GeographyKnnIndex<Integer> objects =
-        GeographyKnnIndex.<Integer>builder()
-            .add(geography("POINT(0 88)"), 0)
-            .add(hemisphere, 1)
-            .build();
+    GeographyKnnIndex<Integer> objects = new GeographyKnnIndex<>();
+    objects.add(geography("POINT(0 88)"), 0);
+    objects.add(hemisphere, 1);
     List<Neighbor<Integer>> neighbors = objects.nearest(query, 1, false);
 
     assertEquals(Arrays.asList(1), items(neighbors));
@@ -326,15 +324,22 @@ public class GeographyKnnIndexTest {
   }
 
   @Test
+  public void rejectsGeographiesAddedAfterTheFirstSearch() {
+    GeographyKnnIndex<Integer> objects = index("POINT(1 0)");
+    objects.nearest(geography("POINT(0 0)"), 1, false);
+
+    assertThrows(RuntimeException.class, () -> objects.add(geography("POINT(2 0)"), 1));
+    assertEquals(1, objects.size());
+  }
+
+  @Test
   public void ignoresNullAndEmptyObjects() {
-    GeographyKnnIndex<Integer> objects =
-        GeographyKnnIndex.<Integer>builder()
-            .add(geography("POINT EMPTY"), 0)
-            .add(geography("POINT(1 0)"), 1)
-            .add(null, 2)
-            .add(geography("POLYGON EMPTY"), 3)
-            .add(geography("LINESTRING EMPTY"), 4)
-            .build();
+    GeographyKnnIndex<Integer> objects = new GeographyKnnIndex<>();
+    objects.add(geography("POINT EMPTY"), 0);
+    objects.add(geography("POINT(1 0)"), 1);
+    objects.add(null, 2);
+    objects.add(geography("POLYGON EMPTY"), 3);
+    objects.add(geography("LINESTRING EMPTY"), 4);
 
     assertEquals(1, objects.size());
     assertEquals(Arrays.asList(1), items(objects.nearest(geography("POINT(0 0)"), 5, false)));
