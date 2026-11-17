@@ -73,11 +73,9 @@ class BroadcastGeographyKnnIndexSuite extends AnyFunSuite {
 
     test(s"the neighbours of a query can be merged after $name serialization") {
       // The per-partition neighbours of a broadcast query are shuffled before they are merged.
-      val index = GeographyKnnIndex
-        .builder[UnsafeRow]()
-        .add(geography("POINT(3 0)"), row(0))
-        .add(geography("POINT(1 0)"), row(1))
-        .build()
+      val index = new GeographyKnnIndex[UnsafeRow]()
+      index.add(geography("POINT(3 0)"), row(0))
+      index.add(geography("POINT(1 0)"), row(1))
       val neighbors = index.nearest(geography("POINT(0 0)"), 2, false)
       val instance = serializer.newInstance()
       val copy = instance.deserialize[java.util.List[Neighbor[UnsafeRow]]](

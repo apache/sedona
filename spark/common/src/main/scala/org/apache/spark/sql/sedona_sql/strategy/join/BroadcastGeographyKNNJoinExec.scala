@@ -37,9 +37,9 @@ import scala.collection.JavaConverters._
 private[join] final class BroadcastGeographyKnnIndex(objects: Array[GeographyKnnInput])
     extends Serializable {
   @transient lazy val index: GeographyKnnIndex[UnsafeRow] = {
-    val builder = GeographyKnnIndex.builder[UnsafeRow]()
-    objects.foreach(input => builder.add(input.geography, input.row))
-    builder.build()
+    val index = new GeographyKnnIndex[UnsafeRow]()
+    objects.foreach(input => index.add(input.geography, input.row))
+    index
   }
 }
 
@@ -157,11 +157,10 @@ case class BroadcastGeographyKNNJoinExec(
     // The nearest neighbours of every query within each partition of objects, keyed by the
     // position of the query in the broadcast array.
     val partitionNeighbors = objectRows.mapPartitions { rows =>
-      val builder = GeographyKnnIndex.builder[UnsafeRow]()
+      val index = new GeographyKnnIndex[UnsafeRow]()
       rows.foreach { row =>
-        builder.add(TraitJoinQueryBase.shapeToGeography(boundObjectShape, row), row.copy())
+        index.add(TraitJoinQueryBase.shapeToGeography(boundObjectShape, row), row.copy())
       }
-      val index = builder.build()
       if (index.isEmpty) {
         Iterator.empty
       } else {
