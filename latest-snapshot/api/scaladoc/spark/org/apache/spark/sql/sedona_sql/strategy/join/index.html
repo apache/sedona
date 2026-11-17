@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.strategy.join</title>
@@ -184,6 +183,10 @@
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy">strategy</a></dd></dl></div>
     </li><li class="current-entities indented7">
                         <span class="separator"></span>
+                        <a class="class" href="BroadcastGeographyKNNJoinExec.html" title="Inner join on ST_KNN(queryShape, objectShape, k) over geography inputs, with one side broadcast."></a>
+                        <a href="BroadcastGeographyKNNJoinExec.html" title="Inner join on ST_KNN(queryShape, objectShape, k) over geography inputs, with one side broadcast.">BroadcastGeographyKNNJoinExec</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
                         <a class="class" href="BroadcastIndexJoinExec.html" title=""></a>
                         <a href="BroadcastIndexJoinExec.html" title="">BroadcastIndexJoinExec</a>
                       </li><li class="current-entities indented7">
@@ -337,7 +340,35 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="org.apache.spark.sql.sedona_sql.strategy.join.BroadcastIndexJoinExec" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="org.apache.spark.sql.sedona_sql.strategy.join.BroadcastGeographyKNNJoinExec" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="BroadcastGeographyKNNJoinExecextendsSparkPlanwithSedonaBinaryExecNodewithLoggingwithProductwithSerializable"></a><a id="BroadcastGeographyKNNJoinExec:BroadcastGeographyKNNJoinExec"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/BroadcastGeographyKNNJoinExec.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Inner join on ST_KNN(queryShape, objectShape, k) over geography inputs, with one side broadcast." href="BroadcastGeographyKNNJoinExec.html"><span class="name">BroadcastGeographyKNNJoinExec</span></a><span class="params">(<span name="left">left: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="right">right: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="queryShape">queryShape: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="objectShape">objectShape: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="broadcastSide">broadcastSide: <a href="JoinSide.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.JoinSide">JoinSide</a></span>, <span name="querySide">querySide: <a href="JoinSide.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.JoinSide">JoinSide</a></span>, <span name="k">k: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="extraCondition">extraCondition: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span> with <a href="../../execution/SedonaBinaryExecNode.html" class="extype" name="org.apache.spark.sql.sedona_sql.execution.SedonaBinaryExecNode">SedonaBinaryExecNode</a> with <span class="extype" name="org.apache.spark.internal.Logging">Logging</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Inner join on <code>ST_KNN(queryShape, objectShape, k)</code> over geography inputs, with one side
+broadcast.</p><div class="fullcomment"><div class="comment cmt"><p>Inner join on <code>ST_KNN(queryShape, objectShape, k)</code> over geography inputs, with one side
+broadcast. Each query row is joined with its k nearest object rows, ranked by the distance that
+<code>ST_Distance(geography, geography)</code> returns.</p><ul><li>When the object side is broadcast, the objects are collected and indexed once, and every
+    query row searches that index.</li><li>When the query side is broadcast, every partition of objects is indexed and searched by
+    every query, and the per-partition neighbours of a query are merged into its k nearest.
+</li></ul></div><dl class="paramcmts block"><dt class="param">queryShape</dt><dd class="cmt"><p>
+  the first argument of ST_KNN, a geography from the query side</p></dd><dt class="param">objectShape</dt><dd class="cmt"><p>
+  the second argument of ST_KNN, a geography from the object side</p></dd><dt class="param">broadcastSide</dt><dd class="cmt"><p>
+  the side of the join that is broadcast</p></dd><dt class="param">querySide</dt><dd class="cmt"><p>
+  the side of the join that <code>queryShape</code> comes from</p></dd><dt class="param">k</dt><dd class="cmt"><p>
+  the number of neighbours per query row</p></dd><dt class="param">extraCondition</dt><dd class="cmt"><p>
+  the rest of the join condition, applied to the k nearest neighbours that were found</p></dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.BroadcastIndexJoinExec" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="BroadcastIndexJoinExecextendsSparkPlanwithSedonaBinaryExecNodewithTraitJoinQueryBasewithLoggingwithProductwithSerializable"></a><a id="BroadcastIndexJoinExec:BroadcastIndexJoinExec"></a>
       <span class="permalink">
       <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/BroadcastIndexJoinExec.html" title="Permalink">
