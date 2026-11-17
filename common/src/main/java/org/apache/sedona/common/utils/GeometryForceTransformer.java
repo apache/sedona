@@ -146,8 +146,15 @@ abstract class GeometryForceTransformer extends GeometryTransformer {
   }
 
   @Override
+  protected Geometry transformLinearRing(LinearRing geom, Geometry parent) {
+    // GeometryTransformer returns a LineString for a ring of fewer than four points, which a
+    // closed ring of three points is. The number of points does not change here, so the ring
+    // is rebuilt as it is.
+    return factory.createLinearRing(transformCoordinates(geom.getCoordinateSequence(), geom));
+  }
+
+  @Override
   protected Geometry transformPolygon(Polygon geom, Geometry parent) {
-    // The number of points does not change, so every ring stays a LinearRing.
     LinearRing shell = (LinearRing) transformLinearRing(geom.getExteriorRing(), geom);
     LinearRing[] holes = new LinearRing[geom.getNumInteriorRing()];
     for (int i = 0; i < holes.length; i++) {

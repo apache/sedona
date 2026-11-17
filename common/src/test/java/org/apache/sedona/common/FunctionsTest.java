@@ -3646,6 +3646,27 @@ public class FunctionsTest extends TestBase {
     assertThrows(IllegalArgumentException.class, () -> Functions.force4D(circle, 5, 7));
   }
 
+  @Test
+  public void forceDimensionKeepsThreePointRings() throws ParseException {
+    // GeometryTransformer turns a closed ring of three points into a LineString.
+    assertForce3DM("POLYGON ((0 0, 0 4, 0 0))", 9, "POLYGON M((0 0 9, 0 4 9, 0 0 9))");
+    assertForce4D("POLYGON ((0 0, 0 4, 0 0))", 5, 7, "POLYGON ZM((0 0 5 7, 0 4 5 7, 0 0 5 7))");
+    assertForce3DM(
+        "POLYGON ZM((0 0 1 2, 0 4 1 2, 4 4 1 2, 4 0 1 2, 0 0 1 2), (1 1 1 2, 2 1 1 2, 1 1 1 2))",
+        9,
+        "POLYGON M((0 0 2, 0 4 2, 4 4 2, 4 0 2, 0 0 2), (1 1 2, 2 1 2, 1 1 2))");
+    assertForce4D(
+        "MULTIPOLYGON Z(((0 0 1, 0 4 1, 0 0 1)))",
+        5,
+        7,
+        "MULTIPOLYGON ZM(((0 0 1 7, 0 4 1 7, 0 0 1 7)))");
+    assertForce4D(
+        "GEOMETRYCOLLECTION (POLYGON ((0 0, 0 4, 0 0)))",
+        5,
+        7,
+        "GEOMETRYCOLLECTION ZM(POLYGON ZM((0 0 5 7, 0 4 5 7, 0 0 5 7)))");
+  }
+
   /**
    * Runs ST_Force3DM the way Spark does, with input and result going through the geometry
    * serializer, and checks that every part of the result, empty ones included, is XYM.
