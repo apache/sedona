@@ -475,4 +475,43 @@ public class GeographyKnnIndexTest {
     }
     return neighbors;
   }
+
+  @Test
+  public void distanceLowerBoundNeverExceedsTheDistanceToAGeographyInsideTheEnvelope() {
+    Random random = new Random(17);
+    for (int i = 0; i < 2000; i++) {
+      Geography query = geography(randomPoint(random));
+      Geography object = geography(i % 2 == 0 ? randomPoint(random) : randomSquare(random));
+      Envelope envelope = GeographyKnnIndex.toEnvelope(GeographyKnnIndex.bounds(object));
+      envelope.expandBy(random.nextDouble() * 5);
+      envelope =
+          new Envelope(
+              Math.max(envelope.getMinX(), -180),
+              Math.min(envelope.getMaxX(), 180),
+              Math.max(envelope.getMinY(), -90),
+              Math.min(envelope.getMaxY(), 90));
+
+      double bound =
+          GeographyKnnIndex.distanceLowerBound(GeographyKnnIndex.bounds(query), envelope);
+
+      assertTrue(bound >= 0);
+      assertTrue(bound <= Functions.distance(query, object));
+    }
+  }
+
+  @Test
+  public void distanceLowerBoundIsMeasuredOnTheSphere() {
+    S2LatLngRect query = GeographyKnnIndex.bounds(geography("POINT(179 0)"));
+    Envelope across =
+        GeographyKnnIndex.toEnvelope(GeographyKnnIndex.bounds(geography("POINT(-179 0)")));
+    double twoDegrees = Functions.distance(geography("POINT(179 0)"), geography("POINT(-179 0)"));
+
+    double bound = GeographyKnnIndex.distanceLowerBound(query, across);
+
+    // Two degrees of longitude apart across the antimeridian, not 358, less the safety margin.
+    assertTrue(bound <= twoDegrees);
+    assertEquals(twoDegrees, bound, 10.0);
+    assertEquals(
+        0.0, GeographyKnnIndex.distanceLowerBound(query, new Envelope(170, 180, -5, 5)), 0.0);
+  }
 }

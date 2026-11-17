@@ -121,7 +121,8 @@ public final class GeographyKnnIndex<T> {
       if (candidate.target instanceof AbstractNode) {
         for (Object child : ((AbstractNode) candidate.target).getChildBoundables()) {
           Envelope envelope = (Envelope) ((Boundable) child).getBounds();
-          queue.add(new Candidate(lowerBound(queryRect, envelope), (Boundable) child, false));
+          queue.add(
+              new Candidate(distanceLowerBound(queryRect, envelope), (Boundable) child, false));
         }
         continue;
       }
@@ -197,8 +198,15 @@ public final class GeographyKnnIndex<T> {
         rect.latHi().degrees());
   }
 
-  /** A distance in meters that no geography inside {@code envelope} can be nearer than. */
-  private static double lowerBound(S2LatLngRect queryRect, Envelope envelope) {
+  /**
+   * A distance in meters that no geography inside an envelope can be nearer to the query than: the
+   * distance on the sphere between the two rectangles, less a small margin for rounding. A
+   * nearest-neighbour search over any tree of such envelopes can prune with it.
+   *
+   * @param queryRect the bounding rectangle of the query, from {@link #bounds}
+   * @param envelope an envelope from {@link #toEnvelope}, or one that covers several of them
+   */
+  public static double distanceLowerBound(S2LatLngRect queryRect, Envelope envelope) {
     // The reverse of toEnvelope, clamped because degrees do not convert back exactly.
     R1Interval lat =
         new R1Interval(
