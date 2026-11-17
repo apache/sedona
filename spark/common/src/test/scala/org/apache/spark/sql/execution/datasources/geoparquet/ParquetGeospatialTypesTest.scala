@@ -30,8 +30,8 @@ class ParquetGeospatialTypesTest extends FunSuite {
   private val utm10n = """{"type":"ProjectedCRS","id":{"authority":"EPSG","code":32610}}"""
   private val webMercator = """{"type":"ProjectedCRS","id":{"authority":"EPSG","code":3857}}"""
 
-  /** The SRID of a CRS that only Spark's registry knows, which Spark has since 4.2. */
-  private def registered(srid: Int): Int = if (SpatialTypeSupport.usesNativeTypes) srid else 0
+  /** Spark has a registry of coordinate reference systems where Sedona uses its native types. */
+  private val hasRegistry = SpatialTypeSupport.usesNativeTypes
 
   private def srid(crs: String, metaData: java.util.Map[String, String] = noMetaData): Int =
     ParquetGeospatialTypes.crsToSrid(Option(crs), metaData)
@@ -48,19 +48,22 @@ class ParquetGeospatialTypesTest extends FunSuite {
     assert(srid("EPSG:Pseudo-Mercator") == 0)
   }
 
-  test("other authorities resolve through Spark's CRS registry where Spark has one") {
-    assert(srid("ESRI:102100") == registered(102100))
-    assert(srid("esri:102100") == registered(102100))
-    assert(srid("OGC:CRS83") == registered(4269))
+  test("an ESRI identifier gives its code as the SRID") {
+    assert(srid("ESRI:102100") == 102100)
+    assert(srid("esri:102100") == 102100)
+    assert(srid("""{"type":"ProjectedCRS","id":{"authority":"ESRI","code":102100}}""") == 102100)
     assert(
-      srid("""{"type":"ProjectedCRS","id":{"authority":"ESRI","code":102100}}""") ==
-        registered(102100))
-    assert(
-      srid("""{"type":"ProjectedCRS","id":{"authority":"ESRI","code":"102100"}}""") ==
-        registered(102100))
-    assert(srid("ESRI:999999999") == 0)
-    assert(srid("IAU_2015:49900") == 0)
+      srid("""{"type":"ProjectedCRS","id":{"authority":"ESRI","code":"102100"}}""") == 102100)
     assert(srid("ESRI:ANY") == 0)
+    assert(srid("ESRI:0") == 0)
+    assert(srid("ESRI:-102100") == 0)
+  }
+
+  test("Spark's CRS registry decides about other authorities where Spark has one") {
+    // The registry rejects an ESRI code it does not know. Without a registry nothing checks it.
+    assert(srid("ESRI:999999999") == (if (hasRegistry) 0 else 999999999))
+    assert(srid("OGC:CRS83") == (if (hasRegistry) 4269 else 0))
+    assert(srid("IAU_2015:49900") == 0)
   }
 
   test("srid:identifier is the SRID, in any case") {

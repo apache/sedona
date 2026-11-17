@@ -191,7 +191,8 @@ object GeoParquetMetaData {
    *   The SRID corresponding to the CRS. Returns 4326 for omitted CRS, 0 for null or unrecognized
    *   CRS, and the EPSG code for PROJJSON with an EPSG identifier. An identifier of another
    *   authority, such as ESRI, gives the SRID that Spark's registry of coordinate reference
-   *   systems assigns to it, which Spark has since 4.2.
+   *   systems assigns to it, which Spark has since 4.2. On older Spark versions an ESRI
+   *   identifier gives its code and any other authority gives 0.
    */
   def extractSridFromCrs(crs: Option[JValue]): Int = {
     crs match {
@@ -225,15 +226,20 @@ object GeoParquetMetaData {
       case (JString(value), JString(codeValue))
           if value.equalsIgnoreCase("OGC") && codeValue.equalsIgnoreCase("CRS84") =>
         DEFAULT_SRID
-      case (JString(value), _) => registeredSrid(value, code)
+      case (JString(value), _) if SpatialTypeSupport.usesNativeTypes =>
+        registeredSrid(value, code)
+      // Nothing can check an ESRI code on a Spark version without a registry. Its number is
+      // taken as the SRID, which is what Spark's registry and PostGIS assign to ESRI codes.
+      case (JString(value), _) if value.trim.equalsIgnoreCase("ESRI") => positiveInt(code)
       case _ => 0
     }
   }
 
   /**
-   * SRID of a CRS of an authority other than EPSG, such as ESRI:102100. Spark has a registry of
-   * such identifiers since 4.2, which is also where Sedona uses Spark's native spatial types. The
-   * SRID is 0 when Spark has no registry or the registry does not know the identifier.
+   * SRID of a CRS of an authority other than EPSG, such as ESRI:102100, in Spark's registry of
+   * coordinate reference systems. Spark has the registry since 4.2, which is also where Sedona
+   * uses Spark's native spatial types. The SRID is 0 when the registry does not know the
+   * identifier.
    */
   private def registeredSrid(authority: String, code: JValue): Int = {
     val codeText = code match {

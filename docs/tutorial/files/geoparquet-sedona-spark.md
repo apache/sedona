@@ -117,12 +117,13 @@ The SRID of each geometry comes from the `crs` property of the logical type:
 | absent | 4326 (the Parquet default, OGC:CRS84) |
 | `EPSG:<code>` | the code |
 | `OGC:CRS84` | 4326 |
-| `<authority>:<code>` of another authority, such as `ESRI:102100` | on Spark 4.2 and later, the SRID Spark assigns to it (102100 here); 0 on Spark 4.1 |
+| `ESRI:<code>` | the code |
+| `<authority>:<code>` of another authority, such as `OGC:CRS83` | on Spark 4.2 and later, the SRID Spark assigns to it (4269 here); 0 on Spark 4.1 |
 | `srid:<identifier>` | the identifier, where `srid:0` means an unknown CRS |
 | inline PROJJSON | the SRID of its `id`, by the rules above |
 | `projjson:<key>` | the SRID of the `id` of the PROJJSON stored under that file metadata key |
 
-Spark 4.2 ships a registry of EPSG and ESRI coordinate reference systems, and Sedona asks it about authorities other than EPSG. Spark 4.1 has no such registry. The `<key>` of `projjson:<key>` is looked up exactly as written.
+Spark 4.2 ships a registry of EPSG and ESRI coordinate reference systems, and Sedona asks it about authorities other than EPSG, so an ESRI code the registry does not know gives no SRID there. Spark 4.1 has no such registry: Sedona takes the code of an ESRI identifier as the SRID without checking it. The `<key>` of `projjson:<key>` is looked up exactly as written.
 
 A CRS that gives no SRID falls back to the `crs` of the GeoParquet metadata. If that also gives none, the SRID is 0. On Spark 4.2 and later, where Sedona uses native Spark geometry types, such a column fails to load because the type has to name its SRID.
 

@@ -117,12 +117,13 @@ df = sedona.read.format("geoparquet").load("/tmp/written-by-another-engine")
 | 未设置 | 4326（Parquet 的默认值 OGC:CRS84） |
 | `EPSG:<code>` | 该代码 |
 | `OGC:CRS84` | 4326 |
-| 其他机构的 `<authority>:<code>`，例如 `ESRI:102100` | 在 Spark 4.2 及更高版本上为 Spark 赋予它的 SRID（此处为 102100）；在 Spark 4.1 上为 0 |
+| `ESRI:<code>` | 该代码 |
+| 其他机构的 `<authority>:<code>`，例如 `OGC:CRS83` | 在 Spark 4.2 及更高版本上为 Spark 赋予它的 SRID（此处为 4269）；在 Spark 4.1 上为 0 |
 | `srid:<identifier>` | 该标识符，其中 `srid:0` 表示 CRS 未知 |
 | 内联 PROJJSON | 按上述规则由其 `id` 得到的 SRID |
 | `projjson:<key>` | 文件元数据中该键下 PROJJSON 的 `id` 对应的 SRID |
 
-Spark 4.2 自带 EPSG 和 ESRI 坐标参考系的注册表，对于 EPSG 以外的机构，Sedona 会查询该注册表。Spark 4.1 没有这样的注册表。`projjson:<key>` 中的 `<key>` 按原样查找，不做任何修改。
+Spark 4.2 自带 EPSG 和 ESRI 坐标参考系的注册表，对于 EPSG 以外的机构，Sedona 会查询该注册表，因此注册表中没有的 ESRI 代码在那里无法给出 SRID。Spark 4.1 没有这样的注册表：Sedona 直接把 ESRI 标识符的代码作为 SRID，不做校验。`projjson:<key>` 中的 `<key>` 按原样查找，不做任何修改。
 
 如果 CRS 无法给出 SRID，则使用 GeoParquet 元数据中的 `crs`。如果它也无法给出，SRID 为 0。在 Spark 4.2 及更高版本上，Sedona 使用 Spark 原生几何类型，类型必须指明 SRID，因此这样的列会加载失败。
 
