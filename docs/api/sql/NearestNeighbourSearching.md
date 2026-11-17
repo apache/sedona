@@ -46,6 +46,63 @@ In case there are ties in the distance, the result will include all the tied geo
 spark.sedona.join.knn.includeTieBreakers=true
 ```
 
+### ST_KNN on Geography
+
+Format: `ST_KNN(R: Geography, S: Geography, k: Integer)`
+
+Since: `v2.0.0`
+
+`ST_KNN` also accepts [Geography](geography/Geography-Functions.md) columns. R is the queries side and S is the object side, as above. Each query row is joined with its `k` nearest object rows.
+
+Neighbors are ranked by the distance that [ST_Distance](geography/Geography-Functions/ST_Distance.md) returns for two geographies: the shortest distance on the sphere between them, in meters. This has three consequences:
+
+- There is no `use_spheroid` argument. Geographies are always measured on the sphere, so only the three-argument form accepts them.
+- Lines and polygons are not replaced by their centroids. The distance to a polygon is the distance to its nearest point, and it is zero when the query lies inside the polygon.
+- Neighbors are found correctly across the antimeridian and around the poles.
+
+Both arguments must be geographies. To join a geography with a geometry, convert the geometry first with [ST_GeomToGeography](geography/Geography-Constructors/ST_GeomToGeography.md).
+
+A geography `ST_KNN` join runs as a broadcast join, so one side must fit in memory. Either side can be broadcast. Add a broadcast hint to the smaller side, or set `sedona.join.autoBroadcastJoinThreshold` high enough for Sedona to broadcast it automatically. If neither side is broadcast, query planning fails with an error. Only inner joins are supported.
+
+The other rules on this page apply to geographies as well: NULL and empty geographies are skipped, ties are returned only when `spark.sedona.join.knn.includeTieBreakers` is `true`, and additional `ON` predicates are evaluated on the neighbors that `ST_KNN` selected.
+
+SQL Example:
+
+```sql
+SELECT /*+ BROADCAST(a) */
+    s.name AS station,
+    a.name AS airport,
+    ROUND(ST_Distance(s.geog, a.geog) / 1000) AS km
+FROM stations AS s
+JOIN airports AS a
+ON ST_KNN(s.geog, a.geog, 1)
+ORDER BY station
+```
+
+With these two tables:
+
+```
+stations                              airports
+name          geog                    name    geog
+Suva          POINT (178.44 -18.14)   Apia    POINT (-171.76 -13.83)
+Longyearbyen  POINT (15.63 78.22)     Noumea  POINT (166.46 -22.27)
+                                      Alert   POINT (-62.35 82.50)
+                                      Tromso  POINT (18.96 69.65)
+```
+
+Output:
+
+```
++------------+-------+------+
+|station     |airport|km    |
++------------+-------+------+
+|Longyearbyen|Tromso |958.0 |
+|Suva        |Apia   |1152.0|
++------------+-------+------+
+```
+
+Apia is on the other side of the antimeridian from Suva. In longitude and latitude degrees it looks much farther away than Noumea, but on the sphere it is the nearer of the two.
+
 ### Filter Pushdown Considerations:
 
 When using ST_KNN with filters applied to the resulting DataFrame, some of these filters may be pushed down to the object side of the kNN join. This means the filters will be applied to the object side reader before the kNN join is executed. If you want the filters to be applied after the kNN join, ensure that you first materialize the kNN join results and then apply the filters.
