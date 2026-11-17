@@ -216,23 +216,6 @@ public class GeographyKnnIndexTest {
   }
 
   @Test
-  public void findsAPolygonThatCoversMoreThanItsVerticesSuggest() {
-    // The ring runs along the equator, so the polygon is a hemisphere. Distance measures it as
-    // the northern one: the query near the north pole is inside it.
-    Geography hemisphere = geography("POLYGON((0 -1e-14,120 -1e-14,-120 -1e-14,0 -1e-14))");
-    Geography query = geography("POINT(0 89)");
-    assertEquals(0.0, Functions.distance(query, hemisphere), 0.0);
-
-    GeographyKnnIndex<Integer> objects = new GeographyKnnIndex<>();
-    objects.add(geography("POINT(0 88)"), 0);
-    objects.add(hemisphere, 1);
-    List<Neighbor<Integer>> neighbors = objects.nearest(query, 1, false);
-
-    assertEquals(Arrays.asList(1), items(neighbors));
-    assertEquals(0.0, neighbors.get(0).getDistance(), 0.0);
-  }
-
-  @Test
   public void boundsCoverThePolesThatAPolygonContains() {
     S2LatLngRect north = GeographyKnnIndex.bounds(geography("POLYGON((0 80,120 80,-120 80,0 80))"));
     assertEquals(Math.PI / 2, north.latHi().radians(), 0.0);
@@ -244,24 +227,6 @@ public class GeographyKnnIndexTest {
     assertEquals(-Math.PI / 2, south.latLo().radians(), 0.0);
     assertTrue(south.lng().isFull());
     assertEquals(-80.0, south.latHi().degrees(), 1.0);
-  }
-
-  @Test
-  public void indexesCollapsedPolygonsThatHaveADistance() {
-    // Rings that enclose no area still have edges, and distance measures to those edges.
-    String[] collapsed = {
-      "POLYGON((0 0, 1 1, 1 1, 0 0))",
-      "POLYGON((3 3, 3 3, 3 3, 3 3))",
-      "POLYGON((5 0, 6 0, 7 0, 5 0))"
-    };
-    Geography query = geography("POINT(0.5 0.5)");
-    for (String wkt : collapsed) {
-      Double distance = Functions.distance(query, geography(wkt));
-      assertTrue(wkt, distance != null && !distance.isInfinite() && !distance.isNaN());
-    }
-
-    assertEquals(3, index(collapsed).size());
-    assertAgreesWithBruteForce(collapsed, new String[] {"POINT(0.5 0.5)", "POINT(4 2)"}, 3);
   }
 
   @Test

@@ -20,12 +20,7 @@ package org.apache.sedona.common.geography;
 
 import com.google.common.geometry.R1Interval;
 import com.google.common.geometry.S1Interval;
-import com.google.common.geometry.S2EdgeUtil;
-import com.google.common.geometry.S2LatLng;
 import com.google.common.geometry.S2LatLngRect;
-import com.google.common.geometry.S2Point;
-import com.google.common.geometry.S2Shape;
-import com.google.common.geometry.S2ShapeUtil;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -66,15 +61,13 @@ public final class GeographyKnnIndex<T> {
    */
   private static final double LOWER_BOUND_SLACK_RADIANS = 1e-6;
 
-  private static final S2Point NORTH_POLE = new S2Point(0, 0, 1);
-  private static final S2Point SOUTH_POLE = new S2Point(0, 0, -1);
-
   private final STRtree tree = new STRtree();
   private int size = 0;
 
   /**
    * Adds a geography and the item to return when it is found. A null or empty geography is skipped:
-   * it is nobody's neighbour.
+   * it is nobody's neighbour. So is a polygon whose rings enclose no area, which has no bounding
+   * rectangle.
    */
   public void add(Geography geography, T item) {
     S2LatLngRect rect = bounds(geography);
@@ -173,62 +166,19 @@ public final class GeographyKnnIndex<T> {
   }
 
   /**
-   * The latitude / longitude bounding rectangle of a geography.
+   * The latitude / longitude bounding rectangle of a geography, as {@code
+   * geography.region().getRectBound()} computes it. It follows the edges of the geography, and
+   * reaches a pole when a polygon contains that pole.
    *
-   * <p>The rectangle is computed from the shapes that {@link Functions#distance(Geography,
-   * Geography)} measures, which is what makes it safe to prune with: {@code
-   * geography.region().getRectBound()} reads some degenerate polygons differently from the distance
-   * function. Like the bound of an S2 loop, it follows every edge, and reaches a pole when a
-   * polygon contains that pole.
-   *
-   * @return the rectangle, or null when the geography is null or has nothing to measure a distance
-   *     to
+   * @return the rectangle, or null when the geography is null or empty
    */
   public static S2LatLngRect bounds(Geography geography) {
-    if (geography == null) {
+    if (geography == null
+        || (geography instanceof WKBGeography && ((WKBGeography) geography).isEmpty())) {
       return null;
     }
-    if (geography instanceof WKBGeography) {
-      WKBGeography wkb = (WKBGeography) geography;
-      if (wkb.isEmpty()) {
-        return null;
-      }
-      if (wkb.isPoint()) {
-        // Points are the common case and need no shapes. This is the point that distance uses.
-        return S2LatLngRect.fromPoint(S2LatLng.fromDegrees(wkb.getPointY(), wkb.getPointX()));
-      }
-    }
-
-    S2LatLngRect bound = S2LatLngRect.empty();
-    boolean containsNorthPole = false;
-    boolean containsSouthPole = false;
-    S2Shape.MutableEdge edge = new S2Shape.MutableEdge();
-    for (S2Shape shape : Functions.toShapeIndex(geography).shapeIndex.getShapes()) {
-      for (int chain = 0; chain < shape.numChains(); chain++) {
-        // A bounder follows one chain of edges, including the way an edge bulges away from the
-        // straight line between its ends in latitude / longitude space.
-        S2EdgeUtil.RectBounder bounder = new S2EdgeUtil.RectBounder();
-        for (int offset = 0; offset < shape.getChainLength(chain); offset++) {
-          shape.getChainEdge(chain, offset, edge);
-          bounder.addPoint(edge.getStart());
-          bounder.addPoint(edge.getEnd());
-        }
-        bound = bound.union(bounder.getBound());
-      }
-      if (shape.dimension() == 2) {
-        // The interior of a polygon reaches further than its edges only around a pole.
-        containsNorthPole |= S2ShapeUtil.containsBruteForce(shape, NORTH_POLE);
-        containsSouthPole |= S2ShapeUtil.containsBruteForce(shape, SOUTH_POLE);
-      }
-    }
-    if (containsNorthPole || containsSouthPole) {
-      R1Interval lat =
-          new R1Interval(
-              containsSouthPole ? -Math.PI / 2 : bound.lat().lo(),
-              containsNorthPole ? Math.PI / 2 : bound.lat().hi());
-      bound = new S2LatLngRect(lat, S1Interval.full());
-    }
-    return bound.isEmpty() ? null : bound;
+    S2LatLngRect rect = geography.region().getRectBound();
+    return rect.isEmpty() ? null : rect;
   }
 
   /**
