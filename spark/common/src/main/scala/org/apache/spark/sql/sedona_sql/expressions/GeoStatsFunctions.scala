@@ -37,11 +37,19 @@ import org.apache.spark.unsafe.types.UTF8String
 private[apache] case class ST_DBSCAN(children: Seq[Expression])
     extends DataframePhysicalFunction {
 
-  private lazy val materializedGeometryName =
-    "__sedona_dbscan_geometry_" + java.util.UUID.randomUUID().toString.replace("-", "")
+  private def getTemporaryColumnName(suffix: String, existingNames: Seq[String] = Seq()): String = {
+    var candidate =
+      "__sedona_dbscan_" + java.util.UUID.randomUUID().toString.replace("-", "") + suffix
+    while (existingNames.exists(name => name.equalsIgnoreCase(candidate))) {
+      candidate =
+        "__sedona_dbscan_" + java.util.UUID.randomUUID().toString.replace("-", "") + suffix
+    }
+    candidate
+  }
 
   override protected def getInputName(i: Int, fieldName: String): String = {
-    if (i == 0 && !children.head.isInstanceOf[AttributeReference]) materializedGeometryName
+    if (i == 0 && !children.head.isInstanceOf[AttributeReference])
+      getTemporaryColumnName("_geometry")
     else super.getInputName(i, fieldName)
   }
 
@@ -84,12 +92,9 @@ private[apache] case class ST_DBSCAN(children: Seq[Expression])
   override def transformDataframe(
       dataframe: DataFrame,
       resultAttrs: Seq[Attribute]): DataFrame = {
-    require(
-      !dataframe.columns.contains("__isCore"),
-      "__isCore is a  reserved name by the dbscan algorithm. Please rename the columns before calling the ST_DBSCAN function.")
-    require(
-      !dataframe.columns.contains("__cluster"),
-      "__cluster is a  reserved name by the dbscan algorithm. Please rename the columns before calling the ST_DBSCAN function.")
+    val existingColumnNames = dataframe.columns.toSeq :+ getResultName(resultAttrs)
+    val tempIsCoreColumnName = getTemporaryColumnName("_isCore", existingColumnNames)
+    val tempClusterColumnName = getTemporaryColumnName("_cluster", existingColumnNames)
 
     val includeOutliers: Boolean = children.lift(4) match {
       case None | Some(Literal(null, _)) =>
@@ -104,12 +109,14 @@ private[apache] case class ST_DBSCAN(children: Seq[Expression])
       geometryColumnName,
       includeOutliers,
       getScalarValue[Boolean](3, "useSpheroid"),
-      "__isCore",
-      "__cluster")
+      tempIsCoreColumnName,
+      tempClusterColumnName)
       .withColumn(
         getResultName(resultAttrs),
-        struct(col("__isCore").as(isCoreColumnName), col("__cluster").as(clusterColumnName)))
-      .drop("__isCore", "__cluster")
+        struct(
+          col(tempIsCoreColumnName).as(isCoreColumnName),
+          col(tempClusterColumnName).as(clusterColumnName)))
+      .drop(tempIsCoreColumnName, tempClusterColumnName)
 
     ret
 

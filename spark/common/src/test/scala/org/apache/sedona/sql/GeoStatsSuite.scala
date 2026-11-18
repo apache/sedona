@@ -243,15 +243,30 @@ class GeoStatsSuite extends TestBaseScala {
     assert(result.length > 0)
   }
 
-  it("test DBSCAN with a column named __isCore in input df") {
-    val exception = intercept[IllegalArgumentException] {
-      getData
-        .withColumn("__isCore", lit(1))
-        .withColumn("sql_result", expr("ST_DBSCAN(geometry, 0.1, 4, false)"))
-        .collect()
+  it("test DBSCAN preserves input columns __isCore and __cluster") {
+    val input = spark
+      .createDataFrame(
+        Seq((1, 0.0, "a", "alpha"), (2, 0.5, "b", "beta"), (3, 10.0, "c", "gamma")))
+      .toDF("id", "x", "__isCore", "__cluster")
+      .selectExpr("id", "ST_Point(x, 0.0) AS geometry", "__isCore", "__cluster")
+    val inputRows = input.orderBy("id").collect()
+    val result =
+      input.withColumn("sql_result", expr("ST_DBSCAN(geometry, 1.0, 2, false, true)"))
+    val rows = result.orderBy("id").collect()
+
+    assert(result.columns.toSeq == input.columns.toSeq :+ "sql_result")
+    assert(rows.length == 3)
+    input.schema.fields.foreach { field =>
+      assert(result.schema(field.name) == field)
+      assert(
+        rows.map(_.getAs[Any](field.name)).toSeq ==
+          inputRows.map(_.getAs[Any](field.name)).toSeq)
     }
-    assert(
-      exception.getMessage == "requirement failed: __isCore is a  reserved name by the dbscan algorithm. Please rename the columns before calling the ST_DBSCAN function.")
+    val clusters = rows.map(_.getAs[Row]("sql_result"))
+    assert(clusters.map(_.getAs[Boolean]("isCore")).toSeq == Seq(true, true, false))
+    assert(clusters(0).getAs[Long]("cluster") == clusters(1).getAs[Long]("cluster"))
+    assert(clusters(0).getAs[Long]("cluster") != -1L)
+    assert(clusters(2).getAs[Long]("cluster") == -1L)
   }
 
   it("test ST_BinaryDistanceBandColumn") {

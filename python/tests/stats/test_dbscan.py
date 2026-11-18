@@ -36,6 +36,46 @@ import os
 class TestDBScan(TestBase):
 
     @pytest.mark.parametrize(
+        "input_columns", [["__isCore"], ["__cluster"], ["__isCore", "__cluster"]]
+    )
+    def test_preserves_internal_named_columns(self, input_columns):
+
+        def _get_column(rows, column_name):
+            return tuple(row[column_name] for row in rows)
+
+        key = "spark.sql.adaptive.enabled"
+        prior = self.spark.conf.get(key)
+        try:
+            self.spark.conf.set(key, "false")
+            df = self.spark.createDataFrame(
+                [
+                    (1, 0.0, "a", "alpha"),
+                    (2, 0.5, "b", "beta"),
+                    (3, 10.0, "c", "gamma"),
+                ],
+                ["id", "x", "__isCore", "__cluster"],
+            ).selectExpr("id", "ST_Point(x, 0.0) AS geometry", *input_columns)
+            input_rows = df.orderBy("id").collect()
+
+            result = dbscan(df, 1.0, 2)
+            rows = result.orderBy("id").collect()
+
+            assert result.columns == df.columns + ["isCore", "cluster"]
+            assert _get_column(rows, "id") == (1, 2, 3)
+            for field in df.schema:
+                assert result.schema[field.name] == field
+                assert _get_column(rows, field.name) == _get_column(
+                    input_rows, field.name
+                )
+
+            assert _get_column(rows, "isCore") == (True, True, False)
+            cluster = _get_column(rows, "cluster")
+            assert cluster[0] == cluster[1] != -1
+            assert cluster[2] == -1
+        finally:
+            self.spark.conf.set(key, prior)
+
+    @pytest.mark.parametrize(
         "input_column,is_core_column_name,cluster_column_name",
         [
             ("__SEDONA_DBSCAN__", "isCore", "cluster"),
