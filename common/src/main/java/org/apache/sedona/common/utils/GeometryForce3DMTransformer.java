@@ -18,34 +18,15 @@
  */
 package org.apache.sedona.common.utils;
 
-import org.apache.sedona.common.Functions;
-import org.locationtech.jts.geom.*;
-import org.locationtech.jts.geom.util.GeometryTransformer;
+import org.apache.sedona.common.geometrySerde.CoordinateType;
+import org.locationtech.jts.geom.Geometry;
 
-public class GeometryForce3DMTransformer extends GeometryTransformer {
-
-  private final double mValue;
-
+public class GeometryForce3DMTransformer extends GeometryForceTransformer {
   public GeometryForce3DMTransformer(double mValue) {
-    this.mValue = mValue;
-  }
-
-  @Override
-  protected CoordinateSequence transformCoordinates(CoordinateSequence coords, Geometry parent) {
-    CoordinateXYM[] newCoords = new CoordinateXYM[coords.size()];
-    for (int i = 0; i < coords.size(); i++) {
-      Coordinate coordinate = coords.getCoordinate(i);
-      newCoords[i] = new CoordinateXYM(coordinate.getX(), coordinate.getY(), mValue);
-    }
-
-    return createCoordinateSequence(newCoords);
+    super(CoordinateType.XYM, Double.NaN, mValue);
   }
 
   public static Geometry transform(Geometry geometry, double mValue) {
-    if (geometry.getCoordinates().length == 0) return geometry;
-    if (Functions.hasM(geometry)) return geometry;
-
-    GeometryForce3DMTransformer transformer = new GeometryForce3DMTransformer(mValue);
-    return transformer.transform(geometry);
+    return new GeometryForce3DMTransformer(mValue).transformIfNeeded(geometry);
   }
 }
