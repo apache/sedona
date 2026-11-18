@@ -248,6 +248,12 @@ When no `geoparquet.crs` option is explicitly provided, Sedona will automaticall
 * If geometries in a column have mixed SRIDs, the `crs` field defaults to `null`.
 * If an explicit `geoparquet.crs` or `geoparquet.crs.<column_name>` option is provided, it always takes precedence over the SRID-derived CRS.
 
+On Spark 4.2 and later a native geometry column names its SRID in the column type, and a CRS option for such a column has to agree with it. This applies to every GeoParquet version:
+
+* The identifier of the CRS, which is `id` or an entry of `ids` in the PROJJSON, must give the SRID of the column.
+* That identifier must not name a version of its registry. The SRID stands for what the code means today, and a code can mean another CRS in another version, so Sedona rejects the option.
+* Sedona compares the identifier only and writes the rest of the definition as given. Make sure that the definition describes the CRS the coordinates are in.
+
 GeoParquet stores WKB coordinates in `(x, y)` order. Per the GeoParquet 1.1
 specification, this ordering overrides any axis order declared by the CRS. Sedona
 therefore preserves the authoritative CRS axis metadata and does not reorder geometry
@@ -277,7 +283,6 @@ A GeoParquet 2.0 file differs from a GeoParquet 1.1 file in these ways:
 
 * The geometry column carries the `GEOMETRY` logical type, and the CRS is a property of that type. The GeoParquet metadata repeats the CRS as PROJJSON.
 * Each row group has geospatial statistics, a bounding box and the geometry types, which the Parquet library writes. Sedona therefore adds no covering column by default. `geoparquet.covering` and `geoparquet.covering.<column_name>` still declare a covering column that you provide.
-* Geometries are stored as ISO WKB, as the Parquet format requires.
 
 Sedona writes the `crs` property of the column in the shortest form that identifies the CRS:
 
@@ -291,7 +296,7 @@ Sedona writes the `crs` property of the column in the shortest form that identif
 
 On Spark 4.2 and later the CRS comes from the SRID of the column type.
 
-Sedona's `geoparquet` reader returns a geometry column for every GeoParquet 2.0 file. What Spark's own Parquet reader, `spark.read.parquet`, returns on Spark 4.2 depends on the column the file was written from. For a native geometry column it returns a native geometry column. For a `GeometryUDT` column, which is every geometry column written on Spark 4.1, it returns the WKB as a binary column, as it does for a GeoParquet 1.1 file.
+Sedona's `geoparquet` reader returns a geometry column for a GeoParquet 2.0 file. The exception is a column whose CRS gives no SRID, such as PROJJSON without an identifier, on Spark 4.2 and later: it fails to load, as the section on reading GeoParquet 2.0 files describes. What Spark's own Parquet reader, `spark.read.parquet`, returns on Spark 4.2 depends on the column the file was written from. For a native geometry column it returns a native geometry column. For a `GeometryUDT` column, which is every geometry column written on Spark 4.1, it returns the WKB as a binary column, as it does for a GeoParquet 1.1 file.
 
 On Spark 4.1 the SRID belongs to each geometry and not to the column, so a GeoParquet 2.0 write needs the CRS of every geometry column in `geoparquet.crs` or `geoparquet.crs.<column_name>`.
 

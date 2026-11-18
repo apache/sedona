@@ -214,16 +214,23 @@ object GeoParquetMetaData {
         // GeoParquet uses a declared top-level PROJJSON identifier as the SRID.
         // Reading the identifier directly also supports CRS objects that omit the
         // optional definition fields that a projection engine would need.
-        val idSrid = identifierSrid(projjson \ "id")
-        if (idSrid != 0) {
-          idSrid
-        } else {
-          projjson \ "ids" match {
-            case JArray(ids) => ids.iterator.map(identifierSrid).find(_ != 0).getOrElse(0)
-            case _ => 0
-          }
-        }
+        sridIdentifier(projjson).map(_._2).getOrElse(0)
     }
+  }
+
+  /**
+   * The identifier of a PROJJSON object that gives its SRID, together with that SRID: `id` when
+   * it names a known CRS, otherwise the first entry of `ids` that does. None when no identifier
+   * names a known CRS.
+   */
+  private[geoparquet] def sridIdentifier(projjson: JValue): Option[(JValue, Int)] = {
+    val identifiers = (projjson \ "id") +: (projjson \ "ids" match {
+      case JArray(ids) => ids
+      case _ => Nil
+    })
+    identifiers.iterator
+      .map(identifier => identifier -> identifierSrid(identifier))
+      .find(_._2 != 0)
   }
 
   private def identifierSrid(identifier: JValue): Int = {

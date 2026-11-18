@@ -245,6 +245,12 @@ df.write.format("geoparquet")
 * 若同一列中的几何对象 SRID 不一致，`crs` 字段默认置为 `null`。
 * 若显式提供了 `geoparquet.crs` 或 `geoparquet.crs.<column_name>` 选项，则始终优先于 SRID 推导出的 CRS。
 
+在 Spark 4.2 及更高版本上，原生几何列在列类型中指明 SRID，针对这种列的 CRS 选项必须与之一致。这对所有 GeoParquet 版本都适用：
+
+* CRS 的标识符，即 PROJJSON 中的 `id` 或 `ids` 中的某一项，必须给出该列的 SRID。
+* 该标识符不能指明其注册库的版本。SRID 代表该代码当前的含义，而同一代码在另一个版本中可能表示另一个 CRS，因此 Sedona 会拒绝这样的选项。
+* Sedona 只比较标识符，定义的其余部分按给定内容写出。请确认该定义描述的就是坐标所在的 CRS。
+
 GeoParquet 以 `(x, y)` 顺序存储 WKB 坐标。根据 GeoParquet 1.1 规范，此顺序会覆盖 CRS
 中声明的坐标轴顺序。因此，Sedona 会保留权威的 CRS 坐标轴元数据，并且在读写 GeoParquet
 时不会重新排列几何坐标。如果坐标本身需要交换，可以使用
@@ -272,7 +278,6 @@ GeoParquet 2.0 文件与 GeoParquet 1.1 文件有以下区别：
 
 * 几何列带有 `GEOMETRY` 逻辑类型，CRS 是该类型的一个属性。GeoParquet 元数据会以 PROJJSON 重复给出 CRS。
 * 每个行组都带有地理空间统计信息，即边界框和几何类型，由 Parquet 库写出。因此 Sedona 默认不再添加 covering 列。`geoparquet.covering` 和 `geoparquet.covering.<column_name>` 仍可声明由你提供的 covering 列。
-* 几何对象按 Parquet 格式的要求以 ISO WKB 存储。
 
 Sedona 会用能够标识 CRS 的最短形式写出列的 `crs` 属性：
 
@@ -286,7 +291,7 @@ Sedona 会用能够标识 CRS 的最短形式写出列的 `crs` 属性：
 
 在 Spark 4.2 及更高版本上，CRS 来自列类型的 SRID。
 
-Sedona 的 `geoparquet` 读取器会把每个 GeoParquet 2.0 文件的几何列读取为几何列。Spark 自带的 Parquet 读取器 `spark.read.parquet` 在 Spark 4.2 上返回什么，取决于写出文件时的列类型。对于原生几何列，它返回原生几何列。对于 `GeometryUDT` 列（在 Spark 4.1 上写出的几何列都是这种类型），它以二进制列返回 WKB，与读取 GeoParquet 1.1 文件时相同。
+Sedona 的 `geoparquet` 读取器会把 GeoParquet 2.0 文件的几何列读取为几何列。例外是在 Spark 4.2 及更高版本上，CRS 无法给出 SRID 的列（例如没有标识符的 PROJJSON）会加载失败，详见读取 GeoParquet 2.0 文件一节。Spark 自带的 Parquet 读取器 `spark.read.parquet` 在 Spark 4.2 上返回什么，取决于写出文件时的列类型。对于原生几何列，它返回原生几何列。对于 `GeometryUDT` 列（在 Spark 4.1 上写出的几何列都是这种类型），它以二进制列返回 WKB，与读取 GeoParquet 1.1 文件时相同。
 
 在 Spark 4.1 上，SRID 属于每个几何对象而不属于列，因此写出 GeoParquet 2.0 时需要通过 `geoparquet.crs` 或 `geoparquet.crs.<column_name>` 给出每个几何列的 CRS。
 

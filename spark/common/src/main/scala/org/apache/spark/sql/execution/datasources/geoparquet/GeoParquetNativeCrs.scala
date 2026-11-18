@@ -47,13 +47,21 @@ private[geoparquet] object GeoParquetNativeCrs {
         requireSrid(column, srid, readSrid(column, crs))
         // The SRID of the column stands for the current meaning of its code. A code can mean
         // another CRS in another version of its registry, and there is no way to compare them.
-        crs.map(_ \ "id" \ "version").filter(_ != JNothing).foreach { version =>
-          throw new IllegalArgumentException(
-            s"The CRS given for GeoParquet column '$column' names version " +
-              s"${compact(render(version))} of its registry, which cannot be checked against " +
-              s"SRID $srid of the column. Remove the version from the id of the CRS, or leave " +
-              "the CRS to the SRID of the column")
-        }
+        // The check is on the identifier that gave the SRID, which is id or an entry of ids.
+        crs
+          .flatMap(GeoParquetMetaData.sridIdentifier)
+          .map(_._1 \ "version")
+          .filter(_ != JNothing)
+          .foreach { version =>
+            throw new IllegalArgumentException(
+              s"The CRS given for GeoParquet column '$column' takes SRID $srid from an " +
+                s"identifier that names version ${compact(render(version))} of its registry. " +
+                "The SRID of the column stands for what the code means today, and that " +
+                "version can mean another CRS. Check which CRS the coordinates of the column " +
+                s"are in. If it is the CRS that SRID $srid stands for today, give the CRS " +
+                "without the version or leave the CRS to the SRID of the column. If it is " +
+                "not, the SRID of the column is wrong")
+          }
         crs
       case None if srid == 0 => Some(JNull)
       case None if srid == GeoParquetMetaData.DEFAULT_SRID => None

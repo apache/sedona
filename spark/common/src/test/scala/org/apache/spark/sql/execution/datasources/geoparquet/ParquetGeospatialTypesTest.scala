@@ -23,7 +23,7 @@ import java.util.Collections
 import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName.BINARY
 import org.apache.parquet.schema.{LogicalTypeAnnotation, Types}
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
-import org.json4s.JNull
+import org.json4s.{JNull, JValue}
 import org.json4s.jackson.JsonMethods.parse
 import org.scalatest.FunSuite
 
@@ -200,6 +200,39 @@ class ParquetGeospatialTypesTest extends FunSuite {
     val current =
       parse("""{"type":"GeographicCRS","name":"x","id":{"authority":"EPSG","code":4812}}""")
     assert(GeoParquetNativeCrs.writeCrs("geometry", 4812, Some(Some(current))).contains(current))
+  }
+
+  test("a native column rejects a registry version on the identifier that gives the SRID") {
+    def write(projjson: String): Option[JValue] =
+      GeoParquetNativeCrs.writeCrs("geometry", 4812, Some(Some(parse(projjson))))
+    // The SRID comes from ids when the CRS has no id, or an id that names no known CRS
+    Seq(
+      """{"name":"x","ids":[{"authority":"EPSG","code":4812,"version":"4.4"}]}""",
+      """{"name":"x","ids":[{"authority":"unknown","code":1},{"authority":"EPSG","code":4812,"version":"4.4"}]}""",
+      """{"name":"x","id":{"authority":"unknown","code":1},"ids":[{"authority":"EPSG","code":4812,"version":"4.4"}]}""")
+      .foreach { historical =>
+        val error = intercept[IllegalArgumentException](write(historical))
+        assert(error.getMessage.contains("version \"4.4\""), historical)
+      }
+    // A version on an identifier that does not give the SRID is no reason to reject the CRS
+    Seq(
+      """{"name":"x","id":{"authority":"EPSG","code":4812},"ids":[{"authority":"EPSG","code":4812,"version":"4.4"}]}""",
+      """{"name":"x","id":{"authority":"unknown","code":1,"version":2},"ids":[{"authority":"EPSG","code":4812}]}""",
+      """{"name":"x","ids":[{"authority":"EPSG","code":4812},{"authority":"EPSG","code":4812,"version":"4.4"}]}""")
+      .foreach { current =>
+        assert(write(current).contains(parse(current)), current)
+      }
+  }
+
+  test("the error for a registry version does not tell the user to remove the version") {
+    val historical =
+      parse("""{"name":"x","id":{"authority":"EPSG","code":4812,"version":"4.4"}}""")
+    val message = intercept[IllegalArgumentException] {
+      GeoParquetNativeCrs.writeCrs("geometry", 4812, Some(Some(historical)))
+    }.getMessage
+    assert(!message.contains("Remove the version"))
+    assert(message.contains("Check which CRS the coordinates of the column are in"))
+    assert(message.contains("SRID 4812"))
   }
 
   test("only GeoParquet 2.x versions use the geospatial logical types") {
