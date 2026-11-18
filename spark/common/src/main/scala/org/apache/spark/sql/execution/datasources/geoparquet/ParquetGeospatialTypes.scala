@@ -132,15 +132,19 @@ object ParquetGeospatialTypes {
    * The `crs` property for a CRS as GeoParquet metadata holds it: None for OGC:CRS84, JSON null
    * for an unknown CRS, PROJJSON otherwise. PROJJSON with an identifier becomes `authority:code`,
    * the form that readers without a PROJJSON parser understand; the GeoParquet metadata of the
-   * file keeps the full definition. PROJJSON without one is written inline.
+   * file keeps the full definition. PROJJSON without one is written inline, and so is PROJJSON
+   * whose identifier names a version of its registry: `authority:code` has no place for the
+   * version, and a code can mean another CRS in another version.
    */
   def crsProperty(crs: Option[JValue]): Option[String] = crs match {
     case None => None
     case Some(JNull) | Some(JNothing) => Some(UNKNOWN_CRS)
     case Some(projjson) =>
+      val id = projjson \ "id"
       val identifier = for {
-        authority <- identifierPart(projjson \ "id" \ "authority")
-        code <- identifierPart(projjson \ "id" \ "code")
+        authority <- identifierPart(id \ "authority")
+        code <- identifierPart(id \ "code")
+        if (id \ "version") == JNothing
         if authorityCodeForm.pattern.matcher(s"$authority:$code").matches()
       } yield s"$authority:$code"
       identifier.orElse(Some(compact(render(projjson))))

@@ -273,6 +273,7 @@ Sedona 会用能够标识 CRS 的最短形式写出列的 `crs` 属性：
 | OGC:CRS84（SRID 4326） | 不设置 | 不设置 |
 | 带标识符的 CRS，例如 EPSG:3857 | `EPSG:3857` | PROJJSON |
 | 不带标识符的 CRS | 内联 PROJJSON | PROJJSON |
+| 标识符带有注册表版本的 CRS，例如 `IAU` 的 2015 版 | 内联 PROJJSON | PROJJSON |
 | 未知（SRID 0） | `srid:0` | `null` |
 
 在 Spark 4.2 及更高版本上，CRS 来自列类型的 SRID。Spark 自带的 Parquet 读取器 `spark.read.parquet` 会把这些文件的几何列读取为原生几何列。

@@ -23,6 +23,8 @@ import java.util.Collections
 import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName.BINARY
 import org.apache.parquet.schema.{LogicalTypeAnnotation, Types}
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
+import org.json4s.JNull
+import org.json4s.jackson.JsonMethods.parse
 import org.scalatest.FunSuite
 
 class ParquetGeospatialTypesTest extends FunSuite {
@@ -143,11 +145,10 @@ class ParquetGeospatialTypesTest extends FunSuite {
     }
   }
 
+  private def property(projjson: String): Option[String] =
+    ParquetGeospatialTypes.crsProperty(Option(projjson).map(parse(_)))
+
   test("a CRS becomes the shortest crs property that still identifies it") {
-    import org.json4s.JNull
-    import org.json4s.jackson.JsonMethods.parse
-    def property(projjson: String): Option[String] =
-      ParquetGeospatialTypes.crsProperty(Option(projjson).map(parse(_)))
     assert(property(null).isEmpty)
     assert(ParquetGeospatialTypes.crsProperty(Some(JNull)).contains("srid:0"))
     assert(property(utm10n).contains("EPSG:32610"))
@@ -159,6 +160,18 @@ class ParquetGeospatialTypesTest extends FunSuite {
     // An identifier that is not a plain authority:code pair cannot be written in that form
     val spaced = """{"name":"x","id":{"authority":"MY ORG","code":7}}"""
     assert(property(spaced).contains(spaced))
+  }
+
+  test("an identifier with a registry version keeps its PROJJSON") {
+    // PROJ writes IAU_2015:49900 as authority IAU, code 49900 and version 2015. IAU:49900 names
+    // no CRS, and a registry may give a code another meaning in another version.
+    val mars =
+      """{"type":"GeodeticCRS","name":"Mars (2015) - Sphere","id":{"authority":"IAU","code":49900,"version":2015}}"""
+    assert(property(mars).contains(mars))
+    val textVersion = """{"name":"x","id":{"authority":"EPSG","code":4812,"version":"4.4"}}"""
+    assert(property(textVersion).contains(textVersion))
+    val decimalVersion = """{"name":"x","id":{"authority":"EPSG","code":4812,"version":4.4}}"""
+    assert(property(decimalVersion).contains(decimalVersion))
   }
 
   test("only GeoParquet 2.x versions use the geospatial logical types") {

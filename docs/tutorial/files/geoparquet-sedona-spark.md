@@ -278,6 +278,7 @@ Sedona writes the `crs` property of the column in the shortest form that identif
 | OGC:CRS84 (SRID 4326) | absent | absent |
 | a CRS with an identifier, such as EPSG:3857 | `EPSG:3857` | PROJJSON |
 | a CRS without an identifier | inline PROJJSON | PROJJSON |
+| a CRS whose identifier names a version of its registry, such as `IAU` version 2015 | inline PROJJSON | PROJJSON |
 | unknown (SRID 0) | `srid:0` | `null` |
 
 On Spark 4.2 and later the CRS comes from the SRID of the column type. Spark's own Parquet reader, `spark.read.parquet`, reads the geometry column of these files as a native geometry column.
