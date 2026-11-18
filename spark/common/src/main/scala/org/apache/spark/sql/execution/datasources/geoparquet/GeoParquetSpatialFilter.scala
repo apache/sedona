@@ -101,12 +101,16 @@ object GeoParquetSpatialFilter {
     def evaluate(columns: Map[String, GeometryFieldMetaData]): Boolean = {
       columns.get(columnName).forall { column =>
         val bbox = column.bbox.getOrElse(return true)
-        if (bbox.isEmpty) {
+        // A bbox lists the minimum of every dimension and then the maximum of every dimension:
+        // four values for XY, six for XYZ and eight for XYZM. X and Y come first in each half.
+        // A file whose bbox has another number of values is kept.
+        if (bbox.length != 4 && bbox.length != 6 && bbox.length != 8) {
           return true
         }
 
-        val columnEnvelope =
-          queryWindow.getFactory.toGeometry(new Envelope(bbox(0), bbox(2), bbox(1), bbox(3)))
+        val dimensions = bbox.length / 2
+        val columnEnvelope = queryWindow.getFactory.toGeometry(
+          new Envelope(bbox(0), bbox(dimensions), bbox(1), bbox(dimensions + 1)))
         predicateType match {
           case SpatialPredicate.COVERS => columnEnvelope.covers(queryWindow)
           case SpatialPredicate.INTERSECTS =>
