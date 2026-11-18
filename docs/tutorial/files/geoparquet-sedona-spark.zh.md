@@ -69,6 +69,8 @@ Sedona 会并行写出多个 Parquet 文件，比写单一文件快得多。
 
 写出 GeoParquet 时，Sedona 会保留空 `Point`、`LineString` 和 `Polygon` 几何对象声明的 XY 或 XYZ 坐标布局。即使 Z 坐标值为 `NaN`，XYZ 几何对象也会保留 Z 维度。
 
+Sedona 按 GeoParquet 规范的要求以 ISO WKB 存储几何对象：带 Z 坐标的几何对象使用 1001 到 1007 的类型代码，例如 `Point Z` 为 1001。Sedona 2.0.0 之前的写出方式是用 EWKB 标志位标记 Z（`Point Z` 为 `0x80000001`）。两种形式 Sedona 都能读取。
+
 [GeoParquet 1.1](https://geoparquet.org/releases/v1.1.0/#wkb) 不支持 M 坐标。Sedona 在写出 GeoParquet 时会丢弃 M：XYM 转换为 XY，XYZM 转换为 XYZ。如果需要保留 M 值，请在写出前将其单独存储。
 
 ## 使用 Spark 将 GeoParquet 读入 Sedona DataFrame

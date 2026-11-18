@@ -29,15 +29,15 @@ import org.apache.commons.io.FileUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.parquet.example.data.simple.SimpleGroupFactory
-import org.apache.parquet.hadoop.ParquetFileReader
+import org.apache.parquet.hadoop.{ParquetFileReader, ParquetReader}
 import org.apache.parquet.hadoop.util.HadoopInputFile
 import org.apache.parquet.column.Encoding
-import org.apache.parquet.hadoop.example.ExampleParquetWriter
+import org.apache.parquet.hadoop.example.{ExampleParquetWriter, GroupReadSupport}
 import org.apache.parquet.io.api.Binary
 import org.apache.parquet.schema.MessageTypeParser
 import org.apache.sedona.common.utils.GeometryEquality
 import org.apache.spark.sql.{DataFrame, Row}
-import org.apache.spark.sql.types.{BinaryType, IntegerType, StructField, StructType}
+import org.apache.spark.sql.types.{ArrayType, BinaryType, IntegerType, StructField, StructType}
 import org.json4s.{DefaultFormats, JNothing, JValue}
 import org.json4s.jackson.parseJson
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
@@ -235,6 +235,13 @@ class GeoParquetDimensionsSuite extends TestBaseScala {
     (kind & 0x80000000) != 0 || ((kind & 0x0fffffff) / 1000) % 2 == 1
   }
 
+  private def typeCode(wkb: Array[Byte]): Int = {
+    val order = if (wkb(0) == 0) ByteOrder.BIG_ENDIAN else ByteOrder.LITTLE_ENDIAN
+    ByteBuffer.wrap(wkb).order(order).getInt(1)
+  }
+
+  private def hex(wkb: Array[Byte]): String = org.locationtech.jts.io.WKBWriter.toHex(wkb)
+
   private def columnMetadata(file: File): JValue = {
     val reader =
       ParquetFileReader.open(HadoopInputFile.fromPath(new Path(file.toURI), new Configuration()))
@@ -257,6 +264,7 @@ class GeoParquetDimensionsSuite extends TestBaseScala {
         else {
           val bytes = row.getAs[Array[Byte]](1)
           assert(hasZ(bytes) == hasZ(sample.wkb), "top-level WKB Z header changed")
+          assert(typeCode(bytes) == typeCode(sample.wkb), "top-level type code is not ISO WKB")
           assert(
             GeometryEquality.equalsIdentical(
               WKBReader.forDeclaredDimensions().read(bytes),
@@ -396,6 +404,75 @@ class GeoParquetDimensionsSuite extends TestBaseScala {
       it(
         s"preserves XYZ, projects M, and writes matching metadata (allEmpty=$allEmpty, legacyUdt=$legacyUdt)") {
         withDirectory(directory => writeAndRoundTrip(directory, allEmpty, legacyUdt))
+      }
+    }
+
+    // GeoParquet asks for the WKB of the OGC and ISO standards, where a geometry with Z has a
+    // type code from 1001 to 1007. EWKB sets a flag bit in the type code instead.
+    val order = ByteOrder.nativeOrder()
+    val pointZ = isoWkb(1, true, Seq(1, 2, 3), order = order)
+    val lineStringZ = isoWkb(2, true, Seq(1, 2, 3, 4, 5, 6), order = order)
+    val isoSamples = Seq(
+      Sample("point", isoWkb(1, false, Seq(1, 2), order = order)),
+      Sample("point-z", pointZ),
+      Sample("line-z", lineStringZ),
+      Sample("multipoint-z", isoWkb(4, true, children = Seq(pointZ), order = order)),
+      Sample("collection-z", isoWkb(7, true, children = Seq(pointZ, lineStringZ), order = order)))
+
+    it("stores geometries as ISO WKB") {
+      withDirectory { directory =>
+        val path = new File(directory, "iso").getPath
+        val rows = isoSamples.zipWithIndex.map { case (sample, index) => Row(index, sample.wkb) }
+        val schema = StructType(
+          Seq(
+            StructField("id", IntegerType, nullable = false),
+            StructField("wkb", BinaryType, nullable = false)))
+        sparkSession
+          .createDataFrame(rows.asJava, schema)
+          .selectExpr("id", "ST_GeomFromWKB(wkb) AS geometry")
+          .coalesce(1)
+          .write
+          .format("geoparquet")
+          .save(path)
+        val stored = sparkSession.read.parquet(path).collect().sortBy(_.getInt(0))
+        assert(stored.length == isoSamples.size)
+        stored.zip(isoSamples).foreach { case (row, sample) =>
+          withClue(s"${sample.name}: ") {
+            assert(hex(row.getAs[Array[Byte]](1)) == hex(sample.wkb))
+          }
+        }
+      }
+    }
+
+    it("stores geometries nested in another column as ISO WKB") {
+      withDirectory { directory =>
+        val path = new File(directory, "nested").getPath
+        // Spark's native geometry type is only written at the root of the schema, so the nested
+        // columns hold GeometryUDT values on every Spark version.
+        val geometry = WKBReader.forDeclaredDimensions().read(pointZ)
+        val holder = StructType(Seq(StructField("g", GeometryUDT())))
+        val schema = StructType(
+          Seq(
+            StructField("geometry", GeometryUDT()),
+            StructField("members", ArrayType(GeometryUDT())),
+            StructField("holder", holder)))
+        sparkSession
+          .createDataFrame(Seq(Row(geometry, Seq(geometry), Row(geometry))).asJava, schema)
+          .coalesce(1)
+          .write
+          .format("geoparquet")
+          .save(path)
+        // Read the stored bytes with the Parquet library: Spark's own reader takes the nested
+        // values for serialized geometries.
+        val file = new File(path).listFiles().filter(_.getName.endsWith(".parquet")).head
+        val reader = ParquetReader.builder(new GroupReadSupport(), new Path(file.toURI)).build()
+        val record =
+          try reader.read()
+          finally reader.close()
+        val member = record.getGroup("members", 0).getGroup("list", 0).getBinary("element", 0)
+        assert(hex(record.getBinary("geometry", 0).getBytes) == hex(pointZ))
+        assert(hex(member.getBytes) == hex(pointZ))
+        assert(hex(record.getGroup("holder", 0).getBinary("g", 0).getBytes) == hex(pointZ))
       }
     }
   }
