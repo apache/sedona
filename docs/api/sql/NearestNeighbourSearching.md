@@ -64,7 +64,7 @@ Both arguments must be geographies. To join a geography with a geometry, convert
 
 A geography `ST_KNN` join runs as a broadcast join, so one side must fit in memory. Either side can be broadcast. Add a broadcast hint to the smaller side, or set `sedona.join.autoBroadcastJoinThreshold` high enough for Sedona to broadcast it automatically. If neither side is broadcast, query planning fails with an error. Only inner joins are supported.
 
-The other rules on this page apply to geographies as well: NULL and empty geographies are skipped, ties are returned only when `spark.sedona.join.knn.includeTieBreakers` is `true`, and additional `ON` predicates are evaluated on the neighbors that `ST_KNN` selected.
+The other rules on this page apply to geographies as well: NULL and empty geographies are skipped, ties are returned only when `spark.sedona.join.knn.includeTieBreakers` is `true`, and additional `ON` predicates that remain in the join condition after optimization are evaluated on the neighbors that `ST_KNN` selected.
 
 SQL Example:
 

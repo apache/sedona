@@ -62,7 +62,7 @@ spark.sedona.join.knn.includeTieBreakers=true
 
 Geography 上的 `ST_KNN` 连接以广播连接的方式执行，因此其中一侧必须能放入内存。两侧都可以被广播。请给较小的一侧加上广播提示，或者把 `sedona.join.autoBroadcastJoinThreshold` 设置得足够大，让 Sedona 自动广播它。如果两侧都没有被广播，查询规划会报错。仅支持内连接。
 
-本页的其他规则同样适用于 geography：NULL 和空的 geography 会被跳过；只有当 `spark.sedona.join.knn.includeTieBreakers` 为 `true` 时才返回并列的结果；`ON` 中的其他谓词作用于 `ST_KNN` 已选出的邻居。
+本页的其他规则同样适用于 geography：NULL 和空的 geography 会被跳过；只有当 `spark.sedona.join.knn.includeTieBreakers` 为 `true` 时才返回并列的结果；`ON` 中经优化后仍保留在连接条件里的其他谓词作用于 `ST_KNN` 已选出的邻居。
 
 SQL 示例：
 
