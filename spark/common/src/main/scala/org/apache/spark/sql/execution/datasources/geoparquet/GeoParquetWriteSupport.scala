@@ -32,7 +32,7 @@ import org.apache.spark.sql.catalyst.util.DateTimeUtils
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData.{GEOPARQUET_COVERING_KEY, GEOPARQUET_COVERING_MODE_AUTO, GEOPARQUET_COVERING_MODE_KEY, GEOPARQUET_COVERING_MODE_LEGACY, GEOPARQUET_CRS_KEY, GEOPARQUET_VERSION_KEY, VERSION, createCoveringColumnMetadata}
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetWriteSupport.GeometryColumnInfo
 import org.apache.spark.sql.execution.datasources.geoparquet.internal.{DataSourceUtils, LegacyBehaviorPolicy, PortableSQLConf}
-import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
+import org.apache.spark.sql.sedona_sql.types.{PublicWkbHeaderAdapter, SpatialTypeSupport}
 import org.apache.spark.sql.types._
 import org.json4s.JValue
 import org.json4s.jackson.JsonMethods.parse
@@ -510,13 +510,16 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
               expectedSrid,
               geom.getSRID)
           }
-          val wkb = wkbWriter.write(geom)
+          // The writer marks a Z coordinate with the EWKB flag bit. GeoParquet asks for the WKB
+          // of the OGC and ISO standards, which uses the type codes 1001 to 1007 instead. The
+          // writer returns a new array without an SRID, so the type words change in that array.
+          val wkb = PublicWkbHeaderAdapter.toIsoWkbInPlace(wkbWriter.write(geom))
           recordConsumer.addBinary(Binary.fromReusedByteArray(wkb))
           if (geometryColumnInfo != null) {
             // The writer resolves each geometry's actual layout, including collection members.
-            // Derive metadata from its EWKB type header rather than the first coordinate.
+            // Derive metadata from its WKB type code rather than the first coordinate.
             val typeCode = ByteBuffer.wrap(wkb, 1, 4).order(ByteOrder.nativeOrder()).getInt
-            geometryColumnInfo.update(geom, (typeCode & 0x80000000) != 0)
+            geometryColumnInfo.update(geom, typeCode / 1000 == 1)
           }
         }
 
