@@ -69,7 +69,9 @@ Sedona writes many Parquet files in parallel because that's much faster than wri
 
 GeoParquet writes preserve the declared XY or XYZ coordinate layout of empty `Point`, `LineString`, and `Polygon` geometries. XYZ geometries also retain their Z dimension when Z ordinates are `NaN`.
 
-Sedona stores geometries as ISO WKB, which the GeoParquet specification asks for: a geometry with a Z coordinate has a type code from 1001 to 1007, for example 1001 for `Point Z`. Before Sedona 2.0.0 the writer marked Z with the EWKB flag bit instead (`0x80000001` for `Point Z`). Sedona reads both forms.
+Sedona writes the Z dimension with the type codes of ISO WKB, which the GeoParquet specification asks for: a geometry with a Z coordinate has a type code from 1001 to 1007, for example 1001 for `Point Z`. Before Sedona 2.0.0 the writer marked Z with the EWKB flag bit instead (`0x80000001` for `Point Z`). Sedona reads both forms.
+
+Each member of a geometry collection keeps its own coordinate layout. A collection with both XY and XYZ members is stored with the type codes of both, for example 1007 for the collection, 2 for an XY `LineString` member and 1001 for a `Point Z` member. ISO WKB requires every member of a collection with a Z coordinate to have one as well, so a reader may reject such a geometry. Spark's native geometry type does: on Spark 4.2 and later, Sedona fails to read it into a native geometry column with `WKB_PARSE_ERROR`.
 
 [GeoParquet 1.1](https://geoparquet.org/releases/v1.1.0/#wkb) does not support M coordinates. Sedona discards M when writing GeoParquet: XYM becomes XY, and XYZM becomes XYZ. If you need the M values, store them separately before writing.
 

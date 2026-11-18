@@ -25,22 +25,43 @@ import java.nio.ByteOrder;
 /** Converts public WKB headers to ISO types without changing coordinate bytes. */
 public final class PublicWkbHeaderAdapter {
   public static byte[] toIsoWkb(byte[] source) {
-    Cursor sizing = new Cursor(source, null);
+    return convert(source, false);
+  }
+
+  /**
+   * Like {@link #toIsoWkb}, for a caller that owns {@code source} and no longer needs its original
+   * bytes: the ISO type words are written into {@code source} itself, so a geometry with a Z or M
+   * coordinate needs no second array. WKB with an embedded SRID is shorter in ISO form; it is left
+   * as it is and the result is a new array.
+   */
+  public static byte[] toIsoWkbInPlace(byte[] source) {
+    return convert(source, true);
+  }
+
+  private static byte[] convert(byte[] source, boolean reuseSource) {
+    Cursor sizing = new Cursor(source, null, false);
     int length = sizing.walk();
     if (!sizing.changed) return source;
+    if (reuseSource && length == source.length) {
+      new Cursor(source, null, true).walk();
+      return source;
+    }
     byte[] result = new byte[length];
-    new Cursor(source, result).walk();
+    new Cursor(source, result, false).walk();
     return result;
   }
 
   private static final class Cursor {
     final byte[] source;
     final ByteBuffer input, output;
+    // Whether the ISO type words are written into the source, which then has no embedded SRID
+    final boolean patchSource;
     int outputSize;
     boolean changed;
 
-    Cursor(byte[] source, byte[] target) {
+    Cursor(byte[] source, byte[] target, boolean patchSource) {
       this.source = source;
+      this.patchSource = patchSource;
       input = ByteBuffer.wrap(source);
       output = target == null ? null : ByteBuffer.wrap(target);
     }
@@ -82,6 +103,7 @@ public final class PublicWkbHeaderAdapter {
           int dimensions = 2 + (z ? 1 : 0) + (m ? 1 : 0);
           if ((code & 0x20000000) != 0) input.getInt(); // Caller supplies the SRID separately.
           changed |= code != iso;
+          if (patchSource && code != iso) input.putInt(input.position() - Integer.BYTES, iso);
           if (output != null) output.order(order).put(endian).putInt(iso);
           outputSize += 5;
           switch (base) {

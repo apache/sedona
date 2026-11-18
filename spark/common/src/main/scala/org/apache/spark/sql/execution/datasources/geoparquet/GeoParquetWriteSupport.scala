@@ -511,8 +511,9 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
               geom.getSRID)
           }
           // The writer marks a Z coordinate with the EWKB flag bit. GeoParquet asks for the WKB
-          // of the OGC and ISO standards, which uses the type codes 1001 to 1007 instead.
-          val wkb = PublicWkbHeaderAdapter.toIsoWkb(wkbWriter.write(geom))
+          // of the OGC and ISO standards, which uses the type codes 1001 to 1007 instead. The
+          // writer returns a new array without an SRID, so the type words change in that array.
+          val wkb = PublicWkbHeaderAdapter.toIsoWkbInPlace(wkbWriter.write(geom))
           recordConsumer.addBinary(Binary.fromReusedByteArray(wkb))
           if (geometryColumnInfo != null) {
             // The writer resolves each geometry's actual layout, including collection members.

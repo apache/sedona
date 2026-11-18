@@ -475,5 +475,49 @@ class GeoParquetDimensionsSuite extends TestBaseScala {
         assert(hex(record.getGroup("holder", 0).getBinary("g", 0).getBytes) == hex(pointZ))
       }
     }
+
+    it("keeps the coordinate layout of each member of a geometry collection") {
+      withDirectory { directory =>
+        // The OGC grammar asks for Z members throughout a collection with a Z coordinate. A
+        // geometry can hold members of both layouts, and the writer stores each one as it is.
+        val order = ByteOrder.nativeOrder()
+        val mixedSamples = Seq(
+          Sample(
+            "members",
+            isoWkb(
+              7,
+              true,
+              children = Seq(
+                isoWkb(2, false, Seq(0, 0, 1, 1), order = order),
+                isoWkb(1, true, Seq(1, 2, 3), order = order)),
+              order = order)),
+          Sample(
+            "empty-members",
+            isoWkb(
+              7,
+              true,
+              children = Seq(isoWkb(2, false, order = order), isoWkb(3, true, order = order)),
+              order = order)))
+        val schema = StructType(Seq(StructField("geometry", GeometryUDT())))
+        mixedSamples.foreach { sample =>
+          val path = new File(directory, sample.name).getPath
+          val geometry = WKBReader.forDeclaredDimensions().read(sample.wkb)
+          sparkSession
+            .createDataFrame(Seq(Row(geometry)).asJava, schema)
+            .coalesce(1)
+            .write
+            .format("geoparquet")
+            .save(path)
+          val file = new File(path).listFiles().filter(_.getName.endsWith(".parquet")).head
+          val reader = ParquetReader.builder(new GroupReadSupport(), new Path(file.toURI)).build()
+          val record =
+            try reader.read()
+            finally reader.close()
+          withClue(s"${sample.name}: ") {
+            assert(hex(record.getBinary("geometry", 0).getBytes) == hex(sample.wkb))
+          }
+        }
+      }
+    }
   }
 }
