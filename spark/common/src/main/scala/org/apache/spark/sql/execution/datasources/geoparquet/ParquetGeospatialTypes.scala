@@ -134,7 +134,9 @@ object ParquetGeospatialTypes {
    * the form that readers without a PROJJSON parser understand; the GeoParquet metadata of the
    * file keeps the full definition. PROJJSON without one is written inline, and so is PROJJSON
    * whose identifier names a version of its registry: `authority:code` has no place for the
-   * version, and a code can mean another CRS in another version.
+   * version, and a code can mean another CRS in another version. An authority named `srid` or
+   * `projjson` stays inline as well, because the Parquet format reads `srid:<number>` and
+   * `projjson:<key>` as something else.
    */
   def crsProperty(crs: Option[JValue]): Option[String] = crs match {
     case None => None
@@ -145,6 +147,7 @@ object ParquetGeospatialTypes {
         authority <- identifierPart(id \ "authority")
         code <- identifierPart(id \ "code")
         if (id \ "version") == JNothing
+        if !reservedPrefixes.contains(authority.toLowerCase(java.util.Locale.ROOT))
         if authorityCodeForm.pattern.matcher(s"$authority:$code").matches()
       } yield s"$authority:$code"
       identifier.orElse(Some(compact(render(projjson))))
@@ -159,6 +162,9 @@ object ParquetGeospatialTypes {
   /** Whether the `crs` property states that the CRS is undefined or unknown. */
   def isUnknownCrs(crs: Option[String]): Boolean =
     crs.exists(_.trim.equalsIgnoreCase(UNKNOWN_CRS))
+
+  /** The words before the colon that the Parquet format gives a meaning of their own. */
+  private val reservedPrefixes = Set("srid", "projjson")
 
   private val sridForm = "(?i)srid:(\\d+)".r
   private val projjsonKeyForm = "(?is)projjson:(.+)".r

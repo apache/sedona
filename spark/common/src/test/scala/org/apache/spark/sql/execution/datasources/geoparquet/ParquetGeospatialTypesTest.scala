@@ -174,6 +174,34 @@ class ParquetGeospatialTypesTest extends FunSuite {
     assert(property(decimalVersion).contains(decimalVersion))
   }
 
+  test("an authority named like a prefix of the crs property keeps its PROJJSON") {
+    // srid:<number> and projjson:<key> already have a meaning in the Parquet format
+    Seq(
+      """{"type":"ProjectedCRS","name":"survey grid","id":{"authority":"srid","code":4326}}""",
+      """{"type":"ProjectedCRS","name":"survey grid","id":{"authority":"SRID","code":4326}}""",
+      """{"type":"ProjectedCRS","name":"survey grid","id":{"authority":"projjson","code":"survey"}}""",
+      """{"type":"ProjectedCRS","name":"survey grid","id":{"authority":"ProjJSON","code":"survey"}}""")
+      .foreach { custom =>
+        assert(property(custom).contains(custom))
+      }
+  }
+
+  test("a native column rejects a CRS option whose identifier names a registry version") {
+    // EPSG:4812 was Voirol Unifie (Paris) in version 4.4 of the registry and is another system
+    // today, and the SRID of a native column stands for the current meaning of the code.
+    val historical =
+      parse(
+        """{"type":"GeographicCRS","name":"x","id":{"authority":"EPSG","code":4812,"version":"4.4"}}""")
+    val error = intercept[IllegalArgumentException] {
+      GeoParquetNativeCrs.writeCrs("geometry", 4812, Some(Some(historical)))
+    }
+    assert(error.getMessage.contains("version"))
+    assert(error.getMessage.contains("geometry"))
+    val current =
+      parse("""{"type":"GeographicCRS","name":"x","id":{"authority":"EPSG","code":4812}}""")
+    assert(GeoParquetNativeCrs.writeCrs("geometry", 4812, Some(Some(current))).contains(current))
+  }
+
   test("only GeoParquet 2.x versions use the geospatial logical types") {
     Seq("2.0.0", "2.1.0", " 2.0.0 ", "2").foreach { version =>
       assert(GeoParquetMetaData.usesGeospatialTypes(version), version)

@@ -18,7 +18,9 @@
  */
 package org.apache.spark.sql.execution.datasources.geoparquet
 
-import org.json4s.{JNull, JValue}
+import org.json4s.{JNothing, JNull, JValue}
+import org.json4s.jackson.JsonMethods.{compact, render}
+import org.json4s.jvalue2monadic
 
 /** Native types need a representable column CRS; explicit legacy UDT reads remain permissive. */
 private[geoparquet] object GeoParquetNativeCrs {
@@ -43,6 +45,15 @@ private[geoparquet] object GeoParquetNativeCrs {
     explicitCrs match {
       case Some(crs) =>
         requireSrid(column, srid, readSrid(column, crs))
+        // The SRID of the column stands for the current meaning of its code. A code can mean
+        // another CRS in another version of its registry, and there is no way to compare them.
+        crs.map(_ \ "id" \ "version").filter(_ != JNothing).foreach { version =>
+          throw new IllegalArgumentException(
+            s"The CRS given for GeoParquet column '$column' names version " +
+              s"${compact(render(version))} of its registry, which cannot be checked against " +
+              s"SRID $srid of the column. Remove the version from the id of the CRS, or leave " +
+              "the CRS to the SRID of the column")
+        }
         crs
       case None if srid == 0 => Some(JNull)
       case None if srid == GeoParquetMetaData.DEFAULT_SRID => None

@@ -233,6 +233,19 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
           }
       }
 
+      it("writes the version without the spaces around it") {
+        withPath { path =>
+          point(4326).write
+            .format("geoparquet")
+            .option("geoparquet.version", " 2.0.0 ")
+            .option("geoparquet.crs", "")
+            .save(path)
+          val written = footer(path)
+          assert(geometryColumn(written) == geometry(None))
+          assert(geoMetadata(written) \ "version" == JString("2.0.0"))
+        }
+      }
+
       it("writes inline PROJJSON for a CRS without an identifier") {
         // Native Spark types cannot hold such a CRS, so only a GeometryUDT column can have it.
         if (!SpatialTypeSupport.usesNativeTypes) {

@@ -148,7 +148,9 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
 
     geoParquetVersion = configuration.get(GEOPARQUET_VERSION_KEY) match {
       case null => Some(VERSION)
-      case version: String => Some(version)
+      // The version decides the layout of the file with the spaces around it ignored, and the
+      // metadata states it in the same form
+      case version: String => Some(version.trim)
     }
     geoParquetCoveringMode = Option(configuration.get(GEOPARQUET_COVERING_MODE_KEY))
       .map(_.trim)

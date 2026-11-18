@@ -265,6 +265,14 @@ df.write.format("geoparquet").option("geoparquet.version", "2.0.0").save(
 )
 ```
 
+On Spark 4.1 the write also needs the CRS of the geometry columns, for the reason given below. An empty `geoparquet.crs` stands for OGC:CRS84:
+
+```python
+df.write.format("geoparquet").option("geoparquet.version", "2.0.0").option(
+    "geoparquet.crs", ""
+).save("/tmp/somewhere")
+```
+
 A GeoParquet 2.0 file differs from a GeoParquet 1.1 file in these ways:
 
 * The geometry column carries the `GEOMETRY` logical type, and the CRS is a property of that type. The GeoParquet metadata repeats the CRS as PROJJSON.
@@ -281,7 +289,9 @@ Sedona writes the `crs` property of the column in the shortest form that identif
 | a CRS whose identifier names a version of its registry, such as `IAU` version 2015 | inline PROJJSON | PROJJSON |
 | unknown (SRID 0) | `srid:0` | `null` |
 
-On Spark 4.2 and later the CRS comes from the SRID of the column type. Spark's own Parquet reader, `spark.read.parquet`, reads the geometry column of these files as a native geometry column.
+On Spark 4.2 and later the CRS comes from the SRID of the column type.
+
+Sedona's `geoparquet` reader returns a geometry column for every GeoParquet 2.0 file. What Spark's own Parquet reader, `spark.read.parquet`, returns on Spark 4.2 depends on the column the file was written from. For a native geometry column it returns a native geometry column. For a `GeometryUDT` column, which is every geometry column written on Spark 4.1, it returns the WKB as a binary column, as it does for a GeoParquet 1.1 file.
 
 On Spark 4.1 the SRID belongs to each geometry and not to the column, so a GeoParquet 2.0 write needs the CRS of every geometry column in `geoparquet.crs` or `geoparquet.crs.<column_name>`.
 
