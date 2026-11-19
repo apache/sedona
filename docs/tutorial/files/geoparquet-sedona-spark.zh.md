@@ -128,7 +128,19 @@ df = sedona.read.format("geoparquet").load("/tmp/written-by-another-engine")
 
 Spark 4.2 自带 EPSG 和 ESRI 坐标参考系的注册表，对于 EPSG 以外的机构，Sedona 会查询该注册表。Spark 4.1 没有这样的注册表。这类标识符的代码不会被直接当作 SRID，因为 SRID 代表 EPSG 代码，而其他机构可能用同一个数字表示不同的坐标系：`ESRI:4812` 不是 `EPSG:4812`，因此在任何 Spark 版本上都不会得到 SRID。`projjson:<key>` 中的 `<key>` 按原样查找，不做任何修改。
 
-如果 CRS 无法给出 SRID，则使用 GeoParquet 元数据中的 `crs`。如果它也无法给出，SRID 为 0。在 Spark 4.2 及更高版本上，Sedona 使用 Spark 原生几何类型，类型必须指明 SRID，因此这样的列会加载失败。
+如果 CRS 无法给出 SRID，则使用 GeoParquet 元数据中的 `crs`。如果它也无法给出，SRID 为 0。
+
+在 Spark 4.2 及更高版本上，Sedona 会推断出 Spark 原生几何类型，而这种类型必须指明 SRID。因此，读取 CRS 无法给出 SRID 的列时，Sedona 在推断 schema 的阶段就会失败，并提示该 CRS 无法用 Spark 原生 SRID 表示。要读取这样的列，请为读取器提供一个 schema，并在其中为该列使用 Sedona 自己的几何类型，在 Python 中是 `LegacyGeometryType`，在 Scala 和 Java 中是 `GeometryUDT`。读出的几何对象 SRID 为 0：
+
+```python
+from pyspark.sql.types import StructField, StructType
+from sedona.spark.sql.types import LegacyGeometryType
+
+schema = StructType([StructField("geometry", LegacyGeometryType())])
+df = sedona.read.schema(schema).format("geoparquet").load("/tmp/somewhere")
+```
+
+Sedona 的函数，例如 `ST_AsText` 和 `ST_Buffer`，可以处理这样的列。Spark 内置的函数，例如 Spark 4.2 上的 `ST_SRID` 和 `ST_AsBinary`，只接受原生几何列。
 
 `GEOGRAPHY` 列会被读取为保存 WKB 的二进制列，即使 GeoParquet 元数据列出了它们也是如此，可以用 `ST_GeogFromWKB` 转换。
 
@@ -291,7 +303,7 @@ Sedona 会用能够标识 CRS 的最短形式写出列的 `crs` 属性：
 
 在 Spark 4.2 及更高版本上，CRS 来自列类型的 SRID。
 
-Sedona 的 `geoparquet` 读取器会把 GeoParquet 2.0 文件的几何列读取为几何列。例外是在 Spark 4.2 及更高版本上，CRS 无法给出 SRID 的列（例如没有标识符的 PROJJSON）会加载失败，详见读取 GeoParquet 2.0 文件一节。Spark 自带的 Parquet 读取器 `spark.read.parquet` 在 Spark 4.2 上返回什么，取决于写出文件时的列类型。对于原生几何列，它返回原生几何列。对于 `GeometryUDT` 列（在 Spark 4.1 上写出的几何列都是这种类型），它以二进制列返回 WKB，与读取 GeoParquet 1.1 文件时相同。
+Sedona 的 `geoparquet` 读取器会把 GeoParquet 2.0 文件的几何列读取为几何列。例外是在 Spark 4.2 及更高版本上，CRS 无法给出 SRID 的列，例如没有标识符的 PROJJSON。Sedona 无法为它推断出原生几何类型，因此读取会失败，除非你提供一个使用 Sedona 自己的几何类型的 schema，做法见读取 GeoParquet 2.0 文件一节。Spark 自带的 Parquet 读取器 `spark.read.parquet` 在 Spark 4.2 上返回什么，取决于写出文件时的列类型。对于原生几何列，它返回原生几何列。对于 `GeometryUDT` 列（在 Spark 4.1 上写出的几何列都是这种类型），它以二进制列返回 WKB，与读取 GeoParquet 1.1 文件时相同。
 
 在 Spark 4.1 上，SRID 属于每个几何对象而不属于列，因此写出 GeoParquet 2.0 时需要通过 `geoparquet.crs` 或 `geoparquet.crs.<column_name>` 给出每个几何列的 CRS。
 

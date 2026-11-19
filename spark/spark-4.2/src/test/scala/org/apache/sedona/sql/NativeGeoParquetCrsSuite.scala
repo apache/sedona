@@ -128,20 +128,24 @@ class NativeGeoParquetCrsSuite extends FunSuite with BeforeAndAfterAll {
   }
 
   test("unrepresentable CRS is rejected natively while explicit UDT behavior remains available") {
-    withPath { path =>
-      val geometry = new org.locationtech.jts.io.WKTReader().read("POINT (1 2)")
-      val schema = StructType(Seq(StructField("geometry", GeometryUDT())))
-      spark
-        .createDataFrame(java.util.Arrays.asList(Row(geometry)), schema)
-        .write
-        .format("geoparquet")
-        .option("geoparquet.crs", """{"name":"custom CRS"}""")
-        .save(path)
-      intercept[Exception] { spark.read.format("geoparquet").load(path).collect() }
-      val legacy =
-        spark.read.schema(schema).format("geoparquet").load(path).head().getAs[Geometry](0)
-      assert(legacy.equalsExact(geometry))
-      assert(legacy.getSRID == 0)
+    // The same holds for a 2.0 file, where the CRS is also in the Parquet schema
+    Seq("1.1.0", "2.0.0").foreach { version =>
+      withPath { path =>
+        val geometry = new org.locationtech.jts.io.WKTReader().read("POINT (1 2)")
+        val schema = StructType(Seq(StructField("geometry", GeometryUDT())))
+        spark
+          .createDataFrame(java.util.Arrays.asList(Row(geometry)), schema)
+          .write
+          .format("geoparquet")
+          .option("geoparquet.version", version)
+          .option("geoparquet.crs", """{"name":"custom CRS"}""")
+          .save(path)
+        intercept[Exception] { spark.read.format("geoparquet").load(path).collect() }
+        val legacy =
+          spark.read.schema(schema).format("geoparquet").load(path).head().getAs[Geometry](0)
+        assert(legacy.equalsExact(geometry), version)
+        assert(legacy.getSRID == 0, version)
+      }
     }
   }
 

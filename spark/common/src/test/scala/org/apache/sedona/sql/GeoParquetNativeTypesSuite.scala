@@ -31,8 +31,10 @@ import org.apache.parquet.hadoop.metadata.{ColumnChunkMetaData, ParquetMetadata}
 import org.apache.parquet.hadoop.util.HadoopInputFile
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.execution.datasources.geoparquet.{GeoParquetMetaData, ParquetGeospatialColumn, ParquetGeospatialTypes}
+import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
-import org.apache.spark.sql.types.BinaryType
+import org.apache.spark.sql.types.{BinaryType, StructField, StructType}
+import org.locationtech.jts.geom.Geometry
 import org.json4s.{JArray, JDouble, JInt, JNothing, JNull, JString, JValue}
 import org.json4s.jackson.JsonMethods.{compact, parse, render}
 
@@ -147,6 +149,16 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
           if (SpatialTypeSupport.usesNativeTypes) {
             val error = intercept[Exception](read(file).collect())
             assert(messages(error).contains("cannot be represented by a Spark native SRID"))
+            // A schema with Sedona's own geometry type still reads the column
+            val schema = StructType(Seq(StructField("geometry", GeometryUDT())))
+            val geometries = sparkSession.read
+              .schema(schema)
+              .format("geoparquet")
+              .load(nativeFolder + file)
+              .collect()
+              .map(_.getAs[Geometry]("geometry"))
+            assert(geometries.map(_.toText).toSeq == Seq.fill(3)("POINT (1 2)"))
+            assert(geometries.map(_.getSRID).toSeq == Seq(0, 0, 0))
           } else {
             val geometries = read(file).collect().map(_.getJtsGeometry("geometry"))
             assert(geometries.map(_.getSRID).toSeq == Seq(0, 0, 0))
