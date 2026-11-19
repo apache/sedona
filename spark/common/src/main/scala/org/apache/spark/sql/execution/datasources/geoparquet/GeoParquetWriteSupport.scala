@@ -277,7 +277,11 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
         val geometryTypes = columnInfo.seenGeometryTypes.toSeq
         // Empty geometries still contribute geometry_types but have no spatial extent.
         // Omit bbox when the file contains only empty/null geometries or no rows.
-        val bbox = if (!columnInfo.bbox.isEmpty) {
+        // GeoParquet 2.0 asks for the bounds of all four dimensions when a column has XYZM
+        // geometries. The writer has the X and Y bounds only, so it leaves the optional bbox
+        // out for such a column. A column with XYM geometries may have the X and Y bounds.
+        val needsEightBounds = geometryTypes.exists(_.endsWith(" ZM"))
+        val bbox = if (!columnInfo.bbox.isEmpty && !needsEightBounds) {
           Some(
             Seq(
               columnInfo.bbox.minX,
@@ -552,10 +556,21 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
               expectedSrid,
               geom.getSRID)
           }
+          // A native geometry value of a 2.x file is stored as it is. It is ISO WKB of any of
+          // the four coordinate layouts, and it keeps the layout that an empty multi-geometry
+          // or collection declares, which geom cannot hold. A 1.x file has no M coordinate, so
+          // its geometries are written again from geom.
+          val nativeWkb =
+            if (writesGeospatialTypes) {
+              SpatialTypeSupport
+                .nativeGeometryWkb(row, ordinal, dataType, ByteOrder.nativeOrder())
+                .map(PublicWkbHeaderAdapter.toIsoWkb)
+            } else None
           // The writer marks a Z coordinate with the EWKB flag bit. GeoParquet asks for the WKB
           // of the OGC and ISO standards, which uses the type codes 1001 to 1007 instead. The
           // writer returns a new array without an SRID, so the type words change in that array.
-          val wkb = PublicWkbHeaderAdapter.toIsoWkbInPlace(wkbWriter.write(geom))
+          val wkb =
+            nativeWkb.getOrElse(PublicWkbHeaderAdapter.toIsoWkbInPlace(wkbWriter.write(geom)))
           recordConsumer.addBinary(Binary.fromReusedByteArray(wkb))
           if (geometryColumnInfo != null) {
             // The writer resolves each geometry's actual layout, including collection members.

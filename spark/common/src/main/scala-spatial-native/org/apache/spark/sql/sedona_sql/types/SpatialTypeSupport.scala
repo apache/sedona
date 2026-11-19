@@ -147,6 +147,36 @@ object SpatialTypeSupport {
   }
   def readGeometry(row: SpecializedGetters, ordinal: Int, dataType: DataType): Geometry =
     if (row.isNullAt(ordinal)) null else deserializeGeometry(row.get(ordinal, dataType), dataType)
+
+  /**
+   * The ISO WKB that a native geometry value holds, None for a value of Sedona's own geometry
+   * type. A native value keeps the Z and M dimensions that an empty multi-geometry or collection
+   * declares. A JTS geometry has no coordinates to keep them in, so they are lost when such a
+   * value is written from the result of [[readGeometry]].
+   */
+  def nativeGeometryWkb(
+      row: SpecializedGetters,
+      ordinal: Int,
+      dataType: DataType,
+      order: ByteOrder): Option[Array[Byte]] = dataType match {
+    case _: GeometryType if !row.isNullAt(ordinal) =>
+      val native = NativeGeometry.fromValue(row.get(ordinal, dataType).asInstanceOf[BinaryView])
+      Some(native.toWkb(order))
+    case _ => None
+  }
+
+  /**
+   * A native geometry value that holds `wkb` as it is, None when `dataType` is Sedona's own
+   * geometry type. Spark checks the WKB. The value keeps what a JTS geometry would lose, as
+   * [[nativeGeometryWkb]] describes.
+   */
+  def nativeGeometryFromWkb(wkb: Array[Byte], srid: Int, dataType: DataType): Option[Any] =
+    dataType match {
+      case native: GeometryType =>
+        native.assertSridAllowedForType(srid)
+        Some(NativeGeometry.fromWkb(PublicWkbHeaderAdapter.toIsoWkb(wkb), srid).getValue)
+      case _ => None
+    }
   def externalGeometry(value: Geometry): Any = externalGeometry(value, geometryType)
   def externalGeometry(value: Geometry, dataType: DataType): Any = dataType match {
     case _: GeometryUDT => value
