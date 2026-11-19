@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.execution.datasources.geoparquet.ParquetGeospatialTypes</title>
@@ -469,6 +468,31 @@ against the older parquet-java of Spark 3.5 and 4.0, so the types are reached by
                 <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.ParquetGeospatialTypes#crsProperty" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="crsProperty(crs:Option[org.json4s.JValue]):Option[String]"></a><a id="crsProperty(Option[JValue]):Option[String]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/ParquetGeospatialTypes$.html#crsProperty(crs:Option[org.json4s.JValue]):Option[String]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">crsProperty</span><span class="params">(<span name="crs">crs: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.json4s.JValue">JValue</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">The <code>crs</code> property for a CRS as GeoParquet metadata holds it: None for OGC:CRS84, JSON null
+for an unknown CRS, PROJJSON otherwise.</p><div class="fullcomment"><div class="comment cmt"><p>The <code>crs</code> property for a CRS as GeoParquet metadata holds it: None for OGC:CRS84, JSON null
+for an unknown CRS, PROJJSON otherwise. PROJJSON with an identifier becomes <code>authority:code</code>,
+the form that readers without a PROJJSON parser understand; the GeoParquet metadata of the
+file keeps the full definition. PROJJSON without one is written inline, and so is PROJJSON
+whose identifier names a version of its registry: <code>authority:code</code> has no place for the
+version, and a code can mean another CRS in another version. An authority named <code>srid</code> or
+<code>projjson</code> stays inline as well, because the Parquet format reads <code>srid:&lt;number&gt;</code> and
+<code>projjson:&lt;key&gt;</code> as something else.
+</p></div></div>
     </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.ParquetGeospatialTypes#crsToSrid" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="crsToSrid(crs:Option[String],keyValueMetaData:java.util.Map[String,String]):Int"></a><a id="crsToSrid(Option[String],Map[String,String]):Int"></a>
       <span class="permalink">

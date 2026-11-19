@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1797,6 +1796,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geoparquet-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        写出 GeoParquet 2.0
+      
+    </span>
+  </a>
   
 </li>
       
@@ -5866,6 +5876,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#geoparquet-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        写出 GeoParquet 2.0
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#covering-geoparquet" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6084,7 +6105,15 @@
 </tbody>
 </table>
 <p>Spark 4.2 自带 EPSG 和 ESRI 坐标参考系的注册表，对于 EPSG 以外的机构，Sedona 会查询该注册表。Spark 4.1 没有这样的注册表。这类标识符的代码不会被直接当作 SRID，因为 SRID 代表 EPSG 代码，而其他机构可能用同一个数字表示不同的坐标系：<code>ESRI:4812</code> 不是 <code>EPSG:4812</code>，因此在任何 Spark 版本上都不会得到 SRID。<code>projjson:&lt;key&gt;</code> 中的 <code>&lt;key&gt;</code> 按原样查找，不做任何修改。</p>
-<p>如果 CRS 无法给出 SRID，则使用 GeoParquet 元数据中的 <code>crs</code>。如果它也无法给出，SRID 为 0。在 Spark 4.2 及更高版本上，Sedona 使用 Spark 原生几何类型，类型必须指明 SRID，因此这样的列会加载失败。</p>
+<p>如果 CRS 无法给出 SRID，则使用 GeoParquet 元数据中的 <code>crs</code>。如果它也无法给出，SRID 为 0。</p>
+<p>在 Spark 4.2 及更高版本上，Sedona 会推断出 Spark 原生几何类型，而这种类型必须指明 SRID。因此，读取 CRS 无法给出 SRID 的列时，Sedona 在推断 schema 的阶段就会失败，并提示该 CRS 无法用 Spark 原生 SRID 表示。要读取这样的列，请为读取器提供一个 schema，并在其中为该列使用 Sedona 自己的几何类型，在 Python 中是 <code>LegacyGeometryType</code>，在 Scala 和 Java 中是 <code>GeometryUDT</code>。读出的几何对象 SRID 为 0：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructField</span><span class="p">,</span> <span class="n">StructType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">LegacyGeometryType</span>
+
+<span class="n">schema</span> <span class="o">=</span> <span class="n">StructType</span><span class="p">([</span><span class="n">StructField</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">,</span> <span class="n">LegacyGeometryType</span><span class="p">())])</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">schema</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geoparquet"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/tmp/somewhere"</span><span class="p">)</span>
+</code></pre></div>
+<p>Sedona 的函数，例如 <code>ST_AsText</code> 和 <code>ST_Buffer</code>，可以处理这样的列。Spark 内置的函数，例如 Spark 4.2 上的 <code>ST_SRID</code> 和 <code>ST_AsBinary</code>，只接受原生几何列。</p>
 <p><code>GEOGRAPHY</code> 列会被读取为保存 WKB 的二进制列，即使 GeoParquet 元数据列出了它们也是如此，可以用 <code>ST_GeogFromWKB</code> 转换。</p>
 <p>Spark 3.5 和 4.0 自带的 Parquet 库早于这些逻辑类型，无法打开此类文件。</p>
 <h2 id="geoparquet">检查 GeoParquet 元数据<a class="headerlink" href="#geoparquet" title="Permanent link">&para;</a></h2>
@@ -6181,10 +6210,73 @@
 <li>若同一列中的几何对象 SRID 不一致，<code>crs</code> 字段默认置为 <code>null</code>。</li>
 <li>若显式提供了 <code>geoparquet.crs</code> 或 <code>geoparquet.crs.&lt;column_name&gt;</code> 选项，则始终优先于 SRID 推导出的 CRS。</li>
 </ul>
+<p>在 Spark 4.2 及更高版本上，原生几何列在列类型中指明 SRID，针对这种列的 CRS 选项必须与之一致。这对所有 GeoParquet 版本都适用：</p>
+<ul>
+<li>CRS 的标识符，即 PROJJSON 中的 <code>id</code> 或 <code>ids</code> 中的某一项，必须给出该列的 SRID。</li>
+<li>该标识符不能指明其注册库的版本。SRID 代表该代码当前的含义，而同一代码在另一个版本中可能表示另一个 CRS，因此 Sedona 会拒绝这样的选项。</li>
+<li>Sedona 只比较标识符，定义的其余部分按给定内容写出。请确认该定义描述的就是坐标所在的 CRS。</li>
+</ul>
 <p>GeoParquet 以 <code>(x, y)</code> 顺序存储 WKB 坐标。根据 GeoParquet 1.1 规范，此顺序会覆盖 CRS
 中声明的坐标轴顺序。因此，Sedona 会保留权威的 CRS 坐标轴元数据，并且在读写 GeoParquet
 时不会重新排列几何坐标。如果坐标本身需要交换，可以使用
 <a href="../../../api/sql/Geometry-Editors/ST_FlipCoordinates/"><code>ST_FlipCoordinates</code></a>。</p>
+<h2 id="geoparquet-20">写出 GeoParquet 2.0<a class="headerlink" href="#geoparquet-20" title="Permanent link">&para;</a></h2>
+<p><a href="https://geoparquet.org/releases/v2.0.0/">GeoParquet 2.0</a> 使用 Parquet 格式的 <code>GEOMETRY</code> 逻辑类型存储每个几何列。自 Sedona 2.0.0 起，在 Spark 4.1 及更高版本上，把 <code>geoparquet.version</code> 设为 <code>2.0.0</code> 即可写出这样的文件。默认版本为 <code>1.1.0</code>。</p>
+<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geoparquet"</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"geoparquet.version"</span><span class="p">,</span> <span class="s2">"2.0.0"</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+    <span class="s2">"/tmp/somewhere"</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>在 Spark 4.1 上，写出时还需要给出几何列的 CRS，原因见下文。空的 <code>geoparquet.crs</code> 表示 OGC:CRS84：</p>
+<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geoparquet"</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"geoparquet.version"</span><span class="p">,</span> <span class="s2">"2.0.0"</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">"geoparquet.crs"</span><span class="p">,</span> <span class="s2">""</span>
+<span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">"/tmp/somewhere"</span><span class="p">)</span>
+</code></pre></div>
+<p>GeoParquet 2.0 文件与 GeoParquet 1.1 文件有以下区别：</p>
+<ul>
+<li>几何列带有 <code>GEOMETRY</code> 逻辑类型，CRS 是该类型的一个属性。GeoParquet 元数据会以 PROJJSON 重复给出 CRS。</li>
+<li>每个行组都带有地理空间统计信息，即边界框和几何类型，由 Parquet 库写出。因此 Sedona 默认不再添加 covering 列。<code>geoparquet.covering</code> 和 <code>geoparquet.covering.&lt;column_name&gt;</code> 仍可声明由你提供的 covering 列。</li>
+</ul>
+<p>Sedona 会用能够标识 CRS 的最短形式写出列的 <code>crs</code> 属性：</p>
+<table>
+<thead>
+<tr>
+<th>列的 CRS</th>
+<th>列的 <code>crs</code> 属性</th>
+<th>GeoParquet 元数据中的 <code>crs</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OGC:CRS84（SRID 4326）</td>
+<td>不设置</td>
+<td>不设置</td>
+</tr>
+<tr>
+<td>带标识符的 CRS，例如 EPSG:3857</td>
+<td><code>EPSG:3857</code></td>
+<td>PROJJSON</td>
+</tr>
+<tr>
+<td>不带标识符的 CRS</td>
+<td>内联 PROJJSON</td>
+<td>PROJJSON</td>
+</tr>
+<tr>
+<td>标识符带有注册表版本的 CRS，例如 <code>IAU</code> 的 2015 版</td>
+<td>内联 PROJJSON</td>
+<td>PROJJSON</td>
+</tr>
+<tr>
+<td>未知（SRID 0）</td>
+<td><code>srid:0</code></td>
+<td><code>null</code></td>
+</tr>
+</tbody>
+</table>
+<p>在 Spark 4.2 及更高版本上，CRS 来自列类型的 SRID。</p>
+<p>Sedona 的 <code>geoparquet</code> 读取器会把 GeoParquet 2.0 文件的几何列读取为几何列。例外是在 Spark 4.2 及更高版本上，CRS 无法给出 SRID 的列，例如没有标识符的 PROJJSON。Sedona 无法为它推断出原生几何类型，因此读取会失败，除非你提供一个使用 Sedona 自己的几何类型的 schema，做法见读取 GeoParquet 2.0 文件一节。Spark 自带的 Parquet 读取器 <code>spark.read.parquet</code> 在 Spark 4.2 上返回什么，取决于写出文件时的列类型。对于原生几何列，它返回原生几何列。对于 <code>GeometryUDT</code> 列（在 Spark 4.1 上写出的几何列都是这种类型），它以二进制列返回 WKB，与读取 GeoParquet 1.1 文件时相同。</p>
+<p>在 Spark 4.1 上，SRID 属于每个几何对象而不属于列，因此写出 GeoParquet 2.0 时需要通过 <code>geoparquet.crs</code> 或 <code>geoparquet.crs.&lt;column_name&gt;</code> 给出每个几何列的 CRS。</p>
+<p>Spark 3.5 和 4.0 自带的 Parquet 库早于 <code>GEOMETRY</code> 逻辑类型。Sedona 在这些版本上写出 GeoParquet 1.1，并拒绝把 <code>geoparquet.version</code> 设为 <code>2.0.0</code>。</p>
 <h2 id="covering-geoparquet">写出带 covering 元数据的 GeoParquet<a class="headerlink" href="#covering-geoparquet" title="Permanent link">&para;</a></h2>
 <p>自 <code>v1.6.1</code> 起，Sedona 支持向几何列元数据写入 <a href="https://github.com/opengeospatial/geoparquet/blob/v1.1.0/format-specs/geoparquet.md#covering"><code>covering</code> 字段</a>。该字段指定一列边界框列以加速空间数据检索。该边界框列必须是顶层结构体列，包含 <code>xmin</code>、<code>ymin</code>、<code>xmax</code>、<code>ymax</code> 四个子列。如果待写入的 DataFrame 已经包含这样的列，可通过 <code>.option("geoparquet.covering.&lt;geometryColumnName&gt;", "&lt;coveringColumnName&gt;")</code> 选项把 <code>covering</code> 元数据写入 GeoParquet：</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"geoparquet"</span><span class="p">)</span>
@@ -6302,7 +6394,7 @@ ORDER BY geohash
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年11月18日 20:11:31 UTC">2026年11月18日 20:11:31</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年11月19日 07:07:48 UTC">2026年11月19日 07:07:48</span>
   </span>
 
     

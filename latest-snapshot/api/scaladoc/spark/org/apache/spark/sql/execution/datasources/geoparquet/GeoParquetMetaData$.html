@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData</title>
@@ -500,7 +499,7 @@ the column name and use <code>geoparquet.covering</code> directly.
       <p class="shortcomment cmt">Configuration key for setting the CRS of the geometries in GeoParquet column metadata.</p><div class="fullcomment"><div class="comment cmt"><p>Configuration key for setting the CRS of the geometries in GeoParquet column metadata. This
 is applied to all geometry columns in the file.
 </p></div></div>
-    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData#GEOPARQUET_VERSION_KEY" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData#GEOPARQUET_VERSION_KEY" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="GEOPARQUET_VERSION_KEY:String"></a>
       <span class="permalink">
       <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetMetaData$.html#GEOPARQUET_VERSION_KEY:String" title="Permalink">
@@ -515,7 +514,10 @@ is applied to all geometry columns in the file.
         <span class="name">GEOPARQUET_VERSION_KEY</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
       
-      <p class="shortcomment cmt">Configuration key for overriding the version field in GeoParquet file metadata.</p>
+      <p class="shortcomment cmt">Configuration key for the GeoParquet version to write.</p><div class="fullcomment"><div class="comment cmt"><p>Configuration key for the GeoParquet version to write. A 2.x version stores geometries in the
+Parquet GEOMETRY logical type. Any other value is written to the file metadata as given, with
+geometries in plain binary columns.
+</p></div></div>
     </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData#VERSION" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="VERSION:String"></a>
       <span class="permalink">
@@ -846,6 +848,23 @@ round-trip SRID preservation when reading the GeoParquet file back.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData#usesGeospatialTypes" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="usesGeospatialTypes(version:String):Boolean"></a><a id="usesGeospatialTypes(String):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetMetaData$.html#usesGeospatialTypes(version:String):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">usesGeospatialTypes</span><span class="params">(<span name="version">version: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Whether a file of this GeoParquet version stores its geometries in the geospatial logical
+types of the Parquet format, which is what GeoParquet 2 requires.</p>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
