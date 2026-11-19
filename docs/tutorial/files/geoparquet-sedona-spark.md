@@ -73,7 +73,7 @@ Sedona writes the Z dimension with the type codes of ISO WKB, which the GeoParqu
 
 Each member of a geometry collection keeps its own coordinate layout. A collection with both XY and XYZ members is stored with the type codes of both, for example 1007 for the collection, 2 for an XY `LineString` member and 1001 for a `Point Z` member. ISO WKB requires every member of a collection with a Z coordinate to have one as well, so a reader may reject such a geometry. Spark's native geometry type does: on Spark 4.2 and later, Sedona fails to read it into a native geometry column with `WKB_PARSE_ERROR`.
 
-[GeoParquet 1.1](https://geoparquet.org/releases/v1.1.0/#wkb) does not support M coordinates. Sedona discards M when writing GeoParquet: XYM becomes XY, and XYZM becomes XYZ. If you need the M values, store them separately before writing.
+[GeoParquet 1.1](https://geoparquet.org/releases/v1.1.0/#wkb) does not support M coordinates. Sedona discards M when writing GeoParquet 1.1: XYM becomes XY, and XYZM becomes XYZ. If you need the M values, store them separately before writing, or write GeoParquet 2.0, which keeps them. See the section on writing GeoParquet 2.0 below.
 
 ## Read GeoParquet files into Sedona DataFrame with Spark
 
@@ -295,6 +295,7 @@ A GeoParquet 2.0 file differs from a GeoParquet 1.1 file in these ways:
 
 * The geometry column carries the `GEOMETRY` logical type, and the CRS is a property of that type. The GeoParquet metadata repeats the CRS as PROJJSON.
 * Each row group has geospatial statistics, a bounding box and the geometry types, which the Parquet library writes. Sedona therefore adds no covering column by default. `geoparquet.covering` and `geoparquet.covering.<column_name>` still declare a covering column that you provide.
+* M coordinates are kept: XYM and XYZM geometries are stored as they are. The `geometry_types` of the GeoParquet metadata name the layout, for example `Point M` or `LineString ZM`.
 
 Sedona writes the `crs` property of the column in the shortest form that identifies the CRS:
 

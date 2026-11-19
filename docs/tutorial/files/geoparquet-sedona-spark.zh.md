@@ -73,7 +73,7 @@ Sedona 按 GeoParquet 规范的要求，用 ISO WKB 的类型代码写出 Z 维�
 
 几何集合的每个成员保留各自的坐标布局。同时包含 XY 和 XYZ 成员的集合会按两种类型代码存储，例如集合为 1007，XY 的 `LineString` 成员为 2，`Point Z` 成员为 1001。ISO WKB 要求带 Z 坐标的集合中每个成员也带 Z 坐标，因此读取方可能拒绝这样的几何对象。Spark 原生几何类型就是如此：在 Spark 4.2 及更高版本上，Sedona 将其读入原生几何列时会失败并报 `WKB_PARSE_ERROR`。
 
-[GeoParquet 1.1](https://geoparquet.org/releases/v1.1.0/#wkb) 不支持 M 坐标。Sedona 在写出 GeoParquet 时会丢弃 M：XYM 转换为 XY，XYZM 转换为 XYZ。如果需要保留 M 值，请在写出前将其单独存储。
+[GeoParquet 1.1](https://geoparquet.org/releases/v1.1.0/#wkb) 不支持 M 坐标。Sedona 在写出 GeoParquet 1.1 时会丢弃 M：XYM 转换为 XY，XYZM 转换为 XYZ。如果需要保留 M 值，请在写出前将其单独存储，或者写出 GeoParquet 2.0，它会保留 M 坐标。详见下文写出 GeoParquet 2.0 一节。
 
 ## 使用 Spark 将 GeoParquet 读入 Sedona DataFrame
 
@@ -290,6 +290,7 @@ GeoParquet 2.0 文件与 GeoParquet 1.1 文件有以下区别：
 
 * 几何列带有 `GEOMETRY` 逻辑类型，CRS 是该类型的一个属性。GeoParquet 元数据会以 PROJJSON 重复给出 CRS。
 * 每个行组都带有地理空间统计信息，即边界框和几何类型，由 Parquet 库写出。因此 Sedona 默认不再添加 covering 列。`geoparquet.covering` 和 `geoparquet.covering.<column_name>` 仍可声明由你提供的 covering 列。
+* M 坐标会被保留：XYM 和 XYZM 几何对象按原样存储。GeoParquet 元数据中的 `geometry_types` 会标明坐标布局，例如 `Point M` 或 `LineString ZM`。
 
 Sedona 会用能够标识 CRS 的最短形式写出列的 `crs` 属性：
 

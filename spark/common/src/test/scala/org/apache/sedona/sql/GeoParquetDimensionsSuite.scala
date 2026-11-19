@@ -37,6 +37,7 @@ import org.apache.parquet.io.api.Binary
 import org.apache.parquet.schema.MessageTypeParser
 import org.apache.sedona.common.utils.GeometryEquality
 import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.execution.datasources.geoparquet.ParquetGeospatialTypes
 import org.apache.spark.sql.types.{ArrayType, BinaryType, IntegerType, StructField, StructType}
 import org.json4s.{DefaultFormats, JNothing, JValue}
 import org.json4s.jackson.parseJson
@@ -473,6 +474,78 @@ class GeoParquetDimensionsSuite extends TestBaseScala {
         assert(hex(record.getBinary("geometry", 0).getBytes) == hex(pointZ))
         assert(hex(member.getBytes) == hex(pointZ))
         assert(hex(record.getGroup("holder", 0).getBinary("g", 0).getBytes) == hex(pointZ))
+      }
+    }
+
+    // GeoParquet 2.0 has M coordinates, which GeoParquet 1.1 has no place for. It needs the
+    // GEOMETRY logical type, which the Parquet library has since 1.16.0.
+    if (ParquetGeospatialTypes.supported) {
+      for (legacyUdt <- representations) {
+        it(s"keeps M coordinates in a GeoParquet 2.0 file (legacyUdt=$legacyUdt)") {
+          withDirectory { directory =>
+            val order = ByteOrder.nativeOrder()
+            val measured = Seq(
+              Sample("xym", isoWkb(1, false, Seq(10, 20, 99), order = order, m = true)),
+              Sample("xyzm", isoWkb(1, true, Seq(10, 20, 30, 99), order = order, m = true)),
+              Sample(
+                "line-xym",
+                isoWkb(2, false, Seq(1, 2, 90, 3, 4, 99), order = order, m = true)),
+              Sample(
+                "line-xyzm",
+                isoWkb(2, true, Seq(1, 2, 3, 90, 3, 4, 5, 99), order = order, m = true)),
+              Sample("empty-line-xym", isoWkb(2, false, order = order, m = true)),
+              Sample("empty-polygon-xyzm", isoWkb(3, true, order = order, m = true)),
+              Sample("xy", isoWkb(1, false, Seq(10, 20), order = order)),
+              Sample("xyz", isoWkb(1, true, Seq(10, 20, 30), order = order)))
+            val path = new File(directory, "measured").getPath
+            val sedonaType = legacyUdt || !SpatialTypeSupport.usesNativeTypes
+            val df = if (legacyUdt) {
+              val rows = measured.zipWithIndex.map { case (sample, index) =>
+                Row(index, WKBReader.forDeclaredDimensions().read(sample.wkb))
+              }
+              sparkSession.createDataFrame(rows.asJava, legacySchema)
+            } else {
+              val rows = measured.zipWithIndex.map { case (sample, index) =>
+                Row(index, sample.wkb)
+              }
+              val schema = StructType(
+                Seq(
+                  StructField("id", IntegerType, nullable = false),
+                  StructField("wkb", BinaryType, nullable = false)))
+              sparkSession
+                .createDataFrame(rows.asJava, schema)
+                .selectExpr("id", "ST_GeomFromWKB(wkb) AS geometry")
+            }
+            val writer =
+              df.coalesce(1).write.format("geoparquet").option("geoparquet.version", "2.0.0")
+            // A column of Sedona's own geometry type has no SRID to take the CRS from
+            (if (sedonaType) writer.option("geoparquet.crs", "null") else writer).save(path)
+
+            val file = new File(path).listFiles().filter(_.getName.endsWith(".parquet")).head
+            val reader =
+              ParquetReader.builder(new GroupReadSupport(), new Path(file.toURI)).build()
+            val stored =
+              try Iterator.continually(reader.read()).takeWhile(_ != null).toList
+              finally reader.close()
+            assert(stored.size == measured.size)
+            stored.sortBy(_.getInteger("id", 0)).zip(measured).foreach { case (record, sample) =>
+              withClue(s"${sample.name}: ") {
+                assert(hex(record.getBinary("geometry", 0).getBytes) == hex(sample.wkb))
+              }
+            }
+            implicit val formats: org.json4s.Formats = DefaultFormats
+            assert(
+              (columnMetadata(file) \ "geometry_types").extract[Seq[String]].toSet == Set(
+                "Point M",
+                "Point ZM",
+                "LineString M",
+                "LineString ZM",
+                "Polygon ZM",
+                "Point",
+                "Point Z"))
+            assertFile(path, measured, legacyUdt = legacyUdt)
+          }
+        }
       }
     }
 

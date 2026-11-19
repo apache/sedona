@@ -540,9 +540,9 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
         val byteOrder = if (ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN) {
           ByteOrderValues.BIG_ENDIAN
         } else ByteOrderValues.LITTLE_ENDIAN
-        // Preserve declared Z even for empty geometries, but keep GeoParquet output limited
-        // to XY/XYZ: the configured XYZ ordinates continue to exclude M.
-        val wkbWriter = new WKBWriter(3, byteOrder, false)
+        // Preserve declared dimensions even for empty geometries. GeoParquet 1.1 has no M
+        // coordinate, so a 1.x file keeps X, Y and Z. GeoParquet 2.0 has all four.
+        val wkbWriter = new WKBWriter(if (writesGeospatialTypes) 4 else 3, byteOrder, false)
         wkbWriter.setPreserveCoordinateDimensions(true)
         (row: SpecializedGetters, ordinal: Int) => {
           val geom = SpatialTypeSupport.readGeometry(row, ordinal, dataType)
@@ -560,8 +560,10 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
           if (geometryColumnInfo != null) {
             // The writer resolves each geometry's actual layout, including collection members.
             // Derive metadata from its WKB type code rather than the first coordinate.
+            // ISO WKB adds 1000 to the type code for Z, 2000 for M and 3000 for both.
             val typeCode = ByteBuffer.wrap(wkb, 1, 4).order(ByteOrder.nativeOrder()).getInt
-            geometryColumnInfo.update(geom, typeCode / 1000 == 1)
+            val layout = typeCode / 1000
+            geometryColumnInfo.update(geom, hasZ = layout % 2 == 1, hasM = layout >= 2)
           }
         }
 
@@ -866,10 +868,12 @@ object GeoParquetWriteSupport {
       else Some(_srid)
     }
 
-    def update(geom: Geometry, hasZ: Boolean): Unit = {
+    def update(geom: Geometry, hasZ: Boolean, hasM: Boolean): Unit = {
       bbox.update(geom)
       // Match the dimensionality encoded in WKB, including typed empty geometries.
-      val geometryType = if (!hasZ) geom.getGeometryType else geom.getGeometryType + " Z"
+      val layout = (if (hasZ) "Z" else "") + (if (hasM) "M" else "")
+      val geometryType =
+        if (layout.isEmpty) geom.getGeometryType else geom.getGeometryType + " " + layout
       seenGeometryTypes.add(geometryType)
 
       // Track SRID consistency across all geometries in this column
