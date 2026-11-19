@@ -270,7 +270,7 @@ public class Constructors {
     coordinates[1] = new Coordinate(minX, maxY);
     coordinates[2] = new Coordinate(maxX, maxY);
     coordinates[3] = new Coordinate(maxX, minY);
-    coordinates[4] = coordinates[0];
+    coordinates[4] = new Coordinate(coordinates[0]);
     return factory.createPolygon(coordinates);
   }
 
