@@ -24,6 +24,8 @@ import org.apache.parquet.hadoop.api.WriteSupport.FinalizedWriteContext
 import org.apache.parquet.hadoop.api.WriteSupport.WriteContext
 import org.apache.parquet.io.api.Binary
 import org.apache.parquet.io.api.RecordConsumer
+import org.apache.parquet.schema.{MessageType, Types}
+import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName
 import org.apache.spark.SPARK_VERSION_SHORT
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
@@ -111,7 +113,9 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
   private var defaultGeoParquetCrs: Option[JValue] = None
   private var userExplicitlySetDefaultCrs: Boolean = false
   private val geoParquetColumnCrsMap: mutable.Map[String, Option[JValue]] = mutable.Map.empty
-  private var nativeColumnCrs: Map[Int, Option[JValue]] = Map.empty
+  // The CRS of the geometry columns for which it is known before the first row is written: the
+  // columns of a native Spark type, and every geometry column of a GeoParquet 2 file.
+  private var fixedColumnCrs: Map[Int, Option[JValue]] = Map.empty
   private val geoParquetColumnCoveringMap: mutable.Map[String, Covering] = mutable.Map.empty
   private val generatedCoveringColumnOrdinals: mutable.Map[Int, Int] = mutable.Map.empty
   private var geoParquetCoveringMode: String = GEOPARQUET_COVERING_MODE_AUTO
@@ -144,7 +148,9 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
 
     geoParquetVersion = configuration.get(GEOPARQUET_VERSION_KEY) match {
       case null => Some(VERSION)
-      case version: String => Some(version)
+      // The version decides the layout of the file with the spaces around it ignored, and the
+      // metadata states it in the same form
+      case version: String => Some(version.trim)
     }
     geoParquetCoveringMode = Option(configuration.get(GEOPARQUET_COVERING_MODE_KEY))
       .map(_.trim)
@@ -177,13 +183,22 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
         case crs: String => geoParquetColumnCrsMap.put(name, Some(parse(crs)))
       }
     }
-    nativeColumnCrs = geometryColumnInfoMap.keys.flatMap { ordinal =>
+    fixedColumnCrs = geometryColumnInfoMap.keys.flatMap { ordinal =>
       val field = schema(ordinal)
-      SpatialTypeSupport.geometrySrid(field.dataType).map { srid =>
-        val explicit = geoParquetColumnCrsMap.get(field.name).orElse {
-          if (userExplicitlySetDefaultCrs) Some(defaultGeoParquetCrs) else None
-        }
-        ordinal -> GeoParquetNativeCrs.writeCrs(field.name, srid, explicit)
+      val explicit = geoParquetColumnCrsMap.get(field.name).orElse {
+        if (userExplicitlySetDefaultCrs) Some(defaultGeoParquetCrs) else None
+      }
+      SpatialTypeSupport.geometrySrid(field.dataType) match {
+        case Some(srid) =>
+          Some(ordinal -> GeoParquetNativeCrs.writeCrs(field.name, srid, explicit))
+        case None if writesGeospatialTypes =>
+          // The GEOMETRY logical type states the CRS in the Parquet schema, and a GeometryUDT
+          // column only has an SRID on each geometry.
+          Some(ordinal -> explicit.getOrElse(throw new IllegalArgumentException(
+            s"GeoParquet ${geoParquetVersion.get} states the CRS of column '${field.name}' in " +
+              "the Parquet schema, which is fixed before the first row is written. Set " +
+              s"$GEOPARQUET_CRS_KEY or $GEOPARQUET_CRS_KEY.${field.name} to the CRS of the column.")))
+        case None => None
       }
     }.toMap
     Option(configuration.get(GEOPARQUET_COVERING_KEY)).foreach { coveringColumnName =>
@@ -218,9 +233,11 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       }
       .toArray[ValueWriter]
 
-    val messageType = new internal.SparkToParquetSchemaConverter(configuration)
-      .convert(GeoParquetSchemaConverter.physicalSchema(schema))
-    val sparkSqlParquetRowMetadata = GeoParquetWriteSupport.getSparkSqlParquetRowMetadata(schema)
+    val messageType = withGeospatialTypes(
+      new internal.SparkToParquetSchemaConverter(configuration)
+        .convert(GeoParquetSchemaConverter.physicalSchema(schema)))
+    val sparkSqlParquetRowMetadata =
+      GeoParquetWriteSupport.getSparkSqlParquetRowMetadata(schema, writesGeospatialTypes)
     val metadata = Map(
       DataSourceUtils.SPARK_VERSION_METADATA_KEY -> SPARK_VERSION_SHORT,
       internal.ParquetReadSupport.SPARK_METADATA_KEY -> sparkSqlParquetRowMetadata) ++ {
@@ -283,7 +300,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
               defaultGeoParquetCrs
             }
           })
-        val crs = nativeColumnCrs.getOrElse(ordinal, legacyCrs)
+        val crs = fixedColumnCrs.getOrElse(ordinal, legacyCrs)
         val covering = geoParquetColumnCoveringMap.get(columnName)
         columnName -> GeometryFieldMetaData("WKB", geometryTypes, bbox, crs, covering)
       }.toMap
@@ -382,6 +399,31 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
 
   private def isGeoParquet11: Boolean = {
     geoParquetVersion.contains(VERSION)
+  }
+
+  private def writesGeospatialTypes: Boolean =
+    geoParquetVersion.exists(GeoParquetMetaData.usesGeospatialTypes)
+
+  /**
+   * Annotates the geometry columns of a GeoParquet 2 file with the GEOMETRY logical type, which
+   * also makes the Parquet library collect geospatial statistics for their row groups.
+   */
+  private def withGeospatialTypes(messageType: MessageType): MessageType = {
+    if (!writesGeospatialTypes) return messageType
+    val fields = messageType.getFields.asScala.zipWithIndex.map { case (field, ordinal) =>
+      fixedColumnCrs.get(ordinal) match {
+        case Some(crs) =>
+          val geometry = Types
+            .primitive(PrimitiveTypeName.BINARY, field.getRepetition)
+            .as(ParquetGeospatialTypes.geometry(ParquetGeospatialTypes.crsProperty(crs)))
+          Option(field.getId)
+            .map(id => geometry.id(id.intValue))
+            .getOrElse(geometry)
+            .named(field.getName)
+        case None => field
+      }
+    }
+    new MessageType(messageType.getName, fields.asJava)
   }
 
   private def isAutoCoveringEnabled: Boolean = {
@@ -762,6 +804,18 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
 
 object GeoParquetWriteSupport {
 
+  /** GeoParquet 2 needs the geospatial logical types of the Parquet library on the classpath. */
+  def requireSupportedVersion(configuration: Configuration): Unit = {
+    Option(configuration.get(GEOPARQUET_VERSION_KEY)).foreach { version =>
+      if (GeoParquetMetaData.usesGeospatialTypes(version) && !ParquetGeospatialTypes.supported) {
+        throw new IllegalArgumentException(
+          s"GeoParquet $version stores geometries in the Parquet GEOMETRY logical type, which " +
+            "needs Spark 4.1 or later (parquet-java 1.16.0). Set " +
+            s"$GEOPARQUET_VERSION_KEY to $VERSION on this Spark version.")
+      }
+    }
+  }
+
   /**
    * Fails unless `schema` has a geometry column, which GeoParquet requires. Called from
    * `prepareWrite` on the driver, so a write without one fails before any task is launched rather
@@ -848,9 +902,19 @@ object GeoParquetWriteSupport {
     }
   }
 
-  private def getSparkSqlParquetRowMetadata(schema: StructType): String = {
+  /**
+   * The Spark schema that the file records for Spark's own Parquet reader.
+   *
+   * @param keepNativeGeometry
+   *   whether the file stores geometries in the GEOMETRY logical type. Spark's own writer records
+   *   its native geometry type for such a column, and its reader needs that to return a geometry.
+   */
+  private def getSparkSqlParquetRowMetadata(
+      schema: StructType,
+      keepNativeGeometry: Boolean): String = {
     val fields = schema.fields.map { field =>
       field.dataType match {
+        case dt if keepNativeGeometry && SpatialTypeSupport.isNativeGeometry(dt) => field
         case dt if SpatialTypeSupport.isGeometry(dt) =>
           // Don't write the spatial type to the Parquet metadata. Write the type as binary for maximum
           // compatibility.

@@ -50,6 +50,20 @@ class NativeGeoParquetCrsSuite extends FunSuite with BeforeAndAfterAll {
   }
   private def pointExpression(srid: Int): String = s"ST_GeomFromWKB(unhex('$point'), $srid)"
 
+  test("Spark's own Parquet reader reads the GEOMETRY column of a GeoParquet 2.0 file") {
+    for (srid <- Seq(4326, 3857, 0)) withPath { path =>
+      spark
+        .sql(s"SELECT ${pointExpression(srid)} AS geometry")
+        .write
+        .format("geoparquet")
+        .option("geoparquet.version", "2.0.0")
+        .save(path)
+      val result = spark.read.parquet(path)
+      assert(result.schema("geometry").dataType == GeometryType(srid))
+      assert(result.selectExpr("hex(ST_AsBinary(geometry))").head().getString(0) == point)
+    }
+  }
+
   test("fixed geometry CRS survives all-null and empty files") {
     for (srid <- Seq(0, 4326, 3857); empty <- Seq(false, true)) withPath { path =>
       val where = if (empty) " WHERE false" else ""
@@ -114,20 +128,24 @@ class NativeGeoParquetCrsSuite extends FunSuite with BeforeAndAfterAll {
   }
 
   test("unrepresentable CRS is rejected natively while explicit UDT behavior remains available") {
-    withPath { path =>
-      val geometry = new org.locationtech.jts.io.WKTReader().read("POINT (1 2)")
-      val schema = StructType(Seq(StructField("geometry", GeometryUDT())))
-      spark
-        .createDataFrame(java.util.Arrays.asList(Row(geometry)), schema)
-        .write
-        .format("geoparquet")
-        .option("geoparquet.crs", """{"name":"custom CRS"}""")
-        .save(path)
-      intercept[Exception] { spark.read.format("geoparquet").load(path).collect() }
-      val legacy =
-        spark.read.schema(schema).format("geoparquet").load(path).head().getAs[Geometry](0)
-      assert(legacy.equalsExact(geometry))
-      assert(legacy.getSRID == 0)
+    // The same holds for a 2.0 file, where the CRS is also in the Parquet schema
+    Seq("1.1.0", "2.0.0").foreach { version =>
+      withPath { path =>
+        val geometry = new org.locationtech.jts.io.WKTReader().read("POINT (1 2)")
+        val schema = StructType(Seq(StructField("geometry", GeometryUDT())))
+        spark
+          .createDataFrame(java.util.Arrays.asList(Row(geometry)), schema)
+          .write
+          .format("geoparquet")
+          .option("geoparquet.version", version)
+          .option("geoparquet.crs", """{"name":"custom CRS"}""")
+          .save(path)
+        intercept[Exception] { spark.read.format("geoparquet").load(path).collect() }
+        val legacy =
+          spark.read.schema(schema).format("geoparquet").load(path).head().getAs[Geometry](0)
+        assert(legacy.equalsExact(geometry), version)
+        assert(legacy.getSRID == 0, version)
+      }
     }
   }
 

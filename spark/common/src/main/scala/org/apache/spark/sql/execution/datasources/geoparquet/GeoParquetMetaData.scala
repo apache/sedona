@@ -84,9 +84,18 @@ object GeoParquetMetaData {
   val VERSION = "1.1.0"
 
   /**
-   * Configuration key for overriding the version field in GeoParquet file metadata.
+   * Configuration key for the GeoParquet version to write. A 2.x version stores geometries in the
+   * Parquet GEOMETRY logical type. Any other value is written to the file metadata as given, with
+   * geometries in plain binary columns.
    */
   val GEOPARQUET_VERSION_KEY = "geoparquet.version"
+
+  /**
+   * Whether a file of this GeoParquet version stores its geometries in the geospatial logical
+   * types of the Parquet format, which is what GeoParquet 2 requires.
+   */
+  def usesGeospatialTypes(version: String): Boolean =
+    version.trim.takeWhile(_ != '.') == "2"
 
   /**
    * Configuration key for setting the CRS of the geometries in GeoParquet column metadata. This
@@ -205,16 +214,23 @@ object GeoParquetMetaData {
         // GeoParquet uses a declared top-level PROJJSON identifier as the SRID.
         // Reading the identifier directly also supports CRS objects that omit the
         // optional definition fields that a projection engine would need.
-        val idSrid = identifierSrid(projjson \ "id")
-        if (idSrid != 0) {
-          idSrid
-        } else {
-          projjson \ "ids" match {
-            case JArray(ids) => ids.iterator.map(identifierSrid).find(_ != 0).getOrElse(0)
-            case _ => 0
-          }
-        }
+        sridIdentifier(projjson).map(_._2).getOrElse(0)
     }
+  }
+
+  /**
+   * The identifier of a PROJJSON object that gives its SRID, together with that SRID: `id` when
+   * it names a known CRS, otherwise the first entry of `ids` that does. None when no identifier
+   * names a known CRS.
+   */
+  private[geoparquet] def sridIdentifier(projjson: JValue): Option[(JValue, Int)] = {
+    val identifiers = (projjson \ "id") +: (projjson \ "ids" match {
+      case JArray(ids) => ids
+      case _ => Nil
+    })
+    identifiers.iterator
+      .map(identifier => identifier -> identifierSrid(identifier))
+      .find(_._2 != 0)
   }
 
   private def identifierSrid(identifier: JValue): Int = {

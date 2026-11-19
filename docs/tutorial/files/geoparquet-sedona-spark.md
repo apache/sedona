@@ -128,7 +128,19 @@ The SRID of each geometry comes from the `crs` property of the logical type:
 
 Spark 4.2 ships a registry of EPSG and ESRI coordinate reference systems, and Sedona asks it about authorities other than EPSG. Spark 4.1 has no such registry. The code of such an identifier is never used as the SRID on its own, because an SRID stands for an EPSG code and another authority can use the same number for a different system: `ESRI:4812` is not `EPSG:4812`, so it gives no SRID on any Spark version. The `<key>` of `projjson:<key>` is looked up exactly as written.
 
-A CRS that gives no SRID falls back to the `crs` of the GeoParquet metadata. If that also gives none, the SRID is 0. On Spark 4.2 and later, where Sedona uses native Spark geometry types, such a column fails to load because the type has to name its SRID.
+A CRS that gives no SRID falls back to the `crs` of the GeoParquet metadata. If that also gives none, the SRID is 0.
+
+On Spark 4.2 and later Sedona infers native Spark geometry types, and such a type has to name its SRID. Reading a column whose CRS gives no SRID therefore fails while Sedona infers the schema, with the message that the CRS cannot be represented by a Spark native SRID. To read the column, give the reader a schema that uses Sedona's own geometry type, `LegacyGeometryType` in Python and `GeometryUDT` in Scala and Java, for it. The geometries then have SRID 0:
+
+```python
+from pyspark.sql.types import StructField, StructType
+from sedona.spark.sql.types import LegacyGeometryType
+
+schema = StructType([StructField("geometry", LegacyGeometryType())])
+df = sedona.read.schema(schema).format("geoparquet").load("/tmp/somewhere")
+```
+
+Sedona's functions, such as `ST_AsText` and `ST_Buffer`, accept such a column. Spark's built-in functions, such as `ST_SRID` and `ST_AsBinary` on Spark 4.2, accept native geometry columns only.
 
 `GEOGRAPHY` columns are read as binary columns that hold WKB, also when the GeoParquet metadata lists them. Convert them with `ST_GeogFromWKB`.
 
@@ -248,12 +260,59 @@ When no `geoparquet.crs` option is explicitly provided, Sedona will automaticall
 * If geometries in a column have mixed SRIDs, the `crs` field defaults to `null`.
 * If an explicit `geoparquet.crs` or `geoparquet.crs.<column_name>` option is provided, it always takes precedence over the SRID-derived CRS.
 
+On Spark 4.2 and later a native geometry column names its SRID in the column type, and a CRS option for such a column has to agree with it. This applies to every GeoParquet version:
+
+* The identifier of the CRS, which is `id` or an entry of `ids` in the PROJJSON, must give the SRID of the column.
+* That identifier must not name a version of its registry. The SRID stands for what the code means today, and a code can mean another CRS in another version, so Sedona rejects the option.
+* Sedona compares the identifier only and writes the rest of the definition as given. Make sure that the definition describes the CRS the coordinates are in.
+
 GeoParquet stores WKB coordinates in `(x, y)` order. Per the GeoParquet 1.1
 specification, this ordering overrides any axis order declared by the CRS. Sedona
 therefore preserves the authoritative CRS axis metadata and does not reorder geometry
 coordinates while reading or writing GeoParquet. You can use
 [`ST_FlipCoordinates`](../../api/sql/Geometry-Editors/ST_FlipCoordinates.md) when the
 coordinates themselves need to be swapped.
+
+## Write GeoParquet 2.0
+
+[GeoParquet 2.0](https://geoparquet.org/releases/v2.0.0/) stores each geometry column in the `GEOMETRY` logical type of the Parquet format. Since Sedona 2.0.0, set `geoparquet.version` to `2.0.0` to write such files on Spark 4.1 and later. The default version is `1.1.0`.
+
+```python
+df.write.format("geoparquet").option("geoparquet.version", "2.0.0").save(
+    "/tmp/somewhere"
+)
+```
+
+On Spark 4.1 the write also needs the CRS of the geometry columns, for the reason given below. An empty `geoparquet.crs` stands for OGC:CRS84:
+
+```python
+df.write.format("geoparquet").option("geoparquet.version", "2.0.0").option(
+    "geoparquet.crs", ""
+).save("/tmp/somewhere")
+```
+
+A GeoParquet 2.0 file differs from a GeoParquet 1.1 file in these ways:
+
+* The geometry column carries the `GEOMETRY` logical type, and the CRS is a property of that type. The GeoParquet metadata repeats the CRS as PROJJSON.
+* Each row group has geospatial statistics, a bounding box and the geometry types, which the Parquet library writes. Sedona therefore adds no covering column by default. `geoparquet.covering` and `geoparquet.covering.<column_name>` still declare a covering column that you provide.
+
+Sedona writes the `crs` property of the column in the shortest form that identifies the CRS:
+
+| CRS of the column | `crs` property of the column | `crs` in the GeoParquet metadata |
+| --- | --- | --- |
+| OGC:CRS84 (SRID 4326) | absent | absent |
+| a CRS with an identifier, such as EPSG:3857 | `EPSG:3857` | PROJJSON |
+| a CRS without an identifier | inline PROJJSON | PROJJSON |
+| a CRS whose identifier names a version of its registry, such as `IAU` version 2015 | inline PROJJSON | PROJJSON |
+| unknown (SRID 0) | `srid:0` | `null` |
+
+On Spark 4.2 and later the CRS comes from the SRID of the column type.
+
+Sedona's `geoparquet` reader returns a geometry column for a GeoParquet 2.0 file. The exception is a column whose CRS gives no SRID, such as PROJJSON without an identifier, on Spark 4.2 and later. Sedona cannot infer a native geometry type for it, so the read fails unless you give a schema with Sedona's own geometry type, as the section on reading GeoParquet 2.0 files shows. What Spark's own Parquet reader, `spark.read.parquet`, returns on Spark 4.2 depends on the column the file was written from. For a native geometry column it returns a native geometry column. For a `GeometryUDT` column, which is every geometry column written on Spark 4.1, it returns the WKB as a binary column, as it does for a GeoParquet 1.1 file.
+
+On Spark 4.1 the SRID belongs to each geometry and not to the column, so a GeoParquet 2.0 write needs the CRS of every geometry column in `geoparquet.crs` or `geoparquet.crs.<column_name>`.
+
+Spark 3.5 and 4.0 ship a Parquet library that predates the `GEOMETRY` logical type. Sedona writes GeoParquet 1.1 on these versions and rejects `geoparquet.version` `2.0.0`.
 
 ## Save GeoParquet with Covering Metadata
 

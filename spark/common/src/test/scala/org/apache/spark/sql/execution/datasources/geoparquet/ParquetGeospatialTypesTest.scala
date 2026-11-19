@@ -23,6 +23,8 @@ import java.util.Collections
 import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName.BINARY
 import org.apache.parquet.schema.{LogicalTypeAnnotation, Types}
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
+import org.json4s.{JNull, JValue}
+import org.json4s.jackson.JsonMethods.parse
 import org.scalatest.FunSuite
 
 class ParquetGeospatialTypesTest extends FunSuite {
@@ -140,6 +142,106 @@ class ParquetGeospatialTypesTest extends FunSuite {
     } else {
       intercept[UnsupportedOperationException](ParquetGeospatialTypes.geometry(None))
       intercept[UnsupportedOperationException](ParquetGeospatialTypes.geography(None, "karney"))
+    }
+  }
+
+  private def property(projjson: String): Option[String] =
+    ParquetGeospatialTypes.crsProperty(Option(projjson).map(parse(_)))
+
+  test("a CRS becomes the shortest crs property that still identifies it") {
+    assert(property(null).isEmpty)
+    assert(ParquetGeospatialTypes.crsProperty(Some(JNull)).contains("srid:0"))
+    assert(property(utm10n).contains("EPSG:32610"))
+    assert(
+      property("""{"type":"GeographicCRS","id":{"authority":"OGC","code":"CRS84"}}""")
+        .contains("OGC:CRS84"))
+    val localGrid = """{"type":"EngineeringCRS","name":"local grid"}"""
+    assert(property(localGrid).contains(localGrid))
+    // An identifier that is not a plain authority:code pair cannot be written in that form
+    val spaced = """{"name":"x","id":{"authority":"MY ORG","code":7}}"""
+    assert(property(spaced).contains(spaced))
+  }
+
+  test("an identifier with a registry version keeps its PROJJSON") {
+    // PROJ writes IAU_2015:49900 as authority IAU, code 49900 and version 2015. IAU:49900 names
+    // no CRS, and a registry may give a code another meaning in another version.
+    val mars =
+      """{"type":"GeodeticCRS","name":"Mars (2015) - Sphere","id":{"authority":"IAU","code":49900,"version":2015}}"""
+    assert(property(mars).contains(mars))
+    val textVersion = """{"name":"x","id":{"authority":"EPSG","code":4812,"version":"4.4"}}"""
+    assert(property(textVersion).contains(textVersion))
+    val decimalVersion = """{"name":"x","id":{"authority":"EPSG","code":4812,"version":4.4}}"""
+    assert(property(decimalVersion).contains(decimalVersion))
+  }
+
+  test("an authority named like a prefix of the crs property keeps its PROJJSON") {
+    // srid:<number> and projjson:<key> already have a meaning in the Parquet format
+    Seq(
+      """{"type":"ProjectedCRS","name":"survey grid","id":{"authority":"srid","code":4326}}""",
+      """{"type":"ProjectedCRS","name":"survey grid","id":{"authority":"SRID","code":4326}}""",
+      """{"type":"ProjectedCRS","name":"survey grid","id":{"authority":"projjson","code":"survey"}}""",
+      """{"type":"ProjectedCRS","name":"survey grid","id":{"authority":"ProjJSON","code":"survey"}}""")
+      .foreach { custom =>
+        assert(property(custom).contains(custom))
+      }
+  }
+
+  test("a native column rejects a CRS option whose identifier names a registry version") {
+    // EPSG:4812 was Voirol Unifie (Paris) in version 4.4 of the registry and is another system
+    // today, and the SRID of a native column stands for the current meaning of the code.
+    val historical =
+      parse(
+        """{"type":"GeographicCRS","name":"x","id":{"authority":"EPSG","code":4812,"version":"4.4"}}""")
+    val error = intercept[IllegalArgumentException] {
+      GeoParquetNativeCrs.writeCrs("geometry", 4812, Some(Some(historical)))
+    }
+    assert(error.getMessage.contains("version"))
+    assert(error.getMessage.contains("geometry"))
+    val current =
+      parse("""{"type":"GeographicCRS","name":"x","id":{"authority":"EPSG","code":4812}}""")
+    assert(GeoParquetNativeCrs.writeCrs("geometry", 4812, Some(Some(current))).contains(current))
+  }
+
+  test("a native column rejects a registry version on the identifier that gives the SRID") {
+    def write(projjson: String): Option[JValue] =
+      GeoParquetNativeCrs.writeCrs("geometry", 4812, Some(Some(parse(projjson))))
+    // The SRID comes from ids when the CRS has no id, or an id that names no known CRS
+    Seq(
+      """{"name":"x","ids":[{"authority":"EPSG","code":4812,"version":"4.4"}]}""",
+      """{"name":"x","ids":[{"authority":"unknown","code":1},{"authority":"EPSG","code":4812,"version":"4.4"}]}""",
+      """{"name":"x","id":{"authority":"unknown","code":1},"ids":[{"authority":"EPSG","code":4812,"version":"4.4"}]}""")
+      .foreach { historical =>
+        val error = intercept[IllegalArgumentException](write(historical))
+        assert(error.getMessage.contains("version \"4.4\""), historical)
+      }
+    // A version on an identifier that does not give the SRID is no reason to reject the CRS
+    Seq(
+      """{"name":"x","id":{"authority":"EPSG","code":4812},"ids":[{"authority":"EPSG","code":4812,"version":"4.4"}]}""",
+      """{"name":"x","id":{"authority":"unknown","code":1,"version":2},"ids":[{"authority":"EPSG","code":4812}]}""",
+      """{"name":"x","ids":[{"authority":"EPSG","code":4812},{"authority":"EPSG","code":4812,"version":"4.4"}]}""")
+      .foreach { current =>
+        assert(write(current).contains(parse(current)), current)
+      }
+  }
+
+  test("the error for a registry version does not tell the user to remove the version") {
+    val historical =
+      parse("""{"name":"x","id":{"authority":"EPSG","code":4812,"version":"4.4"}}""")
+    val message = intercept[IllegalArgumentException] {
+      GeoParquetNativeCrs.writeCrs("geometry", 4812, Some(Some(historical)))
+    }.getMessage
+    assert(!message.contains("Remove the version"))
+    assert(message.contains("Check which CRS the coordinates of the column are in"))
+    assert(message.contains("SRID 4812"))
+  }
+
+  test("only GeoParquet 2.x versions use the geospatial logical types") {
+    Seq("2.0.0", "2.1.0", " 2.0.0 ", "2").foreach { version =>
+      assert(GeoParquetMetaData.usesGeospatialTypes(version), version)
+    }
+    // Any other version string keeps the plain binary layout it has always had
+    Seq("1.0.0", "1.1.0", "10.9.8", "20.0.0", "", "two").foreach { version =>
+      assert(!GeoParquetMetaData.usesGeospatialTypes(version), version)
     }
   }
 }
