@@ -109,8 +109,16 @@ object GeoParquetSpatialFilter {
         }
 
         val dimensions = bbox.length / 2
-        val columnEnvelope = queryWindow.getFactory.toGeometry(
-          new Envelope(bbox(0), bbox(dimensions), bbox(1), bbox(dimensions + 1)))
+        val (xmin, ymin, xmax, ymax) = (bbox(0), bbox(1), bbox(dimensions), bbox(dimensions + 1))
+        // A bbox that crosses the antimeridian lists the west bound first, as RFC 7946 says, so
+        // its xmin is greater than its xmax. An envelope cannot express that range, and the file
+        // is kept. So is a file with any other bounds that are not in order, NaN included.
+        if (!(xmin <= xmax && ymin <= ymax)) {
+          return true
+        }
+
+        val columnEnvelope =
+          queryWindow.getFactory.toGeometry(new Envelope(xmin, xmax, ymin, ymax))
         predicateType match {
           case SpatialPredicate.COVERS => columnEnvelope.covers(queryWindow)
           case SpatialPredicate.INTERSECTS =>
