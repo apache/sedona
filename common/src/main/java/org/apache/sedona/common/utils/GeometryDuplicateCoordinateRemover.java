@@ -84,13 +84,15 @@ public class GeometryDuplicateCoordinateRemover {
             .toArray(Coordinate[]::new);
 
     for (int i = 0; i < deduplicated.length; i++) {
+      if (deduplicated[i] == null) continue;
       for (int j = i + 1; j < deduplicated.length; j++) {
-        if (deduplicated[i] != null
-            && deduplicated[j] != null
-            && deduplicated[i].distance(deduplicated[j]) < TOLERANCE) {
-          deduplicated[j] = null;
-        } else {
+        if (deduplicated[j] == null) continue;
+        // Only X distance is monotonic in the sorted coordinates.
+        if (deduplicated[j].getX() - deduplicated[i].getX() >= TOLERANCE) {
           break;
+        }
+        if (deduplicated[i].distance(deduplicated[j]) < TOLERANCE) {
+          deduplicated[j] = null;
         }
       }
     }
