@@ -29,11 +29,14 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.execution.FileSourceScanExec
 import org.apache.spark.sql.execution.SimpleMode
-import org.apache.spark.sql.execution.datasources.geoparquet.{GeoParquetFileFormat, GeoParquetMetaData, GeoParquetSpatialFilter}
+import org.apache.sedona.core.spatialOperator.SpatialPredicate
+import org.apache.spark.sql.execution.datasources.geoparquet.{GeoParquetFileFormat, GeoParquetMetaData, GeoParquetSpatialFilter, GeometryFieldMetaData}
+import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.LeafFilter
 import org.apache.spark.sql.functions.expr
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.geom.GeometryFactory
+import org.locationtech.jts.io.WKTReader
 import org.scalatest.prop.TableDrivenPropertyChecks
 
 import java.io.File
@@ -47,6 +50,7 @@ class GeoParquetSpatialFilterPushDownSuite extends TestBaseScala with TableDrive
   var df: DataFrame = _
   var geoParquetDf: DataFrame = _
   var geoParquetMetaDataMap: Map[Int, Seq[GeoParquetMetaData]] = _
+  private val wktReader = new WKTReader()
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -317,6 +321,85 @@ class GeoParquetSpatialFilterPushDownSuite extends TestBaseScala with TableDrive
         assert(!explainString.contains("with spatial filter"))
         assert(getPushedDownSpatialFilter(dfFiltered).isEmpty)
       }
+    }
+
+    it("Reads the X and Y bounds of a bbox that also has Z or M bounds") {
+      // The bboxes span x from 1 to 10 and y from 2 to 15, so that a window can lie inside one
+      // range and outside the other.
+      val inside = "POLYGON ((4 4, 6 4, 6 6, 4 6, 4 4))"
+      val aboveXmaxBelowYmax = "POLYGON ((11 11, 14 11, 14 14, 11 14, 11 11))"
+      val belowXmaxAboveYmax = "POLYGON ((4 16, 6 16, 6 18, 4 18, 4 16))"
+      val belowXminInsideY = "POLYGON ((-30 4, -20 4, -20 6, -30 6, -30 4))"
+      val insideByYOnly = "POLYGON ((4 11, 6 11, 6 14, 4 14, 4 11))"
+      val bboxes = Table(
+        "bbox",
+        // xmin, ymin, xmax, ymax
+        Seq(1.0, 2.0, 10.0, 15.0),
+        // xmin, ymin, zmin, xmax, ymax, zmax
+        Seq(1.0, 2.0, -50.0, 10.0, 15.0, -40.0),
+        // xmin, ymin, zmin, mmin, xmax, ymax, zmax, mmax
+        Seq(1.0, 2.0, -50.0, -7.0, 10.0, 15.0, -40.0, -3.0))
+      forAll(bboxes) { bbox =>
+        val columns = Map("geom" -> GeometryFieldMetaData("WKB", Seq.empty, Some(bbox)))
+        Seq(SpatialPredicate.INTERSECTS, SpatialPredicate.COVERS).foreach { predicate =>
+          def keeps(window: String): Boolean =
+            LeafFilter("geom", predicate, wktReader.read(window)).evaluate(columns)
+          assert(keeps(inside))
+          // y from 11 to 14 is inside the bbox only if ymax is read as 15
+          assert(keeps(insideByYOnly))
+          assert(!keeps(aboveXmaxBelowYmax))
+          assert(!keeps(belowXmaxAboveYmax))
+          assert(!keeps(belowXminInsideY))
+        }
+      }
+    }
+
+    it("Keeps a file whose bbox crosses the antimeridian") {
+      // RFC 7946 lists the west bound first, so xmin is greater than xmax: here from 170
+      // degrees east to 170 degrees west. A point at 179 degrees east is inside.
+      val window = wktReader.read("POINT (179 0)")
+      Seq(
+        Seq(170.0, -5.0, -170.0, 5.0),
+        Seq(170.0, -5.0, 200.0, -170.0, 5.0, 210.0),
+        Seq(170.0, -5.0, 200.0, 0.0, -170.0, 5.0, 210.0, 1.0)).foreach { bbox =>
+        val columns = Map("geom" -> GeometryFieldMetaData("WKB", Seq.empty, Some(bbox)))
+        Seq(SpatialPredicate.INTERSECTS, SpatialPredicate.COVERS).foreach { predicate =>
+          assert(LeafFilter("geom", predicate, window).evaluate(columns), bbox)
+        }
+      }
+    }
+
+    it("Keeps a file whose bbox has bounds that are not in order") {
+      val window = wktReader.read("POINT (100 100)")
+      Seq(
+        Seq(1.0, 15.0, 10.0, 2.0),
+        Seq(Double.NaN, 2.0, 10.0, 15.0),
+        Seq(1.0, 2.0, 10.0, Double.NaN))
+        .foreach { bbox =>
+          val columns = Map("geom" -> GeometryFieldMetaData("WKB", Seq.empty, Some(bbox)))
+          assert(LeafFilter("geom", SpatialPredicate.INTERSECTS, window).evaluate(columns))
+        }
+    }
+
+    it("Keeps a file whose bbox has an unexpected number of values") {
+      val window = wktReader.read("POLYGON ((-30 4, -20 4, -20 6, -30 6, -30 4))")
+      Seq(Seq(1.0, 2.0, 10.0), Seq(1.0, 2.0, -50.0, 10.0, 10.0), Seq.fill(10)(1.0)).foreach {
+        bbox =>
+          val columns = Map("geom" -> GeometryFieldMetaData("WKB", Seq.empty, Some(bbox)))
+          assert(LeafFilter("geom", SpatialPredicate.INTERSECTS, window).evaluate(columns))
+      }
+    }
+
+    it("Filters a file whose bbox has Z bounds") {
+      // Written by GDAL 3.13 from three points with Z. Its bbox is [1, 2, -50, 10, 10, -40].
+      val pointsWithZ =
+        sparkSession.read
+          .format("geoparquet")
+          .load(resourceFolder + "geoparquet/gdal/point-z.parquet")
+      val filtered = pointsWithZ.where(
+        "ST_Intersects(geometry, ST_GeomFromText('POLYGON ((4 4, 6 4, 6 6, 4 6, 4 4))'))")
+      assert(getPushedDownSpatialFilter(filtered).isDefined)
+      assert(filtered.select("id").collect().map(_.getString(0)).toSeq == Seq("2"))
     }
 
     it("Push down ST_Intersects against a Box2D column") {
