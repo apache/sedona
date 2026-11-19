@@ -701,6 +701,87 @@ public class RasterizationTest extends RasterTestBase {
   }
 
   @Test
+  public void testAllTouchedLineMatchesGdal() throws ParseException, FactoryException {
+    // GH-3322: with allTouched, a line burns the cells GDAL burns with ALL_TOUCHED=TRUE. The first
+    // three segments cross grid corners exactly, and at each corner GDAL also burns one of the two
+    // cells that meet the segment only at that corner. The fourth crosses no corner, so it burns
+    // just the cells it passes through. Expected {col, row} cells are from rasterio 1.4.4
+    // (GDAL 3.10.3) rasterize(all_touched=True) on the same grid.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 20, 20, 0, 20, 1, -1, 0, 0, 0);
+    assertAllTouchedLine(
+        raster,
+        "LINESTRING (1.5 2.75, 10.5 7.25)",
+        new int[][] {
+          {1, 17}, {2, 16}, {2, 17}, {3, 16}, {4, 15}, {4, 16}, {5, 15}, {6, 14}, {6, 15}, {7, 14},
+          {8, 13}, {8, 14}, {9, 13}, {10, 12}, {10, 13}
+        });
+    assertAllTouchedLine(
+        raster,
+        "LINESTRING (0.75 1.25, 4.25 11.75)",
+        new int[][] {
+          {0, 18}, {1, 15}, {1, 16}, {1, 17}, {1, 18}, {2, 12}, {2, 13}, {2, 14}, {2, 15}, {3, 9},
+          {3, 10}, {3, 11}, {3, 12}, {4, 8}, {4, 9}
+        });
+    assertAllTouchedLine(
+        raster,
+        "LINESTRING (2.5 2.5, 9.5 9.5)",
+        new int[][] {
+          {2, 17}, {3, 16}, {3, 17}, {4, 15}, {4, 16}, {5, 14}, {5, 15}, {6, 13}, {6, 14}, {7, 12},
+          {7, 13}, {8, 11}, {8, 12}, {9, 10}, {9, 11}
+        });
+    assertAllTouchedLine(
+        raster,
+        "LINESTRING (1.3 2.7, 8.6 11.4)",
+        new int[][] {
+          {1, 16}, {1, 17}, {2, 15}, {2, 16}, {3, 14}, {3, 15}, {4, 12}, {4, 13}, {4, 14}, {5, 11},
+          {5, 12}, {6, 10}, {6, 11}, {7, 9}, {7, 10}, {8, 8}, {8, 9}
+        });
+  }
+
+  @Test
+  public void testZonalStatsCountForLineWithAllTouched() throws ParseException, FactoryException {
+    // GH-3322: RS_ZonalStats ignored allTouched for lines. With it, these segments count the 15
+    // cells GDAL/rasterio report; without it, their counts are unchanged.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 20, 20, 0, 20, 1, -1, 0, 0, 0);
+    String[] lines = {
+      "LINESTRING (1.5 2.75, 10.5 7.25)",
+      "LINESTRING (0.75 1.25, 4.25 11.75)",
+      "LINESTRING (2.5 2.5, 9.5 9.5)"
+    };
+    double[] defaultCounts = {10, 11, 8};
+    for (int i = 0; i < lines.length; i++) {
+      Geometry line = Constructors.geomFromWKT(lines[i], 0);
+      Assert.assertEquals(
+          lines[i], 15d, RasterBandAccessors.getZonalStatsAll(raster, line, 1, true, false)[0], 0d);
+      Assert.assertEquals(
+          lines[i],
+          defaultCounts[i],
+          RasterBandAccessors.getZonalStatsAll(raster, line, 1, false, false)[0],
+          0d);
+    }
+  }
+
+  @Test
+  public void testAllTouchedLineCroppedOutputBurnsSameCells()
+      throws ParseException, FactoryException {
+    // The allTouched line walk runs on the reference raster's grid; cropping the output to the
+    // geometry's extent must not lose or shift any of its cells.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 20, 20, 0, 20, 1, -1, 0, 0, 0);
+    Geometry line = Constructors.geomFromWKT("LINESTRING (1.5 2.75, 10.5 7.25)", 0);
+    double[] cropped =
+        MapAlgebra.bandAsArray(
+            RasterConstructors.asRaster(line, raster, "d", true, 1d, 0d, true), 1);
+    // The output covers columns 1 to 10 and rows 12 to 17 of the reference grid.
+    Assert.assertEquals(10 * 6, cropped.length);
+    Assert.assertEquals(15, Arrays.stream(cropped).filter(v -> v != 0).count());
+    // Cell {2, 17} of the reference grid, which GDAL burns at the corner (2, 3).
+    Assert.assertEquals(1d, cropped[(17 - 12) * 10 + (2 - 1)], 0d);
+  }
+
+  @Test
   public void testLineClippedAtFarRasterEdgeKeepsEdgePixels() throws FactoryException {
     // 1/3600 degree pixels have no exact double representation. On this tile origin the right edge
     // converts to pixel x = 256.00000000004, one rounding error past the grid, so a segment that
@@ -791,6 +872,23 @@ public class RasterizationTest extends RasterTestBase {
       Assert.assertEquals(
           g.toText(), expectedCount, Arrays.stream(band).filter(v -> v != 0).count());
       Assert.assertEquals(g.toText(), 1d, band[edgeY * width + edgeX], 0d);
+    }
+  }
+
+  /**
+   * Asserts that a line, in both directions, burns exactly the given {col, row} cells with
+   * allTouched.
+   */
+  private static void assertAllTouchedLine(GridCoverage2D raster, String wkt, int[][] cells)
+      throws ParseException, FactoryException {
+    int width = RasterAccessors.getWidth(raster);
+    double[] expected = new double[width * RasterAccessors.getHeight(raster)];
+    for (int[] cell : cells) {
+      expected[cell[1] * width + cell[0]] = 1;
+    }
+    Geometry line = Constructors.geomFromWKT(wkt, 0);
+    for (Geometry g : new Geometry[] {line, line.reverse()}) {
+      Assert.assertArrayEquals(g.toText(), expected, burn(g, raster, true), 0d);
     }
   }
 
