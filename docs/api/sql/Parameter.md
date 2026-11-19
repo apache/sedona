@@ -69,9 +69,9 @@ If you set the same parameter through both `sedona` and `spark.sedona` prefixes,
 | `sedona.join.autoBroadcastJoinThreshold` | Maximum size in bytes for a table that will be broadcast to all worker nodes when performing a join. Set to -1 to disable automatic broadcasting. | Same as `spark.sql.autoBroadcastJoinThreshold` | Any integer with a byte suffix, e.g. `10MB` or `512KB` |
 | `sedona.join.gridtype` | Spatial partitioning grid type for join query | `kdbtree` | `quadtree`, `kdbtree` |
 | `spark.sedona.join.knn.includeTieBreakers` | KNN join will include all ties in the result, possibly returning more than k results | `false` | `true`, `false` |
-| `sedona.join.indexbuildside` | **(Advanced)** The side which Sedona builds spatial indices on | `left` | `left`, `right` |
+| `sedona.join.indexbuildside` | **(Advanced)** The side which Sedona builds spatial indices on. When not set, Sedona uses the side with more rows (the left side on a tie) | The larger side | `left`, `right` |
 | `sedona.join.numpartition` | **(Advanced)** Number of partitions for both sides in a join query | `-1` (use existing partitions) | Any integer |
-| `sedona.join.spatitionside` | **(Advanced)** The dominant side in spatial partitioning stage | `left` | `left`, `right` |
+| `sedona.join.spatitionside` | **(Advanced)** The dominant side in spatial partitioning stage. When not set, Sedona uses the side with more rows (the left side on a tie) | The larger side | `left`, `right` |
 | `sedona.join.optimizationmode` | **(Advanced)** When Sedona should optimize spatial join SQL queries | `nonequi` | `all` (always optimize, even equi-joins), `none` (disable optimization), `nonequi` (optimize non-equi-joins only) |
 
 ## CRS Transformation Parameters
