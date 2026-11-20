@@ -170,15 +170,18 @@ object SpatialTypeSupport {
   }
 
   /**
-   * A native geometry value that holds `wkb` as it is, None when `dataType` is Sedona's own
-   * geometry type. Spark checks the WKB. The value keeps what a JTS geometry would lose, as
+   * A native geometry value that holds `wkb` as it is. None when `dataType` is Sedona's own
+   * geometry type, and when Spark does not take the WKB as it is: a line of one point or a ring
+   * that is not closed, for example, which the WKB reader completes. The caller then builds the
+   * value from a JTS geometry. The value keeps what a JTS geometry would lose, as
    * [[readGeometryWithWkb]] describes.
    */
   def nativeGeometryFromWkb(wkb: Array[Byte], srid: Int, dataType: DataType): Option[Any] =
     dataType match {
       case native: GeometryType =>
         native.assertSridAllowedForType(srid)
-        Some(NativeGeometry.fromWkb(PublicWkbHeaderAdapter.toIsoWkb(wkb), srid).getValue)
+        try Some(NativeGeometry.fromWkb(PublicWkbHeaderAdapter.toIsoWkb(wkb), srid).getValue)
+        catch { case _: IllegalArgumentException => None }
       case _ => None
     }
   def externalGeometry(value: Geometry): Any = externalGeometry(value, geometryType)

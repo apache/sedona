@@ -460,6 +460,29 @@ class GeoParquetDimensionsSuite extends TestBaseScala {
         }
       }
     }
+    // The WKB reader completes a line of one point and a ring that is not closed. Spark's native
+    // type takes neither as it is.
+    for (legacyUdt <- representations) {
+      it(s"reads a line of one point and a ring that is not closed (legacyUdt=$legacyUdt)") {
+        withDirectory { directory =>
+          val ring = ByteBuffer.allocate(13 + 6 * 8).order(ByteOrder.LITTLE_ENDIAN)
+          ring.put(1.toByte).putInt(3).putInt(1).putInt(3)
+          Seq(0d, 0d, 1d, 0d, 1d, 1d).foreach(ring.putDouble)
+          val values = Seq(
+            Sample("point", isoWkb(1, false, Seq(10, 20))),
+            Sample("line-of-one-point", isoWkb(2, false, Seq(1, 2))),
+            Sample("open-ring", ring.array()))
+          val fixture = new File(directory, "fixture.parquet")
+          writeFixture(fixture, dictionary = false, values)
+          assertFile(
+            fixture.getPath,
+            values,
+            repetitions = 4,
+            expectedSrid = 4326,
+            legacyUdt = legacyUdt)
+        }
+      }
+    }
     for (legacyUdt <- representations; allEmpty <- Seq(false, true)) {
       it(
         s"preserves XYZ, projects M, and writes matching metadata (allEmpty=$allEmpty, legacyUdt=$legacyUdt)") {
