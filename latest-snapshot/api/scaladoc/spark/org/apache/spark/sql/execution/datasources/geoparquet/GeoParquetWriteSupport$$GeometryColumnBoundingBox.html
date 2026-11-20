@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetWriteSupport.GeometryColumnBoundingBox</title>
@@ -374,6 +373,27 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetWriteSupport.GeometryColumnBoundingBox#bounds" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="bounds:Seq[Double]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetWriteSupport$$GeometryColumnBoundingBox.html#bounds:Seq[Double]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">bounds</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Double">Double</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">The bbox of the column metadata: the lower bound of every dimension and then the upper
+bound of every dimension.</p><div class="fullcomment"><div class="comment cmt"><p>The bbox of the column metadata: the lower bound of every dimension and then the upper
+bound of every dimension. X and Y come first, then Z, then M. A dimension without a
+coordinate that is a number has no bounds and is left out. GeoParquet has no bbox with M
+bounds and without Z bounds, so the M bounds are stated only next to the Z bounds.
+</p></div></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
@@ -676,6 +696,24 @@
       </span>
       
       
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetWriteSupport.GeometryColumnBoundingBox#updateZAndM" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="updateZAndM(geom:org.locationtech.jts.geom.Geometry):Unit"></a><a id="updateZAndM(Geometry):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetWriteSupport$$GeometryColumnBoundingBox.html#updateZAndM(geom:org.locationtech.jts.geom.Geometry):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">updateZAndM</span><span class="params">(<span name="geom">geom: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Takes the Z and M coordinates of <code>geom</code> into the bounds.</p><div class="fullcomment"><div class="comment cmt"><p>Takes the Z and M coordinates of <code>geom</code> into the bounds. A coordinate that is NaN is not a
+bound, as in the bounding box of the Parquet statistics.
+</p></div></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">

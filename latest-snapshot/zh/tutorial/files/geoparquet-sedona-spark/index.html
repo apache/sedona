@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6039,7 +6038,7 @@
 <p>写出 GeoParquet 时，Sedona 会保留空 <code>Point</code>、<code>LineString</code> 和 <code>Polygon</code> 几何对象声明的 XY 或 XYZ 坐标布局。即使 Z 坐标值为 <code>NaN</code>，XYZ 几何对象也会保留 Z 维度。</p>
 <p>Sedona 按 GeoParquet 规范的要求，用 ISO WKB 的类型代码写出 Z 维度：带 Z 坐标的几何对象使用 1001 到 1007 的类型代码，例如 <code>Point Z</code> 为 1001。Sedona 2.0.0 之前的写出方式是用 EWKB 标志位标记 Z（<code>Point Z</code> 为 <code>0x80000001</code>）。两种形式 Sedona 都能读取。</p>
 <p>几何集合的每个成员保留各自的坐标布局。同时包含 XY 和 XYZ 成员的集合会按两种类型代码存储，例如集合为 1007，XY 的 <code>LineString</code> 成员为 2，<code>Point Z</code> 成员为 1001。ISO WKB 要求带 Z 坐标的集合中每个成员也带 Z 坐标，因此读取方可能拒绝这样的几何对象。Spark 原生几何类型就是如此：在 Spark 4.2 及更高版本上，Sedona 将其读入原生几何列时会失败并报 <code>WKB_PARSE_ERROR</code>。</p>
-<p><a href="https://geoparquet.org/releases/v1.1.0/#wkb">GeoParquet 1.1</a> 不支持 M 坐标。Sedona 在写出 GeoParquet 时会丢弃 M：XYM 转换为 XY，XYZM 转换为 XYZ。如果需要保留 M 值，请在写出前将其单独存储。</p>
+<p><a href="https://geoparquet.org/releases/v1.1.0/#wkb">GeoParquet 1.1</a> 不支持 M 坐标。Sedona 在写出 GeoParquet 1.1 时会丢弃 M：XYM 转换为 XY，XYZM 转换为 XYZ。如果需要保留 M 值，请在写出前将其单独存储，或者写出 GeoParquet 2.0，它会保留 M 坐标。详见下文写出 GeoParquet 2.0 一节。</p>
 <h2 id="spark-geoparquet-sedona-dataframe">使用 Spark 将 GeoParquet 读入 Sedona DataFrame<a class="headerlink" href="#spark-geoparquet-sedona-dataframe" title="Permanent link">&para;</a></h2>
 <p>将 GeoParquet 文件读入 Sedona DataFrame：</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geoparquet"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/tmp/somewhere"</span><span class="p">)</span>
@@ -6236,6 +6235,8 @@
 <ul>
 <li>几何列带有 <code>GEOMETRY</code> 逻辑类型，CRS 是该类型的一个属性。GeoParquet 元数据会以 PROJJSON 重复给出 CRS。</li>
 <li>每个行组都带有地理空间统计信息，即边界框和几何类型，由 Parquet 库写出。因此 Sedona 默认不再添加 covering 列。<code>geoparquet.covering</code> 和 <code>geoparquet.covering.&lt;column_name&gt;</code> 仍可声明由你提供的 covering 列。</li>
+<li>M 坐标会被保留：XYM 和 XYZM 几何对象按原样存储。GeoParquet 元数据中的 <code>geometry_types</code> 会标明坐标布局，例如 <code>Point M</code> 或 <code>LineString ZM</code>。</li>
+<li>GeoParquet 元数据中的 <code>bbox</code> 还会给出 Z 和 M 坐标的范围。含 Z 坐标的列有六个值 <code>[xmin, ymin, zmin, xmax, ymax, zmax]</code>，同时含 Z 和 M 坐标的列有八个值 <code>[xmin, ymin, zmin, mmin, xmax, ymax, zmax, mmax]</code>。只含 M 而不含 Z 坐标的列只给出 X 和 Y 的范围，因为 GeoParquet 的 <code>bbox</code> 无法在没有 Z 范围时表示 M 范围。为 NaN 的 Z 或 M 坐标不计入范围；如果某一维的坐标全部为 NaN，则视为该列没有这一维，因此数组可能比几何的坐标维度所对应的更短。如果要写出的某个范围值为无穷大或 NaN，Sedona 不会为该列写出 <code>bbox</code>，因为 JSON 无法用数字表示这样的值。GeoParquet 1.1 文件仍只写出 X 和 Y 范围的四个值。</li>
 </ul>
 <p>Sedona 会用能够标识 CRS 的最短形式写出列的 <code>crs</code> 属性：</p>
 <table>
@@ -6395,7 +6396,7 @@ ORDER BY geohash
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年11月19日 07:07:48 UTC">2026年11月19日 07:07:48</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年11月20日 16:21:41 UTC">2026年11月20日 16:21:41</span>
   </span>
 
     

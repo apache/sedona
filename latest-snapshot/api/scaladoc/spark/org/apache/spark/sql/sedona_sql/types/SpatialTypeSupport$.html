@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport</title>
@@ -695,6 +694,22 @@
       </span>
       
       
+    </li><li name="org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport#nativeGeometryFromWkb" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="nativeGeometryFromWkb(wkb:Array[Byte],srid:Int,dataType:org.apache.spark.sql.types.DataType):Option[Any]"></a><a id="nativeGeometryFromWkb(Array[Byte],Int,DataType):Option[Any]"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/types/SpatialTypeSupport$.html#nativeGeometryFromWkb(wkb:Array[Byte],srid:Int,dataType:org.apache.spark.sql.types.DataType):Option[Any]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">nativeGeometryFromWkb</span><span class="params">(<span name="wkb">wkb: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>, <span name="srid">srid: <span class="extype" name="scala.Int">Int</span></span>, <span name="dataType">dataType: <span class="extype" name="org.apache.spark.sql.types.DataType">DataType</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Any">Any</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A native Spark geometry value that holds <code>wkb</code>.</p><div class="fullcomment"><div class="comment cmt"><p>A native Spark geometry value that holds <code>wkb</code>. Sedona uses none before Spark 4.2.</p></div></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -769,6 +784,24 @@
       </span>
       
       
+    </li><li name="org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport#readGeometryWithWkb" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="readGeometryWithWkb(row:org.apache.spark.sql.catalyst.expressions.SpecializedGetters,ordinal:Int,dataType:org.apache.spark.sql.types.DataType,order:java.nio.ByteOrder):(org.locationtech.jts.geom.Geometry,Option[Array[Byte]])"></a><a id="readGeometryWithWkb(SpecializedGetters,Int,DataType,ByteOrder):(Geometry,Option[Array[Byte]])"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/types/SpatialTypeSupport$.html#readGeometryWithWkb(row:org.apache.spark.sql.catalyst.expressions.SpecializedGetters,ordinal:Int,dataType:org.apache.spark.sql.types.DataType,order:java.nio.ByteOrder):(org.locationtech.jts.geom.Geometry,Option[Array[Byte]])" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">readGeometryWithWkb</span><span class="params">(<span name="row">row: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.SpecializedGetters">SpecializedGetters</span></span>, <span name="ordinal">ordinal: <span class="extype" name="scala.Int">Int</span></span>, <span name="dataType">dataType: <span class="extype" name="org.apache.spark.sql.types.DataType">DataType</span></span>, <span name="order">order: <span class="extype" name="java.nio.ByteOrder">ByteOrder</span></span>)</span><span class="result">: (<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>, <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]])</span>
+      </span>
+      
+      <p class="shortcomment cmt">The geometry that <a href="#readGeometry(row:org.apache.spark.sql.catalyst.expressions.SpecializedGetters,ordinal:Int,dataType:org.apache.spark.sql.types.DataType):org.locationtech.jts.geom.Geometry" class="extmbr" name="org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport#readGeometry">readGeometry</a> returns and the WKB of a native Spark geometry value.</p><div class="fullcomment"><div class="comment cmt"><p>The geometry that <a href="#readGeometry(row:org.apache.spark.sql.catalyst.expressions.SpecializedGetters,ordinal:Int,dataType:org.apache.spark.sql.types.DataType):org.locationtech.jts.geom.Geometry" class="extmbr" name="org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport#readGeometry">readGeometry</a> returns and the WKB of a native Spark geometry value.
+Sedona uses no native values before Spark 4.2, so there is no WKB.
+</p></div></div>
     </li><li name="org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport#registeredSrid" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="registeredSrid(crs:String):Option[Int]"></a><a id="registeredSrid(String):Option[Int]"></a>
       <span class="permalink">

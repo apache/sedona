@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6061,7 +6060,7 @@
 <p>GeoParquet writes preserve the declared XY or XYZ coordinate layout of empty <code>Point</code>, <code>LineString</code>, and <code>Polygon</code> geometries. XYZ geometries also retain their Z dimension when Z ordinates are <code>NaN</code>.</p>
 <p>Sedona writes the Z dimension with the type codes of ISO WKB, which the GeoParquet specification asks for: a geometry with a Z coordinate has a type code from 1001 to 1007, for example 1001 for <code>Point Z</code>. Before Sedona 2.0.0 the writer marked Z with the EWKB flag bit instead (<code>0x80000001</code> for <code>Point Z</code>). Sedona reads both forms.</p>
 <p>Each member of a geometry collection keeps its own coordinate layout. A collection with both XY and XYZ members is stored with the type codes of both, for example 1007 for the collection, 2 for an XY <code>LineString</code> member and 1001 for a <code>Point Z</code> member. ISO WKB requires every member of a collection with a Z coordinate to have one as well, so a reader may reject such a geometry. Spark's native geometry type does: on Spark 4.2 and later, Sedona fails to read it into a native geometry column with <code>WKB_PARSE_ERROR</code>.</p>
-<p><a href="https://geoparquet.org/releases/v1.1.0/#wkb">GeoParquet 1.1</a> does not support M coordinates. Sedona discards M when writing GeoParquet: XYM becomes XY, and XYZM becomes XYZ. If you need the M values, store them separately before writing.</p>
+<p><a href="https://geoparquet.org/releases/v1.1.0/#wkb">GeoParquet 1.1</a> does not support M coordinates. Sedona discards M when writing GeoParquet 1.1: XYM becomes XY, and XYZM becomes XYZ. If you need the M values, store them separately before writing, or write GeoParquet 2.0, which keeps them. See the section on writing GeoParquet 2.0 below.</p>
 <h2 id="read-geoparquet-files-into-sedona-dataframe-with-spark">Read GeoParquet files into Sedona DataFrame with Spark<a class="headerlink" href="#read-geoparquet-files-into-sedona-dataframe-with-spark" title="Permanent link">&para;</a></h2>
 <p>Let's read the GeoParquet files into a Sedona DataFrame:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geoparquet"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/tmp/somewhere"</span><span class="p">)</span>
@@ -6263,6 +6262,8 @@ coordinates themselves need to be swapped.</p>
 <ul>
 <li>The geometry column carries the <code>GEOMETRY</code> logical type, and the CRS is a property of that type. The GeoParquet metadata repeats the CRS as PROJJSON.</li>
 <li>Each row group has geospatial statistics, a bounding box and the geometry types, which the Parquet library writes. Sedona therefore adds no covering column by default. <code>geoparquet.covering</code> and <code>geoparquet.covering.&lt;column_name&gt;</code> still declare a covering column that you provide.</li>
+<li>M coordinates are kept: XYM and XYZM geometries are stored as they are. The <code>geometry_types</code> of the GeoParquet metadata name the layout, for example <code>Point M</code> or <code>LineString ZM</code>.</li>
+<li>The <code>bbox</code> of the GeoParquet metadata also states the bounds of the Z and M coordinates. A column with Z coordinates has six values, <code>[xmin, ymin, zmin, xmax, ymax, zmax]</code>, and a column with Z and M coordinates has eight, <code>[xmin, ymin, zmin, mmin, xmax, ymax, zmax, mmax]</code>. A column with M and without Z coordinates has the X and Y bounds only, because GeoParquet has no <code>bbox</code> with M bounds and without Z bounds. A Z or M coordinate that is NaN is skipped, and a dimension whose coordinates are all NaN counts as absent, so the array can be shorter than the coordinates of the geometries suggest. Sedona writes no <code>bbox</code> for a column when one of the bounds it would list is infinite or NaN, because JSON has no number for such a value. A GeoParquet 1.1 file keeps the four values of the X and Y bounds.</li>
 </ul>
 <p>Sedona writes the <code>crs</code> property of the column in the shortest form that identifies the CRS:</p>
 <table>
@@ -6428,7 +6429,7 @@ ORDER BY geohash
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="November 19, 2026 07:07:48 UTC">November 19, 2026 07:07:48</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="November 20, 2026 16:21:41 UTC">November 20, 2026 16:21:41</span>
   </span>
 
     
