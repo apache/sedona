@@ -301,7 +301,7 @@ Sedona 的 `geoparquet` 读取器会把 GeoParquet 2.0 文件的几何列读取�
 
 在 Spark 4.1 上，SRID 属于每个几何对象而不属于列，而 GeoParquet 2.0 的一列只有一个 CRS。Sedona 取每个文件中该列第一个几何对象的 SRID 作为列的 CRS；如果同一文件中另一个几何对象的 SRID 不同，写出会失败。SRID 为 0 的列，或在文件中没有任何几何对象的列，会以未知 CRS 写出。
 
-Sedona 必须在写出第一行之前知道 CRS，因此会把第一个几何对象之前的行暂存在内存中，每个文件最多 16 MB。`geoparquet.crs.lookahead.bytes` 可以修改这一上限。到达上限时仍未出现几何对象的列会以未知 CRS 写出，之后如果出现带 SRID 的几何对象，写出会失败。
+Sedona 必须在写出第一行之前知道 CRS，因此会把第一个几何对象之前的行暂存在内存中，每个文件最多 16 MB。`geoparquet.srid.lookahead.bytes` 可以修改这一上限。到达上限时仍未出现几何对象的列会以未知 CRS 写出，之后如果出现带 SRID 的几何对象，写出会失败。
 
 设置 `geoparquet.crs` 或 `geoparquet.crs.<column_name>` 可以自行指定 CRS。此时 Sedona 按给定值写出，不再与几何对象的 SRID 比较。
 

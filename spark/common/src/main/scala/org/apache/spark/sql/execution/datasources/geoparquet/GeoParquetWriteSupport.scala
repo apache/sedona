@@ -180,12 +180,12 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
         userExplicitlySetDefaultCrs = true
         Some(parse(crs))
     }
-    geometryColumnInfoMap.keys.map(schema(_).name).foreach { name =>
-      Option(configuration.get(GEOPARQUET_CRS_KEY + "." + name)).foreach {
-        case "" => geoParquetColumnCrsMap.put(name, None)
-        case crs: String => geoParquetColumnCrsMap.put(name, Some(parse(crs)))
+    GeoParquetWriteSupport
+      .columnCrsOptions(configuration, geometryColumnInfoMap.keys.map(schema(_).name).toSeq)
+      .foreach {
+        case (name, "") => geoParquetColumnCrsMap.put(name, None)
+        case (name, crs) => geoParquetColumnCrsMap.put(name, Some(parse(crs)))
       }
-    }
     fixedColumnCrs = geometryColumnInfoMap.keys.flatMap { ordinal =>
       val field = schema(ordinal)
       val explicit = geoParquetColumnCrsMap.get(field.name).orElse {
@@ -856,9 +856,10 @@ object GeoParquetWriteSupport {
 
   /**
    * Configuration key for the bytes of rows that a GeoParquet 2 write holds back while it waits
-   * for the first geometry of a GeometryUDT column.
+   * for the first geometry of a GeometryUDT column. It is not under geoparquet.crs, where every
+   * key that goes on names a column.
    */
-  val GEOPARQUET_CRS_LOOKAHEAD_KEY = "geoparquet.crs.lookahead.bytes"
+  val GEOPARQUET_SRID_LOOKAHEAD_KEY = "geoparquet.srid.lookahead.bytes"
   val DEFAULT_CRS_LOOKAHEAD_BYTES: Long = 16L * 1024 * 1024
 
   /**
@@ -872,14 +873,33 @@ object GeoParquetWriteSupport {
       configuration.get(GEOPARQUET_CRS_KEY) != null) {
       Seq.empty
     } else {
-      schema.fields.toSeq.zipWithIndex.collect {
-        case (field, ordinal)
-            if SpatialTypeSupport.isGeometry(field.dataType) &&
-              SpatialTypeSupport.geometrySrid(field.dataType).isEmpty &&
-              configuration.get(GEOPARQUET_CRS_KEY + "." + field.name) == null =>
-          ordinal
+      val candidates = schema.fields.toSeq.zipWithIndex.filter { case (field, _) =>
+        SpatialTypeSupport.isGeometry(field.dataType) &&
+        SpatialTypeSupport.geometrySrid(field.dataType).isEmpty
       }
+      val stated = columnCrsOptions(configuration, candidates.map(_._1.name))
+      candidates.collect { case (field, ordinal) if !stated.contains(field.name) => ordinal }
     }
+  }
+
+  /**
+   * The CRS option of each of `columns` that has one: the value of the key that is
+   * `geoparquet.crs.` and the name of the column. Spark takes the keys of the options of a write
+   * without regard to case, so a key names a column in any case. A key in the case of the column
+   * comes first, for columns that differ in case only.
+   */
+  private[geoparquet] def columnCrsOptions(
+      configuration: Configuration,
+      columns: Seq[String]): Map[String, String] = {
+    lazy val inLowerCase = configuration
+      .getPropsWithPrefix(GEOPARQUET_CRS_KEY + ".")
+      .asScala
+      .map { case (column, crs) => column.toLowerCase(java.util.Locale.ROOT) -> crs }
+    columns.flatMap { column =>
+      Option(configuration.get(GEOPARQUET_CRS_KEY + "." + column))
+        .orElse(inLowerCase.get(column.toLowerCase(java.util.Locale.ROOT)))
+        .map(column -> _)
+    }.toMap
   }
 
   private def secondSrid(

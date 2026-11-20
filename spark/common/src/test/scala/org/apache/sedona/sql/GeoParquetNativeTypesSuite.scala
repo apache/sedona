@@ -25,12 +25,15 @@ import java.nio.file.Files
 import org.apache.commons.io.FileUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
-import org.apache.parquet.hadoop.{ParquetFileReader, ParquetReader}
+import org.apache.hadoop.mapreduce.{Job, TaskAttemptID, TaskType}
+import org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl
+import org.apache.parquet.hadoop.{ParquetFileReader, ParquetOutputFormat, ParquetReader}
 import org.apache.parquet.hadoop.example.GroupReadSupport
 import org.apache.parquet.hadoop.metadata.{ColumnChunkMetaData, ParquetMetadata}
 import org.apache.parquet.hadoop.util.HadoopInputFile
 import org.apache.spark.sql.{DataFrame, Row}
-import org.apache.spark.sql.execution.datasources.geoparquet.{GeoParquetMetaData, ParquetGeospatialColumn, ParquetGeospatialTypes}
+import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
+import org.apache.spark.sql.execution.datasources.geoparquet.{GeoParquetFileFormat, GeoParquetMetaData, ParquetGeospatialColumn, ParquetGeospatialTypes}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.types.{BinaryType, StructField, StructType}
@@ -97,6 +100,12 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
   private def geometryColumn(footer: ParquetMetadata): Option[ParquetGeospatialColumn] = {
     val schema = footer.getFileMetaData.getSchema
     ParquetGeospatialTypes.describe(schema.getType(schema.getFieldIndex("geometry")))
+  }
+
+  /** The CRS that the Parquet schema of the file in `path` states for `column`. */
+  private def parquetCrs(path: String, column: String): Option[String] = {
+    val schema = footer(path).getFileMetaData.getSchema
+    ParquetGeospatialTypes.describe(schema.getType(schema.getFieldIndex(column))).flatMap(_.crs)
   }
 
   private def geoMetadata(footer: ParquetMetadata): JValue =
@@ -369,7 +378,7 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
       }
 
       it("stops waiting for the first geometry when the rows held back reach the limit") {
-        val limit = "geoparquet.crs.lookahead.bytes" -> "1"
+        val limit = "geoparquet.srid.lookahead.bytes" -> "1"
         withPath { path =>
           // The CRS is fixed as unknown after the first row, which geometries without an SRID fit
           writeVersion2(udtColumn(null, pointWithSrid(0)), path, limit)
@@ -392,6 +401,92 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
             "geoparquet.crs" -> "")
           assert(geometryColumn(footer(path)) == geometry(None))
         }
+      }
+
+      it("takes the CRS option of a column whatever the case of its name in the key") {
+        // Spark takes the keys of the options of a write without regard to case
+        val df = udtColumns(Seq("Geom"), Seq(pointWithSrid(4326)))
+        withPath { path =>
+          writeVersion2(df, path, "geoparquet.crs.geom" -> webMercator)
+          assert(parquetCrs(path, "Geom").contains("EPSG:3857"))
+        }
+        withPath { path =>
+          df.write
+            .format("geoparquet")
+            .option("geoparquet.version", "1.1.0")
+            .option("geoparquet.crs.GEOM", webMercator)
+            .save(path)
+          assert(geoMetadata(footer(path)) \ "columns" \ "Geom" \ "crs" == parse(webMercator))
+        }
+      }
+
+      it("keeps the limit of the rows held back apart from the CRS options of the columns") {
+        withPath { path =>
+          val df = udtColumns(
+            Seq("lookahead.bytes", "other"),
+            Seq(pointWithSrid(3857), pointWithSrid(4326)))
+          writeVersion2(df, path, "geoparquet.crs.lookahead.bytes" -> webMercator)
+          assert(parquetCrs(path, "lookahead.bytes").contains("EPSG:3857"))
+          assert(parquetCrs(path, "other").isEmpty)
+        }
+      }
+
+      it("releases the file when the rows held back until the end show a second SRID") {
+        // Parquet lists the writers that are open, and offers no public way to read the list
+        def openWriters: Int = {
+          val manager = ParquetOutputFormat.getMemoryManager
+          val writers = manager.getClass.getDeclaredMethod("getWriterList")
+          writers.setAccessible(true)
+          writers.invoke(manager).asInstanceOf[java.util.Map[_, _]].size
+        }
+        withPath(path => writeVersion2(udtColumn(pointWithSrid(4326)), path))
+        val before = openWriters
+        withPath { path =>
+          // The second column shows no geometry, so the rows are held back until the file ends
+          val df = udtColumns(
+            Seq("geometry", "other"),
+            Seq(pointWithSrid(4326), null),
+            Seq(pointWithSrid(3857), null))
+          val message = messages(intercept[Exception](writeVersion2(df, path)))
+          assert(message.contains("SRID 4326") && message.contains("SRID 3857"))
+        }
+        assert(openWriters == before)
+      }
+
+      it("holds back a copy of a row only while it waits for a geometry") {
+        class CountingRow(values: Array[Any]) extends GenericInternalRow(values) {
+          var copies = 0
+          override def copy(): GenericInternalRow = {
+            copies += 1
+            super.copy()
+          }
+        }
+        val schema = StructType(Seq(StructField("geometry", GeometryUDT())))
+        def copies(geometries: Seq[Geometry], options: (String, String)*): Seq[Int] = {
+          var counted = Seq.empty[Int]
+          withPath { path =>
+            val all = options.toMap + ("geoparquet.version" -> "2.0.0")
+            val job = Job.getInstance(sparkSession.sessionState.newHadoopConfWithOptions(all))
+            val factory = new GeoParquetFileFormat().prepareWrite(sparkSession, job, all, schema)
+            val context = new TaskAttemptContextImpl(
+              job.getConfiguration,
+              new TaskAttemptID("test", 0, TaskType.MAP, 0, 0))
+            val writer = factory.newInstance(path, schema, context)
+            val rows = geometries.map { geometry =>
+              new CountingRow(
+                Array[Any](if (geometry == null) null else GeometryUDT().serialize(geometry)))
+            }
+            try rows.foreach(writer.write)
+            finally writer.close()
+            assert(sridsIn(path).size == geometries.size)
+            counted = rows.map(_.copies)
+          }
+          counted
+        }
+        // The row that shows the last geometry waited for opens the file and is written as it is
+        assert(copies(Seq(null, pointWithSrid(3857), pointWithSrid(3857))) == Seq(1, 0, 0))
+        // So is the row that reaches the limit, however large it is
+        assert(copies(Seq(null, null), "geoparquet.srid.lookahead.bytes" -> "1") == Seq(0, 0))
       }
 
       it("writes geospatial statistics for the row groups of a GEOMETRY column") {

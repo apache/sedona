@@ -40,7 +40,7 @@ import org.apache.spark.sql.types.StructType
  * file with those SRIDs. [[GeoParquetWriteSupport]] turns them into the CRS of the columns and
  * rejects a later geometry that has another SRID.
  *
- * The rows held back are limited to [[GeoParquetWriteSupport.GEOPARQUET_CRS_LOOKAHEAD_KEY]]
+ * The rows held back are limited to [[GeoParquetWriteSupport.GEOPARQUET_SRID_LOOKAHEAD_KEY]]
  * bytes. A column that has shown no geometry by then is written with an unknown CRS.
  *
  * @param columns
@@ -55,7 +55,7 @@ class FirstGeometryOutputWriter(
 
   private val configuration = context.getConfiguration
   private val lookaheadBytes = configuration.getLong(
-    GeoParquetWriteSupport.GEOPARQUET_CRS_LOOKAHEAD_KEY,
+    GeoParquetWriteSupport.GEOPARQUET_SRID_LOOKAHEAD_KEY,
     GeoParquetWriteSupport.DEFAULT_CRS_LOOKAHEAD_BYTES)
 
   private val waiting = mutable.LinkedHashSet(columns: _*)
@@ -63,6 +63,7 @@ class FirstGeometryOutputWriter(
   private val heldBack = mutable.ArrayBuffer.empty[InternalRow]
   private var heldBackBytes = 0L
   private var recordWriter: RecordWriter[Void, InternalRow] = _
+  private var closed = false
 
   override def write(row: InternalRow): Unit = {
     if (recordWriter != null) {
@@ -75,12 +76,19 @@ class FirstGeometryOutputWriter(
           waiting.remove(ordinal)
         }
       }
-      heldBack += row.copy()
-      heldBackBytes += (row match {
+      val bytes = row match {
         case unsafe: UnsafeRow => unsafe.getSizeInBytes.toLong
         case _ => FirstGeometryOutputWriter.ASSUMED_ROW_BYTES
-      })
-      if (waiting.isEmpty || heldBackBytes >= lookaheadBytes) open()
+      }
+      if (waiting.isEmpty || heldBackBytes + bytes >= lookaheadBytes) {
+        // This row ends the wait, so it is written as it is. Only the rows before it are kept
+        // as copies, which keeps the rows held back under the limit however large this row is.
+        open()
+        recordWriter.write(null, row)
+      } else {
+        heldBack += row.copy()
+        heldBackBytes += bytes
+      }
     }
   }
 
@@ -94,12 +102,25 @@ class FirstGeometryOutputWriter(
     }
     recordWriter = new ParquetOutputFormat[InternalRow]()
       .getRecordWriter(fileConfiguration, new Path(path), CodecConfig.from(context).getCodec)
-    heldBack.foreach(recordWriter.write(null, _))
-    heldBack.clear()
+    try heldBack.foreach(recordWriter.write(null, _))
+    catch {
+      case error: Throwable =>
+        // A row held back can fail, with a second SRID for example. Spark does not close a
+        // writer again after its close() has failed, so the file is released here.
+        release(error)
+        throw error
+    } finally heldBack.clear()
   }
 
-  override def close(): Unit = {
+  private def release(error: Throwable): Unit = {
+    closed = true
+    try recordWriter.close(context)
+    catch { case other: Throwable => error.addSuppressed(other) }
+  }
+
+  override def close(): Unit = if (!closed) {
     if (recordWriter == null) open()
+    closed = true
     recordWriter.close(context)
   }
 }
