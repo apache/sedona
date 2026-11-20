@@ -52,6 +52,6 @@ Now the surprise. The refine step sees 0.26% of the pairs and takes most of the 
 
 One box test is four comparisons. One exact test against Tacoma checks a road against a boundary of 3,152 points. The [GeoSpark paper](https://doi.org/10.1007/s10707-018-0330-9), where Sedona started, noted that exact tests on complex shapes are time-consuming. A spatial join gets faster with fewer candidates, or with a faster exact test on each candidate.
 
-Every spatial join in Sedona has these two steps. A GeoParquet footer applies the filter step one level up, as [One Sort, Many Indexes](https://sedona.apache.org/latest/blog/2026/11/06/one-sort-many-indexes/) showed. The box of a row group lets a reader skip the whole group.
+Filter and refine are two of the steps inside every spatial join in Sedona. A GeoParquet footer applies the filter step one level up, as [One Sort, Many Indexes](https://sedona.apache.org/latest/blog/2026/11/06/one-sort-many-indexes/) showed. The box of a row group lets a reader skip the whole group.
 
 *Cities and roads from Overture Maps (divisions and transportation themes, release 2026-10-21.0). The tree is the R-tree in Sedona 1.9.1, built over the 305 city boxes. Counts from one `ST_Intersects` join on Sedona 1.9.1 on a laptop, run as a partitioned join. Time share from the same join with and without the exact test, median of three runs each.*
