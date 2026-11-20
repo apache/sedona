@@ -1,0 +1,154 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<svg xml:lang="zh-CN" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 970" width="1200" height="970" role="img" aria-labelledby="equals-identical-dimensions-title equals-identical-dimensions-description">
+  <title id="equals-identical-dimensions-title">ST_EqualsIdentical 比较每个坐标维度及其分量值</title>
+  <desc id="equals-identical-dimensions-description">图中分栏展示输入 A 和 B 的四组点比较。两点的 XYZ 布局和值都相同，返回 TRUE。Z 值不同，返回 FALSE。三个数值虽然相同，但分别按 XYZ 和 XYM 解读时，第三个分量的含义不同，返回 FALSE。两个 XYZM 点的 M 值不同，也返回 FALSE。</desc>
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, 'Noto Sans CJK SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; }
+      text:not([fill]) { fill: #172033; }
+      .comparison { fill: #f8fafc; stroke: #b8c3d1; stroke-width: 1.5; }
+      .input-card { fill: #ffffff; stroke-width: 2; }
+      .input-a-card { stroke: #005ea8; }
+      .input-b-card { stroke: #b8324a; stroke-dasharray: 8 5; }
+      .row-title { font-size: 15px; font-weight: 700; }
+      .input-title { font-size: 13px; font-weight: 700; }
+      .caption { font-size: 12px; fill: #475569; }
+      .small { font-size: 11px; fill: #475569; }
+      .wkt { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; fill: #334155; }
+      .slot { fill: #eef3f8; stroke: #8291a5; stroke-width: 1.4; }
+      .slot-different { fill: #fff7ed; stroke: #a84d00; stroke-width: 2; stroke-dasharray: 5 3; }
+      .slot-name { font-size: 11px; font-weight: 700; fill: #475569; }
+      .slot-value { font-size: 16px; font-weight: 700; }
+      .signature { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Noto Sans CJK SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', monospace; font-size: 11px; font-weight: 700; }
+      .result-true { fill: #e6f5ef; stroke: #08775f; stroke-width: 2; }
+      .result-false { fill: #fff0f1; stroke: #a92e43; stroke-width: 2; }
+      .result-word { font-size: 20px; font-weight: 800; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="970" fill="#ffffff"/>
+  <text x="600" y="32" text-anchor="middle" font-size="22" font-weight="700">每个坐标维度都参与比较</text>
+  <text x="600" y="57" text-anchor="middle" class="caption">X、Y、Z 和 M 每个分量的含义与数值都必须相同。虚线框标出有差异的分量。</text>
+
+  <!-- XYZ 点的布局和数值相同，返回 TRUE。 -->
+  <rect x="25" y="80" width="1150" height="195" rx="10" class="comparison"/>
+  <text x="45" y="108" class="row-title">1 · XYZ 布局和数值均相同</text>
+
+  <rect x="45" y="124" width="420" height="130" rx="8" class="input-card input-a-card"/>
+  <text x="62" y="147" class="input-title" fill="#005ea8">输入 A · POINT Z</text>
+  <rect x="330" y="133" width="115" height="23" rx="11" fill="#eef6fb" stroke="#96bfd9"/><text x="387" y="149" text-anchor="middle" class="signature" fill="#005ea8">XYZ 布局</text>
+  <rect x="75" y="163" width="92" height="53" rx="7" class="slot"/><text x="121" y="181" text-anchor="middle" class="slot-name">X</text><text x="121" y="205" text-anchor="middle" class="slot-value">1</text>
+  <rect x="188" y="163" width="92" height="53" rx="7" class="slot"/><text x="234" y="181" text-anchor="middle" class="slot-name">Y</text><text x="234" y="205" text-anchor="middle" class="slot-value">2</text>
+  <rect x="301" y="163" width="92" height="53" rx="7" class="slot"/><text x="347" y="181" text-anchor="middle" class="slot-name">Z</text><text x="347" y="205" text-anchor="middle" class="slot-value">3</text>
+  <text x="255" y="241" text-anchor="middle" class="wkt">POINT Z (1 2 3)</text>
+
+  <rect x="490" y="124" width="420" height="130" rx="8" class="input-card input-b-card"/>
+  <text x="507" y="147" class="input-title" fill="#a92e43">输入 B · POINT Z</text>
+  <rect x="775" y="133" width="115" height="23" rx="11" fill="#fff5f5" stroke="#e0a4ae"/><text x="832" y="149" text-anchor="middle" class="signature" fill="#a92e43">XYZ 布局</text>
+  <rect x="520" y="163" width="92" height="53" rx="7" class="slot"/><text x="566" y="181" text-anchor="middle" class="slot-name">X</text><text x="566" y="205" text-anchor="middle" class="slot-value">1</text>
+  <rect x="633" y="163" width="92" height="53" rx="7" class="slot"/><text x="679" y="181" text-anchor="middle" class="slot-name">Y</text><text x="679" y="205" text-anchor="middle" class="slot-value">2</text>
+  <rect x="746" y="163" width="92" height="53" rx="7" class="slot"/><text x="792" y="181" text-anchor="middle" class="slot-name">Z</text><text x="792" y="205" text-anchor="middle" class="slot-value">3</text>
+  <text x="700" y="241" text-anchor="middle" class="wkt">POINT Z (1 2 3)</text>
+
+  <rect x="935" y="139" width="220" height="100" rx="9" class="result-true"/>
+  <text x="1045" y="166" text-anchor="middle" class="small">ST_EqualsIdentical(A, B)</text>
+  <text x="1045" y="200" text-anchor="middle" class="result-word" fill="#08775f">TRUE</text>
+  <text x="1045" y="222" text-anchor="middle" class="small">布局和数值均相同</text>
+
+  <!-- Z 值不同，返回 FALSE。 -->
+  <rect x="25" y="290" width="1150" height="195" rx="10" class="comparison"/>
+  <text x="45" y="318" class="row-title">2 · XYZ 布局相同，Z 值不同</text>
+
+  <rect x="45" y="334" width="420" height="130" rx="8" class="input-card input-a-card"/>
+  <text x="62" y="357" class="input-title" fill="#005ea8">输入 A · POINT Z</text>
+  <rect x="330" y="343" width="115" height="23" rx="11" fill="#eef6fb" stroke="#96bfd9"/><text x="387" y="359" text-anchor="middle" class="signature" fill="#005ea8">XYZ 布局</text>
+  <rect x="75" y="373" width="92" height="53" rx="7" class="slot"/><text x="121" y="391" text-anchor="middle" class="slot-name">X</text><text x="121" y="415" text-anchor="middle" class="slot-value">1</text>
+  <rect x="188" y="373" width="92" height="53" rx="7" class="slot"/><text x="234" y="391" text-anchor="middle" class="slot-name">Y</text><text x="234" y="415" text-anchor="middle" class="slot-value">2</text>
+  <rect x="301" y="373" width="92" height="53" rx="7" class="slot-different"/><text x="347" y="391" text-anchor="middle" class="slot-name">Z 值不同</text><text x="347" y="415" text-anchor="middle" class="slot-value">3</text>
+  <text x="255" y="451" text-anchor="middle" class="wkt">POINT Z (1 2 3)</text>
+
+  <rect x="490" y="334" width="420" height="130" rx="8" class="input-card input-b-card"/>
+  <text x="507" y="357" class="input-title" fill="#a92e43">输入 B · POINT Z</text>
+  <rect x="775" y="343" width="115" height="23" rx="11" fill="#fff5f5" stroke="#e0a4ae"/><text x="832" y="359" text-anchor="middle" class="signature" fill="#a92e43">XYZ 布局</text>
+  <rect x="520" y="373" width="92" height="53" rx="7" class="slot"/><text x="566" y="391" text-anchor="middle" class="slot-name">X</text><text x="566" y="415" text-anchor="middle" class="slot-value">1</text>
+  <rect x="633" y="373" width="92" height="53" rx="7" class="slot"/><text x="679" y="391" text-anchor="middle" class="slot-name">Y</text><text x="679" y="415" text-anchor="middle" class="slot-value">2</text>
+  <rect x="746" y="373" width="92" height="53" rx="7" class="slot-different"/><text x="792" y="391" text-anchor="middle" class="slot-name">Z 值不同</text><text x="792" y="415" text-anchor="middle" class="slot-value">4</text>
+  <text x="700" y="451" text-anchor="middle" class="wkt">POINT Z (1 2 4)</text>
+
+  <rect x="935" y="349" width="220" height="100" rx="9" class="result-false"/>
+  <text x="1045" y="376" text-anchor="middle" class="small">ST_EqualsIdentical(A, B)</text>
+  <text x="1045" y="410" text-anchor="middle" class="result-word" fill="#a92e43">FALSE</text>
+  <text x="1045" y="432" text-anchor="middle" class="small">Z: 3 ≠ 4</text>
+
+  <!-- 第三个分量的数值相同、含义不同，返回 FALSE。 -->
+  <rect x="25" y="500" width="1150" height="195" rx="10" class="comparison"/>
+  <text x="45" y="528" class="row-title">3 · 三个数值相同，第三个分量的含义不同</text>
+
+  <rect x="45" y="544" width="420" height="130" rx="8" class="input-card input-a-card"/>
+  <text x="62" y="567" class="input-title" fill="#005ea8">输入 A · 高程（Z）</text>
+  <rect x="330" y="553" width="115" height="23" rx="11" fill="#eef6fb" stroke="#96bfd9"/><text x="387" y="569" text-anchor="middle" class="signature" fill="#005ea8">XYZ 布局</text>
+  <rect x="75" y="583" width="92" height="53" rx="7" class="slot"/><text x="121" y="601" text-anchor="middle" class="slot-name">X</text><text x="121" y="625" text-anchor="middle" class="slot-value">1</text>
+  <rect x="188" y="583" width="92" height="53" rx="7" class="slot"/><text x="234" y="601" text-anchor="middle" class="slot-name">Y</text><text x="234" y="625" text-anchor="middle" class="slot-value">2</text>
+  <rect x="301" y="583" width="92" height="53" rx="7" class="slot-different"/><text x="347" y="601" text-anchor="middle" class="slot-name">高程 Z</text><text x="347" y="625" text-anchor="middle" class="slot-value">3</text>
+  <text x="255" y="661" text-anchor="middle" class="wkt">POINT Z (1 2 3)</text>
+
+  <rect x="490" y="544" width="420" height="130" rx="8" class="input-card input-b-card"/>
+  <text x="507" y="567" class="input-title" fill="#a92e43">输入 B · 度量值（M）</text>
+  <rect x="775" y="553" width="115" height="23" rx="11" fill="#fff5f5" stroke="#e0a4ae"/><text x="832" y="569" text-anchor="middle" class="signature" fill="#a92e43">XYM 布局</text>
+  <rect x="520" y="583" width="92" height="53" rx="7" class="slot"/><text x="566" y="601" text-anchor="middle" class="slot-name">X</text><text x="566" y="625" text-anchor="middle" class="slot-value">1</text>
+  <rect x="633" y="583" width="92" height="53" rx="7" class="slot"/><text x="679" y="601" text-anchor="middle" class="slot-name">Y</text><text x="679" y="625" text-anchor="middle" class="slot-value">2</text>
+  <rect x="746" y="583" width="92" height="53" rx="7" class="slot-different"/><text x="792" y="601" text-anchor="middle" class="slot-name">度量值 M</text><text x="792" y="625" text-anchor="middle" class="slot-value">3</text>
+  <text x="700" y="661" text-anchor="middle" class="wkt">POINT M (1 2 3)</text>
+
+  <rect x="935" y="559" width="220" height="100" rx="9" class="result-false"/>
+  <text x="1045" y="586" text-anchor="middle" class="small">ST_EqualsIdentical(A, B)</text>
+  <text x="1045" y="620" text-anchor="middle" class="result-word" fill="#a92e43">FALSE</text>
+  <text x="1045" y="642" text-anchor="middle" class="small">XYZ ≠ XYM</text>
+
+  <!-- XYZM 点的 M 值不同，返回 FALSE。 -->
+  <rect x="25" y="710" width="1150" height="195" rx="10" class="comparison"/>
+  <text x="45" y="738" class="row-title">4 · XYZ 数值相同，M 值不同</text>
+
+  <rect x="45" y="754" width="420" height="130" rx="8" class="input-card input-a-card"/>
+  <text x="62" y="777" class="input-title" fill="#005ea8">输入 A · POINT ZM</text>
+  <rect x="325" y="763" width="120" height="23" rx="11" fill="#eef6fb" stroke="#96bfd9"/><text x="385" y="779" text-anchor="middle" class="signature" fill="#005ea8">XYZM 布局</text>
+  <rect x="67" y="793" width="73" height="53" rx="7" class="slot"/><text x="103" y="811" text-anchor="middle" class="slot-name">X</text><text x="103" y="835" text-anchor="middle" class="slot-value">1</text>
+  <rect x="153" y="793" width="73" height="53" rx="7" class="slot"/><text x="189" y="811" text-anchor="middle" class="slot-name">Y</text><text x="189" y="835" text-anchor="middle" class="slot-value">2</text>
+  <rect x="239" y="793" width="73" height="53" rx="7" class="slot"/><text x="275" y="811" text-anchor="middle" class="slot-name">Z</text><text x="275" y="835" text-anchor="middle" class="slot-value">3</text>
+  <rect x="325" y="793" width="73" height="53" rx="7" class="slot-different"/><text x="361" y="811" text-anchor="middle" class="slot-name">M 值不同</text><text x="361" y="835" text-anchor="middle" class="slot-value">4</text>
+  <text x="255" y="871" text-anchor="middle" class="wkt">POINT ZM (1 2 3 4)</text>
+
+  <rect x="490" y="754" width="420" height="130" rx="8" class="input-card input-b-card"/>
+  <text x="507" y="777" class="input-title" fill="#a92e43">输入 B · POINT ZM</text>
+  <rect x="770" y="763" width="120" height="23" rx="11" fill="#fff5f5" stroke="#e0a4ae"/><text x="830" y="779" text-anchor="middle" class="signature" fill="#a92e43">XYZM 布局</text>
+  <rect x="512" y="793" width="73" height="53" rx="7" class="slot"/><text x="548" y="811" text-anchor="middle" class="slot-name">X</text><text x="548" y="835" text-anchor="middle" class="slot-value">1</text>
+  <rect x="598" y="793" width="73" height="53" rx="7" class="slot"/><text x="634" y="811" text-anchor="middle" class="slot-name">Y</text><text x="634" y="835" text-anchor="middle" class="slot-value">2</text>
+  <rect x="684" y="793" width="73" height="53" rx="7" class="slot"/><text x="720" y="811" text-anchor="middle" class="slot-name">Z</text><text x="720" y="835" text-anchor="middle" class="slot-value">3</text>
+  <rect x="770" y="793" width="73" height="53" rx="7" class="slot-different"/><text x="806" y="811" text-anchor="middle" class="slot-name">M 值不同</text><text x="806" y="835" text-anchor="middle" class="slot-value">9</text>
+  <text x="700" y="871" text-anchor="middle" class="wkt">POINT ZM (1 2 3 9)</text>
+
+  <rect x="935" y="769" width="220" height="100" rx="9" class="result-false"/>
+  <text x="1045" y="796" text-anchor="middle" class="small">ST_EqualsIdentical(A, B)</text>
+  <text x="1045" y="830" text-anchor="middle" class="result-word" fill="#a92e43">FALSE</text>
+  <text x="1045" y="852" text-anchor="middle" class="small">M: 4 ≠ 9</text>
+
+  <rect x="25" y="920" width="1150" height="32" rx="7" fill="#eef2ff" stroke="#b7b9e6"/>
+  <text x="600" y="941" text-anchor="middle" class="small" fill="#4338ca">Z 表示高程，M 表示度量值。即使数值相同，分量的含义不同也会使比较返回 FALSE。</text>
+</svg>
