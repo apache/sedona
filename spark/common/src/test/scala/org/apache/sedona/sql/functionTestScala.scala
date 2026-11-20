@@ -4040,6 +4040,48 @@ class functionTestScala
     }
   }
 
+  it(
+    "ST_IsValid, ST_IsValidReason and ST_IsValidDetail should not fail when the JTS validator throws") {
+    // JTS 1.20.0 throws "Segment vertex does not intersect ring" when validating this polygon
+    val wkt =
+      "POLYGON ((-1.7e308 -10, 1.7e308 -10, 1.7e308 0, 1.7e308 10, -1.7e308 10, -1.7e308 -10), " +
+        "(-1e308 0, -5e307 5, -5e307 -5, -1e308 0))"
+    val reason = "IllegalArgumentException: Segment vertex does not intersect ring"
+    val row = sparkSession
+      .sql(s"SELECT ST_GeomFromWKT('$wkt') AS geom")
+      .selectExpr(
+        "ST_IsValid(geom)",
+        "ST_IsValid(geom, 1)",
+        "ST_IsValidReason(geom)",
+        "ST_IsValidReason(geom, 1)",
+        "ST_IsValidDetail(geom)",
+        "ST_IsValidDetail(geom, 1)")
+      .first()
+
+    assert(!row.getBoolean(0))
+    assert(!row.getBoolean(1))
+    assert(row.getString(2) == reason)
+    assert(row.getString(3) == reason)
+    assert(row.getAs[Row](4) == Row(false, reason, null))
+    assert(row.getAs[Row](5) == Row(false, reason, null))
+  }
+
+  it("ST_IsValidReason and ST_IsValidDetail should return null for a null geometry") {
+    val row = sparkSession
+      .sql("SELECT ST_GeomFromWKT(CAST(NULL AS STRING)) AS geom")
+      .selectExpr(
+        "ST_IsValidReason(geom)",
+        "ST_IsValidReason(geom, 1)",
+        "ST_IsValidDetail(geom)",
+        "ST_IsValidDetail(geom, 1)")
+      .first()
+
+    assert(row.isNullAt(0))
+    assert(row.isNullAt(1))
+    assert(row.isNullAt(2))
+    assert(row.isNullAt(3))
+  }
+
   it("ST_IsValidReason should provide reasons for invalid geometries") {
     val testData = Seq(
       (5330, "POLYGON ((0 0, 3 3, 0 3, 3 0, 0 0))"),

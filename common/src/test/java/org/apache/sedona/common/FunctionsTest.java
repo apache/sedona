@@ -6247,6 +6247,46 @@ public class FunctionsTest extends TestBase {
     assertEquals("Self-intersection at or near point (10.0, 20.0, NaN)", invalidReasonESRI);
   }
 
+  // JTS 1.20.0 throws "Segment vertex does not intersect ring" when validating this polygon.
+  private static final String VALIDATOR_FAILURE_WKT =
+      "POLYGON ((-1.7e308 -10, 1.7e308 -10, 1.7e308 0, 1.7e308 10, -1.7e308 10, -1.7e308 -10),"
+          + " (-1e308 0, -5e307 5, -5e307 -5, -1e308 0))";
+  private static final String VALIDATOR_FAILURE_REASON =
+      "IllegalArgumentException: Segment vertex does not intersect ring";
+
+  @Test
+  public void isValidWhenValidatorThrows() throws ParseException {
+    Geometry geom = Constructors.geomFromEWKT(VALIDATOR_FAILURE_WKT);
+    assertFalse(Functions.isValid(geom));
+    assertFalse(Functions.isValid(geom, 0));
+    assertFalse(Functions.isValid(geom, 1));
+  }
+
+  @Test
+  public void isValidReasonWhenValidatorThrows() throws ParseException {
+    Geometry geom = Constructors.geomFromEWKT(VALIDATOR_FAILURE_WKT);
+    assertEquals(VALIDATOR_FAILURE_REASON, Functions.isValidReason(geom));
+    assertEquals(VALIDATOR_FAILURE_REASON, Functions.isValidReason(geom, 0));
+    assertEquals(VALIDATOR_FAILURE_REASON, Functions.isValidReason(geom, 1));
+  }
+
+  @Test
+  public void isValidDetailWhenValidatorThrows() throws ParseException {
+    Geometry geom = Constructors.geomFromEWKT(VALIDATOR_FAILURE_WKT);
+    ValidDetail expected = new ValidDetail(false, VALIDATOR_FAILURE_REASON, null);
+    assertTrue(expected.equals(Functions.isValidDetail(geom)));
+    assertTrue(expected.equals(Functions.isValidDetail(geom, 0)));
+    assertTrue(expected.equals(Functions.isValidDetail(geom, 1)));
+  }
+
+  @Test
+  public void isValidReasonAndDetailOfNullGeometry() {
+    assertNull(Functions.isValidReason(null));
+    assertNull(Functions.isValidReason(null, 1));
+    assertNull(Functions.isValidDetail(null));
+    assertNull(Functions.isValidDetail(null, 1));
+  }
+
   @Test
   public void points() throws ParseException {
     Geometry polygon = Constructors.geomFromEWKT("POLYGON ((0 0, 1 1, 5 1, 5 0, 1 0, 0 0))");

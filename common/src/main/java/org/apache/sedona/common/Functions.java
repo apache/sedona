@@ -1160,16 +1160,14 @@ public class Functions {
   }
 
   public static boolean isValid(Geometry geom, int flag) {
-    IsValidOp isValidOp = new IsValidOp(geom);
+    IsValidOp isValidOp = getIsValidOpObject(geom, flag);
 
-    // Set the validity model based on flags
-    if (flag == ESRI_VALIDITY) {
-      isValidOp.setSelfTouchingRingFormingHoleValid(true);
-    } else {
-      isValidOp.setSelfTouchingRingFormingHoleValid(false);
+    try {
+      return isValidOp.isValid();
+    } catch (RuntimeException e) {
+      // A geometry the validator cannot process is not valid
+      return false;
     }
-
-    return isValidOp.isValid();
   }
 
   public static boolean isValidTrajectory(Geometry geom) {
@@ -2955,9 +2953,19 @@ public class Functions {
   }
 
   public static ValidDetail isValidDetail(Geometry geom, int flag) {
+    if (geom == null) {
+      return null;
+    }
     IsValidOp isValidOp = getIsValidOpObject(geom, flag);
 
-    if (isValidOp.isValid()) {
+    boolean valid;
+    try {
+      valid = isValidOp.isValid();
+    } catch (RuntimeException e) {
+      return new ValidDetail(false, validatorFailureReason(e), null);
+    }
+
+    if (valid) {
       return new ValidDetail(true, null, null);
     } else {
       TopologyValidationError error = isValidOp.getValidationError();
@@ -2972,14 +2980,35 @@ public class Functions {
   }
 
   public static String isValidReason(Geometry geom, int flag) {
+    if (geom == null) {
+      return null;
+    }
     IsValidOp isValidOp = getIsValidOpObject(geom, flag);
 
-    if (isValidOp.isValid()) {
+    boolean valid;
+    try {
+      valid = isValidOp.isValid();
+    } catch (RuntimeException e) {
+      return validatorFailureReason(e);
+    }
+
+    if (valid) {
       return "Valid Geometry";
     } else {
       TopologyValidationError error = isValidOp.getValidationError();
       return error.toString();
     }
+  }
+
+  /**
+   * Describes a failure of the JTS validator itself, e.g. "IllegalArgumentException: Segment vertex
+   * does not intersect ring". Used as the invalidity reason of a geometry the validator cannot
+   * process.
+   */
+  private static String validatorFailureReason(RuntimeException e) {
+    String message = e.getMessage();
+    String name = e.getClass().getSimpleName();
+    return message == null ? name : name + ": " + message;
   }
 
   /**

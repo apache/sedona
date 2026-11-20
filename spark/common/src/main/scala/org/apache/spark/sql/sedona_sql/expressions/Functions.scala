@@ -527,12 +527,14 @@ private[apache] case class ST_IsValidDetail(children: Seq[Expression])
       throw new IllegalArgumentException(s"Invalid number of arguments: $nArgs")
     }
 
-    try {
-      if (validDetail.location == null) {
-        return InternalRow.fromSeq(Seq(validDetail.valid, null, null))
-      }
+    if (validDetail == null) {
+      return null
+    }
 
-      val serLocation = GeometrySerializer.serialize(validDetail.location)
+    try {
+      val serLocation =
+        if (validDetail.location == null) null
+        else GeometrySerializer.serialize(validDetail.location)
       InternalRow.fromSeq(
         Seq(validDetail.valid, UTF8String.fromString(validDetail.reason), serLocation))
     } catch {

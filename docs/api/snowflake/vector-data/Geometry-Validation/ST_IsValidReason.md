@@ -24,6 +24,8 @@ Introduction: Returns text stating if the geometry is valid. If not, it provides
 - 0 (default): Use usual OGC SFS (Simple Features Specification) validity semantics.
 - 1: "ESRI flag", Accepts certain self-touching rings as valid, which are considered invalid under OGC standards.
 
+If the validator cannot process a geometry and fails with an error, the error is returned as the reason, e.g. `IllegalArgumentException: Segment vertex does not intersect ring`, instead of failing the query.
+
 ![ST_IsValidReason](../../../../image/ST_IsValidReason/ST_IsValidReason.svg "ST_IsValidReason")
 
 Formats:
