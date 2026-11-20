@@ -46,7 +46,7 @@ The filter step left 0.26% of all pairs. The refine step ran the exact test on t
 
 ## The exact test takes most of the time
 
-The refine step sees 0.26% of the pairs and takes most of the join time. A second run of the same join compared only the boxes and needed 4% of the time. The exact test accounts for the other 96%.
+Now the surprise. The refine step sees 0.26% of the pairs and takes most of the join time. A second run of the same join compared only the boxes and needed 4% of the time. The exact test accounts for the other 96%.
 
 ![Two bars drawn to scale. In the first bar, all possible pairs, a thin purple line at the right end is the 0.26% of pairs that get the exact test. In the second bar, the time of the join, purple fills 96% of the bar: the time spent in the exact test](filter-and-refine-time.png)
 
