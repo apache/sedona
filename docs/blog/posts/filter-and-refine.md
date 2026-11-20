@@ -12,40 +12,38 @@ slug: filter-and-refine
 
 # Ask the Box First: Filter and Refine in Apache Sedona
 
-*Sedona internals, one idea at a time.*
+A spatial join asks one question again and again: does this road touch this city? Overture Maps lists 305 cities and towns and 1,495,982 road segments in Washington State, so the join has 456 million pairs to ask about. The exact answer is slow, because the boundary of Tacoma alone is 3,152 points and a road is a line with many points of its own. Apache Sedona asks a cheaper question first, and this short post shows how.
 
-A spatial join asks one question again and again: is this address inside this city? Overture Maps lists 305 cities and towns and 3,036,650 addresses in Washington State, so the join has 926 million pairs to ask about. The exact answer is slow, because the boundary of Tacoma alone is 3,152 points. Apache Sedona asks a cheaper question first, and this short post shows how.
-
-![Two maps of Tacoma, Washington. On the left, the filter step: every address inside the bounding box of the city is dark, 159,915 addresses. On the right, the refine step: the city boundary is drawn, 106,230 addresses inside it are blue and 53,685 outside it are orange](filter-and-refine-cover.png)
+![Two maps of the roads of Tacoma, Washington. On the left, the filter step: the bounding box of the city is yellow and the 46,832 roads whose boxes overlap it are black. On the right, the refine step: the city boundary is drawn, the 30,937 roads that touch the city are blue and the 15,895 that do not are pink](filter-and-refine-cover.png)
 
 <!-- more -->
 
 ## Filter: ask the box
 
-Every shape has a bounding box, the smallest rectangle that holds it. A box is four numbers, and testing a point against it takes four comparisons. An address outside the box of Tacoma is outside Tacoma. An address inside the box may be in Tacoma, so it becomes a candidate. The box of Tacoma holds 159,915 addresses.
+Every shape has a bounding box, the smallest rectangle that holds it. A box is four numbers, and two boxes are compared with four comparisons. When two boxes are apart, the shapes inside them are apart. When two boxes overlap, the shapes may touch, so the pair becomes a candidate. The box of Tacoma overlaps the boxes of 46,832 roads.
 
 ## The tree: skip most boxes
 
-Testing every address against 305 boxes is still a lot of work. Sedona stores the boxes in an R-tree. The tree groups up to ten nearby boxes into a bigger box, then groups those boxes again, until one box covers the state. The 305 city boxes become 35 groups, then 4, then 1.
+Comparing every road with 305 city boxes is still a lot of work. Sedona stores the boxes in an R-tree. The tree groups up to ten nearby boxes into a bigger box, then groups those boxes again, until one box covers the state. The 305 city boxes become 35 groups, then 4, then 1.
 
-A search starts at the top and opens only the boxes that hold the address.
+A search starts at the top and opens only the boxes that overlap the box of the road.
 
-![Four maps that zoom in step by step. The first shows 4 boxes over Washington State, one of them blue. The second shows the 10 boxes inside it, one blue. The third shows 10 city boxes, three blue. The fourth shows the outlines of Tacoma, University Place and Fircrest, with Fircrest filled blue around a star](filter-and-refine-tree.png)
+![On the left, a map of Washington State with the four top boxes of the tree labeled A to D, the smaller boxes inside them, and one small box in yellow. On the right, a close view of one road and four cities: University Place and Steilacoom in blue, Tacoma and Lakewood in pink. Below, the same boxes drawn as a tree: a root, four boxes, 35 boxes and 305 city boxes, with the path through box B highlighted](filter-and-refine-tree.png)
 
-The star is one address in Fircrest, a small city that sits inside the box of Tacoma. The search tests 4 boxes, then 10, then 10. After 24 box tests, three candidates are left: Tacoma, University Place and Fircrest.
+The star is Chambers Creek Road West, 2.9 km long. The search tests 4 boxes, then 10, then 10. After 24 box tests, four candidates are left: Tacoma, University Place, Steilacoom and Lakewood.
 
 ## Refine: ask the shape
 
-Only the candidates get the exact test against the real boundary. The address is inside the box of Tacoma and outside Tacoma. It is inside Fircrest. Three exact tests, one match.
+Only the candidates get the exact test against the real boundary. The road runs through University Place and Steilacoom. Its box overlaps the boxes of Tacoma and Lakewood, and the road never reaches either city. Four exact tests, two matches.
 
 ## The whole join
 
-Sedona 1.9.1 counts its own work during a join. For all of Washington, it reported 2,627,358 candidates and 1,865,052 matches.
+Sedona 1.9.1 counts its own work during a join. For all of Washington, it reported 1,171,972 candidates and 840,156 matches.
 
-![A large grey square stands for 926,178,250 possible pairs. A small orange square in its corner stands for the 2,627,358 pairs that pass the box test, and a blue square inside it for the 1,865,052 pairs that pass the exact test](filter-and-refine-pairs.png)
+![A large grey square stands for 456,274,510 possible pairs. A small pink square in its corner stands for the 1,171,972 pairs whose boxes overlap, and a blue square inside it for the 840,156 pairs that touch](filter-and-refine-pairs.png)
 
-The filter step left 0.28% of all pairs. The refine step ran the slow test on those and kept 71% of them.
+The filter step left 0.26% of all pairs. The refine step ran the slow test on those and kept 72% of them.
 
-Filter is cheap and touches many pairs. Refine is exact and touches few. Every spatial join in Sedona has this shape. The bounding boxes in a GeoParquet footer, from [One Sort, Many Indexes](https://sedona.apache.org/latest/blog/2026/11/06/one-sort-many-indexes/), are the same idea one level up: there the box lets a reader skip a whole row group.
+Filter is cheap and sees many pairs. Refine is exact and sees few. Every spatial join in Sedona has this shape. The bounding boxes in a GeoParquet footer, from [One Sort, Many Indexes](https://sedona.apache.org/latest/blog/2026/11/06/one-sort-many-indexes/), are the same idea one level up: there the box lets a reader skip a whole row group.
 
-*Cities and addresses from Overture Maps (divisions and addresses themes, release 2026-10-21.0). The tree is the R-tree in Sedona 1.9.1, built over the 305 city boxes. Counts from one `ST_Contains` join on Sedona 1.9.1 on a laptop.*
+*Cities and roads from Overture Maps (divisions and transportation themes, release 2026-10-21.0). The tree is the R-tree in Sedona 1.9.1, built over the 305 city boxes. Counts from one `ST_Intersects` join on Sedona 1.9.1 on a laptop.*
