@@ -543,23 +543,26 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
         val wkbWriter = new WKBWriter(if (geospatialTypes) 4 else 3, byteOrder, false)
         wkbWriter.setPreserveCoordinateDimensions(true)
         (row: SpecializedGetters, ordinal: Int) => {
-          val geom = SpatialTypeSupport.readGeometry(row, ordinal, dataType)
+          // A native geometry value of a 2.x file is stored as it is. It is ISO WKB of any of
+          // the four coordinate layouts, and it keeps the layout that an empty multi-geometry
+          // or collection declares, which geom cannot hold. geom is read from the same WKB, so
+          // the value is converted once. A 1.x file has no M coordinate, so its geometries are
+          // written again from geom.
+          val (geom, heldWkb) =
+            if (geospatialTypes) {
+              SpatialTypeSupport.readGeometryWithWkb(
+                row,
+                ordinal,
+                dataType,
+                ByteOrder.nativeOrder())
+            } else (SpatialTypeSupport.readGeometry(row, ordinal, dataType), None)
           SpatialTypeSupport.geometrySrid(dataType).foreach { expectedSrid =>
             GeoParquetNativeCrs.requireSrid(
               rootOrdinal.map(schema(_).name).getOrElse("<nested geometry>"),
               expectedSrid,
               geom.getSRID)
           }
-          // A native geometry value of a 2.x file is stored as it is. It is ISO WKB of any of
-          // the four coordinate layouts, and it keeps the layout that an empty multi-geometry
-          // or collection declares, which geom cannot hold. A 1.x file has no M coordinate, so
-          // its geometries are written again from geom.
-          val nativeWkb =
-            if (geospatialTypes) {
-              SpatialTypeSupport
-                .nativeGeometryWkb(row, ordinal, dataType, ByteOrder.nativeOrder())
-                .map(PublicWkbHeaderAdapter.toIsoWkb)
-            } else None
+          val nativeWkb = heldWkb.map(PublicWkbHeaderAdapter.toIsoWkb)
           // The writer marks a Z coordinate with the EWKB flag bit. GeoParquet asks for the WKB
           // of the OGC and ISO standards, which uses the type codes 1001 to 1007 instead. The
           // writer returns a new array without an SRID, so the type words change in that array.

@@ -54,12 +54,16 @@ object SpatialTypeSupport {
   def readGeometry(row: SpecializedGetters, ordinal: Int, dataType: DataType): Geometry =
     if (row.isNullAt(ordinal)) null else deserializeGeometry(row.get(ordinal, dataType), dataType)
 
-  /** The WKB of a native Spark geometry value. Sedona uses none before Spark 4.2. */
-  def nativeGeometryWkb(
+  /**
+   * The geometry that [[readGeometry]] returns and the WKB of a native Spark geometry value.
+   * Sedona uses no native values before Spark 4.2, so there is no WKB.
+   */
+  def readGeometryWithWkb(
       row: SpecializedGetters,
       ordinal: Int,
       dataType: DataType,
-      order: ByteOrder): Option[Array[Byte]] = None
+      order: ByteOrder): (Geometry, Option[Array[Byte]]) =
+    (readGeometry(row, ordinal, dataType), None)
 
   /** A native Spark geometry value that holds `wkb`. Sedona uses none before Spark 4.2. */
   def nativeGeometryFromWkb(wkb: Array[Byte], srid: Int, dataType: DataType): Option[Any] = None

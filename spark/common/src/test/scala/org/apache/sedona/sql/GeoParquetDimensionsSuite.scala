@@ -38,6 +38,7 @@ import org.apache.parquet.io.api.Binary
 import org.apache.parquet.schema.MessageTypeParser
 import org.apache.sedona.common.utils.GeometryEquality
 import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
 import org.apache.spark.sql.execution.datasources.geoparquet.ParquetGeospatialTypes
 import org.apache.spark.sql.types.{ArrayType, BinaryType, IntegerType, StructField, StructType}
 import org.json4s.{DefaultFormats, JNothing, JValue}
@@ -742,6 +743,22 @@ class GeoParquetDimensionsSuite extends TestBaseScala {
           assert(read.where("ST_Intersects(geometry, ST_Point(10, 20))").count() == 1)
         }
       }
+    }
+
+    it("reads a geometry value and the WKB that it holds in one step") {
+      val dataType = SpatialTypeSupport.geometryType(4326)
+      val wkb = isoWkb(2, true, Seq(1, 2, 3, 4, 5, 6, 7, 8), m = true)
+      val value = SpatialTypeSupport.serializeGeometry(
+        WKBReader.forDeclaredDimensions(4326).read(wkb),
+        dataType)
+      val row = new GenericInternalRow(Array[Any](value))
+      val (geometry, held) =
+        SpatialTypeSupport.readGeometryWithWkb(row, 0, dataType, ByteOrder.LITTLE_ENDIAN)
+      val expected = SpatialTypeSupport.readGeometry(row, 0, dataType)
+      assert(GeometryEquality.equalsIdentical(geometry, expected))
+      assert(geometry.getSRID == 4326)
+      // Only a native value holds WKB
+      assert(held.map(hex) == (if (SpatialTypeSupport.usesNativeTypes) Some(hex(wkb)) else None))
     }
 
     it("keeps the coordinate layout of each member of a geometry collection") {
