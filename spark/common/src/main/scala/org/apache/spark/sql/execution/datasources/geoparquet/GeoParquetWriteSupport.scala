@@ -30,7 +30,7 @@ import org.apache.spark.SPARK_VERSION_SHORT
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters
-import org.apache.spark.sql.catalyst.util.DateTimeUtils
+import org.apache.spark.sql.catalyst.util.{CaseInsensitiveMap, DateTimeUtils}
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData.{GEOPARQUET_COVERING_KEY, GEOPARQUET_COVERING_MODE_AUTO, GEOPARQUET_COVERING_MODE_KEY, GEOPARQUET_COVERING_MODE_LEGACY, GEOPARQUET_CRS_KEY, GEOPARQUET_VERSION_KEY, VERSION, createCoveringColumnMetadata}
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetWriteSupport.GeometryColumnInfo
 import org.apache.spark.sql.execution.datasources.geoparquet.internal.{DataSourceUtils, LegacyBehaviorPolicy, PortableSQLConf}
@@ -882,24 +882,71 @@ object GeoParquetWriteSupport {
     }
   }
 
-  /**
-   * The CRS option of each of `columns` that has one: the value of the key that is
-   * `geoparquet.crs.` and the name of the column. Spark takes the keys of the options of a write
-   * without regard to case, so a key names a column in any case. A key in the case of the column
-   * comes first, for columns that differ in case only.
-   */
+  /** The CRS option of each of `columns` that has one, under the key [[setWriteOptions]] set. */
   private[geoparquet] def columnCrsOptions(
       configuration: Configuration,
-      columns: Seq[String]): Map[String, String] = {
-    lazy val inLowerCase = configuration
-      .getPropsWithPrefix(GEOPARQUET_CRS_KEY + ".")
-      .asScala
-      .map { case (column, crs) => column.toLowerCase(java.util.Locale.ROOT) -> crs }
+      columns: Seq[String]): Map[String, String] =
     columns.flatMap { column =>
-      Option(configuration.get(GEOPARQUET_CRS_KEY + "." + column))
-        .orElse(inLowerCase.get(column.toLowerCase(java.util.Locale.ROOT)))
-        .map(column -> _)
+      Option(configuration.get(GEOPARQUET_CRS_KEY + "." + column)).map(column -> _)
     }.toMap
+
+  /** The keys of the options of a GeoParquet write that are complete as they are. */
+  private val WRITE_OPTION_KEYS = Seq(
+    GEOPARQUET_VERSION_KEY,
+    GEOPARQUET_CRS_KEY,
+    GEOPARQUET_COVERING_KEY,
+    GEOPARQUET_COVERING_MODE_KEY,
+    GEOPARQUET_SRID_LOOKAHEAD_KEY)
+
+  /** The keys of the options of a GeoParquet write that go on with the name of a column. */
+  private val COLUMN_WRITE_OPTION_KEYS =
+    Seq(GEOPARQUET_CRS_KEY + ".", GEOPARQUET_COVERING_KEY + ".")
+
+  /**
+   * Sets the GeoParquet options of a write in `configuration` under the keys that the writer
+   * reads there. Spark takes the keys of the options of a write without regard to case, and
+   * copies them to the Hadoop configuration as they were written, where a key in another case is
+   * another key. An option of the write replaces a value that the configuration has from
+   * elsewhere.
+   *
+   * A key that goes on with the name of a column is for the geometry column of that name. When no
+   * geometry column has the name in that case, the key is for the one whose name differs from it
+   * in case only, and is rejected when there are several of those.
+   */
+  def setWriteOptions(
+      options: Map[String, String],
+      schema: StructType,
+      configuration: Configuration): Unit = {
+    def lowerCase(text: String): String = text.toLowerCase(java.util.Locale.ROOT)
+    val geometryColumns =
+      schema.fields.toSeq
+        .filter(field => SpatialTypeSupport.isGeometry(field.dataType))
+        .map(_.name)
+    // The map that Spark hands over lists its keys in lower case, which would take the case
+    // from the column names in them
+    val asWritten = options match {
+      case insensitive: CaseInsensitiveMap[String @unchecked] => insensitive.originalMap
+      case other => other
+    }
+    asWritten.foreach { case (key, value) =>
+      WRITE_OPTION_KEYS.find(_ == lowerCase(key)) match {
+        case Some(complete) => configuration.set(complete, value)
+        case None =>
+          COLUMN_WRITE_OPTION_KEYS.find(lowerCase(key).startsWith).foreach { prefix =>
+            val name = key.substring(prefix.length)
+            val columns =
+              if (geometryColumns.contains(name)) Seq(name)
+              else geometryColumns.filter(lowerCase(_) == lowerCase(name))
+            if (columns.size > 1) {
+              throw new IllegalArgumentException(
+                s"Option $key names the geometry columns ${columns.mkString("'", "', '", "'")}, " +
+                  "which differ in case only. Write the name in the key in the case of the " +
+                  "column that the option is for.")
+            }
+            columns.foreach(column => configuration.set(prefix + column, value))
+          }
+      }
+    }
   }
 
   private def secondSrid(

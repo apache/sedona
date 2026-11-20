@@ -26,7 +26,7 @@ import org.apache.hadoop.mapreduce.{RecordWriter, TaskAttemptContext}
 import org.apache.parquet.hadoop.ParquetOutputFormat
 import org.apache.parquet.hadoop.codec.CodecConfig
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.UnsafeRow
+import org.apache.spark.sql.catalyst.expressions.{UnsafeProjection, UnsafeRow}
 import org.apache.spark.sql.execution.datasources.OutputWriter
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.types.StructType
@@ -60,7 +60,8 @@ class FirstGeometryOutputWriter(
 
   private val waiting = mutable.LinkedHashSet(columns: _*)
   private val srids = mutable.Map.empty[Int, Int]
-  private val heldBack = mutable.ArrayBuffer.empty[InternalRow]
+  private val heldBack = mutable.ArrayBuffer.empty[UnsafeRow]
+  private var toUnsafe: UnsafeProjection = _
   private var heldBackBytes = 0L
   private var recordWriter: RecordWriter[Void, InternalRow] = _
   private var closed = false
@@ -76,20 +77,32 @@ class FirstGeometryOutputWriter(
           waiting.remove(ordinal)
         }
       }
-      val bytes = row match {
-        case unsafe: UnsafeRow => unsafe.getSizeInBytes.toLong
-        case _ => FirstGeometryOutputWriter.ASSUMED_ROW_BYTES
-      }
-      if (waiting.isEmpty || heldBackBytes + bytes >= lookaheadBytes) {
-        // This row ends the wait, so it is written as it is. Only the rows before it are kept
-        // as copies, which keeps the rows held back under the limit however large this row is.
-        open()
-        recordWriter.write(null, row)
-      } else {
-        heldBack += row.copy()
-        heldBackBytes += bytes
+      // The row that ends the wait is written as it is: the one that shows the last geometry
+      // waited for, or the one that reaches the limit. Only the rows before it are kept, which
+      // keeps the rows held back under the limit however large this row is.
+      val kept =
+        if (waiting.isEmpty) None
+        else Some(asUnsafe(row)).filter(heldBackBytes + _.getSizeInBytes < lookaheadBytes)
+      kept match {
+        case Some(unsafe) =>
+          heldBack += unsafe.copy()
+          heldBackBytes += unsafe.getSizeInBytes
+        case None =>
+          open()
+          recordWriter.write(null, row)
       }
     }
+  }
+
+  /**
+   * A row of another kind may share its values with the caller, and does not tell its size. As an
+   * UnsafeRow it tells its size, and a copy of that owns all its values.
+   */
+  private def asUnsafe(row: InternalRow): UnsafeRow = row match {
+    case unsafe: UnsafeRow => unsafe
+    case other =>
+      if (toUnsafe == null) toUnsafe = UnsafeProjection.create(schema)
+      toUnsafe(other)
   }
 
   private def open(): Unit = {
@@ -109,7 +122,11 @@ class FirstGeometryOutputWriter(
         // writer again after its close() has failed, so the file is released here.
         release(error)
         throw error
-    } finally heldBack.clear()
+    } finally {
+      heldBack.clear()
+      // It keeps the last row that it converted
+      toUnsafe = null
+    }
   }
 
   private def release(error: Throwable): Unit = {
@@ -123,10 +140,4 @@ class FirstGeometryOutputWriter(
     closed = true
     recordWriter.close(context)
   }
-}
-
-object FirstGeometryOutputWriter {
-
-  /** The size counted for a held back row that does not report its own size. */
-  private val ASSUMED_ROW_BYTES = 1024L
 }

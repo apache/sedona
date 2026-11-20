@@ -32,8 +32,10 @@ import org.apache.parquet.hadoop.example.GroupReadSupport
 import org.apache.parquet.hadoop.metadata.{ColumnChunkMetaData, ParquetMetadata}
 import org.apache.parquet.hadoop.util.HadoopInputFile
 import org.apache.spark.sql.{DataFrame, Row}
-import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
-import org.apache.spark.sql.execution.datasources.geoparquet.{GeoParquetFileFormat, GeoParquetMetaData, ParquetGeospatialColumn, ParquetGeospatialTypes}
+import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.sql.catalyst.expressions.{GenericInternalRow, UnsafeProjection}
+import org.apache.spark.sql.execution.datasources.OutputWriter
+import org.apache.spark.sql.execution.datasources.geoparquet.{GeoParquetFileFormat, GeoParquetMetaData, GeoParquetWriteSupport, ParquetGeospatialColumn, ParquetGeospatialTypes}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.types.{BinaryType, StructField, StructType}
@@ -42,6 +44,7 @@ import org.json4s.jackson.JsonMethods.{compact, parse, render}
 
 import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory}
 
+import scala.collection.mutable
 import scala.util.Try
 
 /**
@@ -139,6 +142,42 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
       .option("geoparquet.version", "2.0.0")
       .options(options.toMap)
       .save(path)
+
+  /**
+   * Writes a GeoParquet 2 file to `path` with the writer that a write task gets, the way a caller
+   * does that hands it rows of its own.
+   */
+  private def withWriter(
+      path: String,
+      schema: StructType,
+      options: Map[String, String] = Map.empty,
+      writeSupport: Option[Class[_]] = None)(run: OutputWriter => Unit): Unit = {
+    val all = options + ("geoparquet.version" -> "2.0.0")
+    val job = Job.getInstance(sparkSession.sessionState.newHadoopConfWithOptions(all))
+    val factory = new GeoParquetFileFormat().prepareWrite(sparkSession, job, all, schema)
+    writeSupport.foreach { support =>
+      job.getConfiguration.set(ParquetOutputFormat.WRITE_SUPPORT_CLASS, support.getName)
+    }
+    val context = new TaskAttemptContextImpl(
+      job.getConfiguration,
+      new TaskAttemptID("test", 0, TaskType.MAP, 0, 0))
+    val writer = factory.newInstance(path, schema, context)
+    try run(writer)
+    catch {
+      case error: Throwable =>
+        Try(writer.close())
+        throw error
+    }
+    writer.close()
+  }
+
+  private def withCaseSensitiveNames(run: => Unit): Unit = {
+    val key = "spark.sql.caseSensitive"
+    val before = sparkSession.conf.get(key)
+    sparkSession.conf.set(key, "true")
+    try run
+    finally sparkSession.conf.set(key, before)
+  }
 
   /** The SRID of each geometry read back from `path`, None for a null geometry. */
   private def sridsIn(path: String, column: String = "geometry"): Seq[Option[Int]] =
@@ -403,21 +442,81 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
         }
       }
 
-      it("takes the CRS option of a column whatever the case of its name in the key") {
+      it("takes the CRS options whatever the case of their keys") {
         // Spark takes the keys of the options of a write without regard to case
         val df = udtColumns(Seq("Geom"), Seq(pointWithSrid(4326)))
-        withPath { path =>
-          writeVersion2(df, path, "geoparquet.crs.geom" -> webMercator)
-          assert(parquetCrs(path, "Geom").contains("EPSG:3857"))
+        Seq("geoparquet.crs.geom", "GeoParquet.CRS.Geom", "GEOPARQUET.CRS").foreach { key =>
+          withPath { path =>
+            writeVersion2(df, path, key -> webMercator)
+            assert(parquetCrs(path, "Geom").contains("EPSG:3857"), key)
+          }
         }
         withPath { path =>
           df.write
             .format("geoparquet")
             .option("geoparquet.version", "1.1.0")
-            .option("geoparquet.crs.GEOM", webMercator)
+            .option("GEOPARQUET.CRS.GEOM", webMercator)
             .save(path)
           assert(geoMetadata(footer(path)) \ "columns" \ "Geom" \ "crs" == parse(webMercator))
         }
+      }
+
+      it("takes the version whatever the case of its key") {
+        withPath { path =>
+          point(3857).write.format("geoparquet").option("GeoParquet.Version", "2.0.0").save(path)
+          assert(geometryColumn(footer(path)).exists(_.crs.contains("EPSG:3857")))
+        }
+      }
+
+      it("gives the CRS option of a column to that column only") {
+        withCaseSensitiveNames {
+          val df =
+            udtColumns(Seq("Geom", "geom"), Seq(pointWithSrid(4326), pointWithSrid(32610)))
+          withPath { path =>
+            writeVersion2(df, path, "geoparquet.crs.Geom" -> webMercator)
+            assert(parquetCrs(path, "Geom").contains("EPSG:3857"))
+            assert(parquetCrs(path, "geom").contains("EPSG:32610"))
+          }
+          withPath { path =>
+            df.write
+              .format("geoparquet")
+              .option("geoparquet.version", "1.1.0")
+              .option("geoparquet.crs.Geom", webMercator)
+              .save(path)
+            val columns = geoMetadata(footer(path)) \ "columns"
+            assert(columns \ "Geom" \ "crs" == parse(webMercator))
+            assert(columns \ "geom" \ "crs" \ "id" \ "code" == JInt(32610))
+          }
+        }
+      }
+
+      it("rejects a CRS option that names two columns in a case that neither has") {
+        withCaseSensitiveNames {
+          val df =
+            udtColumns(Seq("Geom", "geom"), Seq(pointWithSrid(4326), pointWithSrid(32610)))
+          withPath { path =>
+            val message = messages(intercept[Exception] {
+              writeVersion2(df, path, "geoparquet.crs.GEOM" -> webMercator)
+            })
+            assert(message.contains("geoparquet.crs.GEOM"))
+            assert(message.contains("'Geom'") && message.contains("'geom'"))
+          }
+        }
+      }
+
+      it("prefers a CRS option of the write to the Hadoop configuration") {
+        val hadoop = sparkSession.sparkContext.hadoopConfiguration
+        // An empty CRS leaves the CRS of the column out of the file
+        hadoop.set("geoparquet.crs.geometry", "")
+        try {
+          withPath { path =>
+            writeVersion2(
+              udtColumn(pointWithSrid(4326)),
+              path,
+              "geoparquet.crs.GEOMETRY" -> webMercator)
+            assert(parquetCrs(path, "geometry").contains("EPSG:3857"))
+          }
+        } finally hadoop.unset("geoparquet.crs.geometry")
       }
 
       it("keeps the limit of the rows held back apart from the CRS options of the columns") {
@@ -453,40 +552,78 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
         assert(openWriters == before)
       }
 
-      it("holds back a copy of a row only while it waits for a geometry") {
-        class CountingRow(values: Array[Any]) extends GenericInternalRow(values) {
-          var copies = 0
-          override def copy(): GenericInternalRow = {
-            copies += 1
-            super.copy()
-          }
-        }
+      it("writes the row that ends the wait for a geometry as it is") {
         val schema = StructType(Seq(StructField("geometry", GeometryUDT())))
-        def copies(geometries: Seq[Geometry], options: (String, String)*): Seq[Int] = {
-          var counted = Seq.empty[Int]
-          withPath { path =>
-            val all = options.toMap + ("geoparquet.version" -> "2.0.0")
-            val job = Job.getInstance(sparkSession.sessionState.newHadoopConfWithOptions(all))
-            val factory = new GeoParquetFileFormat().prepareWrite(sparkSession, job, all, schema)
-            val context = new TaskAttemptContextImpl(
-              job.getConfiguration,
-              new TaskAttemptID("test", 0, TaskType.MAP, 0, 0))
-            val writer = factory.newInstance(path, schema, context)
-            val rows = geometries.map { geometry =>
-              new CountingRow(
-                Array[Any](if (geometry == null) null else GeometryUDT().serialize(geometry)))
-            }
-            try rows.foreach(writer.write)
-            finally writer.close()
-            assert(sridsIn(path).size == geometries.size)
-            counted = rows.map(_.copies)
+        val toUnsafe = UnsafeProjection.create(schema)
+        def writtenAsGiven(
+            geometries: Seq[Geometry],
+            options: (String, String)*): Seq[Boolean] = {
+          val rows = geometries.map { geometry =>
+            val value = if (geometry == null) null else GeometryUDT().serialize(geometry)
+            toUnsafe(new GenericInternalRow(Array[Any](value))).copy()
           }
-          counted
+          RecordingWriteSupport.rows.clear()
+          withPath { path =>
+            withWriter(path, schema, options.toMap, Some(classOf[RecordingWriteSupport])) {
+              writer => rows.foreach(writer.write)
+            }
+            assert(sridsIn(path).size == geometries.size)
+          }
+          rows.zip(RecordingWriteSupport.rows).map { case (given, written) => given eq written }
         }
-        // The row that shows the last geometry waited for opens the file and is written as it is
-        assert(copies(Seq(null, pointWithSrid(3857), pointWithSrid(3857))) == Seq(1, 0, 0))
-        // So is the row that reaches the limit, however large it is
-        assert(copies(Seq(null, null), "geoparquet.srid.lookahead.bytes" -> "1") == Seq(0, 0))
+        // The row that shows the last geometry waited for opens the file, so only the row before
+        // it is written from a copy
+        assert(
+          writtenAsGiven(Seq(null, pointWithSrid(3857), pointWithSrid(3857))) ==
+            Seq(false, true, true))
+        // The row that reaches the limit opens the file too, however large it is
+        assert(
+          writtenAsGiven(Seq(null, null), "geoparquet.srid.lookahead.bytes" -> "1") ==
+            Seq(true, true))
+      }
+
+      describe("with rows that are not UnsafeRows") {
+        val schema =
+          StructType(
+            Seq(StructField("geometry", GeometryUDT()), StructField("payload", BinaryType)))
+        def serialized(srid: Int): Any = GeometryUDT().serialize(pointWithSrid(srid))
+
+        it("holds back a copy that shares no values with the row") {
+          val payload = Array[Byte](1)
+          val row = new GenericInternalRow(Array[Any](null, payload))
+          withPath { path =>
+            withWriter(path, schema) { writer =>
+              writer.write(row)
+              // The caller uses the row and its values again for the next one
+              payload(0) = 2
+              row.update(0, serialized(3857))
+              writer.write(row)
+            }
+            val payloads = sparkSession.read
+              .format("geoparquet")
+              .load(path)
+              .collect()
+              .map(_.getAs[Array[Byte]]("payload").toSeq)
+              .toSeq
+            assert(payloads == Seq(Seq[Byte](1), Seq[Byte](2)))
+            assert(sridsIn(path) == Seq(None, Some(3857)))
+          }
+        }
+
+        it("counts the bytes of a row held back against the limit") {
+          withPath { path =>
+            val error = intercept[Exception] {
+              withWriter(path, schema, Map("geoparquet.srid.lookahead.bytes" -> "4096")) {
+                writer =>
+                  // This row alone reaches the limit, so the file opens with an unknown CRS
+                  writer.write(new GenericInternalRow(Array[Any](null, new Array[Byte](8192))))
+                  writer.write(
+                    new GenericInternalRow(Array[Any](serialized(3857), Array[Byte](1))))
+              }
+            }
+            assert(messages(error).contains("had no geometry in the first rows"))
+          }
+        }
       }
 
       it("writes geospatial statistics for the row groups of a GEOMETRY column") {
@@ -555,4 +692,16 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
       }
     }
   }
+}
+
+/** Keeps the rows that the Parquet writer gets, to tell a row from a copy of it. */
+class RecordingWriteSupport extends GeoParquetWriteSupport {
+  override def write(row: InternalRow): Unit = {
+    RecordingWriteSupport.rows += row
+    super.write(row)
+  }
+}
+
+object RecordingWriteSupport {
+  val rows: mutable.ArrayBuffer[InternalRow] = mutable.ArrayBuffer.empty
 }

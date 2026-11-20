@@ -92,6 +92,7 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
     val parquetOptions = new ParquetOptions(options, sqlConf)
 
     val conf = ContextUtil.getConfiguration(job)
+    GeoParquetWriteSupport.setWriteOptions(options, dataSchema, conf)
     GeoParquetWriteSupport.requireSupportedVersion(conf)
 
     val committerClass =
