@@ -30,6 +30,7 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.parquet.example.data.simple.SimpleGroupFactory
 import org.apache.parquet.hadoop.{ParquetFileReader, ParquetReader}
+import org.apache.parquet.hadoop.metadata.ColumnChunkMetaData
 import org.apache.parquet.hadoop.util.HadoopInputFile
 import org.apache.parquet.column.Encoding
 import org.apache.parquet.hadoop.example.{ExampleParquetWriter, GroupReadSupport}
@@ -37,6 +38,8 @@ import org.apache.parquet.io.api.Binary
 import org.apache.parquet.schema.MessageTypeParser
 import org.apache.sedona.common.utils.GeometryEquality
 import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
+import org.apache.spark.sql.execution.datasources.geoparquet.ParquetGeospatialTypes
 import org.apache.spark.sql.types.{ArrayType, BinaryType, IntegerType, StructField, StructType}
 import org.json4s.{DefaultFormats, JNothing, JValue}
 import org.json4s.jackson.parseJson
@@ -360,6 +363,63 @@ class GeoParquetDimensionsSuite extends TestBaseScala {
     assertFile(path, expected, legacyUdt = legacyUdt)
   }
 
+  /**
+   * Geometries that a native Spark geometry value can hold and a JTS geometry cannot: an empty
+   * multi-geometry or collection has no coordinates to carry its Z and M dimensions.
+   */
+  private def emptyMembers(order: ByteOrder): Seq[Sample] = Seq(
+    Sample("empty-multipoint-m", isoWkb(4, false, order = order, m = true)),
+    Sample("empty-multipolygon-zm", isoWkb(6, true, order = order, m = true)),
+    Sample("empty-collection-z", isoWkb(7, true, order = order)),
+    Sample(
+      "collection-m-with-empty-member",
+      isoWkb(
+        7,
+        false,
+        children = Seq(
+          isoWkb(4, false, order = order, m = true),
+          isoWkb(1, false, Seq(1, 2, 4), order = order, m = true)),
+        order = order,
+        m = true)),
+    Sample(
+      "collection-z-with-empty-member",
+      isoWkb(
+        7,
+        true,
+        children =
+          Seq(isoWkb(5, true, order = order), isoWkb(1, true, Seq(1, 2, 3), order = order)),
+        order = order)))
+
+  /** The geometry type codes in the statistics of the first row group of a file. */
+  private def rowGroupTypes(file: File): Set[Int] = {
+    val reader =
+      ParquetFileReader.open(HadoopInputFile.fromPath(new Path(file.toURI), new Configuration()))
+    try {
+      val chunk = reader.getFooter.getBlocks
+        .get(0)
+        .getColumns
+        .asScala
+        .find(_.getPath.toDotString == "geometry")
+        .get
+      // Reflection, because the Parquet library of Spark 3.5 and 4.0 has no such statistics
+      val geospatial = "org.apache.parquet.column.statistics.geospatial."
+      val statistics =
+        classOf[ColumnChunkMetaData].getMethod("getGeospatialStatistics").invoke(chunk)
+      val types = Class
+        .forName(geospatial + "GeospatialStatistics")
+        .getMethod("getGeospatialTypes")
+        .invoke(statistics)
+      Class
+        .forName(geospatial + "GeospatialTypes")
+        .getMethod("getTypes")
+        .invoke(types)
+        .asInstanceOf[java.util.Set[Integer]]
+        .asScala
+        .map(_.intValue)
+        .toSet
+    } finally reader.close()
+  }
+
   describe("GeoParquet declared coordinate dimensions") {
     val representations = if (SpatialTypeSupport.usesNativeTypes) Seq(false, true) else Seq(false)
     for (legacyUdt <- representations; dictionary <- Seq(false, true)) {
@@ -397,6 +457,29 @@ class GeoParquetDimensionsSuite extends TestBaseScala {
               }
             }
           }
+        }
+      }
+    }
+    // The WKB reader completes a line of one point and a ring that is not closed. Spark's native
+    // type takes neither as it is.
+    for (legacyUdt <- representations) {
+      it(s"reads a line of one point and a ring that is not closed (legacyUdt=$legacyUdt)") {
+        withDirectory { directory =>
+          val ring = ByteBuffer.allocate(13 + 6 * 8).order(ByteOrder.LITTLE_ENDIAN)
+          ring.put(1.toByte).putInt(3).putInt(1).putInt(3)
+          Seq(0d, 0d, 1d, 0d, 1d, 1d).foreach(ring.putDouble)
+          val values = Seq(
+            Sample("point", isoWkb(1, false, Seq(10, 20))),
+            Sample("line-of-one-point", isoWkb(2, false, Seq(1, 2))),
+            Sample("open-ring", ring.array()))
+          val fixture = new File(directory, "fixture.parquet")
+          writeFixture(fixture, dictionary = false, values)
+          assertFile(
+            fixture.getPath,
+            values,
+            repetitions = 4,
+            expectedSrid = 4326,
+            legacyUdt = legacyUdt)
         }
       }
     }
@@ -474,6 +557,231 @@ class GeoParquetDimensionsSuite extends TestBaseScala {
         assert(hex(member.getBytes) == hex(pointZ))
         assert(hex(record.getGroup("holder", 0).getBinary("g", 0).getBytes) == hex(pointZ))
       }
+    }
+
+    // GeoParquet 2.0 has M coordinates, which GeoParquet 1.1 has no place for. It needs the
+    // GEOMETRY logical type, which the Parquet library has since 1.16.0.
+    if (ParquetGeospatialTypes.supported) {
+      for (legacyUdt <- representations) {
+        it(s"keeps M coordinates in a GeoParquet 2.0 file (legacyUdt=$legacyUdt)") {
+          withDirectory { directory =>
+            val order = ByteOrder.nativeOrder()
+            val measured = Seq(
+              Sample("xym", isoWkb(1, false, Seq(10, 20, 99), order = order, m = true)),
+              Sample("xyzm", isoWkb(1, true, Seq(10, 20, 30, 99), order = order, m = true)),
+              Sample(
+                "line-xym",
+                isoWkb(2, false, Seq(1, 2, 90, 3, 4, 99), order = order, m = true)),
+              Sample(
+                "line-xyzm",
+                isoWkb(2, true, Seq(1, 2, 3, 90, 3, 4, 5, 99), order = order, m = true)),
+              Sample("empty-line-xym", isoWkb(2, false, order = order, m = true)),
+              Sample("empty-polygon-xyzm", isoWkb(3, true, order = order, m = true)),
+              Sample("xy", isoWkb(1, false, Seq(10, 20), order = order)),
+              Sample("xyz", isoWkb(1, true, Seq(10, 20, 30), order = order))) ++
+              (if (SpatialTypeSupport.usesNativeTypes && !legacyUdt) emptyMembers(order)
+               else Seq.empty)
+            val path = new File(directory, "measured").getPath
+            val sedonaType = legacyUdt || !SpatialTypeSupport.usesNativeTypes
+            val df = if (legacyUdt) {
+              val rows = measured.zipWithIndex.map { case (sample, index) =>
+                Row(index, WKBReader.forDeclaredDimensions().read(sample.wkb))
+              }
+              sparkSession.createDataFrame(rows.asJava, legacySchema)
+            } else {
+              val rows = measured.zipWithIndex.map { case (sample, index) =>
+                Row(index, sample.wkb)
+              }
+              val schema = StructType(
+                Seq(
+                  StructField("id", IntegerType, nullable = false),
+                  StructField("wkb", BinaryType, nullable = false)))
+              sparkSession
+                .createDataFrame(rows.asJava, schema)
+                .selectExpr("id", "ST_GeomFromWKB(wkb) AS geometry")
+            }
+            val writer =
+              df.coalesce(1).write.format("geoparquet").option("geoparquet.version", "2.0.0")
+            // A column of Sedona's own geometry type has no SRID to take the CRS from
+            (if (sedonaType) writer.option("geoparquet.crs", "null") else writer).save(path)
+
+            val file = new File(path).listFiles().filter(_.getName.endsWith(".parquet")).head
+            val reader =
+              ParquetReader.builder(new GroupReadSupport(), new Path(file.toURI)).build()
+            val stored =
+              try Iterator.continually(reader.read()).takeWhile(_ != null).toList
+              finally reader.close()
+            assert(stored.size == measured.size)
+            stored.sortBy(_.getInteger("id", 0)).zip(measured).foreach { case (record, sample) =>
+              withClue(s"${sample.name}: ") {
+                assert(hex(record.getBinary("geometry", 0).getBytes) == hex(sample.wkb))
+              }
+            }
+            implicit val formats: org.json4s.Formats = DefaultFormats
+            val metadata = columnMetadata(file)
+            val layouts = Seq("", " Z", " M", " ZM")
+            val kinds = Seq(
+              "Point",
+              "LineString",
+              "Polygon",
+              "MultiPoint",
+              "MultiLineString",
+              "MultiPolygon",
+              "GeometryCollection")
+            def typeName(code: Int): String = kinds(code % 1000 - 1) + layouts(code / 1000)
+            assert(
+              (metadata \ "geometry_types").extract[Seq[String]].toSet ==
+                measured.map(sample => typeName(typeCode(sample.wkb))).toSet)
+            // The Parquet library takes the types of the row-group statistics from the
+            // geometries that have coordinates.
+            val withCoordinates =
+              measured.filterNot(s => WKBReader.forDeclaredDimensions().read(s.wkb).isEmpty)
+            assert(rowGroupTypes(file) == withCoordinates.map(s => typeCode(s.wkb)).toSet)
+            // The bounds of X, Y, Z and M, first the lower ones and then the upper ones. The M
+            // bounds cover the XYM geometries too. A member of a collection of the native
+            // column has the lowest M.
+            val lowestM = if (SpatialTypeSupport.usesNativeTypes && !legacyUdt) 4 else 90
+            assert(
+              (metadata \ "bbox").extract[Seq[Double]] ==
+                Seq(1, 2, 3, lowestM, 10, 20, 30, 99))
+            assertFile(path, measured, legacyUdt = legacyUdt)
+            if (SpatialTypeSupport.usesNativeTypes && !legacyUdt) {
+              // The native values hold the stored WKB, empty members included
+              val read = readFile(path, legacyUdt = false)
+                .selectExpr("id", "hex(ST_AsBinary(geometry))")
+                .collect()
+                .sortBy(_.getInt(0))
+              read.zip(measured).foreach { case (row, sample) =>
+                withClue(s"${sample.name}, read: ") {
+                  assert(row.getString(1) == hex(sample.wkb))
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // The bbox of a GeoParquet 2.0 column lists the lower bounds of its dimensions and then the
+    // upper bounds: X and Y, then Z, then M. It has no form with M bounds and without Z bounds.
+    val nan = Double.NaN
+    val xy = isoWkb(1, false, Seq(10, 20))
+    val boundsCases = Seq[(String, String, Seq[Array[Byte]], Seq[Double])](
+      (
+        "the X and Y bounds of XYM geometries",
+        "2.0.0",
+        Seq(isoWkb(1, false, Seq(1, 2, 4), m = true), xy),
+        Seq(1, 2, 10, 20)),
+      (
+        "the X and Y bounds of XYM geometries with an infinite M coordinate",
+        "2.0.0",
+        Seq(isoWkb(1, false, Seq(1, 2, Double.PositiveInfinity), m = true), xy),
+        Seq(1, 2, 10, 20)),
+      (
+        "the X and Y bounds of XYZ geometries with an infinite Z coordinate in a GeoParquet 1.1 file",
+        "1.1.0",
+        Seq(isoWkb(1, true, Seq(1, 2, Double.PositiveInfinity)), xy),
+        Seq(1, 2, 10, 20)),
+      (
+        "the Z bounds of XYZ geometries",
+        "2.0.0",
+        Seq(isoWkb(1, true, Seq(1, 2, 7)), isoWkb(1, true, Seq(3, 4, -5)), xy),
+        Seq(1, 2, -5, 10, 20, 7)),
+      (
+        "the Z and M bounds of XYZ and XYM geometries",
+        "2.0.0",
+        Seq(isoWkb(1, true, Seq(1, 2, 7)), isoWkb(1, false, Seq(3, 4, 60), m = true), xy),
+        Seq(1, 2, 7, 60, 10, 20, 7, 60)),
+      (
+        "the Z bounds without the Z coordinates that are NaN",
+        "2.0.0",
+        Seq(isoWkb(2, true, Seq(1, 2, nan, 3, 4, 5)), xy),
+        Seq(1, 2, 5, 10, 20, 5)),
+      (
+        "the X and Y bounds of XYZ geometries without a Z coordinate that is a number",
+        "2.0.0",
+        Seq(isoWkb(1, true, Seq(1, 2, nan)), xy),
+        Seq(1, 2, 10, 20)),
+      (
+        "the X and Y bounds of XYZM geometries without a Z coordinate that is a number",
+        "2.0.0",
+        Seq(isoWkb(1, true, Seq(1, 2, nan, 60), m = true), xy),
+        Seq(1, 2, 10, 20)),
+      (
+        "the X, Y and Z bounds of XYZM geometries without an M coordinate that is a number",
+        "2.0.0",
+        Seq(isoWkb(1, true, Seq(1, 2, 7, nan), m = true), xy),
+        Seq(1, 2, 7, 10, 20, 7)),
+      (
+        "the X and Y bounds of XYZ geometries in a GeoParquet 1.1 file",
+        "1.1.0",
+        Seq(isoWkb(1, true, Seq(1, 2, 7)), xy),
+        Seq(1, 2, 10, 20)))
+    def columnMetadataOf(version: String, geometries: Seq[Array[Byte]])(
+        check: (JValue, String) => Unit): Unit = withDirectory { directory =>
+      val path = new File(directory, "bounds").getPath
+      val rows = geometries.zipWithIndex.map { case (wkb, index) =>
+        Row(index, WKBReader.forDeclaredDimensions().read(wkb))
+      }
+      sparkSession
+        .createDataFrame(rows.asJava, legacySchema)
+        .coalesce(1)
+        .write
+        .format("geoparquet")
+        .option("geoparquet.version", version)
+        .option("geoparquet.crs", "null")
+        .save(path)
+      val file = new File(path).listFiles().filter(_.getName.endsWith(".parquet")).head
+      check(columnMetadata(file), path)
+    }
+    for ((name, version, geometries, expected) <- boundsCases
+      if version == "1.1.0" || ParquetGeospatialTypes.supported) {
+      it(s"writes $name") {
+        columnMetadataOf(version, geometries) { (metadata, _) =>
+          implicit val formats: org.json4s.Formats = DefaultFormats
+          assert((metadata \ "bbox").extract[Seq[Double]] == expected)
+        }
+      }
+    }
+
+    // JSON has no number for a bound that is infinite or NaN, and the bbox has to state the range
+    // of every dimension that it covers, so such a column has no bbox.
+    val infinity = Double.PositiveInfinity
+    val unboundedCases = Seq[(String, String, Seq[Array[Byte]])](
+      (
+        "an M coordinate is infinite",
+        "2.0.0",
+        Seq(isoWkb(1, true, Seq(1, 2, 7, infinity), m = true), xy)),
+      ("a Z coordinate is infinite", "2.0.0", Seq(isoWkb(1, true, Seq(1, 2, -infinity)), xy)),
+      ("an X coordinate is infinite", "2.0.0", Seq(isoWkb(1, false, Seq(infinity, 2)), xy)),
+      ("a Y coordinate is infinite", "1.1.0", Seq(isoWkb(1, false, Seq(1, -infinity)), xy)),
+      ("a Y coordinate is NaN", "1.1.0", Seq(isoWkb(1, false, Seq(1, nan)), xy)))
+    for ((name, version, geometries) <- unboundedCases
+      if version == "1.1.0" || ParquetGeospatialTypes.supported) {
+      it(s"writes no bbox to a GeoParquet $version file when $name") {
+        columnMetadataOf(version, geometries) { (metadata, path) =>
+          assert(metadata \ "bbox" == JNothing)
+          val read = readFile(path, legacyUdt = true)
+          assert(read.count() == geometries.size)
+          assert(read.where("ST_Intersects(geometry, ST_Point(10, 20))").count() == 1)
+        }
+      }
+    }
+
+    it("reads a geometry value and the WKB that it holds in one step") {
+      val dataType = SpatialTypeSupport.geometryType(4326)
+      val wkb = isoWkb(2, true, Seq(1, 2, 3, 4, 5, 6, 7, 8), m = true)
+      val value = SpatialTypeSupport.serializeGeometry(
+        WKBReader.forDeclaredDimensions(4326).read(wkb),
+        dataType)
+      val row = new GenericInternalRow(Array[Any](value))
+      val (geometry, held) =
+        SpatialTypeSupport.readGeometryWithWkb(row, 0, dataType, ByteOrder.LITTLE_ENDIAN)
+      val expected = SpatialTypeSupport.readGeometry(row, 0, dataType)
+      assert(GeometryEquality.equalsIdentical(geometry, expected))
+      assert(geometry.getSRID == 4326)
+      // Only a native value holds WKB
+      assert(held.map(hex) == (if (SpatialTypeSupport.usesNativeTypes) Some(hex(wkb)) else None))
     }
 
     it("keeps the coordinate layout of each member of a geometry collection") {

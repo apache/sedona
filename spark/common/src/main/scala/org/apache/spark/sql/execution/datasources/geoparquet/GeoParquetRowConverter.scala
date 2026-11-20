@@ -226,9 +226,18 @@ private[geoparquet] class GeoParquetRowConverter(
         if (parquetType.isPrimitive) {
           new ParquetPrimitiveConverter(updater) {
             override def addBinary(value: Binary): Unit = {
-              val geom = WKBReader.forDeclaredDimensions().read(value.getBytes)
-              geom.setSRID(srid)
-              this.updater.set(SpatialTypeSupport.serializeGeometry(geom, catalystType))
+              val wkb = value.getBytes
+              // A native geometry value takes the stored WKB as it is. A JTS geometry in
+              // between would lose the Z and M dimensions that an empty multi-geometry or
+              // collection declares. Spark does not take all WKB as it is: a line of one
+              // point, for example, is read into a JTS geometry, which completes it.
+              val geometry =
+                SpatialTypeSupport.nativeGeometryFromWkb(wkb, srid, catalystType).getOrElse {
+                  val geom = WKBReader.forDeclaredDimensions().read(wkb)
+                  geom.setSRID(srid)
+                  SpatialTypeSupport.serializeGeometry(geom, catalystType)
+                }
+              this.updater.set(geometry)
             }
           }
         } else {

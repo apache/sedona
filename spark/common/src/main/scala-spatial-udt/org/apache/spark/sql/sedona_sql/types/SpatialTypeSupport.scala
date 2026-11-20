@@ -18,6 +18,8 @@
  */
 package org.apache.spark.sql.sedona_sql.types
 
+import java.nio.ByteOrder
+
 import org.apache.sedona.common.S2Geography.Geography
 import org.apache.sedona.common.geography.Constructors
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
@@ -51,6 +53,20 @@ object SpatialTypeSupport {
     if (value == null) null else GeographyUDT.deserialize(value)
   def readGeometry(row: SpecializedGetters, ordinal: Int, dataType: DataType): Geometry =
     if (row.isNullAt(ordinal)) null else deserializeGeometry(row.get(ordinal, dataType), dataType)
+
+  /**
+   * The geometry that [[readGeometry]] returns and the WKB of a native Spark geometry value.
+   * Sedona uses no native values before Spark 4.2, so there is no WKB.
+   */
+  def readGeometryWithWkb(
+      row: SpecializedGetters,
+      ordinal: Int,
+      dataType: DataType,
+      order: ByteOrder): (Geometry, Option[Array[Byte]]) =
+    (readGeometry(row, ordinal, dataType), None)
+
+  /** A native Spark geometry value that holds `wkb`. Sedona uses none before Spark 4.2. */
+  def nativeGeometryFromWkb(wkb: Array[Byte], srid: Int, dataType: DataType): Option[Any] = None
   def externalGeometry(value: Geometry): Any = value
   def externalGeometry(value: Geometry, dataType: DataType): Any = value
   def fromExternalGeometry(value: Any): Geometry = value.asInstanceOf[Geometry]

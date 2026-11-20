@@ -147,6 +147,43 @@ object SpatialTypeSupport {
   }
   def readGeometry(row: SpecializedGetters, ordinal: Int, dataType: DataType): Geometry =
     if (row.isNullAt(ordinal)) null else deserializeGeometry(row.get(ordinal, dataType), dataType)
+
+  /**
+   * The geometry that [[readGeometry]] returns and, for a native geometry value, the ISO WKB that
+   * the value holds, None for a value of Sedona's own geometry type. The geometry is read from
+   * that WKB, so a native value is converted to WKB once. A native value keeps the Z and M
+   * dimensions that an empty multi-geometry or collection declares. A JTS geometry has no
+   * coordinates to keep them in, so they are lost when such a value is written from the geometry.
+   */
+  def readGeometryWithWkb(
+      row: SpecializedGetters,
+      ordinal: Int,
+      dataType: DataType,
+      order: ByteOrder): (Geometry, Option[Array[Byte]]) = dataType match {
+    case nativeType: GeometryType if !row.isNullAt(ordinal) =>
+      val native = NativeGeometry.fromValue(row.get(ordinal, dataType).asInstanceOf[BinaryView])
+      val wkb = native.toWkb(order)
+      val result = WKBReader.forDeclaredDimensions(native.srid()).read(wkb)
+      nativeType.assertSridAllowedForType(result.getSRID)
+      (result, Some(wkb))
+    case _ => (readGeometry(row, ordinal, dataType), None)
+  }
+
+  /**
+   * A native geometry value that holds `wkb` as it is. None when `dataType` is Sedona's own
+   * geometry type, and when Spark does not take the WKB as it is: a line of one point or a ring
+   * that is not closed, for example, which the WKB reader completes. The caller then builds the
+   * value from a JTS geometry. The value keeps what a JTS geometry would lose, as
+   * [[readGeometryWithWkb]] describes.
+   */
+  def nativeGeometryFromWkb(wkb: Array[Byte], srid: Int, dataType: DataType): Option[Any] =
+    dataType match {
+      case native: GeometryType =>
+        native.assertSridAllowedForType(srid)
+        try Some(NativeGeometry.fromWkb(PublicWkbHeaderAdapter.toIsoWkb(wkb), srid).getValue)
+        catch { case _: IllegalArgumentException => None }
+      case _ => None
+    }
   def externalGeometry(value: Geometry): Any = externalGeometry(value, geometryType)
   def externalGeometry(value: Geometry, dataType: DataType): Any = dataType match {
     case _: GeometryUDT => value
