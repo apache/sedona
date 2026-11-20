@@ -73,8 +73,11 @@ object GeoParquetUtils {
       val geometryFiles = if (filesByType.data.nonEmpty) filesByType.data else filesToTouch
       GeoParquetFileFormat.mergeGeometrySchemasInParallel(parameters, geometryFiles, sparkSession)
     } else None
-    val inferred =
-      GeoParquetFileFormat.mergeSchemasInParallel(parameters, filesToTouch, sparkSession)
+    val inferred = GeoParquetFileFormat.mergeSchemasInParallel(
+      parameters,
+      filesToTouch,
+      sparkSession,
+      geometrySridsFromElsewhere = geometrySchema.isDefined)
     geometrySchema match {
       case None => inferred
       case Some(geometryFields) =>

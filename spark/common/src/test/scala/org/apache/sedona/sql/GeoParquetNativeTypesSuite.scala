@@ -280,6 +280,92 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
     }
   }
 
+  describe("Reading files that state no CRS for a geometry column without geometries") {
+    // A writer that takes the CRS of a column from its geometries has none to state for a file
+    // without a geometry in the column. Such a file fits the CRS that the other files state.
+    val schema = StructType(Seq(StructField("geometry", GeometryUDT())))
+    val mercator = compact(render(GeoParquetMetaData.sridToProjJson(3857).get))
+
+    def frame(geometries: Geometry*): DataFrame = sparkSession.createDataFrame(
+      sparkSession.sparkContext.parallelize(geometries.map(Row(_)), 1),
+      schema)
+
+    def pointWithSrid(srid: Int): Geometry = {
+      val point = new GeometryFactory().createPoint(new Coordinate(1, 2))
+      point.setSRID(srid)
+      point
+    }
+
+    def append(df: DataFrame, path: String, version: String, options: (String, String)*): Unit =
+      df.write
+        .format("geoparquet")
+        .mode("append")
+        .option("geoparquet.version", version)
+        .options(options.toMap)
+        .save(path)
+
+    /** The SRID of each geometry read from `path`, None for a null, in a stable order. */
+    def srids(path: String, options: (String, String)*): Seq[Option[Int]] =
+      sparkSession.read
+        .format("geoparquet")
+        .options(options.toMap)
+        .load(path)
+        .collect()
+        .map(row => Option(row.getJtsGeometry("geometry")).map(_.getSRID))
+        .toSeq
+        .sortBy(_.getOrElse(-1))
+
+    val versions = if (libraryHasGeospatialTypes) Seq("1.1.0", "2.0.0") else Seq("1.1.0")
+    for (version <- versions) {
+      // A GeoParquet 2 file of a GeometryUDT column needs the CRS option to be written at all
+      def unknown: Seq[(String, String)] =
+        if (version == "2.0.0") Seq("geoparquet.crs" -> "null") else Seq.empty
+      def stated: Seq[(String, String)] =
+        if (version == "2.0.0") Seq("geoparquet.crs" -> mercator) else Seq.empty
+
+      for (mergeSchema <- Seq("false", "true")) {
+        it(
+          s"reads a $version file without geometries next to a file with a CRS (mergeSchema=$mergeSchema)") {
+          withPath { path =>
+            append(frame(null, null), path, version, unknown: _*)
+            append(frame(pointWithSrid(3857)), path, version, stated: _*)
+            assert(srids(path, "mergeSchema" -> mergeSchema) == Seq(None, None, Some(3857)))
+          }
+        }
+      }
+
+      it(s"reads $version files without geometries as a column of unknown CRS") {
+        withPath { path =>
+          append(frame(null), path, version, unknown: _*)
+          append(frame(null, null), path, version, unknown: _*)
+          assert(srids(path) == Seq(None, None, None))
+        }
+      }
+
+      if (SpatialTypeSupport.usesNativeTypes) {
+        it(s"rejects a $version file with geometries of unknown CRS next to a file with a CRS") {
+          withPath { path =>
+            append(frame(null, pointWithSrid(0)), path, version, unknown: _*)
+            append(frame(pointWithSrid(3857)), path, version, stated: _*)
+            val message = messages(intercept[Exception](srids(path)))
+            assert(message.contains("GEOMETRY(0)") && message.contains("GEOMETRY(3857)"))
+          }
+        }
+
+        it(s"rejects a geometry of unknown CRS in a $version file read with an SRID") {
+          withPath { path =>
+            append(frame(null, pointWithSrid(0)), path, version, unknown: _*)
+            val withSrid =
+              StructType(Seq(StructField("geometry", SpatialTypeSupport.geometryType(3857))))
+            val read = sparkSession.read.format("geoparquet").schema(withSrid).load(path)
+            val message = messages(intercept[Exception](read.collect()))
+            assert(message.contains("requires SRID 3857 but contains SRID 0"))
+          }
+        }
+      }
+    }
+  }
+
   describe("Writing GeoParquet 2.0") {
     if (libraryHasGeospatialTypes) {
       val webMercator = compact(render(GeoParquetMetaData.sridToProjJson(3857).get))

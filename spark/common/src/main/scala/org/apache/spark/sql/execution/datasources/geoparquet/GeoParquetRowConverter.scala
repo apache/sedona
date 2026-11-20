@@ -220,12 +220,19 @@ private[geoparquet] class GeoParquetRowConverter(
         val srid = schemaConverter.geometrySrid(
           parquetType,
           native = SpatialTypeSupport.isNativeGeometry(catalystType))
-        SpatialTypeSupport.geometrySrid(catalystType).foreach { targetSrid =>
-          GeoParquetNativeCrs.requireSrid(parquetType.getName, targetSrid, srid)
+        val targetSrid = SpatialTypeSupport.geometrySrid(catalystType)
+        // A file states no CRS for a column that it has no geometry in, which fits any SRID.
+        // The check for such a column therefore waits for a geometry.
+        val waitsForGeometry = srid == 0 && parquetType.isPrimitive && targetSrid.exists(_ != 0)
+        if (!waitsForGeometry) {
+          targetSrid.foreach(GeoParquetNativeCrs.requireSrid(parquetType.getName, _, srid))
         }
         if (parquetType.isPrimitive) {
           new ParquetPrimitiveConverter(updater) {
             override def addBinary(value: Binary): Unit = {
+              if (waitsForGeometry) {
+                GeoParquetNativeCrs.requireSrid(parquetType.getName, targetSrid.get, srid)
+              }
               val wkb = value.getBytes
               // A native geometry value takes the stored WKB as it is. A JTS geometry in
               // between would lose the Z and M dimensions that an empty multi-geometry or

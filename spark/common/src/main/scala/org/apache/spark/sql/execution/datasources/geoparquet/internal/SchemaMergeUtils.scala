@@ -67,13 +67,16 @@ object SchemaMergeUtils extends Logging {
 
   /**
    * Figures out a merged Parquet/ORC schema with a distributed Spark job.
+   *
+   * @param merge
+   *   merges the schemas of two sets of files, given whether the analysis is case sensitive
    */
   def mergeSchemasInParallel(
       sparkSession: SparkSession,
       parameters: Map[String, String],
       files: Seq[FileStatus],
-      schemaReader: (Seq[FileStatus], Configuration, Boolean) => Seq[StructType])
-      : Option[StructType] = {
+      schemaReader: (Seq[FileStatus], Configuration, Boolean) => Seq[StructType],
+      merge: (StructType, StructType, Boolean) => StructType = safeMerge): Option[StructType] = {
     val hadoopConf = sparkSession.sessionState.newHadoopConfWithOptions(parameters)
     // Workaround "The file might have been updated during query execution" on Databricks
     hadoopConf.set("spark.databricks.scan.modTimeCheck.enabled", "false")
@@ -124,7 +127,7 @@ object SchemaMergeUtils extends Logging {
             var mergedSchema = schemas.head
             schemas.tail.foreach { schema =>
               try {
-                mergedSchema = safeMerge(mergedSchema, schema, caseSensitive)
+                mergedSchema = merge(mergedSchema, schema, caseSensitive)
               } catch {
                 case cause: SparkException =>
                   throw QueryExecutionErrors.failedMergingSchemaError(mergedSchema, schema, cause)
@@ -141,7 +144,7 @@ object SchemaMergeUtils extends Logging {
       var finalSchema = partiallyMergedSchemas.head
       partiallyMergedSchemas.tail.foreach { schema =>
         try {
-          finalSchema = safeMerge(finalSchema, schema, caseSensitive)
+          finalSchema = merge(finalSchema, schema, caseSensitive)
         } catch {
           case cause: SparkException =>
             throw QueryExecutionErrors.failedMergingSchemaError(finalSchema, schema, cause)
