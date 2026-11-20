@@ -649,6 +649,16 @@ class GeoParquetDimensionsSuite extends TestBaseScala {
         Seq(isoWkb(1, false, Seq(1, 2, 4), m = true), xy),
         Seq(1, 2, 10, 20)),
       (
+        "the X and Y bounds of XYM geometries with an infinite M coordinate",
+        "2.0.0",
+        Seq(isoWkb(1, false, Seq(1, 2, Double.PositiveInfinity), m = true), xy),
+        Seq(1, 2, 10, 20)),
+      (
+        "the X and Y bounds of XYZ geometries with an infinite Z coordinate in a GeoParquet 1.1 file",
+        "1.1.0",
+        Seq(isoWkb(1, true, Seq(1, 2, Double.PositiveInfinity)), xy),
+        Seq(1, 2, 10, 20)),
+      (
         "the Z bounds of XYZ geometries",
         "2.0.0",
         Seq(isoWkb(1, true, Seq(1, 2, 7)), isoWkb(1, true, Seq(3, 4, -5)), xy),
@@ -683,25 +693,53 @@ class GeoParquetDimensionsSuite extends TestBaseScala {
         "1.1.0",
         Seq(isoWkb(1, true, Seq(1, 2, 7)), xy),
         Seq(1, 2, 10, 20)))
+    def columnMetadataOf(version: String, geometries: Seq[Array[Byte]])(
+        check: (JValue, String) => Unit): Unit = withDirectory { directory =>
+      val path = new File(directory, "bounds").getPath
+      val rows = geometries.zipWithIndex.map { case (wkb, index) =>
+        Row(index, WKBReader.forDeclaredDimensions().read(wkb))
+      }
+      sparkSession
+        .createDataFrame(rows.asJava, legacySchema)
+        .coalesce(1)
+        .write
+        .format("geoparquet")
+        .option("geoparquet.version", version)
+        .option("geoparquet.crs", "null")
+        .save(path)
+      val file = new File(path).listFiles().filter(_.getName.endsWith(".parquet")).head
+      check(columnMetadata(file), path)
+    }
     for ((name, version, geometries, expected) <- boundsCases
       if version == "1.1.0" || ParquetGeospatialTypes.supported) {
       it(s"writes $name") {
-        withDirectory { directory =>
-          val path = new File(directory, "bounds").getPath
-          val rows = geometries.zipWithIndex.map { case (wkb, index) =>
-            Row(index, WKBReader.forDeclaredDimensions().read(wkb))
-          }
-          sparkSession
-            .createDataFrame(rows.asJava, legacySchema)
-            .coalesce(1)
-            .write
-            .format("geoparquet")
-            .option("geoparquet.version", version)
-            .option("geoparquet.crs", "null")
-            .save(path)
-          val file = new File(path).listFiles().filter(_.getName.endsWith(".parquet")).head
+        columnMetadataOf(version, geometries) { (metadata, _) =>
           implicit val formats: org.json4s.Formats = DefaultFormats
-          assert((columnMetadata(file) \ "bbox").extract[Seq[Double]] == expected)
+          assert((metadata \ "bbox").extract[Seq[Double]] == expected)
+        }
+      }
+    }
+
+    // JSON has no number for a bound that is infinite or NaN, and the bbox has to state the range
+    // of every dimension that it covers, so such a column has no bbox.
+    val infinity = Double.PositiveInfinity
+    val unboundedCases = Seq[(String, String, Seq[Array[Byte]])](
+      (
+        "an M coordinate is infinite",
+        "2.0.0",
+        Seq(isoWkb(1, true, Seq(1, 2, 7, infinity), m = true), xy)),
+      ("a Z coordinate is infinite", "2.0.0", Seq(isoWkb(1, true, Seq(1, 2, -infinity)), xy)),
+      ("an X coordinate is infinite", "2.0.0", Seq(isoWkb(1, false, Seq(infinity, 2)), xy)),
+      ("a Y coordinate is infinite", "1.1.0", Seq(isoWkb(1, false, Seq(1, -infinity)), xy)),
+      ("a Y coordinate is NaN", "1.1.0", Seq(isoWkb(1, false, Seq(1, nan)), xy)))
+    for ((name, version, geometries) <- unboundedCases
+      if version == "1.1.0" || ParquetGeospatialTypes.supported) {
+      it(s"writes no bbox to a GeoParquet $version file when $name") {
+        columnMetadataOf(version, geometries) { (metadata, path) =>
+          assert(metadata \ "bbox" == JNothing)
+          val read = readFile(path, legacyUdt = true)
+          assert(read.count() == geometries.size)
+          assert(read.where("ST_Intersects(geometry, ST_Point(10, 20))").count() == 1)
         }
       }
     }

@@ -277,7 +277,11 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
         val geometryTypes = columnInfo.seenGeometryTypes.toSeq
         // Empty geometries still contribute geometry_types but have no spatial extent.
         // Omit bbox when the file contains only empty/null geometries or no rows.
-        val bbox = if (!columnInfo.bbox.isEmpty) Some(columnInfo.bbox.bounds) else None
+        // Omit it too when a bound is infinite or NaN. JSON has no number for such a bound, and
+        // a bbox states the range of every dimension that it covers.
+        val bbox =
+          if (columnInfo.bbox.isEmpty) None
+          else Some(columnInfo.bbox.bounds).filter(_.forall(b => !b.isNaN && !b.isInfinity))
         lazy val legacyCrs = geoParquetColumnCrsMap.getOrElse(
           columnName, {
             if (!userExplicitlySetDefaultCrs) {
