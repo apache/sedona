@@ -24,7 +24,7 @@ Introduction: Test if a geometry is well-formed. The function can be invoked wit
 - 0 (default): Use usual OGC SFS (Simple Features Specification) validity semantics.
 - 1: "ESRI flag", Accepts certain self-touching rings as valid, which are considered invalid under OGC standards.
 
-If the validator cannot process a geometry and fails with an error, the geometry is reported as not valid (`false`) instead of failing the query.
+If the validity checks cannot complete for a geometry, for example because coordinates close to the largest double value overflow them, the function returns `false` for that geometry instead of failing the query. [ST_IsValidReason](ST_IsValidReason.md) returns the error that stopped the checks.
 
 ![ST_IsValid](../../../../image/ST_IsValid/ST_IsValid.svg "ST_IsValid")
 

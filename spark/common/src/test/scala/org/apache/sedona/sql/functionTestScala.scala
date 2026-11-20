@@ -652,6 +652,71 @@ class functionTestScala
       assert(testtable.take(1).head.get(0) == null)
     }
 
+    it("ST_IsValid returns false for a geometry the validator throws on") {
+      // Row 3 makes JTS IsValidOp throw: near Double.MAX_VALUE its orientation test overflows.
+      val geoms = sparkSession
+        .sql("""
+          |SELECT id, ST_GeomFromWKT(wkt) AS geom FROM VALUES
+          |  (1, 'POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))'),
+          |  (2, 'POLYGON ((0 0, 1 1, 0 1, 1 0, 0 0))'),
+          |  (3, 'POLYGON ((-1.7e308 -10, 1.7e308 -10, 1.7e308 0, 1.7e308 10, -1.7e308 10, -1.7e308 -10), (-1e308 0, -5e307 5, -5e307 -5, -1e308 0))'),
+          |  (4, NULL),
+          |  (5, 'POLYGON EMPTY'),
+          |  (6, 'POLYGON ((0 0, 10 0, 10 10, 5 10, 7 5, 3 5, 5 10, 0 10, 0 0))')
+          |  AS t(id, wkt)
+          |""".stripMargin)
+        .repartition(3, col("id"))
+      val actual = geoms
+        .selectExpr("id", "ST_IsValid(geom)", "ST_IsValid(geom, 0)", "ST_IsValid(geom, 1)")
+        .collect()
+        .map(row => row.getInt(0) -> (1 to 3).map(i => Option(row.get(i))))
+        .toMap
+      val expected = Map(
+        1 -> Seq(Some(true), Some(true), Some(true)),
+        2 -> Seq(Some(false), Some(false), Some(false)),
+        3 -> Seq(Some(false), Some(false), Some(false)),
+        4 -> Seq(None, None, None),
+        5 -> Seq(Some(true), Some(true), Some(true)),
+        6 -> Seq(Some(false), Some(false), Some(true)))
+      assertEquals(expected, actual)
+    }
+
+    it("ST_IsValidReason and ST_IsValidDetail report the error the validator throws") {
+      val geoms = sparkSession
+        .sql("""
+          |SELECT id, ST_GeomFromWKT(wkt) AS geom FROM VALUES
+          |  (1, 'POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))'),
+          |  (2, 'POLYGON ((-1.7e308 -10, 1.7e308 -10, 1.7e308 0, 1.7e308 10, -1.7e308 10, -1.7e308 -10), (-1e308 0, -5e307 5, -5e307 -5, -1e308 0))'),
+          |  (3, NULL)
+          |  AS t(id, wkt)
+          |""".stripMargin)
+        .repartition(3, col("id"))
+      val actual = geoms
+        .selectExpr(
+          "id",
+          "ST_IsValidReason(geom)",
+          "ST_IsValidReason(geom, 1)",
+          "ST_IsValidDetail(geom)",
+          "ST_IsValidDetail(geom, 1)")
+        .collect()
+        .map(row => row.getInt(0) -> (1 to 4).map(i => Option(row.get(i))))
+        .toMap
+      val reason = "IllegalArgumentException: Segment vertex does not intersect ring"
+      val expected = Map(
+        1 -> Seq(
+          Some("Valid Geometry"),
+          Some("Valid Geometry"),
+          Some(Row(true, null, null)),
+          Some(Row(true, null, null))),
+        2 -> Seq(
+          Some(reason),
+          Some(reason),
+          Some(Row(false, reason, null)),
+          Some(Row(false, reason, null))),
+        3 -> Seq(None, None, None, None))
+      assertEquals(expected, actual)
+    }
+
     it("Passed ST_ReducePrecision") {
       var testtable = sparkSession.sql("""
           |SELECT ST_ReducePrecision(ST_GeomFromWKT('Point(0.1234567890123456789 0.1234567890123456789)'), 8)
@@ -4038,48 +4103,6 @@ class functionTestScala
         expectedResults(gid).equals(
           Row(validDetailRow.get(0), validDetailRow.get(1), validDetailRow.getJtsGeometry(2))))
     }
-  }
-
-  it(
-    "ST_IsValid, ST_IsValidReason and ST_IsValidDetail should not fail when the JTS validator throws") {
-    // JTS 1.20.0 throws "Segment vertex does not intersect ring" when validating this polygon
-    val wkt =
-      "POLYGON ((-1.7e308 -10, 1.7e308 -10, 1.7e308 0, 1.7e308 10, -1.7e308 10, -1.7e308 -10), " +
-        "(-1e308 0, -5e307 5, -5e307 -5, -1e308 0))"
-    val reason = "IllegalArgumentException: Segment vertex does not intersect ring"
-    val row = sparkSession
-      .sql(s"SELECT ST_GeomFromWKT('$wkt') AS geom")
-      .selectExpr(
-        "ST_IsValid(geom)",
-        "ST_IsValid(geom, 1)",
-        "ST_IsValidReason(geom)",
-        "ST_IsValidReason(geom, 1)",
-        "ST_IsValidDetail(geom)",
-        "ST_IsValidDetail(geom, 1)")
-      .first()
-
-    assert(!row.getBoolean(0))
-    assert(!row.getBoolean(1))
-    assert(row.getString(2) == reason)
-    assert(row.getString(3) == reason)
-    assert(row.getAs[Row](4) == Row(false, reason, null))
-    assert(row.getAs[Row](5) == Row(false, reason, null))
-  }
-
-  it("ST_IsValidReason and ST_IsValidDetail should return null for a null geometry") {
-    val row = sparkSession
-      .sql("SELECT ST_GeomFromWKT(CAST(NULL AS STRING)) AS geom")
-      .selectExpr(
-        "ST_IsValidReason(geom)",
-        "ST_IsValidReason(geom, 1)",
-        "ST_IsValidDetail(geom)",
-        "ST_IsValidDetail(geom, 1)")
-      .first()
-
-    assert(row.isNullAt(0))
-    assert(row.isNullAt(1))
-    assert(row.isNullAt(2))
-    assert(row.isNullAt(3))
   }
 
   it("ST_IsValidReason should provide reasons for invalid geometries") {

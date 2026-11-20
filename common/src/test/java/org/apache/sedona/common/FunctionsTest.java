@@ -5930,6 +5930,61 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void isValidValidatorErrorReturnsFalse() throws ParseException {
+    // Near Double.MAX_VALUE the orientation determinant overflows to NaN, so JTS places the
+    // hole's first vertex on the shell boundary but then cannot find the shell segment it lies on.
+    Geometry geom =
+        geomFromWKT(
+            "POLYGON ((-1.7e308 -10, 1.7e308 -10, 1.7e308 0, 1.7e308 10, -1.7e308 10, -1.7e308 -10),"
+                + " (-1e308 0, -5e307 5, -5e307 -5, -1e308 0))",
+            0);
+    IllegalArgumentException validatorError =
+        assertThrows(
+            "fixture no longer makes the JTS validator throw",
+            IllegalArgumentException.class,
+            () -> new org.locationtech.jts.operation.valid.IsValidOp(geom).isValid());
+    assertEquals("Segment vertex does not intersect ring", validatorError.getMessage());
+
+    assertFalse(Functions.isValid(geom));
+    assertFalse(Functions.isValid(geom, 0));
+    assertFalse(Functions.isValid(geom, 1));
+
+    // The reason carries the validator's error, in the form GEOS reports it
+    String reason = "IllegalArgumentException: Segment vertex does not intersect ring";
+    assertEquals(reason, Functions.isValidReason(geom));
+    assertEquals(reason, Functions.isValidReason(geom, 0));
+    assertEquals(reason, Functions.isValidReason(geom, 1));
+    ValidDetail expectedDetail = new ValidDetail(false, reason, null);
+    assertTrue(expectedDetail.equals(Functions.isValidDetail(geom)));
+    assertTrue(expectedDetail.equals(Functions.isValidDetail(geom, 0)));
+    assertTrue(expectedDetail.equals(Functions.isValidDetail(geom, 1)));
+  }
+
+  @Test
+  public void isValidReasonAndDetailOfNullAreNull() {
+    assertNull(Functions.isValidReason(null));
+    assertNull(Functions.isValidReason(null, 1));
+    assertNull(Functions.isValidDetail(null));
+    assertNull(Functions.isValidDetail(null, 1));
+  }
+
+  @Test
+  public void isValidKeepsOrdinaryResults() throws ParseException {
+    assertTrue(Functions.isValid(geomFromWKT("POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))", 0)));
+    assertFalse(Functions.isValid(geomFromWKT("POLYGON ((0 0, 1 1, 0 1, 1 0, 0 0))", 0)));
+    assertTrue(Functions.isValid(geomFromWKT("POLYGON EMPTY", 0)));
+    assertTrue(Functions.isValid(geomFromWKT("GEOMETRYCOLLECTION EMPTY", 0)));
+    assertFalse(Functions.isValid(geomFromWKT("POINT (NaN NaN)", 0)));
+
+    // The shell touches itself at (5 10) and encloses an inverted hole: invalid under OGC,
+    // valid under the Esri model.
+    Geometry invertedHole =
+        geomFromWKT("POLYGON ((0 0, 10 0, 10 10, 5 10, 7 5, 3 5, 5 10, 0 10, 0 0))", 0);
+    assertFalse(Functions.isValid(invertedHole, 0));
+    assertTrue(Functions.isValid(invertedHole, 1));
+  }
+
+  @Test
   public void testAddMeasureWithDefaultJtsCoordinates() {
     // JTS's default XY coordinates carry a NaN Z slot, not an actual Z dimension.
     LineString source =
@@ -6245,46 +6300,6 @@ public class FunctionsTest extends TestBase {
 
     String invalidReasonESRI = Functions.isValidReason(invalidGeom, ESRI_VALIDITY);
     assertEquals("Self-intersection at or near point (10.0, 20.0, NaN)", invalidReasonESRI);
-  }
-
-  // JTS 1.20.0 throws "Segment vertex does not intersect ring" when validating this polygon.
-  private static final String VALIDATOR_FAILURE_WKT =
-      "POLYGON ((-1.7e308 -10, 1.7e308 -10, 1.7e308 0, 1.7e308 10, -1.7e308 10, -1.7e308 -10),"
-          + " (-1e308 0, -5e307 5, -5e307 -5, -1e308 0))";
-  private static final String VALIDATOR_FAILURE_REASON =
-      "IllegalArgumentException: Segment vertex does not intersect ring";
-
-  @Test
-  public void isValidWhenValidatorThrows() throws ParseException {
-    Geometry geom = Constructors.geomFromEWKT(VALIDATOR_FAILURE_WKT);
-    assertFalse(Functions.isValid(geom));
-    assertFalse(Functions.isValid(geom, 0));
-    assertFalse(Functions.isValid(geom, 1));
-  }
-
-  @Test
-  public void isValidReasonWhenValidatorThrows() throws ParseException {
-    Geometry geom = Constructors.geomFromEWKT(VALIDATOR_FAILURE_WKT);
-    assertEquals(VALIDATOR_FAILURE_REASON, Functions.isValidReason(geom));
-    assertEquals(VALIDATOR_FAILURE_REASON, Functions.isValidReason(geom, 0));
-    assertEquals(VALIDATOR_FAILURE_REASON, Functions.isValidReason(geom, 1));
-  }
-
-  @Test
-  public void isValidDetailWhenValidatorThrows() throws ParseException {
-    Geometry geom = Constructors.geomFromEWKT(VALIDATOR_FAILURE_WKT);
-    ValidDetail expected = new ValidDetail(false, VALIDATOR_FAILURE_REASON, null);
-    assertTrue(expected.equals(Functions.isValidDetail(geom)));
-    assertTrue(expected.equals(Functions.isValidDetail(geom, 0)));
-    assertTrue(expected.equals(Functions.isValidDetail(geom, 1)));
-  }
-
-  @Test
-  public void isValidReasonAndDetailOfNullGeometry() {
-    assertNull(Functions.isValidReason(null));
-    assertNull(Functions.isValidReason(null, 1));
-    assertNull(Functions.isValidDetail(null));
-    assertNull(Functions.isValidDetail(null, 1));
   }
 
   @Test
