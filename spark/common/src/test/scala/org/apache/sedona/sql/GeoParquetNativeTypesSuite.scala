@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.sql
 
-import java.io.File
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File}
 import java.nio.{ByteBuffer, ByteOrder}
 import java.nio.file.Files
 
@@ -27,6 +27,7 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.mapreduce.{Job, TaskAttemptID, TaskType}
 import org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl
+import org.apache.parquet.format.{Util => ParquetFormatUtil}
 import org.apache.parquet.hadoop.{ParquetFileReader, ParquetOutputFormat, ParquetReader}
 import org.apache.parquet.hadoop.example.GroupReadSupport
 import org.apache.parquet.hadoop.metadata.{ColumnChunkMetaData, ParquetMetadata}
@@ -38,7 +39,7 @@ import org.apache.spark.sql.execution.datasources.OutputWriter
 import org.apache.spark.sql.execution.datasources.geoparquet.{GeoParquetFileFormat, GeoParquetMetaData, GeoParquetWriteSupport, ParquetGeospatialColumn, ParquetGeospatialTypes}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
-import org.apache.spark.sql.types.{BinaryType, StructField, StructType}
+import org.apache.spark.sql.types.{BinaryType, IntegerType, StructField, StructType}
 import org.json4s.{JArray, JDouble, JInt, JNothing, JNull, JString, JValue}
 import org.json4s.jackson.JsonMethods.{compact, parse, render}
 
@@ -361,6 +362,96 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
             val message = messages(intercept[Exception](read.collect()))
             assert(message.contains("requires SRID 3857 but contains SRID 0"))
           }
+        }
+      }
+    }
+
+    if (SpatialTypeSupport.usesNativeTypes) {
+      def parquetFiles(path: String): Seq[File] =
+        new File(path).listFiles().filter(_.getName.endsWith(".parquet")).toSeq
+
+      def withSetting[T](key: String, value: String)(run: => T): T = {
+        val before = sparkSession.conf.get(key)
+        sparkSession.conf.set(key, value)
+        try run
+        finally sparkSession.conf.set(key, before)
+      }
+
+      /** Leaves the schema of a Parquet file readable, and its row groups unreadable. */
+      def damageRowGroups(file: File): Unit = {
+        val bytes = Files.readAllBytes(file.toPath)
+        val length =
+          ByteBuffer.wrap(bytes, bytes.length - 8, 4).order(ByteOrder.LITTLE_ENDIAN).getInt
+        val start = bytes.length - 8 - length
+        val metadata =
+          ParquetFormatUtil.readFileMetaData(new ByteArrayInputStream(bytes, start, length))
+        // The first column chunk now belongs to a column that the schema does not have
+        val chunk = metadata.getRow_groups.get(0).getColumns.get(0)
+        chunk.getMeta_data.setPath_in_schema(java.util.Arrays.asList("missing"))
+        val damaged = new ByteArrayOutputStream()
+        damaged.write(bytes, 0, start)
+        ParquetFormatUtil.writeFileMetaData(metadata, damaged)
+        val newLength = damaged.size - start
+        damaged.write(
+          ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(newLength).array)
+        damaged.write(bytes, bytes.length - 4, 4)
+        Files.write(file.toPath, damaged.toByteArray)
+        // The checksum that Hadoop keeps next to the file is for the bytes before
+        new File(file.getParentFile, s".${file.getName}.crc").delete()
+      }
+
+      it("rejects a column that is a geometry in some files only, next to such a file") {
+        withPath { path =>
+          val withNumber = sparkSession.createDataFrame(
+            sparkSession.sparkContext.parallelize(Seq(Row(pointWithSrid(3857), 75)), 1),
+            StructType(
+              Seq(StructField("geometry", GeometryUDT()), StructField("aux", IntegerType))))
+          val withoutGeometries = sparkSession.createDataFrame(
+            sparkSession.sparkContext.parallelize(Seq(Row(null, null)), 1),
+            StructType(
+              Seq(StructField("geometry", GeometryUDT()), StructField("aux", GeometryUDT()))))
+          // The schema comes from the first file, where aux is a number
+          append(withNumber, path + "/a", "1.1.0")
+          append(withoutGeometries, path + "/b", "1.1.0")
+          val read = sparkSession.read.format("geoparquet")
+          val message = messages(intercept[Exception](read.load(path + "/a", path + "/b")))
+          assert(message.contains("Incompatible GeoParquet geometry column 'aux'"))
+        }
+      }
+
+      for (mergeSchema <- Seq("false", "true")) {
+        it(s"keeps the CRS of a column that only the summary file has (mergeSchema=$mergeSchema)") {
+          withPath { path =>
+            append(frame(pointWithSrid(3857)), path, "1.1.0")
+            withPath { other =>
+              val twoColumns = StructType(
+                Seq(StructField("geometry", GeometryUDT()), StructField("other", GeometryUDT())))
+              val noRows = sparkSession.createDataFrame(
+                sparkSession.sparkContext.parallelize(Seq.empty[Row], 1),
+                twoColumns)
+              append(noRows, other, "1.1.0", "geoparquet.crs" -> mercator)
+              Files.copy(
+                parquetFiles(other).head.toPath,
+                new File(path, "_common_metadata").toPath)
+            }
+            val read =
+              sparkSession.read.format("geoparquet").option("mergeSchema", mergeSchema).load(path)
+            assert(read.schema("other").dataType == SpatialTypeSupport.geometryType(3857))
+            assert(read.schema("geometry").dataType == SpatialTypeSupport.geometryType(3857))
+          }
+        }
+      }
+
+      it("treats a file without geometries whose row groups are corrupt as Spark does") {
+        withPath { path =>
+          append(frame(null, null), path, "1.1.0")
+          val corrupt = parquetFiles(path).head
+          damageRowGroups(corrupt)
+          append(frame(pointWithSrid(3857)), path, "1.1.0")
+          val key = "spark.sql.files.ignoreCorruptFiles"
+          assert(withSetting(key, "true")(srids(path)) == Seq(Some(3857)))
+          val message = messages(intercept[Exception](withSetting(key, "false")(srids(path))))
+          assert(message.contains(corrupt.getName))
         }
       }
     }

@@ -18,9 +18,9 @@
  */
 package org.apache.spark.sql.execution.datasources.geoparquet
 
-import org.apache.spark.sql.execution.datasources.geoparquet.internal.{DataTypeUtils, ParquetFileFormat, ParquetFilters, ParquetFooterReader, ParquetOptions, ParquetOutputWriter, ParquetReadSupport, ParquetRowIndexUtil, ParquetWriteSupport, PortableSQLConf, SchemaMergeUtils, DataSourceUtils => InternalDataSourceUtils}
+import org.apache.spark.sql.execution.datasources.geoparquet.internal.{DataTypeUtils, ParquetFileFormat, ParquetFilters, ParquetFooterReader, ParquetOptions, ParquetOutputWriter, ParquetReadSupport, ParquetRowIndexUtil, ParquetWriteSupport, PortableSQLConf, QueryExecutionErrors, SchemaMergeUtils, DataSourceUtils => InternalDataSourceUtils}
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.FileStatus
+import org.apache.hadoop.fs.{FileStatus, Path}
 import org.apache.hadoop.mapred.FileSplit
 import org.apache.hadoop.mapreduce._
 import org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl
@@ -402,7 +402,10 @@ object GeoParquetFileFormat extends Logging {
       parameters: Map[String, String],
       filesToTouch: Seq[FileStatus],
       sparkSession: SparkSession): Option[StructType] = {
-    def reader(skipUnknownCrsWithoutValues: Boolean) =
+    val caseSensitive = sparkSession.sessionState.conf.caseSensitiveAnalysis
+    // A file that states no CRS for one of `withoutValues` and has no value in it leaves the
+    // column out
+    def reader(withoutValues: Set[String]) =
       (files: Seq[FileStatus], conf: Configuration, ignoreCorruptFiles: Boolean) => {
         ParquetFileFormat.readParquetFootersInParallel(conf, files, ignoreCorruptFiles).map {
           footer =>
@@ -414,19 +417,17 @@ object GeoParquetFileFormat extends Logging {
               keyValueMetaData = keyValueMetaData,
               parameters = parameters)
             // The footers above come without their row groups, which say whether a column
-            // has values
-            lazy val rowGroups = ParquetFooterReader
-              .readFooter(conf, footer.getFile, ParquetMetadataConverter.NO_FILTER)
-              .getBlocks
-              .asScala
-              .toSeq
+            // has values. They are None for a corrupt file that the read skips, which has no
+            // value to return.
+            lazy val rowGroups = readRowGroups(conf, footer.getFile, ignoreCorruptFiles)
             val fields = parquetSchema.getFields.asScala.filter(converter.isGeometryColumn)
             StructType(fields.toSeq.sortBy(_.getName).flatMap { field =>
+              val name = field.getName
               val srid = converter.geometrySrid(field)
-              if (skipUnknownCrsWithoutValues && srid == 0 &&
-                hasNoValues(rowGroups, field.getName)) {
+              if (srid == 0 && withoutValues(columnKey(name, caseSensitive)) &&
+                rowGroups.forall(hasNoValues(_, name))) {
                 None
-              } else Some(StructField(field.getName, SpatialTypeSupport.geometryType(srid)))
+              } else Some(StructField(name, SpatialTypeSupport.geometryType(srid)))
             })
         }
       }
@@ -434,19 +435,56 @@ object GeoParquetFileFormat extends Logging {
     // without a geometry in the column, so such a file fits the CRS that the other files
     // state. Finding these files takes their row groups. That is only worth it where the files
     // differ in the CRS of a column, which the first pass marks with the type of mixed SRIDs.
+    // The second pass leaves only those columns out, so that every other column is compared
+    // as before.
     val merged = SchemaMergeUtils.mergeSchemasInParallel(
       sparkSession,
       parameters,
       filesToTouch,
-      reader(skipUnknownCrsWithoutValues = false),
+      reader(withoutValues = Set.empty),
       mergeGeometryColumns _)
-    if (merged.exists(_.exists(field => hasMixedSrids(field.dataType)))) {
+    val mixed = merged.toSeq
+      .flatMap(_.fields)
+      .filter(field => hasMixedSrids(field.dataType))
+      .map(field => columnKey(field.name, caseSensitive))
+      .toSet
+    if (mixed.nonEmpty) {
       SchemaMergeUtils.mergeSchemasInParallel(
         sparkSession,
         parameters,
         filesToTouch,
-        reader(skipUnknownCrsWithoutValues = true))
+        reader(withoutValues = mixed))
     } else merged
+  }
+
+  private def columnKey(name: String, caseSensitive: Boolean): String =
+    if (caseSensitive) name else name.toLowerCase(java.util.Locale.ROOT)
+
+  /**
+   * The row groups of `file`, or None for a file whose row groups cannot be read while corrupt
+   * files are ignored. [[ParquetFileFormat.readParquetFootersInParallel]] does the same for the
+   * footers that it reads without their row groups.
+   */
+  private def readRowGroups(
+      conf: Configuration,
+      file: Path,
+      ignoreCorruptFiles: Boolean): Option[Seq[BlockMetaData]] = {
+    try {
+      Some(
+        ParquetFooterReader
+          .readFooter(conf, file, ParquetMetadataConverter.NO_FILTER)
+          .getBlocks
+          .asScala
+          .toSeq)
+    } catch {
+      case e: RuntimeException =>
+        if (ignoreCorruptFiles) {
+          logWarning(s"Skipped the row groups in the corrupted file: $file", e)
+          None
+        } else {
+          throw QueryExecutionErrors.cannotReadFooterForFileError(file, e)
+        }
+    }
   }
 
   private def hasMixedSrids(dataType: DataType): Boolean =
@@ -461,8 +499,7 @@ object GeoParquetFileFormat extends Logging {
       left: StructType,
       right: StructType,
       caseSensitive: Boolean): StructType = {
-    def key(field: StructField): String =
-      if (caseSensitive) field.name else field.name.toLowerCase(java.util.Locale.ROOT)
+    def key(field: StructField): String = columnKey(field.name, caseSensitive)
     val rightFields = right.fields.map(field => key(field) -> field).toMap
     val leftKeys = left.fields.map(key).toSet
     StructType(left.fields.map { field =>
@@ -503,8 +540,13 @@ object GeoParquetFileFormat extends Logging {
       parameters: Map[String, String],
       filesToTouch: Seq[FileStatus],
       sparkSession: SparkSession,
-      geometrySridsFromElsewhere: Boolean = false): Option[StructType] = {
+      geometryColumns: Option[StructType] = None): Option[StructType] = {
     val conf = new PortableSQLConf(sparkSession.sessionState.conf)
+    val caseSensitive = sparkSession.sessionState.conf.caseSensitiveAnalysis
+    val geometryTypes = geometryColumns.toSeq
+      .flatMap(_.fields)
+      .map(field => columnKey(field.name, caseSensitive) -> field.dataType)
+      .toMap
     val assumeBinaryIsString = conf.isParquetBinaryAsString
     val assumeInt96IsTimestamp = conf.isParquetINT96AsTimestamp
 
@@ -520,15 +562,17 @@ object GeoParquetFileFormat extends Logging {
             assumeInt96IsTimestamp = assumeInt96IsTimestamp,
             parameters = parameters)
           val schema = readSchemaFromFooter(footer, keyValueMetaData, converter, parameters)
-          // The caller takes the SRIDs of the geometry columns from
-          // mergeGeometrySchemasInParallel, so the SRIDs of the files do not have to agree here
-          if (geometrySridsFromElsewhere) {
-            StructType(schema.fields.map { field =>
-              if (SpatialTypeSupport.isNativeGeometry(field.dataType)) {
-                field.copy(dataType = SpatialTypeSupport.geometryType(0))
-              } else field
-            })
-          } else schema
+          // The caller has settled the types of `geometryColumns` with
+          // mergeGeometrySchemasInParallel, so the files do not have to agree on their SRIDs
+          // here. Any other geometry column, one that only a summary file has for example,
+          // keeps the SRID that its file states.
+          StructType(schema.fields.map { field =>
+            geometryTypes.get(columnKey(field.name, caseSensitive)) match {
+              case Some(settled) if SpatialTypeSupport.isNativeGeometry(field.dataType) =>
+                field.copy(dataType = settled)
+              case _ => field
+            }
+          })
         }
     }
 

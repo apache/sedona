@@ -77,7 +77,7 @@ object GeoParquetUtils {
       parameters,
       filesToTouch,
       sparkSession,
-      geometrySridsFromElsewhere = geometrySchema.isDefined)
+      geometryColumns = geometrySchema)
     geometrySchema match {
       case None => inferred
       case Some(geometryFields) =>
