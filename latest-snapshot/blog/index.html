@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -28,7 +27,7 @@
       
       
       <link rel="icon" href="../favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
     
     
       
@@ -5634,6 +5633,51 @@
     <div class="md-post__meta md-meta">
       <ul class="md-meta__list">
         <li class="md-meta__item">
+          <time datetime="2026-11-20 00:00:00+00:00">Friday, November 20, 2026</time></li>
+        
+        
+          
+          <li class="md-meta__item">
+            
+              4 min read
+            
+          </li>
+        
+        
+      </ul>
+      
+    </div>
+  </header>
+  <div class="md-post__content md-typeset">
+    <h2 id="ask-the-box-first-filter-and-refine-in-apache-sedona"><a class="toclink" href="2026/11/20/filter-and-refine/">Ask the Box First: Filter and Refine in Apache Sedona</a></h2>
+<p>A spatial join asks one question again and again: does this road touch this city? Overture Maps lists 305 cities and towns and 1,495,982 road segments in Washington State, so the join has 456 million pairs to ask about. The exact answer is slow, because the boundary of Tacoma alone is 3,152 points and a road is a line with many points of its own. Apache Sedona asks a cheaper question first.</p>
+<p><img alt="Two maps of the roads of Tacoma, Washington. On the left, the filter step: the bounding box of the city is yellow and the 46,832 roads whose boxes overlap it are black. On the right, the refine step: the city boundary is drawn, the 30,937 roads that touch the city are blue and the 15,895 that do not are pink" src="filter-and-refine-cover.png" /></p>
+
+    
+      <nav class="md-post__action">
+        <a href="2026/11/20/filter-and-refine/">
+          Continue reading
+        </a>
+      </nav>
+    
+    
+  </div>
+</article>
+      
+        <article class="md-post md-post--excerpt">
+  <header class="md-post__header">
+    
+      <nav class="md-post__authors md-typeset">
+        
+          <span class="md-author">
+            <img src="../assets/authors/jia.jpeg" alt="Jia Yu">
+          </span>
+        
+      </nav>
+    
+    <div class="md-post__meta md-meta">
+      <ul class="md-meta__list">
+        <li class="md-meta__item">
           <time datetime="2026-11-06 00:00:00+00:00">Friday, November 6, 2026</time></li>
         
         
@@ -6035,52 +6079,6 @@
     
       <nav class="md-post__action">
         <a href="2026/09/11/select-from-satellite-in-a-rust-database/">
-          Continue reading
-        </a>
-      </nav>
-    
-    
-  </div>
-</article>
-      
-        <article class="md-post md-post--excerpt">
-  <header class="md-post__header">
-    
-      <nav class="md-post__authors md-typeset">
-        
-          <span class="md-author">
-            <img src="../assets/authors/jia.jpeg" alt="Jia Yu">
-          </span>
-        
-      </nav>
-    
-    <div class="md-post__meta md-meta">
-      <ul class="md-meta__list">
-        <li class="md-meta__item">
-          <time datetime="2026-09-04 00:00:00+00:00">Friday, September 4, 2026</time></li>
-        
-        
-          
-          <li class="md-meta__item">
-            
-              7 min read
-            
-          </li>
-        
-        
-      </ul>
-      
-    </div>
-  </header>
-  <div class="md-post__content md-typeset">
-    <h2 id="group-by-but-for-pixels"><a class="toclink" href="2026/09/04/group-by-but-for-pixels/">GROUP BY, But for Pixels</a></h2>
-<p>Many raster analyses need one result for each polygon. Examples include mean elevation by canton, forest cover by district, and flood depth by parcel. A raster stores values in a grid of pixels. A polygon defines an area, also called a zone.</p>
-<p>Zonal statistics summarize the raster pixels inside each zone. A spatial join matches data by location. Apache Sedona performs both steps in one query. This example reads 7,006,027 elevation pixels from Amazon S3 and summarizes all 26 Swiss cantons in 56 seconds.</p>
-<p><img alt="Map of Switzerland. Each canton is shaded by its mean elevation. Low cantons are light blue. Valais and Graubünden are dark blue." src="zonal-statistics-cover.png" /></p>
-
-    
-      <nav class="md-post__action">
-        <a href="2026/09/04/group-by-but-for-pixels/">
           Continue reading
         </a>
       </nav>
