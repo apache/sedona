@@ -23,7 +23,12 @@ Introduction: Returns true if A and B have identical geometry types, component o
 
 Unlike `ST_EqualsExact`, this predicate compares every available coordinate dimension, including Z and M, and does not accept a tolerance. NaN ordinate values are considered equal to other NaN values. The SRID and other geometry metadata are not compared.
 
-The dimensions compared are the ones the geometry is stored with, so a 2D geometry built from WKT is identical to the same geometry read back from a table. A Z ordinate that is NaN in every coordinate counts only when the geometry keeps a Z dimension, as geometries from `ST_GeomFromWKB` or read back from a table do; `ST_GeomFromWKT` does not keep a Z dimension whose values are all NaN.
+The predicate compares the dimensions stored with each geometry. A 2D geometry built from WKT
+is identical to the same geometry read back from a table. A declared Z dimension counts
+even if every Z value is NaN, whether the coordinate sequence comes from `ST_GeomFromWKT` or
+`ST_GeomFromWKB`. For example, `ST_EqualsIdentical` returns false for `POINT Z (1 2 NaN)` and
+`POINT (1 2)` before and after storage. It also returns false for `POINT ZM (1 2 NaN 9)` and
+`POINT M (1 2 9)`.
 
 Format: `ST_EqualsIdentical(A: Geometry, B: Geometry)`
 
@@ -60,11 +65,14 @@ For ZM geometries, both the Z and M values participate in the comparison.
 `ST_EqualsIdentical` does not compare SRID, precision model, user data, or the coordinate-sequence
 implementation. Compare SRIDs separately when CRS identity is also required.
 
-The predicate compares the dimensions retained by the geometry value it receives. At Spark and
-Flink serialization boundaries, JTS cannot distinguish ordinary XY coordinates from declared XYZ
-coordinates when every Z ordinate is NaN; those values may normalize to XY. Empty XYZ values and
-zero-member collections have the same limitation. Mixed layouts within a Polygon or multi-geometry
-are rejected by the serializer; use a GeometryCollection when members need independent layouts.
+Spark and Flink can store an unmarked JTS XYZ coordinate sequence as XY when every Z value is
+NaN. An explicitly tagged `POINT Z EMPTY` retains its Z dimension through serialization.
+
+Each member of a `GEOMETRYCOLLECTION` carries its own layout. To preserve an all-NaN Z on a
+point member, tag the point itself, as in `GEOMETRYCOLLECTION Z (POINT Z (1 2 NaN))`. A
+collection with no members has no coordinate sequence to carry the tag, so `MULTIPOINT Z EMPTY`
+is identical to `MULTIPOINT EMPTY`. The serializer requires a common layout across the
+rings of a polygon or the members of a multi-geometry.
 
 ## SQL examples
 
