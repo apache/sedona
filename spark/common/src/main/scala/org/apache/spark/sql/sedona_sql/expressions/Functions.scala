@@ -517,6 +517,9 @@ private[apache] case class ST_IsValidDetail(children: Seq[Expression])
 
   override def eval(input: InternalRow): Any = {
     val geometry = children.head.toGeometry(input)
+    if (geometry == null) {
+      return null
+    }
     var validDetail: ValidDetail = null
     if (nArgs == 1) {
       validDetail = Functions.isValidDetail(geometry)
@@ -528,11 +531,10 @@ private[apache] case class ST_IsValidDetail(children: Seq[Expression])
     }
 
     try {
-      if (validDetail.location == null) {
-        return InternalRow.fromSeq(Seq(validDetail.valid, null, null))
-      }
-
-      val serLocation = GeometrySerializer.serialize(validDetail.location)
+      // A geometry the validator throws on is invalid with a reason but no location
+      val serLocation =
+        if (validDetail.location == null) null
+        else GeometrySerializer.serialize(validDetail.location)
       InternalRow.fromSeq(
         Seq(validDetail.valid, UTF8String.fromString(validDetail.reason), serLocation))
     } catch {

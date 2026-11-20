@@ -1169,7 +1169,16 @@ public class Functions {
       isValidOp.setSelfTouchingRingFormingHoleValid(false);
     }
 
-    return isValidOp.isValid();
+    try {
+      return isValidOp.isValid();
+    } catch (RuntimeException e) {
+      // JTS throws on some inputs instead of reporting them invalid, e.g. coordinates near
+      // Double.MAX_VALUE that overflow its orientation test. A geometry that cannot be validated
+      // is not valid, and one bad row must not fail the query. isValidReason and isValidDetail
+      // report the error.
+      log.debug("Geometry validation failed, reporting the geometry as invalid", e);
+      return false;
+    }
   }
 
   public static boolean isValidTrajectory(Geometry geom) {
@@ -2955,16 +2964,23 @@ public class Functions {
   }
 
   public static ValidDetail isValidDetail(Geometry geom, int flag) {
+    if (geom == null) {
+      return null;
+    }
     IsValidOp isValidOp = getIsValidOpObject(geom, flag);
 
-    if (isValidOp.isValid()) {
-      return new ValidDetail(true, null, null);
-    } else {
-      TopologyValidationError error = isValidOp.getValidationError();
-      String reason = error.toString();
-      Geometry location = geom.getFactory().createPoint(error.getCoordinate());
-      return new ValidDetail(false, reason, location);
+    try {
+      if (isValidOp.isValid()) {
+        return new ValidDetail(true, null, null);
+      }
+    } catch (RuntimeException e) {
+      // The validator threw before it found a location
+      return new ValidDetail(false, validationFailureReason(e), null);
     }
+    TopologyValidationError error = isValidOp.getValidationError();
+    String reason = error.toString();
+    Geometry location = geom.getFactory().createPoint(error.getCoordinate());
+    return new ValidDetail(false, reason, location);
   }
 
   public static String isValidReason(Geometry geom) {
@@ -2972,14 +2988,30 @@ public class Functions {
   }
 
   public static String isValidReason(Geometry geom, int flag) {
+    if (geom == null) {
+      return null;
+    }
     IsValidOp isValidOp = getIsValidOpObject(geom, flag);
 
-    if (isValidOp.isValid()) {
-      return "Valid Geometry";
-    } else {
-      TopologyValidationError error = isValidOp.getValidationError();
-      return error.toString();
+    try {
+      if (isValidOp.isValid()) {
+        return "Valid Geometry";
+      }
+    } catch (RuntimeException e) {
+      return validationFailureReason(e);
     }
+    TopologyValidationError error = isValidOp.getValidationError();
+    return error.toString();
+  }
+
+  /**
+   * The reason reported for a geometry the validator throws on (see {@link #isValid(Geometry,
+   * int)}), in the form GEOS reports it, e.g. "IllegalArgumentException: Segment vertex does not
+   * intersect ring".
+   */
+  private static String validationFailureReason(RuntimeException e) {
+    String type = e.getClass().getSimpleName();
+    return e.getMessage() == null ? type : type + ": " + e.getMessage();
   }
 
   /**

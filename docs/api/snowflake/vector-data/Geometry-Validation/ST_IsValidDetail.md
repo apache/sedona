@@ -28,6 +28,8 @@ The flags parameter is a bitfield with the following options:
 - 0: Use usual OGC SFS (Simple Features Specification) validity semantics.
 - 1: "ESRI flag", Accepts certain self-touching rings as valid, which are considered invalid under OGC standards.
 
+If the validity checks cannot complete for a geometry, for example because coordinates close to the largest double value overflow them, the function returns `false` as `valid`, the error that stopped them as `reason`, such as `IllegalArgumentException: Segment vertex does not intersect ring`, and a null `location`, instead of failing the query.
+
 ![ST_IsValidDetail](../../../../image/ST_IsValidDetail/ST_IsValidDetail.svg "ST_IsValidDetail")
 
 Format:
