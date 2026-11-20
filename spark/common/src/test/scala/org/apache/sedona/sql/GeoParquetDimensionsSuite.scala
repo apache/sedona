@@ -613,9 +613,13 @@ class GeoParquetDimensionsSuite extends TestBaseScala {
             val withCoordinates =
               measured.filterNot(s => WKBReader.forDeclaredDimensions().read(s.wkb).isEmpty)
             assert(rowGroupTypes(file) == withCoordinates.map(s => typeCode(s.wkb)).toSet)
-            // A bbox of a column with XYZM geometries needs eight values, which Sedona does not
-            // write yet, so the optional bbox is left out.
-            assert((metadata \ "bbox") == JNothing)
+            // The bounds of X, Y, Z and M, first the lower ones and then the upper ones. The M
+            // bounds cover the XYM geometries too. A member of a collection of the native
+            // column has the lowest M.
+            val lowestM = if (SpatialTypeSupport.usesNativeTypes && !legacyUdt) 4 else 90
+            assert(
+              (metadata \ "bbox").extract[Seq[Double]] ==
+                Seq(1, 2, 3, lowestM, 10, 20, 30, 99))
             assertFile(path, measured, legacyUdt = legacyUdt)
             if (SpatialTypeSupport.usesNativeTypes && !legacyUdt) {
               // The native values hold the stored WKB, empty members included
@@ -634,27 +638,70 @@ class GeoParquetDimensionsSuite extends TestBaseScala {
       }
     }
 
-    if (ParquetGeospatialTypes.supported) {
-      it("writes the X and Y bounds of a GeoParquet 2.0 column with XYM geometries") {
+    // The bbox of a GeoParquet 2.0 column lists the lower bounds of its dimensions and then the
+    // upper bounds: X and Y, then Z, then M. It has no form with M bounds and without Z bounds.
+    val nan = Double.NaN
+    val xy = isoWkb(1, false, Seq(10, 20))
+    val boundsCases = Seq[(String, String, Seq[Array[Byte]], Seq[Double])](
+      (
+        "the X and Y bounds of XYM geometries",
+        "2.0.0",
+        Seq(isoWkb(1, false, Seq(1, 2, 4), m = true), xy),
+        Seq(1, 2, 10, 20)),
+      (
+        "the Z bounds of XYZ geometries",
+        "2.0.0",
+        Seq(isoWkb(1, true, Seq(1, 2, 7)), isoWkb(1, true, Seq(3, 4, -5)), xy),
+        Seq(1, 2, -5, 10, 20, 7)),
+      (
+        "the Z and M bounds of XYZ and XYM geometries",
+        "2.0.0",
+        Seq(isoWkb(1, true, Seq(1, 2, 7)), isoWkb(1, false, Seq(3, 4, 60), m = true), xy),
+        Seq(1, 2, 7, 60, 10, 20, 7, 60)),
+      (
+        "the Z bounds without the Z coordinates that are NaN",
+        "2.0.0",
+        Seq(isoWkb(2, true, Seq(1, 2, nan, 3, 4, 5)), xy),
+        Seq(1, 2, 5, 10, 20, 5)),
+      (
+        "the X and Y bounds of XYZ geometries without a Z coordinate that is a number",
+        "2.0.0",
+        Seq(isoWkb(1, true, Seq(1, 2, nan)), xy),
+        Seq(1, 2, 10, 20)),
+      (
+        "the X and Y bounds of XYZM geometries without a Z coordinate that is a number",
+        "2.0.0",
+        Seq(isoWkb(1, true, Seq(1, 2, nan, 60), m = true), xy),
+        Seq(1, 2, 10, 20)),
+      (
+        "the X, Y and Z bounds of XYZM geometries without an M coordinate that is a number",
+        "2.0.0",
+        Seq(isoWkb(1, true, Seq(1, 2, 7, nan), m = true), xy),
+        Seq(1, 2, 7, 10, 20, 7)),
+      (
+        "the X and Y bounds of XYZ geometries in a GeoParquet 1.1 file",
+        "1.1.0",
+        Seq(isoWkb(1, true, Seq(1, 2, 7)), xy),
+        Seq(1, 2, 10, 20)))
+    for ((name, version, geometries, expected) <- boundsCases
+      if version == "1.1.0" || ParquetGeospatialTypes.supported) {
+      it(s"writes $name") {
         withDirectory { directory =>
-          // GeoParquet 2.0 has no bbox with M bounds and without Z bounds
-          val path = new File(directory, "xym").getPath
-          val rows = Seq(
-            Row(
-              0,
-              WKBReader.forDeclaredDimensions().read(isoWkb(1, false, Seq(1, 2, 4), m = true))),
-            Row(1, WKBReader.forDeclaredDimensions().read(isoWkb(1, false, Seq(10, 20)))))
+          val path = new File(directory, "bounds").getPath
+          val rows = geometries.zipWithIndex.map { case (wkb, index) =>
+            Row(index, WKBReader.forDeclaredDimensions().read(wkb))
+          }
           sparkSession
             .createDataFrame(rows.asJava, legacySchema)
             .coalesce(1)
             .write
             .format("geoparquet")
-            .option("geoparquet.version", "2.0.0")
+            .option("geoparquet.version", version)
             .option("geoparquet.crs", "null")
             .save(path)
           val file = new File(path).listFiles().filter(_.getName.endsWith(".parquet")).head
           implicit val formats: org.json4s.Formats = DefaultFormats
-          assert((columnMetadata(file) \ "bbox").extract[Seq[Double]] == Seq(1, 2, 10, 20))
+          assert((columnMetadata(file) \ "bbox").extract[Seq[Double]] == expected)
         }
       }
     }

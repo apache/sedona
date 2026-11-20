@@ -38,7 +38,7 @@ import org.apache.spark.sql.sedona_sql.types.{PublicWkbHeaderAdapter, SpatialTyp
 import org.apache.spark.sql.types._
 import org.json4s.JValue
 import org.json4s.jackson.JsonMethods.parse
-import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.geom.{CoordinateSequence, Geometry, LineString, Point, Polygon}
 import org.locationtech.jts.io.ByteOrderValues
 import org.datasyslab.jts.io.WKBWriter
 
@@ -277,18 +277,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
         val geometryTypes = columnInfo.seenGeometryTypes.toSeq
         // Empty geometries still contribute geometry_types but have no spatial extent.
         // Omit bbox when the file contains only empty/null geometries or no rows.
-        // GeoParquet 2.0 asks for the bounds of all four dimensions when a column has XYZM
-        // geometries. The writer has the X and Y bounds only, so it leaves the optional bbox
-        // out for such a column. A column with XYM geometries may have the X and Y bounds.
-        val needsEightBounds = geometryTypes.exists(_.endsWith(" ZM"))
-        val bbox = if (!columnInfo.bbox.isEmpty && !needsEightBounds) {
-          Some(
-            Seq(
-              columnInfo.bbox.minX,
-              columnInfo.bbox.minY,
-              columnInfo.bbox.maxX,
-              columnInfo.bbox.maxY))
-        } else None
+        val bbox = if (!columnInfo.bbox.isEmpty) Some(columnInfo.bbox.bounds) else None
         lazy val legacyCrs = geoParquetColumnCrsMap.getOrElse(
           columnName, {
             if (!userExplicitlySetDefaultCrs) {
@@ -546,7 +535,8 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
         } else ByteOrderValues.LITTLE_ENDIAN
         // Preserve declared dimensions even for empty geometries. GeoParquet 1.1 has no M
         // coordinate, so a 1.x file keeps X, Y and Z. GeoParquet 2.0 has all four.
-        val wkbWriter = new WKBWriter(if (writesGeospatialTypes) 4 else 3, byteOrder, false)
+        val geospatialTypes = writesGeospatialTypes
+        val wkbWriter = new WKBWriter(if (geospatialTypes) 4 else 3, byteOrder, false)
         wkbWriter.setPreserveCoordinateDimensions(true)
         (row: SpecializedGetters, ordinal: Int) => {
           val geom = SpatialTypeSupport.readGeometry(row, ordinal, dataType)
@@ -561,7 +551,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
           // or collection declares, which geom cannot hold. A 1.x file has no M coordinate, so
           // its geometries are written again from geom.
           val nativeWkb =
-            if (writesGeospatialTypes) {
+            if (geospatialTypes) {
               SpatialTypeSupport
                 .nativeGeometryWkb(row, ordinal, dataType, ByteOrder.nativeOrder())
                 .map(PublicWkbHeaderAdapter.toIsoWkb)
@@ -579,6 +569,9 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
             val typeCode = ByteBuffer.wrap(wkb, 1, 4).order(ByteOrder.nativeOrder()).getInt
             val layout = typeCode / 1000
             geometryColumnInfo.update(geom, hasZ = layout % 2 == 1, hasM = layout >= 2)
+            // The bbox of a 2.x file states the Z and M bounds too. A 1.x file keeps the X and
+            // Y bounds that Sedona has always written for it.
+            if (geospatialTypes) geometryColumnInfo.bbox.updateZAndM(geom)
           }
         }
 
@@ -908,6 +901,11 @@ object GeoParquetWriteSupport {
       var minY: Double = Double.PositiveInfinity,
       var maxX: Double = Double.NegativeInfinity,
       var maxY: Double = Double.NegativeInfinity) {
+    private var minZ = Double.PositiveInfinity
+    private var maxZ = Double.NegativeInfinity
+    private var minM = Double.PositiveInfinity
+    private var maxM = Double.NegativeInfinity
+
     def isEmpty: Boolean = minX > maxX || minY > maxY
 
     def update(geom: Geometry): Unit = {
@@ -918,6 +916,67 @@ object GeoParquetWriteSupport {
         maxX = math.max(maxX, env.getMaxX)
         maxY = math.max(maxY, env.getMaxY)
       }
+    }
+
+    /**
+     * Takes the Z and M coordinates of `geom` into the bounds. A coordinate that is NaN is not a
+     * bound, as in the bounding box of the Parquet statistics.
+     */
+    def updateZAndM(geom: Geometry): Unit = geom match {
+      case point: Point => updateZAndM(point.getCoordinateSequence)
+      case line: LineString => updateZAndM(line.getCoordinateSequence)
+      case polygon: Polygon =>
+        updateZAndM(polygon.getExteriorRing.getCoordinateSequence)
+        var i = 0
+        while (i < polygon.getNumInteriorRing) {
+          updateZAndM(polygon.getInteriorRingN(i).getCoordinateSequence)
+          i += 1
+        }
+      case _ =>
+        var i = 0
+        while (i < geom.getNumGeometries) {
+          updateZAndM(geom.getGeometryN(i))
+          i += 1
+        }
+    }
+
+    private def updateZAndM(coordinates: CoordinateSequence): Unit = {
+      val hasZ = coordinates.hasZ
+      val hasM = coordinates.hasM
+      if (hasZ || hasM) {
+        var i = 0
+        while (i < coordinates.size) {
+          if (hasZ) {
+            val z = coordinates.getZ(i)
+            if (!z.isNaN) {
+              minZ = math.min(minZ, z)
+              maxZ = math.max(maxZ, z)
+            }
+          }
+          if (hasM) {
+            val m = coordinates.getM(i)
+            if (!m.isNaN) {
+              minM = math.min(minM, m)
+              maxM = math.max(maxM, m)
+            }
+          }
+          i += 1
+        }
+      }
+    }
+
+    /**
+     * The bbox of the column metadata: the lower bound of every dimension and then the upper
+     * bound of every dimension. X and Y come first, then Z, then M. A dimension without a
+     * coordinate that is a number has no bounds and is left out. GeoParquet has no bbox with M
+     * bounds and without Z bounds, so the M bounds are stated only next to the Z bounds.
+     */
+    def bounds: Seq[Double] = {
+      val hasZ = minZ <= maxZ
+      val hasM = minM <= maxM
+      if (hasZ && hasM) Seq(minX, minY, minZ, minM, maxX, maxY, maxZ, maxM)
+      else if (hasZ) Seq(minX, minY, minZ, maxX, maxY, maxZ)
+      else Seq(minX, minY, maxX, maxY)
     }
   }
 
