@@ -44,6 +44,14 @@ Sedona 1.9.1 counts its own work during a join. For all of Washington, it report
 
 The filter step left 0.26% of all pairs. The refine step ran the slow test on those and kept 72% of them.
 
-Filter is cheap and sees many pairs. Refine is exact and sees few. Every spatial join in Sedona has this shape. The bounding boxes in a GeoParquet footer, from [One Sort, Many Indexes](https://sedona.apache.org/latest/blog/2026/11/06/one-sort-many-indexes/), are the same idea one level up: there the box lets a reader skip a whole row group.
+## Where the time goes
 
-*Cities and roads from Overture Maps (divisions and transportation themes, release 2026-10-21.0). The tree is the R-tree in Sedona 1.9.1, built over the 305 city boxes. Counts from one `ST_Intersects` join on Sedona 1.9.1 on a laptop.*
+Now the surprise. The refine step sees 0.26% of the pairs, and it takes most of the time. We ran the same join again and compared only the boxes. That run needed 4% of the time. The other 96% went to the exact test.
+
+![Two bars drawn to scale. In the first bar, all possible pairs, a thin purple line at the right end is the 0.26% of pairs that get the exact test. In the second bar, the time of the join, purple fills 96% of the bar: the time spent in the exact test](filter-and-refine-time.png)
+
+A box test is four comparisons. An exact test walks the points of a boundary, and Tacoma has 3,152 of them. The [GeoSpark paper](https://doi.org/10.1007/s10707-018-0330-9), where Sedona started, already noted that exact tests on complex shapes are time-consuming. So a spatial join gets faster in two ways: fewer candidates, or a faster exact test on each one.
+
+Every spatial join in Sedona has these two steps. The bounding boxes in a GeoParquet footer, from [One Sort, Many Indexes](https://sedona.apache.org/latest/blog/2026/11/06/one-sort-many-indexes/), are the same idea one level up: there the box lets a reader skip a whole row group.
+
+*Cities and roads from Overture Maps (divisions and transportation themes, release 2026-10-21.0). The tree is the R-tree in Sedona 1.9.1, built over the 305 city boxes. Counts from one `ST_Intersects` join on Sedona 1.9.1 on a laptop, run as a partitioned join. Time share from the same join with and without the exact test, median of three runs each.*
