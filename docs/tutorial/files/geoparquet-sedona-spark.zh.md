@@ -291,7 +291,7 @@ GeoParquet 2.0 文件与 GeoParquet 1.1 文件有以下区别：
 * 几何列带有 `GEOMETRY` 逻辑类型，CRS 是该类型的一个属性。GeoParquet 元数据会以 PROJJSON 重复给出 CRS。
 * 每个行组都带有地理空间统计信息，即边界框和几何类型，由 Parquet 库写出。因此 Sedona 默认不再添加 covering 列。`geoparquet.covering` 和 `geoparquet.covering.<column_name>` 仍可声明由你提供的 covering 列。
 * M 坐标会被保留：XYM 和 XYZM 几何对象按原样存储。GeoParquet 元数据中的 `geometry_types` 会标明坐标布局，例如 `Point M` 或 `LineString ZM`。
-* GeoParquet 元数据中的 `bbox` 还会给出 Z 和 M 坐标的范围。含 Z 坐标的列有六个值 `[xmin, ymin, zmin, xmax, ymax, zmax]`，同时含 Z 和 M 坐标的列有八个值 `[xmin, ymin, zmin, mmin, xmax, ymax, zmax, mmax]`。只含 M 而不含 Z 坐标的列只给出 X 和 Y 的范围，因为 GeoParquet 的 `bbox` 无法在没有 Z 范围时表示 M 范围。GeoParquet 1.1 文件仍只写出 X 和 Y 范围的四个值。
+* GeoParquet 元数据中的 `bbox` 还会给出 Z 和 M 坐标的范围。含 Z 坐标的列有六个值 `[xmin, ymin, zmin, xmax, ymax, zmax]`，同时含 Z 和 M 坐标的列有八个值 `[xmin, ymin, zmin, mmin, xmax, ymax, zmax, mmax]`。只含 M 而不含 Z 坐标的列只给出 X 和 Y 的范围，因为 GeoParquet 的 `bbox` 无法在没有 Z 范围时表示 M 范围。为 NaN 的 Z 或 M 坐标不计入范围；如果某一维的坐标全部为 NaN，则视为该列没有这一维，因此数组可能比几何的坐标维度所对应的更短。如果要写出的某个范围值为无穷大或 NaN，Sedona 不会为该列写出 `bbox`，因为 JSON 无法用数字表示这样的值。GeoParquet 1.1 文件仍只写出 X 和 Y 范围的四个值。
 
 Sedona 会用能够标识 CRS 的最短形式写出列的 `crs` 属性：
 
