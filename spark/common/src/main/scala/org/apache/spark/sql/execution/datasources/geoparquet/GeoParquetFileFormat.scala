@@ -18,17 +18,19 @@
  */
 package org.apache.spark.sql.execution.datasources.geoparquet
 
-import org.apache.spark.sql.execution.datasources.geoparquet.internal.{DataTypeUtils, ParquetFileFormat, ParquetFilters, ParquetFooterReader, ParquetOptions, ParquetOutputWriter, ParquetReadSupport, ParquetRowIndexUtil, ParquetWriteSupport, PortableSQLConf, SchemaMergeUtils, DataSourceUtils => InternalDataSourceUtils}
+import org.apache.spark.sql.execution.datasources.geoparquet.internal.{DataTypeUtils, ParquetFileFormat, ParquetFilters, ParquetFooterReader, ParquetOptions, ParquetOutputWriter, ParquetReadSupport, ParquetRowIndexUtil, ParquetWriteSupport, PortableSQLConf, QueryExecutionErrors, SchemaMergeUtils, DataSourceUtils => InternalDataSourceUtils}
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.FileStatus
+import org.apache.hadoop.fs.{FileStatus, Path}
 import org.apache.hadoop.mapred.FileSplit
 import org.apache.hadoop.mapreduce._
 import org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl
 import org.apache.parquet.filter2.compat.FilterCompat
 import org.apache.parquet.filter2.predicate.FilterApi
+import org.apache.parquet.format.converter.ParquetMetadataConverter
 import org.apache.parquet.hadoop.ParquetOutputFormat.JobSummaryLevel
 import org.apache.parquet.hadoop._
 import org.apache.parquet.hadoop.codec.CodecConfig
+import org.apache.parquet.hadoop.metadata.BlockMetaData
 import org.apache.parquet.hadoop.util.ContextUtil
 import org.apache.parquet.schema.MessageType
 import org.apache.spark.internal.Logging
@@ -395,31 +397,150 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
 
 object GeoParquetFileFormat extends Logging {
 
-  /** Merge only column CRS declarations, so mergeSchema=false still checks every data file. */
+  /**
+   * Merge only column CRS declarations, so mergeSchema=false still checks every data file.
+   *
+   * @return
+   *   the geometry columns, and the paths of the files that were left out as corrupt ones
+   */
   private[geoparquet] def mergeGeometrySchemasInParallel(
       parameters: Map[String, String],
       filesToTouch: Seq[FileStatus],
-      sparkSession: SparkSession): Option[StructType] = {
-    val reader = (files: Seq[FileStatus], conf: Configuration, ignoreCorruptFiles: Boolean) => {
-      ParquetFileFormat.readParquetFootersInParallel(conf, files, ignoreCorruptFiles).map {
-        footer =>
-          val fileMetaData = footer.getParquetMetadata.getFileMetaData
-          val keyValueMetaData = fileMetaData.getKeyValueMetaData
-          val parquetSchema = fileMetaData.getSchema
-          GeoParquetUtils.requireGeoParquet(keyValueMetaData, parquetSchema, parameters)
-          val converter = new GeoParquetToSparkSchemaConverter(
-            keyValueMetaData = keyValueMetaData,
-            parameters = parameters)
-          val fields = parquetSchema.getFields.asScala.filter(converter.isGeometryColumn)
-          StructType(fields.toSeq.sortBy(_.getName).map { field =>
-            StructField(
-              field.getName,
-              SpatialTypeSupport.geometryType(converter.geometrySrid(field)))
-          })
+      sparkSession: SparkSession): (Option[StructType], Set[String]) = {
+    val caseSensitive = sparkSession.sessionState.conf.caseSensitiveAnalysis
+    val corruptFiles = sparkSession.sparkContext.collectionAccumulator[String]
+    // A file that states no CRS for one of `withoutValues` and has no value in it leaves the
+    // column out
+    def reader(withoutValues: Set[String]) =
+      (files: Seq[FileStatus], conf: Configuration, ignoreCorruptFiles: Boolean) => {
+        ParquetFileFormat.readParquetFootersInParallel(conf, files, ignoreCorruptFiles).flatMap {
+          footer =>
+            val fileMetaData = footer.getParquetMetadata.getFileMetaData
+            val keyValueMetaData = fileMetaData.getKeyValueMetaData
+            val parquetSchema = fileMetaData.getSchema
+            GeoParquetUtils.requireGeoParquet(keyValueMetaData, parquetSchema, parameters)
+            val converter = new GeoParquetToSparkSchemaConverter(
+              keyValueMetaData = keyValueMetaData,
+              parameters = parameters)
+            val columns = parquetSchema.getFields.asScala.toSeq
+              .filter(converter.isGeometryColumn)
+              .sortBy(_.getName)
+              .map(field => field.getName -> converter.geometrySrid(field))
+            def schemaOf(columns: Seq[(String, Int)]): StructType =
+              StructType(columns.map { case (name, srid) =>
+                StructField(name, SpatialTypeSupport.geometryType(srid))
+              })
+            val mayHaveNoValues = columns.collect {
+              case (name, 0) if withoutValues(columnKey(name, caseSensitive)) => name
+            }
+            if (mayHaveNoValues.isEmpty) Some(schemaOf(columns))
+            else {
+              // The footers above come without their row groups, which say whether a column
+              // has values
+              readRowGroups(conf, footer.getFile, ignoreCorruptFiles) match {
+                case Some(rowGroups) =>
+                  val withoutAny = mayHaveNoValues.filter(hasNoValues(rowGroups, _)).toSet
+                  Some(schemaOf(columns.filterNot { case (name, _) => withoutAny(name) }))
+                case None =>
+                  // The read skips the file, so none of its columns counts
+                  corruptFiles.add(footer.getFile.toString)
+                  None
+              }
+            }
+        }
+      }
+    // A writer that takes the CRS of a column from its geometries has none to state for a file
+    // without a geometry in the column, so such a file fits the CRS that the other files
+    // state. Finding these files takes their row groups. That is only worth it where the files
+    // differ in the CRS of a column, which the first pass marks with the type of mixed SRIDs.
+    // The second pass leaves only those columns out, so that every other column is compared
+    // as before.
+    val merged = SchemaMergeUtils.mergeSchemasInParallel(
+      sparkSession,
+      parameters,
+      filesToTouch,
+      reader(withoutValues = Set.empty),
+      mergeGeometryColumns _)
+    val mixed = merged.toSeq
+      .flatMap(_.fields)
+      .filter(field => hasMixedSrids(field.dataType))
+      .map(field => columnKey(field.name, caseSensitive))
+      .toSet
+    if (mixed.nonEmpty) {
+      val settled = SchemaMergeUtils.mergeSchemasInParallel(
+        sparkSession,
+        parameters,
+        filesToTouch,
+        reader(withoutValues = mixed))
+      (settled, corruptFiles.value.asScala.toSet)
+    } else (merged, Set.empty)
+  }
+
+  private def columnKey(name: String, caseSensitive: Boolean): String =
+    if (caseSensitive) name else name.toLowerCase(java.util.Locale.ROOT)
+
+  /**
+   * The row groups of `file`, or None for a file whose row groups cannot be read while corrupt
+   * files are ignored, which is a file that the read skips.
+   * [[ParquetFileFormat.readParquetFootersInParallel]] does the same for the footers that it
+   * reads without their row groups.
+   */
+  private def readRowGroups(
+      conf: Configuration,
+      file: Path,
+      ignoreCorruptFiles: Boolean): Option[Seq[BlockMetaData]] = {
+    try {
+      Some(
+        ParquetFooterReader
+          .readFooter(conf, file, ParquetMetadataConverter.NO_FILTER)
+          .getBlocks
+          .asScala
+          .toSeq)
+    } catch {
+      case e: RuntimeException =>
+        if (ignoreCorruptFiles) {
+          logWarning(s"Skipped the corrupted file: $file", e)
+          None
+        } else {
+          throw QueryExecutionErrors.cannotReadFooterForFileError(file, e)
+        }
+    }
+  }
+
+  private def hasMixedSrids(dataType: DataType): Boolean =
+    SpatialTypeSupport.isNativeGeometry(dataType) &&
+      SpatialTypeSupport.geometrySrid(dataType).isEmpty
+
+  /**
+   * The geometry columns of two sets of files. A column for which they state different SRIDs gets
+   * the type of mixed SRIDs, which no file states by itself.
+   */
+  private def mergeGeometryColumns(
+      left: StructType,
+      right: StructType,
+      caseSensitive: Boolean): StructType = {
+    def key(field: StructField): String = columnKey(field.name, caseSensitive)
+    val rightFields = right.fields.map(field => key(field) -> field).toMap
+    val leftKeys = left.fields.map(key).toSet
+    StructType(left.fields.map { field =>
+      rightFields.get(key(field)) match {
+        case Some(other) if other.dataType != field.dataType =>
+          field.copy(dataType = SpatialTypeSupport.geometryType)
+        case _ => field
+      }
+    } ++ right.fields.filterNot(field => leftKeys(key(field))))
+  }
+
+  /** Whether the statistics of `rowGroups` show that the column `name` holds nulls only. */
+  private def hasNoValues(rowGroups: Seq[BlockMetaData], name: String): Boolean =
+    rowGroups.forall { rowGroup =>
+      rowGroup.getColumns.asScala.find(_.getPath.toArray.sameElements(Array(name))).exists {
+        column =>
+          val statistics = column.getStatistics
+          statistics != null && statistics.isNumNullsSet &&
+          statistics.getNumNulls == column.getValueCount
       }
     }
-    SchemaMergeUtils.mergeSchemasInParallel(sparkSession, parameters, filesToTouch, reader)
-  }
 
   /**
    * Figures out a merged Parquet schema with a distributed Spark job.
@@ -438,8 +559,14 @@ object GeoParquetFileFormat extends Logging {
   def mergeSchemasInParallel(
       parameters: Map[String, String],
       filesToTouch: Seq[FileStatus],
-      sparkSession: SparkSession): Option[StructType] = {
+      sparkSession: SparkSession,
+      geometryColumns: Option[StructType] = None): Option[StructType] = {
     val conf = new PortableSQLConf(sparkSession.sessionState.conf)
+    val caseSensitive = sparkSession.sessionState.conf.caseSensitiveAnalysis
+    val geometryTypes = geometryColumns.toSeq
+      .flatMap(_.fields)
+      .map(field => columnKey(field.name, caseSensitive) -> field.dataType)
+      .toMap
     val assumeBinaryIsString = conf.isParquetBinaryAsString
     val assumeInt96IsTimestamp = conf.isParquetINT96AsTimestamp
 
@@ -454,7 +581,18 @@ object GeoParquetFileFormat extends Logging {
             assumeBinaryIsString = assumeBinaryIsString,
             assumeInt96IsTimestamp = assumeInt96IsTimestamp,
             parameters = parameters)
-          readSchemaFromFooter(footer, keyValueMetaData, converter, parameters)
+          val schema = readSchemaFromFooter(footer, keyValueMetaData, converter, parameters)
+          // The caller has settled the types of `geometryColumns` with
+          // mergeGeometrySchemasInParallel, so the files do not have to agree on their SRIDs
+          // here. Any other geometry column, one that only a summary file has for example,
+          // keeps the SRID that its file states.
+          StructType(schema.fields.map { field =>
+            geometryTypes.get(columnKey(field.name, caseSensitive)) match {
+              case Some(settled) if SpatialTypeSupport.isNativeGeometry(field.dataType) =>
+                field.copy(dataType = settled)
+              case _ => field
+            }
+          })
         }
     }
 

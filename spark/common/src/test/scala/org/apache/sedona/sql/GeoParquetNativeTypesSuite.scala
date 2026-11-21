@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.sql
 
-import java.io.File
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File}
 import java.nio.{ByteBuffer, ByteOrder}
 import java.nio.file.Files
 
@@ -27,6 +27,7 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.mapreduce.{Job, TaskAttemptID, TaskType}
 import org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl
+import org.apache.parquet.format.{Util => ParquetFormatUtil}
 import org.apache.parquet.hadoop.{ParquetFileReader, ParquetOutputFormat, ParquetReader}
 import org.apache.parquet.hadoop.example.GroupReadSupport
 import org.apache.parquet.hadoop.metadata.{ColumnChunkMetaData, ParquetMetadata}
@@ -38,7 +39,7 @@ import org.apache.spark.sql.execution.datasources.OutputWriter
 import org.apache.spark.sql.execution.datasources.geoparquet.{GeoParquetFileFormat, GeoParquetMetaData, GeoParquetWriteSupport, ParquetGeospatialColumn, ParquetGeospatialTypes}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
-import org.apache.spark.sql.types.{BinaryType, StructField, StructType}
+import org.apache.spark.sql.types.{BinaryType, DataType, IntegerType, StructField, StructType}
 import org.json4s.{JArray, JDouble, JInt, JNothing, JNull, JString, JValue}
 import org.json4s.jackson.JsonMethods.{compact, parse, render}
 
@@ -276,6 +277,213 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
             .collect()
         }
         assert(messages(error).contains("does not contain valid geo metadata"))
+      }
+    }
+  }
+
+  describe("Reading files that state no CRS for a geometry column without geometries") {
+    // A writer that takes the CRS of a column from its geometries has none to state for a file
+    // without a geometry in the column. Such a file fits the CRS that the other files state.
+    val schema = StructType(Seq(StructField("geometry", GeometryUDT())))
+    val mercator = compact(render(GeoParquetMetaData.sridToProjJson(3857).get))
+
+    def frame(geometries: Geometry*): DataFrame = sparkSession.createDataFrame(
+      sparkSession.sparkContext.parallelize(geometries.map(Row(_)), 1),
+      schema)
+
+    def pointWithSrid(srid: Int): Geometry = {
+      val point = new GeometryFactory().createPoint(new Coordinate(1, 2))
+      point.setSRID(srid)
+      point
+    }
+
+    def append(df: DataFrame, path: String, version: String, options: (String, String)*): Unit =
+      df.write
+        .format("geoparquet")
+        .mode("append")
+        .option("geoparquet.version", version)
+        .options(options.toMap)
+        .save(path)
+
+    /** The SRID of each geometry read from `path`, None for a null, in a stable order. */
+    def srids(path: String, options: (String, String)*): Seq[Option[Int]] =
+      sparkSession.read
+        .format("geoparquet")
+        .options(options.toMap)
+        .load(path)
+        .collect()
+        .map(row => Option(row.getJtsGeometry("geometry")).map(_.getSRID))
+        .toSeq
+        .sortBy(_.getOrElse(-1))
+
+    val versions = if (libraryHasGeospatialTypes) Seq("1.1.0", "2.0.0") else Seq("1.1.0")
+    for (version <- versions) {
+      for (mergeSchema <- Seq("false", "true")) {
+        it(
+          s"reads a $version file without geometries next to a file with a CRS (mergeSchema=$mergeSchema)") {
+          withPath { path =>
+            append(frame(null, null), path, version)
+            append(frame(pointWithSrid(3857)), path, version)
+            assert(srids(path, "mergeSchema" -> mergeSchema) == Seq(None, None, Some(3857)))
+          }
+        }
+      }
+
+      it(s"reads $version files without geometries as a column of unknown CRS") {
+        withPath { path =>
+          append(frame(null), path, version)
+          append(frame(null, null), path, version)
+          assert(srids(path) == Seq(None, None, None))
+        }
+      }
+
+      if (SpatialTypeSupport.usesNativeTypes) {
+        it(s"rejects a $version file with geometries of unknown CRS next to a file with a CRS") {
+          withPath { path =>
+            append(frame(null, pointWithSrid(0)), path, version)
+            append(frame(pointWithSrid(3857)), path, version)
+            val message = messages(intercept[Exception](srids(path)))
+            assert(message.contains("GEOMETRY(0)") && message.contains("GEOMETRY(3857)"))
+          }
+        }
+
+        it(s"rejects a geometry of unknown CRS in a $version file read with an SRID") {
+          withPath { path =>
+            append(frame(null, pointWithSrid(0)), path, version)
+            val withSrid =
+              StructType(Seq(StructField("geometry", SpatialTypeSupport.geometryType(3857))))
+            val read = sparkSession.read.format("geoparquet").schema(withSrid).load(path)
+            val message = messages(intercept[Exception](read.collect()))
+            assert(message.contains("requires SRID 3857 but contains SRID 0"))
+          }
+        }
+      }
+    }
+
+    if (SpatialTypeSupport.usesNativeTypes) {
+      def parquetFiles(path: String): Seq[File] =
+        new File(path).listFiles().filter(_.getName.endsWith(".parquet")).toSeq
+
+      def withSetting[T](key: String, value: String)(run: => T): T = {
+        val before = sparkSession.conf.get(key)
+        sparkSession.conf.set(key, value)
+        try run
+        finally sparkSession.conf.set(key, before)
+      }
+
+      /** Leaves the schema of a Parquet file readable, and its row groups unreadable. */
+      def damageRowGroups(file: File): Unit = {
+        val bytes = Files.readAllBytes(file.toPath)
+        val length =
+          ByteBuffer.wrap(bytes, bytes.length - 8, 4).order(ByteOrder.LITTLE_ENDIAN).getInt
+        val start = bytes.length - 8 - length
+        val metadata =
+          ParquetFormatUtil.readFileMetaData(new ByteArrayInputStream(bytes, start, length))
+        // The first column chunk now belongs to a column that the schema does not have
+        val chunk = metadata.getRow_groups.get(0).getColumns.get(0)
+        chunk.getMeta_data.setPath_in_schema(java.util.Arrays.asList("missing"))
+        val damaged = new ByteArrayOutputStream()
+        damaged.write(bytes, 0, start)
+        ParquetFormatUtil.writeFileMetaData(metadata, damaged)
+        val newLength = damaged.size - start
+        damaged.write(
+          ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(newLength).array)
+        damaged.write(bytes, bytes.length - 4, 4)
+        Files.write(file.toPath, damaged.toByteArray)
+        // The checksum that Hadoop keeps next to the file is for the bytes before
+        new File(file.getParentFile, s".${file.getName}.crc").delete()
+      }
+
+      it("rejects a column that is a geometry in some files only, next to such a file") {
+        withPath { path =>
+          val withNumber = sparkSession.createDataFrame(
+            sparkSession.sparkContext.parallelize(Seq(Row(pointWithSrid(3857), 75)), 1),
+            StructType(
+              Seq(StructField("geometry", GeometryUDT()), StructField("aux", IntegerType))))
+          val withoutGeometries = sparkSession.createDataFrame(
+            sparkSession.sparkContext.parallelize(Seq(Row(null, null)), 1),
+            StructType(
+              Seq(StructField("geometry", GeometryUDT()), StructField("aux", GeometryUDT()))))
+          // The schema comes from the first file, where aux is a number
+          append(withNumber, path + "/a", "1.1.0")
+          append(withoutGeometries, path + "/b", "1.1.0")
+          val read = sparkSession.read.format("geoparquet")
+          val message = messages(intercept[Exception](read.load(path + "/a", path + "/b")))
+          assert(message.contains("Incompatible GeoParquet geometry column 'aux'"))
+        }
+      }
+
+      for (mergeSchema <- Seq("false", "true")) {
+        it(s"keeps the CRS of a column that only the summary file has (mergeSchema=$mergeSchema)") {
+          withPath { path =>
+            append(frame(pointWithSrid(3857)), path, "1.1.0")
+            withPath { other =>
+              val twoColumns = StructType(
+                Seq(StructField("geometry", GeometryUDT()), StructField("other", GeometryUDT())))
+              val noRows = sparkSession.createDataFrame(
+                sparkSession.sparkContext.parallelize(Seq.empty[Row], 1),
+                twoColumns)
+              append(noRows, other, "1.1.0", "geoparquet.crs" -> mercator)
+              Files.copy(
+                parquetFiles(other).head.toPath,
+                new File(path, "_common_metadata").toPath)
+            }
+            val read =
+              sparkSession.read.format("geoparquet").option("mergeSchema", mergeSchema).load(path)
+            assert(read.schema("other").dataType == SpatialTypeSupport.geometryType(3857))
+            assert(read.schema("geometry").dataType == SpatialTypeSupport.geometryType(3857))
+          }
+        }
+      }
+
+      it("treats a file without geometries whose row groups are corrupt as Spark does") {
+        withPath { path =>
+          append(frame(null, null), path, "1.1.0")
+          val corrupt = parquetFiles(path).head
+          damageRowGroups(corrupt)
+          append(frame(pointWithSrid(3857)), path, "1.1.0")
+          val key = "spark.sql.files.ignoreCorruptFiles"
+          assert(withSetting(key, "true")(srids(path)) == Seq(Some(3857)))
+          val message = messages(intercept[Exception](withSetting(key, "false")(srids(path))))
+          assert(message.contains(corrupt.getName))
+        }
+      }
+
+      // The read skips such a file, so what the file says about its other columns does not
+      // count either
+      for (mergeSchema <- Seq("false", "true");
+        (title, auxType, auxValue, auxOptions) <- Seq(
+          (
+            "another CRS for another column",
+            GeometryUDT(),
+            null,
+            Seq("geoparquet.crs.aux" -> mercator)),
+          ("another type for another column", IntegerType, 75, Seq.empty))) {
+        it(
+          s"leaves out a file whose row groups are corrupt, with $title (mergeSchema=$mergeSchema)") {
+          withPath { path =>
+            def twoColumns(aux: DataType, row: Row): DataFrame = sparkSession.createDataFrame(
+              sparkSession.sparkContext.parallelize(Seq(row), 1),
+              StructType(Seq(StructField("geometry", GeometryUDT()), StructField("aux", aux))))
+            // The schema comes from the first file without mergeSchema, which is the corrupt one
+            append(twoColumns(auxType, Row(null, auxValue)), path + "/a", "1.1.0", auxOptions: _*)
+            damageRowGroups(parquetFiles(path + "/a").head)
+            append(
+              twoColumns(GeometryUDT(), Row(pointWithSrid(3857), pointWithSrid(4326))),
+              path + "/b",
+              "1.1.0")
+            val read = withSetting("spark.sql.files.ignoreCorruptFiles", "true") {
+              val loaded = sparkSession.read
+                .format("geoparquet")
+                .option("mergeSchema", mergeSchema)
+                .load(path + "/a", path + "/b")
+              (loaded.schema, loaded.collect().toSeq)
+            }
+            assert(read._1("geometry").dataType == SpatialTypeSupport.geometryType(3857))
+            assert(read._1("aux").dataType == SpatialTypeSupport.geometryType(4326))
+            assert(read._2.map(_.getJtsGeometry("aux").getSRID) == Seq(4326))
+          }
+        }
       }
     }
   }

@@ -46,8 +46,7 @@ object GeoParquetUtils {
     val parquetOptions = new internal.ParquetOptions(parameters, conf)
     val shouldMergeSchemas = parquetOptions.mergeSchema
     val mergeRespectSummaries = conf.isParquetSchemaRespectSummaries
-    val filesByType = splitFiles(files)
-    val filesToTouch =
+    def filesToMerge(filesByType: FileTypes): Seq[FileStatus] =
       if (shouldMergeSchemas) {
         val needMerged: Seq[FileStatus] =
           if (mergeRespectSummaries) {
@@ -69,12 +68,25 @@ object GeoParquetUtils {
           .orElse(filesByType.data.headOption)
           .toSeq
       }
-    val geometrySchema = if (SpatialTypeSupport.usesNativeTypes && !isLegacyMode(parameters)) {
-      val geometryFiles = if (filesByType.data.nonEmpty) filesByType.data else filesToTouch
-      GeoParquetFileFormat.mergeGeometrySchemasInParallel(parameters, geometryFiles, sparkSession)
-    } else None
-    val inferred =
-      GeoParquetFileFormat.mergeSchemasInParallel(parameters, filesToTouch, sparkSession)
+    val filesByType = splitFiles(files)
+    val (geometrySchema, corruptFiles) =
+      if (SpatialTypeSupport.usesNativeTypes && !isLegacyMode(parameters)) {
+        val geometryFiles =
+          if (filesByType.data.nonEmpty) filesByType.data else filesToMerge(filesByType)
+        GeoParquetFileFormat.mergeGeometrySchemasInParallel(
+          parameters,
+          geometryFiles,
+          sparkSession)
+      } else (None, Set.empty[String])
+    // The read skips the files that turned out to be corrupt, so they have no say in the schema
+    val filesToTouch = filesToMerge(
+      if (corruptFiles.isEmpty) filesByType
+      else splitFiles(files.filterNot(file => corruptFiles(file.getPath.toString))))
+    val inferred = GeoParquetFileFormat.mergeSchemasInParallel(
+      parameters,
+      filesToTouch,
+      sparkSession,
+      geometryColumns = geometrySchema)
     geometrySchema match {
       case None => inferred
       case Some(geometryFields) =>
