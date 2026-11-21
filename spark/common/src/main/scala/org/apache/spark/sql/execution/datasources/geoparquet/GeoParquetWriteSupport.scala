@@ -151,7 +151,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
     }
 
     geoParquetVersion = configuration.get(GEOPARQUET_VERSION_KEY) match {
-      case null => Some(VERSION)
+      case null => Some(GeoParquetMetaData.defaultVersion)
       // The version decides the layout of the file with the spaces around it ignored, and the
       // metadata states it in the same form
       case version: String => Some(version.trim)
@@ -1014,7 +1014,8 @@ object GeoParquetWriteSupport {
    * and a GeoParquet 1 file states the CRS in metadata that is written after the last row.
    */
   def columnsWithoutCrs(schema: StructType, configuration: Configuration): Seq[Int] = {
-    val version = Option(configuration.get(GEOPARQUET_VERSION_KEY)).getOrElse(VERSION)
+    val version = Option(configuration.get(GEOPARQUET_VERSION_KEY))
+      .getOrElse(GeoParquetMetaData.defaultVersion)
     if (!GeoParquetMetaData.usesGeospatialTypes(version) ||
       configuration.get(GEOPARQUET_CRS_KEY) != null) {
       Seq.empty
@@ -1036,7 +1037,8 @@ object GeoParquetWriteSupport {
    * statistics of the Parquet library are turned off for them.
    */
   def collectsGeographyStatistics(schema: StructType, configuration: Configuration): Boolean = {
-    val version = Option(configuration.get(GEOPARQUET_VERSION_KEY)).getOrElse(VERSION)
+    val version = Option(configuration.get(GEOPARQUET_VERSION_KEY))
+      .getOrElse(GeoParquetMetaData.defaultVersion)
     GeoParquetMetaData.usesGeospatialTypes(version) && schema.fields.exists { field =>
       SpatialTypeSupport.isGeography(field.dataType) &&
       GeographyRowGroupStatistics.enabled(configuration, field.name)
@@ -1139,15 +1141,29 @@ object GeoParquetWriteSupport {
         s"$GEOPARQUET_CRS_KEY or $GEOPARQUET_CRS_KEY.$column to state the CRS.")
   }
 
-  /** GeoParquet 2 needs the geospatial logical types of the Parquet library on the classpath. */
-  def requireSupportedVersion(configuration: Configuration): Unit = {
-    Option(configuration.get(GEOPARQUET_VERSION_KEY)).foreach { version =>
-      if (GeoParquetMetaData.usesGeospatialTypes(version) && !ParquetGeospatialTypes.supported) {
-        throw new IllegalArgumentException(
-          s"GeoParquet $version stores geometries in the Parquet GEOMETRY logical type, which " +
-            "needs Spark 4.1 or later (parquet-java 1.16.0). Set " +
-            s"$GEOPARQUET_VERSION_KEY to $VERSION on this Spark version.")
-      }
+  /**
+   * Settles the GeoParquet version of a write in `configuration`, where the writer reads it. The
+   * version that the write states, as an option or in the Hadoop configuration, comes first. A
+   * write that states none takes `sessionVersion`, the value of the session setting
+   * [[GeoParquetMetaData.GEOPARQUET_VERSION_SESSION_KEY]], and when that is empty
+   * [[GeoParquetMetaData.defaultVersion]].
+   *
+   * GeoParquet 2 needs the geospatial logical types of the Parquet library on the classpath.
+   */
+  def setVersion(configuration: Configuration, sessionVersion: Option[String]): Unit = {
+    val ofSession = sessionVersion.map(_.trim).filter(_.nonEmpty)
+    val (version, statedBy) = Option(configuration.get(GEOPARQUET_VERSION_KEY)) match {
+      case Some(version) => (version, GEOPARQUET_VERSION_KEY)
+      case None =>
+        val version = ofSession.getOrElse(GeoParquetMetaData.defaultVersion)
+        configuration.set(GEOPARQUET_VERSION_KEY, version)
+        (version, GeoParquetMetaData.GEOPARQUET_VERSION_SESSION_KEY)
+    }
+    if (GeoParquetMetaData.usesGeospatialTypes(version) && !ParquetGeospatialTypes.supported) {
+      throw new IllegalArgumentException(
+        s"GeoParquet ${version.trim} stores geometries in the Parquet GEOMETRY logical type, " +
+          "which needs Spark 4.1 or later (parquet-java 1.16.0). Set " +
+          s"$statedBy to $VERSION on this Spark version.")
     }
   }
 
@@ -1180,7 +1196,7 @@ object GeoParquetWriteSupport {
    * @param version
    *   the GeoParquet version of the write
    */
-  def requireGeometryColumn(schema: StructType, version: String = VERSION): Unit = {
+  def requireGeometryColumn(schema: StructType, version: String): Unit = {
     val geospatialTypes = GeoParquetMetaData.usesGeospatialTypes(version)
     // Every field with a native geography, not only the first one: a column that passes here
     // without a check is written with the CRS of an option, whatever SRID its geographies have

@@ -262,7 +262,7 @@ The `columns` column contains bounding box information on each file in the GeoPa
 ## Write GeoParquet with CRS Metadata
 
 Since v`1.5.1`, Sedona supports writing GeoParquet files with custom GeoParquet spec version and crs.
-The default GeoParquet spec version is `1.1.0` (since `v1.9.0`) and the default crs is `null`. You can specify the GeoParquet spec version and crs as follows:
+The default GeoParquet spec version is `2.0.0` on Spark 4.1 and later (since `v2.0.0`) and `1.1.0` on Spark 3.5 and 4.0 (since `v1.9.0`), and the default crs is `null`. You can specify the GeoParquet spec version and crs as follows:
 
 ```scala
 val projjson = "{...}" // PROJJSON string for all geometry columns
@@ -316,13 +316,26 @@ coordinates themselves need to be swapped.
 
 ## Write GeoParquet 2.0
 
-[GeoParquet 2.0](https://geoparquet.org/releases/v2.0.0/) stores each geometry column in the `GEOMETRY` logical type of the Parquet format. Since Sedona 2.0.0, set `geoparquet.version` to `2.0.0` to write such files on Spark 4.1 and later. The default version is `1.1.0`.
+[GeoParquet 2.0](https://geoparquet.org/releases/v2.0.0/) stores each geometry column in the `GEOMETRY` logical type of the Parquet format. Since Sedona 2.0.0, this is the version that Sedona writes on Spark 4.1 and later. On Spark 3.5 and 4.0 Sedona writes GeoParquet 1.1.
 
 ```python
-df.write.format("geoparquet").option("geoparquet.version", "2.0.0").save(
+df.write.format("geoparquet").save("/tmp/somewhere")
+```
+
+To write GeoParquet 1.1 on Spark 4.1 and later, set `geoparquet.version` on the write. The session parameter `spark.sedona.geoparquet.version` sets the version of all the writes that set none:
+
+```python
+df.write.format("geoparquet").option("geoparquet.version", "1.1.0").save(
     "/tmp/somewhere"
 )
+
+sedona.conf.set("spark.sedona.geoparquet.version", "1.1.0")
 ```
+
+Write GeoParquet 1.1 when the files have to be read by software that predates the `GEOMETRY` logical type:
+
+* Spark 3.5 and 4.0 cannot open a GeoParquet 2.0 file, and Sedona 1.9.1 and earlier cannot read one.
+* GeoPandas and other Python libraries that read Parquet files through PyArrow need PyArrow 20 or later.
 
 A GeoParquet 2.0 file differs from a GeoParquet 1.1 file in these ways:
 
@@ -359,7 +372,7 @@ The CRS of a geography column follows the rules of a geometry column, and `geopa
 
 The `GEOGRAPHY` logical type takes a geographic CRS, with longitudes from -180 to 180 and latitudes from -90 to 90. Sedona's own geography type on Spark 4.1 takes any SRID and any coordinates, so a write fails for a geography column whose CRS is a projected one, and for a geography outside these bounds.
 
-A GeoParquet 1.1 file has no geography type. On Spark 4.1 and earlier, Sedona stores a column of its own geography type there in a form that only Sedona reads back. On Spark 4.2 and later a write of a column of Spark's native geography type to a GeoParquet 1.1 file fails, so set `geoparquet.version` to `2.0.0` for it.
+A GeoParquet 1.1 file has no geography type. On Spark 4.1 and earlier, Sedona stores a column of its own geography type there in a form that only Sedona reads back. On Spark 4.2 and later a write of a column of Spark's native geography type to a GeoParquet 1.1 file fails. GeoParquet 2.0, the default there, stores it.
 
 Spark 3.5 and 4.0 ship a Parquet library that predates the `GEOMETRY` logical type. Sedona writes GeoParquet 1.1 on these versions and rejects `geoparquet.version` `2.0.0`.
 
@@ -381,7 +394,7 @@ df.write.format("geoparquet")
     .save("/path/to/saved_geoparquet.parquet")
 ```
 
-If you don't set a `geoparquet.covering` option, Sedona will automatically populate covering metadata for GeoParquet `1.1.0`.
+If you don't set a `geoparquet.covering` option, Sedona will automatically populate covering metadata for GeoParquet `1.1.0`. A GeoParquet 2.0 file, which is what Sedona writes by default on Spark 4.1 and later, gets no covering column this way, because its row groups have geospatial statistics.
 
 For each geometry column, Sedona uses `<geometryColumnName>_bbox` as the covering column:
 

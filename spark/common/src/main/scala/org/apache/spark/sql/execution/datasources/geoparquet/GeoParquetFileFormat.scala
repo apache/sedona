@@ -94,12 +94,13 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
 
     val conf = ContextUtil.getConfiguration(job)
     GeoParquetWriteSupport.setWriteOptions(options, dataSchema, conf)
-    GeoParquetWriteSupport.requireSupportedVersion(conf)
+    GeoParquetWriteSupport.setVersion(
+      conf,
+      sparkSession.conf.getOption(GeoParquetMetaData.GEOPARQUET_VERSION_SESSION_KEY))
     // Fail on the driver, not in every write task
     GeoParquetWriteSupport.requireGeometryColumn(
       dataSchema,
-      Option(conf.get(GeoParquetMetaData.GEOPARQUET_VERSION_KEY))
-        .getOrElse(GeoParquetMetaData.VERSION))
+      conf.get(GeoParquetMetaData.GEOPARQUET_VERSION_KEY))
 
     val committerClass =
       conf.getClass(

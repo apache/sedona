@@ -40,6 +40,12 @@ See [Migrating to Sedona 2.0](migration-2.0.md) for what to check when upgrading
   `RS_SetBandNoDataValue(raster, band, value, true)` to `RS_ReplaceBandNoDataValue(raster, band, value)`,
   and drop a `false` fourth argument.
 
+* **GeoParquet 2.0 is the default on Spark 4.1 and later**: a `geoparquet` write that sets no
+  `geoparquet.version` now writes GeoParquet 2.0 files on Spark 4.1 and later. It wrote
+  GeoParquet 1.1 before, and still does on Spark 3.5 and 4.0. Spark 3.5 and 4.0 cannot open
+  GeoParquet 2.0 files, Sedona 1.9.1 and earlier cannot read them, and GeoPandas needs
+  PyArrow 20 or later. Set the write option `geoparquet.version` or the session parameter
+  `spark.sedona.geoparquet.version` to `1.1.0` to keep writing GeoParquet 1.1.
 * **WKB output**: `ST_AsBinary`, `ST_AsEWKB`, and `ST_AsHEXEWKB` now retain M for measured
   geometries in Spark, Flink, and Snowflake, including geometries read from WKT. Earlier
   versions dropped M, so these inputs now produce XYM or XYZM instead of XY or XYZ.

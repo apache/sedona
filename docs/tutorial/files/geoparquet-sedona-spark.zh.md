@@ -260,7 +260,7 @@ df.show(truncate=False)
 
 ## 写出带 CRS 元数据的 GeoParquet
 
-自 v`1.5.1` 起，Sedona 支持以自定义的 GeoParquet 规范版本与 CRS 写出 GeoParquet 文件。默认的 GeoParquet 规范版本为 `1.1.0`（自 `v1.9.0` 起），默认 CRS 为 `null`。可按以下方式指定：
+自 v`1.5.1` 起，Sedona 支持以自定义的 GeoParquet 规范版本与 CRS 写出 GeoParquet 文件。默认的 GeoParquet 规范版本在 Spark 4.1 及更高版本上为 `2.0.0`（自 `v2.0.0` 起），在 Spark 3.5 和 4.0 上为 `1.1.0`（自 `v1.9.0` 起），默认 CRS 为 `null`。可按以下方式指定：
 
 ```scala
 val projjson = "{...}" // 所有几何列共享的 PROJJSON 字符串
@@ -311,13 +311,26 @@ GeoParquet 以 `(x, y)` 顺序存储 WKB 坐标。根据 GeoParquet 1.1 规范�
 
 ## 写出 GeoParquet 2.0
 
-[GeoParquet 2.0](https://geoparquet.org/releases/v2.0.0/) 使用 Parquet 格式的 `GEOMETRY` 逻辑类型存储每个几何列。自 Sedona 2.0.0 起，在 Spark 4.1 及更高版本上，把 `geoparquet.version` 设为 `2.0.0` 即可写出这样的文件。默认版本为 `1.1.0`。
+[GeoParquet 2.0](https://geoparquet.org/releases/v2.0.0/) 使用 Parquet 格式的 `GEOMETRY` 逻辑类型存储每个几何列。自 Sedona 2.0.0 起，Sedona 在 Spark 4.1 及更高版本上默认写出这一版本。在 Spark 3.5 和 4.0 上，Sedona 写出 GeoParquet 1.1。
 
 ```python
-df.write.format("geoparquet").option("geoparquet.version", "2.0.0").save(
+df.write.format("geoparquet").save("/tmp/somewhere")
+```
+
+如需在 Spark 4.1 及更高版本上写出 GeoParquet 1.1，请在写出时设置 `geoparquet.version`。会话参数 `spark.sedona.geoparquet.version` 则为所有未设置版本的写出操作指定版本：
+
+```python
+df.write.format("geoparquet").option("geoparquet.version", "1.1.0").save(
     "/tmp/somewhere"
 )
+
+sedona.conf.set("spark.sedona.geoparquet.version", "1.1.0")
 ```
+
+如果读取这些文件的软件早于 `GEOMETRY` 逻辑类型，请写出 GeoParquet 1.1：
+
+* Spark 3.5 和 4.0 无法打开 GeoParquet 2.0 文件，Sedona 1.9.1 及更早版本也无法读取。
+* GeoPandas 以及其他通过 PyArrow 读取 Parquet 文件的 Python 库需要 PyArrow 20 或更高版本。
 
 GeoParquet 2.0 文件与 GeoParquet 1.1 文件有以下区别：
 
@@ -354,7 +367,7 @@ Sedona 必须在写出第一行之前知道 CRS，因此会把第一个几何对
 
 `GEOGRAPHY` 逻辑类型要求使用地理 CRS，经度范围为 -180 到 180，纬度范围为 -90 到 90。Spark 4.1 上 Sedona 自有的地理类型接受任意 SRID 和任意坐标，因此如果地理列的 CRS 是投影 CRS，或者某个地理对象超出上述范围，写入会失败。
 
-GeoParquet 1.1 文件没有地理类型。在 Spark 4.1 及更早版本上，Sedona 会把自己的地理类型的列以只有 Sedona 能读回的形式存入这样的文件。在 Spark 4.2 及更高版本上，把 Spark 原生地理类型的列写入 GeoParquet 1.1 文件会失败，请为此把 `geoparquet.version` 设为 `2.0.0`。
+GeoParquet 1.1 文件没有地理类型。在 Spark 4.1 及更早版本上，Sedona 会把自己的地理类型的列以只有 Sedona 能读回的形式存入这样的文件。在 Spark 4.2 及更高版本上，把 Spark 原生地理类型的列写入 GeoParquet 1.1 文件会失败。该版本上默认写出的 GeoParquet 2.0 可以存储这样的列。
 
 Spark 3.5 和 4.0 自带的 Parquet 库早于 `GEOMETRY` 逻辑类型。Sedona 在这些版本上写出 GeoParquet 1.1，并拒绝把 `geoparquet.version` 设为 `2.0.0`。
 
@@ -376,7 +389,7 @@ df.write.format("geoparquet")
     .save("/path/to/saved_geoparquet.parquet")
 ```
 
-如果未设置 `geoparquet.covering` 选项，Sedona 在写出 GeoParquet `1.1.0` 时会自动为您填充 covering 元数据。
+如果未设置 `geoparquet.covering` 选项，Sedona 在写出 GeoParquet `1.1.0` 时会自动为您填充 covering 元数据。GeoParquet 2.0 文件（Sedona 在 Spark 4.1 及更高版本上的默认写出版本）不会以这种方式获得 covering 列，因为它的行组带有地理空间统计信息。
 
 对每个几何列，Sedona 会使用 `<geometryColumnName>_bbox` 作为 covering 列：
 

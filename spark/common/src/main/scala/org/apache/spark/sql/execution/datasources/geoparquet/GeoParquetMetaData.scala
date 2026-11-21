@@ -83,9 +83,26 @@ case class GeoParquetMetaData(
     columns: Map[String, GeometryFieldMetaData])
 
 object GeoParquetMetaData {
-  // We're conforming to version 1.1.0 of the GeoParquet specification, please refer to
-  // https://geoparquet.org/releases/v1.1.0/ for more details.
+  // The version of the GeoParquet specification that is written where the Parquet library has no
+  // geospatial logical types, please refer to https://geoparquet.org/releases/v1.1.0/ for more
+  // details.
   val VERSION = "1.1.0"
+
+  // The version that is written where the Parquet library has the geospatial logical types,
+  // please refer to https://geoparquet.org/releases/v2.0.0/ for more details.
+  val VERSION_2 = "2.0.0"
+
+  /**
+   * The GeoParquet version of a write that states none: [[VERSION_2]] where the Parquet library
+   * can write the geospatial logical types, which Spark has from 4.1, and [[VERSION]] elsewhere.
+   */
+  def defaultVersion: String = if (ParquetGeospatialTypes.supported) VERSION_2 else VERSION
+
+  /**
+   * Session setting for the GeoParquet version of the writes that have no
+   * [[GEOPARQUET_VERSION_KEY]] option.
+   */
+  val GEOPARQUET_VERSION_SESSION_KEY = "spark.sedona.geoparquet.version"
 
   /**
    * Configuration key for the GeoParquet version to write. A 2.x version stores geometries in the

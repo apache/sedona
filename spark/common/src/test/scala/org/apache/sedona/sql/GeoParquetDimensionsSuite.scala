@@ -358,7 +358,8 @@ class GeoParquetDimensionsSuite extends TestBaseScala {
         .selectExpr("id", "ST_GeomFromWKB(wkb) AS geometry")
     }
     assertGeometries(df, input, "before write")
-    df.coalesce(1).write.format("geoparquet").save(path)
+    // A GeoParquet 1 file has no M coordinates. A GeoParquet 2 file keeps them.
+    df.coalesce(1).write.format("geoparquet").option("geoparquet.version", "1.1.0").save(path)
     assertWrittenFile(path, expected, allEmpty)
     assertFile(path, expected, legacyUdt = legacyUdt)
   }
@@ -517,7 +518,12 @@ class GeoParquetDimensionsSuite extends TestBaseScala {
           .write
           .format("geoparquet")
           .save(path)
-        val stored = sparkSession.read.parquet(path).collect().sortBy(_.getInt(0))
+        // Without the schema, Spark 4.2 returns the column of a GeoParquet 2 file as a geometry
+        val stored = sparkSession.read
+          .schema("id int, geometry binary")
+          .parquet(path)
+          .collect()
+          .sortBy(_.getInt(0))
         assert(stored.length == isoSamples.size)
         stored.zip(isoSamples).foreach { case (row, sample) =>
           withClue(s"${sample.name}: ") {

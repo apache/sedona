@@ -120,7 +120,14 @@ class NativeSpatialIOSuite extends FunSuite with BeforeAndAfterAll {
           }
           .mkString(" UNION ALL ")
         val path = new java.io.File(directory, "data").getAbsolutePath
-        spark.sql(query).coalesce(1).write.format("geoparquet").save(path)
+        // A GeoParquet 1 file has no M coordinates. A GeoParquet 2 file keeps them.
+        spark
+          .sql(query)
+          .coalesce(1)
+          .write
+          .format("geoparquet")
+          .option("geoparquet.version", "1.1.0")
+          .save(path)
         val raw = spark.read.parquet(path).orderBy("id").collect()
         val restored = spark.read.format("geoparquet").load(path)
         assert(restored.schema("geometry").dataType == GeometryType(4326))

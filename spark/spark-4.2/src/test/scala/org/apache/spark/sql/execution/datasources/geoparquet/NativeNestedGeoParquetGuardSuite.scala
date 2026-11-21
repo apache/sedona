@@ -23,28 +23,36 @@ import org.apache.spark.sql.types._
 import org.scalatest.funsuite.AnyFunSuite
 
 class NativeNestedGeoParquetGuardSuite extends AnyFunSuite {
+  // The version of a write without one, and the one before it
+  private val versions = Seq(GeoParquetMetaData.VERSION_2, GeoParquetMetaData.VERSION)
+
   test("native geometry inside structs, arrays and maps is rejected before a write") {
     val nestedTypes = Seq(
       StructType(Seq(StructField("g", GeometryType(3857)))),
       ArrayType(GeometryType(4326)),
       MapType(StringType, GeometryType(0)))
-    nestedTypes.foreach { nested =>
+    for (nested <- nestedTypes; version <- versions) {
       val schema =
         StructType(Seq(StructField("top", GeometryType(4326)), StructField("nested", nested)))
       val error = intercept[IllegalArgumentException] {
-        GeoParquetWriteSupport.requireGeometryColumn(schema)
+        GeoParquetWriteSupport.requireGeometryColumn(schema, version)
       }
-      assert(error.getMessage.contains("root of the schema"))
+      assert(error.getMessage.contains("root of the schema"), version)
     }
   }
 
   test("root native columns and explicit nested legacy UDT controls keep their behavior") {
-    GeoParquetWriteSupport.requireGeometryColumn(
-      StructType(Seq(StructField("g", GeometryType(4326)), StructField("h", GeometryType(3857)))))
-    GeoParquetWriteSupport.requireGeometryColumn(
-      StructType(
-        Seq(
-          StructField("top", GeometryUDT()),
-          StructField("nested", StructType(Seq(StructField("g", GeometryUDT())))))))
+    versions.foreach { version =>
+      GeoParquetWriteSupport.requireGeometryColumn(
+        StructType(
+          Seq(StructField("g", GeometryType(4326)), StructField("h", GeometryType(3857)))),
+        version)
+      GeoParquetWriteSupport.requireGeometryColumn(
+        StructType(
+          Seq(
+            StructField("top", GeometryUDT()),
+            StructField("nested", StructType(Seq(StructField("g", GeometryUDT())))))),
+        version)
+    }
   }
 }

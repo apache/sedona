@@ -96,6 +96,41 @@ so queries that use it fail until rewritten:
   `RS_SetBandNoDataValue(raster, band, value)`, which declares the new value and leaves the pixels
   as they are.
 
+## GeoParquet 2.0 is the default on Spark 4.1 and later
+
+On Spark 4.1 and later, a `geoparquet` write that sets no `geoparquet.version` now writes
+[GeoParquet 2.0](https://geoparquet.org/releases/v2.0.0/) files, which store each geometry column
+in the `GEOMETRY` logical type of the Parquet format. It wrote GeoParquet 1.1 before. On
+Spark 3.5 and 4.0 the default is still GeoParquet 1.1.
+
+What changes for a write that relied on the default:
+
+* Spark 3.5 and 4.0 cannot open the files, Sedona 1.9.1 and earlier cannot read them, and
+  GeoPandas needs PyArrow 20 or later to read them.
+* Sedona adds no `<column>_bbox` covering column. The row groups have geospatial statistics
+  instead.
+* M coordinates are kept. A GeoParquet 1.1 write drops them.
+* A geometry column has one CRS. A write fails when the geometries of a column in a file have
+  different SRIDs, where a GeoParquet 1.1 write stored the CRS as unknown.
+* On Spark 4.2, Spark's own `spark.read.parquet` returns a native geometry column where it
+  returned a binary column with the WKB.
+* A geography column is stored in the `GEOGRAPHY` logical type. On Spark 4.1 a GeoParquet 1.1
+  write stored it in a form that only Sedona reads back. The write fails for a geography column
+  whose CRS is a projected one, and for a geography with a coordinate that is no longitude or
+  latitude.
+
+To keep writing GeoParquet 1.1, set the option on a write, or the session parameter for all
+writes that set no version:
+
+```python
+df.write.format("geoparquet").option("geoparquet.version", "1.1.0").save(path)
+
+sedona.conf.set("spark.sedona.geoparquet.version", "1.1.0")
+```
+
+See [Write GeoParquet 2.0](../tutorial/files/geoparquet-sedona-spark.md#write-geoparquet-20)
+for the details.
+
 ## Other behaviour changes
 
 * **WKB output keeps M.** `ST_AsBinary`, `ST_AsEWKB` and `ST_AsHEXEWKB` now write the M

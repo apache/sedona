@@ -26,10 +26,10 @@ import org.apache.parquet.hadoop.ParquetFileReader
 import org.apache.parquet.hadoop.util.HadoopInputFile
 import org.apache.spark.SparkException
 import org.apache.spark.scheduler.{SparkListener, SparkListenerTaskEnd}
-import org.apache.spark.sql.{AnalysisException, DataFrame}
+import org.apache.spark.sql.{AnalysisException, DataFrame, DataFrameWriter}
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.SaveMode
-import org.apache.spark.sql.execution.datasources.geoparquet.{Covering, GeoParquetMetaData, GeometryFieldMetaData}
+import org.apache.spark.sql.execution.datasources.geoparquet.{Covering, GeoParquetMetaData, GeometryFieldMetaData, ParquetGeospatialTypes}
 import org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetReadSupport
 import org.apache.spark.sql.functions.{col, expr}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
@@ -119,7 +119,10 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
           .getJtsGeometry("geometry")
           .toString == "MULTIPOLYGON (((180 -16.067132663642447, 180 -16.555216566639196, 179.36414266196414 -16.801354076946883, 178.72505936299711 -17.01204167436804, 178.59683859511713 -16.639150000000004, 179.0966093629971 -16.433984277547403, 179.4135093629971 -16.379054277547404, 180 -16.067132663642447)), ((178.12557 -17.50481, 178.3736 -17.33992, 178.71806 -17.62846, 178.55271 -18.15059, 177.93266000000003 -18.28799, 177.38146 -18.16432, 177.28504 -17.72465, 177.67087 -17.381140000000002, 178.12557 -17.50481)), ((-179.79332010904864 -16.020882256741224, -179.9173693847653 -16.501783135649397, -180 -16.555216566639196, -180 -16.067132663642447, -179.79332010904864 -16.020882256741224)))")
       // The endianness of the WKB should be system native.
-      val df2Binary = sparkSession.read.parquet(geoparquetoutputlocation + "/gp_sample1.parquet")
+      // Without the schema, Spark 4.2 returns the column of a GeoParquet 2 file as a geometry
+      val df2Binary = sparkSession.read
+        .schema("geometry binary")
+        .parquet(geoparquetoutputlocation + "/gp_sample1.parquet")
       df2Binary.collect().foreach { row =>
         val wkb = row.getAs[Array[Byte]]("geometry")
         wkb(0) match {
@@ -244,7 +247,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       validateGeoParquetMetadata(geoParquetSavePath) { geo =>
         implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
         val version = (geo \ "version").extract[String]
-        assert(version == GeoParquetMetaData.VERSION)
+        assert(version == GeoParquetMetaData.defaultVersion)
         val g0Types = (geo \ "columns" \ "g0" \ "geometry_types").extract[Seq[String]]
         val g1Types = (geo \ "columns" \ "g1" \ "geometry_types").extract[Seq[String]]
         assert(g0Types.sorted == Seq("Point", "Point Z", "MultiPoint").sorted)
@@ -787,7 +790,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       }
     }
 
-    it("GeoParquet save should keep crs null for mixed SRIDs in one column") {
+    it("GeoParquet 1.1.0 save should keep crs null for mixed SRIDs in one column") {
       val wktReader = new WKTReader()
       val geom1 = wktReader.read("POINT (1 2)")
       geom1.setSRID(4326)
@@ -800,7 +803,12 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
           StructField("geometry", GeometryUDT(), nullable = false)))
       val df = sparkSession.createDataFrame(testData.asJava, schema).repartition(1)
       val geoParquetSavePath = geoparquetoutputlocation + "/gp_mixed_srid.parquet"
-      df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)
+      // A GeoParquet 2 write fails here, because its column states one CRS for all its values
+      df.write
+        .format("geoparquet")
+        .option("geoparquet.version", "1.1.0")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
       validateGeoParquetMetadata(geoParquetSavePath) { geo =>
         val crs = geo \ "columns" \ "geometry" \ "crs"
         assert(crs == org.json4s.JNull, s"Expected null CRS for mixed SRIDs, got $crs")
@@ -1165,7 +1173,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       }
     }
 
-    it("GeoParquet auto populates covering metadata for a Box2D <geom>_bbox column") {
+    it("GeoParquet 1.1.0 auto populates covering metadata for a Box2D <geom>_bbox column") {
       // Auto-detect path: when a column named <geom>_bbox is a Box2D, reuse it as the
       // covering column instead of synthesizing a separate float64 struct.
       val df = sparkSession
@@ -1175,7 +1183,11 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         .withColumn("geometry", expr("ST_Point(id, id + 1)"))
         .withColumn("geometry_bbox", expr("ST_Box2D(geometry)"))
       val geoParquetSavePath = geoparquetoutputlocation + "/gp_box2d_auto_covering.parquet"
-      df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)
+      df.write
+        .format("geoparquet")
+        .option("geoparquet.version", "1.1.0")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
       validateGeoParquetMetadata(geoParquetSavePath) { geo =>
         implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
         val coveringJsValue = geo \ "columns" \ "geometry" \ "covering"
@@ -1187,7 +1199,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       }
     }
 
-    it("GeoParquet auto populates covering metadata for single geometry column") {
+    it("GeoParquet 1.1.0 auto populates covering metadata for single geometry column") {
       val df = sparkSession
         .range(0, 100)
         .toDF("id")
@@ -1200,6 +1212,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         geoparquetoutputlocation + "/gp_with_covering_metadata_auto_single.parquet"
       df.write
         .format("geoparquet")
+        .option("geoparquet.version", "1.1.0")
         .mode("overwrite")
         .save(geoParquetSavePath)
       validateGeoParquetMetadata(geoParquetSavePath) { geo =>
@@ -1223,6 +1236,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         geoparquetoutputlocation + "/gp_with_generated_covering_column.parquet"
       df.write
         .format("geoparquet")
+        .option("geoparquet.version", "1.1.0")
         .mode("overwrite")
         .save(geoParquetSavePath)
 
@@ -1250,6 +1264,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         geoparquetoutputlocation + "/gp_without_generated_covering_column_legacy_mode.parquet"
       df.write
         .format("geoparquet")
+        .option("geoparquet.version", "1.1.0")
         .option("geoparquet.covering.mode", "legacy")
         .mode("overwrite")
         .save(geoParquetSavePath)
@@ -1276,9 +1291,16 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
           .mode("overwrite")
           .save(geoparquetoutputlocation + "/gp_invalid_covering_mode.parquet")
       }
-      assert(e.getMessage.contains("geoparquet.covering.mode"))
-      assert(e.getMessage.contains("auto"))
-      assert(e.getMessage.contains("legacy"))
+      // A GeoParquet 2 file of Sedona's own geometry type is opened at its first geometry, so
+      // the write of a row fails with this as its cause
+      val messages = Iterator
+        .iterate[Throwable](e)(_.getCause)
+        .takeWhile(_ != null)
+        .flatMap(cause => Option(cause.getMessage))
+        .mkString("\n")
+      assert(messages.contains("geoparquet.covering.mode"))
+      assert(messages.contains("auto"))
+      assert(messages.contains("legacy"))
     }
 
     it("GeoParquet supports writing covering metadata for multiple columns") {
@@ -1367,13 +1389,14 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         geoparquetoutputlocation + "/gp_with_covering_mode_in_another_case.parquet"
       df.write
         .format("geoparquet")
+        .option("geoparquet.version", "1.1.0")
         .option("GeoParquet.Covering.Mode", "legacy")
         .mode("overwrite")
         .save(geoParquetSavePath)
       assert(!sparkSession.read.parquet(geoParquetSavePath).columns.contains("geometry_bbox"))
     }
 
-    it("GeoParquet auto populates covering metadata for multiple geometry columns") {
+    it("GeoParquet 1.1.0 auto populates covering metadata for multiple geometry columns") {
       val df = sparkSession
         .range(0, 100)
         .toDF("id")
@@ -1391,6 +1414,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         geoparquetoutputlocation + "/gp_with_covering_metadata_auto_multiple.parquet"
       df.write
         .format("geoparquet")
+        .option("geoparquet.version", "1.1.0")
         .mode("overwrite")
         .save(geoParquetSavePath)
       validateGeoParquetMetadata(geoParquetSavePath) { geo =>
@@ -1446,12 +1470,75 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       // Should succeed without throwing
       df.write
         .format("geoparquet")
+        .option("geoparquet.version", "1.1.0")
         .mode("overwrite")
         .save(geoParquetSavePath)
 
       // No covering metadata should be generated for the invalid bbox column
       validateGeoParquetMetadata(geoParquetSavePath) { geo =>
         assert(geo \ "columns" \ "geometry" \ "covering" == org.json4s.JNothing)
+      }
+    }
+  }
+
+  describe("GeoParquet version of a write") {
+    val sessionKey = "spark.sedona.geoparquet.version"
+    // GeoParquet 2 needs the geospatial types of the Parquet library, which Spark has from 4.1
+    val defaultVersion = if (ParquetGeospatialTypes.supported) "2.0.0" else "1.1.0"
+
+    def writtenVersion(name: String)(
+        write: DataFrameWriter[Row] => DataFrameWriter[Row]): String = {
+      val path = geoparquetoutputlocation + "/" + name
+      val df = sparkSession.sql("SELECT ST_Point(1, 2) AS geometry")
+      write(df.write.format("geoparquet").mode("overwrite")).save(path)
+      assert(sparkSession.read.format("geoparquet").load(path).count() == 1)
+      var version: String = null
+      validateGeoParquetMetadata(path) { geo =>
+        implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
+        version = (geo \ "version").extract[String]
+      }
+      version
+    }
+
+    it("is 2.0.0 where the Parquet library has the geospatial types, and 1.1.0 elsewhere") {
+      assert(GeoParquetMetaData.defaultVersion == defaultVersion)
+      assert(writtenVersion("version_default.parquet")(identity) == defaultVersion)
+    }
+
+    it("is the version of the session setting when the write has no version option") {
+      withConf(Map(sessionKey -> "1.1.0")) {
+        assert(writtenVersion("version_session.parquet")(identity) == "1.1.0")
+      }
+      withConf(Map(sessionKey -> " 1.0.0 ")) {
+        assert(writtenVersion("version_session_spaces.parquet")(identity) == "1.0.0")
+      }
+    }
+
+    it("is the version of the write option, whatever the session setting is") {
+      withConf(Map(sessionKey -> "1.0.0")) {
+        val version =
+          writtenVersion("version_option.parquet")(_.option("geoparquet.version", "1.1.0"))
+        assert(version == "1.1.0")
+      }
+    }
+
+    it("is the default version when the session setting is empty") {
+      withConf(Map(sessionKey -> " ")) {
+        assert(writtenVersion("version_session_empty.parquet")(identity) == defaultVersion)
+      }
+    }
+
+    it("is rejected when the session setting asks for 2.0.0 without the geospatial types") {
+      withConf(Map(sessionKey -> "2.0.0")) {
+        if (ParquetGeospatialTypes.supported) {
+          assert(writtenVersion("version_session_2.parquet")(identity) == "2.0.0")
+        } else {
+          val e = intercept[IllegalArgumentException] {
+            writtenVersion("version_session_2.parquet")(identity)
+          }
+          assert(e.getMessage.contains("Spark 4.1 or later"))
+          assert(e.getMessage.contains(sessionKey))
+        }
       }
     }
   }

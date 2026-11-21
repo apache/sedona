@@ -84,6 +84,12 @@ If you set the same parameter through both `sedona` and `spark.sedona` prefixes,
 | `spark.sedona.crs.url.pathTemplate` | URL path template appended to `spark.sedona.crs.url.base`. Placeholders `{authority}` and `{code}` are replaced at runtime. | `/{authority}/{code}.json` | e.g. `/epsg/{code}.json` | v1.9.0 |
 | `spark.sedona.crs.url.format` | The CRS definition format returned by the URL provider | `projjson` | `projjson`, `proj`, `wkt1` (OGC WKT1), `wkt2` (ISO 19162 WKT2) | v1.9.0 |
 
+## GeoParquet Parameters
+
+| Parameter | Description | Default | Possible Values | Since |
+| :--- | :--- | :--- | :--- | :--- |
+| `spark.sedona.geoparquet.version` | GeoParquet version of the `geoparquet` writes that set no `geoparquet.version` option | `2.0.0` on Spark 4.1 and later, `1.1.0` on Spark 3.5 and 4.0 | `1.0.0`, `1.1.0`, `2.0.0` | v2.0.0 |
+
 ## GeoParquet Write Options
 
 These are options of a `geoparquet` write, not parameters of the session. Set them on the writer:
@@ -97,7 +103,7 @@ df.write.format("geoparquet")
 
 | Option | Description | Default | Possible Values | Since |
 | :--- | :--- | :--- | :--- | :--- |
-| `geoparquet.version` | GeoParquet version of the files. Version `2.0.0` stores the geometry columns in the Parquet `GEOMETRY` logical type and needs Spark 4.1 or later. | `1.1.0` | `1.0.0`, `1.1.0`, `2.0.0` | v1.5.1 (`2.0.0` since v2.0.0) |
+| `geoparquet.version` | GeoParquet version of the files. Version `2.0.0` stores the geometry columns in the Parquet `GEOMETRY` logical type and needs Spark 4.1 or later. | The value of `spark.sedona.geoparquet.version` | `1.0.0`, `1.1.0`, `2.0.0` | v1.5.1 (`2.0.0` since v2.0.0) |
 | `geoparquet.crs` | CRS of all geometry columns | Derived from the SRID of the geometries | A PROJJSON string, `""` (OGC:CRS84) or `"null"` (unknown CRS) | v1.5.1 |
 | `geoparquet.crs.<column_name>` | CRS of one geometry column. It comes before `geoparquet.crs`. | Derived from the SRID of the geometries | A PROJJSON string, `""` (OGC:CRS84) or `"null"` (unknown CRS) | v1.5.1 |
 | `geoparquet.covering` | Bounding box column of the geometry column, for a DataFrame with one geometry column | See `geoparquet.covering.mode` | Name of a top-level struct column with `xmin`, `ymin`, `xmax` and `ymax` | v1.6.1 |
