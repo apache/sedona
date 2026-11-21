@@ -909,9 +909,12 @@ object GeoParquetWriteSupport {
    * another key. An option of the write replaces a value that the configuration has from
    * elsewhere.
    *
-   * A key that goes on with the name of a column is for the geometry column of that name. When no
-   * geometry column has the name in that case, the key is for the one whose name differs from it
-   * in case only, and is rejected when there are several of those.
+   * A key that goes on with the name of a geometry column, in the case of that column, is for
+   * that column. This comes before anything else that the key is in another case:
+   * `geoparquet.covering.MODE` is the covering of a column `MODE`, not the covering mode. When no
+   * geometry column has the name in that case and the key is no other option either, the key is
+   * for the column whose name differs from it in case only, and is rejected when there are
+   * several of those.
    */
   def setWriteOptions(
       options: Map[String, String],
@@ -929,21 +932,28 @@ object GeoParquetWriteSupport {
       case other => other
     }
     asWritten.foreach { case (key, value) =>
-      WRITE_OPTION_KEYS.find(_ == lowerCase(key)) match {
-        case Some(complete) => configuration.set(complete, value)
-        case None =>
-          COLUMN_WRITE_OPTION_KEYS.find(lowerCase(key).startsWith).foreach { prefix =>
-            val name = key.substring(prefix.length)
-            val columns =
-              if (geometryColumns.contains(name)) Seq(name)
-              else geometryColumns.filter(lowerCase(_) == lowerCase(name))
-            if (columns.size > 1) {
-              throw new IllegalArgumentException(
-                s"Option $key names the geometry columns ${columns.mkString("'", "', '", "'")}, " +
-                  "which differ in case only. Write the name in the key in the case of the " +
-                  "column that the option is for.")
-            }
-            columns.foreach(column => configuration.set(prefix + column, value))
+      // The name that the key goes on with, if it is the key of a column
+      val ofColumn = COLUMN_WRITE_OPTION_KEYS
+        .find(lowerCase(key).startsWith)
+        .map(prefix => prefix -> key.substring(prefix.length))
+      ofColumn match {
+        case Some((prefix, name)) if geometryColumns.contains(name) =>
+          configuration.set(prefix + name, value)
+        case _ =>
+          WRITE_OPTION_KEYS.find(_ == lowerCase(key)) match {
+            case Some(complete) => configuration.set(complete, value)
+            case None =>
+              ofColumn.foreach { case (prefix, name) =>
+                val columns = geometryColumns.filter(lowerCase(_) == lowerCase(name))
+                if (columns.size > 1) {
+                  throw new IllegalArgumentException(
+                    s"Option $key names the geometry columns " +
+                      s"${columns.mkString("'", "', '", "'")}, which differ in case only. " +
+                      "Write the name in the key in the case of the column that the option " +
+                      "is for.")
+                }
+                columns.foreach(column => configuration.set(prefix + column, value))
+              }
           }
       }
     }
