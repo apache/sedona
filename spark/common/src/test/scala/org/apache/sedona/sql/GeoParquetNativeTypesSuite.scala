@@ -39,7 +39,7 @@ import org.apache.spark.sql.execution.datasources.OutputWriter
 import org.apache.spark.sql.execution.datasources.geoparquet.{GeoParquetFileFormat, GeoParquetMetaData, GeoParquetWriteSupport, ParquetGeospatialColumn, ParquetGeospatialTypes}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
-import org.apache.spark.sql.types.{BinaryType, IntegerType, StructField, StructType}
+import org.apache.spark.sql.types.{BinaryType, DataType, IntegerType, StructField, StructType}
 import org.json4s.{JArray, JDouble, JInt, JNothing, JNull, JString, JValue}
 import org.json4s.jackson.JsonMethods.{compact, parse, render}
 
@@ -452,6 +452,43 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
           assert(withSetting(key, "true")(srids(path)) == Seq(Some(3857)))
           val message = messages(intercept[Exception](withSetting(key, "false")(srids(path))))
           assert(message.contains(corrupt.getName))
+        }
+      }
+
+      // The read skips such a file, so what the file says about its other columns does not
+      // count either
+      for (mergeSchema <- Seq("false", "true");
+        (title, auxType, auxValue, auxOptions) <- Seq(
+          (
+            "another CRS for another column",
+            GeometryUDT(),
+            null,
+            Seq("geoparquet.crs.aux" -> mercator)),
+          ("another type for another column", IntegerType, 75, Seq.empty))) {
+        it(
+          s"leaves out a file whose row groups are corrupt, with $title (mergeSchema=$mergeSchema)") {
+          withPath { path =>
+            def twoColumns(aux: DataType, row: Row): DataFrame = sparkSession.createDataFrame(
+              sparkSession.sparkContext.parallelize(Seq(row), 1),
+              StructType(Seq(StructField("geometry", GeometryUDT()), StructField("aux", aux))))
+            // The schema comes from the first file without mergeSchema, which is the corrupt one
+            append(twoColumns(auxType, Row(null, auxValue)), path + "/a", "1.1.0", auxOptions: _*)
+            damageRowGroups(parquetFiles(path + "/a").head)
+            append(
+              twoColumns(GeometryUDT(), Row(pointWithSrid(3857), pointWithSrid(4326))),
+              path + "/b",
+              "1.1.0")
+            val read = withSetting("spark.sql.files.ignoreCorruptFiles", "true") {
+              val loaded = sparkSession.read
+                .format("geoparquet")
+                .option("mergeSchema", mergeSchema)
+                .load(path + "/a", path + "/b")
+              (loaded.schema, loaded.collect().toSeq)
+            }
+            assert(read._1("geometry").dataType == SpatialTypeSupport.geometryType(3857))
+            assert(read._1("aux").dataType == SpatialTypeSupport.geometryType(4326))
+            assert(read._2.map(_.getJtsGeometry("aux").getSRID) == Seq(4326))
+          }
         }
       }
     }
