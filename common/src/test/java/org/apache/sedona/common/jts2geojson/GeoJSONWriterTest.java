@@ -19,6 +19,7 @@
 package org.apache.sedona.common.jts2geojson;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
@@ -60,6 +61,70 @@ public class GeoJSONWriterTest {
         "GeoJSON should be correctly converted back to geometry",
         "POINT (1 1)",
         geometry.toString());
+  }
+
+  @Test
+  public void testEmptyPointConversion() {
+    org.apache.sedona.common.jts2geojson.GeoJSONReader reader =
+        new org.apache.sedona.common.jts2geojson.GeoJSONReader();
+    org.apache.sedona.common.jts2geojson.GeoJSONWriter writer =
+        new org.apache.sedona.common.jts2geojson.GeoJSONWriter();
+    GeometryFactory factory = new GeometryFactory();
+
+    Point emptyPoint = factory.createPoint();
+    org.wololo.geojson.Geometry json = writer.write(emptyPoint);
+    assertEquals("{\"type\":\"Point\",\"coordinates\":[]}", json.toString());
+    assertEquals("POINT EMPTY", reader.read(json).toString());
+
+    // An empty point nested in a collection must not break the other members
+    org.locationtech.jts.geom.Geometry collection =
+        factory.createGeometryCollection(
+            new org.locationtech.jts.geom.Geometry[] {
+              factory.createPoint(), factory.createPoint(new Coordinate(1, 2))
+            });
+    json = writer.write(collection);
+    assertEquals(
+        "{\"type\":\"GeometryCollection\",\"geometries\":["
+            + "{\"type\":\"Point\",\"coordinates\":[]},"
+            + "{\"type\":\"Point\",\"coordinates\":[1.0,2.0]}]}",
+        json.toString());
+    assertEquals("GEOMETRYCOLLECTION (POINT EMPTY, POINT (1 2))", reader.read(json).toString());
+  }
+
+  @Test
+  public void testEmptyPointEdgeCases() {
+    org.apache.sedona.common.jts2geojson.GeoJSONWriter writer =
+        new org.apache.sedona.common.jts2geojson.GeoJSONWriter();
+    GeometryFactory factory = new GeometryFactory();
+
+    // An empty point with a Z dimension is written like a 2D one, as PostGIS does
+    Point emptyPointZ = factory.createPoint(factory.getCoordinateSequenceFactory().create(0, 3, 0));
+    assertEquals("{\"type\":\"Point\",\"coordinates\":[]}", writer.write(emptyPointZ).toString());
+
+    // The feature output wraps the same empty point
+    String feature = org.apache.sedona.common.Functions.asGeoJson(factory.createPoint(), "feature");
+    assertTrue(feature, feature.contains("\"geometry\":{\"type\":\"Point\",\"coordinates\":[]}"));
+  }
+
+  @Test
+  public void testMultiPointWithEmptyMemberIsValidGeoJson() {
+    org.apache.sedona.common.jts2geojson.GeoJSONWriter writer =
+        new org.apache.sedona.common.jts2geojson.GeoJSONWriter();
+    GeometryFactory factory = new GeometryFactory();
+
+    // A GeoJSON position needs at least two numbers (RFC 7946, 3.1.1), so an empty member of a
+    // MultiPoint has no position of its own and is left out, as DuckDB and GEOS write it
+    MultiPoint multiPoint =
+        factory.createMultiPoint(
+            new Point[] {factory.createPoint(), factory.createPoint(new Coordinate(1, 2))});
+    assertEquals(
+        "{\"type\":\"MultiPoint\",\"coordinates\":[[1.0,2.0]]}",
+        writer.write(multiPoint).toString());
+
+    // A MultiPoint whose members are all empty has no positions, as PostGIS writes it
+    MultiPoint allEmpty =
+        factory.createMultiPoint(new Point[] {factory.createPoint(), factory.createPoint()});
+    assertEquals("{\"type\":\"MultiPoint\",\"coordinates\":[]}", writer.write(allEmpty).toString());
   }
 
   @Test
