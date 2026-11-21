@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.execution.datasources.geoparquet</title>
@@ -207,6 +206,10 @@
                         <a class="class" href="CoveringBBox.html" title=""></a>
                         <a href="CoveringBBox.html" title="">CoveringBBox</a>
                       </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="class" href="FirstGeometryOutputWriter.html" title="Writes a GeoParquet 2 file that has GeometryUDT columns without a CRS option."></a>
+                        <a href="FirstGeometryOutputWriter.html" title="Writes a GeoParquet 2 file that has GeometryUDT columns without a CRS option.">FirstGeometryOutputWriter</a>
+                      </li><li class="current-entities indented7">
                         <a class="object" href="GeoParquetFileFormat$.html" title=""></a>
                         <a class="class" href="GeoParquetFileFormat.html" title=""></a>
                         <a href="GeoParquetFileFormat.html" title="">GeoParquetFileFormat</a>
@@ -369,6 +372,28 @@
       </span>
       
       
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.FirstGeometryOutputWriter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="FirstGeometryOutputWriterextendsOutputWriter"></a><a id="FirstGeometryOutputWriter:FirstGeometryOutputWriter"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/FirstGeometryOutputWriter.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Writes a GeoParquet 2 file that has GeometryUDT columns without a CRS option." href="FirstGeometryOutputWriter.html"><span class="name">FirstGeometryOutputWriter</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.sql.execution.datasources.OutputWriter">OutputWriter</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Writes a GeoParquet 2 file that has GeometryUDT columns without a CRS option.</p><div class="fullcomment"><div class="comment cmt"><p>Writes a GeoParquet 2 file that has GeometryUDT columns without a CRS option.</p><p>GeoParquet 2 states the CRS of a geometry column in the Parquet schema, which the Parquet
+writer needs before the first row. A GeometryUDT column has an SRID on each geometry only. This
+writer therefore holds rows back until every such column has shown a geometry, then opens the
+file with those SRIDs. <a href="GeoParquetWriteSupport.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetWriteSupport">GeoParquetWriteSupport</a> turns them into the CRS of the columns and
+rejects a later geometry that has another SRID.</p><p>The rows held back are limited to <a href="GeoParquetWriteSupport$.html#GEOPARQUET_SRID_LOOKAHEAD_KEY:String" class="extmbr" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetWriteSupport#GEOPARQUET_SRID_LOOKAHEAD_KEY">GeoParquetWriteSupport.GEOPARQUET_SRID_LOOKAHEAD_KEY</a>
+bytes. A column that has shown no geometry by then is written with an unknown CRS.
+</p></div></div>
     </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetFileFormat" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="GeoParquetFileFormatextendsParquetFileFormatwithGeoParquetFileFormatBasewithFileFormatwithDataSourceRegisterwithLoggingwithSerializable"></a><a id="GeoParquetFileFormat:GeoParquetFileFormat"></a>
       <span class="permalink">

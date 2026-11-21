@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetWriteSupport</title>
@@ -206,6 +205,10 @@
                         <span class="separator"></span>
                         <a class="class" href="CoveringBBox.html" title=""></a>
                         <a href="CoveringBBox.html" title="">CoveringBBox</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="class" href="FirstGeometryOutputWriter.html" title="Writes a GeoParquet 2 file that has GeometryUDT columns without a CRS option."></a>
+                        <a href="FirstGeometryOutputWriter.html" title="Writes a GeoParquet 2 file that has GeometryUDT columns without a CRS option.">FirstGeometryOutputWriter</a>
                       </li><li class="current-entities indented7">
                         <a class="object" href="GeoParquetFileFormat$.html" title=""></a>
                         <a class="class" href="GeoParquetFileFormat.html" title=""></a>
@@ -428,6 +431,42 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetWriteSupport#DEFAULT_CRS_LOOKAHEAD_BYTES" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DEFAULT_CRS_LOOKAHEAD_BYTES:Long"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetWriteSupport$.html#DEFAULT_CRS_LOOKAHEAD_BYTES:Long" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">DEFAULT_CRS_LOOKAHEAD_BYTES</span><span class="result">: <span class="extype" name="scala.Long">Long</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetWriteSupport#GEOPARQUET_SRID_LOOKAHEAD_KEY" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="GEOPARQUET_SRID_LOOKAHEAD_KEY:String"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetWriteSupport$.html#GEOPARQUET_SRID_LOOKAHEAD_KEY:String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">GEOPARQUET_SRID_LOOKAHEAD_KEY</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Configuration key for the bytes of rows that a GeoParquet 2 write holds back while it waits
+for the first geometry of a GeometryUDT column.</p><div class="fullcomment"><div class="comment cmt"><p>Configuration key for the bytes of rows that a GeoParquet 2 write holds back while it waits
+for the first geometry of a GeometryUDT column. It is not under geoparquet.crs, where every
+key that goes on names a column.
+</p></div></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -470,6 +509,26 @@
                 <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetWriteSupport#columnsWithoutCrs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="columnsWithoutCrs(schema:org.apache.spark.sql.types.StructType,configuration:org.apache.hadoop.conf.Configuration):Seq[Int]"></a><a id="columnsWithoutCrs(StructType,Configuration):Seq[Int]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetWriteSupport$.html#columnsWithoutCrs(schema:org.apache.spark.sql.types.StructType,configuration:org.apache.hadoop.conf.Configuration):Seq[Int]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">columnsWithoutCrs</span><span class="params">(<span name="schema">schema: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>, <span name="configuration">configuration: <span class="extype" name="org.apache.hadoop.conf.Configuration">Configuration</span></span>)</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Int">Int</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">The ordinals of the geometry columns whose CRS a GeoParquet 2 write takes from the data:
+GeometryUDT columns that no CRS option covers.</p><div class="fullcomment"><div class="comment cmt"><p>The ordinals of the geometry columns whose CRS a GeoParquet 2 write takes from the data:
+GeometryUDT columns that no CRS option covers. A native Spark geometry type names its SRID,
+and a GeoParquet 1 file states the CRS in metadata that is written after the last row.
+</p></div></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -653,6 +712,33 @@ than in every task.
       </span>
       
       <p class="shortcomment cmt">GeoParquet 2 needs the geospatial logical types of the Parquet library on the classpath.</p>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetWriteSupport#setWriteOptions" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setWriteOptions(options:Map[String,String],schema:org.apache.spark.sql.types.StructType,configuration:org.apache.hadoop.conf.Configuration):Unit"></a><a id="setWriteOptions(Map[String,String],StructType,Configuration):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetWriteSupport$.html#setWriteOptions(options:Map[String,String],schema:org.apache.spark.sql.types.StructType,configuration:org.apache.hadoop.conf.Configuration):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setWriteOptions</span><span class="params">(<span name="options">options: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="schema">schema: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>, <span name="configuration">configuration: <span class="extype" name="org.apache.hadoop.conf.Configuration">Configuration</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Sets the GeoParquet options of a write in <code>configuration</code> under the keys that the writer
+reads there.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the GeoParquet options of a write in <code>configuration</code> under the keys that the writer
+reads there. Spark takes the keys of the options of a write without regard to case, and
+copies them to the Hadoop configuration as they were written, where a key in another case is
+another key. An option of the write replaces a value that the configuration has from
+elsewhere.</p><p>A key that goes on with the name of a geometry column, in the case of that column, is for
+that column. This comes before anything else that the key is in another case:
+<code>geoparquet.covering.MODE</code> is the covering of a column <code>MODE</code>, not the covering mode. When no
+geometry column has the name in that case and the key is no other option either, the key is
+for the column whose name differs from it in case only, and is rejected when there are
+several of those.
+</p></div></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

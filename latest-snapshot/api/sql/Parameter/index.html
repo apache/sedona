@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -3122,6 +3121,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#geoparquet-write-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GeoParquet Write Options
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -5725,6 +5735,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#geoparquet-write-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GeoParquet Write Options
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -5929,6 +5950,77 @@
 </tr>
 </tbody>
 </table>
+<h2 id="geoparquet-write-options">GeoParquet Write Options<a class="headerlink" href="#geoparquet-write-options" title="Permanent link">&para;</a></h2>
+<p>These are options of a <code>geoparquet</code> write, not parameters of the session. Set them on the writer:</p>
+<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"geoparquet"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"geoparquet.version"</span><span class="p">,</span><span class="w"> </span><span class="s">"2.0.0"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"geoparquet.crs.geometry"</span><span class="p">,</span><span class="w"> </span><span class="n">projjson</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"/path/to/saved_geoparquet.parquet"</span><span class="p">)</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Option</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Default</th>
+<th style="text-align: left;">Possible Values</th>
+<th style="text-align: left;">Since</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>geoparquet.version</code></td>
+<td style="text-align: left;">GeoParquet version of the files. Version <code>2.0.0</code> stores the geometry columns in the Parquet <code>GEOMETRY</code> logical type and needs Spark 4.1 or later.</td>
+<td style="text-align: left;"><code>1.1.0</code></td>
+<td style="text-align: left;"><code>1.0.0</code>, <code>1.1.0</code>, <code>2.0.0</code></td>
+<td style="text-align: left;">v1.5.1 (<code>2.0.0</code> since v2.0.0)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>geoparquet.crs</code></td>
+<td style="text-align: left;">CRS of all geometry columns</td>
+<td style="text-align: left;">Derived from the SRID of the geometries</td>
+<td style="text-align: left;">A PROJJSON string, <code>""</code> (OGC:CRS84) or <code>"null"</code> (unknown CRS)</td>
+<td style="text-align: left;">v1.5.1</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>geoparquet.crs.&lt;column_name&gt;</code></td>
+<td style="text-align: left;">CRS of one geometry column. It comes before <code>geoparquet.crs</code>.</td>
+<td style="text-align: left;">Derived from the SRID of the geometries</td>
+<td style="text-align: left;">A PROJJSON string, <code>""</code> (OGC:CRS84) or <code>"null"</code> (unknown CRS)</td>
+<td style="text-align: left;">v1.5.1</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>geoparquet.covering</code></td>
+<td style="text-align: left;">Bounding box column of the geometry column, for a DataFrame with one geometry column</td>
+<td style="text-align: left;">See <code>geoparquet.covering.mode</code></td>
+<td style="text-align: left;">Name of a top-level struct column with <code>xmin</code>, <code>ymin</code>, <code>xmax</code> and <code>ymax</code></td>
+<td style="text-align: left;">v1.6.1</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>geoparquet.covering.&lt;column_name&gt;</code></td>
+<td style="text-align: left;">Bounding box column of one geometry column</td>
+<td style="text-align: left;">See <code>geoparquet.covering.mode</code></td>
+<td style="text-align: left;">Name of a top-level struct column with <code>xmin</code>, <code>ymin</code>, <code>xmax</code> and <code>ymax</code></td>
+<td style="text-align: left;">v1.6.1</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>geoparquet.covering.mode</code></td>
+<td style="text-align: left;">What a GeoParquet <code>1.1.0</code> write does for a geometry column without a covering option</td>
+<td style="text-align: left;"><code>auto</code></td>
+<td style="text-align: left;"><code>auto</code> (use <code>&lt;column_name&gt;_bbox</code> as the bounding box column, and generate it if the DataFrame has none), <code>legacy</code> (write no covering)</td>
+<td style="text-align: left;">v1.9.0</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>geoparquet.srid.lookahead.bytes</code></td>
+<td style="text-align: left;">A GeoParquet <code>2.0.0</code> write on Spark 4.1 takes the CRS of a geometry column without a CRS option from the first geometry of each file. This is the size of the rows that it holds in memory per file until every such column has shown a geometry.</td>
+<td style="text-align: left;"><code>16777216</code> (16 MB)</td>
+<td style="text-align: left;">A number of bytes</td>
+<td style="text-align: left;">v2.0.0</td>
+</tr>
+</tbody>
+</table>
+<p>Since v2.0.0, the keys are read without regard to case, as Spark reads the keys of write options. In a key that ends in a column name, the name is first compared with the geometry columns as it is written: <code>geoparquet.covering.MODE</code> is the bounding box column of a geometry column <code>MODE</code>. If no geometry column has the name in that case, the name is compared without regard to case. The write fails if it then fits several geometry columns, which a DataFrame can have with <code>spark.sql.caseSensitive=true</code>.</p>
+<p>See <a href="../../../tutorial/files/geoparquet-sedona-spark/">Apache Sedona GeoParquet with Spark</a> for examples.</p>
 
 
 
@@ -5949,7 +6041,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 27, 2026 06:37:29 UTC">February 27, 2026 06:37:29</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="November 21, 2026 07:09:31 UTC">November 21, 2026 07:09:31</span>
   </span>
 
     

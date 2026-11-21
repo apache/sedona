@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -3122,6 +3121,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#geoparquet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GeoParquet 写出选项
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -5725,6 +5735,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#geoparquet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GeoParquet 写出选项
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -5929,6 +5950,77 @@
 </tr>
 </tbody>
 </table>
+<h2 id="geoparquet">GeoParquet 写出选项<a class="headerlink" href="#geoparquet" title="Permanent link">&para;</a></h2>
+<p>以下是 <code>geoparquet</code> 写出操作的选项，而不是会话参数，需要在 writer 上设置：</p>
+<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"geoparquet"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"geoparquet.version"</span><span class="p">,</span><span class="w"> </span><span class="s">"2.0.0"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"geoparquet.crs.geometry"</span><span class="p">,</span><span class="w"> </span><span class="n">projjson</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"/path/to/saved_geoparquet.parquet"</span><span class="p">)</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">选项</th>
+<th style="text-align: left;">说明</th>
+<th style="text-align: left;">默认值</th>
+<th style="text-align: left;">可选值</th>
+<th style="text-align: left;">起始版本</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>geoparquet.version</code></td>
+<td style="text-align: left;">文件的 GeoParquet 版本。<code>2.0.0</code> 版本把几何列存为 Parquet 的 <code>GEOMETRY</code> 逻辑类型，需要 Spark 4.1 及以上版本。</td>
+<td style="text-align: left;"><code>1.1.0</code></td>
+<td style="text-align: left;"><code>1.0.0</code>、<code>1.1.0</code>、<code>2.0.0</code></td>
+<td style="text-align: left;">v1.5.1（<code>2.0.0</code> 自 v2.0.0 起）</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>geoparquet.crs</code></td>
+<td style="text-align: left;">所有几何列的 CRS</td>
+<td style="text-align: left;">由几何对象的 SRID 推导</td>
+<td style="text-align: left;">PROJJSON 字符串、<code>""</code>（OGC:CRS84）或 <code>"null"</code>（未知 CRS）</td>
+<td style="text-align: left;">v1.5.1</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>geoparquet.crs.&lt;column_name&gt;</code></td>
+<td style="text-align: left;">单个几何列的 CRS，优先于 <code>geoparquet.crs</code>。</td>
+<td style="text-align: left;">由几何对象的 SRID 推导</td>
+<td style="text-align: left;">PROJJSON 字符串、<code>""</code>（OGC:CRS84）或 <code>"null"</code>（未知 CRS）</td>
+<td style="text-align: left;">v1.5.1</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>geoparquet.covering</code></td>
+<td style="text-align: left;">几何列的边界框列，适用于只有一个几何列的 DataFrame</td>
+<td style="text-align: left;">见 <code>geoparquet.covering.mode</code></td>
+<td style="text-align: left;">包含 <code>xmin</code>、<code>ymin</code>、<code>xmax</code>、<code>ymax</code> 的顶层 struct 列的名称</td>
+<td style="text-align: left;">v1.6.1</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>geoparquet.covering.&lt;column_name&gt;</code></td>
+<td style="text-align: left;">单个几何列的边界框列</td>
+<td style="text-align: left;">见 <code>geoparquet.covering.mode</code></td>
+<td style="text-align: left;">包含 <code>xmin</code>、<code>ymin</code>、<code>xmax</code>、<code>ymax</code> 的顶层 struct 列的名称</td>
+<td style="text-align: left;">v1.6.1</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>geoparquet.covering.mode</code></td>
+<td style="text-align: left;">写出 GeoParquet <code>1.1.0</code> 时，如何处理没有 covering 选项的几何列</td>
+<td style="text-align: left;"><code>auto</code></td>
+<td style="text-align: left;"><code>auto</code>（以 <code>&lt;column_name&gt;_bbox</code> 作为边界框列，DataFrame 中没有该列时自动生成）、<code>legacy</code>（不写出 covering）</td>
+<td style="text-align: left;">v1.9.0</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>geoparquet.srid.lookahead.bytes</code></td>
+<td style="text-align: left;">在 Spark 4.1 上写出 GeoParquet <code>2.0.0</code> 时，没有 CRS 选项的几何列的 CRS 取自每个文件中该列的第一个几何对象。本选项是在所有这类列都出现几何对象之前，每个文件暂存在内存中的行的大小上限。</td>
+<td style="text-align: left;"><code>16777216</code>（16 MB）</td>
+<td style="text-align: left;">字节数</td>
+<td style="text-align: left;">v2.0.0</td>
+</tr>
+</tbody>
+</table>
+<p>自 v2.0.0 起，选项的键不区分大小写，与 Spark 处理写出选项的键的方式一致。对于以列名结尾的键，先按键中的写法与几何列的名称比较：<code>geoparquet.covering.MODE</code> 是几何列 <code>MODE</code> 的边界框列。如果没有几何列的名称与该写法完全一致，再忽略大小写进行比较。此时如果有多个几何列匹配，写出会失败；在 <code>spark.sql.caseSensitive=true</code> 时 DataFrame 可能包含这样的列。</p>
+<p>示例请参见 <a href="../../../tutorial/files/geoparquet-sedona-spark/">在 Spark 上使用 Apache Sedona 处理 GeoParquet</a>。</p>
 
 
 
@@ -5949,7 +6041,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月11日 04:13:31 UTC">2026年5月11日 04:13:31</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年11月21日 07:09:31 UTC">2026年11月21日 07:09:31</span>
   </span>
 
     
