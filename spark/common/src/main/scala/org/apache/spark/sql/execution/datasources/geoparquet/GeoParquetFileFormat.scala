@@ -92,6 +92,7 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
     val parquetOptions = new ParquetOptions(options, sqlConf)
 
     val conf = ContextUtil.getConfiguration(job)
+    GeoParquetWriteSupport.setWriteOptions(options, dataSchema, conf)
     GeoParquetWriteSupport.requireSupportedVersion(conf)
 
     val committerClass =
@@ -168,7 +169,11 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
           path: String,
           dataSchema: StructType,
           context: TaskAttemptContext): OutputWriter = {
-        new ParquetOutputWriter(path, context)
+        // A GeoParquet 2 file needs the CRS of its GeometryUDT columns before the first row
+        val columns =
+          GeoParquetWriteSupport.columnsWithoutCrs(dataSchema, context.getConfiguration)
+        if (columns.isEmpty) new ParquetOutputWriter(path, context)
+        else new FirstGeometryOutputWriter(path, context, dataSchema, columns)
       }
 
       override def getFileExtension(context: TaskAttemptContext): String = {

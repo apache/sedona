@@ -1332,6 +1332,47 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       }
     }
 
+    it("GeoParquet gives a covering option to the column that its key names as it is written") {
+      // In lower case this key is the one of the covering mode
+      val df = sparkSession
+        .range(0, 10)
+        .toDF("id")
+        .withColumn("id", expr("CAST(id AS DOUBLE)"))
+        .withColumn("MODE", expr("ST_Point(id, id + 1)"))
+        .withColumn("other", expr("ST_Point(10 * id, 10 * id + 1)"))
+        .withColumn(
+          "test_cov",
+          expr("struct(id AS xmin, id + 1 AS ymin, id AS xmax, id + 1 AS ymax)"))
+      val geoParquetSavePath =
+        geoparquetoutputlocation + "/gp_with_covering_of_column_mode.parquet"
+      df.write
+        .format("geoparquet")
+        .option("geoparquet.covering.MODE", "test_cov")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
+        val covering = (geo \ "columns" \ "MODE" \ "covering").extract[Covering]
+        assert(covering.bbox.xmin == Seq("test_cov", "xmin"))
+      }
+    }
+
+    it("GeoParquet takes the covering mode whatever the case of its key") {
+      val df = sparkSession
+        .range(0, 10)
+        .toDF("id")
+        .withColumn("id", expr("CAST(id AS DOUBLE)"))
+        .withColumn("geometry", expr("ST_Point(id, id + 1)"))
+      val geoParquetSavePath =
+        geoparquetoutputlocation + "/gp_with_covering_mode_in_another_case.parquet"
+      df.write
+        .format("geoparquet")
+        .option("GeoParquet.Covering.Mode", "legacy")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+      assert(!sparkSession.read.parquet(geoParquetSavePath).columns.contains("geometry_bbox"))
+    }
+
     it("GeoParquet auto populates covering metadata for multiple geometry columns") {
       val df = sparkSession
         .range(0, 100)
