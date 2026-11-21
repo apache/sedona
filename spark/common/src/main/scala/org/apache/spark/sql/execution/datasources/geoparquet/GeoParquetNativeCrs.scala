@@ -34,6 +34,12 @@ private[geoparquet] object GeoParquetNativeCrs {
     throw new IllegalArgumentException(
       s"GeoParquet column '$column' has a CRS that cannot be represented by a Spark native SRID")
 
+  def rejectUnrepresentableGeography(column: String): Nothing =
+    throw new IllegalArgumentException(
+      s"GeoParquet column '$column' has a CRS that Spark's native geography type cannot " +
+        "represent. To read the column, give the reader a schema with Sedona's own geography " +
+        "type for it")
+
   def requireSrid(column: String, expected: Int, actual: Int): Unit = {
     if (expected != actual) {
       throw new IllegalArgumentException(

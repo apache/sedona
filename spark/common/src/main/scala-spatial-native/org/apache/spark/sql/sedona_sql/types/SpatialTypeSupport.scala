@@ -81,6 +81,22 @@ object SpatialTypeSupport {
     case native: GeometryType if !native.isMixedSrid => Some(native.srid)
     case _ => None
   }
+  def geographySrid(dataType: DataType): Option[Int] = dataType match {
+    case native: GeographyType if !native.isMixedSrid => Some(native.srid)
+    case _ => None
+  }
+
+  /** Spark's native geography type takes the SRID of a geographic CRS only. */
+  def supportsGeographySrid(srid: Int): Boolean = GeographyType.isSridSupported(srid)
+
+  /** The value of a geography column for the geography that `wkb` is the WKB of. */
+  def geographyFromWkb(wkb: Array[Byte], srid: Int, dataType: DataType): Any = dataType match {
+    case _: GeographyUDT => GeographySerializer.serializeWkb(wkb, srid)
+    case native: GeographyType =>
+      native.assertSridAllowedForType(srid)
+      NativeGeography.fromWkb(PublicWkbHeaderAdapter.toIsoWkb(wkb), srid).getValue
+    case other => throw new IllegalArgumentException(s"Expected a geography type, got $other")
+  }
 
   /**
    * The SRID that Spark's registry of coordinate reference systems gives to `crs`, an identifier

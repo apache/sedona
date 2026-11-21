@@ -31,7 +31,8 @@ import org.apache.spark.sql.catalyst.util.{ArrayBasedMapData, CaseInsensitiveMap
 import org.apache.spark.sql.execution.datasources.geoparquet.internal._
 
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.sedona.sql.utils.GeographySerializer
+import org.apache.spark.sql.sedona_sql.UDT.{GeographyUDT, GeometryUDT}
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
 import org.datasyslab.jts.io.WKBReader
@@ -113,7 +114,8 @@ private[geoparquet] class GeoParquetRowConverter(
 
   assert(
     !catalystType.existsRecursively(t =>
-      !t.isInstanceOf[GeometryUDT] && t.isInstanceOf[UserDefinedType[_]]),
+      !t.isInstanceOf[GeometryUDT] && !t.isInstanceOf[GeographyUDT] &&
+        t.isInstanceOf[UserDefinedType[_]]),
     s"""User-defined types in Catalyst schema should have already been expanded:
        |${catalystType.prettyJson}
      """.stripMargin)
@@ -265,6 +267,44 @@ private[geoparquet] class GeoParquetRowConverter(
               s"Parquet type for geometry column is $parquetType. This parquet file could be written by " +
                 "Apache Sedona <= 1.3.1-incubating. Please use option(\"legacyMode\", \"true\") to read this file.")
           }
+        }
+
+      case dt if SpatialTypeSupport.isGeography(dt) =>
+        val name = parquetType.getName
+        ParquetGeospatialTypes.describe(parquetType) match {
+          case Some(column) if column.isGeography =>
+            // Compute SRID once per column converter, not per row
+            val srid = schemaConverter.geographySrid(
+              parquetType,
+              native = SpatialTypeSupport.isNativeGeography(catalystType))
+            SpatialTypeSupport
+              .geographySrid(catalystType)
+              .foreach(GeoParquetNativeCrs.requireSrid(name, _, srid))
+            new ParquetPrimitiveConverter(updater) {
+              // The value takes the stored WKB as it is, without a JTS or S2 object in between
+              override def addBinary(value: Binary): Unit =
+                this.updater.set(
+                  SpatialTypeSupport.geographyFromWkb(value.getBytes, srid, catalystType))
+            }
+          case Some(_) =>
+            throw new IllegalArgumentException(
+              s"Column '$name' is a Parquet GEOMETRY column and cannot be read as a geography")
+          case None if catalystType.isInstanceOf[GeographyUDT] =>
+            // A column that Sedona wrote from its own geography type, as that type is
+            // serialized
+            new ParquetPrimitiveConverter(updater)
+          case None =>
+            val targetSrid = SpatialTypeSupport.geographySrid(catalystType)
+            new ParquetPrimitiveConverter(updater) {
+              override def addBinary(value: Binary): Unit = {
+                val serialized = value.getBytes
+                val srid = GeographySerializer.readSRID(serialized)
+                targetSrid.foreach(GeoParquetNativeCrs.requireSrid(name, _, srid))
+                val wkb =
+                  java.util.Arrays.copyOfRange(serialized, Integer.BYTES, serialized.length)
+                this.updater.set(SpatialTypeSupport.geographyFromWkb(wkb, srid, catalystType))
+              }
+            }
         }
 
       case ByteType =>

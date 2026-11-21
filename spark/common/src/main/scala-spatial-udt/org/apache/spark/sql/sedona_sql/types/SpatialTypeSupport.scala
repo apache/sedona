@@ -22,6 +22,7 @@ import java.nio.ByteOrder
 
 import org.apache.sedona.common.S2Geography.Geography
 import org.apache.sedona.common.geography.Constructors
+import org.apache.sedona.sql.utils.GeographySerializer
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
 import org.apache.spark.sql.catalyst.expressions.{Expression, SpecializedGetters}
 import org.apache.spark.sql.sedona_sql.UDT.{GeographyUDT, GeometryUDT}
@@ -35,6 +36,16 @@ object SpatialTypeSupport {
   def unwrapGeographyInput(expression: Expression): Expression = expression
   def geometryType: DataType = GeometryUDT()
   def geometryType(srid: Int): DataType = geometryType
+  def geographyType: DataType = GeographyUDT()
+  def geographyType(srid: Int): DataType = geographyType
+  def geographySrid(dataType: DataType): Option[Int] = None
+
+  /** Sedona's own geography type takes any SRID. */
+  def supportsGeographySrid(srid: Int): Boolean = true
+
+  /** The value of a geography column for the geography that `wkb` is the WKB of. */
+  def geographyFromWkb(wkb: Array[Byte], srid: Int, dataType: DataType): Any =
+    GeographySerializer.serializeWkb(wkb, srid)
   def geometrySrid(dataType: DataType): Option[Int] = None
 
   /** Spark has a registry of coordinate reference systems only where it has native types. */

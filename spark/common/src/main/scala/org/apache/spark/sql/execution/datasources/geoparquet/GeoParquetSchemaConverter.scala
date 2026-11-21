@@ -137,6 +137,40 @@ class GeoParquetToSparkSchemaConverter(
   }
 
   /**
+   * Returns the SRID of the geography column stored in `field`, a column of the GEOGRAPHY logical
+   * type, by the rules of [[geometrySrid]]. Sedona computes on a sphere, as Spark's native
+   * geography type does, so a column whose edges follow another algorithm is rejected.
+   *
+   * @param field
+   *   Parquet field of the geography column
+   * @param native
+   *   whether the column is read as a native Spark geography, whose type takes the SRID of a
+   *   geographic CRS only. A column read as GeographyUDT accepts any CRS, an unknown one as SRID
+   *   0.
+   */
+  def geographySrid(field: Type, native: Boolean = SpatialTypeSupport.usesNativeTypes): Int = {
+    val name = field.getName
+    val column = ParquetGeospatialTypes
+      .describe(field)
+      .filter(_.isGeography)
+      .getOrElse(
+        throw new IllegalArgumentException(s"Column '$name' is not a Parquet GEOGRAPHY column"))
+    column.edges.filter(_ != ParquetGeospatialTypes.DEFAULT_EDGES).foreach { edges =>
+      throw new IllegalArgumentException(
+        s"Column '$name' is a Parquet GEOGRAPHY column whose edges follow the $edges " +
+          "algorithm. Sedona reads geographies with spherical edges only. To read the WKB of " +
+          "the column, give the reader a schema in which the column is binary")
+    }
+    val unknown = ParquetGeospatialTypes.isUnknownCrs(column.crs)
+    val declared = ParquetGeospatialTypes.crsToSrid(column.crs, keyValueMetaData)
+    val srid = if (declared != 0 || unknown) declared else getSrid(name)
+    if (native && !SpatialTypeSupport.supportsGeographySrid(srid)) {
+      GeoParquetNativeCrs.rejectUnrepresentableGeography(name)
+    }
+    srid
+  }
+
+  /**
    * Returns true if TIMESTAMP_NTZ type is enabled in this ParquetToSparkSchemaConverter.
    */
   def isTimestampNTZEnabled(): Boolean = {
@@ -200,8 +234,7 @@ class GeoParquetToSparkSchemaConverter(
       if (isGeometryColumn(primitive)) {
         Some(SpatialTypeSupport.geometryType(geometrySrid(primitive)))
       } else if (ParquetGeospatialTypes.describe(primitive).isDefined) {
-        // GEOGRAPHY columns hold WKB. Keep the bytes rather than guess a string encoding.
-        Some(BinaryType)
+        Some(SpatialTypeSupport.geographyType(geographySrid(primitive)))
       } else None
     case _ => None
   }
