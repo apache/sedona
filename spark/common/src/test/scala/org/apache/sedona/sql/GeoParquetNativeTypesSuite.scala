@@ -318,18 +318,12 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
 
     val versions = if (libraryHasGeospatialTypes) Seq("1.1.0", "2.0.0") else Seq("1.1.0")
     for (version <- versions) {
-      // A GeoParquet 2 file of a GeometryUDT column needs the CRS option to be written at all
-      def unknown: Seq[(String, String)] =
-        if (version == "2.0.0") Seq("geoparquet.crs" -> "null") else Seq.empty
-      def stated: Seq[(String, String)] =
-        if (version == "2.0.0") Seq("geoparquet.crs" -> mercator) else Seq.empty
-
       for (mergeSchema <- Seq("false", "true")) {
         it(
           s"reads a $version file without geometries next to a file with a CRS (mergeSchema=$mergeSchema)") {
           withPath { path =>
-            append(frame(null, null), path, version, unknown: _*)
-            append(frame(pointWithSrid(3857)), path, version, stated: _*)
+            append(frame(null, null), path, version)
+            append(frame(pointWithSrid(3857)), path, version)
             assert(srids(path, "mergeSchema" -> mergeSchema) == Seq(None, None, Some(3857)))
           }
         }
@@ -337,8 +331,8 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
 
       it(s"reads $version files without geometries as a column of unknown CRS") {
         withPath { path =>
-          append(frame(null), path, version, unknown: _*)
-          append(frame(null, null), path, version, unknown: _*)
+          append(frame(null), path, version)
+          append(frame(null, null), path, version)
           assert(srids(path) == Seq(None, None, None))
         }
       }
@@ -346,8 +340,8 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
       if (SpatialTypeSupport.usesNativeTypes) {
         it(s"rejects a $version file with geometries of unknown CRS next to a file with a CRS") {
           withPath { path =>
-            append(frame(null, pointWithSrid(0)), path, version, unknown: _*)
-            append(frame(pointWithSrid(3857)), path, version, stated: _*)
+            append(frame(null, pointWithSrid(0)), path, version)
+            append(frame(pointWithSrid(3857)), path, version)
             val message = messages(intercept[Exception](srids(path)))
             assert(message.contains("GEOMETRY(0)") && message.contains("GEOMETRY(3857)"))
           }
@@ -355,7 +349,7 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
 
         it(s"rejects a geometry of unknown CRS in a $version file read with an SRID") {
           withPath { path =>
-            append(frame(null, pointWithSrid(0)), path, version, unknown: _*)
+            append(frame(null, pointWithSrid(0)), path, version)
             val withSrid =
               StructType(Seq(StructField("geometry", SpatialTypeSupport.geometryType(3857))))
             val read = sparkSession.read.format("geoparquet").schema(withSrid).load(path)
