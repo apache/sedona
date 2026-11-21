@@ -318,8 +318,7 @@ private[geoparquet] class GeoParquetRowConverter(
             val targetSrid = SpatialTypeSupport.geographySrid(catalystType)
             new ParquetPrimitiveConverter(updater) {
               override def addBinary(value: Binary): Unit = {
-                val serialized = value.getBytes
-                val srid = GeographySerializer.readSRID(serialized)
+                val (wkb, srid) = GeographySerializer.wkbAndSrid(value.getBytes)
                 val expected = targetSrid match {
                   case Some(target) if target != srid =>
                     Some(s"The column is read with SRID $target")
@@ -332,8 +331,6 @@ private[geoparquet] class GeoParquetRowConverter(
                     s"Column '$name' is stored as binary, which is read as values of Sedona's " +
                       s"own geography type. A value of it states SRID $srid. $reason")
                 }
-                val wkb =
-                  java.util.Arrays.copyOfRange(serialized, Integer.BYTES, serialized.length)
                 this.updater.set(SpatialTypeSupport.geographyFromWkb(wkb, srid, catalystType))
               }
             }

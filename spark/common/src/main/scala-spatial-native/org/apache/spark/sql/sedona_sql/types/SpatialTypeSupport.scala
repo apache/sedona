@@ -99,6 +99,21 @@ object SpatialTypeSupport {
   }
 
   /**
+   * The WKB and the SRID of the geography at `ordinal` of `row`, which is not null. The WKB is an
+   * array that the caller owns.
+   */
+  def readGeographyWkb(
+      row: SpecializedGetters,
+      ordinal: Int,
+      dataType: DataType): (Array[Byte], Int) = dataType match {
+    case _: GeographyUDT => GeographySerializer.wkbAndSrid(row.getBinary(ordinal))
+    case _: GeographyType =>
+      val native = NativeGeography.fromValue(row.get(ordinal, dataType).asInstanceOf[BinaryView])
+      (native.toWkb(ByteOrder.nativeOrder()), native.srid())
+    case other => throw new IllegalArgumentException(s"Expected a geography type, got $other")
+  }
+
+  /**
    * The SRID that Spark's registry of coordinate reference systems gives to `crs`, an identifier
    * such as `ESRI:102100` in the spelling Spark uses. None when the registry does not know it.
    */

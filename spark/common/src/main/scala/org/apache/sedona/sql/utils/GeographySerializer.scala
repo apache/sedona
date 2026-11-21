@@ -61,6 +61,10 @@ object GeographySerializer {
     WKBGeography.fromWKB(Arrays.copyOfRange(value, Integer.BYTES, value.length), readSRID(value))
   }
 
+  /** The WKB and the SRID of a serialized geography. The WKB is a copy that the caller owns. */
+  def wkbAndSrid(value: Array[Byte]): (Array[Byte], Int) =
+    (Arrays.copyOfRange(value, Integer.BYTES, value.length), readSRID(value))
+
   def readSRID(value: Array[Byte]): Int = {
     if (value.length < Integer.BYTES) {
       throw new IllegalArgumentException("Truncated spatial SRID header")

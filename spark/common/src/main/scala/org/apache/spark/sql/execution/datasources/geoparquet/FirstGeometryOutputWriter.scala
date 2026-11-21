@@ -23,6 +23,7 @@ import scala.collection.mutable
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.mapreduce.{RecordWriter, TaskAttemptContext}
+import org.apache.sedona.sql.utils.GeographySerializer
 import org.apache.parquet.hadoop.ParquetOutputFormat
 import org.apache.parquet.hadoop.codec.CodecConfig
 import org.apache.spark.sql.catalyst.InternalRow
@@ -32,7 +33,7 @@ import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.types.StructType
 
 /**
- * Writes a GeoParquet 2 file that has GeometryUDT columns without a CRS option.
+ * Writes a GeoParquet 2 file that has GeometryUDT or GeographyUDT columns without a CRS option.
  *
  * GeoParquet 2 states the CRS of a geometry column in the Parquet schema, which the Parquet
  * writer needs before the first row. A GeometryUDT column has an SRID on each geometry only. This
@@ -72,8 +73,12 @@ class FirstGeometryOutputWriter(
     } else {
       waiting.toSeq.foreach { ordinal =>
         if (!row.isNullAt(ordinal)) {
-          val geometry = SpatialTypeSupport.readGeometry(row, ordinal, schema(ordinal).dataType)
-          srids.put(ordinal, geometry.getSRID)
+          val dataType = schema(ordinal).dataType
+          val srid =
+            if (SpatialTypeSupport.isGeography(dataType)) {
+              GeographySerializer.readSRID(row.getBinary(ordinal))
+            } else SpatialTypeSupport.readGeometry(row, ordinal, dataType).getSRID
+          srids.put(ordinal, srid)
           waiting.remove(ordinal)
         }
       }

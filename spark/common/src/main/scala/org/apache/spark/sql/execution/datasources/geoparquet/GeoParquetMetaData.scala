@@ -46,13 +46,17 @@ import org.json4s.{DefaultFormats, Extraction, JArray, JField, JInt, JNothing, J
  *   null, Some(value) if the crs is present and not null.
  * @param covering
  *   Object containing bounding box column names to help accelerate spatial data retrieval
+ * @param edges
+ *   How the edges of the geometries are interpreted. None stands for planar edges, which a
+ *   geometry column has. A geography column has "spherical" edges.
  */
 case class GeometryFieldMetaData(
     encoding: String,
     geometryTypes: Seq[String],
     bbox: Option[Seq[Double]],
     crs: Option[JValue] = None,
-    covering: Option[Covering] = None)
+    covering: Option[Covering] = None,
+    edges: Option[String] = None)
 
 case class Covering(bbox: CoveringBBox)
 

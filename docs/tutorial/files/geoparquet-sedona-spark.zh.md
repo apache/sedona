@@ -344,6 +344,12 @@ Sedona 必须在写出第一行之前知道 CRS，因此会把第一个几何对
 
 设置 `geoparquet.crs` 或 `geoparquet.crs.<column_name>` 可以自行指定 CRS。此时 Sedona 按给定值写出，不再与几何对象的 SRID 比较。
 
+地理列以 WKB 存入边为球面（spherical）的 `GEOGRAPHY` 逻辑类型，GeoParquet 元数据中该列带有 `"edges": "spherical"`。文件可以只有地理列而没有几何列。Sedona 不为地理列写出 `bbox`，因为 GeoParquet 元数据中的 `bbox` 是平面的。
+
+地理列的 CRS 遵循几何列的规则，`geoparquet.crs` 和 `geoparquet.crs.<column_name>` 同样适用。在 Spark 4.1 上有一点不同：没有 SRID 的地理对象按 OGC:CRS84 写出，文件中没有任何地理对象的列也是如此。
+
+GeoParquet 1.1 文件没有地理类型。在 Spark 4.1 及更早版本上，Sedona 会把自己的地理类型的列以只有 Sedona 能读回的形式存入这样的文件。在 Spark 4.2 及更高版本上，把 Spark 原生地理类型的列写入 GeoParquet 1.1 文件会失败，请为此把 `geoparquet.version` 设为 `2.0.0`。
+
 Spark 3.5 和 4.0 自带的 Parquet 库早于 `GEOMETRY` 逻辑类型。Sedona 在这些版本上写出 GeoParquet 1.1，并拒绝把 `geoparquet.version` 设为 `2.0.0`。
 
 ## 写出带 covering 元数据的 GeoParquet

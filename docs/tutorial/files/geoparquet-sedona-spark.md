@@ -349,6 +349,12 @@ Sedona has to know the CRS before it writes the first row, so it holds the rows 
 
 Set `geoparquet.crs` or `geoparquet.crs.<column_name>` to state the CRS yourself. Sedona then writes it as given and does not compare it with the SRIDs of the geometries.
 
+A geography column is stored in the `GEOGRAPHY` logical type with spherical edges, as WKB, and the GeoParquet metadata lists it with `"edges": "spherical"`. A file can have geography columns and no geometry column. Sedona writes no `bbox` for a geography column, because the `bbox` of the GeoParquet metadata is planar.
+
+The CRS of a geography column follows the rules of a geometry column, and `geoparquet.crs` and `geoparquet.crs.<column_name>` apply to it as well. There is one difference on Spark 4.1: a geography without an SRID is written as OGC:CRS84, and so is a column without any geography in the file.
+
+A GeoParquet 1.1 file has no geography type. On Spark 4.1 and earlier, Sedona stores a column of its own geography type there in a form that only Sedona reads back. On Spark 4.2 and later a write of a column of Spark's native geography type to a GeoParquet 1.1 file fails, so set `geoparquet.version` to `2.0.0` for it.
+
 Spark 3.5 and 4.0 ship a Parquet library that predates the `GEOMETRY` logical type. Sedona writes GeoParquet 1.1 on these versions and rejects `geoparquet.version` `2.0.0`.
 
 ## Save GeoParquet with Covering Metadata

@@ -25,18 +25,24 @@ import java.nio.file.Files
 import org.apache.commons.io.FileUtils
 import org.apache.sedona.common.S2Geography.WKBGeography
 import org.apache.sedona.sql.utils.GeographySerializer
+import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.parquet.example.data.Group
 import org.apache.parquet.example.data.simple.SimpleGroup
-import org.apache.parquet.hadoop.example.ExampleParquetWriter
+import org.apache.parquet.hadoop.{ParquetFileReader, ParquetReader}
+import org.apache.parquet.hadoop.example.{ExampleParquetWriter, GroupReadSupport}
+import org.apache.parquet.hadoop.metadata.ParquetMetadata
+import org.apache.parquet.hadoop.util.HadoopInputFile
 import org.apache.parquet.io.api.Binary
 import org.apache.parquet.schema.{GroupType, LogicalTypeAnnotation, MessageType, Type, Types}
 import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName.{BINARY, INT32}
 import org.apache.spark.sql.{DataFrame, Row}
-import org.apache.spark.sql.execution.datasources.geoparquet.ParquetGeospatialTypes
+import org.apache.spark.sql.execution.datasources.geoparquet.{ParquetGeospatialColumn, ParquetGeospatialTypes}
 import org.apache.spark.sql.sedona_sql.UDT.GeographyUDT
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.types.{ArrayType, BinaryType, DataType, IntegerType, StructField, StructType}
+import org.json4s.{JArray, JInt, JNothing, JString, JValue}
+import org.json4s.jackson.JsonMethods.parse
 import org.locationtech.jts.io.{ByteOrderValues, WKBWriter, WKTReader}
 
 import scala.collection.JavaConverters._
@@ -944,9 +950,234 @@ class GeoParquetGeographySuite extends TestBaseScala {
     }
   }
 
-  describe("Writing geography columns") {
-    // Sedona's own geography type is written as it is serialized, and the schema that Spark
-    // leaves in the file names the type.
+  describe("Writing geography columns to GeoParquet 2 files") {
+    if (ParquetGeospatialTypes.supported) {
+      def writeVersion2(df: DataFrame, path: String, options: (String, String)*): Unit =
+        df.coalesce(1)
+          .write
+          .format("geoparquet")
+          .option("geoparquet.version", "2.0.0")
+          .options(options.toMap)
+          .save(path)
+
+      def writtenFile(path: String): Path = {
+        val files = new File(path).listFiles().filter(_.getName.endsWith(".parquet"))
+        assert(files.length == 1)
+        new Path(files.head.getPath)
+      }
+
+      def footer(path: String): ParquetMetadata = {
+        val reader =
+          ParquetFileReader.open(HadoopInputFile.fromPath(writtenFile(path), new Configuration()))
+        try reader.getFooter
+        finally reader.close()
+      }
+
+      def column(path: String, name: String): Option[ParquetGeospatialColumn] = {
+        val schema = footer(path).getFileMetaData.getSchema
+        ParquetGeospatialTypes.describe(schema.getType(schema.getFieldIndex(name)))
+      }
+
+      def geoMetadata(path: String): JValue =
+        parse(footer(path).getFileMetaData.getKeyValueMetaData.get("geo"))
+
+      /** The bytes that the file stores for `name` in its first row. */
+      def stored(path: String, name: String): String = {
+        val reader = ParquetReader.builder(new GroupReadSupport(), writtenFile(path)).build()
+        try WKBWriter.toHex(reader.read().getBinary(name, 0).getBytes)
+        finally reader.close()
+      }
+
+      val spherical = Some("spherical")
+      val line = "LINESTRING (0 0, 10 10)"
+      // ISO WKB of the line, in the byte order of little endian machines
+      val lineWkb = WKBWriter.toHex(wkb(line))
+
+      it("stores a geography column in the GEOGRAPHY logical type, as WKB") {
+        withDirectory { directory =>
+          val path = new File(directory, "data").getPath
+          writeVersion2(
+            sparkSession.sql(s"""SELECT 1 AS id, ST_Point(1, 2) AS geometry,
+                 |ST_GeogFromWKT('$line', 4326) AS geography""".stripMargin),
+            path)
+          assert(
+            column(path, "geography") == Some(ParquetGeospatialColumn(true, None, spherical)))
+          assert(stored(path, "geography") == lineWkb)
+          val geo = geoMetadata(path)
+          assert(geo \ "primary_column" == JString("geometry"))
+          val metadata = geo \ "columns" \ "geography"
+          assert(metadata \ "encoding" == JString("WKB"))
+          assert(metadata \ "geometry_types" == JArray(List(JString("LineString"))))
+          assert(metadata \ "edges" == JString("spherical"))
+          // OGC:CRS84 is the CRS of a column that states none
+          assert(metadata \ "crs" == JNothing)
+          // The bounding box of GeoParquet metadata is planar
+          assert(metadata \ "bbox" == JNothing)
+          assert(metadata \ "covering" == JNothing)
+          assert(geo \ "columns" \ "geometry" \ "edges" == JNothing)
+          val df = read(path)
+          assertGeography(df, 4326)
+          assert(ewkt(df) == Seq(s"SRID=4326; $line"))
+        }
+      }
+
+      it("writes a file whose only spatial column is a geography column") {
+        withDirectory { directory =>
+          val path = new File(directory, "data").getPath
+          writeVersion2(
+            sparkSession.sql(s"SELECT 1 AS id, ST_GeogFromWKT('$line', 4326) AS geography"),
+            path)
+          assert(geoMetadata(path) \ "primary_column" == JString("geography"))
+          val df = read(path)
+          assertGeography(df, 4326)
+          assert(ewkt(df) == Seq(s"SRID=4326; $line"))
+        }
+      }
+
+      it("states the CRS of a geography column that is not OGC:CRS84") {
+        withDirectory { directory =>
+          val path = new File(directory, "data").getPath
+          writeVersion2(
+            sparkSession.sql(s"SELECT 1 AS id, ST_GeogFromWKT('$line', 4269) AS geography"),
+            path)
+          assert(
+            column(path, "geography") ==
+              Some(ParquetGeospatialColumn(true, Some("EPSG:4269"), spherical)))
+          val id = geoMetadata(path) \ "columns" \ "geography" \ "crs" \ "id"
+          assert(id \ "authority" == JString("EPSG"))
+          assert(id \ "code" == JInt(4269))
+          val df = read(path)
+          assertGeography(df, 4269)
+          assert(ewkt(df) == Seq(s"SRID=4269; $line"))
+        }
+      }
+
+      it("takes the CRS of a geography column from a CRS option") {
+        withDirectory { directory =>
+          val path = new File(directory, "data").getPath
+          writeVersion2(
+            sparkSession.sql(s"SELECT 1 AS id, ST_GeogFromWKT('$line', 4269) AS geography"),
+            path,
+            "geoparquet.crs.geography" -> projjson4269)
+          assert(
+            column(path, "geography") ==
+              Some(ParquetGeospatialColumn(true, Some("EPSG:4269"), spherical)))
+          assert(geoMetadata(path) \ "columns" \ "geography" \ "crs" == parse(projjson4269))
+        }
+      }
+
+      it("keeps the Z coordinate of a geography") {
+        withDirectory { directory =>
+          val path = new File(directory, "data").getPath
+          // A geography that is read from WKB keeps it. One that is read from text has no Z.
+          val pointZ = "01E9030000000000000000F03F00000000000000400000000000000840"
+          writeVersion2(
+            sparkSession.sql(s"SELECT 1 AS id, ST_GeogFromWKB(unhex('$pointZ')) AS geography"),
+            path)
+          assert(stored(path, "geography") == pointZ)
+          assert(
+            geoMetadata(path) \ "columns" \ "geography" \ "geometry_types" ==
+              JArray(List(JString("Point Z"))))
+        }
+      }
+
+      it("writes a geography column without a value") {
+        withDirectory { directory =>
+          val path = new File(directory, "data").getPath
+          writeVersion2(
+            sparkSession.sql(s"""SELECT id, IF(id = 0, NULL, ST_GeogFromWKT('$line', 4326))
+                 |AS geography FROM range(1)""".stripMargin),
+            path)
+          assert(
+            column(path, "geography") == Some(ParquetGeospatialColumn(true, None, spherical)))
+          assert(geoMetadata(path) \ "columns" \ "geography" \ "geometry_types" == JArray(Nil))
+          val df = read(path)
+          assertGeography(df, 4326)
+          assert(df.where("geography IS NULL").count() == 1)
+        }
+      }
+
+      it("returns the column from Spark's own Parquet reader") {
+        withDirectory { directory =>
+          val path = new File(directory, "data").getPath
+          writeVersion2(
+            sparkSession.sql(s"SELECT 1 AS id, ST_GeogFromWKT('$line', 4326) AS geography"),
+            path)
+          val df = sparkSession.read.parquet(path)
+          if (SpatialTypeSupport.usesNativeTypes) {
+            // The schema that Spark leaves in the file names its native type
+            assert(df.schema("geography").dataType == SpatialTypeSupport.geographyType(4326))
+            assert(ewkt(df) == Seq(s"SRID=4326; $line"))
+          } else {
+            assert(df.schema("geography").dataType == BinaryType)
+            val hex = df.selectExpr("hex(geography)").collect().head.getString(0)
+            assert(hex == lineWkb)
+          }
+        }
+      }
+
+      if (SpatialTypeSupport.usesNativeTypes) {
+        it("rejects a native geography column whose type names no SRID") {
+          withDirectory { directory =>
+            val error = intercept[Exception] {
+              writeVersion2(
+                sparkSession.sql(s"""SELECT 1 AS id,
+                     |CAST(ST_GeogFromWKT('$line', 4326) AS GEOGRAPHY(ANY)) AS geography""".stripMargin),
+                new File(directory, "data").getPath)
+            }
+            assert(messages(error).contains("GEOGRAPHY(<srid>)"))
+          }
+        }
+      } else {
+        // Sedona's own geography type has an SRID on each value, and a GEOGRAPHY column has one
+        // CRS. A geography without an SRID is in OGC:CRS84, as a geography that Sedona
+        // constructs without one is on Spark 4.2.
+        it("writes geographies without an SRID as OGC:CRS84") {
+          withDirectory { directory =>
+            val path = new File(directory, "data").getPath
+            writeVersion2(
+              sparkSession.sql(s"SELECT 1 AS id, ST_GeogFromWKT('$line') AS geography"),
+              path)
+            assert(
+              column(path, "geography") == Some(ParquetGeospatialColumn(true, None, spherical)))
+            assert(ewkt(read(path)) == Seq(s"SRID=4326; $line"))
+          }
+        }
+
+        it("rejects geographies with another SRID than the first of the file") {
+          withDirectory { directory =>
+            val error = intercept[Exception] {
+              writeVersion2(
+                sparkSession.sql(s"""SELECT id,
+                     |IF(id = 0, ST_GeogFromWKT('$line', 4326), ST_GeogFromWKT('$line', 4269))
+                     |AS geography FROM range(2)""".stripMargin),
+                new File(directory, "data").getPath)
+            }
+            assert(messages(error).contains("'geography'"))
+            assert(messages(error).contains("SRID 4326"))
+            assert(messages(error).contains("SRID 4269"))
+          }
+        }
+
+        it("keeps a geography column that is nested in another column as it is serialized") {
+          withDirectory { directory =>
+            val path = new File(directory, "data").getPath
+            writeVersion2(
+              sparkSession.sql(s"""SELECT 1 AS id, ST_Point(1, 2) AS geometry,
+                   |named_struct('geography', ST_GeogFromWKT('$line', 4326)) AS holder""".stripMargin),
+              path)
+            val df = read(path).selectExpr("id", "holder.geography AS geography")
+            assert(df.schema("geography").dataType == GeographyUDT())
+            assert(ewkt(df) == Seq(s"SRID=4326; $line"))
+          }
+        }
+      }
+    }
+  }
+
+  describe("Writing geography columns to GeoParquet 1 files") {
+    // GeoParquet 1 has no GEOGRAPHY logical type. Sedona's own geography type is written as it
+    // is serialized, and the schema that Spark leaves in the file names the type.
     if (SpatialTypeSupport.usesNativeTypes) {
       it("rejects a column of Spark's native geography type") {
         withDirectory { directory =>
@@ -956,10 +1187,12 @@ class GeoParquetGeographySuite extends TestBaseScala {
                      |ST_GeogFromWKT('POINT (1 2)', 4326) AS geography""".stripMargin)
               .write
               .format("geoparquet")
+              .option("geoparquet.version", "1.1.0")
               .save(new File(directory, "data").getPath)
           }
           assert(messages(error).contains("'geography'"))
-          assert(messages(error).contains("native geography type"))
+          assert(messages(error).contains("geoparquet.version"))
+          assert(messages(error).contains("2.0.0"))
         }
       }
     } else {

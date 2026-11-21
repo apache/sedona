@@ -89,14 +89,17 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
       job: Job,
       options: Map[String, String],
       dataSchema: StructType): OutputWriterFactory = {
-    // Fail on the driver, not in every write task
-    GeoParquetWriteSupport.requireGeometryColumn(dataSchema)
     val sqlConf = new PortableSQLConf(sparkSession.sessionState.conf)
     val parquetOptions = new ParquetOptions(options, sqlConf)
 
     val conf = ContextUtil.getConfiguration(job)
     GeoParquetWriteSupport.setWriteOptions(options, dataSchema, conf)
     GeoParquetWriteSupport.requireSupportedVersion(conf)
+    // Fail on the driver, not in every write task
+    GeoParquetWriteSupport.requireGeometryColumn(
+      dataSchema,
+      Option(conf.get(GeoParquetMetaData.GEOPARQUET_VERSION_KEY))
+        .getOrElse(GeoParquetMetaData.VERSION))
 
     val committerClass =
       conf.getClass(
@@ -172,7 +175,8 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
           path: String,
           dataSchema: StructType,
           context: TaskAttemptContext): OutputWriter = {
-        // A GeoParquet 2 file needs the CRS of its GeometryUDT columns before the first row
+        // A GeoParquet 2 file needs the CRS of its GeometryUDT and GeographyUDT columns before
+        // the first row
         val columns =
           GeoParquetWriteSupport.columnsWithoutCrs(dataSchema, context.getConfiguration)
         if (columns.isEmpty) new ParquetOutputWriter(path, context)
@@ -399,7 +403,8 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
   override def supportDataType(dataType: DataType): Boolean = dataType match {
     // Explicit ANY read schemas preserve per-file CRSs. prepareWrite rejects ANY outputs.
     case dt if SpatialTypeSupport.isNativeGeometry(dt) => true
-    // A read returns GEOGRAPHY columns in this type. prepareWrite rejects it.
+    // A read returns GEOGRAPHY columns in this type. prepareWrite rejects it for a GeoParquet 1
+    // file, which has no type for it.
     case dt if SpatialTypeSupport.isNativeGeography(dt) => true
     case StructType(fields) => fields.forall(field => supportDataType(field.dataType))
     case ArrayType(elementType, _) => supportDataType(elementType)

@@ -119,6 +119,12 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
   // The SRID that FirstGeometryOutputWriter found for a GeometryUDT column of a GeoParquet 2 file,
   // None when it found no geometry before it had to open the file.
   private val firstGeometrySrids: mutable.Map[Int, Option[Int]] = mutable.Map.empty
+  // The geography columns of a GeoParquet 2 file, which stores them in the GEOGRAPHY logical
+  // type: the geography columns at the root of the schema, with the geometry types that their
+  // values have shown. A GeoParquet 1 file has no such columns.
+  private val geographyColumnTypes: mutable.Map[Int, mutable.Set[String]] =
+    mutable.LinkedHashMap.empty
+  private var geographyColumnCrs: Map[Int, Option[JValue]] = Map.empty
   private val geoParquetColumnCoveringMap: mutable.Map[String, Covering] = mutable.Map.empty
   private val generatedCoveringColumnOrdinals: mutable.Map[Int, Int] = mutable.Map.empty
   private var geoParquetCoveringMode: String = GEOPARQUET_COVERING_MODE_AUTO
@@ -138,22 +144,24 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       PortableSQLConf.ParquetOutputTimestampType.withName(configuration.get(key))
     }
 
-    schema.zipWithIndex.foreach { case (field, ordinal) =>
-      if (SpatialTypeSupport.isGeometry(field.dataType)) {
-        geometryColumnInfoMap.getOrElseUpdate(ordinal, new GeometryColumnInfo())
-      }
-    }
-
-    // prepareWrite already checked this on the driver
-    if (geometryColumnInfoMap.isEmpty) {
-      GeoParquetWriteSupport.requireGeometryColumn(schema)
-    }
-
     geoParquetVersion = configuration.get(GEOPARQUET_VERSION_KEY) match {
       case null => Some(VERSION)
       // The version decides the layout of the file with the spaces around it ignored, and the
       // metadata states it in the same form
       case version: String => Some(version.trim)
+    }
+
+    schema.zipWithIndex.foreach { case (field, ordinal) =>
+      if (SpatialTypeSupport.isGeometry(field.dataType)) {
+        geometryColumnInfoMap.getOrElseUpdate(ordinal, new GeometryColumnInfo())
+      } else if (writesGeospatialTypes && SpatialTypeSupport.isGeography(field.dataType)) {
+        geographyColumnTypes.getOrElseUpdate(ordinal, mutable.Set.empty)
+      }
+    }
+
+    // prepareWrite already checked this on the driver
+    if (geometryColumnInfoMap.isEmpty) {
+      GeoParquetWriteSupport.requireGeometryColumn(schema, geoParquetVersion.get)
     }
     geoParquetCoveringMode = Option(configuration.get(GEOPARQUET_COVERING_MODE_KEY))
       .map(_.trim)
@@ -181,7 +189,9 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
         Some(parse(crs))
     }
     GeoParquetWriteSupport
-      .columnCrsOptions(configuration, geometryColumnInfoMap.keys.map(schema(_).name).toSeq)
+      .columnCrsOptions(
+        configuration,
+        (geometryColumnInfoMap.keys ++ geographyColumnTypes.keys).map(schema(_).name).toSeq)
       .foreach {
         case (name, "") => geoParquetColumnCrsMap.put(name, None)
         case (name, crs) => geoParquetColumnCrsMap.put(name, Some(parse(crs)))
@@ -214,6 +224,34 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
           })
         case None => None
       }
+    }.toMap
+    geographyColumnCrs = geographyColumnTypes.keys.map { ordinal =>
+      val field = schema(ordinal)
+      val explicit = geoParquetColumnCrsMap.get(field.name).orElse {
+        if (userExplicitlySetDefaultCrs) Some(defaultGeoParquetCrs) else None
+      }
+      val crs = SpatialTypeSupport.geographySrid(field.dataType) match {
+        case Some(srid) => GeoParquetNativeCrs.writeCrs(field.name, srid, explicit)
+        case None =>
+          // A GeographyUDT column only has an SRID on each geography, as a GeometryUDT column
+          // has. FirstGeometryOutputWriter looks it up.
+          explicit.getOrElse {
+            val found =
+              configuration.get(GeoParquetWriteSupport.FIRST_GEOMETRY_SRID_KEY + ordinal)
+            if (found == null) {
+              throw new IllegalArgumentException(
+                s"GeoParquet ${geoParquetVersion.get} states the CRS of column '${field.name}' " +
+                  "in the Parquet schema, which is fixed before the first row is written. Set " +
+                  s"$GEOPARQUET_CRS_KEY or $GEOPARQUET_CRS_KEY.${field.name} to the CRS of the " +
+                  "column.")
+            }
+            val srid = GeoParquetWriteSupport.geographySrid(
+              if (found == GeoParquetWriteSupport.NO_FIRST_GEOMETRY) 0 else found.toInt)
+            firstGeometrySrids.put(ordinal, Some(srid))
+            GeoParquetNativeCrs.writeCrs(field.name, srid, None)
+          }
+      }
+      ordinal -> crs
     }.toMap
     Option(configuration.get(GEOPARQUET_COVERING_KEY)).foreach { coveringColumnName =>
       if (geometryColumnInfoMap.size > 1) {
@@ -283,8 +321,10 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
 
   override def finalizeWrite(): WriteSupport.FinalizedWriteContext = {
     val metadata = new util.HashMap[String, String]()
-    if (geometryColumnInfoMap.nonEmpty) {
-      val primaryColumnIndex = geometryColumnInfoMap.keys.head
+    if (geometryColumnInfoMap.nonEmpty || geographyColumnTypes.nonEmpty) {
+      // A geometry column comes first. A file can have geography columns alone.
+      val primaryColumnIndex =
+        geometryColumnInfoMap.keys.headOption.getOrElse(geographyColumnTypes.keys.head)
       val primaryColumn = schema.fields(primaryColumnIndex).name
       val columns = geometryColumnInfoMap.map { case (ordinal, columnInfo) =>
         val columnName = schema.fields(ordinal).name
@@ -315,7 +355,19 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
         val covering = geoParquetColumnCoveringMap.get(columnName)
         columnName -> GeometryFieldMetaData("WKB", geometryTypes, bbox, crs, covering)
       }.toMap
-      val geoParquetMetadata = GeoParquetMetaData(geoParquetVersion, primaryColumn, columns)
+      // A geography column has no bounding box here: the one of this metadata is planar, and
+      // the edges of a geography leave the planar bounding box of their end points.
+      val geographyColumns = geographyColumnTypes.map { case (ordinal, geometryTypes) =>
+        schema.fields(ordinal).name -> GeometryFieldMetaData(
+          "WKB",
+          geometryTypes.toSeq,
+          None,
+          geographyColumnCrs(ordinal),
+          None,
+          Some(ParquetGeospatialTypes.DEFAULT_EDGES))
+      }
+      val geoParquetMetadata =
+        GeoParquetMetaData(geoParquetVersion, primaryColumn, columns ++ geographyColumns)
       val geoParquetMetadataJson = GeoParquetMetaData.toJson(geoParquetMetadata)
       metadata.put("geo", geoParquetMetadataJson)
     }
@@ -422,14 +474,21 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
   private def withGeospatialTypes(messageType: MessageType): MessageType = {
     if (!writesGeospatialTypes) return messageType
     val fields = messageType.getFields.asScala.zipWithIndex.map { case (field, ordinal) =>
-      fixedColumnCrs.get(ordinal) match {
-        case Some(crs) =>
-          val geometry = Types
-            .primitive(PrimitiveTypeName.BINARY, field.getRepetition)
-            .as(ParquetGeospatialTypes.geometry(ParquetGeospatialTypes.crsProperty(crs)))
+      val logicalType = fixedColumnCrs
+        .get(ordinal)
+        .map(crs => ParquetGeospatialTypes.geometry(ParquetGeospatialTypes.crsProperty(crs)))
+        .orElse(geographyColumnCrs.get(ordinal).map { crs =>
+          ParquetGeospatialTypes.geography(
+            ParquetGeospatialTypes.crsProperty(crs),
+            ParquetGeospatialTypes.DEFAULT_EDGES)
+        })
+      logicalType match {
+        case Some(annotation) =>
+          val column =
+            Types.primitive(PrimitiveTypeName.BINARY, field.getRepetition).as(annotation)
           Option(field.getId)
-            .map(id => geometry.id(id.intValue))
-            .getOrElse(geometry)
+            .map(id => column.id(id.intValue))
+            .getOrElse(column)
             .named(field.getName)
         case None => field
       }
@@ -604,6 +663,32 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
             // Y bounds that Sedona has always written for it.
             if (geospatialTypes) geometryColumnInfo.bbox.updateZAndM(geom)
           }
+        }
+
+      case dt if rootOrdinal.exists(geographyColumnTypes.contains) =>
+        val column = schema(rootOrdinal.get).name
+        val geometryTypes = geographyColumnTypes(rootOrdinal.get)
+        val typeSrid = SpatialTypeSupport.geographySrid(dt)
+        val firstSrid = firstGeometrySrids.get(rootOrdinal.get).flatten
+        (row: SpecializedGetters, ordinal: Int) => {
+          // The WKB of the value is stored as it is, without a JTS or S2 object in between
+          val (source, srid) = SpatialTypeSupport.readGeographyWkb(row, ordinal, dt)
+          typeSrid.foreach(GeoParquetNativeCrs.requireSrid(column, _, srid))
+          firstSrid.foreach { expected =>
+            if (GeoParquetWriteSupport.geographySrid(srid) != expected) {
+              throw GeoParquetWriteSupport.secondSrid(
+                geoParquetVersion.get,
+                column,
+                Some(expected),
+                srid)
+            }
+          }
+          val wkb = PublicWkbHeaderAdapter.toIsoWkbInPlace(source)
+          recordConsumer.addBinary(Binary.fromConstantByteArray(wkb))
+          val order = if (wkb(0) == 0) ByteOrder.BIG_ENDIAN else ByteOrder.LITTLE_ENDIAN
+          GeoParquetWriteSupport
+            .geometryTypeName(ByteBuffer.wrap(wkb, 1, 4).order(order).getInt)
+            .foreach(geometryTypes.add)
         }
 
       case t: UserDefinedType[_] => makeWriter(t.sqlType)
@@ -875,7 +960,9 @@ object GeoParquetWriteSupport {
     } else {
       val candidates = schema.fields.toSeq.zipWithIndex.filter { case (field, _) =>
         SpatialTypeSupport.isGeometry(field.dataType) &&
-        SpatialTypeSupport.geometrySrid(field.dataType).isEmpty
+        SpatialTypeSupport.geometrySrid(field.dataType).isEmpty ||
+        SpatialTypeSupport.isGeography(field.dataType) &&
+        SpatialTypeSupport.geographySrid(field.dataType).isEmpty
       }
       val stated = columnCrsOptions(configuration, candidates.map(_._1.name))
       candidates.collect { case (field, ordinal) if !stated.contains(field.name) => ordinal }
@@ -923,7 +1010,9 @@ object GeoParquetWriteSupport {
     def lowerCase(text: String): String = text.toLowerCase(java.util.Locale.ROOT)
     val geometryColumns =
       schema.fields.toSeq
-        .filter(field => SpatialTypeSupport.isGeometry(field.dataType))
+        .filter(field =>
+          SpatialTypeSupport.isGeometry(field.dataType) ||
+            SpatialTypeSupport.isGeography(field.dataType))
         .map(_.name)
     // The map that Spark hands over lists its keys in lower case, which would take the case
     // from the column names in them
@@ -989,17 +1078,62 @@ object GeoParquetWriteSupport {
   }
 
   /**
-   * Fails unless `schema` has a geometry column, which GeoParquet requires. Called from
-   * `prepareWrite` on the driver, so a write without one fails before any task is launched rather
-   * than in every task.
+   * The SRID of the CRS that a GEOGRAPHY column states for a geography with `srid`. A geography
+   * without an SRID is in OGC:CRS84, as a geography that Sedona constructs without one is where
+   * Spark has a native geography type.
    */
-  def requireGeometryColumn(schema: StructType): Unit = {
+  private[geoparquet] def geographySrid(srid: Int): Int =
+    if (srid == 0) GeoParquetMetaData.DEFAULT_SRID else srid
+
+  private val geometryTypeNames = Seq(
+    "Point",
+    "LineString",
+    "Polygon",
+    "MultiPoint",
+    "MultiLineString",
+    "MultiPolygon",
+    "GeometryCollection")
+
+  /**
+   * The name that GeoParquet metadata has for the geometry type of an ISO WKB type code, such as
+   * `Point Z` for 1001. None for a code of another kind of geometry.
+   */
+  private[geoparquet] def geometryTypeName(typeCode: Int): Option[String] = {
+    val layout = Seq("", " Z", " M", " ZM").lift(typeCode / 1000)
+    for {
+      name <- geometryTypeNames.lift(typeCode % 1000 - 1)
+      suffix <- layout
+    } yield name + suffix
+  }
+
+  /**
+   * Fails unless `schema` has a column that GeoParquet lists in its metadata: a geometry column,
+   * or in a GeoParquet 2 file a geography column. Called from `prepareWrite` on the driver, so a
+   * write without one fails before any task is launched rather than in every task.
+   *
+   * @param version
+   *   the GeoParquet version of the write
+   */
+  def requireGeometryColumn(schema: StructType, version: String = VERSION): Unit = {
+    val geospatialTypes = GeoParquetMetaData.usesGeospatialTypes(version)
     schema.find(_.dataType.existsRecursively(SpatialTypeSupport.isNativeGeography)).foreach {
       field =>
-        throw new IllegalArgumentException(
-          s"The GeoParquet writer does not support the column '${field.name}' of the type " +
-            s"${field.dataType.sql}: it writes no geography columns of Spark's native " +
-            "geography type")
+        if (!geospatialTypes) {
+          throw new IllegalArgumentException(
+            s"GeoParquet ${version.trim} has no type for the column '${field.name}' of the type " +
+              s"${field.dataType.sql}. Set $GEOPARQUET_VERSION_KEY to 2.0.0 to store it in " +
+              "the Parquet GEOGRAPHY logical type")
+        }
+        if (!SpatialTypeSupport.isNativeGeography(field.dataType)) {
+          throw new IllegalArgumentException(
+            "GeoParquet native geography columns must be at the root of the schema; " +
+              "nested CRS metadata cannot be preserved")
+        }
+        if (SpatialTypeSupport.geographySrid(field.dataType).isEmpty) {
+          throw new IllegalArgumentException(
+            "GeoParquet requires a fixed native geography CRS, as Spark Parquet does; " +
+              "cast GEOGRAPHY(ANY) columns to GEOGRAPHY(<srid>) before writing")
+        }
     }
     if (schema.exists(field =>
         !SpatialTypeSupport.isNativeGeometry(field.dataType) &&
@@ -1014,7 +1148,9 @@ object GeoParquetWriteSupport {
         "GeoParquet requires a fixed native geometry CRS, as Spark Parquet does; " +
           "cast GEOMETRY(ANY) columns to GEOMETRY(<srid>) before writing")
     }
-    if (!schema.exists(field => SpatialTypeSupport.isGeometry(field.dataType))) {
+    if (!schema.exists(field =>
+        SpatialTypeSupport.isGeometry(field.dataType) ||
+          geospatialTypes && SpatialTypeSupport.isGeography(field.dataType))) {
       throw new IllegalArgumentException(
         "GeoParquet requires at least one geometry column, but the schema has none: " +
           schema.simpleString + ". Use format(\"parquet\") to write a table without " +
@@ -1162,6 +1298,11 @@ object GeoParquetWriteSupport {
     val fields = schema.fields.map { field =>
       field.dataType match {
         case dt if keepNativeGeometry && SpatialTypeSupport.isNativeGeometry(dt) => field
+        case dt if keepNativeGeometry && SpatialTypeSupport.isNativeGeography(dt) => field
+        // A GEOGRAPHY column holds WKB, which is not how Sedona's own geography type is
+        // serialized
+        case dt if keepNativeGeometry && SpatialTypeSupport.isGeography(dt) =>
+          field.copy(dataType = BinaryType)
         case dt if SpatialTypeSupport.isGeometry(dt) =>
           // Don't write the spatial type to the Parquet metadata. Write the type as binary for maximum
           // compatibility.
