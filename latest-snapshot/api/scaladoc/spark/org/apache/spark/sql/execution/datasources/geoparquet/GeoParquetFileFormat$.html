@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetFileFormat</title>
@@ -770,9 +769,9 @@
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Logging</dd></dl></div>
     </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetFileFormat#mergeSchemasInParallel" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="mergeSchemasInParallel(parameters:Map[String,String],filesToTouch:Seq[org.apache.hadoop.fs.FileStatus],sparkSession:org.apache.spark.sql.SparkSession):Option[org.apache.spark.sql.types.StructType]"></a><a id="mergeSchemasInParallel(Map[String,String],Seq[FileStatus],SparkSession):Option[StructType]"></a>
+      <a id="mergeSchemasInParallel(parameters:Map[String,String],filesToTouch:Seq[org.apache.hadoop.fs.FileStatus],sparkSession:org.apache.spark.sql.SparkSession,geometryColumns:Option[org.apache.spark.sql.types.StructType]):Option[org.apache.spark.sql.types.StructType]"></a><a id="mergeSchemasInParallel(Map[String,String],Seq[FileStatus],SparkSession,Option[StructType]):Option[StructType]"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetFileFormat$.html#mergeSchemasInParallel(parameters:Map[String,String],filesToTouch:Seq[org.apache.hadoop.fs.FileStatus],sparkSession:org.apache.spark.sql.SparkSession):Option[org.apache.spark.sql.types.StructType]" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetFileFormat$.html#mergeSchemasInParallel(parameters:Map[String,String],filesToTouch:Seq[org.apache.hadoop.fs.FileStatus],sparkSession:org.apache.spark.sql.SparkSession,geometryColumns:Option[org.apache.spark.sql.types.StructType]):Option[org.apache.spark.sql.types.StructType]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -781,7 +780,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">mergeSchemasInParallel</span><span class="params">(<span name="parameters">parameters: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="filesToTouch">filesToTouch: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.hadoop.fs.FileStatus">FileStatus</span>]</span>, <span name="sparkSession">sparkSession: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span>]</span>
+        <span class="name">mergeSchemasInParallel</span><span class="params">(<span name="parameters">parameters: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="filesToTouch">filesToTouch: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.hadoop.fs.FileStatus">FileStatus</span>]</span>, <span name="sparkSession">sparkSession: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>, <span name="geometryColumns">geometryColumns: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span>] = <span class="symbol">None</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Figures out a merged Parquet schema with a distributed Spark job.</p><div class="fullcomment"><div class="comment cmt"><p>Figures out a merged Parquet schema with a distributed Spark job.</p><p>Note that locality is not taken into consideration here because:</p><ol class="decimal"><li>For a single Parquet part-file, in most cases the footer only resides in the last block

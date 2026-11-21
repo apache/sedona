@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.execution.datasources.geoparquet.internal.SchemaMergeUtils</title>
@@ -875,10 +874,10 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Logging</dd></dl></div>
-    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.SchemaMergeUtils#mergeSchemasInParallel" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="mergeSchemasInParallel(sparkSession:org.apache.spark.sql.SparkSession,parameters:Map[String,String],files:Seq[org.apache.hadoop.fs.FileStatus],schemaReader:(Seq[org.apache.hadoop.fs.FileStatus],org.apache.hadoop.conf.Configuration,Boolean)=&gt;Seq[org.apache.spark.sql.types.StructType]):Option[org.apache.spark.sql.types.StructType]"></a><a id="mergeSchemasInParallel(SparkSession,Map[String,String],Seq[FileStatus],(Seq[FileStatus],Configuration,Boolean)⇒Seq[StructType]):Option[StructType]"></a>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.SchemaMergeUtils#mergeSchemasInParallel" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="mergeSchemasInParallel(sparkSession:org.apache.spark.sql.SparkSession,parameters:Map[String,String],files:Seq[org.apache.hadoop.fs.FileStatus],schemaReader:(Seq[org.apache.hadoop.fs.FileStatus],org.apache.hadoop.conf.Configuration,Boolean)=&gt;Seq[org.apache.spark.sql.types.StructType],merge:(org.apache.spark.sql.types.StructType,org.apache.spark.sql.types.StructType,Boolean)=&gt;org.apache.spark.sql.types.StructType):Option[org.apache.spark.sql.types.StructType]"></a><a id="mergeSchemasInParallel(SparkSession,Map[String,String],Seq[FileStatus],(Seq[FileStatus],Configuration,Boolean)⇒Seq[StructType],(StructType,StructType,Boolean)⇒StructType):Option[StructType]"></a>
       <span class="permalink">
-      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/SchemaMergeUtils$.html#mergeSchemasInParallel(sparkSession:org.apache.spark.sql.SparkSession,parameters:Map[String,String],files:Seq[org.apache.hadoop.fs.FileStatus],schemaReader:(Seq[org.apache.hadoop.fs.FileStatus],org.apache.hadoop.conf.Configuration,Boolean)=&gt;Seq[org.apache.spark.sql.types.StructType]):Option[org.apache.spark.sql.types.StructType]" title="Permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/SchemaMergeUtils$.html#mergeSchemasInParallel(sparkSession:org.apache.spark.sql.SparkSession,parameters:Map[String,String],files:Seq[org.apache.hadoop.fs.FileStatus],schemaReader:(Seq[org.apache.hadoop.fs.FileStatus],org.apache.hadoop.conf.Configuration,Boolean)=&gt;Seq[org.apache.spark.sql.types.StructType],merge:(org.apache.spark.sql.types.StructType,org.apache.spark.sql.types.StructType,Boolean)=&gt;org.apache.spark.sql.types.StructType):Option[org.apache.spark.sql.types.StructType]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -887,10 +886,12 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">mergeSchemasInParallel</span><span class="params">(<span name="sparkSession">sparkSession: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>, <span name="parameters">parameters: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="files">files: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.hadoop.fs.FileStatus">FileStatus</span>]</span>, <span name="schemaReader">schemaReader: (<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.hadoop.fs.FileStatus">FileStatus</span>], <span class="extype" name="org.apache.hadoop.conf.Configuration">Configuration</span>, <span class="extype" name="scala.Boolean">Boolean</span>) ⇒ <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span>]</span>
+        <span class="name">mergeSchemasInParallel</span><span class="params">(<span name="sparkSession">sparkSession: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>, <span name="parameters">parameters: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="files">files: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.hadoop.fs.FileStatus">FileStatus</span>]</span>, <span name="schemaReader">schemaReader: (<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.hadoop.fs.FileStatus">FileStatus</span>], <span class="extype" name="org.apache.hadoop.conf.Configuration">Configuration</span>, <span class="extype" name="scala.Boolean">Boolean</span>) ⇒ <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span>]</span>, <span name="merge">merge: (<span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span>, <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span>, <span class="extype" name="scala.Boolean">Boolean</span>) ⇒ <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span> = <span class="symbol">safeMerge</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">Figures out a merged Parquet/ORC schema with a distributed Spark job.</p>
+      <p class="shortcomment cmt">Figures out a merged Parquet/ORC schema with a distributed Spark job.</p><div class="fullcomment"><div class="comment cmt"><p>Figures out a merged Parquet/ORC schema with a distributed Spark job.
+</p></div><dl class="paramcmts block"><dt class="param">merge</dt><dd class="cmt"><p>
+  merges the schemas of two sets of files, given whether the analysis is case sensitive</p></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
