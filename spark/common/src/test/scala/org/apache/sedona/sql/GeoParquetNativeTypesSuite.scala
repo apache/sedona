@@ -55,7 +55,7 @@ import scala.util.Try
  * Parquet writer, and the `crs-*` files come from parquet-java 1.17.0, one per form the Parquet
  * format allows for the CRS of a column. Each `crs-*` file holds three POINT (1 2) rows.
  * `spark-4.2-geography-geo-metadata.parquet` is Spark's geography file with GeoParquet 2.0
- * metadata added to its footer.
+ * metadata added to its footer. [[GeoParquetGeographySuite]] reads the geography files.
  */
 class GeoParquetNativeTypesSuite extends TestBaseScala {
   private val nativeFolder = resourceFolder + "geoparquet/native/"
@@ -253,20 +253,6 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
           df.where(s"ST_Intersects(geometry, ST_GeomFromText('$envelope'))").count()
         assert(count("POLYGON ((0 0, 3 0, 3 3, 0 3, 0 0))") == 3)
         assert(count("POLYGON ((10 10, 20 10, 20 20, 10 20, 10 10))") == 0)
-      }
-
-      it("reads a GEOGRAPHY column as WKB") {
-        val df = read("spark-4.2-geography.parquet")
-        assert(df.schema("geography").dataType == BinaryType)
-        val wkb = df.selectExpr("hex(geography)").collect().map(_.getString(0))
-        assert(wkb.toSeq == Seq.fill(3)("0101000000000000000000F03F0000000000000040"))
-      }
-
-      it("reads a GEOGRAPHY column as WKB when the GeoParquet metadata lists it") {
-        val df = read("spark-4.2-geography-geo-metadata.parquet")
-        assert(df.schema("geography").dataType == BinaryType)
-        val wkb = df.selectExpr("hex(geography)").collect().map(_.getString(0))
-        assert(wkb.toSeq == Seq.fill(3)("0101000000000000000000F03F0000000000000040"))
       }
 
       it("reports a file with neither native types nor GeoParquet metadata") {

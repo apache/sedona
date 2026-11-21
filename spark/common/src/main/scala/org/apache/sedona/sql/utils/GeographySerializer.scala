@@ -34,11 +34,19 @@ object GeographySerializer {
       case value: WKBGeography => value.getWKBBytes
       case _ => new WKBWriter(2, ByteOrderValues.LITTLE_ENDIAN, false).write(geography)
     }
+    serializeWkb(source, geography.getSRID)
+  }
+
+  /**
+   * The SQL transport of the geography that `source` is the WKB of. The coordinates are not
+   * parsed, so a geography that is only passed on costs no JTS or S2 object.
+   */
+  def serializeWkb(source: Array[Byte], srid: Int): Array[Byte] = {
     val wkb = PublicWkbHeaderAdapter.toIsoWkb(source)
     ByteBuffer
       .allocate(Integer.BYTES + wkb.length)
       .order(ByteOrder.LITTLE_ENDIAN)
-      .putInt(geography.getSRID)
+      .putInt(srid)
       .put(wkb)
       .array()
   }

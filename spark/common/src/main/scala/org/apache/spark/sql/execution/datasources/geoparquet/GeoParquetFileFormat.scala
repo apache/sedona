@@ -385,7 +385,8 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
   override def supportDataType(dataType: DataType): Boolean = dataType match {
     // Explicit ANY read schemas preserve per-file CRSs. prepareWrite rejects ANY outputs.
     case dt if SpatialTypeSupport.isNativeGeometry(dt) => true
-    case dt if SpatialTypeSupport.isNativeGeography(dt) => false
+    // A read returns GEOGRAPHY columns in this type. prepareWrite rejects it.
+    case dt if SpatialTypeSupport.isNativeGeography(dt) => true
     case StructType(fields) => fields.forall(field => supportDataType(field.dataType))
     case ArrayType(elementType, _) => supportDataType(elementType)
     case MapType(keyType, valueType, _) => supportDataType(keyType) && supportDataType(valueType)

@@ -142,7 +142,14 @@ df = sedona.read.schema(schema).format("geoparquet").load("/tmp/somewhere")
 
 Sedona 的函数，例如 `ST_AsText` 和 `ST_Buffer`，可以处理这样的列。Spark 内置的函数，例如 Spark 4.2 上的 `ST_SRID` 和 `ST_AsBinary`，只接受原生几何列。
 
-`GEOGRAPHY` 列会被读取为保存 WKB 的二进制列，即使 GeoParquet 元数据列出了它们也是如此，可以用 `ST_GeogFromWKB` 转换。
+`GEOGRAPHY` 列会被读取为地理列：在 Spark 4.1 上是 Sedona 的地理类型，在 Spark 4.2 及更高版本上是 Spark 原生地理类型。SRID 按上述规则取自 `crs` 属性，因此没有该属性的列 SRID 为 4326。
+
+有两类 `GEOGRAPHY` 列需要您提供 schema：
+
+* 边的插值算法不是 `spherical` 的列，即 `vincenty`、`thomas`、`andoyer` 或 `karney`。Sedona 在球面上计算，因此会拒绝这样的列。在 schema 中把该列声明为二进制类型，即可读出它的 WKB。
+* 在 Spark 4.2 及更高版本上，CRS 未知或不是地理坐标系的列。Spark 原生地理类型无法表示这样的 CRS。在 schema 中为该列使用 Sedona 自己的地理类型即可读取，在 Python 中是 `LegacyGeographyType`，在 Scala 和 Java 中是 `GeographyUDT`。
+
+对地理列的过滤条件，Sedona 会逐行计算，不会使用文件的边界框，因为这些边界框是平面的。
 
 Spark 3.5 和 4.0 自带的 Parquet 库早于这些逻辑类型，无法打开此类文件。
 

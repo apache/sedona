@@ -142,7 +142,14 @@ df = sedona.read.schema(schema).format("geoparquet").load("/tmp/somewhere")
 
 Sedona's functions, such as `ST_AsText` and `ST_Buffer`, accept such a column. Spark's built-in functions, such as `ST_SRID` and `ST_AsBinary` on Spark 4.2, accept native geometry columns only.
 
-`GEOGRAPHY` columns are read as binary columns that hold WKB, also when the GeoParquet metadata lists them. Convert them with `ST_GeogFromWKB`.
+`GEOGRAPHY` columns are read as geography columns: Sedona's geography type on Spark 4.1, and Spark's native geography type on Spark 4.2 and later. The SRID comes from the `crs` property by the rules above, so a column without one has SRID 4326.
+
+Two kinds of `GEOGRAPHY` columns need a schema from you:
+
+* A column whose edges follow an algorithm other than `spherical`, which is `vincenty`, `thomas`, `andoyer` or `karney`. Sedona computes on a sphere, so it rejects the column. A schema in which the column is binary returns its WKB.
+* On Spark 4.2 and later, a column whose CRS is unknown or not geographic. Spark's native geography type cannot represent it. A schema with Sedona's own geography type, `LegacyGeographyType` in Python and `GeographyUDT` in Scala and Java, reads the column.
+
+Sedona applies a filter on a geography column to the rows and does not use the bounding boxes of the files for it, because these are planar.
 
 Spark 3.5 and 4.0 ship a Parquet library that predates these logical types and cannot open such files.
 

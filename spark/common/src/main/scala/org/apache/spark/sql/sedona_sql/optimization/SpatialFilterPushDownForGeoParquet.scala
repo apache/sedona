@@ -98,8 +98,13 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
   }
 
   private class SpatialPushableColumn(underlying: PushableColumnBase) {
+    // A spatial filter compares the planar bounding box of the geometry of a query with the
+    // bounding box of a file. The edges of a geography are arcs on the sphere, which leave the
+    // planar bounding box of their end points, so a predicate on a geography column is not
+    // pushed down.
     def unapply(expression: Expression): Option[String] =
-      underlying.unapply(SpatialTypeSupport.unwrapGeometryInput(expression))
+      if (SpatialTypeSupport.isGeography(expression.dataType)) None
+      else underlying.unapply(SpatialTypeSupport.unwrapGeometryInput(expression))
   }
 
   private def translateToGeoParquetSpatialFilter(

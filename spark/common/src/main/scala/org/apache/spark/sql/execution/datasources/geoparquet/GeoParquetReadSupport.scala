@@ -26,7 +26,7 @@ import org.apache.parquet.io.api.RecordMaterializer
 import org.apache.parquet.schema._
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.UDT.{GeographyUDT, GeometryUDT}
 import org.apache.spark.sql.types._
 
 import java.time.ZoneId
@@ -120,6 +120,10 @@ object GeoParquetReadSupport extends Logging {
         // Don't expand GeometryUDT types. We'll treat geometry columns specially in
         // GeoParquetRowConverter
         case t: GeometryUDT => t
+
+        // Nor GeographyUDT types: a column of the GEOGRAPHY logical type holds WKB, which the
+        // row converter turns into the value of the type
+        case t: GeographyUDT => t
 
         case t: UserDefinedType[_] =>
           t.sqlType

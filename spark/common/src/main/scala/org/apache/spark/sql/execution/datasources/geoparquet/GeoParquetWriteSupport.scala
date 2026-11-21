@@ -994,6 +994,13 @@ object GeoParquetWriteSupport {
    * than in every task.
    */
   def requireGeometryColumn(schema: StructType): Unit = {
+    schema.find(_.dataType.existsRecursively(SpatialTypeSupport.isNativeGeography)).foreach {
+      field =>
+        throw new IllegalArgumentException(
+          s"The GeoParquet writer does not support the column '${field.name}' of the type " +
+            s"${field.dataType.sql}: it writes no geography columns of Spark's native " +
+            "geography type")
+    }
     if (schema.exists(field =>
         !SpatialTypeSupport.isNativeGeometry(field.dataType) &&
           field.dataType.existsRecursively(SpatialTypeSupport.isNativeGeometry))) {
