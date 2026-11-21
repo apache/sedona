@@ -249,6 +249,8 @@ df.write.format("geoparquet")
 * `""`（空字符串）：省略 `crs` 字段。对于支持 CRS 的实现而言，意味着使用 [OGC:CRS84](https://www.opengis.net/def/crs/OGC/1.3/CRS84)。
 * `"{...}"`（PROJJSON 字符串）：`crs` 字段会被设为表示该几何坐标参考系的 PROJJSON 对象。可在 https://epsg.io/ （页面底部点击 JSON 选项）查找特定 CRS 的 PROJJSON，也可以根据需要自定义 PROJJSON。
 
+GeoParquet 写出操作的全部选项见[参数](../../api/sql/Parameter.md)。
+
 ### 通过 SRID 自动推断 CRS
 
 未显式提供 `geoparquet.crs` 选项时，Sedona 会根据几何列的 SRID 自动推导出 CRS PROJJSON。例如，如果某列所有几何对象的 SRID 都是 32632（通过 [`ST_SetSRID`](../../api/sql/Spatial-Reference-System/ST_SetSRID.md) 设置），写入器会自动在 GeoParquet 元数据中生成 EPSG:32632 对应的 PROJJSON。当 SRID 为 4326 时，由于这就是 GeoParquet 的默认 CRS（OGC:CRS84），`crs` 字段会被省略。
