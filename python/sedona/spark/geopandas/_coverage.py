@@ -402,16 +402,10 @@ def simplify_coverage(
                 stf.ST_NPoints("geom").alias("n"),
                 F.when(F.col("geom").isNull(), F.lit(False))
                 .otherwise(
-                    # Balanced, as Spark parses a chain of ORs, to keep the plan unchanged.
-                    (
-                        (
-                            ~stf.ST_GeometryType("geom").isin(
-                                "ST_Polygon", "ST_MultiPolygon"
-                            )
-                        )
-                        | (~stf.ST_IsValid("geom"))
-                    )
-                    | (stf.ST_HasZ("geom") | stf.ST_HasM("geom"))
+                    (~stf.ST_GeometryType("geom").isin("ST_Polygon", "ST_MultiPolygon"))
+                    | (~stf.ST_IsValid("geom"))
+                    | (stf.ST_HasZ("geom"))
+                    | (stf.ST_HasM("geom"))
                 )
                 .alias("invalid"),
             )

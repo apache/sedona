@@ -19,7 +19,9 @@ import os
 import geopandas as gpd
 import pandas as pd
 import pytest
+import shapely
 from geopandas.testing import assert_geoseries_equal
+from packaging.version import parse as parse_version
 from shapely.geometry import Point, Polygon, box
 from tests.test_base import TestBase
 
@@ -28,7 +30,13 @@ from sedona.spark import geopandas as sgpd
 # The prefix is JVM-wide and fixed by the first Sedona registrator, so these tests need a
 # pytest process of their own whose session was built with SEDONA_TEST_FUNCTION_PREFIX.
 PREFIX = os.getenv("SEDONA_TEST_FUNCTION_PREFIX")
-pytestmark = pytest.mark.skipif(not PREFIX, reason="needs SEDONA_TEST_FUNCTION_PREFIX")
+pytestmark = [
+    pytest.mark.skipif(not PREFIX, reason="needs SEDONA_TEST_FUNCTION_PREFIX"),
+    pytest.mark.skipif(
+        parse_version(shapely.__version__) < parse_version("2.0.0"),
+        reason=f"Tests require shapely>=2.0.0, but found v{shapely.__version__}",
+    ),
+]
 
 
 def square(x, y, size=1.0):
@@ -60,6 +68,24 @@ class TestPrefixGeopandas(TestBase):
         right = sgpd_frame(geometry=[Point(0, 0)], key=["b"])
         joined = sgpd.sjoin(left, right, predicate="intersects", on_attribute=["key"])
         assert len(joined.to_pandas()) == 0
+
+        # Every left point intersects every right point; only the keys decide the pairs.
+        left = sgpd_frame(
+            geometry=[Point(0, 0), Point(0, 0)], key=["a", "c"], left_id=[1, 2]
+        )
+        right = sgpd_frame(
+            geometry=[Point(0, 0), Point(0, 0)], key=["b", "c"], right_id=[10, 20]
+        )
+        joined = sgpd.sjoin(
+            left, right, predicate="intersects", on_attribute=["key"]
+        ).to_pandas()
+        pairs = zip(
+            joined["left_id"],
+            joined["right_id"],
+            joined["key_left"],
+            joined["key_right"],
+        )
+        assert list(pairs) == [(2, 20, "c", "c")]
 
     def test_sjoin_nearest(self):
         left = sgpd_frame(geometry=[Point(0, 0), Point(10, 10)], left_id=[1, 2])

@@ -18,6 +18,7 @@
 import os
 
 import pytest
+from pyspark.errors import AnalysisException
 from pyspark.sql import functions as F
 from tests.test_base import TestBase
 
@@ -49,7 +50,10 @@ class TestPrefixDataFrameApi(TestBase):
         assert row[0] == "POINT (1 2)"
 
     def test_plain_sedona_name_is_not_registered(self):
-        with pytest.raises(Exception):
+        # Classic and Spark Connect both raise a subclass of this AnalysisException.
+        with pytest.raises(
+            AnalysisException, match="UNRESOLVED_ROUTINE.*`ST_SubDivideExplode`"
+        ):
             self.spark.sql("SELECT ST_SubDivideExplode(null, 5)").collect()
 
     def test_scalar_wrappers(self):

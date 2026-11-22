@@ -179,7 +179,6 @@ class CollectionClient:
                             raise ValueError("Invalid geometry string")
                         geom_wkt = geom_str.strip()
 
-                    # The WKT is a literal, so it needs no quote escaping.
                     geometry_conditions.append(
                         stp.ST_Intersects(
                             stc.ST_GeomFromText(F.lit(geom_wkt)), F.col("geometry")

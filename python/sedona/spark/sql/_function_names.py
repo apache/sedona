@@ -70,7 +70,24 @@ def function_prefix(spark: Optional[SparkSession] = None) -> str:
         return prefix
     # Never cache on classic: the JVM value changes from "" to the fixed prefix when the first
     # Sedona registrator runs, for example in SedonaContext.create.
-    return spark._jvm.org.apache.sedona.sql.UDF.SedonaFunctionNames.effectivePrefix()
+    # A Sedona jar older than the prefix has no SedonaFunctionNames, and such a JVM has no prefix.
+    from py4j.protocol import Py4JError, Py4JNetworkError
+
+    try:
+        effective_prefix = (
+            spark._jvm.org.apache.sedona.sql.UDF.SedonaFunctionNames.effectivePrefix
+        )
+    except Py4JNetworkError:
+        raise
+    except Py4JError:
+        # The JVM has no such class or method.
+        return ""
+    try:
+        return effective_prefix()
+    except TypeError:
+        # py4j returns a JavaPackage for a class it cannot find, and a JavaPackage is not
+        # callable. The call takes no arguments, so this is the only TypeError it can raise.
+        return ""
 
 
 def resolve_function_name(name: str, spark: Optional[SparkSession] = None) -> str:
