@@ -44,14 +44,28 @@ abstract class AbstractCatalog {
   private val sparkNativeFunctions =
     Set("st_asbinary", "st_geomfromwkb", "st_geogfromwkb", "st_srid", "st_setsrid")
 
+  /** True for the five names that belong to Spark on the native-types build. */
+  private def isSparkNative(identifier: FunctionIdentifier): Boolean =
+    SpatialTypeSupport.usesNativeTypes &&
+      sparkNativeFunctions.contains(identifier.funcName.toLowerCase(Locale.ROOT))
+
   private def registeredExpressions: Seq[FunctionDescription] =
-    if (SpatialTypeSupport.usesNativeTypes) {
-      expressions.filterNot { case (identifier, _, _) =>
-        sparkNativeFunctions.contains(identifier.funcName.toLowerCase(Locale.ROOT))
+    expressions.filterNot { case (identifier, _, _) => isSparkNative(identifier) }
+
+  /**
+   * The plain names of Spark's builtins that, with a prefix set, are registered under the prefix
+   * as aliases of Spark's own functions. None without a prefix: Spark's plain names are enough.
+   */
+  private def sparkNativeAliases: Seq[String] =
+    if (SedonaFunctionNames.effectivePrefix.isEmpty) Seq.empty
+    else
+      expressions.collect {
+        case (identifier, _, _) if isSparkNative(identifier) => identifier.funcName
       }
-    } else {
-      expressions
-    }
+
+  /** The registry identifier for `name` under the effective prefix. */
+  private def resolvedIdentifier(name: String): FunctionIdentifier =
+    registryIdentifier(FunctionIdentifier(SedonaFunctionNames.resolve(name)))
 
   private def registryIdentifier(identifier: FunctionIdentifier): FunctionIdentifier =
     if (SpatialTypeSupport.usesNativeTypes) {
@@ -106,9 +120,10 @@ abstract class AbstractCatalog {
   }
 
   def registerAll(sparkSession: SparkSession): Unit = {
+    SedonaFunctionNames.initialize(sparkSession)
     val registry = sparkSession.sessionState.functionRegistry
     registeredExpressions.foreach { case (identifier, expressionInfo, functionBuilder) =>
-      val functionIdentifier = registryIdentifier(identifier)
+      val functionIdentifier = resolvedIdentifier(identifier.funcName)
       val shouldRegister = registry.lookupFunction(functionIdentifier) match {
         case Some(existingInfo) =>
           // Skip if Sedona already registered this function (e.g., SedonaContext.create called
@@ -121,11 +136,17 @@ abstract class AbstractCatalog {
         case None => true
       }
       if (shouldRegister) {
+        // Carry the resolved name so DESCRIBE FUNCTION and SHOW FUNCTIONS show it.
+        val info = new ExpressionInfo(
+          expressionInfo.getClassName,
+          expressionInfo.getDb,
+          functionIdentifier.funcName)
         val builder = SpatialTypeSupport.adaptFunction(functionBuilder)
-        registry.registerFunction(functionIdentifier, expressionInfo, builder)
-        FunctionRegistry.builtin.registerFunction(functionIdentifier, expressionInfo, builder)
+        registry.registerFunction(functionIdentifier, info, builder)
+        FunctionRegistry.builtin.registerFunction(functionIdentifier, info, builder)
       }
     }
+    registerSparkNativeAliases(sparkSession)
     aggregateExpressions.foreach { f =>
       registerAggregateFunction(sparkSession, f.getClass.getSimpleName, f)
     }
@@ -133,6 +154,24 @@ abstract class AbstractCatalog {
     registerAggregateFunction(sparkSession, "ST_Envelope_Agg", new ST_Envelope_Aggr)
     registerAggregateFunction(sparkSession, "ST_Intersection_Agg", new ST_Intersection_Aggr)
     registerAggregateFunction(sparkSession, "ST_Union_Agg", new ST_Union_Aggr())
+  }
+
+  // Registers each prefixed Spark 4.2 name with the ExpressionInfo and builder of Spark's own
+  // function, so Sedona's classes for these names stay unregistered under any prefix. A name
+  // that Spark does not have is skipped.
+  private def registerSparkNativeAliases(sparkSession: SparkSession): Unit = {
+    val registry = sparkSession.sessionState.functionRegistry
+    sparkNativeAliases.foreach { name =>
+      val sparkIdentifier = registryIdentifier(FunctionIdentifier(name))
+      for {
+        info <- registry.lookupFunction(sparkIdentifier)
+        builder <- registry.lookupFunctionBuilder(sparkIdentifier)
+      } {
+        val aliasIdentifier = resolvedIdentifier(name)
+        registry.registerFunction(aliasIdentifier, info, builder)
+        FunctionRegistry.builtin.registerFunction(aliasIdentifier, info, builder)
+      }
+    }
   }
 
   // Builds the catalyst aggregate for a UDAF so the FunctionRegistry.builtin entry can be the
@@ -166,8 +205,9 @@ abstract class AbstractCatalog {
 
   private def registerAggregateFunction(
       sparkSession: SparkSession,
-      functionName: String,
+      plainName: String,
       aggregator: Aggregator[Geometry, _, _]): Unit = {
+    val functionName = SedonaFunctionNames.resolve(plainName)
     val functionIdentifier = registryIdentifier(FunctionIdentifier(functionName))
     val registry = sparkSession.sessionState.functionRegistry
     val udaf = functions.udaf(aggregator)
@@ -202,17 +242,17 @@ abstract class AbstractCatalog {
   }
 
   def dropAll(sparkSession: SparkSession): Unit = {
-    registeredExpressions.foreach { case (functionIdentifier, _, _) =>
-      sparkSession.sessionState.functionRegistry.dropFunction(
-        registryIdentifier(functionIdentifier))
+    val registry = sparkSession.sessionState.functionRegistry
+    registeredExpressions.foreach { case (identifier, _, _) =>
+      registry.dropFunction(resolvedIdentifier(identifier.funcName))
     }
+    // Only the prefixed aliases: Spark's own functions keep their plain names.
+    sparkNativeAliases.foreach(name => registry.dropFunction(resolvedIdentifier(name)))
     aggregateExpressions.foreach(f =>
-      sparkSession.sessionState.functionRegistry.dropFunction(
-        registryIdentifier(FunctionIdentifier(f.getClass.getSimpleName))))
+      registry.dropFunction(resolvedIdentifier(f.getClass.getSimpleName)))
     // Drop aliases for *_Aggr functions
     Seq("ST_Envelope_Agg", "ST_Intersection_Agg", "ST_Union_Agg").foreach { aliasName =>
-      sparkSession.sessionState.functionRegistry.dropFunction(
-        registryIdentifier(FunctionIdentifier(aliasName)))
+      registry.dropFunction(resolvedIdentifier(aliasName))
     }
   }
 }
