@@ -27,6 +27,9 @@ import datetime as python_datetime
 from pyspark.sql import DataFrame, SparkSession
 from shapely.geometry.base import BaseGeometry
 
+from sedona.spark.sql import st_constructors as stc
+from sedona.spark.sql import st_predicates as stp
+
 _CLIENT_ITEMS_LIMIT_PER_REQUEST = 200
 
 
@@ -176,14 +179,10 @@ class CollectionClient:
                             raise ValueError("Invalid geometry string")
                         geom_wkt = geom_str.strip()
 
-                    # Use Spark SQL functions with safe literal values
-                    from pyspark.sql.functions import expr
-
+                    # The WKT is a literal, so it needs no quote escaping.
                     geometry_conditions.append(
-                        expr(
-                            "st_intersects(ST_GeomFromText('{}'), geometry)".format(
-                                geom_wkt.replace("'", "''")
-                            )
+                        stp.ST_Intersects(
+                            stc.ST_GeomFromText(F.lit(geom_wkt)), F.col("geometry")
                         )
                     )
                 except (ValueError, TypeError, AttributeError):
@@ -235,8 +234,8 @@ class CollectionClient:
                     )
 
                     bbox_conditions.append(
-                        F.expr(
-                            f"st_intersects(ST_GeomFromText('{polygon_wkt}'), geometry)"
+                        stp.ST_Intersects(
+                            stc.ST_GeomFromText(F.lit(polygon_wkt)), F.col("geometry")
                         )
                     )
 

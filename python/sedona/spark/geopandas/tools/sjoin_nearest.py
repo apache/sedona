@@ -29,6 +29,7 @@ from pyspark.sql import functions as F
 from sedona.spark.geopandas import GeoDataFrame
 from sedona.spark.geopandas._crs import warn_crs_mismatch, with_crs_metadata
 from sedona.spark.sql import st_functions as stf
+from sedona.spark.sql._function_names import call_sedona_function_by_name
 from sedona.spark.sql.types import is_geometry_type
 
 
@@ -214,7 +215,13 @@ def sjoin_nearest(
     if left_has_points and right_has_points:
         joined = left.join(
             right,
-            F.expr(f"ST_KNN({left_geometry}, {right_geometry}, 1, false)"),
+            call_sedona_function_by_name(
+                "ST_KNN",
+                F.col(left_geometry),
+                F.col(right_geometry),
+                F.lit(1),
+                F.lit(False),
+            ),
             "inner",
         )
     else:

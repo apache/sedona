@@ -62,6 +62,7 @@ from sedona.spark.sql import st_aggregates as sta
 from sedona.spark.sql import st_constructors as stc
 from sedona.spark.sql import st_functions as stf
 from sedona.spark.sql import st_predicates as stp
+from sedona.spark.sql._function_names import call_sedona_function_by_name
 
 from pyspark.sql import Column as PySparkColumn
 from pyspark.sql import functions as F
@@ -1477,9 +1478,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         diagnostics = diagnostics.withColumn(gap_width_name, F.lit(gap_width))
         diagnostics = diagnostics.withColumn(
             diagnostic_edges_name,
-            F.expr(
-                f"__sedona_internal_coverage_invalid_edges_for_target("
-                f"`{target_geometry_name}`, `{neighbors_name}`, `{gap_width_name}`)"
+            call_sedona_function_by_name(
+                "__sedona_internal_coverage_invalid_edges_for_target",
+                F.col(target_geometry_name),
+                F.col(neighbors_name),
+                F.col(gap_width_name),
             ),
         ).select(
             target_geometry_name,
@@ -1504,9 +1507,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         validation_rows = validation_rows.withColumn(
             neighbors_name, empty_neighbors
         ).withColumn(gap_width_name, F.lit(gap_width))
-        unmatched_edges = F.expr(
-            f"__sedona_internal_coverage_invalid_edges_for_target("
-            f"`{geometry_name}`, `{neighbors_name}`, `{gap_width_name}`)"
+        unmatched_edges = call_sedona_function_by_name(
+            "__sedona_internal_coverage_invalid_edges_for_target",
+            F.col(geometry_name),
+            F.col(neighbors_name),
+            F.col(gap_width_name),
         )
         validation_rows = validation_rows.withColumn(
             invalid_edges_name,

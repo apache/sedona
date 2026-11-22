@@ -15,7 +15,10 @@
 # specific language governing permissions and limitations
 # under the License.
 
+from pyspark.sql import functions as F
+
 from sedona.spark.maps.SedonaMapUtils import SedonaMapUtils
+from sedona.spark.sql._function_names import call_sedona_function_by_name
 
 
 class SedonaUtils:
@@ -54,16 +57,15 @@ class SedonaUtils:
         if raster_cols:
             # Replace each raster column with its RS_AsImage() HTML representation,
             # preserving all other columns in the DataFrame.
-            select_exprs = []
+            select_cols = []
             for f in schema.fields:
-                col_name_escaped = f.name.replace("`", "``")
+                column = F.col("`" + f.name.replace("`", "``") + "`")
                 if f.name in raster_cols:
-                    select_exprs.append(
-                        f"RS_AsImage(`{col_name_escaped}`) as `{col_name_escaped}`"
+                    column = call_sedona_function_by_name("RS_AsImage", column).alias(
+                        f.name
                     )
-                else:
-                    select_exprs.append(f"`{col_name_escaped}`")
-            df = df.selectExpr(*select_exprs)
+                select_cols.append(column)
+            df = df.select(*select_cols)
 
         pdf = SedonaMapUtils.__convert_to_gdf_or_pdf__(df, rename=False)
         display(HTML(pdf.to_html(escape=False)))
