@@ -19,7 +19,8 @@ import os
 import geopandas as gpd
 import pandas as pd
 import pytest
-from shapely.geometry import Point, Polygon
+from geopandas.testing import assert_geoseries_equal
+from shapely.geometry import Point, Polygon, box
 from tests.test_base import TestBase
 
 from sedona.spark import geopandas as sgpd
@@ -73,3 +74,15 @@ class TestPrefixGeopandas(TestBase):
         edges = series.invalid_coverage_edges(gap_width=0.5).to_geopandas()
         assert len(edges) == 2
         assert not edges.is_empty.any()
+
+    def test_simplify_coverage(self):
+        # The two polygons of test_simplify_coverage.py's shared-boundary test: the shared
+        # vertex (1.1, 0.5) is removed from both, which leaves two unit squares.
+        left = Polygon([(0, 0), (1, 0), (1.1, 0.5), (1, 1), (0, 1)])
+        right = Polygon([(1, 0), (2, 0), (2, 1), (1, 1), (1.1, 0.5)])
+        source = sgpd.GeoSeries([left, right], crs=3857)
+
+        result = source.simplify_coverage(0.3, simplify_boundary=False).to_geopandas()
+
+        expected = gpd.GeoSeries([box(0, 0, 1, 1), box(1, 0, 2, 1)], crs=3857)
+        assert_geoseries_equal(result, expected, normalize=True)

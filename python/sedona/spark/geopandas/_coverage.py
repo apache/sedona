@@ -31,6 +31,9 @@ from pyspark.sql import functions as F
 from pyspark.sql.types import LongType
 from pyspark.sql.utils import is_remote
 
+from sedona.spark.sql import st_constructors as stc
+from sedona.spark.sql import st_functions as stf
+from sedona.spark.sql import st_predicates as stp
 from sedona.spark.sql.types import GeometryType, USES_NATIVE_SPATIAL_TYPES
 
 
@@ -101,25 +104,24 @@ def _extract(frame: DataFrame) -> DataFrame:
     """Expand rings without closing duplicates; normalize signed-zero XY IDs."""
     parts = frame.select(
         "id",
-        F.posexplode(F.expr("ST_Dump(geom)")).alias("part", "_polygon"),
-    ).where("NOT ST_IsEmpty(_polygon)")
+        F.posexplode(stf.ST_Dump("geom")).alias("part", "_polygon"),
+    ).where(~stf.ST_IsEmpty("_polygon"))
     rings = (
         parts.select(
             "id",
             "part",
             "_polygon",
-            F.explode(
-                F.sequence(F.lit(0), F.expr("ST_NumInteriorRings(_polygon)"))
-            ).alias("ring"),
+            F.explode(F.sequence(F.lit(0), stf.ST_NumInteriorRings("_polygon"))).alias(
+                "ring"
+            ),
         )
         .withColumn(
             "_line",
-            F.expr(
-                "CASE WHEN ring = 0 THEN ST_ExteriorRing(_polygon) "
-                "ELSE ST_InteriorRingN(_polygon, ring) END"
+            F.when(F.col("ring") == 0, stf.ST_ExteriorRing("_polygon")).otherwise(
+                stf.ST_InteriorRingN("_polygon", F.col("ring"))
             ),
         )
-        .withColumn("_points", F.expr("ST_DumpPoints(_line)"))
+        .withColumn("_points", stf.ST_DumpPoints("_line"))
     )
     # Trim before expansion so Generate does not carry and copy the full ring
     # array for every vertex when Spark inlines a post-expansion size filter.
@@ -131,8 +133,8 @@ def _extract(frame: DataFrame) -> DataFrame:
             "pos", "_point"
         ),
     )
-    points = points.withColumn("_x", F.expr("ST_X(_point)")).withColumn(
-        "_y", F.expr("ST_Y(_point)")
+    points = points.withColumn("_x", stf.ST_X("_point")).withColumn(
+        "_y", stf.ST_Y("_point")
     )
     points = points.select(
         "id",
@@ -186,7 +188,9 @@ def _segments(occ: DataFrame) -> DataFrame:
         "ay",
         "bx",
         "by",
-        F.expr("ST_MakeLine(array(ST_Point(ax, ay), ST_Point(bx, by)))").alias("geom"),
+        stf.ST_MakeLine(
+            F.array(stc.ST_Point("ax", "ay"), stc.ST_Point("bx", "by"))
+        ).alias("geom"),
         "owners",
     )
 
@@ -237,23 +241,32 @@ def _candidates(occ, edges, tolerance, simplify_boundary):
         )
         .withColumn(
             "_triangle",
-            F.expr(
-                "ST_MakePolygon(ST_MakeLine(array("
-                "ST_Point(ux,uy),ST_Point(x,y),ST_Point(wx,wy),ST_Point(ux,uy))))"
+            stf.ST_MakePolygon(
+                stf.ST_MakeLine(
+                    F.array(
+                        stc.ST_Point("ux", "uy"),
+                        stc.ST_Point("x", "y"),
+                        stc.ST_Point("wx", "wy"),
+                        stc.ST_Point("ux", "uy"),
+                    )
+                )
             ),
         )
-        .withColumn("area", F.expr("ST_Area(_triangle)"))
+        .withColumn("area", stf.ST_Area("_triangle"))
         .where(F.col("area") <= tolerance * tolerance)
         .withColumn("priority", F.struct("area", "vid"))
         .withColumn(
-            "ends", F.expr("ST_Collect(array(ST_Point(ux,uy), ST_Point(wx,wy)))")
+            "ends",
+            stf.ST_Collect(F.array(stc.ST_Point("ux", "uy"), stc.ST_Point("wx", "wy"))),
         )
         # Robust orientation, not a rounded area, determines the dimension.
         # Keep the original triangle's area: hull ordering can change floating-
         # point cancellation for very thin triangles.
-        .withColumn("footprint", F.expr("ST_ConvexHull(_triangle)"))
+        .withColumn("footprint", stf.ST_ConvexHull("_triangle"))
         # Skip non-collinear edits whose area rounds to zero.
-        .where("area > 0 OR ST_GeometryType(footprint) = 'ST_LineString'")
+        .where(
+            (F.col("area") > 0) | (stf.ST_GeometryType("footprint") == "ST_LineString")
+        )
         .drop("_triangle")
     )
 
@@ -263,10 +276,14 @@ def _rebuild(occ: DataFrame, original: DataFrame) -> DataFrame:
     rings = (
         occ.groupBy("id", "part", "ring")
         .agg(F.sort_array(F.collect_list(F.struct("pos", "x", "y"))).alias("_coords"))
-        .withColumn("_points", F.expr("transform(_coords, p -> ST_Point(p.x, p.y))"))
+        .withColumn(
+            "_points", F.transform("_coords", lambda p: stc.ST_Point(p["x"], p["y"]))
+        )
         .withColumn(
             "_line",
-            F.expr("ST_MakeLine(concat(_points, array(element_at(_points, 1))))"),
+            stf.ST_MakeLine(
+                F.concat(F.col("_points"), F.array(F.element_at("_points", 1)))
+            ),
         )
     )
     # Compare integer IDs, not GeometryUDT values.
@@ -279,26 +296,29 @@ def _rebuild(occ: DataFrame, original: DataFrame) -> DataFrame:
     parts = ring_arrays.select(
         "id",
         "part",
-        F.expr(
-            "ST_MakePolygon("
-            "element_at(filter(_rings, r -> r.ring = 0), 1)._line, "
-            "transform(filter(_rings, r -> r.ring > 0), r -> r._line))"
+        stf.ST_MakePolygon(
+            F.element_at(F.filter("_rings", lambda r: r["ring"] == 0), 1)["_line"],
+            F.transform(
+                F.filter("_rings", lambda r: r["ring"] > 0), lambda r: r["_line"]
+            ),
         ).alias("_polygon"),
     )
     # Empty members have no coordinate occurrences. Restore them at their
     # original positions rather than dropping them while assembling the parts.
     original_parts = original.select(
         "id",
-        F.expr("ST_SRID(geom)").alias("_srid"),
-        F.posexplode(F.expr("ST_Dump(geom)")).alias("part", "_original_polygon"),
+        stf.ST_SRID("geom").alias("_srid"),
+        F.posexplode(stf.ST_Dump("geom")).alias("part", "_original_polygon"),
     )
     parts = original_parts.join(parts, ["id", "part"], "left").select(
         "id",
         "part",
         # Restore each reconstructed polygon's SRID before collecting the parts.
-        F.expr(
-            "ST_SetSRID(CASE WHEN ST_IsEmpty(_original_polygon) "
-            "THEN _original_polygon ELSE _polygon END, _srid)"
+        stf.ST_SetSRID(
+            F.when(
+                stf.ST_IsEmpty("_original_polygon"), F.col("_original_polygon")
+            ).otherwise(F.col("_polygon")),
+            F.col("_srid"),
         ).alias("_polygon"),
     )
     polygons = parts.groupBy("id").agg(
@@ -310,11 +330,14 @@ def _rebuild(occ: DataFrame, original: DataFrame) -> DataFrame:
     assembled = original.select("id", F.col("geom").alias("_original")).join(
         polygons, "id", "left"
     )
-    result = F.expr(
-        "CASE WHEN _original IS NULL OR ST_IsEmpty(_original) THEN _original "
-        "ELSE CASE WHEN ST_GeometryType(_original) = 'ST_Polygon' "
-        "THEN element_at(_parts, 1)._polygon "
-        "ELSE ST_Collect(transform(_parts, p -> p._polygon)) END END"
+    result = F.when(
+        F.col("_original").isNull() | stf.ST_IsEmpty("_original"),
+        F.col("_original"),
+    ).otherwise(
+        F.when(
+            stf.ST_GeometryType("_original") == "ST_Polygon",
+            F.element_at("_parts", 1)["_polygon"],
+        ).otherwise(stf.ST_Collect(F.transform("_parts", lambda p: p["_polygon"])))
     )
     if USES_NATIVE_SPATIAL_TYPES:
         from sedona.spark.geopandas._native import fixed_srid
@@ -374,12 +397,23 @@ def simplify_coverage(
         # columns) may originate from nondeterministic Spark expressions.
         original = checkpoints.save(frame)
         stats = (
-            original.selectExpr(
+            original.select(
                 "id",
-                "ST_NPoints(geom) n",
-                "CASE WHEN geom IS NULL THEN false ELSE "
-                "ST_GeometryType(geom) NOT IN ('ST_Polygon','ST_MultiPolygon') OR "
-                "NOT ST_IsValid(geom) OR ST_HasZ(geom) OR ST_HasM(geom) END invalid",
+                stf.ST_NPoints("geom").alias("n"),
+                F.when(F.col("geom").isNull(), F.lit(False))
+                .otherwise(
+                    # Balanced, as Spark parses a chain of ORs, to keep the plan unchanged.
+                    (
+                        (
+                            ~stf.ST_GeometryType("geom").isin(
+                                "ST_Polygon", "ST_MultiPolygon"
+                            )
+                        )
+                        | (~stf.ST_IsValid("geom"))
+                    )
+                    | (stf.ST_HasZ("geom") | stf.ST_HasM("geom"))
+                )
+                .alias("invalid"),
             )
             .agg(
                 F.count("*").alias("rows"),
@@ -404,7 +438,12 @@ def simplify_coverage(
         # coordinate. A NaN first ordinate can hide later Z/M coordinates.
         # Inspect individual points only after the per-geometry size check.
         if (
-            original.where("exists(ST_DumpPoints(geom), p -> ST_HasZ(p) OR ST_HasM(p))")
+            original.where(
+                F.exists(
+                    stf.ST_DumpPoints("geom"),
+                    lambda p: stf.ST_HasZ(p) | stf.ST_HasM(p),
+                )
+            )
             .limit(1)
             .count()
         ):
@@ -413,9 +452,17 @@ def simplify_coverage(
             )
         if (
             original.where(
-                "exists(ST_Dump(geom), p -> CASE WHEN ST_NumInteriorRings(p) = 0 "
-                "THEN false ELSE exists(sequence(1, ST_NumInteriorRings(p)), "
-                "i -> ST_IsEmpty(ST_InteriorRingN(p, i))) END)"
+                F.exists(
+                    stf.ST_Dump("geom"),
+                    lambda p: F.when(
+                        stf.ST_NumInteriorRings(p) == 0, F.lit(False)
+                    ).otherwise(
+                        F.exists(
+                            F.sequence(F.lit(1), stf.ST_NumInteriorRings(p)),
+                            lambda i: stf.ST_IsEmpty(stf.ST_InteriorRingN(p, i)),
+                        )
+                    ),
+                )
             )
             .limit(1)
             .count()
@@ -464,16 +511,18 @@ def simplify_coverage(
                     candidates.alias("c")
                     .join(
                         edge.alias("s"),
-                        F.expr(
-                            "ST_Intersects(c.footprint,s.geom) AND s.a <> c.vid AND s.b <> c.vid"
-                        ),
+                        stp.ST_Intersects("c.footprint", "s.geom")
+                        & (F.col("s.a") != F.col("c.vid"))
+                        & (F.col("s.b") != F.col("c.vid")),
                     )
-                    .selectExpr(
-                        "c.vid", "c.ends", "ST_Intersection(c.footprint,s.geom) hit"
+                    .select(
+                        F.col("c.vid"),
+                        F.col("c.ends"),
+                        stf.ST_Intersection("c.footprint", "s.geom").alias("hit"),
                     )
                 )
                 flags = hits.groupBy("vid").agg(
-                    F.max((~F.expr("ST_CoveredBy(hit,ends)")).cast("int")).alias(
+                    F.max((~stp.ST_CoveredBy("hit", "ends")).cast("int")).alias(
                         "blocked"
                     )
                 )
@@ -501,9 +550,8 @@ def simplify_coverage(
                     winners.alias("a")
                     .join(
                         winners.alias("b"),
-                        F.expr(
-                            "ST_Intersects(a.footprint,b.footprint) AND a.priority > b.priority"
-                        ),
+                        stp.ST_Intersects("a.footprint", "b.footprint")
+                        & (F.col("a.priority") > F.col("b.priority")),
                     )
                     .selectExpr("a.vid")
                     .distinct()
