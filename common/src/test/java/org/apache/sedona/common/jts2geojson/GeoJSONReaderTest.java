@@ -40,6 +40,40 @@ public class GeoJSONReaderTest {
   }
 
   @Test
+  public void testEmptyPointAndMultiPointMember() {
+    GeoJSONReader reader = new GeoJSONReader();
+
+    // PostGIS and DuckDB write an empty point with an empty coordinates array
+    assertEquals("POINT EMPTY", reader.read("{\"type\":\"Point\",\"coordinates\":[]}").toText());
+
+    // PostGIS writes an empty member of a MultiPoint as an empty position and reads this back as
+    // MULTIPOINT (EMPTY, (1 2))
+    Geometry multiPoint = reader.read("{\"type\":\"MultiPoint\",\"coordinates\":[[],[1,2]]}");
+    assertEquals("MultiPoint", multiPoint.getGeometryType());
+    assertEquals(2, multiPoint.getNumGeometries());
+    assertTrue(multiPoint.getGeometryN(0).isEmpty());
+    assertEquals("POINT (1 2)", multiPoint.getGeometryN(1).toText());
+  }
+
+  @Test
+  public void testEmptyPolygonAndMultiPolygonMember() {
+    GeoJSONReader reader = new GeoJSONReader();
+
+    // PostGIS and DuckDB write an empty polygon with an empty coordinates array
+    assertEquals(
+        "POLYGON EMPTY", reader.read("{\"type\":\"Polygon\",\"coordinates\":[]}").toText());
+
+    // PostGIS writes an empty member of a MultiPolygon the same way and reads this back as
+    // MULTIPOLYGON (EMPTY, ((0 0, 1 0, 1 1, 0 0)))
+    Geometry multiPolygon =
+        reader.read("{\"type\":\"MultiPolygon\",\"coordinates\":[[],[[[0,0],[1,0],[1,1],[0,0]]]]}");
+    assertEquals("MultiPolygon", multiPolygon.getGeometryType());
+    assertEquals(2, multiPolygon.getNumGeometries());
+    assertTrue(multiPolygon.getGeometryN(0).isEmpty());
+    assertEquals("POLYGON ((0 0, 1 0, 1 1, 0 0))", multiPolygon.getGeometryN(1).toText());
+  }
+
+  @Test
   public void testMultiPointConversion() {
     org.apache.sedona.common.jts2geojson.GeoJSONReader reader =
         new org.apache.sedona.common.jts2geojson.GeoJSONReader();
