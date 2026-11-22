@@ -164,6 +164,13 @@ jobs:
           SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
           export SPARK_HOME
           uv run pytest -v tests
+      - name: Run function prefix tests
+        # The prefix is JVM-wide, so these tests need a pytest process of their own.
+        run: |
+          cd python
+          SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
+          export SPARK_HOME
+          SEDONA_TEST_FUNCTION_PREFIX=sedona_ uv run pytest -v tests/prefix
       - name: Run basic tests without rasterio
         run: |
           cd python
@@ -184,9 +191,11 @@ jobs:
           if [[ "${SPARK_VERSION}" == 4.2.* ]]; then
             # Connect extras were installed before adding the freshly built Sedona jar.
             uv run pytest -v tests/sql/test_dataframe_api.py tests/sql/test_native_spatial.py
+            SEDONA_TEST_FUNCTION_PREFIX=sedona_ uv run pytest -v tests/prefix/test_prefix_dataframe_api.py
           else
             uv pip install "pyspark[connect]==${{ matrix.spark }}" --reinstall
             uv run pytest -v tests/sql/test_dataframe_api.py
+            SEDONA_TEST_FUNCTION_PREFIX=sedona_ uv run pytest -v tests/prefix/test_prefix_dataframe_api.py
           fi
       - name: Run Spark Connect-only tests
         # pyspark-client is the Spark Connect-only distribution (Spark 4.0+): no RDD API, no JVM.
