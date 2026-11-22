@@ -156,7 +156,7 @@ class GeoParquetToSparkSchemaConverter(
       .getOrElse(
         throw new IllegalArgumentException(s"Column '$name' is not a Parquet GEOGRAPHY column"))
     column.edges.filter(_ != ParquetGeospatialTypes.DEFAULT_EDGES).foreach { edges =>
-      throw new IllegalArgumentException(
+      throw new GeoParquetColumnMismatchException(
         s"Column '$name' is a Parquet GEOGRAPHY column whose edges follow the $edges " +
           "algorithm. Sedona reads geographies with spherical edges only. To read the WKB of " +
           "the column, give the reader a schema in which the column is binary")

@@ -220,7 +220,7 @@ private[geoparquet] class GeoParquetRowConverter(
       case dt if SpatialTypeSupport.isGeometry(dt) =>
         // A geometry is computed on a plane, which the values of a GEOGRAPHY column are not for
         if (ParquetGeospatialTypes.describe(parquetType).exists(_.isGeography)) {
-          throw new IllegalArgumentException(
+          throw new GeoParquetColumnMismatchException(
             s"Column '${parquetType.getName}' is a Parquet GEOGRAPHY column and cannot be " +
               "read as a geometry")
         }
@@ -285,7 +285,7 @@ private[geoparquet] class GeoParquetRowConverter(
               native = SpatialTypeSupport.isNativeGeography(catalystType))
             SpatialTypeSupport
               .geographySrid(catalystType)
-              .foreach(GeoParquetNativeCrs.requireSrid(name, _, srid))
+              .foreach(GeoParquetNativeCrs.requireColumnSrid(name, _, srid))
             new ParquetPrimitiveConverter(updater) {
               // The value takes the stored WKB as it is, without a JTS or S2 object in between
               override def addBinary(value: Binary): Unit =
@@ -293,19 +293,34 @@ private[geoparquet] class GeoParquetRowConverter(
                   SpatialTypeSupport.geographyFromWkb(value.getBytes, srid, catalystType))
             }
           case Some(_) =>
-            throw new IllegalArgumentException(
+            throw new GeoParquetColumnMismatchException(
               s"Column '$name' is a Parquet GEOMETRY column and cannot be read as a geography")
           case None if catalystType.isInstanceOf[GeographyUDT] =>
             // A column that Sedona wrote from its own geography type, as that type is
             // serialized
             new ParquetPrimitiveConverter(updater)
           case None =>
+            // A binary column, which holds geographies if Sedona wrote it from its own
+            // geography type. A file does not state that in a way that could be checked here,
+            // so the SRID that each value begins with is what shows a column of something else,
+            // or of a Sedona release that stored a geography in another way.
             val targetSrid = SpatialTypeSupport.geographySrid(catalystType)
             new ParquetPrimitiveConverter(updater) {
               override def addBinary(value: Binary): Unit = {
                 val serialized = value.getBytes
                 val srid = GeographySerializer.readSRID(serialized)
-                targetSrid.foreach(GeoParquetNativeCrs.requireSrid(name, _, srid))
+                val expected = targetSrid match {
+                  case Some(target) if target != srid =>
+                    Some(s"The column is read with SRID $target")
+                  case None if !SpatialTypeSupport.supportsGeographySrid(srid) =>
+                    Some("Spark's native geography type does not take that SRID")
+                  case _ => None
+                }
+                expected.foreach { reason =>
+                  throw new GeoParquetColumnMismatchException(
+                    s"Column '$name' is stored as binary, which is read as values of Sedona's " +
+                      s"own geography type. A value of it states SRID $srid. $reason")
+                }
                 val wkb =
                   java.util.Arrays.copyOfRange(serialized, Integer.BYTES, serialized.length)
                 this.updater.set(SpatialTypeSupport.geographyFromWkb(wkb, srid, catalystType))

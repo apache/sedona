@@ -208,3 +208,12 @@ object GeoParquetUtils {
  */
 private[geoparquet] class GeoParquetNoInputFilesException(message: String)
     extends AnalysisException(message)
+
+/**
+ * Raised for a file that stores a column in a way that the schema of the read does not take: a
+ * GEOGRAPHY column for a geometry column, for example, or another SRID than the type of the
+ * column names. Such a file is a sound one, and a read that left it out would return a part of
+ * the data as if it were all of it. A scan that ignores corrupt files leaves out a file for a
+ * RuntimeException or an IOException, so this is neither of the two.
+ */
+class GeoParquetColumnMismatchException(message: String) extends Exception(message)

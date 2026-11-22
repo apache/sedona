@@ -49,7 +49,7 @@ object SchemaMergeUtils extends Logging {
    * parameter is supported. Falls back to merge(schema) if merge(schema, caseSensitive) is not
    * available.
    */
-  private def safeMerge(
+  private[geoparquet] def safeMerge(
       schema1: StructType,
       schema2: StructType,
       caseSensitive: Boolean): StructType = {
