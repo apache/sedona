@@ -198,8 +198,9 @@ FROM my_table
 
 请注意以下几点：
 
-* 请按上文所示，在集群的 Spark 配置中设置该选项。同一个 JVM 中第一个 Sedona 会话会确定该 JVM 的前缀。如果之后的会话要求使用不同的取值，Sedona 会保留第一个取值，并在日志中输出一条警告。
+* 请按上文所示，在集群的 Spark 配置中设置该选项。同一个 JVM 中第一个 Sedona 会话会确定该 JVM 的前缀。如果之后的会话要求使用不同的取值，Sedona 会保留第一个取值，并在日志中输出一条警告。如需更改前缀，请重启集群：JVM 会一直保留第一个取值。
 * Sedona 的 Scala 和 Python DataFrame API 无需修改代码。
+* 您自己代码中的 SQL 文本（`spark.sql`、`expr` 或 `selectExpr` 中的内容）必须使用带前缀的名称，例如 `expr("sedona_ST_Buffer(geom, 1.0)")`。
 * 使用 Spark 4.2 对应的 Sedona 版本时（该版本使用 Spark 的原生空间类型），带前缀的 `ST_AsBinary`、`ST_GeomFromWKB`、`ST_GeogFromWKB`、`ST_SRID` 和 `ST_SetSRID` 这五个名称（例如 `sedona_ST_SRID`）是 Spark 自带的函数。
 
 前缀允许的取值请参阅 [Parameter](../api/sql/Parameter.md)。

@@ -208,8 +208,6 @@ The dbplyr interface transparently translates dbplyr workflows into SQL, and giv
 
 Results are then collected back into R with `collect`.
 
-If the Spark config `spark.sedona.function.prefix` is set, Sedona registers its functions only under the prefixed names. In dplyr, write the prefixed name, for example `sedona_ST_Buffer(geom, 1)`. The name is passed to Spark as written. For `ST_Buffer`, `ST_ReducePrecision`, `ST_SimplifyPreserveTopology`, `ST_GeometryN`, `ST_InteriorRingN`, `ST_AddPoint` and `ST_RemovePoint`, you must then give the numeric arguments with the right type (`1L`, `as.integer()` or `as.double()`). The automatic cast applies to the plain names only.
-
 ```{r}
 ## ! ST_transform uses lon/lat order since v1.5.0. Before, it used lat/lon order.
 data_tbl %>%
@@ -224,6 +222,8 @@ data_tbl %>%
   head() %>%
   collect()
 ```
+
+If the Spark config `spark.sedona.function.prefix` is set, Sedona registers its functions only under the prefixed names. In dplyr, write the prefixed name, for example `sedona_ST_Buffer(geom, 1)` (`1` is already a double in R). The name is passed to Spark as written. For `ST_Buffer`, `ST_ReducePrecision`, `ST_SimplifyPreserveTopology`, `ST_GeometryN`, `ST_InteriorRingN`, `ST_AddPoint` and `ST_RemovePoint`, you must then give the numeric arguments with the right type (`1L`, `as.integer()` or `as.double()`). The automatic cast applies to the plain names only.
 
 Geometries need to be converted to a serializable (text or binary) format before `collect` is called:
 ```{r}

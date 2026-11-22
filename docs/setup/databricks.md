@@ -198,8 +198,9 @@ Here `sedona_geom` is a column that holds Sedona geometries, and `platform_geom`
 
 Keep these points in mind:
 
-* Set the option in the cluster Spark config, as shown above. The first Sedona session in a JVM fixes the prefix for that JVM. If a later session asks for a different value, Sedona keeps the first one and writes a warning to the log.
+* Set the option in the cluster Spark config, as shown above. The first Sedona session in a JVM fixes the prefix for that JVM. If a later session asks for a different value, Sedona keeps the first one and writes a warning to the log. To change the prefix, restart the cluster: the JVM keeps the first value.
 * The Sedona Scala and Python DataFrame APIs need no change in your code.
+* SQL text in your own code, in `spark.sql`, `expr` or `selectExpr`, must use the prefixed names, for example `expr("sedona_ST_Buffer(geom, 1.0)")`.
 * With the Sedona build for Spark 4.2, which uses Spark's native spatial types, the five names `ST_AsBinary`, `ST_GeomFromWKB`, `ST_GeogFromWKB`, `ST_SRID` and `ST_SetSRID` with the prefix (for example `sedona_ST_SRID`) are Spark's own functions.
 
 See [Parameter](../api/sql/Parameter.md) for the allowed values of the prefix.
