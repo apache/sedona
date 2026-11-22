@@ -52,6 +52,7 @@ object RasterRegistrator {
   }
 
   def dropAll(sparkSession: SparkSession): Unit = {
+    SedonaFunctionNames.initialize(sparkSession)
     if (isGeoToolsAvailable) {
       sparkSession.sessionState.functionRegistry.dropFunction(
         functionIdentifier(

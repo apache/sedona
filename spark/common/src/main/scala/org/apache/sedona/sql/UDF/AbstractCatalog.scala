@@ -250,6 +250,7 @@ abstract class AbstractCatalog {
   }
 
   def dropAll(sparkSession: SparkSession): Unit = {
+    SedonaFunctionNames.initialize(sparkSession)
     val registry = sparkSession.sessionState.functionRegistry
     registeredExpressions.foreach { case (identifier, _, _) =>
       registry.dropFunction(resolvedIdentifier(identifier.funcName))

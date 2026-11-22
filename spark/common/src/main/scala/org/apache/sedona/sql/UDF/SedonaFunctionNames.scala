@@ -33,10 +33,14 @@ object SedonaFunctionNames {
   private val logger: Logger = LoggerFactory.getLogger(getClass)
   private val ValidPrefix = "^[A-Za-z_][A-Za-z0-9_]*$".r
 
+  // Guards fixing and resetting the prefix; reads go through the volatile field alone.
   private val lock = new Object
   // None means no prefix has been fixed yet; Some("") means it was fixed to the empty string.
-  private var fixedPrefix: Option[String] = None
+  @volatile private var fixedPrefix: Option[String] = None
   private val warnedValues = mutable.Set[String]()
+
+  private def isValid(prefix: String): Boolean =
+    prefix.isEmpty || ValidPrefix.pattern.matcher(prefix).matches()
 
   /** Reads the key from the session conf (default "") and calls initialize(String). */
   def initialize(sparkSession: SparkSession): Unit =
@@ -47,7 +51,7 @@ object SedonaFunctionNames {
    * different value.
    */
   private[sedona] def initialize(requestedPrefix: String): Unit = {
-    if (requestedPrefix.nonEmpty && !ValidPrefix.pattern.matcher(requestedPrefix).matches()) {
+    if (!isValid(requestedPrefix)) {
       throw new IllegalArgumentException(
         s"Invalid value '$requestedPrefix' for $PrefixConfigKey: the prefix must be empty or " +
           "match ^[A-Za-z_][A-Za-z0-9_]*$")
@@ -65,8 +69,23 @@ object SedonaFunctionNames {
     }
   }
 
-  /** "" until a prefix is fixed. Public so Python can read it over py4j. */
-  def effectivePrefix: String = lock.synchronized(fixedPrefix.getOrElse(""))
+  /**
+   * The fixed prefix. Until one is fixed, the key's value in the conf of the active session, else
+   * of the default session, if that value is valid; otherwise "". Reading it fixes nothing. So a
+   * DataFrame column built before the first registrator runs already carries the name Sedona
+   * registers. Public so Python can read it over py4j.
+   */
+  def effectivePrefix: String = fixedPrefix match {
+    case Some(prefix) => prefix
+    case None => configuredPrefix
+  }
+
+  private def configuredPrefix: String =
+    SparkSession.getActiveSession
+      .orElse(SparkSession.getDefaultSession)
+      .map(_.conf.get(PrefixConfigKey, ""))
+      .filter(isValid)
+      .getOrElse("")
 
   /** effectivePrefix + name. */
   def resolve(name: String): String = effectivePrefix + name

@@ -18,13 +18,51 @@
  */
 package org.apache.sedona.sql.UDF
 
-import org.scalatest.BeforeAndAfterEach
+import org.apache.spark.sql.SparkSession
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatest.funspec.AnyFunSpec
 
-class SedonaFunctionNamesTest extends AnyFunSpec with BeforeAndAfterEach {
+class SedonaFunctionNamesTest extends AnyFunSpec with BeforeAndAfterAll with BeforeAndAfterEach {
 
   override def beforeEach(): Unit = SedonaFunctionNames.resetForTesting()
   override def afterEach(): Unit = SedonaFunctionNames.resetForTesting()
+
+  // The session the conf tests derive theirs from: one that is already running, else a local
+  // one that afterAll stops.
+  private var createdSession: Option[SparkSession] = None
+  private lazy val baseSession: SparkSession =
+    SparkSession.getActiveSession
+      .orElse(SparkSession.getDefaultSession)
+      .filterNot(_.sparkContext.isStopped)
+      .getOrElse {
+        val session = SparkSession
+          .builder()
+          .master("local[1]")
+          .appName("SedonaFunctionNamesTest")
+          .config("spark.ui.enabled", "false")
+          .getOrCreate()
+        createdSession = Some(session)
+        session
+      }
+
+  override def afterAll(): Unit =
+    try createdSession.foreach(_.stop())
+    finally super.afterAll()
+
+  // Runs `body` with a new session, whose conf holds `conf`, as the active session.
+  private def withActiveSession(conf: (String, String)*)(body: => Unit): Unit = {
+    val session = baseSession.newSession()
+    conf.foreach { case (key, value) => session.conf.set(key, value) }
+    val previous = SparkSession.getActiveSession
+    SparkSession.setActiveSession(session)
+    try body
+    finally {
+      previous match {
+        case Some(s) => SparkSession.setActiveSession(s)
+        case None => SparkSession.clearActiveSession()
+      }
+    }
+  }
 
   describe("SedonaFunctionNames") {
     it("resolves to the plain name before any prefix is fixed") {
@@ -62,6 +100,26 @@ class SedonaFunctionNamesTest extends AnyFunSpec with BeforeAndAfterEach {
           assert(e.getMessage.contains(p))
           assert(SedonaFunctionNames.effectivePrefix == "")
         }
+      SedonaFunctionNames.initialize("sedona_")
+      assert(SedonaFunctionNames.effectivePrefix == "sedona_")
+    }
+    it("reads the active session's prefix before one is fixed, without fixing it") {
+      withActiveSession(SedonaFunctionNames.PrefixConfigKey -> "sedona_") {
+        assert(SedonaFunctionNames.resolve("ST_Point") == "sedona_ST_Point")
+        SedonaFunctionNames.initialize("other_")
+        assert(SedonaFunctionNames.effectivePrefix == "other_")
+        assert(SedonaFunctionNames.resolve("ST_Point") == "other_ST_Point")
+      }
+    }
+    it("resolves to the plain name while the active session's prefix is invalid") {
+      withActiveSession(SedonaFunctionNames.PrefixConfigKey -> "sedona-") {
+        assert(SedonaFunctionNames.resolve("ST_Point") == "ST_Point")
+      }
+    }
+    it("resolves to the plain name while the active session has no prefix") {
+      withActiveSession() {
+        assert(SedonaFunctionNames.resolve("ST_Point") == "ST_Point")
+      }
     }
   }
 }

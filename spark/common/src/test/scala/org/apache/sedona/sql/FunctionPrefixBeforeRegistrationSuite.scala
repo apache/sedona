@@ -1,0 +1,144 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.sedona.sql
+
+import org.apache.sedona.spark.SedonaContext
+import org.apache.sedona.sql.UDF.{Catalog, NativeFunctionRegistrationTest, SedonaFunctionNames}
+import org.apache.sedona.sql.UDT.UdtRegistrator
+import org.apache.sedona.sql.utils.GeoToolsCoverageAvailability.{gridClassName, isGeoToolsAvailable}
+import org.apache.sedona.viz.sql.utils.SedonaVizRegistrator
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.catalyst.FunctionIdentifier
+import org.apache.spark.sql.catalyst.analysis.FunctionRegistry
+import org.apache.spark.sql.catalyst.expressions.{Expression, ExpressionInfo, Literal}
+import org.apache.spark.sql.functions.lit
+import org.apache.spark.sql.sedona_sql.UDT.RasterUdtRegistratorWrapper
+import org.apache.spark.sql.sedona_sql.expressions.{st_constructors, st_functions}
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.funspec.AnyFunSpec
+
+/**
+ * Sets the function name prefix on a session and checks what Sedona does before a registrator has
+ * fixed the prefix in the JVM, so each test resets it first. Like FunctionPrefixSuite, the set-up
+ * removes the plain Sedona names that earlier suites left behind, and the tear-down puts the JVM
+ * back as it was.
+ */
+class FunctionPrefixBeforeRegistrationSuite extends AnyFunSpec with BeforeAndAfterAll {
+  val P = "sedona_"
+
+  private var fixture: NativeFunctionRegistrationTest.SessionFixture = _
+  private def spark: SparkSession = fixture.spark
+
+  private def isSedonaClass(c: String): Boolean =
+    c.startsWith("org.apache.sedona.") || c.startsWith("org.apache.spark.sql.sedona_sql.")
+
+  // The identifier forms the three registrators use for a plain name.
+  private def identifier(name: String, namespace: String): FunctionIdentifier =
+    if (SpatialTypeSupport.usesNativeTypes) {
+      FunctionIdentifier(name, Some(namespace), Some("system"))
+    } else {
+      FunctionIdentifier(name)
+    }
+
+  // A platform function that owns a plain name.
+  private def registerPlatformMarker(id: FunctionIdentifier): Unit =
+    spark.sessionState.functionRegistry.registerFunction(
+      id,
+      new ExpressionInfo("org.example.PlatformMarker", null, id.funcName),
+      (_: Seq[Expression]) => Literal(42))
+
+  private def markerClass(id: FunctionIdentifier): Option[String] =
+    spark.sessionState.functionRegistry.lookupFunction(id).map(_.getClassName)
+
+  private def withActiveSession(session: SparkSession)(body: => Unit): Unit = {
+    val previous = SparkSession.getActiveSession
+    SparkSession.setActiveSession(session)
+    try body
+    finally {
+      previous match {
+        case Some(s) => SparkSession.setActiveSession(s)
+        case None => SparkSession.clearActiveSession()
+      }
+    }
+  }
+
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
+    fixture = new NativeFunctionRegistrationTest.SessionFixture(
+      SparkSession.getActiveSession.orElse(SparkSession.getDefaultSession))
+    UdtRegistrator.registerAll()
+    // RasterRegistrator.dropAll builds the raster aggregate, whose encoder needs the raster UDT.
+    if (isGeoToolsAvailable) RasterUdtRegistratorWrapper.registerAll(gridClassName)
+    // Remove the plain Sedona names this session inherited from the builtin registry.
+    Catalog.dropAll(spark)
+    RasterRegistrator.dropAll(spark)
+    SedonaVizRegistrator.dropAll(spark)
+    // And from the JVM-wide builtin registry itself. fixture.close() puts the snapshot back.
+    FunctionRegistry.builtin.listFunction().foreach { id =>
+      if (FunctionRegistry.builtin.lookupFunction(id).exists(i => isSedonaClass(i.getClassName)))
+        FunctionRegistry.builtin.dropFunction(id)
+    }
+    spark.conf.set(SedonaFunctionNames.PrefixConfigKey, P)
+  }
+
+  override protected def afterAll(): Unit = {
+    try {
+      Catalog.dropAll(spark)
+      RasterRegistrator.dropAll(spark)
+      SedonaVizRegistrator.dropAll(spark)
+    } finally {
+      SedonaFunctionNames.resetForTesting()
+      fixture.close() // restores FunctionRegistry.builtin
+      super.afterAll()
+    }
+  }
+
+  describe("Sedona functions with a name prefix, before any registrator runs") {
+    it("drops only prefixed names") {
+      val markers = Seq(
+        (() => Catalog.dropAll(spark), identifier("ST_Buffer", "builtin")),
+        (() => SedonaVizRegistrator.dropAll(spark), identifier("ST_TileName", "builtin"))) ++
+        (if (isGeoToolsAvailable)
+           Seq((() => RasterRegistrator.dropAll(spark), identifier("RS_Stack_Aggr", "session")))
+         else Seq.empty)
+      // The active session has no prefix, so only the session handed to dropAll can supply it.
+      withActiveSession(spark.newSession()) {
+        markers.foreach { case (dropAll, id) =>
+          SedonaFunctionNames.resetForTesting()
+          registerPlatformMarker(id)
+          dropAll()
+          assert(markerClass(id).contains("org.example.PlatformMarker"), id.funcName)
+          assert(SedonaFunctionNames.effectivePrefix == P, id.funcName)
+        }
+      }
+    }
+
+    it("resolves a DataFrame column built before SedonaContext.create") {
+      SedonaFunctionNames.resetForTesting()
+      withActiveSession(spark) {
+        // On Spark 4.x the wrapper looks the function up by the name it resolves now.
+        val point = st_constructors.ST_Point(lit(1.0), lit(2.0))
+        SedonaContext.create(spark)
+        val wkt = spark.range(1).select(st_functions.ST_AsText(point)).head().getString(0)
+        assert(wkt == "POINT (1 2)")
+      }
+    }
+  }
+}

@@ -61,6 +61,7 @@ object UdfRegistrator {
   }
 
   def dropAll(sparkSession: SparkSession): Unit = {
+    SedonaFunctionNames.initialize(sparkSession)
     Catalog.expressions.foreach(f =>
       sparkSession.sessionState.functionRegistry.dropFunction(
         functionIdentifier(scalarName(f), "builtin")))
