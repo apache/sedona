@@ -178,8 +178,6 @@ class FunctionPrefixSuite extends AnyFunSpec with BeforeAndAfterAll {
 
     it("gives a second session the same prefixed names") {
       val second = spark.newSession()
-      // A new session does not inherit session conf; a deployment sets the prefix cluster-wide.
-      second.conf.set(SedonaFunctionNames.PrefixConfigKey, P)
       SedonaContext.create(second)
       assert(
         second

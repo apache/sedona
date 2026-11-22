@@ -30,6 +30,7 @@ import org.locationtech.jts.geom.Geometry
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 
 import java.util.Locale
+import scala.collection.concurrent.TrieMap
 import scala.reflect.ClassTag
 import scala.util.Try
 
@@ -66,6 +67,16 @@ abstract class AbstractCatalog {
   /** The registry identifier for `name` under the effective prefix. */
   private def resolvedIdentifier(name: String): FunctionIdentifier =
     registryIdentifier(FunctionIdentifier(SedonaFunctionNames.resolve(name)))
+
+  // Spark logs that a function was replaced unless a repeat registration passes the same
+  // ExpressionInfo and builder objects, so each resolved name keeps one ExpressionInfo.
+  private val resolvedInfos = TrieMap.empty[String, ExpressionInfo]
+
+  /** `info` under `name`: the catalog's own object for the plain name, else one copy per name. */
+  private def resolvedInfo(info: ExpressionInfo, name: String): ExpressionInfo =
+    if (name == info.getName) info
+    else
+      resolvedInfos.getOrElseUpdate(name, new ExpressionInfo(info.getClassName, info.getDb, name))
 
   private def registryIdentifier(identifier: FunctionIdentifier): FunctionIdentifier =
     if (SpatialTypeSupport.usesNativeTypes) {
@@ -137,10 +148,7 @@ abstract class AbstractCatalog {
       }
       if (shouldRegister) {
         // Carry the resolved name so DESCRIBE FUNCTION and SHOW FUNCTIONS show it.
-        val info = new ExpressionInfo(
-          expressionInfo.getClassName,
-          expressionInfo.getDb,
-          functionIdentifier.funcName)
+        val info = resolvedInfo(expressionInfo, functionIdentifier.funcName)
         val builder = SpatialTypeSupport.adaptFunction(functionBuilder)
         registry.registerFunction(functionIdentifier, info, builder)
         FunctionRegistry.builtin.registerFunction(functionIdentifier, info, builder)
