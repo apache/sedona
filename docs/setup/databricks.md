@@ -174,6 +174,32 @@ This is what the results look like in Databricks:
 
 ![Write table](../image/databricks/image9.png)
 
+## Use Sedona next to the Databricks spatial functions
+
+By default, Sedona registers its functions under their plain names, such as `ST_Buffer`. Your platform can also provide functions with plain `ST_*` names. You can ask Sedona to add a prefix to every function name instead. Then Sedona does not use the plain names, and they stay as the platform has them.
+
+Add this line to the Spark config of your cluster:
+
+```
+spark.sedona.function.prefix sedona_
+```
+
+Sedona now registers `ST_Buffer` as `sedona_ST_Buffer`, `RS_Value` as `sedona_RS_Value`, and so on. This applies to every SQL function that Sedona registers. Sedona does not register the plain names, and it does not replace a function that already has a plain name. Function names stay case-insensitive.
+
+You can call both kinds of function in one query. Here `sedona_ST_Buffer` and `sedona_ST_GeomFromWKT` are Sedona functions. `ST_Area` is the function that Databricks provides.
+
+```sql
+SELECT ST_Area(sedona_ST_Buffer(sedona_ST_GeomFromWKT('POINT (1 2)'), 1.0))
+```
+
+Keep these points in mind:
+
+* Set the option in the cluster Spark config, as shown above. The first Sedona session in a JVM fixes the prefix for that JVM. If a later session asks for a different value, Sedona keeps the first one and writes a warning to the log.
+* The Sedona Scala and Python DataFrame APIs need no change in your code. They use the prefix themselves.
+* On a runtime with native spatial types, the five names `ST_AsBinary`, `ST_GeomFromWKB`, `ST_GeogFromWKB`, `ST_SRID` and `ST_SetSRID` with the prefix (for example `sedona_ST_SRID`) are the platform's own functions.
+
+See [Parameter](../api/sql/Parameter.md) for the allowed values of the prefix.
+
 ## Known issues
 
 To ensure stability, we recommend using a currently supported Long-Term Support (LTS) version, such as Databricks Runtime 16.4 LTS or 15.4 LTS.  Some Databricks Runtimes, such as 16.2 (non-LTS), are not compatible with Apache Sedona, as this particular runtime introduced a change in the json4s dependency.
