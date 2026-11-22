@@ -36,6 +36,7 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funspec.AnyFunSpec
 
 import java.nio.file.Files
+import java.util.Locale
 
 /**
  * Registers Sedona with the function name prefix set. The prefix and FunctionRegistry.builtin are
@@ -142,6 +143,16 @@ class FunctionPrefixSuite extends AnyFunSpec with BeforeAndAfterAll {
       assert(leaked.isEmpty, leaked.mkString(", "))
     }
 
+    it("leaves no Sedona class under a plain name in the builtin registry") {
+      // The registry keeps names in lower case.
+      val prefix = P.toLowerCase(Locale.ROOT)
+      val leaked = FunctionRegistry.builtin.listFunction().filter { id =>
+        !id.funcName.toLowerCase(Locale.ROOT).startsWith(prefix) &&
+        FunctionRegistry.builtin.lookupFunction(id).exists(i => isSedonaClass(i.getClassName))
+      }
+      assert(leaked.isEmpty, leaked.mkString(", "))
+    }
+
     it("leaves a platform function with a plain name alone") {
       assert(
         spark.sessionState.functionRegistry
@@ -205,6 +216,8 @@ class FunctionPrefixSuite extends AnyFunSpec with BeforeAndAfterAll {
       SedonaContext.create(other) // must not throw
       assert(SedonaFunctionNames.effectivePrefix == P)
       assert(other.catalog.functionExists(P + "ST_Point"))
+      // Session-only, so only the registration for this session can have put it there.
+      assert(other.catalog.functionExists(P + "RS_Stack_Aggr"))
       assert(!other.catalog.functionExists("other_ST_Point"))
     }
 
@@ -258,11 +271,24 @@ class FunctionPrefixSuite extends AnyFunSpec with BeforeAndAfterAll {
         .select(
           st_functions.ST_NumGeometries(st_aggregates.ST_Collect_Agg(col("geom"))),
           st_functions.ST_AsText(st_aggregates.ST_Envelope_Aggr(col("geom"))),
-          st_functions.ST_NumGeometries(st_aggregates.ST_Union_Aggr(col("geom"))))
+          st_functions.ST_NumGeometries(st_aggregates.ST_Union_Aggr(col("geom"))),
+          st_aggregates.ST_Extent(col("geom")),
+          st_aggregates.ST_3DExtent(col("geom")))
         .head()
       assert(row.getInt(0) == 2)
       assert(row.getString(1) == "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))")
       assert(row.getInt(2) == 2)
+      assert(row.get(3).toString == "BOX(0.0 0.0, 1.0 1.0)")
+      assert(row.get(4).toString == "BOX3D(0.0 0.0 0.0, 1.0 1.0 0.0)")
+
+      // Two squares that overlap in the unit square (1 1, 2 2).
+      val squares = spark.sql(s"SELECT ${P}ST_GeomFromText(wkt) AS geom FROM VALUES " +
+        "('POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))'), ('POLYGON ((1 1, 3 1, 3 3, 1 3, 1 1))') AS t(wkt)")
+      val intersection = squares
+        .select(st_functions.ST_AsText(st_aggregates.ST_Intersection_Aggr(col("geom"))))
+        .head()
+        .getString(0)
+      assert(intersection == "POLYGON ((1 2, 2 2, 2 1, 1 1, 1 2))")
     }
 
     it("runs LocalOutlierFactor") {
