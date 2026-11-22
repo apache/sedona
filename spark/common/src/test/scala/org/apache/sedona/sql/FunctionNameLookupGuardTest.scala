@@ -54,34 +54,53 @@ class FunctionNameLookupGuardTest extends AnyFunSuite {
   private def sparkDir: File =
     new File(System.getProperty("user.dir")).getAbsoluteFile.getParentFile
 
+  // Every directory directly under spark/ that has a src/main, in a stable order.
   private def mainDirs: Seq[File] = {
-    val modules = sparkDir
-      .listFiles()
-      .filter(d => d.isDirectory && (d.getName == "common" || d.getName.matches("spark-\\d.*")))
+    val modules = Option(sparkDir.listFiles()).getOrElse(Array.empty[File])
+    modules
+      .filter(_.isDirectory)
       .sortBy(_.getName)
-    modules.map(new File(_, "src/main")).filter(_.isDirectory).toSeq
+      .map(new File(_, "src/main"))
+      .filter(_.isDirectory)
+      .toSeq
   }
 
-  private def matchingFiles: Set[String] = {
+  private def isCommentLine(line: String): Boolean = {
+    val t = line.trim
+    t.startsWith("//") || t.startsWith("*") || t.startsWith("/*")
+  }
+
+  private def looksUpByName(text: String): Boolean =
+    text.split("\\r?\\n").exists(l => !isCommentLine(l) && lookupPattern.findFirstIn(l).isDefined)
+
+  private def matchingFiles(dirs: Seq[File]): Set[String] = {
     val base = sparkDir.toPath
-    mainDirs.flatMap { dir =>
+    dirs.flatMap { dir =>
       Files
         .walk(dir.toPath)
         .iterator()
         .asScala
         .filter(p => Files.isRegularFile(p))
         .filter(p => p.toString.endsWith(".scala") || p.toString.endsWith(".java"))
-        .filter { p =>
-          val text = new String(Files.readAllBytes(p), "UTF-8")
-          lookupPattern.findFirstIn(text).isDefined
-        }
+        .filter(p => looksUpByName(new String(Files.readAllBytes(p), "UTF-8")))
         .map(p => base.relativize(p).toString.replace(File.separatorChar, '/'))
         .toSeq
     }.toSet
   }
 
   test("main code looks up functions by name only in reviewed files") {
-    val found = matchingFiles
+    val dirs = mainDirs
+    val where =
+      s"user.dir=${System.getProperty("user.dir")}, resolved spark directory=$sparkDir"
+    assert(
+      sparkDir.isDirectory && sparkDir.getName == "spark",
+      s"The resolved directory is not the spark directory; run the test with user.dir set " +
+        s"to the spark/common module ($where).")
+    assert(
+      dirs.contains(new File(sparkDir, "common/src/main")),
+      s"No common/src/main found under the spark directory; run the test with user.dir " +
+        s"set to the spark/common module ($where; walked: ${dirs.mkString(", ")}).")
+    val found = matchingFiles(dirs)
     val unexpected = (found -- allowed.keySet).toSeq.sorted
     val stale = (allowed.keySet -- found).toSeq.sorted
     val message =
