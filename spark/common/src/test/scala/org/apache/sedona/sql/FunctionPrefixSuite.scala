@@ -22,15 +22,20 @@ import org.apache.sedona.spark.SedonaContext
 import org.apache.sedona.sql.UDF.{Catalog, NativeFunctionRegistrationTest, RasterUdafCatalog, SedonaFunctionNames}
 import org.apache.sedona.sql.UDT.UdtRegistrator
 import org.apache.sedona.sql.utils.GeoToolsCoverageAvailability.{gridClassName, isGeoToolsAvailable}
+import org.apache.sedona.stats.outlierDetection.LocalOutlierFactor
 import org.apache.sedona.viz.sql.utils.SedonaVizRegistrator
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry
 import org.apache.spark.sql.catalyst.expressions.{Expression, ExpressionInfo, Literal}
+import org.apache.spark.sql.functions.{col, lit}
 import org.apache.spark.sql.sedona_sql.UDT.RasterUdtRegistratorWrapper
+import org.apache.spark.sql.sedona_sql.expressions.{st_aggregates, st_constructors, st_functions}
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funspec.AnyFunSpec
+
+import java.nio.file.Files
 
 /**
  * Registers Sedona with the function name prefix set. The prefix and FunctionRegistry.builtin are
@@ -235,6 +240,61 @@ class FunctionPrefixSuite extends AnyFunSpec with BeforeAndAfterAll {
         assert(spark.catalog.functionExists(n), n) // Spark's own stay
       }
       Catalog.registerAll(spark)
+    }
+
+    it("runs scalar DataFrame wrappers") {
+      val wkt = spark
+        .range(1)
+        .select(st_functions.ST_AsText(st_constructors.ST_Point(lit(1.0), lit(2.0))))
+        .head()
+        .getString(0)
+      assert(wkt == "POINT (1 2)")
+    }
+
+    it("runs aggregate DataFrame wrappers") {
+      val points =
+        spark.sql(s"SELECT ${P}ST_Point(x, x) AS geom FROM VALUES (0.0), (1.0) AS t(x)")
+      val row = points
+        .select(
+          st_functions.ST_NumGeometries(st_aggregates.ST_Collect_Agg(col("geom"))),
+          st_functions.ST_AsText(st_aggregates.ST_Envelope_Aggr(col("geom"))),
+          st_functions.ST_NumGeometries(st_aggregates.ST_Union_Aggr(col("geom"))))
+        .head()
+      assert(row.getInt(0) == 2)
+      assert(row.getString(1) == "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))")
+      assert(row.getInt(2) == 2)
+    }
+
+    it("runs LocalOutlierFactor") {
+      // LocalOutlierFactor checkpoints, and a session this suite creates has no checkpoint
+      // directory.
+      if (spark.sparkContext.getCheckpointDir.isEmpty) {
+        spark.sparkContext.setCheckpointDir(Files.createTempDirectory("checkpoints").toString)
+      }
+      val points = spark.sql(
+        s"SELECT ${P}ST_Point(x, y) AS geometry FROM VALUES (0.0,0.0),(0.0,1.0),(1.0,0.0),(1.0,1.0),(9.0,9.0) AS t(x, y)")
+      val result = LocalOutlierFactor.localOutlierFactor(points, 2)
+      assert(result.count() == 5)
+      assert(result.columns.contains("lof"))
+    }
+
+    it("still plans a prefixed predicate as a Sedona spatial join") {
+      spark
+        .sql(s"SELECT ${P}ST_Point(x, x) AS geom FROM VALUES (0.0), (1.0) AS t(x)")
+        .createOrReplaceTempView("pa")
+      // ${P}ST_Buffer is Sedona's; the platform marker sits on plain ST_Buffer only.
+      spark
+        .sql(
+          s"SELECT ${P}ST_Buffer(${P}ST_Point(x, x), 0.5) AS geom FROM VALUES (0.0), (5.0) AS t(x)")
+        .createOrReplaceTempView("pb")
+      val joined = spark.sql(s"SELECT * FROM pa JOIN pb ON ${P}ST_Intersects(pa.geom, pb.geom)")
+      val sedonaJoins = joined.queryExecution.sparkPlan.collect {
+        case p
+            if p.getClass.getName.startsWith("org.apache.spark.sql.sedona_sql.strategy.join") =>
+          p
+      }
+      assert(sedonaJoins.nonEmpty)
+      assert(joined.count() == 1)
     }
   }
 }

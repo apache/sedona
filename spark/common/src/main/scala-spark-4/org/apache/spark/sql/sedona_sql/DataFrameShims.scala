@@ -20,6 +20,7 @@ package org.apache.spark.sql.sedona_sql
 
 import scala.reflect.ClassTag
 
+import org.apache.sedona.sql.UDF.SedonaFunctionNames
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{Column, DataFrame, SparkSession}
 import org.apache.spark.sql.catalyst.InternalRow
@@ -45,7 +46,7 @@ object DataFrameShims {
       case x: Any => lit(x)
       case null => lit(null)
     })
-    Column.fn(runtimeClass.getSimpleName(), colArgs :_*)
+    Column.fn(SedonaFunctionNames.resolve(runtimeClass.getSimpleName()), colArgs :_*)
   }
 
   private[sedona_sql] def wrapAggregator[A <: UserDefinedAggregateFunction: ClassTag](arg: Any*): Column = {
@@ -56,7 +57,7 @@ object DataFrameShims {
       case x: Any => lit(x)
       case null => lit(null)
     })
-    Column.fn(runtimeClass.getSimpleName(), colArgs :_*)
+    Column.fn(SedonaFunctionNames.resolve(runtimeClass.getSimpleName()), colArgs :_*)
   }
 
   private[sedona_sql] def createDataFrame(
