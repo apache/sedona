@@ -218,6 +218,12 @@ private[geoparquet] class GeoParquetRowConverter(
         new ParquetPrimitiveConverter(updater)
 
       case dt if SpatialTypeSupport.isGeometry(dt) =>
+        // A geometry is computed on a plane, which the values of a GEOGRAPHY column are not for
+        if (ParquetGeospatialTypes.describe(parquetType).exists(_.isGeography)) {
+          throw new IllegalArgumentException(
+            s"Column '${parquetType.getName}' is a Parquet GEOGRAPHY column and cannot be " +
+              "read as a geometry")
+        }
         // Compute SRID once per column converter, not per row
         val srid = schemaConverter.geometrySrid(
           parquetType,
@@ -651,9 +657,16 @@ private[geoparquet] class GeoParquetRowConverter(
       // Here we try to convert field `list` into a Catalyst type to see whether the converted type
       // matches the Catalyst array element type. If it doesn't match, then it's case 1; otherwise,
       // it's case 2.
-      val guessedElementType = schemaConverter.convertFieldWithGeo(repeatedType)
+      //
+      // The layout is a matter of how the columns are stored, so both sides of the comparison
+      // take a geometry or geography column as the binary column that it is stored in. What
+      // such a column states, its CRS or its edges, is for the converter of the element to
+      // check against the type that the reader asks for, which may be binary.
+      val guessedElementType = schemaConverter.convertFieldWithGeo(repeatedType, asStored = true)
 
-      if (DataType.equalsIgnoreCompatibleNullability(guessedElementType, elementType)) {
+      if (DataType.equalsIgnoreCompatibleNullability(
+          guessedElementType,
+          GeoParquetSchemaConverter.physicalType(elementType))) {
         // If the repeated field corresponds to the element type, creates a new converter using the
         // type of the repeated field.
         newConverter(

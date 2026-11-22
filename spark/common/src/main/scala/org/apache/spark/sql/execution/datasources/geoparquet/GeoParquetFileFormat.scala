@@ -399,10 +399,12 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
 object GeoParquetFileFormat extends Logging {
 
   /**
-   * Merge only column CRS declarations, so mergeSchema=false still checks every data file.
+   * Merge only what the files state about their geometry and geography columns, so
+   * mergeSchema=false still checks every data file.
    *
    * @return
-   *   the geometry columns, and the paths of the files that were left out as corrupt ones
+   *   the geometry and geography columns, and the paths of the files that were left out as
+   *   corrupt ones
    */
   private[geoparquet] def mergeGeometrySchemasInParallel(
       parameters: Map[String, String],
@@ -424,15 +426,21 @@ object GeoParquetFileFormat extends Logging {
               keyValueMetaData = keyValueMetaData,
               parameters = parameters)
             val columns = parquetSchema.getFields.asScala.toSeq
-              .filter(converter.isGeometryColumn)
               .sortBy(_.getName)
-              .map(field => field.getName -> converter.geometrySrid(field))
-            def schemaOf(columns: Seq[(String, Int)]): StructType =
-              StructType(columns.map { case (name, srid) =>
-                StructField(name, SpatialTypeSupport.geometryType(srid))
-              })
+              .flatMap { field =>
+                if (converter.isGeometryColumn(field)) {
+                  val srid = converter.geometrySrid(field)
+                  Some(field.getName -> SpatialTypeSupport.geometryType(srid))
+                } else if (ParquetGeospatialTypes.describe(field).isDefined) {
+                  val srid = converter.geographySrid(field)
+                  Some(field.getName -> SpatialTypeSupport.geographyType(srid))
+                } else None
+              }
+            def schemaOf(columns: Seq[(String, DataType)]): StructType =
+              StructType(columns.map { case (name, dataType) => StructField(name, dataType) })
+            val withoutCrs = SpatialTypeSupport.geometryType(0)
             val mayHaveNoValues = columns.collect {
-              case (name, 0) if withoutValues(columnKey(name, caseSensitive)) => name
+              case (name, `withoutCrs`) if withoutValues(columnKey(name, caseSensitive)) => name
             }
             if (mayHaveNoValues.isEmpty) Some(schemaOf(columns))
             else {
@@ -513,8 +521,14 @@ object GeoParquetFileFormat extends Logging {
       SpatialTypeSupport.geometrySrid(dataType).isEmpty
 
   /**
-   * The geometry columns of two sets of files. A column for which they state different SRIDs gets
-   * the type of mixed SRIDs, which no file states by itself.
+   * The geometry and geography columns of two sets of files. A geometry column for which they
+   * state different SRIDs gets the type of mixed SRIDs, which no file states by itself. The
+   * second pass of [[mergeGeometrySchemasInParallel]] decides about it.
+   *
+   * Nothing is left to decide about a geography column. The files have to agree on its SRID, and
+   * on which of the two kinds a column is: the reader of the one kind does not take the values of
+   * the other. Finding that out during the scan would be too late, because a scan that ignores
+   * corrupt files leaves out a file that it cannot read.
    */
   private def mergeGeometryColumns(
       left: StructType,
@@ -526,7 +540,19 @@ object GeoParquetFileFormat extends Logging {
     StructType(left.fields.map { field =>
       rightFields.get(key(field)) match {
         case Some(other) if other.dataType != field.dataType =>
-          field.copy(dataType = SpatialTypeSupport.geometryType)
+          val isGeometry = SpatialTypeSupport.isGeometry(field.dataType)
+          if (isGeometry != SpatialTypeSupport.isGeometry(other.dataType)) {
+            throw new IllegalArgumentException(
+              s"Column '${field.name}' is a geometry column in some files and a geography " +
+                "column in others")
+          } else if (isGeometry) {
+            field.copy(dataType = SpatialTypeSupport.geometryType)
+          } else {
+            throw new IllegalArgumentException(
+              s"The files state different SRIDs for the geography column '${field.name}': " +
+                s"${field.dataType.sql} and ${other.dataType.sql}. A schema that gives the " +
+                s"column the type ${SpatialTypeSupport.geographyType.sql} reads them")
+          }
         case _ => field
       }
     } ++ right.fields.filterNot(field => leftKeys(key(field))))
@@ -589,7 +615,9 @@ object GeoParquetFileFormat extends Logging {
           // keeps the SRID that its file states.
           StructType(schema.fields.map { field =>
             geometryTypes.get(columnKey(field.name, caseSensitive)) match {
-              case Some(settled) if SpatialTypeSupport.isNativeGeometry(field.dataType) =>
+              case Some(settled)
+                  if SpatialTypeSupport.isNativeGeometry(field.dataType) &&
+                    SpatialTypeSupport.isNativeGeometry(settled) =>
                 field.copy(dataType = settled)
               case _ => field
             }

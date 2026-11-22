@@ -144,10 +144,13 @@ Sedona 的函数，例如 `ST_AsText` 和 `ST_Buffer`，可以处理这样的列
 
 `GEOGRAPHY` 列会被读取为地理列：在 Spark 4.1 上是 Sedona 的地理类型，在 Spark 4.2 及更高版本上是 Spark 原生地理类型。SRID 按上述规则取自 `crs` 属性，因此没有该属性的列 SRID 为 4326。
 
-有两类 `GEOGRAPHY` 列需要您提供 schema：
+有三类 `GEOGRAPHY` 列需要您提供 schema：
 
 * 边的插值算法不是 `spherical` 的列，即 `vincenty`、`thomas`、`andoyer` 或 `karney`。Sedona 在球面上计算，因此会拒绝这样的列。在 schema 中把该列声明为二进制类型，即可读出它的 WKB。
 * 在 Spark 4.2 及更高版本上，CRS 未知或不是地理坐标系的列。Spark 原生地理类型无法表示这样的 CRS。在 schema 中为该列使用 Sedona 自己的地理类型即可读取，在 Python 中是 `LegacyGeographyType`，在 Scala 和 Java 中是 `GeographyUDT`。
+* 在 Spark 4.2 及更高版本上，各文件声明的 SRID 不一致的列。Spark 原生地理类型的一列只有一个 SRID，因此 Sedona 会在扫描文件之前拒绝读取。在 schema 中为该列使用 `GEOGRAPHY(ANY)` 类型即可读取这些文件。
+
+`GEOGRAPHY` 列不会被读取为几何列。如果 schema 为它指定几何类型，Sedona 会拒绝读取；如果同一列在一部分文件中是 `GEOMETRY` 列、在另一部分文件中是 `GEOGRAPHY` 列，Sedona 也会拒绝读取。
 
 对地理列的过滤条件，Sedona 会逐行计算，不会使用文件的边界框，因为这些边界框是平面的。
 

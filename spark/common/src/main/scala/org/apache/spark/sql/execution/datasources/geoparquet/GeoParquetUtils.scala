@@ -94,6 +94,14 @@ object GeoParquetUtils {
         inferred.map(schema =>
           StructType(schema.fields.map { field =>
             geometryFields.fields.find(geometry => resolver(geometry.name, field.name)) match {
+              case Some(geometry) if SpatialTypeSupport.isGeography(geometry.dataType) =>
+                // A geography column of the files. Only a GEOGRAPHY column is one, so a binary
+                // column of the same name is not taken for one, as it is for a geometry column.
+                if (!SpatialTypeSupport.isGeography(field.dataType)) {
+                  throw new IllegalArgumentException(
+                    s"Incompatible GeoParquet geography column '${field.name}'")
+                }
+                field.copy(dataType = geometry.dataType)
               case Some(geometry)
                   if field.dataType == org.apache.spark.sql.types.BinaryType ||
                     SpatialTypeSupport.isGeometry(field.dataType) =>

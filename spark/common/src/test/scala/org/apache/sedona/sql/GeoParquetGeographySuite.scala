@@ -28,13 +28,13 @@ import org.apache.parquet.example.data.Group
 import org.apache.parquet.example.data.simple.SimpleGroup
 import org.apache.parquet.hadoop.example.ExampleParquetWriter
 import org.apache.parquet.io.api.Binary
-import org.apache.parquet.schema.{GroupType, MessageType, Type, Types}
+import org.apache.parquet.schema.{GroupType, LogicalTypeAnnotation, MessageType, Type, Types}
 import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName.{BINARY, INT32}
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.execution.datasources.geoparquet.ParquetGeospatialTypes
 import org.apache.spark.sql.sedona_sql.UDT.GeographyUDT
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
-import org.apache.spark.sql.types.{BinaryType, DataType, IntegerType, StructField, StructType}
+import org.apache.spark.sql.types.{ArrayType, BinaryType, DataType, IntegerType, StructField, StructType}
 import org.locationtech.jts.io.{ByteOrderValues, WKBWriter, WKTReader}
 
 import scala.collection.JavaConverters._
@@ -101,6 +101,45 @@ class GeoParquetGeographySuite extends TestBaseScala {
       group
     }
     write(file, schema, keyValues)(rows: _*)
+  }
+
+  private def geometry(name: String, crs: Option[String] = None): Type =
+    Types.optional(BINARY).as(ParquetGeospatialTypes.geometry(crs)).named(name)
+
+  /**
+   * Writes a file of one row: `id`, and each of `columns` with the geometry or geography of its
+   * WKT.
+   */
+  private def writeRow(file: File, id: Int, columns: (Type, String)*): Unit = {
+    val fields = Types.required(INT32).named("id") +: columns.map(_._1)
+    val schema = new MessageType("spark_schema", fields.asJava)
+    write(file, schema) { _ =>
+      val group: Group = new SimpleGroup(schema)
+      group.add("id", id)
+      columns.foreach { case (field, wkt) =>
+        group.add(field.getName, Binary.fromConstantByteArray(wkb(wkt)))
+      }
+      group
+    }
+  }
+
+  /** Writes a file of one row, whose column `items` is a list of the one value of `element`. */
+  private def writeList(file: File, element: Type, wkt: String): Unit = {
+    val items = Types
+      .optionalGroup()
+      .as(LogicalTypeAnnotation.listType())
+      .addField(Types.repeatedGroup().addField(element).named("list"))
+      .named("items")
+    val schema = Types.buildMessage().required(INT32).named("id").addField(items).named("data")
+    write(file, schema) { id =>
+      val group: Group = new SimpleGroup(schema)
+      group.add("id", id)
+      group
+        .addGroup("items")
+        .addGroup("list")
+        .add(element.getName, Binary.fromConstantByteArray(wkb(wkt)))
+      group
+    }
   }
 
   private def read(path: String): DataFrame = sparkSession.read.format("geoparquet").load(path)
@@ -357,6 +396,187 @@ class GeoParquetGeographySuite extends TestBaseScala {
           assertGeography(df, 4326)
           assert(df.where("geography IS NOT NULL").count() == 1)
           assert(df.count() == 2)
+        }
+      }
+
+      for (mergeSchema <- Seq("false", "true")) {
+        it(
+          s"reads no value from a file without the geography column (mergeSchema=$mergeSchema)") {
+          withDirectory { directory =>
+            writeRow(
+              new File(directory, "part-0.parquet"),
+              0,
+              geometry("anchor") -> "POINT (3 4)",
+              geography("geography", Some("EPSG:4269"), "spherical") -> "POINT (1 2)")
+            writeRow(
+              new File(directory, "part-1.parquet"),
+              1,
+              geometry("anchor") -> "POINT (3 4)")
+            val df = sparkSession.read
+              .format("geoparquet")
+              .option("mergeSchema", mergeSchema)
+              .load(directory.getPath)
+            assertGeography(df, 4269)
+            assert(ewkt(df) == Seq("SRID=4269; POINT (1 2)", null))
+          }
+        }
+      }
+
+      it("reads no value from a file without the geography column of a nested column") {
+        withDirectory { directory =>
+          def holder(field: Type): GroupType =
+            Types.optionalGroup().addField(field).named("holder")
+          def file(name: String, holder: GroupType)(fill: Group => Unit): Unit = {
+            val schema = Types
+              .buildMessage()
+              .required(INT32)
+              .named("id")
+              .addField(geometry("anchor"))
+              .addField(holder)
+              .named("data")
+            write(new File(directory, name), schema) { _ =>
+              val group: Group = new SimpleGroup(schema)
+              group.add("anchor", Binary.fromConstantByteArray(wkb("POINT (3 4)")))
+              fill(group)
+              group
+            }
+          }
+          file("part-0.parquet", holder(geography("geography", None, "spherical"))) { group =>
+            group.add("id", 0)
+            group
+              .addGroup("holder")
+              .add("geography", Binary.fromConstantByteArray(wkb("POINT (1 2)")))
+          }
+          file("part-1.parquet", holder(Types.optional(INT32).named("number"))) { group =>
+            group.add("id", 1)
+            group.addGroup("holder").add("number", 7)
+          }
+          val df = read(directory.getPath).selectExpr("id", "holder.geography AS geography")
+          assertGeography(df, 4326)
+          assert(ewkt(df) == Seq("SRID=4326; POINT (1 2)", null))
+        }
+      }
+
+      // A reader of geometries computes on a plane, so it must not take the values of a
+      // GEOGRAPHY column, and the other way around
+      Seq("GEOMETRY" -> "GEOGRAPHY", "GEOGRAPHY" -> "GEOMETRY").foreach { case (first, second) =>
+        it(
+          s"rejects a column that is a $first column in one file and a $second column in the next") {
+          withDirectory { directory =>
+            def column(kind: String): Type =
+              if (kind == "GEOMETRY") geometry("shape") else geography("shape", None, "spherical")
+            writeRow(new File(directory, "part-0.parquet"), 0, column(first) -> "POINT (1 2)")
+            writeRow(new File(directory, "part-1.parquet"), 1, column(second) -> "POINT (1 2)")
+            val error = intercept[Exception](read(directory.getPath).collect())
+            val message = messages(error).toLowerCase(java.util.Locale.ROOT)
+            assert(message.contains("'shape'"))
+            assert(message.contains("geometry"))
+            assert(message.contains("geography"))
+          }
+        }
+      }
+
+      it("rejects a GEOGRAPHY column for a schema that makes it a geometry") {
+        withDirectory { directory =>
+          writeGeographies(new File(directory, "part-0.parquet"))("POINT (1 2)")
+          val schema = StructType(
+            Seq(
+              StructField("id", IntegerType),
+              StructField("geography", SpatialTypeSupport.geometryType(4326))))
+          val error = intercept[Exception] {
+            sparkSession.read
+              .schema(schema)
+              .format("geoparquet")
+              .load(directory.getPath)
+              .collect()
+          }
+          assert(messages(error).contains(
+            "Column 'geography' is a Parquet GEOGRAPHY column and cannot be read as a geometry"))
+        }
+      }
+
+      it("reads files that state different SRIDs for a geography column") {
+        withDirectory { directory =>
+          writeRow(
+            new File(directory, "part-0.parquet"),
+            0,
+            geography("geography", None, "spherical") -> "POINT (1 2)")
+          writeRow(
+            new File(directory, "part-1.parquet"),
+            1,
+            geography("geography", Some("EPSG:4269"), "spherical") -> "POINT (3 4)")
+          val both = Seq("SRID=4326; POINT (1 2)", "SRID=4269; POINT (3 4)")
+          if (SpatialTypeSupport.usesNativeTypes) {
+            // The type of a native geography column names one SRID. The files are compared
+            // before the scan, which would otherwise leave out a file as a corrupt one.
+            for (ignoreCorruptFiles <- Seq("false", "true")) {
+              val error = intercept[Exception] {
+                sparkSession.read
+                  .format("geoparquet")
+                  .option("ignoreCorruptFiles", ignoreCorruptFiles)
+                  .load(directory.getPath)
+              }
+              assert(messages(error).contains("'geography'"))
+              assert(messages(error).contains("4326"))
+              assert(messages(error).contains("4269"))
+            }
+          } else {
+            assert(ewkt(read(directory.getPath)) == both)
+          }
+          // The type of mixed SRIDs takes the SRID of each file
+          val schema = StructType(
+            Seq(
+              StructField("id", IntegerType),
+              StructField("geography", SpatialTypeSupport.geographyType)))
+          val df = sparkSession.read.schema(schema).format("geoparquet").load(directory.getPath)
+          assert(ewkt(df) == both)
+        }
+      }
+
+      it("reads a list of geographies") {
+        withDirectory { directory =>
+          writeList(
+            new File(directory, "part-0.parquet"),
+            geography("element", None, "spherical"),
+            "POINT (1 2)")
+          val df = read(directory.getPath).selectExpr("id", "items[0] AS geography")
+          assertGeography(df, 4326)
+          assert(ewkt(df) == Seq("SRID=4326; POINT (1 2)"))
+        }
+      }
+
+      it("reads the WKB of a list of geographies whose edges do not follow a sphere") {
+        withDirectory { directory =>
+          writeList(
+            new File(directory, "part-0.parquet"),
+            geography("element", None, "karney"),
+            "POINT (1 2)")
+          val schema = StructType(Seq(StructField("items", ArrayType(BinaryType))))
+          val stored = sparkSession.read
+            .schema(schema)
+            .format("geoparquet")
+            .load(directory.getPath)
+            .selectExpr("hex(items[0])")
+            .collect()
+            .map(_.getString(0))
+          assert(stored.toSeq == Seq("0101000000000000000000F03F0000000000000040"))
+        }
+      }
+
+      it("reads a list of geographies of unknown CRS with Sedona's own geography type") {
+        withDirectory { directory =>
+          writeList(
+            new File(directory, "part-0.parquet"),
+            geography("element", Some("srid:0"), "spherical"),
+            "POINT (1 2)")
+          val schema = StructType(
+            Seq(StructField("id", IntegerType), StructField("items", ArrayType(GeographyUDT()))))
+          val df = sparkSession.read
+            .schema(schema)
+            .format("geoparquet")
+            .load(directory.getPath)
+            .selectExpr("id", "items[0] AS geography")
+          assert(ewkt(df) == Seq("POINT (1 2)"))
         }
       }
 

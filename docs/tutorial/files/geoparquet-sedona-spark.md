@@ -144,10 +144,13 @@ Sedona's functions, such as `ST_AsText` and `ST_Buffer`, accept such a column. S
 
 `GEOGRAPHY` columns are read as geography columns: Sedona's geography type on Spark 4.1, and Spark's native geography type on Spark 4.2 and later. The SRID comes from the `crs` property by the rules above, so a column without one has SRID 4326.
 
-Two kinds of `GEOGRAPHY` columns need a schema from you:
+Three kinds of `GEOGRAPHY` columns need a schema from you:
 
 * A column whose edges follow an algorithm other than `spherical`, which is `vincenty`, `thomas`, `andoyer` or `karney`. Sedona computes on a sphere, so it rejects the column. A schema in which the column is binary returns its WKB.
 * On Spark 4.2 and later, a column whose CRS is unknown or not geographic. Spark's native geography type cannot represent it. A schema with Sedona's own geography type, `LegacyGeographyType` in Python and `GeographyUDT` in Scala and Java, reads the column.
+* On Spark 4.2 and later, a column for which the files state different SRIDs. Spark's native geography type names one SRID for a column, so Sedona rejects the read before it scans the files. A schema with the type `GEOGRAPHY(ANY)` for the column reads them.
+
+A `GEOGRAPHY` column is not read as a geometry column. Sedona rejects a schema that gives it a geometry type, and it rejects files in which a column is a `GEOMETRY` column in some and a `GEOGRAPHY` column in others.
 
 Sedona applies a filter on a geography column to the rows and does not use the bounding boxes of the files for it, because these are planar.
 
