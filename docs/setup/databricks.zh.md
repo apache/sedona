@@ -186,17 +186,21 @@ spark.sedona.function.prefix sedona_
 
 此时 Sedona 会把 `ST_Buffer` 注册为 `sedona_ST_Buffer`，把 `RS_Value` 注册为 `sedona_RS_Value`，依此类推。该前缀适用于 Sedona 注册的所有 SQL 函数。Sedona 不会注册不带前缀的原名，也不会覆盖已经使用原名的函数。函数名仍然不区分大小写。
 
-您可以在同一个查询中调用两类函数。下例中，`sedona_ST_Buffer` 和 `sedona_ST_GeomFromWKT` 是 Sedona 的函数，`ST_Area` 是 Databricks 提供的函数。
+您可以在同一个查询中调用两类函数。
 
 ```sql
-SELECT ST_Area(sedona_ST_Buffer(sedona_ST_GeomFromWKT('POINT (1 2)'), 1.0))
+SELECT sedona_ST_Area(sedona_ST_Buffer(sedona_geom, 1.0)) AS sedona_area,
+       ST_Area(platform_geom) AS platform_area
+FROM my_table
 ```
+
+其中 `sedona_geom` 是存放 Sedona 几何对象的列，`platform_geom` 是使用 Databricks 提供的几何类型的列。`sedona_ST_Area` 和 `sedona_ST_Buffer` 是 Sedona 的函数，`ST_Area` 是 Databricks 提供的函数。
 
 请注意以下几点：
 
 * 请按上文所示，在集群的 Spark 配置中设置该选项。同一个 JVM 中第一个 Sedona 会话会确定该 JVM 的前缀。如果之后的会话要求使用不同的取值，Sedona 会保留第一个取值，并在日志中输出一条警告。
-* Sedona 的 Scala 和 Python DataFrame API 无需修改代码，它们会自行使用该前缀。
-* 在支持原生空间类型的运行时上，带前缀的 `ST_AsBinary`、`ST_GeomFromWKB`、`ST_GeogFromWKB`、`ST_SRID` 和 `ST_SetSRID` 这五个名称（例如 `sedona_ST_SRID`）是平台自带的函数。
+* Sedona 的 Scala 和 Python DataFrame API 无需修改代码。
+* 使用 Spark 4.2 对应的 Sedona 版本时（该版本使用 Spark 的原生空间类型），带前缀的 `ST_AsBinary`、`ST_GeomFromWKB`、`ST_GeogFromWKB`、`ST_SRID` 和 `ST_SetSRID` 这五个名称（例如 `sedona_ST_SRID`）是 Spark 自带的函数。
 
 前缀允许的取值请参阅 [Parameter](../api/sql/Parameter.md)。
 

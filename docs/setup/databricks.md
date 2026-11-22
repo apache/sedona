@@ -186,17 +186,21 @@ spark.sedona.function.prefix sedona_
 
 Sedona now registers `ST_Buffer` as `sedona_ST_Buffer`, `RS_Value` as `sedona_RS_Value`, and so on. This applies to every SQL function that Sedona registers. Sedona does not register the plain names, and it does not replace a function that already has a plain name. Function names stay case-insensitive.
 
-You can call both kinds of function in one query. Here `sedona_ST_Buffer` and `sedona_ST_GeomFromWKT` are Sedona functions. `ST_Area` is the function that Databricks provides.
+You can call both kinds of function in one query.
 
 ```sql
-SELECT ST_Area(sedona_ST_Buffer(sedona_ST_GeomFromWKT('POINT (1 2)'), 1.0))
+SELECT sedona_ST_Area(sedona_ST_Buffer(sedona_geom, 1.0)) AS sedona_area,
+       ST_Area(platform_geom) AS platform_area
+FROM my_table
 ```
+
+Here `sedona_geom` is a column that holds Sedona geometries, and `platform_geom` is a column in the geometry type that Databricks provides. `sedona_ST_Area` and `sedona_ST_Buffer` are Sedona functions. `ST_Area` is the function that Databricks provides.
 
 Keep these points in mind:
 
 * Set the option in the cluster Spark config, as shown above. The first Sedona session in a JVM fixes the prefix for that JVM. If a later session asks for a different value, Sedona keeps the first one and writes a warning to the log.
-* The Sedona Scala and Python DataFrame APIs need no change in your code. They use the prefix themselves.
-* On a runtime with native spatial types, the five names `ST_AsBinary`, `ST_GeomFromWKB`, `ST_GeogFromWKB`, `ST_SRID` and `ST_SetSRID` with the prefix (for example `sedona_ST_SRID`) are the platform's own functions.
+* The Sedona Scala and Python DataFrame APIs need no change in your code.
+* With the Sedona build for Spark 4.2, which uses Spark's native spatial types, the five names `ST_AsBinary`, `ST_GeomFromWKB`, `ST_GeogFromWKB`, `ST_SRID` and `ST_SetSRID` with the prefix (for example `sedona_ST_SRID`) are Spark's own functions.
 
 See [Parameter](../api/sql/Parameter.md) for the allowed values of the prefix.
 
