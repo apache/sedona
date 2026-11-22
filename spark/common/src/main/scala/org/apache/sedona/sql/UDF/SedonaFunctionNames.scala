@@ -71,18 +71,20 @@ object SedonaFunctionNames {
 
   /**
    * The fixed prefix. Until one is fixed, the key's value in the conf of the active session, else
-   * of the default session, if that value is valid; otherwise "". Reading it fixes nothing. So a
-   * DataFrame column built before the first registrator runs already carries the name Sedona
-   * registers. Public so Python can read it over py4j.
+   * of the default session (a stopped session is skipped), if that value is valid; otherwise "".
+   * Reading it fixes nothing. So a DataFrame column built before the first registrator runs
+   * already carries the name Sedona registers. Public so Python can read it over py4j.
    */
   def effectivePrefix: String = fixedPrefix match {
     case Some(prefix) => prefix
     case None => configuredPrefix
   }
 
+  // A stopped session can stay the thread's active session, so stopped ones are skipped.
   private def configuredPrefix: String =
     SparkSession.getActiveSession
-      .orElse(SparkSession.getDefaultSession)
+      .filterNot(_.sparkContext.isStopped)
+      .orElse(SparkSession.getDefaultSession.filterNot(_.sparkContext.isStopped))
       .map(_.conf.get(PrefixConfigKey, ""))
       .filter(isValid)
       .getOrElse("")
