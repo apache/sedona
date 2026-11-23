@@ -2032,8 +2032,9 @@ class TestDataFrameAPI(TestBase):
             envelope = sta.ST_Envelope_Aggr(square)
         finally:
             SparkContext._jvm = jvm
-        row = self.spark.range(1).select(point, area, intersects).head()
-        assert row[0].wkt == "POINT (0.5 0.5)"
+        # ST_AsText: on Spark 4.2 a geometry comes back as Spark's own type, without .wkt.
+        row = self.spark.range(1).select(stf.ST_AsText(point), area, intersects).head()
+        assert row[0] == "POINT (0.5 0.5)"
         assert row[1] == 1.0
         assert row[2] is True
         assert self.spark.range(1).select(stf.ST_Area(envelope)).head()[0] == 1.0
