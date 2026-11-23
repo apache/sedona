@@ -18,8 +18,9 @@
  */
 package org.apache.sedona.sql.UDF
 
-import org.apache.spark.SparkConf
+import org.apache.spark.SparkContext
 import org.apache.spark.sql.SparkSession
+import org.mockito.Mockito.{mock, when}
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatest.funspec.AnyFunSpec
 
@@ -143,8 +144,7 @@ class SedonaFunctionNamesTest extends AnyFunSpec with BeforeAndAfterAll with Bef
     }
     it("takes the prefix from the application's Spark config when that decides") {
       // As after SedonaSqlExtensions was loaded with sedona_ in the application's config.
-      SedonaFunctionNames.useApplicationConf(
-        new SparkConf(false).set(SedonaFunctionNames.PrefixConfigKey, "sedona_"))
+      SedonaFunctionNames.useApplicationConf(baseSession.sparkContext, "sedona_")
       withActiveSession(SedonaFunctionNames.PrefixConfigKey -> "other_") {
         // Before a registrator runs, and when one runs for the session that asks for other_.
         assert(SedonaFunctionNames.resolve("ST_Point") == "sedona_ST_Point")
@@ -153,7 +153,7 @@ class SedonaFunctionNamesTest extends AnyFunSpec with BeforeAndAfterAll with Bef
       }
     }
     it("takes no prefix when the application's Spark config has none and that decides") {
-      SedonaFunctionNames.useApplicationConf(new SparkConf(false))
+      SedonaFunctionNames.useApplicationConf(baseSession.sparkContext, "")
       withActiveSession(SedonaFunctionNames.PrefixConfigKey -> "other_") {
         assert(SedonaFunctionNames.resolve("ST_Point") == "ST_Point")
         SedonaFunctionNames.initialize(SparkSession.getActiveSession.get, Nil)
@@ -161,14 +161,58 @@ class SedonaFunctionNamesTest extends AnyFunSpec with BeforeAndAfterAll with Bef
       }
     }
     it("rejects an invalid prefix of the application's config whatever the session asks") {
-      SedonaFunctionNames.useApplicationConf(
-        new SparkConf(false).set(SedonaFunctionNames.PrefixConfigKey, "bad-prefix"))
+      SedonaFunctionNames.useApplicationConf(baseSession.sparkContext, "bad-prefix")
       withActiveSession(SedonaFunctionNames.PrefixConfigKey -> "sedona_") {
         val session = SparkSession.getActiveSession.get
         val e = intercept[IllegalArgumentException](SedonaFunctionNames.initialize(session, Nil))
         assert(e.getMessage.contains("'bad-prefix'"))
         intercept[IllegalArgumentException](SedonaFunctionNames.prefixToDrop(session, Nil))
         assert(SedonaFunctionNames.resolve("ST_Point") == "ST_Point")
+      }
+    }
+    it("lets a session decide again once the application that loaded the extension stopped") {
+      // An application loaded the extension with first_ and stopped. The next application in
+      // this JVM does not load the extension.
+      val stopped = mock(classOf[SparkContext])
+      when(stopped.isStopped).thenReturn(true)
+      SedonaFunctionNames.useApplicationConf(stopped, "first_")
+      withActiveSession(SedonaFunctionNames.PrefixConfigKey -> "second_") {
+        val session = SparkSession.getActiveSession.get
+        assert(SedonaFunctionNames.resolve("ST_Point") == "second_ST_Point")
+        assert(SedonaFunctionNames.prefixToDrop(session, Nil) == "second_")
+        assert(SedonaFunctionNames.initialize(session, Nil) == "second_")
+        assert(SedonaFunctionNames.effectivePrefix == "second_")
+      }
+    }
+    it("returns the prefix in effect to the registrator that asked") {
+      withActiveSession(SedonaFunctionNames.PrefixConfigKey -> "sedona_") {
+        val session = SparkSession.getActiveSession.get
+        assert(SedonaFunctionNames.initialize(session, Nil) == "sedona_")
+        val other = baseSession.newSession()
+        other.conf.set(SedonaFunctionNames.PrefixConfigKey, "other_")
+        assert(SedonaFunctionNames.initialize(other, Nil) == "sedona_")
+      }
+    }
+    it("uses the default session on a thread that has no active session") {
+      val session = baseSession.newSession()
+      session.conf.set(SedonaFunctionNames.PrefixConfigKey, "sedona_")
+      val previous = SparkSession.getDefaultSession
+      SparkSession.setDefaultSession(session)
+      try {
+        var resolved: (Option[SparkSession], String) = null
+        val worker = new Thread(() => {
+          // A new thread inherits the active session of the thread that starts it.
+          SparkSession.clearActiveSession()
+          resolved = (SparkSession.getActiveSession, SedonaFunctionNames.resolve("ST_Point"))
+        })
+        worker.start()
+        worker.join()
+        assert(resolved == ((None, "sedona_ST_Point")))
+      } finally {
+        previous match {
+          case Some(s) => SparkSession.setDefaultSession(s)
+          case None => SparkSession.clearDefaultSession()
+        }
       }
     }
     it("rejects an invalid prefix when dropping, as when registering") {
@@ -185,6 +229,17 @@ class SedonaFunctionNamesTest extends AnyFunSpec with BeforeAndAfterAll with Bef
       assert(SedonaFunctionNames.prefixOfListedNames(Seq(marker)) == "")
       // No Sedona on the server, or a Sedona from before the prefix.
       assert(SedonaFunctionNames.prefixOfListedNames(Nil) == "")
+      // Spark lists names in lower case, whatever the case of the prefix.
+      assert(
+        SedonaFunctionNames.prefixOfListedNames(
+          Seq("sedona_" + marker, "SEDONA_" + marker)) == "sedona_")
+    }
+    it("refuses to choose between two listed marker functions") {
+      // The session has a temporary function under the marker's plain name.
+      val marker = SedonaFunctionNames.MarkerFunctionName
+      val e = intercept[IllegalStateException](
+        SedonaFunctionNames.prefixOfListedNames(Seq(marker, "sedona_" + marker)))
+      assert(e.getMessage.contains(s"($marker, sedona_$marker)"), e.getMessage)
     }
     it("resolves to the plain name while the active session has no prefix") {
       withActiveSession() {

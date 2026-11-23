@@ -28,6 +28,7 @@ from sedona.spark.sql import st_constructors as stc
 from sedona.spark.sql import st_functions as stf
 from sedona.spark.sql import st_predicates as stp
 from sedona.spark.sql._function_names import (
+    _MARKER_FUNCTION_NAME,
     PREFIX_CONFIG_KEY,
     call_sedona_function_by_name,
     function_prefix,
@@ -42,8 +43,11 @@ pytestmark = pytest.mark.skipif(not PREFIX, reason="needs SEDONA_TEST_FUNCTION_P
 
 class TestPrefixDataFrameApi(TestBase):
     def test_prefix_is_visible_to_python(self):
-        assert function_prefix(self.spark) == PREFIX
-        assert resolve_function_name("ST_Point", self.spark) == PREFIX + "ST_Point"
+        # A Spark Connect client reads the prefix from the server's function list, which is in
+        # lower case. Spark resolves function names ignoring case.
+        expected = PREFIX.lower() if SPARK_REMOTE else PREFIX
+        assert function_prefix(self.spark) == expected
+        assert resolve_function_name("ST_Point", self.spark) == expected + "ST_Point"
 
     def test_prefixed_sql(self):
         row = self.spark.sql(
@@ -82,11 +86,8 @@ class TestPrefixDataFrameApi(TestBase):
             == 2
         )
 
-    @pytest.mark.skipif(not SPARK_REMOTE, reason="needs Spark Connect")
-    @pytest.mark.parametrize("query_first", [False, True])
-    def test_second_connect_session_asking_for_another_prefix(self, query_first):
-        # The session sets the key before its first query, or after the server registered
-        # Sedona for it. Either way the wrappers must use the server's prefix.
+    def _in_second_connect_session(self, body):
+        """Return body(session) for a second Spark Connect session, run on a thread of its own."""
         from pyspark.sql.connect.session import SparkSession as ConnectSession
 
         self.spark  # starts the server for SPARK_REMOTE=local
@@ -99,14 +100,7 @@ class TestPrefixDataFrameApi(TestBase):
             # active one in this thread, and the wrappers resolve the prefix through it.
             second = ConnectSession.builder.remote(url).create()
             try:
-                if query_first:
-                    second.sql("SELECT 1").collect()
-                second.conf.set(PREFIX_CONFIG_KEY, "other_")
-                outcome["wkt"] = (
-                    second.range(1)
-                    .select(stf.ST_AsText(stc.ST_Point(1.0, 2.0)))
-                    .head()[0]
-                )
+                outcome["result"] = body(second)
             except Exception as error:
                 outcome["error"] = error
             finally:
@@ -118,7 +112,53 @@ class TestPrefixDataFrameApi(TestBase):
         thread.join()
         if "error" in outcome:
             raise outcome["error"]
-        assert outcome["wkt"] == "POINT (1 2)"
+        return outcome["result"]
+
+    @staticmethod
+    def _point_as_text(session):
+        return session.range(1).select(stf.ST_AsText(stc.ST_Point(1.0, 2.0))).head()[0]
+
+    @pytest.mark.skipif(not SPARK_REMOTE, reason="needs Spark Connect")
+    @pytest.mark.parametrize("query_first", [False, True])
+    def test_second_connect_session_asking_for_another_prefix(self, query_first):
+        # The session sets the key before its first query, or after the server registered
+        # Sedona for it. Either way the wrappers must use the server's prefix.
+        def body(second):
+            if query_first:
+                second.sql("SELECT 1").collect()
+            second.conf.set(PREFIX_CONFIG_KEY, "other_")
+            return self._point_as_text(second)
+
+        assert self._in_second_connect_session(body) == "POINT (1 2)"
+
+    @pytest.mark.skipif(not SPARK_REMOTE, reason="needs Spark Connect")
+    def test_connect_session_with_another_current_catalog(self):
+        # Spark lists no Sedona function for a JDBC catalog, so the wrappers must not look
+        # for the prefix in the session's current catalog.
+        def body(second):
+            catalog = "spark.sql.catalog.sedona_prefix_test"
+            second.conf.set(
+                catalog,
+                "org.apache.spark.sql.execution.datasources.v2.jdbc.JDBCTableCatalog",
+            )
+            second.conf.set(
+                catalog + ".url", "jdbc:derby:memory:sedona_prefix_test;create=true"
+            )
+            second.catalog.setCurrentCatalog("sedona_prefix_test")
+            return self._point_as_text(second)
+
+        assert self._in_second_connect_session(body) == "POINT (1 2)"
+
+    @pytest.mark.skipif(not SPARK_REMOTE, reason="needs Spark Connect")
+    def test_connect_session_with_a_function_named_like_the_marker(self):
+        # The server then lists two functions, and the wrappers must not guess which is
+        # Sedona's.
+        def body(second):
+            second.udf.register(_MARKER_FUNCTION_NAME, lambda _: 0, "int")
+            return self._point_as_text(second)
+
+        with pytest.raises(RuntimeError, match="Cannot tell the prefix"):
+            self._in_second_connect_session(body)
 
     def test_by_name_helper(self):
         df = self.spark.range(1).select(

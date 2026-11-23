@@ -22,8 +22,8 @@ import org.apache.sedona.spark.SedonaContext
 import org.apache.sedona.sql.UDF.{Catalog, NativeFunctionRegistrationTest, SedonaFunctionNames}
 import org.apache.sedona.sql.UDT.UdtRegistrator
 import org.apache.sedona.sql.utils.GeoToolsCoverageAvailability.{gridClassName, isGeoToolsAvailable}
+import org.apache.sedona.viz.sql.SedonaVizExtensions
 import org.apache.sedona.viz.sql.utils.SedonaVizRegistrator
-import org.apache.spark.SparkConf
 import org.apache.spark.sql.{SparkSession, SparkSessionExtensions}
 import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry
@@ -208,21 +208,38 @@ class FunctionPrefixBeforeRegistrationSuite extends AnyFunSpec with BeforeAndAft
     }
 
     it("lets the application's Spark config decide when loaded through spark.sql.extensions") {
-      SedonaFunctionNames.resetForTesting()
-      // Spark calls this when it loads the extension. The test context's config has no prefix.
-      new SedonaSqlExtensions().apply(new SparkSessionExtensions)
+      // Spark calls apply when it loads an extension. The test context's config has no prefix.
+      val extensions: Seq[SparkSessionExtensions => Unit] =
+        Seq(new SedonaSqlExtensions, new SedonaVizExtensions)
       val expected = spark.sparkContext.getConf.get(SedonaFunctionNames.PrefixConfigKey, "")
+      extensions.foreach { extension =>
+        SedonaFunctionNames.resetForTesting()
+        extension(new SparkSessionExtensions)
+        val client = spark.newSession()
+        client.conf.set(SedonaFunctionNames.PrefixConfigKey, "other_")
+        withActiveSession(client) {
+          assert(SedonaFunctionNames.effectivePrefix == expected, extension.getClass.getName)
+        }
+      }
+    }
+
+    it("registers the viz functions under the application's prefix too") {
+      SedonaFunctionNames.resetForTesting()
+      SedonaFunctionNames.useApplicationConf(spark.sparkContext, P)
       val client = spark.newSession()
       client.conf.set(SedonaFunctionNames.PrefixConfigKey, "other_")
       withActiveSession(client) {
-        assert(SedonaFunctionNames.effectivePrefix == expected)
+        SedonaVizRegistrator.registerAll(client)
+        assert(SedonaFunctionNames.effectivePrefix == P)
+        assert(client.catalog.functionExists(P + "ST_TileName"))
+        assert(!client.catalog.functionExists("other_ST_TileName"))
+        SedonaVizRegistrator.dropAll(client)
       }
     }
 
     it("registers under the application's prefix for a session that asks for another") {
       SedonaFunctionNames.resetForTesting()
-      SedonaFunctionNames.useApplicationConf(
-        new SparkConf(false).set(SedonaFunctionNames.PrefixConfigKey, P))
+      SedonaFunctionNames.useApplicationConf(spark.sparkContext, P)
       // As the first session of a Spark Connect client that set the key before its first query.
       val client = spark.newSession()
       client.conf.set(SedonaFunctionNames.PrefixConfigKey, "other_")

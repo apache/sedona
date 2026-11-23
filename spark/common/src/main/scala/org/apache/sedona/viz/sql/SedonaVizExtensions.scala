@@ -18,11 +18,16 @@
  */
 package org.apache.sedona.viz.sql
 
+import org.apache.sedona.sql.UDF.SedonaFunctionNames
 import org.apache.sedona.viz.sql.utils.SedonaVizRegistrator
+import org.apache.spark.SparkContext
 import org.apache.spark.sql.SparkSessionExtensions
 
 class SedonaVizExtensions extends (SparkSessionExtensions => Unit) {
   def apply(e: SparkSessionExtensions): Unit = {
+    // As in SedonaSqlExtensions: the check rule below registers for every session, so the
+    // function name prefix comes from the application's Spark config.
+    SedonaFunctionNames.useApplicationConf(SparkContext.getOrCreate())
     e.injectCheckRule(spark => {
       SedonaVizRegistrator.registerAll(spark)
       _ => ()

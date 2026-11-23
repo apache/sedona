@@ -47,10 +47,9 @@ object UdfRegistrator {
   }
 
   def registerAll(sparkSession: SparkSession): Unit = {
-    SedonaFunctionNames.initialize(sparkSession, PlainFunctionNames.all)
+    val prefix = SedonaFunctionNames.initialize(sparkSession, PlainFunctionNames.all)
     Catalog.expressions.foreach(f => {
-      val identifier =
-        functionIdentifier(SedonaFunctionNames.resolve(plainScalarName(f)), "builtin")
+      val identifier = functionIdentifier(prefix + plainScalarName(f), "builtin")
       val expressionInfo = new ExpressionInfo(
         f.getClass.getCanonicalName,
         identifier.database.orNull,
@@ -59,7 +58,7 @@ object UdfRegistrator {
         .registerFunction(identifier, expressionInfo, SpatialTypeSupport.adaptFunction(f))
     })
     Catalog.aggregateExpressions.foreach(f =>
-      sparkSession.udf.register(SedonaFunctionNames.resolve(plainAggregateName(f)), f))
+      sparkSession.udf.register(prefix + plainAggregateName(f), f))
   }
 
   def dropAll(sparkSession: SparkSession): Unit = {

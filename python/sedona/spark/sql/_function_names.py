@@ -43,6 +43,13 @@ PREFIX_CONFIG_KEY = "spark.sedona.function.prefix"
 # the name the server lists this function under. SedonaFunctionNames.scala has the same name.
 _MARKER_FUNCTION_NAME = "__sedona_internal_coverage_invalid_edges_for_target"
 
+# Lists the marker function. The namespace is named: without one Spark lists the functions of
+# the session's current catalog, which may list none of Sedona's or may not support functions
+# at all. SedonaFunctionNames.scala runs the same statement.
+_MARKER_LOOKUP_SQL = (
+    f"SHOW FUNCTIONS IN spark_catalog.default LIKE '*{_MARKER_FUNCTION_NAME}'"
+)
+
 # A Spark Connect session caches the prefix its server reported under this attribute.
 _PREFIX_CACHE_ATTRIBUTE = "_sedona_function_prefix"
 
@@ -51,10 +58,19 @@ def _prefix_of_listed_names(listed) -> str:
     # Spark lists function names in lower case, and resolves them ignoring case. No name means
     # no Sedona on the server, or a Sedona from before the prefix.
     marker = _MARKER_FUNCTION_NAME.lower()
-    prefixes = [
-        name.lower()[: -len(marker)] for name in listed if name.lower().endswith(marker)
-    ]
-    return min(prefixes, key=len) if prefixes else ""
+    names = sorted({name.lower() for name in listed if name.lower().endswith(marker)})
+    if not names:
+        return ""
+    if len(names) > 1:
+        # Sedona registers the marker under one name. The others are not Sedona's, for example
+        # a temporary function of the session, and the list does not say which they are. A
+        # guessed prefix could call a platform's function.
+        raise RuntimeError(
+            "Cannot tell the prefix of Sedona's function names: the session has more than "
+            f"one function whose name ends in {_MARKER_FUNCTION_NAME} ({', '.join(names)}). "
+            "Drop the ones that are not Sedona's."
+        )
+    return names[0][: -len(marker)]
 
 
 def _active_or_default_session() -> Optional[SparkSession]:
@@ -84,9 +100,7 @@ def function_prefix(spark: Optional[SparkSession] = None) -> str:
             # Listing the function also makes a server that loads Sedona through
             # spark.sql.extensions register Sedona for this session first. An error
             # propagates: a guessed plain name could call a platform's function.
-            rows = spark.sql(
-                f"SHOW FUNCTIONS LIKE '*{_MARKER_FUNCTION_NAME}'"
-            ).collect()
+            rows = spark.sql(_MARKER_LOOKUP_SQL).collect()
             prefix = _prefix_of_listed_names(row[0] for row in rows)
             setattr(spark, _PREFIX_CACHE_ATTRIBUTE, prefix)
         return prefix

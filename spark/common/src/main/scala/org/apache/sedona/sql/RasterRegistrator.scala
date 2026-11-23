@@ -37,11 +37,11 @@ object RasterRegistrator {
     }
 
   def registerAll(sparkSession: SparkSession): Unit = {
-    SedonaFunctionNames.initialize(sparkSession, PlainFunctionNames.all)
+    val prefix = SedonaFunctionNames.initialize(sparkSession, PlainFunctionNames.all)
     if (isGeoToolsAvailable) {
       RasterUdtRegistratorWrapper.registerAll(gridClassName)
-      val functionName = SedonaFunctionNames.resolve(
-        RasterUdafCatalog.rasterAggregateExpression.getClass.getSimpleName)
+      val functionName =
+        prefix + RasterUdafCatalog.rasterAggregateExpression.getClass.getSimpleName
       val identifier = functionIdentifier(functionName)
       if (!sparkSession.sessionState.functionRegistry.functionExists(identifier)) {
         sparkSession.udf.register(

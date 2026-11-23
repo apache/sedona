@@ -15,7 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""function_prefix on classic when the JVM's Sedona jar has no SedonaFunctionNames.
+"""function_prefix on classic when the JVM's Sedona jar has no SedonaFunctionNames, and the
+prefix a Spark Connect client reads from the functions its server lists.
 
 These tests need no JVM and no SEDONA_TEST_FUNCTION_PREFIX.
 """
@@ -27,7 +28,12 @@ from py4j.java_gateway import JavaPackage
 from py4j.protocol import Py4JError, Py4JNetworkError
 
 from sedona.spark.sql import _function_names
-from sedona.spark.sql._function_names import function_prefix, resolve_function_name
+from sedona.spark.sql._function_names import (
+    _MARKER_FUNCTION_NAME,
+    _prefix_of_listed_names,
+    function_prefix,
+    resolve_function_name,
+)
 
 
 class _Lookup:
@@ -88,3 +94,18 @@ def test_other_errors_propagate():
 
     with pytest.raises(RuntimeError, match="boom"):
         function_prefix(_session(_Lookup(leaf=fail)))
+
+
+def test_prefix_of_the_listed_marker_function():
+    assert _prefix_of_listed_names(["sedona_" + _MARKER_FUNCTION_NAME]) == "sedona_"
+    assert _prefix_of_listed_names([_MARKER_FUNCTION_NAME]) == ""
+    # No Sedona on the server, or a Sedona from before the prefix.
+    assert _prefix_of_listed_names([]) == ""
+
+
+def test_two_listed_marker_functions_are_an_error():
+    # The session has a temporary function under the marker's plain name.
+    with pytest.raises(RuntimeError, match="more than one function"):
+        _prefix_of_listed_names(
+            [_MARKER_FUNCTION_NAME, "sedona_" + _MARKER_FUNCTION_NAME]
+        )

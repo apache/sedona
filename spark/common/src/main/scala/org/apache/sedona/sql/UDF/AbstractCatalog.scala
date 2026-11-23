@@ -69,10 +69,6 @@ abstract class AbstractCatalog {
   private[sedona] val aggregateAliasNames: Seq[String] =
     Seq("ST_Envelope_Agg", "ST_Intersection_Agg", "ST_Union_Agg")
 
-  /** The registry identifier for `name` under the effective prefix. */
-  private def resolvedIdentifier(name: String): FunctionIdentifier =
-    prefixedIdentifier(SedonaFunctionNames.effectivePrefix, name)
-
   /** The registry identifier for `name` under `prefix`. */
   private def prefixedIdentifier(prefix: String, name: String): FunctionIdentifier =
     registryIdentifier(FunctionIdentifier(prefix + name))
@@ -140,10 +136,10 @@ abstract class AbstractCatalog {
   }
 
   def registerAll(sparkSession: SparkSession): Unit = {
-    SedonaFunctionNames.initialize(sparkSession, PlainFunctionNames.all)
+    val prefix = SedonaFunctionNames.initialize(sparkSession, PlainFunctionNames.all)
     val registry = sparkSession.sessionState.functionRegistry
     registeredExpressions.foreach { case (identifier, expressionInfo, functionBuilder) =>
-      val functionIdentifier = resolvedIdentifier(identifier.funcName)
+      val functionIdentifier = prefixedIdentifier(prefix, identifier.funcName)
       val shouldRegister = registry.lookupFunction(functionIdentifier) match {
         case Some(existingInfo) =>
           // Skip if Sedona already registered this function (e.g., SedonaContext.create called
@@ -163,14 +159,17 @@ abstract class AbstractCatalog {
         FunctionRegistry.builtin.registerFunction(functionIdentifier, info, builder)
       }
     }
-    registerSparkNativeAliases(sparkSession)
+    registerSparkNativeAliases(sparkSession, prefix)
     aggregateExpressions.foreach { f =>
-      registerAggregateFunction(sparkSession, f.getClass.getSimpleName, f)
+      registerAggregateFunction(sparkSession, prefix + f.getClass.getSimpleName, f)
     }
     // Register aliases for *_Aggr functions with *_Agg suffix
-    registerAggregateFunction(sparkSession, "ST_Envelope_Agg", new ST_Envelope_Aggr)
-    registerAggregateFunction(sparkSession, "ST_Intersection_Agg", new ST_Intersection_Aggr)
-    registerAggregateFunction(sparkSession, "ST_Union_Agg", new ST_Union_Aggr())
+    registerAggregateFunction(sparkSession, prefix + "ST_Envelope_Agg", new ST_Envelope_Aggr)
+    registerAggregateFunction(
+      sparkSession,
+      prefix + "ST_Intersection_Agg",
+      new ST_Intersection_Aggr)
+    registerAggregateFunction(sparkSession, prefix + "ST_Union_Agg", new ST_Union_Aggr())
   }
 
   // Registers each prefixed Spark 4.2 name with the ExpressionInfo and builder of Spark's own
@@ -178,15 +177,15 @@ abstract class AbstractCatalog {
   // that Spark does not have is skipped. Spark's function comes from the builtin registry: the
   // session's may hold a function of the session's own under that name, and the alias goes into
   // the builtin registry, which every later session starts from.
-  private def registerSparkNativeAliases(sparkSession: SparkSession): Unit = {
+  private def registerSparkNativeAliases(sparkSession: SparkSession, prefix: String): Unit = {
     val registry = sparkSession.sessionState.functionRegistry
-    sparkNativeAliases(SedonaFunctionNames.effectivePrefix).foreach { name =>
+    sparkNativeAliases(prefix).foreach { name =>
       val sparkIdentifier = registryIdentifier(FunctionIdentifier(name))
       for {
         info <- FunctionRegistry.builtin.lookupFunction(sparkIdentifier)
         builder <- FunctionRegistry.builtin.lookupFunctionBuilder(sparkIdentifier)
       } {
-        val aliasIdentifier = resolvedIdentifier(name)
+        val aliasIdentifier = prefixedIdentifier(prefix, name)
         registry.registerFunction(aliasIdentifier, info, builder)
         FunctionRegistry.builtin.registerFunction(aliasIdentifier, info, builder)
       }
@@ -224,9 +223,8 @@ abstract class AbstractCatalog {
 
   private def registerAggregateFunction(
       sparkSession: SparkSession,
-      plainName: String,
+      functionName: String,
       aggregator: Aggregator[Geometry, _, _]): Unit = {
-    val functionName = SedonaFunctionNames.resolve(plainName)
     val functionIdentifier = registryIdentifier(FunctionIdentifier(functionName))
     val registry = sparkSession.sessionState.functionRegistry
     val udaf = functions.udaf(aggregator)

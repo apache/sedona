@@ -28,15 +28,26 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry
 import org.apache.spark.sql.catalyst.expressions.{Expression, ExpressionInfo, Literal}
+import org.apache.spark.sql.connector.catalog.CatalogPlugin
 import org.apache.spark.sql.functions.{col, lit}
 import org.apache.spark.sql.sedona_sql.UDT.RasterUdtRegistratorWrapper
 import org.apache.spark.sql.sedona_sql.expressions.{st_aggregates, st_constructors, st_functions}
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
+import org.apache.spark.sql.util.CaseInsensitiveStringMap
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funspec.AnyFunSpec
 
 import java.nio.file.Files
 import java.util.Locale
+import scala.util.Try
+
+/** A catalog with no tables and no functions, as the current catalog of a session. */
+class NoFunctionsCatalog extends CatalogPlugin {
+  private var catalogName: String = _
+  override def initialize(name: String, options: CaseInsensitiveStringMap): Unit =
+    catalogName = name
+  override def name(): String = catalogName
+}
 
 /**
  * Registers Sedona with the function name prefix set. The prefix and FunctionRegistry.builtin are
@@ -232,12 +243,31 @@ class FunctionPrefixSuite extends AnyFunSpec with BeforeAndAfterAll {
       val client = spark.newSession()
       client.conf.set(SedonaFunctionNames.PrefixConfigKey, "other_")
       SedonaContext.create(client)
-      val listed = client
-        .sql(s"SHOW FUNCTIONS LIKE '*${SedonaFunctionNames.MarkerFunctionName}'")
-        .collect()
-        .map(_.getString(0))
+      val listed = client.sql(SedonaFunctionNames.MarkerLookupSql).collect().map(_.getString(0))
       assert(listed.length == 1, listed.mkString(", "))
       assert(SedonaFunctionNames.prefixOfListedNames(listed) == P)
+    }
+
+    it("lists the marker function when the current catalog has no functions") {
+      val client = spark.newSession()
+      client.conf.set("spark.sql.catalog.no_functions", classOf[NoFunctionsCatalog].getName)
+      client.sql("USE no_functions")
+      // Without a namespace Spark asks the current catalog, which cannot list functions.
+      val unqualified = Try(
+        client
+          .sql(s"SHOW FUNCTIONS LIKE '*${SedonaFunctionNames.MarkerFunctionName}'")
+          .collect())
+      assert(unqualified.toOption.forall(_.isEmpty), unqualified.toString)
+      val listed = client.sql(SedonaFunctionNames.MarkerLookupSql).collect().map(_.getString(0))
+      assert(SedonaFunctionNames.prefixOfListedNames(listed) == P, listed.mkString(", "))
+    }
+
+    it("lists two marker functions when the session has one of its own") {
+      val client = spark.newSession()
+      client.udf.register(SedonaFunctionNames.MarkerFunctionName, (_: Int) => 0)
+      val listed = client.sql(SedonaFunctionNames.MarkerLookupSql).collect().map(_.getString(0))
+      assert(listed.length == 2, listed.mkString(", "))
+      intercept[IllegalStateException](SedonaFunctionNames.prefixOfListedNames(listed))
     }
 
     it("drops and re-registers the prefixed names") {

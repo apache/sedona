@@ -36,7 +36,7 @@ class SedonaSqlExtensions extends (SparkSessionExtensions => Unit) {
     // The check rule below registers Sedona for every session, also for the session of a Spark
     // Connect client. So the function name prefix comes from the application's Spark config, not
     // from the conf of whichever session is analysed first.
-    SedonaFunctionNames.useApplicationConf(SparkContext.getOrCreate().getConf)
+    SedonaFunctionNames.useApplicationConf(SparkContext.getOrCreate())
     e.injectCheckRule(spark => {
       SedonaContext.create(spark)
       _ => ()
