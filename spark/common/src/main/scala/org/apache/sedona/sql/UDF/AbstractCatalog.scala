@@ -175,14 +175,16 @@ abstract class AbstractCatalog {
 
   // Registers each prefixed Spark 4.2 name with the ExpressionInfo and builder of Spark's own
   // function, so Sedona's classes for these names stay unregistered under any prefix. A name
-  // that Spark does not have is skipped.
+  // that Spark does not have is skipped. Spark's function comes from the builtin registry: the
+  // session's may hold a function of the session's own under that name, and the alias goes into
+  // the builtin registry, which every later session starts from.
   private def registerSparkNativeAliases(sparkSession: SparkSession): Unit = {
     val registry = sparkSession.sessionState.functionRegistry
     sparkNativeAliases(SedonaFunctionNames.effectivePrefix).foreach { name =>
       val sparkIdentifier = registryIdentifier(FunctionIdentifier(name))
       for {
-        info <- registry.lookupFunction(sparkIdentifier)
-        builder <- registry.lookupFunctionBuilder(sparkIdentifier)
+        info <- FunctionRegistry.builtin.lookupFunction(sparkIdentifier)
+        builder <- FunctionRegistry.builtin.lookupFunctionBuilder(sparkIdentifier)
       } {
         val aliasIdentifier = resolvedIdentifier(name)
         registry.registerFunction(aliasIdentifier, info, builder)

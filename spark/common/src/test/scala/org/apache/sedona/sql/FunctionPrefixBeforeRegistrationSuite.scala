@@ -182,6 +182,32 @@ class FunctionPrefixBeforeRegistrationSuite extends AnyFunSpec with BeforeAndAft
       }
     }
 
+    it("aliases the Spark 4.2 names to Spark's own functions, not to a session's") {
+      assume(
+        SpatialTypeSupport.usesNativeTypes,
+        "Spark 4.2 native spatial types are not available")
+      SedonaFunctionNames.resetForTesting()
+      val session = spark.newSession()
+      session.conf.set(SedonaFunctionNames.PrefixConfigKey, P)
+      // The session has its own ST_SRID before Sedona registers.
+      registerPlatformMarker(identifier("ST_SRID", "builtin"), session)
+      withActiveSession(session)(Catalog.registerAll(session))
+      // The alias went into the JVM-wide builtin registry, so a fresh session shows it.
+      val fresh = spark.newSession()
+      val alias = fresh.sessionState.functionRegistry
+        .lookupFunction(identifier(P + "ST_SRID", "builtin"))
+        .map(_.getClassName)
+      assert(
+        alias.exists(_.startsWith("org.apache.spark.sql.catalyst.expressions.st.")),
+        alias.toString)
+      val srid = fresh
+        .sql(s"SELECT ${P}ST_SRID(${P}ST_SetSRID(" +
+          s"${P}ST_GeomFromWKB(X'0101000000000000000000F03F0000000000000040'), 4326))")
+        .head()
+        .getInt(0)
+      assert(srid == 4326)
+    }
+
     it("resolves a DataFrame column built before SedonaContext.create") {
       SedonaFunctionNames.resetForTesting()
       withActiveSession(spark) {
