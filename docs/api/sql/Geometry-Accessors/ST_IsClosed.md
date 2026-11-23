@@ -19,7 +19,7 @@
 
 # ST_IsClosed
 
-Introduction: RETURNS true if the LINESTRING start and end point are the same. Points and polygons are closed. A MULTI* geometry or GEOMETRYCOLLECTION is closed when all of its members are. An empty geometry is not closed, and neither is a MULTI* geometry or GEOMETRYCOLLECTION with an empty member.
+Introduction: RETURNS true if the LINESTRING start and end point are the same. Points and polygons are closed. A `MULTI*` geometry or GEOMETRYCOLLECTION is closed when all of its members are. An empty geometry is not closed, and neither is a `MULTI*` geometry or GEOMETRYCOLLECTION with an empty member.
 
 ![ST_IsClosed](../../../image/ST_IsClosed/ST_IsClosed.svg "ST_IsClosed")
 
