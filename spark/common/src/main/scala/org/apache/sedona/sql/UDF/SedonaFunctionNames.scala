@@ -125,9 +125,13 @@ object SedonaFunctionNames {
   // asking for one throws; such a session is never taken for stopped.
   private def sessionPrefix(session: Option[SparkSession]): Option[String] =
     session.flatMap { s =>
-      Try(s.sparkContext) match {
-        case Success(context) => if (context.isStopped) None else Some(confPrefix(s))
-        case Failure(_) => Some(connectPrefix(s))
+      // The cache first: a Connect client resolves every function name through here, and the
+      // exception below costs more than a map lookup.
+      Option(connectPrefixes.get(s)).orElse {
+        Try(s.sparkContext) match {
+          case Success(context) => if (context.isStopped) None else Some(confPrefix(s))
+          case Failure(_) => Some(connectPrefix(s))
+        }
       }
     }
 
