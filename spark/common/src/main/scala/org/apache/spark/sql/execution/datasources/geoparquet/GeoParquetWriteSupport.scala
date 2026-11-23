@@ -34,7 +34,8 @@ import org.apache.spark.sql.catalyst.util.{CaseInsensitiveMap, DateTimeUtils}
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData.{GEOPARQUET_COVERING_KEY, GEOPARQUET_COVERING_MODE_AUTO, GEOPARQUET_COVERING_MODE_KEY, GEOPARQUET_COVERING_MODE_LEGACY, GEOPARQUET_CRS_KEY, GEOPARQUET_VERSION_KEY, VERSION, createCoveringColumnMetadata}
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetWriteSupport.GeometryColumnInfo
 import org.apache.spark.sql.execution.datasources.geoparquet.internal.{DataSourceUtils, LegacyBehaviorPolicy, PortableSQLConf}
-import org.apache.spark.sql.sedona_sql.types.{PublicWkbHeaderAdapter, SpatialTypeSupport}
+import org.apache.sedona.sql.utils.GeographySerializer
+import org.apache.spark.sql.sedona_sql.types.{GeographyWkbScanner, PublicWkbHeaderAdapter, SpatialTypeSupport}
 import org.apache.spark.sql.types._
 import org.json4s.JValue
 import org.json4s.jackson.JsonMethods.parse
@@ -120,9 +121,9 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
   // None when it found no geometry before it had to open the file.
   private val firstGeometrySrids: mutable.Map[Int, Option[Int]] = mutable.Map.empty
   // The geography columns of a GeoParquet 2 file, which stores them in the GEOGRAPHY logical
-  // type: the geography columns at the root of the schema, with the geometry types that their
+  // type: the geography columns at the root of the schema, with the ISO type codes that their
   // values have shown. A GeoParquet 1 file has no such columns.
-  private val geographyColumnTypes: mutable.Map[Int, mutable.Set[String]] =
+  private val geographyColumnTypes: mutable.Map[Int, mutable.BitSet] =
     mutable.LinkedHashMap.empty
   private var geographyColumnCrs: Map[Int, Option[JValue]] = Map.empty
   private val geoParquetColumnCoveringMap: mutable.Map[String, Covering] = mutable.Map.empty
@@ -155,7 +156,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       if (SpatialTypeSupport.isGeometry(field.dataType)) {
         geometryColumnInfoMap.getOrElseUpdate(ordinal, new GeometryColumnInfo())
       } else if (writesGeospatialTypes && SpatialTypeSupport.isGeography(field.dataType)) {
-        geographyColumnTypes.getOrElseUpdate(ordinal, mutable.Set.empty)
+        geographyColumnTypes.getOrElseUpdate(ordinal, mutable.BitSet.empty)
       }
     }
 
@@ -245,11 +246,19 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
                   s"$GEOPARQUET_CRS_KEY or $GEOPARQUET_CRS_KEY.${field.name} to the CRS of the " +
                   "column.")
             }
-            val srid = GeoParquetWriteSupport.geographySrid(
+            val srid = GeoParquetNativeCrs.geographySrid(
               if (found == GeoParquetWriteSupport.NO_FIRST_GEOMETRY) 0 else found.toInt)
             firstGeometrySrids.put(ordinal, Some(srid))
             GeoParquetNativeCrs.writeCrs(field.name, srid, None)
           }
+      }
+      // Sedona's own geography type takes any SRID, and a CRS option any CRS
+      crs.filterNot(GeoParquetMetaData.isGeographicCrs).foreach { projjson =>
+        throw new IllegalArgumentException(
+          s"The CRS of the geography column '${field.name}' is not a geographic one: " +
+            s"${GeoParquetMetaData.crsName(projjson)}. The GEOGRAPHY logical type of the " +
+            "Parquet format takes a geographic CRS, with longitudes and latitudes as its " +
+            "coordinates")
       }
       ordinal -> crs
     }.toMap
@@ -357,10 +366,10 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       }.toMap
       // A geography column has no bounding box here: the one of this metadata is planar, and
       // the edges of a geography leave the planar bounding box of their end points.
-      val geographyColumns = geographyColumnTypes.map { case (ordinal, geometryTypes) =>
+      val geographyColumns = geographyColumnTypes.map { case (ordinal, typeCodes) =>
         schema.fields(ordinal).name -> GeometryFieldMetaData(
           "WKB",
-          geometryTypes.toSeq,
+          typeCodes.toSeq.flatMap(GeoParquetWriteSupport.geometryTypeName),
           None,
           geographyColumnCrs(ordinal),
           None,
@@ -667,28 +676,46 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
 
       case dt if rootOrdinal.exists(geographyColumnTypes.contains) =>
         val column = schema(rootOrdinal.get).name
-        val geometryTypes = geographyColumnTypes(rootOrdinal.get)
+        val typeCodes = geographyColumnTypes(rootOrdinal.get)
         val typeSrid = SpatialTypeSupport.geographySrid(dt)
         val firstSrid = firstGeometrySrids.get(rootOrdinal.get).flatten
+        val native = SpatialTypeSupport.isNativeGeography(dt)
         (row: SpecializedGetters, ordinal: Int) => {
-          // The WKB of the value is stored as it is, without a JTS or S2 object in between
-          val (source, srid) = SpatialTypeSupport.readGeographyWkb(row, ordinal, dt)
-          typeSrid.foreach(GeoParquetNativeCrs.requireSrid(column, _, srid))
-          firstSrid.foreach { expected =>
-            if (GeoParquetWriteSupport.geographySrid(srid) != expected) {
-              throw GeoParquetWriteSupport.secondSrid(
-                geoParquetVersion.get,
-                column,
-                Some(expected),
-                srid)
-            }
+          // The WKB of the value is stored as it is, without a JTS or S2 object in between. A
+          // value of Sedona's own geography type is its SRID and its WKB in one array, which
+          // the column takes the WKB from without another copy.
+          var bytes: Array[Byte] = null
+          var offset = 0
+          var srid = 0
+          if (native) {
+            val value = SpatialTypeSupport.nativeGeographyWkb(row, ordinal, dt)
+            bytes = value._1
+            srid = value._2
+          } else {
+            bytes = row.getBinary(ordinal)
+            offset = GeographySerializer.WKB_OFFSET
+            srid = GeographySerializer.readSRID(bytes)
           }
-          val wkb = PublicWkbHeaderAdapter.toIsoWkbInPlace(source)
-          recordConsumer.addBinary(Binary.fromConstantByteArray(wkb))
-          val order = if (wkb(0) == 0) ByteOrder.BIG_ENDIAN else ByteOrder.LITTLE_ENDIAN
-          GeoParquetWriteSupport
-            .geometryTypeName(ByteBuffer.wrap(wkb, 1, 4).order(order).getInt)
-            .foreach(geometryTypes.add)
+          if (typeSrid.isDefined) GeoParquetNativeCrs.requireSrid(column, typeSrid.get, srid)
+          if (firstSrid.isDefined && GeoParquetNativeCrs.geographySrid(srid) != firstSrid.get) {
+            throw GeoParquetWriteSupport.secondSrid(
+              geoParquetVersion.get,
+              column,
+              firstSrid,
+              srid)
+          }
+          // Spark has checked the coordinates of a value of its native geography type. Sedona's
+          // own type takes any, and a GEOGRAPHY column takes longitudes and latitudes.
+          val scanned = GeographyWkbScanner.scan(bytes, offset, !native, column)
+          if ((scanned & GeographyWkbScanner.NOT_ISO) == 0) {
+            recordConsumer.addBinary(
+              Binary.fromConstantByteArray(bytes, offset, bytes.length - offset))
+          } else {
+            val wkb = java.util.Arrays.copyOfRange(bytes, offset, bytes.length)
+            recordConsumer.addBinary(
+              Binary.fromConstantByteArray(PublicWkbHeaderAdapter.toIsoWkbInPlace(wkb)))
+          }
+          typeCodes += scanned & ~GeographyWkbScanner.NOT_ISO
         }
 
       case t: UserDefinedType[_] => makeWriter(t.sqlType)
@@ -1076,14 +1103,6 @@ object GeoParquetWriteSupport {
       }
     }
   }
-
-  /**
-   * The SRID of the CRS that a GEOGRAPHY column states for a geography with `srid`. A geography
-   * without an SRID is in OGC:CRS84, as a geography that Sedona constructs without one is where
-   * Spark has a native geography type.
-   */
-  private[geoparquet] def geographySrid(srid: Int): Int =
-    if (srid == 0) GeoParquetMetaData.DEFAULT_SRID else srid
 
   private val geometryTypeNames = Seq(
     "Point",

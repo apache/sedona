@@ -40,6 +40,13 @@ private[geoparquet] object GeoParquetNativeCrs {
         "represent. To read the column, give the reader a schema with Sedona's own geography " +
         "type for it")
 
+  /**
+   * The SRID of the CRS of a GEOGRAPHY column for a geography of Sedona's own geography type with
+   * `srid`. A geography without an SRID is in OGC:CRS84, as a geography that Sedona constructs
+   * without one is where Spark has a native geography type.
+   */
+  def geographySrid(srid: Int): Int = if (srid == 0) GeoParquetMetaData.DEFAULT_SRID else srid
+
   def requireSrid(column: String, expected: Int, actual: Int): Unit = {
     if (expected != actual) {
       throw new IllegalArgumentException(

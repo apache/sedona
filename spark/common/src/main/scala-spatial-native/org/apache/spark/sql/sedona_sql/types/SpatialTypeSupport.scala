@@ -99,18 +99,18 @@ object SpatialTypeSupport {
   }
 
   /**
-   * The WKB and the SRID of the geography at `ordinal` of `row`, which is not null. The WKB is an
-   * array that the caller owns.
+   * The WKB and the SRID of the native geography at `ordinal` of `row`, which is not null. The
+   * WKB is an array that the caller owns.
    */
-  def readGeographyWkb(
+  def nativeGeographyWkb(
       row: SpecializedGetters,
       ordinal: Int,
       dataType: DataType): (Array[Byte], Int) = dataType match {
-    case _: GeographyUDT => GeographySerializer.wkbAndSrid(row.getBinary(ordinal))
     case _: GeographyType =>
       val native = NativeGeography.fromValue(row.get(ordinal, dataType).asInstanceOf[BinaryView])
       (native.toWkb(ByteOrder.nativeOrder()), native.srid())
-    case other => throw new IllegalArgumentException(s"Expected a geography type, got $other")
+    case other =>
+      throw new IllegalArgumentException(s"Expected a native geography type, got $other")
   }
 
   /**

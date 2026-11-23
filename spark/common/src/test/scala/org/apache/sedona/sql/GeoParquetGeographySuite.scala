@@ -654,6 +654,40 @@ class GeoParquetGeographySuite extends TestBaseScala {
         }
       }
 
+      // A writer has to state a CRS for a GEOGRAPHY column of a file before it has seen a
+      // geography, and has none to state for a file without one
+      for (emptyFirst <- Seq(true, false); mergeSchema <- Seq("false", "true")) {
+        val order = if (emptyFirst) "first" else "second"
+        it(
+          "reads a file without a geography in a column next to a file that states another " +
+            s"SRID for it (the file without one $order, mergeSchema $mergeSchema)") {
+          withDirectory { directory =>
+            def name(empty: Boolean): String =
+              if (empty == emptyFirst) "part-0.parquet" else "part-1.parquet"
+            writeGeographies(new File(directory, name(empty = true)))(null)
+            writeRow(
+              new File(directory, name(empty = false)),
+              1,
+              geography("geography", Some("EPSG:4269"), "spherical") -> "POINT (1 2)")
+            val df = sparkSession.read
+              .format("geoparquet")
+              .option("mergeSchema", mergeSchema)
+              .load(directory.getPath)
+            assertGeography(df, 4269)
+            assert(ewkt(df) == Seq(null, "SRID=4269; POINT (1 2)"))
+            if (SpatialTypeSupport.usesNativeTypes) {
+              val schema = StructType(
+                Seq(
+                  StructField("id", IntegerType),
+                  StructField("geography", SpatialTypeSupport.geographyType(4269))))
+              val withSchema =
+                sparkSession.read.schema(schema).format("geoparquet").load(directory.getPath)
+              assert(ewkt(withSchema) == Seq(null, "SRID=4269; POINT (1 2)"))
+            }
+          }
+        }
+      }
+
       it("reads a list of geographies") {
         withDirectory { directory =>
           writeList(
@@ -857,21 +891,34 @@ class GeoParquetGeographySuite extends TestBaseScala {
           }
         }
 
-      it(
-        "reads a column that one file stores as Sedona's geography type and the next as GEOGRAPHY") {
-        withDirectory { directory =>
-          writeStoredGeography(
-            new File(directory, "part-0.parquet"),
-            0,
-            GeographySerializer.serializeWkb(wkb("POINT (1 2)"), 4326))
-          writeRow(
-            new File(directory, "part-1.parquet"),
-            1,
-            geometry("anchor") -> "POINT (3 4)",
-            geography("geography", None, "spherical") -> "POINT (5 6)")
-          val df = read(directory.getPath)
-          assertGeography(df, 4326)
-          assert(ewkt(df) == Seq("SRID=4326; POINT (1 2)", "SRID=4326; POINT (5 6)"))
+      // A GeoParquet 1 write stores a geography column as Sedona's own geography type is
+      // serialized. Files of it may be next to the files of a GeoParquet 2 write to the same
+      // path. A geography without an SRID is in OGC:CRS84 for the native geography type.
+      for (storedSrid <- Seq(4326, 0); mergeSchema <- Seq("false", "true")) {
+        it(
+          "reads a column that one file stores as Sedona's geography type and the next as " +
+            s"GEOGRAPHY (stored SRID $storedSrid, mergeSchema $mergeSchema)") {
+          withDirectory { directory =>
+            writeStoredGeography(
+              new File(directory, "part-0.parquet"),
+              0,
+              GeographySerializer.serializeWkb(wkb("POINT (1 2)"), storedSrid))
+            writeRow(
+              new File(directory, "part-1.parquet"),
+              1,
+              geometry("anchor") -> "POINT (3 4)",
+              geography("geography", None, "spherical") -> "POINT (5 6)")
+            val df = sparkSession.read
+              .format("geoparquet")
+              .option("mergeSchema", mergeSchema)
+              .load(directory.getPath)
+            assertGeography(df, 4326)
+            val stored =
+              if (storedSrid == 4326 || SpatialTypeSupport.usesNativeTypes) {
+                "SRID=4326; POINT (1 2)"
+              } else "POINT (1 2)"
+            assert(ewkt(df) == Seq(stored, "SRID=4326; POINT (5 6)"))
+          }
         }
       }
 
@@ -1156,6 +1203,85 @@ class GeoParquetGeographySuite extends TestBaseScala {
             assert(messages(error).contains("'geography'"))
             assert(messages(error).contains("SRID 4326"))
             assert(messages(error).contains("SRID 4269"))
+          }
+        }
+
+        // The GeoParquet metadata of a file names its columns, and none of the fields within
+        // them
+        it(
+          "keeps the SRID of a geometry that is nested in a column named as a geography column") {
+          withDirectory { directory =>
+            val path = new File(directory, "data").getPath
+            writeVersion2(
+              sparkSession.sql(s"""SELECT 1 AS id, ST_GeogFromWKT('$line', 4269) AS shape,
+                   |named_struct('shape', ST_Point(1, 2)) AS holder""".stripMargin),
+              path)
+            val df = read(path)
+            assert(df.selectExpr("ST_SRID(holder.shape)").head().getInt(0) == 0)
+            assert(ewkt(df, "shape") == Seq(s"SRID=4269; $line"))
+          }
+        }
+
+        // The GEOGRAPHY logical type takes a geographic CRS, with longitudes from -180 to 180
+        // and latitudes from -90 to 90. Sedona's own geography type takes any SRID and any
+        // coordinates.
+        it("rejects geographies whose SRID is the one of a projected CRS") {
+          withDirectory { directory =>
+            val error = intercept[Exception] {
+              writeVersion2(
+                sparkSession.sql(s"SELECT 1 AS id, ST_GeogFromWKT('$line', 3857) AS geography"),
+                new File(directory, "data").getPath)
+            }
+            assert(messages(error).contains("'geography'"))
+            assert(messages(error).contains("geographic"))
+          }
+        }
+
+        it("rejects a CRS option that gives a geography column a projected CRS") {
+          withDirectory { directory =>
+            val projected = """{"type":"ProjectedCRS","name":"WGS 84 / Pseudo-Mercator",""" +
+              """"id":{"authority":"EPSG","code":3857}}"""
+            val error = intercept[Exception] {
+              writeVersion2(
+                sparkSession.sql(s"SELECT 1 AS id, ST_GeogFromWKT('$line', 3857) AS geography"),
+                new File(directory, "data").getPath,
+                "geoparquet.crs.geography" -> projected)
+            }
+            assert(messages(error).contains("'geography'"))
+            assert(messages(error).contains("geographic"))
+          }
+        }
+
+        Seq(
+          "POINT (190 10)" -> "longitude 190",
+          "POINT (10 100)" -> "latitude 100",
+          "LINESTRING (0 0, -180.5 10)" -> "longitude -180.5",
+          "POLYGON ((0 0, 10 0, 10 -91, 0 0))" -> "latitude -91",
+          "GEOMETRYCOLLECTION (POINT (1 2), MULTIPOINT ((3 4), (5 95)))" -> "latitude 95")
+          .foreach { case (wkt, coordinate) =>
+            it(s"rejects $wkt, which is outside the bounds of a geography") {
+              withDirectory { directory =>
+                val error = intercept[Exception] {
+                  writeVersion2(
+                    sparkSession.sql(
+                      s"SELECT 1 AS id, ST_GeogFromWKT('$wkt', 4326) AS geography"),
+                    new File(directory, "data").getPath)
+                }
+                assert(messages(error).contains("'geography'"))
+                assert(messages(error).contains(coordinate))
+              }
+            }
+          }
+
+        it("writes geographies at the bounds of longitude and latitude, and empty ones") {
+          withDirectory { directory =>
+            val path = new File(directory, "data").getPath
+            val wkts = Seq("POINT (-180 -90)", "LINESTRING (180 90, 0 0)", "POINT EMPTY")
+            val rows = wkts.zipWithIndex.map { case (wkt, id) =>
+              s"SELECT $id AS id, ST_GeogFromWKT('$wkt', 4326) AS geography"
+            }
+            writeVersion2(sparkSession.sql(rows.mkString(" UNION ALL ")), path)
+            assert(read(path).count() == 3)
           }
         }
 

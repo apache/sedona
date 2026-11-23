@@ -179,6 +179,8 @@ A `GEOGRAPHY` column is not read as a geometry column. Sedona rejects a schema t
 
 A file that Sedona rejects for one of these reasons is not a corrupt file. The read fails for it with the option `ignoreCorruptFiles` as well, and does not leave the file out.
 
+The files of a dataset do not have to store a geography column in the same way. A file without a geography in the column takes the CRS of the files that have one, whatever CRS it states itself. And a file in which Sedona stored the column as its own geography type, as a GeoParquet 1.1 write does, is read next to files with a `GEOGRAPHY` column. On Spark 4.2 and later a geography without an SRID in such a file has SRID 4326.
+
 Sedona applies a filter on a geography column to the rows and does not use the bounding boxes of the files for it, because these are planar.
 
 Spark 3.5 and 4.0 ship a Parquet library that predates these logical types and cannot open such files.
@@ -352,6 +354,8 @@ Set `geoparquet.crs` or `geoparquet.crs.<column_name>` to state the CRS yourself
 A geography column is stored in the `GEOGRAPHY` logical type with spherical edges, as WKB, and the GeoParquet metadata lists it with `"edges": "spherical"`. A file can have geography columns and no geometry column. Sedona writes no `bbox` for a geography column, because the `bbox` of the GeoParquet metadata is planar.
 
 The CRS of a geography column follows the rules of a geometry column, and `geoparquet.crs` and `geoparquet.crs.<column_name>` apply to it as well. There is one difference on Spark 4.1: a geography without an SRID is written as OGC:CRS84, and so is a column without any geography in the file.
+
+The `GEOGRAPHY` logical type takes a geographic CRS, with longitudes from -180 to 180 and latitudes from -90 to 90. Sedona's own geography type on Spark 4.1 takes any SRID and any coordinates, so a write fails for a geography column whose CRS is a projected one, and for a geography outside these bounds.
 
 A GeoParquet 1.1 file has no geography type. On Spark 4.1 and earlier, Sedona stores a column of its own geography type there in a form that only Sedona reads back. On Spark 4.2 and later a write of a column of Spark's native geography type to a GeoParquet 1.1 file fails, so set `geoparquet.version` to `2.0.0` for it.
 
