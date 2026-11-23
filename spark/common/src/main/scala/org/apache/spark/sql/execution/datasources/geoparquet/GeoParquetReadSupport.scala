@@ -22,11 +22,12 @@ import org.apache.spark.sql.execution.datasources.geoparquet.internal.{ParquetRe
 import org.apache.hadoop.conf.Configuration
 import org.apache.parquet.hadoop.api.ReadSupport.ReadContext
 import org.apache.parquet.hadoop.api.{InitContext, ReadSupport}
+import org.apache.parquet.hadoop.metadata.FileMetaData
 import org.apache.parquet.io.api.RecordMaterializer
 import org.apache.parquet.schema._
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.UDT.{GeographyUDT, GeometryUDT}
 import org.apache.spark.sql.types._
 
 import java.time.ZoneId
@@ -100,6 +101,21 @@ class GeoParquetReadSupport(
       int96RebaseSpec,
       parameters)
   }
+
+  /**
+   * Fails as a scan of a file does for what the footer of the file states about its columns: a
+   * GEOGRAPHY column that the schema of the read makes a geometry column, for example. Nothing of
+   * the file is read for it.
+   */
+  def requireReadable(conf: Configuration, fileMetaData: FileMetaData): Unit = {
+    val fileSchema = fileMetaData.getSchema
+    val readContext = init(
+      new InitContext(
+        conf,
+        java.util.Collections.emptyMap[String, java.util.Set[String]],
+        fileSchema))
+    prepareForRead(conf, fileMetaData.getKeyValueMetaData, fileSchema, readContext)
+  }
 }
 
 object GeoParquetReadSupport extends Logging {
@@ -120,6 +136,10 @@ object GeoParquetReadSupport extends Logging {
         // Don't expand GeometryUDT types. We'll treat geometry columns specially in
         // GeoParquetRowConverter
         case t: GeometryUDT => t
+
+        // Nor GeographyUDT types: a column of the GEOGRAPHY logical type holds WKB, which the
+        // row converter turns into the value of the type
+        case t: GeographyUDT => t
 
         case t: UserDefinedType[_] =>
           t.sqlType

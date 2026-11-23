@@ -23,7 +23,7 @@ import org.apache.parquet.io.api.{Binary, Converter, GroupConverter, PrimitiveCo
 import org.apache.parquet.schema.LogicalTypeAnnotation.{TimeUnit, TimestampLogicalTypeAnnotation}
 import org.apache.parquet.schema.OriginalType.LIST
 import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName._
-import org.apache.parquet.schema.{GroupType, OriginalType, Type}
+import org.apache.parquet.schema.{GroupType, MessageType, OriginalType, Type}
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions._
@@ -31,7 +31,8 @@ import org.apache.spark.sql.catalyst.util.{ArrayBasedMapData, CaseInsensitiveMap
 import org.apache.spark.sql.execution.datasources.geoparquet.internal._
 
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.sedona.sql.utils.GeographySerializer
+import org.apache.spark.sql.sedona_sql.UDT.{GeographyUDT, GeometryUDT}
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
 import org.datasyslab.jts.io.WKBReader
@@ -113,7 +114,8 @@ private[geoparquet] class GeoParquetRowConverter(
 
   assert(
     !catalystType.existsRecursively(t =>
-      !t.isInstanceOf[GeometryUDT] && t.isInstanceOf[UserDefinedType[_]]),
+      !t.isInstanceOf[GeometryUDT] && !t.isInstanceOf[GeographyUDT] &&
+        t.isInstanceOf[UserDefinedType[_]]),
     s"""User-defined types in Catalyst schema should have already been expanded:
        |${catalystType.prettyJson}
      """.stripMargin)
@@ -169,6 +171,17 @@ private[geoparquet] class GeoParquetRowConverter(
     parquetType.getFields.asScala.map { parquetField =>
       val fieldIndex = catalystFieldNameToIndex(parquetField.getName)
       val catalystField = catalystType(fieldIndex)
+      // The GeoParquet metadata of a file names its geometry columns, which are columns of the
+      // file and none of the fields within them. Such a column holds WKB, which is not what a
+      // binary column of Sedona's own geography type holds.
+      if (parquetType.isInstanceOf[MessageType] &&
+        SpatialTypeSupport.isGeography(catalystField.dataType) &&
+        ParquetGeospatialTypes.describe(parquetField).isEmpty &&
+        schemaConverter.isGeometryColumn(parquetField)) {
+        throw new GeoParquetColumnMismatchException(
+          s"Column '${parquetField.getName}' is a geometry column in the GeoParquet metadata " +
+            "of its file and cannot be read as a geography")
+      }
       // Converted field value should be set to the `fieldIndex`-th cell of `currentRow`
       newConverter(parquetField, catalystField.dataType, new RowUpdater(currentRow, fieldIndex))
     }.toArray
@@ -216,6 +229,12 @@ private[geoparquet] class GeoParquetRowConverter(
         new ParquetPrimitiveConverter(updater)
 
       case dt if SpatialTypeSupport.isGeometry(dt) =>
+        // A geometry is computed on a plane, which the values of a GEOGRAPHY column are not for
+        if (ParquetGeospatialTypes.describe(parquetType).exists(_.isGeography)) {
+          throw new GeoParquetColumnMismatchException(
+            s"Column '${parquetType.getName}' is a Parquet GEOGRAPHY column and cannot be " +
+              "read as a geometry")
+        }
         // Compute SRID once per column converter, not per row
         val srid = schemaConverter.geometrySrid(
           parquetType,
@@ -265,6 +284,59 @@ private[geoparquet] class GeoParquetRowConverter(
               s"Parquet type for geometry column is $parquetType. This parquet file could be written by " +
                 "Apache Sedona <= 1.3.1-incubating. Please use option(\"legacyMode\", \"true\") to read this file.")
           }
+        }
+
+      case dt if SpatialTypeSupport.isGeography(dt) =>
+        val name = parquetType.getName
+        ParquetGeospatialTypes.describe(parquetType) match {
+          case Some(column) if column.isGeography =>
+            // Compute SRID once per column converter, not per row
+            val srid = schemaConverter.geographySrid(
+              parquetType,
+              native = SpatialTypeSupport.isNativeGeography(catalystType))
+            SpatialTypeSupport
+              .geographySrid(catalystType)
+              .foreach(GeoParquetNativeCrs.requireColumnSrid(name, _, srid))
+            new ParquetPrimitiveConverter(updater) {
+              // The value takes the stored WKB as it is, without a JTS or S2 object in between
+              override def addBinary(value: Binary): Unit =
+                this.updater.set(
+                  SpatialTypeSupport.geographyFromWkb(value.getBytes, srid, catalystType))
+            }
+          case Some(_) =>
+            throw new GeoParquetColumnMismatchException(
+              s"Column '$name' is a Parquet GEOMETRY column and cannot be read as a geography")
+          case None if catalystType.isInstanceOf[GeographyUDT] =>
+            // A column that Sedona wrote from its own geography type, as that type is
+            // serialized
+            new ParquetPrimitiveConverter(updater)
+          case None =>
+            // A binary column, which holds geographies if Sedona wrote it from its own
+            // geography type. A file does not state that in a way that could be checked here,
+            // so the SRID that each value begins with is what shows a column of something else,
+            // or of a Sedona release that stored a geography in another way.
+            val targetSrid = SpatialTypeSupport.geographySrid(catalystType)
+            new ParquetPrimitiveConverter(updater) {
+              override def addBinary(value: Binary): Unit = {
+                val serialized = value.getBytes
+                val srid = GeographySerializer.readSRID(serialized)
+                val expected = targetSrid match {
+                  case Some(target) if target != srid =>
+                    Some(s"The column is read with SRID $target")
+                  case None if !SpatialTypeSupport.supportsGeographySrid(srid) =>
+                    Some("Spark's native geography type does not take that SRID")
+                  case _ => None
+                }
+                expected.foreach { reason =>
+                  throw new GeoParquetColumnMismatchException(
+                    s"Column '$name' is stored as binary, which is read as values of Sedona's " +
+                      s"own geography type. A value of it states SRID $srid. $reason")
+                }
+                val wkb =
+                  java.util.Arrays.copyOfRange(serialized, Integer.BYTES, serialized.length)
+                this.updater.set(SpatialTypeSupport.geographyFromWkb(wkb, srid, catalystType))
+              }
+            }
         }
 
       case ByteType =>
@@ -611,9 +683,16 @@ private[geoparquet] class GeoParquetRowConverter(
       // Here we try to convert field `list` into a Catalyst type to see whether the converted type
       // matches the Catalyst array element type. If it doesn't match, then it's case 1; otherwise,
       // it's case 2.
-      val guessedElementType = schemaConverter.convertFieldWithGeo(repeatedType)
+      //
+      // The layout is a matter of how the columns are stored, so both sides of the comparison
+      // take a geometry or geography column as the binary column that it is stored in. What
+      // such a column states, its CRS or its edges, is for the converter of the element to
+      // check against the type that the reader asks for, which may be binary.
+      val guessedElementType = schemaConverter.convertFieldWithGeo(repeatedType, asStored = true)
 
-      if (DataType.equalsIgnoreCompatibleNullability(guessedElementType, elementType)) {
+      if (DataType.equalsIgnoreCompatibleNullability(
+          guessedElementType,
+          GeoParquetSchemaConverter.physicalType(elementType))) {
         // If the repeated field corresponds to the element type, creates a new converter using the
         // type of the repeated field.
         newConverter(

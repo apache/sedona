@@ -94,6 +94,14 @@ object GeoParquetUtils {
         inferred.map(schema =>
           StructType(schema.fields.map { field =>
             geometryFields.fields.find(geometry => resolver(geometry.name, field.name)) match {
+              case Some(geometry) if SpatialTypeSupport.isGeography(geometry.dataType) =>
+                // A geography column of the files. Only a GEOGRAPHY column is one, so a binary
+                // column of the same name is not taken for one, as it is for a geometry column.
+                if (!SpatialTypeSupport.isGeography(field.dataType)) {
+                  throw new IllegalArgumentException(
+                    s"Incompatible GeoParquet geography column '${field.name}'")
+                }
+                field.copy(dataType = geometry.dataType)
               case Some(geometry)
                   if field.dataType == org.apache.spark.sql.types.BinaryType ||
                     SpatialTypeSupport.isGeometry(field.dataType) =>
@@ -200,3 +208,12 @@ object GeoParquetUtils {
  */
 private[geoparquet] class GeoParquetNoInputFilesException(message: String)
     extends AnalysisException(message)
+
+/**
+ * Raised for a file that stores a column in a way that the schema of the read does not take: a
+ * GEOGRAPHY column for a geometry column, for example, or another SRID than the type of the
+ * column names. Such a file is a sound one, and a read that left it out would return a part of
+ * the data as if it were all of it. A scan that ignores corrupt files leaves out a file for a
+ * RuntimeException or an IOException, so this is neither of the two.
+ */
+class GeoParquetColumnMismatchException(message: String) extends Exception(message)

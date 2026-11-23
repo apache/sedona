@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.sql
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File}
+import java.io.File
 import java.nio.{ByteBuffer, ByteOrder}
 import java.nio.file.Files
 
@@ -27,7 +27,6 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.mapreduce.{Job, TaskAttemptID, TaskType}
 import org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl
-import org.apache.parquet.format.{Util => ParquetFormatUtil}
 import org.apache.parquet.hadoop.{ParquetFileReader, ParquetOutputFormat, ParquetReader}
 import org.apache.parquet.hadoop.example.GroupReadSupport
 import org.apache.parquet.hadoop.metadata.{ColumnChunkMetaData, ParquetMetadata}
@@ -55,7 +54,7 @@ import scala.util.Try
  * Parquet writer, and the `crs-*` files come from parquet-java 1.17.0, one per form the Parquet
  * format allows for the CRS of a column. Each `crs-*` file holds three POINT (1 2) rows.
  * `spark-4.2-geography-geo-metadata.parquet` is Spark's geography file with GeoParquet 2.0
- * metadata added to its footer.
+ * metadata added to its footer. [[GeoParquetGeographySuite]] reads the geography files.
  */
 class GeoParquetNativeTypesSuite extends TestBaseScala {
   private val nativeFolder = resourceFolder + "geoparquet/native/"
@@ -255,20 +254,6 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
         assert(count("POLYGON ((10 10, 20 10, 20 20, 10 20, 10 10))") == 0)
       }
 
-      it("reads a GEOGRAPHY column as WKB") {
-        val df = read("spark-4.2-geography.parquet")
-        assert(df.schema("geography").dataType == BinaryType)
-        val wkb = df.selectExpr("hex(geography)").collect().map(_.getString(0))
-        assert(wkb.toSeq == Seq.fill(3)("0101000000000000000000F03F0000000000000040"))
-      }
-
-      it("reads a GEOGRAPHY column as WKB when the GeoParquet metadata lists it") {
-        val df = read("spark-4.2-geography-geo-metadata.parquet")
-        assert(df.schema("geography").dataType == BinaryType)
-        val wkb = df.selectExpr("hex(geography)").collect().map(_.getString(0))
-        assert(wkb.toSeq == Seq.fill(3)("0101000000000000000000F03F0000000000000040"))
-      }
-
       it("reports a file with neither native types nor GeoParquet metadata") {
         val error = intercept[Exception] {
           sparkSession.read
@@ -371,29 +356,6 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
         finally sparkSession.conf.set(key, before)
       }
 
-      /** Leaves the schema of a Parquet file readable, and its row groups unreadable. */
-      def damageRowGroups(file: File): Unit = {
-        val bytes = Files.readAllBytes(file.toPath)
-        val length =
-          ByteBuffer.wrap(bytes, bytes.length - 8, 4).order(ByteOrder.LITTLE_ENDIAN).getInt
-        val start = bytes.length - 8 - length
-        val metadata =
-          ParquetFormatUtil.readFileMetaData(new ByteArrayInputStream(bytes, start, length))
-        // The first column chunk now belongs to a column that the schema does not have
-        val chunk = metadata.getRow_groups.get(0).getColumns.get(0)
-        chunk.getMeta_data.setPath_in_schema(java.util.Arrays.asList("missing"))
-        val damaged = new ByteArrayOutputStream()
-        damaged.write(bytes, 0, start)
-        ParquetFormatUtil.writeFileMetaData(metadata, damaged)
-        val newLength = damaged.size - start
-        damaged.write(
-          ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(newLength).array)
-        damaged.write(bytes, bytes.length - 4, 4)
-        Files.write(file.toPath, damaged.toByteArray)
-        // The checksum that Hadoop keeps next to the file is for the bytes before
-        new File(file.getParentFile, s".${file.getName}.crc").delete()
-      }
-
       it("rejects a column that is a geometry in some files only, next to such a file") {
         withPath { path =>
           val withNumber = sparkSession.createDataFrame(
@@ -440,7 +402,7 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
         withPath { path =>
           append(frame(null, null), path, "1.1.0")
           val corrupt = parquetFiles(path).head
-          damageRowGroups(corrupt)
+          ParquetTestFiles.damageRowGroups(corrupt)
           append(frame(pointWithSrid(3857)), path, "1.1.0")
           val key = "spark.sql.files.ignoreCorruptFiles"
           assert(withSetting(key, "true")(srids(path)) == Seq(Some(3857)))
@@ -467,7 +429,7 @@ class GeoParquetNativeTypesSuite extends TestBaseScala {
               StructType(Seq(StructField("geometry", GeometryUDT()), StructField("aux", aux))))
             // The schema comes from the first file without mergeSchema, which is the corrupt one
             append(twoColumns(auxType, Row(null, auxValue)), path + "/a", "1.1.0", auxOptions: _*)
-            damageRowGroups(parquetFiles(path + "/a").head)
+            ParquetTestFiles.damageRowGroups(parquetFiles(path + "/a").head)
             append(
               twoColumns(GeometryUDT(), Row(pointWithSrid(3857), pointWithSrid(4326))),
               path + "/b",

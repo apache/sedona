@@ -142,7 +142,44 @@ df = sedona.read.schema(schema).format("geoparquet").load("/tmp/somewhere")
 
 Sedona's functions, such as `ST_AsText` and `ST_Buffer`, accept such a column. Spark's built-in functions, such as `ST_SRID` and `ST_AsBinary` on Spark 4.2, accept native geometry columns only.
 
-`GEOGRAPHY` columns are read as binary columns that hold WKB, also when the GeoParquet metadata lists them. Convert them with `ST_GeogFromWKB`.
+`GEOGRAPHY` columns are read as geography columns: Sedona's geography type on Spark 4.1, and Spark's native geography type on Spark 4.2 and later. The SRID comes from the `crs` property by the rules above, so a column without one has SRID 4326, and a column in another geographic CRS, such as NAD83 (`EPSG:4269`), has the SRID of that CRS.
+
+Three kinds of `GEOGRAPHY` columns need a schema from you.
+
+The first is a column whose edges follow an algorithm other than `spherical`, which is `vincenty`, `thomas`, `andoyer` or `karney`. Sedona computes on a sphere, so it rejects the column. A schema in which the column is binary returns its WKB:
+
+```python
+from pyspark.sql.types import BinaryType, StructField, StructType
+
+schema = StructType([StructField("geography", BinaryType())])
+df = sedona.read.schema(schema).format("geoparquet").load("/tmp/somewhere")
+```
+
+The second, on Spark 4.2 and later, is a column whose CRS is unknown or not geographic. Spark's native geography type cannot represent it. A schema with Sedona's own geography type, `LegacyGeographyType` in Python and `GeographyUDT` in Scala and Java, reads the column:
+
+```python
+from pyspark.sql.types import StructField, StructType
+from sedona.spark.sql.types import LegacyGeographyType
+
+schema = StructType([StructField("geography", LegacyGeographyType())])
+df = sedona.read.schema(schema).format("geoparquet").load("/tmp/somewhere")
+```
+
+The third, on Spark 4.2 and later, is a column for which the files state different SRIDs. Spark's native geography type names one SRID for a column, so Sedona rejects the read before it scans the files. A schema with the type `GEOGRAPHY(ANY)` for the column reads them, and each geography keeps the SRID of its file:
+
+```python
+df = (
+    sedona.read.schema("geography GEOGRAPHY(ANY)")
+    .format("geoparquet")
+    .load("/tmp/somewhere")
+)
+```
+
+A `GEOGRAPHY` column is not read as a geometry column. Sedona rejects a schema that gives it a geometry type, and it rejects files in which a column is a geometry column in some and a `GEOGRAPHY` column in others. This holds for a geometry column of a GeoParquet 1.x file as well as for a `GEOMETRY` column.
+
+A file that Sedona rejects for one of these reasons is not a corrupt file. The read fails for it with the option `ignoreCorruptFiles` as well, and does not leave the file out.
+
+Sedona applies a filter on a geography column to the rows and does not use the bounding boxes of the files for it, because these are planar.
 
 Spark 3.5 and 4.0 ship a Parquet library that predates these logical types and cannot open such files.
 

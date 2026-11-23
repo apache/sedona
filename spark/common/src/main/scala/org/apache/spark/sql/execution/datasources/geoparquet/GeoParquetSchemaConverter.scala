@@ -137,6 +137,40 @@ class GeoParquetToSparkSchemaConverter(
   }
 
   /**
+   * Returns the SRID of the geography column stored in `field`, a column of the GEOGRAPHY logical
+   * type, by the rules of [[geometrySrid]]. Sedona computes on a sphere, as Spark's native
+   * geography type does, so a column whose edges follow another algorithm is rejected.
+   *
+   * @param field
+   *   Parquet field of the geography column
+   * @param native
+   *   whether the column is read as a native Spark geography, whose type takes the SRID of a
+   *   geographic CRS only. A column read as GeographyUDT accepts any CRS, an unknown one as SRID
+   *   0.
+   */
+  def geographySrid(field: Type, native: Boolean = SpatialTypeSupport.usesNativeTypes): Int = {
+    val name = field.getName
+    val column = ParquetGeospatialTypes
+      .describe(field)
+      .filter(_.isGeography)
+      .getOrElse(
+        throw new IllegalArgumentException(s"Column '$name' is not a Parquet GEOGRAPHY column"))
+    column.edges.filter(_ != ParquetGeospatialTypes.DEFAULT_EDGES).foreach { edges =>
+      throw new GeoParquetColumnMismatchException(
+        s"Column '$name' is a Parquet GEOGRAPHY column whose edges follow the $edges " +
+          "algorithm. Sedona reads geographies with spherical edges only. To read the WKB of " +
+          "the column, give the reader a schema in which the column is binary")
+    }
+    val unknown = ParquetGeospatialTypes.isUnknownCrs(column.crs)
+    val declared = ParquetGeospatialTypes.crsToSrid(column.crs, keyValueMetaData)
+    val srid = if (declared != 0 || unknown) declared else getSrid(name)
+    if (native && !SpatialTypeSupport.supportsGeographySrid(srid)) {
+      GeoParquetNativeCrs.rejectUnrepresentableGeography(name)
+    }
+    srid
+  }
+
+  /**
    * Returns true if TIMESTAMP_NTZ type is enabled in this ParquetToSparkSchemaConverter.
    */
   def isTimestampNTZEnabled(): Boolean = {
@@ -146,22 +180,23 @@ class GeoParquetToSparkSchemaConverter(
   /**
    * Converts Parquet [[MessageType]] `parquetSchema` to a Spark SQL [[StructType]].
    */
-  def convert(parquetSchema: MessageType): StructType = convert(parquetSchema.asGroupType())
+  def convert(parquetSchema: MessageType): StructType =
+    convert(parquetSchema.asGroupType(), asStored = false)
 
-  private def convert(parquetSchema: GroupType): StructType = {
+  private def convert(parquetSchema: GroupType, asStored: Boolean): StructType = {
     val fields = parquetSchema.getFields.asScala.map { field =>
       field.getRepetition match {
         case OPTIONAL =>
-          StructField(field.getName, convertFieldWithGeo(field), nullable = true)
+          StructField(field.getName, convertFieldWithGeo(field, asStored), nullable = true)
 
         case REQUIRED =>
-          StructField(field.getName, convertFieldWithGeo(field), nullable = false)
+          StructField(field.getName, convertFieldWithGeo(field, asStored), nullable = false)
 
         case REPEATED =>
           // A repeated field that is neither contained by a `LIST`- or `MAP`-annotated group nor
           // annotated by `LIST` or `MAP` should be interpreted as a required list of required
           // elements where the element type is the type of the field.
-          val arrayType = ArrayType(convertFieldWithGeo(field), containsNull = false)
+          val arrayType = ArrayType(convertFieldWithGeo(field, asStored), containsNull = false)
           StructField(field.getName, arrayType, nullable = false)
       }
     }
@@ -171,11 +206,17 @@ class GeoParquetToSparkSchemaConverter(
 
   /**
    * Converts a Parquet [[Type]] to a Spark SQL [[DataType]].
+   *
+   * @param asStored
+   *   whether a geometry or geography column converts to the binary type that it is stored in.
+   *   The conversion then reads nothing of what such a column states, its CRS or its edges, so it
+   *   cannot fail for a column that the schema of a reader may still accept.
    */
-  def convertFieldWithGeo(parquetType: Type): DataType = parquetType match {
-    case t: PrimitiveType => convertPrimitiveField(t)
-    case t: GroupType => convertGroupField(t.asGroupType())
-  }
+  def convertFieldWithGeo(parquetType: Type, asStored: Boolean = false): DataType =
+    parquetType match {
+      case t: PrimitiveType => convertPrimitiveField(t, asStored)
+      case t: GroupType => convertGroupField(t.asGroupType(), asStored)
+    }
 
   /**
    * Whether `field` stores geometries. The logical type of the Parquet format decides for a
@@ -194,19 +235,18 @@ class GeoParquetToSparkSchemaConverter(
    * Schema inference uses it to convert these columns alone, so that a column of a type this
    * converter does not handle cannot fail a read that takes its type from elsewhere.
    */
-  def geospatialType(field: Type): Option[DataType] = field match {
+  def geospatialType(field: Type, asStored: Boolean = false): Option[DataType] = field match {
     case primitive: PrimitiveType
         if primitive.getPrimitiveTypeName == BINARY && primitive.getOriginalType == null =>
-      if (isGeometryColumn(primitive)) {
-        Some(SpatialTypeSupport.geometryType(geometrySrid(primitive)))
-      } else if (ParquetGeospatialTypes.describe(primitive).isDefined) {
-        // GEOGRAPHY columns hold WKB. Keep the bytes rather than guess a string encoding.
-        Some(BinaryType)
-      } else None
+      val isGeometry = isGeometryColumn(primitive)
+      if (!isGeometry && ParquetGeospatialTypes.describe(primitive).isEmpty) None
+      else if (asStored) Some(BinaryType)
+      else if (isGeometry) Some(SpatialTypeSupport.geometryType(geometrySrid(primitive)))
+      else Some(SpatialTypeSupport.geographyType(geographySrid(primitive)))
     case _ => None
   }
 
-  private def convertPrimitiveField(field: PrimitiveType): DataType = {
+  private def convertPrimitiveField(field: PrimitiveType, asStored: Boolean): DataType = {
     val typeName = field.getPrimitiveTypeName
     val originalType = field.getOriginalType
 
@@ -278,7 +318,8 @@ class GeoParquetToSparkSchemaConverter(
         originalType match {
           case UTF8 | ENUM | JSON => StringType
           case null =>
-            geospatialType(field).getOrElse(if (assumeBinaryIsString) StringType else BinaryType)
+            geospatialType(field, asStored).getOrElse(
+              if (assumeBinaryIsString) StringType else BinaryType)
           case BSON => BinaryType
           case DECIMAL => makeDecimalType()
           case _ => illegalType()
@@ -295,8 +336,8 @@ class GeoParquetToSparkSchemaConverter(
     }
   }
 
-  private def convertGroupField(field: GroupType): DataType = {
-    Option(field.getOriginalType).fold(convert(field): DataType) {
+  private def convertGroupField(field: GroupType, asStored: Boolean): DataType = {
+    Option(field.getOriginalType).fold(convert(field, asStored): DataType) {
       // A Parquet list is represented as a 3-level structure:
       //
       //   <list-repetition> group <name> (LIST) {
@@ -321,11 +362,11 @@ class GeoParquetToSparkSchemaConverter(
           s"Invalid list type $field")
 
         if (isElementTypeWithGeo(repeatedType, field.getName)) {
-          ArrayType(convertFieldWithGeo(repeatedType), containsNull = false)
+          ArrayType(convertFieldWithGeo(repeatedType, asStored), containsNull = false)
         } else {
           val elementType = repeatedType.asGroupType().getType(0)
           val optional = elementType.isRepetition(OPTIONAL)
-          ArrayType(convertFieldWithGeo(elementType), containsNull = optional)
+          ArrayType(convertFieldWithGeo(elementType, asStored), containsNull = optional)
         }
 
       // scalastyle:off
@@ -346,8 +387,8 @@ class GeoParquetToSparkSchemaConverter(
         val valueType = keyValueType.getType(1)
         val valueOptional = valueType.isRepetition(OPTIONAL)
         MapType(
-          convertFieldWithGeo(keyType),
-          convertFieldWithGeo(valueType),
+          convertFieldWithGeo(keyType, asStored),
+          convertFieldWithGeo(valueType, asStored),
           valueContainsNull = valueOptional)
 
       case _ =>
@@ -691,19 +732,22 @@ class SparkToGeoParquetSchemaConverter(
 }
 
 private[sql] object GeoParquetSchemaConverter {
-  // GeoParquet stores geometry as WKB binary, regardless of Spark's spatial representation.
-  def physicalSchema(schema: StructType): StructType = {
-    def physicalType(dataType: DataType): DataType = dataType match {
-      case dt if SpatialTypeSupport.isGeometry(dt) => BinaryType
-      case StructType(fields) =>
-        StructType(fields.map(f => f.copy(dataType = physicalType(f.dataType))))
-      case ArrayType(elementType, containsNull) =>
-        ArrayType(physicalType(elementType), containsNull)
-      case MapType(keyType, valueType, containsNull) =>
-        MapType(physicalType(keyType), physicalType(valueType), containsNull)
-      case other => other
-    }
+  // GeoParquet stores geometry as WKB binary, regardless of Spark's spatial representation. A
+  // geography is stored in a binary column as well, of whichever of its types it is.
+  def physicalSchema(schema: StructType): StructType =
     physicalType(schema).asInstanceOf[StructType]
+
+  /** The type that `dataType` is stored in, which is binary for a geometry or a geography. */
+  def physicalType(dataType: DataType): DataType = dataType match {
+    case dt if SpatialTypeSupport.isGeometry(dt) => BinaryType
+    case dt if SpatialTypeSupport.isGeography(dt) => BinaryType
+    case StructType(fields) =>
+      StructType(fields.map(f => f.copy(dataType = physicalType(f.dataType))))
+    case ArrayType(elementType, containsNull) =>
+      ArrayType(physicalType(elementType), containsNull)
+    case MapType(keyType, valueType, containsNull) =>
+      MapType(physicalType(keyType), physicalType(valueType), containsNull)
+    case other => other
   }
 
   def checkFieldName(name: String): Unit = {

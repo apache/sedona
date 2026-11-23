@@ -142,7 +142,44 @@ df = sedona.read.schema(schema).format("geoparquet").load("/tmp/somewhere")
 
 Sedona 的函数，例如 `ST_AsText` 和 `ST_Buffer`，可以处理这样的列。Spark 内置的函数，例如 Spark 4.2 上的 `ST_SRID` 和 `ST_AsBinary`，只接受原生几何列。
 
-`GEOGRAPHY` 列会被读取为保存 WKB 的二进制列，即使 GeoParquet 元数据列出了它们也是如此，可以用 `ST_GeogFromWKB` 转换。
+`GEOGRAPHY` 列会被读取为地理列：在 Spark 4.1 上是 Sedona 的地理类型，在 Spark 4.2 及更高版本上是 Spark 原生地理类型。SRID 按上述规则取自 `crs` 属性，因此没有该属性的列 SRID 为 4326，使用其他地理坐标系（例如 NAD83，即 `EPSG:4269`）的列 SRID 为该坐标系的 SRID。
+
+有三类 `GEOGRAPHY` 列需要您提供 schema。
+
+第一类是边的插值算法不是 `spherical` 的列，即 `vincenty`、`thomas`、`andoyer` 或 `karney`。Sedona 在球面上计算，因此会拒绝这样的列。在 schema 中把该列声明为二进制类型，即可读出它的 WKB：
+
+```python
+from pyspark.sql.types import BinaryType, StructField, StructType
+
+schema = StructType([StructField("geography", BinaryType())])
+df = sedona.read.schema(schema).format("geoparquet").load("/tmp/somewhere")
+```
+
+第二类是在 Spark 4.2 及更高版本上，CRS 未知或不是地理坐标系的列。Spark 原生地理类型无法表示这样的 CRS。在 schema 中为该列使用 Sedona 自己的地理类型即可读取，在 Python 中是 `LegacyGeographyType`，在 Scala 和 Java 中是 `GeographyUDT`：
+
+```python
+from pyspark.sql.types import StructField, StructType
+from sedona.spark.sql.types import LegacyGeographyType
+
+schema = StructType([StructField("geography", LegacyGeographyType())])
+df = sedona.read.schema(schema).format("geoparquet").load("/tmp/somewhere")
+```
+
+第三类是在 Spark 4.2 及更高版本上，各文件声明的 SRID 不一致的列。Spark 原生地理类型的一列只有一个 SRID，因此 Sedona 会在扫描文件之前拒绝读取。在 schema 中为该列使用 `GEOGRAPHY(ANY)` 类型即可读取这些文件，每个地理对象保留其所在文件的 SRID：
+
+```python
+df = (
+    sedona.read.schema("geography GEOGRAPHY(ANY)")
+    .format("geoparquet")
+    .load("/tmp/somewhere")
+)
+```
+
+`GEOGRAPHY` 列不会被读取为几何列。如果 schema 为它指定几何类型，Sedona 会拒绝读取；如果同一列在一部分文件中是几何列、在另一部分文件中是 `GEOGRAPHY` 列，Sedona 也会拒绝读取。这既适用于 `GEOMETRY` 列，也适用于 GeoParquet 1.x 文件中的几何列。
+
+因上述原因被 Sedona 拒绝的文件并不是损坏的文件。即使设置了 `ignoreCorruptFiles` 选项，读取也会失败，而不会跳过该文件。
+
+对地理列的过滤条件，Sedona 会逐行计算，不会使用文件的边界框，因为这些边界框是平面的。
 
 Spark 3.5 和 4.0 自带的 Parquet 库早于这些逻辑类型，无法打开此类文件。
 
