@@ -175,7 +175,7 @@ df = (
 )
 ```
 
-`GEOGRAPHY` 列不会被读取为几何列。如果 schema 为它指定几何类型，Sedona 会拒绝读取；如果同一列在一部分文件中是 `GEOMETRY` 列、在另一部分文件中是 `GEOGRAPHY` 列，Sedona 也会拒绝读取。
+`GEOGRAPHY` 列不会被读取为几何列。如果 schema 为它指定几何类型，Sedona 会拒绝读取；如果同一列在一部分文件中是几何列、在另一部分文件中是 `GEOGRAPHY` 列，Sedona 也会拒绝读取。这既适用于 `GEOMETRY` 列，也适用于 GeoParquet 1.x 文件中的几何列。
 
 因上述原因被 Sedona 拒绝的文件并不是损坏的文件。即使设置了 `ignoreCorruptFiles` 选项，读取也会失败，而不会跳过该文件。
 

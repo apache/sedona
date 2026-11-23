@@ -175,7 +175,7 @@ df = (
 )
 ```
 
-A `GEOGRAPHY` column is not read as a geometry column. Sedona rejects a schema that gives it a geometry type, and it rejects files in which a column is a `GEOMETRY` column in some and a `GEOGRAPHY` column in others.
+A `GEOGRAPHY` column is not read as a geometry column. Sedona rejects a schema that gives it a geometry type, and it rejects files in which a column is a geometry column in some and a `GEOGRAPHY` column in others. This holds for a geometry column of a GeoParquet 1.x file as well as for a `GEOMETRY` column.
 
 A file that Sedona rejects for one of these reasons is not a corrupt file. The read fails for it with the option `ignoreCorruptFiles` as well, and does not leave the file out.
 

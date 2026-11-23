@@ -447,8 +447,8 @@ object GeoParquetFileFormat extends Logging {
     val caseSensitive = sparkSession.sessionState.conf.caseSensitiveAnalysis
     val corruptFiles = sparkSession.sparkContext.collectionAccumulator[String]
     // `undecided` are the columns that the files differ in. A file that states no CRS for a
-    // geometry column of them and has no value in it leaves the column out, and a file that a
-    // scan would skip as a corrupt one leaves out all of its columns.
+    // geometry column of them and has no value in it states a geometry column of any SRID, and
+    // a file that a scan would skip as a corrupt one leaves out all of its columns.
     def reader(undecided: Set[String]) =
       (files: Seq[FileStatus], conf: Configuration, ignoreCorruptFiles: Boolean) => {
         ParquetFileFormat.readParquetFootersInParallel(conf, files, ignoreCorruptFiles).flatMap {
@@ -488,7 +488,10 @@ object GeoParquetFileFormat extends Logging {
               readRowGroups(conf, footer.getFile, ignoreCorruptFiles) match {
                 case Some(rowGroups) =>
                   val withoutAny = mayHaveNoValues.filter(hasNoValues(rowGroups, _)).toSet
-                  Some(schemaOf(columns.filterNot { case (name, _) => withoutAny(name) }))
+                  Some(schemaOf(columns.map {
+                    case (name, _) if withoutAny(name) => name -> withAnySrid
+                    case column => column
+                  }))
                 case None =>
                   // The read skips the file, so none of its columns counts
                   corruptFiles.add(footer.getFile.toString)
@@ -499,7 +502,8 @@ object GeoParquetFileFormat extends Logging {
       }
     // A writer that takes the CRS of a column from its geometries has none to state for a file
     // without a geometry in the column, so such a file fits the CRS that the other files
-    // state. And a file that a scan skips as a corrupt one has no say in what the files state.
+    // state. The column is a geometry column all the same, which does not fit a geography
+    // column. And a file that a scan skips as a corrupt one has no say in what the files state.
     // Finding these files takes their row groups. That is only worth it where the files differ
     // in a column, which the first pass marks with a type that no file states. The second pass
     // looks at the row groups of the files with such a column, and rejects the files that
@@ -522,7 +526,10 @@ object GeoParquetFileFormat extends Logging {
         filesToTouch,
         reader(undecided),
         requireSameColumns _)
-      (settled, corruptFiles.value.asScala.toSet)
+      // A column that no file has a value in keeps what its files state
+      val stated =
+        settled.map(schema => StructType(schema.fields.filterNot(_.dataType == withAnySrid)))
+      (stated, corruptFiles.value.asScala.toSet)
     } else (merged, Set.empty)
   }
 
@@ -556,6 +563,13 @@ object GeoParquetFileFormat extends Logging {
         }
     }
   }
+
+  /**
+   * The type of a geometry column of a file that has no value in the column and states no CRS for
+   * it, in the second pass of [[mergeGeometrySchemasInParallel]]. The column fits the SRID that
+   * another file states.
+   */
+  private val withAnySrid: DataType = SpatialTypeSupport.geometryType
 
   /** Whether the first pass of [[mergeGeometrySchemasInParallel]] gave a column this type. */
   private def isUndecided(dataType: DataType): Boolean =
@@ -605,11 +619,24 @@ object GeoParquetFileFormat extends Logging {
       left: StructType,
       right: StructType,
       caseSensitive: Boolean): StructType = {
-    val rightFields =
-      right.fields.map(field => columnKey(field.name, caseSensitive) -> field).toMap
+    def key(field: StructField): String = columnKey(field.name, caseSensitive)
+    def byKey(schema: StructType): Map[String, StructField] =
+      schema.fields.map(field => key(field) -> field).toMap
+    // A geometry column without a value takes the SRID that the other files state
+    def withSridOf(schema: StructType, others: Map[String, StructField]): StructType =
+      StructType(schema.fields.map { field =>
+        others.get(key(field)) match {
+          case Some(other)
+              if field.dataType == withAnySrid && SpatialTypeSupport.isGeometry(other.dataType) =>
+            field.copy(dataType = other.dataType)
+          case _ => field
+        }
+      })
+    val leftFields = byKey(left)
+    val rightFields = byKey(right)
     left.fields.foreach { field =>
       rightFields
-        .get(columnKey(field.name, caseSensitive))
+        .get(key(field))
         .filter(_.dataType != field.dataType)
         .foreach { other =>
           val isGeometry = SpatialTypeSupport.isGeometry(field.dataType)
@@ -626,7 +653,10 @@ object GeoParquetFileFormat extends Logging {
         }
     }
     // Spark rejects the SRIDs of a geometry column that differ
-    SchemaMergeUtils.safeMerge(left, right, caseSensitive)
+    SchemaMergeUtils.safeMerge(
+      withSridOf(left, rightFields),
+      withSridOf(right, leftFields),
+      caseSensitive)
   }
 
   /** Whether the statistics of `rowGroups` show that the column `name` holds nulls only. */
@@ -754,7 +784,17 @@ object GeoParquetFileFormat extends Logging {
         // for no other column.
         converter
           .geospatialType(parquetField)
-          .map(dataType => field.copy(dataType = dataType))
+          .map { dataType =>
+            if (parquetField.isRepetition(Type.Repetition.REPEATED)) {
+              // A repeated field is an array of its values, with or without the list
+              // annotation of the Parquet format
+              val array = field.dataType match {
+                case declared: ArrayType => declared.copy(elementType = dataType)
+                case _ => ArrayType(dataType, containsNull = false)
+              }
+              field.copy(dataType = array)
+            } else field.copy(dataType = dataType)
+          }
           .getOrElse(field)
       } else field
     }

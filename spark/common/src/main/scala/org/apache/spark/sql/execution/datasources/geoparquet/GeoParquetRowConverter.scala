@@ -23,7 +23,7 @@ import org.apache.parquet.io.api.{Binary, Converter, GroupConverter, PrimitiveCo
 import org.apache.parquet.schema.LogicalTypeAnnotation.{TimeUnit, TimestampLogicalTypeAnnotation}
 import org.apache.parquet.schema.OriginalType.LIST
 import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName._
-import org.apache.parquet.schema.{GroupType, OriginalType, Type}
+import org.apache.parquet.schema.{GroupType, MessageType, OriginalType, Type}
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions._
@@ -171,6 +171,17 @@ private[geoparquet] class GeoParquetRowConverter(
     parquetType.getFields.asScala.map { parquetField =>
       val fieldIndex = catalystFieldNameToIndex(parquetField.getName)
       val catalystField = catalystType(fieldIndex)
+      // The GeoParquet metadata of a file names its geometry columns, which are columns of the
+      // file and none of the fields within them. Such a column holds WKB, which is not what a
+      // binary column of Sedona's own geography type holds.
+      if (parquetType.isInstanceOf[MessageType] &&
+        SpatialTypeSupport.isGeography(catalystField.dataType) &&
+        ParquetGeospatialTypes.describe(parquetField).isEmpty &&
+        schemaConverter.isGeometryColumn(parquetField)) {
+        throw new GeoParquetColumnMismatchException(
+          s"Column '${parquetField.getName}' is a geometry column in the GeoParquet metadata " +
+            "of its file and cannot be read as a geography")
+      }
       // Converted field value should be set to the `fieldIndex`-th cell of `currentRow`
       newConverter(parquetField, catalystField.dataType, new RowUpdater(currentRow, fieldIndex))
     }.toArray
