@@ -3182,6 +3182,87 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void isClosedEmptyAndCollections() throws ParseException {
+    // An empty geometry is not closed. A multi-geometry or collection is closed when every member
+    // is, so an empty member makes it not closed. The expected values match PostGIS.
+    String[] closed = {
+      "POINT (1 2)",
+      "LINESTRING (0 0, 1 0, 1 1, 0 0)",
+      "POLYGON ((0 0, 1 0, 1 1, 0 0))",
+      "MULTIPOINT ((1 2), (3 4))",
+      "GEOMETRYCOLLECTION (POINT (1 2), POLYGON ((0 0, 1 0, 1 1, 0 0)))",
+      "GEOMETRYCOLLECTION (GEOMETRYCOLLECTION (POINT (1 2)), LINESTRING (0 0, 1 0, 1 1, 0 0))"
+    };
+    String[] notClosed = {
+      "POINT EMPTY",
+      "POINT Z EMPTY",
+      "LINESTRING EMPTY",
+      "POLYGON EMPTY",
+      "MULTIPOINT EMPTY",
+      "MULTILINESTRING EMPTY",
+      "MULTIPOLYGON EMPTY",
+      "GEOMETRYCOLLECTION EMPTY",
+      "MULTIPOINT (EMPTY, (1 2))",
+      "MULTILINESTRING ((0 0, 1 0, 1 1, 0 0), EMPTY)",
+      "MULTIPOLYGON (((0 0, 1 0, 1 1, 0 0)), EMPTY)",
+      "GEOMETRYCOLLECTION (POINT EMPTY)",
+      "GEOMETRYCOLLECTION (POINT (1 2), LINESTRING (0 0, 1 1))",
+      "GEOMETRYCOLLECTION (POINT (1 2), GEOMETRYCOLLECTION EMPTY)"
+    };
+    for (String wkt : closed) {
+      assertTrue(wkt, Functions.isClosed(Constructors.geomFromWKT(wkt, 0)));
+    }
+    for (String wkt : notClosed) {
+      assertFalse(wkt, Functions.isClosed(Constructors.geomFromWKT(wkt, 0)));
+    }
+  }
+
+  @Test
+  public void isClosedComparesZ() throws ParseException {
+    // As in PostGIS, line ends and polygon rings must also match in Z when the geometry has Z.
+    // M is not compared. The expected values match PostGIS.
+    String[] closed = {
+      "POINT Z (1 2 3)",
+      "LINESTRING Z (0 0 0, 1 1 0, 0 0 0)",
+      "LINESTRING M (0 0 0, 1 1 0, 0 0 5)",
+      "LINESTRING ZM (0 0 0 0, 1 1 0 0, 0 0 0 5)",
+      "POLYGON Z ((0 0 0, 4 0 0, 4 4 0, 0 0 0), (1 1 0, 2 1 0, 2 2 0, 1 1 0))",
+      "GEOMETRYCOLLECTION Z (LINESTRING Z (0 0 0, 1 1 0, 0 0 0))"
+    };
+    String[] notClosed = {
+      "LINESTRING Z (0 0 0, 1 1 0, 0 0 1)",
+      "MULTILINESTRING Z ((0 0 0, 1 1 0, 0 0 1))",
+      "GEOMETRYCOLLECTION Z (LINESTRING Z (0 0 0, 1 1 0, 0 0 1))",
+      "POLYGON Z ((0 0 0, 1 0 0, 1 1 0, 0 0 1))",
+      "POLYGON Z ((0 0 0, 4 0 0, 4 4 0, 0 0 0), (1 1 0, 2 1 0, 2 2 0, 1 1 1))",
+      "MULTIPOLYGON Z (((0 0 0, 1 0 0, 1 1 0, 0 0 1)))",
+      "GEOMETRYCOLLECTION Z (POLYGON Z ((0 0 0, 1 0 0, 1 1 0, 0 0 1)))"
+    };
+    for (String wkt : closed) {
+      assertTrue(wkt, Functions.isClosed(Constructors.geomFromWKT(wkt, 0)));
+    }
+    for (String wkt : notClosed) {
+      assertFalse(wkt, Functions.isClosed(Constructors.geomFromWKT(wkt, 0)));
+    }
+  }
+
+  @Test
+  public void isClosedNullAndEmptyHole() {
+    // Flink passes a null geometry straight in; master returned false for it.
+    assertFalse(Functions.isClosed(null));
+    // An empty hole is not closed, like an empty member, and must not throw.
+    LinearRing shell =
+        GEOMETRY_FACTORY.createLinearRing(
+            new Coordinate[] {
+              new Coordinate(0, 0), new Coordinate(4, 0), new Coordinate(4, 4), new Coordinate(0, 0)
+            });
+    Polygon polygon =
+        GEOMETRY_FACTORY.createPolygon(
+            shell, new LinearRing[] {GEOMETRY_FACTORY.createLinearRing()});
+    assertFalse(Functions.isClosed(polygon));
+  }
+
+  @Test
   public void forceCollection() throws ParseException {
     Geometry geom =
         Constructors.geomFromWKT("MULTIPOINT (30 10, 40 40, 20 20, 10 30, 10 10, 20 50)", 0);

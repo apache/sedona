@@ -19,7 +19,7 @@
 
 # ST_IsClosed
 
-Introduction: RETURNS true if the LINESTRING start and end point are the same.
+Introduction: RETURNS true if the LINESTRING start and end point are the same, including their Z values when the geometry has Z. Points are closed. A polygon is closed unless one of its rings ends at a different Z value than it starts. A `MULTI*` geometry or GEOMETRYCOLLECTION is closed when all of its members are. An empty geometry is not closed, and neither is a `MULTI*` geometry or GEOMETRYCOLLECTION with an empty member.
 
 ![ST_IsClosed](../../../../image/ST_IsClosed/ST_IsClosed.svg "ST_IsClosed")
 

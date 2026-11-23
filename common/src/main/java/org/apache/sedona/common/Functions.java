@@ -1123,20 +1123,58 @@ public class Functions {
   }
 
   public static boolean isClosed(Geometry geometry) {
-    if (geometry instanceof Circle
-        || geometry instanceof MultiPoint
-        || geometry instanceof MultiPolygon
-        || geometry instanceof Point
-        || geometry instanceof Polygon) {
-      return true;
-    } else if (geometry instanceof LineString) {
-      return ((LineString) geometry).isClosed();
-    } else if (geometry instanceof MultiLineString) {
-      return ((MultiLineString) geometry).isClosed();
-    } else if (geometry instanceof GeometryCollection) {
+    // As in PostGIS: an empty geometry is not closed, a multi-geometry or collection is closed
+    // when every member is (so an empty member makes it not closed), and line ends and polygon
+    // rings must also match in Z when the geometry has Z.
+    if (geometry == null) {
       return false;
     }
-    return false;
+    // Collections are handled before isEmpty(), which would walk the members again at every
+    // level of nesting. This visits each member at most once and stops at the first one that is
+    // not closed.
+    if (geometry instanceof GeometryCollection) {
+      int numGeometries = geometry.getNumGeometries();
+      if (numGeometries == 0) {
+        return false;
+      }
+      for (int i = 0; i < numGeometries; i++) {
+        if (!isClosed(geometry.getGeometryN(i))) {
+          return false;
+        }
+      }
+      return true;
+    }
+    if (geometry.isEmpty()) {
+      return false;
+    }
+    if (geometry instanceof LineString) {
+      return endsMatch((LineString) geometry);
+    }
+    if (geometry instanceof Polygon) {
+      Polygon polygon = (Polygon) geometry;
+      if (!endsMatch(polygon.getExteriorRing())) {
+        return false;
+      }
+      for (int i = 0; i < polygon.getNumInteriorRing(); i++) {
+        if (!endsMatch(polygon.getInteriorRingN(i))) {
+          return false;
+        }
+      }
+      return true;
+    }
+    // Points and circles
+    return true;
+  }
+
+  /**
+   * Whether a line ends where it starts. Unlike {@link LineString#isClosed()}, which compares X and
+   * Y only, this also compares Z when the coordinates have it. M is not compared.
+   */
+  private static boolean endsMatch(LineString line) {
+    if (line.isEmpty()) {
+      return false;
+    }
+    return line.getCoordinateN(0).equals3D(line.getCoordinateN(line.getNumPoints() - 1));
   }
 
   public static boolean isRing(Geometry geometry) {

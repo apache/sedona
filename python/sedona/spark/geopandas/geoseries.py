@@ -1994,10 +1994,11 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def is_closed(self):
-        # Only check LineStrings; return False for all other geometry types
+        # Only check LineStrings; return False for all other geometry types.
+        # Like geopandas, compare X and Y only: ST_IsClosed also compares Z.
         spark_expr = F.when(
             stf.ST_GeometryType(self.spark.column) == "ST_LineString",
-            stf.ST_IsClosed(self.spark.column),
+            stf.ST_IsClosed(stf.ST_Force2D(self.spark.column)),
         ).otherwise(False)
 
         result = self._query_geometry_column(

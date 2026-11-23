@@ -2079,7 +2079,15 @@ class functionTestScala
       (9, "MULTILINESTRING ((10 10, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))"),
       (
         10,
-        "GEOMETRYCOLLECTION (POINT (40 10), LINESTRING (10 10, 20 20, 10 40), POLYGON ((40 40, 20 45, 45 30, 40 40)))"))
+        "GEOMETRYCOLLECTION (POINT (40 10), LINESTRING (10 10, 20 20, 10 40), POLYGON ((40 40, 20 45, 45 30, 40 40)))"),
+      (11, "POINT EMPTY"),
+      (12, "POLYGON EMPTY"),
+      (13, "MULTIPOINT EMPTY"),
+      (14, "GEOMETRYCOLLECTION (POINT (1 2), POLYGON ((0 0, 1 0, 1 1, 0 0)))"),
+      (15, "GEOMETRYCOLLECTION (POINT EMPTY, POINT (1 2))"),
+      (16, "LINESTRING Z (0 0 0, 1 1 0, 0 0 1)"),
+      (17, "GEOMETRYCOLLECTION Z (LINESTRING Z (0 0 0, 1 1 0, 0 0 1))"),
+      (18, "POLYGON Z ((0 0 0, 1 0 0, 1 1 0, 0 0 1))"))
       .map({ case (index, wkt) => Tuple2(index, wktReader.read(wkt)) })
       .toDF("id", "geom")
 
@@ -2099,7 +2107,15 @@ class functionTestScala
       (7, true),
       (8, false),
       (9, false),
-      (10, false))
+      (10, false),
+      (11, false),
+      (12, false),
+      (13, false),
+      (14, true),
+      (15, false),
+      (16, false),
+      (17, false),
+      (18, false))
   }
 
   it("Should pass ST_NumInteriorRings") {

@@ -1687,6 +1687,15 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testIsClosedForNull() {
+    // ST_GeometryN returns null for an index past the end
+    Table table =
+        tableEnv.sqlQuery(
+            "SELECT ST_IsClosed(ST_GeometryN(ST_GeomFromWKT('POINT (1 2)'), 2)) AS is_closed");
+    assertFalse((boolean) first(table).getField(0));
+  }
+
+  @Test
   public void testIsRingForRing() {
     Table polygonTable = createPolygonTable(1);
     Table linestringTable =
