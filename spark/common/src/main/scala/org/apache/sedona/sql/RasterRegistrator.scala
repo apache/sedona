@@ -52,12 +52,11 @@ object RasterRegistrator {
   }
 
   def dropAll(sparkSession: SparkSession): Unit = {
-    SedonaFunctionNames.initialize(sparkSession)
+    val prefix = SedonaFunctionNames.prefixToDrop(sparkSession)
     if (isGeoToolsAvailable) {
       sparkSession.sessionState.functionRegistry.dropFunction(
         functionIdentifier(
-          SedonaFunctionNames.resolve(
-            RasterUdafCatalog.rasterAggregateExpression.getClass.getSimpleName)))
+          prefix + RasterUdafCatalog.rasterAggregateExpression.getClass.getSimpleName))
     }
   }
 }

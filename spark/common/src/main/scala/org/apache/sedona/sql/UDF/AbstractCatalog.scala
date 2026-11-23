@@ -54,19 +54,28 @@ abstract class AbstractCatalog {
     expressions.filterNot { case (identifier, _, _) => isSparkNative(identifier) }
 
   /**
-   * The plain names of Spark's builtins that, with a prefix set, are registered under the prefix
-   * as aliases of Spark's own functions. None without a prefix: Spark's plain names are enough.
+   * The plain names of Spark's builtins that, under a non-empty `prefix`, are registered under
+   * the prefix as aliases of Spark's own functions. None without a prefix: Spark's plain names
+   * are enough.
    */
-  private def sparkNativeAliases: Seq[String] =
-    if (SedonaFunctionNames.effectivePrefix.isEmpty) Seq.empty
+  private def sparkNativeAliases(prefix: String): Seq[String] =
+    if (prefix.isEmpty) Seq.empty
     else
       expressions.collect {
         case (identifier, _, _) if isSparkNative(identifier) => identifier.funcName
       }
 
+  /** The plain names of the *_Agg aliases of the *_Aggr aggregates. */
+  private[sedona] val aggregateAliasNames: Seq[String] =
+    Seq("ST_Envelope_Agg", "ST_Intersection_Agg", "ST_Union_Agg")
+
   /** The registry identifier for `name` under the effective prefix. */
   private def resolvedIdentifier(name: String): FunctionIdentifier =
-    registryIdentifier(FunctionIdentifier(SedonaFunctionNames.resolve(name)))
+    prefixedIdentifier(SedonaFunctionNames.effectivePrefix, name)
+
+  /** The registry identifier for `name` under `prefix`. */
+  private def prefixedIdentifier(prefix: String, name: String): FunctionIdentifier =
+    registryIdentifier(FunctionIdentifier(prefix + name))
 
   // Spark logs that a function was replaced unless a repeat registration passes the same
   // ExpressionInfo and builder objects, so each resolved name keeps one ExpressionInfo.
@@ -169,7 +178,7 @@ abstract class AbstractCatalog {
   // that Spark does not have is skipped.
   private def registerSparkNativeAliases(sparkSession: SparkSession): Unit = {
     val registry = sparkSession.sessionState.functionRegistry
-    sparkNativeAliases.foreach { name =>
+    sparkNativeAliases(SedonaFunctionNames.effectivePrefix).foreach { name =>
       val sparkIdentifier = registryIdentifier(FunctionIdentifier(name))
       for {
         info <- registry.lookupFunction(sparkIdentifier)
@@ -250,18 +259,14 @@ abstract class AbstractCatalog {
   }
 
   def dropAll(sparkSession: SparkSession): Unit = {
-    SedonaFunctionNames.initialize(sparkSession)
+    val prefix = SedonaFunctionNames.prefixToDrop(sparkSession)
     val registry = sparkSession.sessionState.functionRegistry
-    registeredExpressions.foreach { case (identifier, _, _) =>
-      registry.dropFunction(resolvedIdentifier(identifier.funcName))
-    }
+    def drop(name: String): Unit = registry.dropFunction(prefixedIdentifier(prefix, name))
+    registeredExpressions.foreach { case (identifier, _, _) => drop(identifier.funcName) }
     // Only the prefixed aliases: Spark's own functions keep their plain names.
-    sparkNativeAliases.foreach(name => registry.dropFunction(resolvedIdentifier(name)))
-    aggregateExpressions.foreach(f =>
-      registry.dropFunction(resolvedIdentifier(f.getClass.getSimpleName)))
+    sparkNativeAliases(prefix).foreach(drop)
+    aggregateExpressions.foreach(f => drop(f.getClass.getSimpleName))
     // Drop aliases for *_Aggr functions
-    Seq("ST_Envelope_Agg", "ST_Intersection_Agg", "ST_Union_Agg").foreach { aliasName =>
-      registry.dropFunction(resolvedIdentifier(aliasName))
-    }
+    aggregateAliasNames.foreach(drop)
   }
 }

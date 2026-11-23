@@ -92,6 +92,17 @@ object SedonaFunctionNames {
   /** effectivePrefix + name. */
   def resolve(name: String): String = effectivePrefix + name
 
+  /**
+   * The prefix dropAll resolves names with: the fixed prefix, else the key's value in the conf of
+   * `sparkSession` if that value is valid, else "". Reading it fixes nothing, so a drop before a
+   * session sets the key does not stop a later registrator from fixing what that session asks
+   * for.
+   */
+  private[sedona] def prefixToDrop(sparkSession: SparkSession): String = fixedPrefix match {
+    case Some(prefix) => prefix
+    case None => Some(sparkSession.conf.get(PrefixConfigKey, "")).filter(isValid).getOrElse("")
+  }
+
   private[sedona] def resetForTesting(): Unit = lock.synchronized {
     fixedPrefix = None
     warnedValues.clear()

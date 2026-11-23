@@ -125,7 +125,32 @@ class FunctionPrefixBeforeRegistrationSuite extends AnyFunSpec with BeforeAndAft
           registerPlatformMarker(id)
           dropAll()
           assert(markerClass(id).contains("org.example.PlatformMarker"), id.funcName)
-          assert(SedonaFunctionNames.effectivePrefix == P, id.funcName)
+          // dropAll fixes nothing, and the active session asks for no prefix.
+          assert(SedonaFunctionNames.effectivePrefix == "", id.funcName)
+        }
+      }
+    }
+
+    it("lets the first registration fix the prefix after a drop") {
+      val drops: Seq[SparkSession => Unit] = Seq(
+        s => Catalog.dropAll(s),
+        s => RasterRegistrator.dropAll(s),
+        s => SedonaVizRegistrator.dropAll(s))
+      drops.zipWithIndex.foreach { case (dropAll, i) =>
+        SedonaFunctionNames.resetForTesting()
+        // A session created from the context, so its conf has no prefix yet.
+        val session = spark.newSession()
+        withActiveSession(session) {
+          dropAll(session)
+          session.conf.set(SedonaFunctionNames.PrefixConfigKey, P)
+          SedonaContext.create(session)
+          assert(SedonaFunctionNames.effectivePrefix == P, s"drop $i")
+          assert(
+            session
+              .sql(s"SELECT ${P}ST_AsText(${P}ST_Point(1.0, 2.0))")
+              .head()
+              .getString(0) == "POINT (1 2)",
+            s"drop $i")
         }
       }
     }
