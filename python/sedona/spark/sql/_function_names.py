@@ -62,9 +62,13 @@ def function_prefix(spark: Optional[SparkSession] = None) -> str:
         if spark is None:
             return ""
     if is_remote():
-        # The server fixed the prefix when it started, so one round trip per session is enough.
+        # The server's prefix does not change once fixed, so each session is asked once.
         prefix = getattr(spark, _PREFIX_CACHE_ATTRIBUTE, None)
         if prefix is None:
+            # With spark.sql.extensions the server registers Sedona for a session when it
+            # first analyses a plan there, and registering sets the key to the prefix in
+            # effect. So analyse a trivial plan before reading the key.
+            spark.range(0).schema
             prefix = spark.conf.get(PREFIX_CONFIG_KEY, "")
             setattr(spark, _PREFIX_CACHE_ATTRIBUTE, prefix)
         return prefix

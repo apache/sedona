@@ -21,8 +21,9 @@ package org.apache.sedona.sql.UDF
 import org.apache.spark.sql.SparkSession
 import org.slf4j.{Logger, LoggerFactory}
 
-import java.util.Locale
+import java.util.{Collections, Locale, WeakHashMap}
 import scala.collection.mutable
+import scala.util.{Failure, Success, Try}
 
 /**
  * Owns the name prefix of the Spark SQL functions Sedona registers. The first registrator to run
@@ -39,30 +40,43 @@ object SedonaFunctionNames {
   // None means no prefix has been fixed yet; Some("") means it was fixed to the empty string.
   @volatile private var fixedPrefix: Option[String] = None
   private val warnedValues = mutable.Set[String]()
+  // Spark Connect sessions and the prefix each one reported. Reading it costs two round trips to
+  // the server, and the server's prefix does not change, so each session is asked once.
+  private val connectPrefixes =
+    Collections.synchronizedMap(new WeakHashMap[SparkSession, String]())
 
   private def isValid(prefix: String): Boolean =
     prefix.isEmpty || ValidPrefix.pattern.matcher(prefix).matches()
 
   /**
    * Reads the key from the session conf (default "") and calls initialize(String, plainNames).
-   * `plainNames` are the plain names of every function Sedona registers.
+   * `plainNames` are the plain names of every function Sedona registers. Afterwards the key in
+   * the session's conf holds the prefix in effect.
    */
   private[sedona] def initialize(
       sparkSession: SparkSession,
-      plainNames: => Iterable[String]): Unit =
-    initialize(sparkSession.conf.get(PrefixConfigKey, ""), plainNames)
+      plainNames: => Iterable[String]): Unit = {
+    val requested = sparkSession.conf.get(PrefixConfigKey, "")
+    val effective = initialize(requested, plainNames)
+    // A Spark Connect client names the functions after the key's value in its session, so the
+    // value must be the prefix the functions are registered under, not the one asked for.
+    if (requested != effective) sparkSession.conf.set(PrefixConfigKey, effective)
+  }
 
   /** initialize(requestedPrefix, plainNames) with no names to check against. */
-  private[sedona] def initialize(requestedPrefix: String): Unit =
+  private[sedona] def initialize(requestedPrefix: String): Unit = {
     initialize(requestedPrefix, Nil)
+    ()
+  }
 
   /**
    * Validates, then fixes the effective prefix if none is fixed yet; otherwise warns on a
    * different value. A prefix is fixed only if it turns none of `plainNames` into another.
+   * Returns the effective prefix.
    */
   private[sedona] def initialize(
       requestedPrefix: String,
-      plainNames: => Iterable[String]): Unit = {
+      plainNames: => Iterable[String]): String = {
     if (!isValid(requestedPrefix)) {
       throw new IllegalArgumentException(
         s"Invalid value '$requestedPrefix' for $PrefixConfigKey: the prefix must be empty or " +
@@ -73,13 +87,16 @@ object SedonaFunctionNames {
     if (fixedPrefix.isEmpty) requireNoCollision(requestedPrefix, plainNames)
     lock.synchronized {
       fixedPrefix match {
-        case None => fixedPrefix = Some(requestedPrefix)
+        case None =>
+          fixedPrefix = Some(requestedPrefix)
+          requestedPrefix
         case Some(effective) =>
           if (effective != requestedPrefix && warnedValues.add(requestedPrefix)) {
             logger.warn(
               s"$PrefixConfigKey is already fixed to '$effective' in this JVM; " +
                 s"ignoring the requested value '$requestedPrefix'")
           }
+          effective
       }
     }
   }
@@ -89,20 +106,48 @@ object SedonaFunctionNames {
    * of the default session (a stopped session is skipped), if that value is valid; otherwise "".
    * Reading it fixes nothing. So a DataFrame column built before the first registrator runs
    * already carries the name Sedona registers. Public so Python can read it over py4j.
+   *
+   * In a Spark Connect client no registrator runs, so the prefix is never fixed there. A Connect
+   * session asks the server once for the prefix in effect; a failure of that request propagates.
    */
   def effectivePrefix: String = fixedPrefix match {
     case Some(prefix) => prefix
     case None => configuredPrefix
   }
 
-  // A stopped session can stay the thread's active session, so stopped ones are skipped.
   private def configuredPrefix: String =
-    SparkSession.getActiveSession
-      .filterNot(_.sparkContext.isStopped)
-      .orElse(SparkSession.getDefaultSession.filterNot(_.sparkContext.isStopped))
-      .map(_.conf.get(PrefixConfigKey, ""))
-      .filter(isValid)
+    sessionPrefix(SparkSession.getActiveSession)
+      .orElse(sessionPrefix(SparkSession.getDefaultSession))
       .getOrElse("")
+
+  // The prefix `session` asks for, or None for no session or a stopped one: a stopped session
+  // can stay the thread's active session. A Spark Connect session has no SparkContext, and
+  // asking for one throws; such a session is never taken for stopped.
+  private def sessionPrefix(session: Option[SparkSession]): Option[String] =
+    session.flatMap { s =>
+      Try(s.sparkContext) match {
+        case Success(context) => if (context.isStopped) None else Some(confPrefix(s))
+        case Failure(_) => Some(connectPrefix(s))
+      }
+    }
+
+  private def confPrefix(session: SparkSession): String =
+    Try(session.conf.get(PrefixConfigKey, "")).toOption.filter(isValid).getOrElse("")
+
+  private def connectPrefix(session: SparkSession): String =
+    Option(connectPrefixes.get(session)).getOrElse {
+      // With spark.sql.extensions the server registers Sedona for a session when it first
+      // analyses a plan there, and registering puts the prefix in effect into the session's
+      // conf. So analyse a trivial plan before reading the key.
+      session.range(0).schema
+      Try(session.conf.get(PrefixConfigKey, "")) match {
+        case Success(value) =>
+          val prefix = if (isValid(value)) value else ""
+          connectPrefixes.put(session, prefix)
+          prefix
+        case Failure(_) => "" // Asked again next time.
+      }
+    }
 
   /** effectivePrefix + name. */
   def resolve(name: String): String = effectivePrefix + name
@@ -148,5 +193,6 @@ object SedonaFunctionNames {
   private[sedona] def resetForTesting(): Unit = lock.synchronized {
     fixedPrefix = None
     warnedValues.clear()
+    connectPrefixes.clear()
   }
 }

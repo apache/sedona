@@ -223,6 +223,15 @@ class FunctionPrefixSuite extends AnyFunSpec with BeforeAndAfterAll {
       // Session-only, so only the registration for this session can have put it there.
       assert(other.catalog.functionExists(P + "RS_Stack_Aggr"))
       assert(!other.catalog.functionExists("other_ST_Point"))
+      // A Spark Connect client reads the key from its session to name the functions.
+      assert(other.conf.get(SedonaFunctionNames.PrefixConfigKey) == P)
+    }
+
+    it("puts the prefix in effect into the conf of a session without the key") {
+      val plain = spark.newSession()
+      assert(plain.conf.getOption(SedonaFunctionNames.PrefixConfigKey).isEmpty)
+      SedonaContext.create(plain)
+      assert(plain.conf.get(SedonaFunctionNames.PrefixConfigKey) == P)
     }
 
     it("drops and re-registers the prefixed names") {

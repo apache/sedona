@@ -16,17 +16,19 @@
 # under the License.
 
 import os
+import threading
 
 import pytest
 from pyspark.errors import AnalysisException
 from pyspark.sql import functions as F
-from tests.test_base import TestBase
+from tests.test_base import SPARK_REMOTE, TestBase
 
 from sedona.spark.sql import st_aggregates as sta
 from sedona.spark.sql import st_constructors as stc
 from sedona.spark.sql import st_functions as stf
 from sedona.spark.sql import st_predicates as stp
 from sedona.spark.sql._function_names import (
+    PREFIX_CONFIG_KEY,
     call_sedona_function_by_name,
     function_prefix,
     resolve_function_name,
@@ -79,6 +81,39 @@ class TestPrefixDataFrameApi(TestBase):
             points.select(stf.ST_NumGeometries(sta.ST_Union_Aggr("geom"))).head()[0]
             == 2
         )
+
+    @pytest.mark.skipif(not SPARK_REMOTE, reason="needs Spark Connect")
+    def test_second_connect_session_asking_for_another_prefix(self):
+        from pyspark.sql.connect.session import SparkSession as ConnectSession
+
+        self.spark  # starts the server for SPARK_REMOTE=local
+        # The local server that SPARK_REMOTE=local starts listens at sc://localhost.
+        url = "sc://localhost" if SPARK_REMOTE.startswith("local") else SPARK_REMOTE
+        outcome = {}
+
+        def build_and_run():
+            # A new thread has no active session, so the session created here becomes the
+            # active one in this thread, and the wrappers resolve the prefix through it.
+            second = ConnectSession.builder.remote(url).create()
+            try:
+                second.conf.set(PREFIX_CONFIG_KEY, "other_")
+                outcome["wkt"] = (
+                    second.range(1)
+                    .select(stf.ST_AsText(stc.ST_Point(1.0, 2.0)))
+                    .head()[0]
+                )
+            except Exception as error:
+                outcome["error"] = error
+            finally:
+                # Not stop(): in local mode that also stops the server.
+                second.client.close()
+
+        thread = threading.Thread(target=build_and_run)
+        thread.start()
+        thread.join()
+        if "error" in outcome:
+            raise outcome["error"]
+        assert outcome["wkt"] == "POINT (1 2)"
 
     def test_by_name_helper(self):
         df = self.spark.range(1).select(
