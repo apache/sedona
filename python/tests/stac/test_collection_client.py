@@ -16,12 +16,15 @@
 # under the License.
 
 import collections.abc
+import os
 from unittest.mock import patch
 
+import pytest
 from pyspark.sql import DataFrame
 from sedona.spark.stac.client import Client
 from sedona.spark.stac.collection_client import CollectionClient
 
+from tests import tests_resource
 from tests.test_base import TestBase
 from tests.stac.test_mock_fixtures import MockClient, MockCollectionClient
 
@@ -395,6 +398,29 @@ class TestStacReader(TestBase):
         # Both should return the same count
         assert df_with_tuple is not None
         assert df_with_list is not None
+
+    @pytest.mark.parametrize(
+        "spatial_filter",
+        [
+            {"geometry": "POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))"},
+            {"bbox": [[-1.0, -1.0, 1.0, 1.0]]},
+        ],
+    )
+    def test_spatial_filter_that_cannot_be_built_is_not_skipped(
+        self, spatial_filter
+    ) -> None:
+        # Skipping it as invalid input would return every item instead of the matching ones.
+        self.spark
+        collection = CollectionClient(
+            os.path.join(tests_resource, "datasource_stac/collection.json")
+        )
+        with patch(
+            "sedona.spark.sql.st_predicates.ST_Intersects",
+            side_effect=TypeError("cannot build the filter"),
+        ):
+            with pytest.raises(RuntimeError) as raised:
+                collection.get_dataframe(**spatial_filter)
+        assert isinstance(raised.value.__context__, TypeError)
 
     def test_expand_date(self) -> None:
         """_expand_date should expand each supported STAC datetime form.

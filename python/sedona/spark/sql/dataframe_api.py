@@ -85,7 +85,8 @@ def call_sedona_function(
 
     args = map(_convert_argument_to_java_column, args)
 
-    # Only here: pyspark-client (Spark Connect only) has no SparkContext.
+    # Only here: pyspark-client (Spark Connect only) has no SparkContext and no py4j.
+    from py4j.java_gateway import JavaPackage, java_import
     from pyspark import SparkContext
 
     jvm = SparkContext._jvm
@@ -94,6 +95,14 @@ def call_sedona_function(
             "No active spark context was detected. Unable to call sedona function."
         )
     jobject = getattr(jvm, object_name)
+    if isinstance(jobject, JavaPackage):
+        # The short name exists on the JVM view only after a java_import, which the Python
+        # SedonaContext.create runs. A session that registered Sedona only through
+        # spark.sql.extensions has none.
+        from sedona.spark.register.java_libs import SedonaJvmLib
+
+        java_import(jvm, SedonaJvmLib[object_name].value)
+        jobject = getattr(jvm, object_name)
     jfunc = getattr(jobject, function_name)
 
     jc = jfunc(*args)

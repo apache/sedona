@@ -178,15 +178,17 @@ class CollectionClient:
                         ):
                             raise ValueError("Invalid geometry string")
                         geom_wkt = geom_str.strip()
-
-                    geometry_conditions.append(
-                        stp.ST_Intersects(
-                            stc.ST_GeomFromText(F.lit(geom_wkt)), F.col("geometry")
-                        )
-                    )
                 except (ValueError, TypeError, AttributeError):
                     # Skip invalid geometries rather than failing
                     continue
+
+                # Outside the try: a failure to build the filter is not invalid input, and
+                # skipping it would return every item.
+                geometry_conditions.append(
+                    stp.ST_Intersects(
+                        stc.ST_GeomFromText(F.lit(geom_wkt)), F.col("geometry")
+                    )
+                )
 
             if geometry_conditions:
                 # Combine conditions with OR using reduce
@@ -232,15 +234,16 @@ class CollectionClient:
                         float(min_lat),
                     )
 
-                    bbox_conditions.append(
-                        stp.ST_Intersects(
-                            stc.ST_GeomFromText(F.lit(polygon_wkt)), F.col("geometry")
-                        )
-                    )
-
                 except (ValueError, TypeError, IndexError):
                     # Skip invalid bbox items rather than failing
                     continue
+
+                # Outside the try, as for a geometry above.
+                bbox_conditions.append(
+                    stp.ST_Intersects(
+                        stc.ST_GeomFromText(F.lit(polygon_wkt)), F.col("geometry")
+                    )
+                )
 
             if bbox_conditions:
                 # Combine conditions with OR using reduce
