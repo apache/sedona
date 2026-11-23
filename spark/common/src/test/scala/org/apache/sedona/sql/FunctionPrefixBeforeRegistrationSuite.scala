@@ -23,7 +23,8 @@ import org.apache.sedona.sql.UDF.{Catalog, NativeFunctionRegistrationTest, Sedon
 import org.apache.sedona.sql.UDT.UdtRegistrator
 import org.apache.sedona.sql.utils.GeoToolsCoverageAvailability.{gridClassName, isGeoToolsAvailable}
 import org.apache.sedona.viz.sql.utils.SedonaVizRegistrator
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.SparkConf
+import org.apache.spark.sql.{SparkSession, SparkSessionExtensions}
 import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry
 import org.apache.spark.sql.catalyst.expressions.{Expression, ExpressionInfo, Literal}
@@ -179,6 +180,61 @@ class FunctionPrefixBeforeRegistrationSuite extends AnyFunSpec with BeforeAndAft
         // Nothing was fixed, so a later request still fixes its prefix.
         SedonaFunctionNames.initialize("sedona_")
         assert(SedonaFunctionNames.effectivePrefix == "sedona_", call)
+      }
+    }
+
+    it("rejects a malformed prefix before dropping anything") {
+      val drops: Seq[(SparkSession => Unit, FunctionIdentifier)] = Seq(
+        ((s: SparkSession) => Catalog.dropAll(s), identifier("ST_Buffer", "builtin")),
+        (
+          (s: SparkSession) => SedonaVizRegistrator.dropAll(s),
+          identifier("ST_TileName", "builtin"))) ++
+        (if (isGeoToolsAvailable)
+           Seq(
+             (
+               (s: SparkSession) => RasterRegistrator.dropAll(s),
+               identifier("RS_Stack_Aggr", "session")))
+         else Seq.empty)
+      drops.foreach { case (dropAll, id) =>
+        SedonaFunctionNames.resetForTesting()
+        val session = spark.newSession()
+        session.conf.set(SedonaFunctionNames.PrefixConfigKey, "bad-prefix")
+        registerPlatformMarker(id, session)
+        val e = intercept[IllegalArgumentException](dropAll(session))
+        assert(e.getMessage.contains("'bad-prefix'"), id.funcName)
+        // Dropping under no prefix would have removed the platform's function.
+        assert(markerClass(id, session).contains("org.example.PlatformMarker"), id.funcName)
+      }
+    }
+
+    it("lets the application's Spark config decide when loaded through spark.sql.extensions") {
+      SedonaFunctionNames.resetForTesting()
+      // Spark calls this when it loads the extension. The test context's config has no prefix.
+      new SedonaSqlExtensions().apply(new SparkSessionExtensions)
+      val expected = spark.sparkContext.getConf.get(SedonaFunctionNames.PrefixConfigKey, "")
+      val client = spark.newSession()
+      client.conf.set(SedonaFunctionNames.PrefixConfigKey, "other_")
+      withActiveSession(client) {
+        assert(SedonaFunctionNames.effectivePrefix == expected)
+      }
+    }
+
+    it("registers under the application's prefix for a session that asks for another") {
+      SedonaFunctionNames.resetForTesting()
+      SedonaFunctionNames.useApplicationConf(
+        new SparkConf(false).set(SedonaFunctionNames.PrefixConfigKey, P))
+      // As the first session of a Spark Connect client that set the key before its first query.
+      val client = spark.newSession()
+      client.conf.set(SedonaFunctionNames.PrefixConfigKey, "other_")
+      withActiveSession(client) {
+        SedonaContext.create(client)
+        assert(SedonaFunctionNames.effectivePrefix == P)
+        assert(
+          client
+            .sql(s"SELECT ${P}ST_AsText(${P}ST_Point(1.0, 2.0))")
+            .head()
+            .getString(0) == "POINT (1 2)")
+        assert(!client.catalog.functionExists("other_ST_Point"))
       }
     }
 

@@ -39,8 +39,22 @@ except ImportError:
 
 PREFIX_CONFIG_KEY = "spark.sedona.function.prefix"
 
-# A Spark Connect session caches the prefix it read from its conf under this attribute.
+# A Sedona function that no platform has. On Spark Connect the prefix in effect is read from
+# the name the server lists this function under. SedonaFunctionNames.scala has the same name.
+_MARKER_FUNCTION_NAME = "__sedona_internal_coverage_invalid_edges_for_target"
+
+# A Spark Connect session caches the prefix its server reported under this attribute.
 _PREFIX_CACHE_ATTRIBUTE = "_sedona_function_prefix"
+
+
+def _prefix_of_listed_names(listed) -> str:
+    # Spark lists function names in lower case, and resolves them ignoring case. No name means
+    # no Sedona on the server, or a Sedona from before the prefix.
+    marker = _MARKER_FUNCTION_NAME.lower()
+    prefixes = [
+        name.lower()[: -len(marker)] for name in listed if name.lower().endswith(marker)
+    ]
+    return min(prefixes, key=len) if prefixes else ""
 
 
 def _active_or_default_session() -> Optional[SparkSession]:
@@ -65,11 +79,15 @@ def function_prefix(spark: Optional[SparkSession] = None) -> str:
         # The server's prefix does not change once fixed, so each session is asked once.
         prefix = getattr(spark, _PREFIX_CACHE_ATTRIBUTE, None)
         if prefix is None:
-            # With spark.sql.extensions the server registers Sedona for a session when it
-            # first analyses a plan there, and registering sets the key to the prefix in
-            # effect. So analyse a trivial plan before reading the key.
-            spark.range(0).schema
-            prefix = spark.conf.get(PREFIX_CONFIG_KEY, "")
+            # The server's function registry says under which names Sedona's functions are
+            # registered, and a client cannot write to it as it can to its session's conf.
+            # Listing the function also makes a server that loads Sedona through
+            # spark.sql.extensions register Sedona for this session first. An error
+            # propagates: a guessed plain name could call a platform's function.
+            rows = spark.sql(
+                f"SHOW FUNCTIONS LIKE '*{_MARKER_FUNCTION_NAME}'"
+            ).collect()
+            prefix = _prefix_of_listed_names(row[0] for row in rows)
             setattr(spark, _PREFIX_CACHE_ATTRIBUTE, prefix)
         return prefix
     # Never cache on classic: the JVM value changes from "" to the fixed prefix when the first

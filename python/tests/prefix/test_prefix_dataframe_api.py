@@ -83,7 +83,10 @@ class TestPrefixDataFrameApi(TestBase):
         )
 
     @pytest.mark.skipif(not SPARK_REMOTE, reason="needs Spark Connect")
-    def test_second_connect_session_asking_for_another_prefix(self):
+    @pytest.mark.parametrize("query_first", [False, True])
+    def test_second_connect_session_asking_for_another_prefix(self, query_first):
+        # The session sets the key before its first query, or after the server registered
+        # Sedona for it. Either way the wrappers must use the server's prefix.
         from pyspark.sql.connect.session import SparkSession as ConnectSession
 
         self.spark  # starts the server for SPARK_REMOTE=local
@@ -96,6 +99,8 @@ class TestPrefixDataFrameApi(TestBase):
             # active one in this thread, and the wrappers resolve the prefix through it.
             second = ConnectSession.builder.remote(url).create()
             try:
+                if query_first:
+                    second.sql("SELECT 1").collect()
                 second.conf.set(PREFIX_CONFIG_KEY, "other_")
                 outcome["wkt"] = (
                     second.range(1)

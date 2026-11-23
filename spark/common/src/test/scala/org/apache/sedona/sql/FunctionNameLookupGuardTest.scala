@@ -46,6 +46,8 @@ class FunctionNameLookupGuardTest extends AnyFunSuite {
       "resolves through SedonaFunctionNames",
     "common/src/main/scala/org/apache/spark/sql/sedona_sql/expressions/st_aggregates.scala" ->
       "resolves through SedonaFunctionNames",
+    "common/src/main/scala/org/apache/sedona/sql/UDF/SedonaFunctionNames.scala" ->
+      "SHOW FUNCTIONS for the marker function, to read the prefix of a Spark Connect server",
     "common/src/main/scala/org/apache/sedona/stats/SpatialRowHash.scala" ->
       "ST_AsBinary / ST_SRID on native types are Spark's builtins under any prefix",
     "common/src/main/scala/org/apache/sedona/stats/autocorrelation/Moran.scala" ->

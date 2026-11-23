@@ -18,12 +18,14 @@
  */
 package org.apache.sedona.sql.UDF
 
+import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
 import org.slf4j.{Logger, LoggerFactory}
 
 import java.util.{Collections, Locale, WeakHashMap}
+import java.util.concurrent.ConcurrentHashMap
 import scala.collection.mutable
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 /**
  * Owns the name prefix of the Spark SQL functions Sedona registers. The first registrator to run
@@ -32,6 +34,13 @@ import scala.util.{Failure, Success, Try}
 object SedonaFunctionNames {
   val PrefixConfigKey: String = "spark.sedona.function.prefix"
 
+  /**
+   * A Sedona function that no platform has. A Spark Connect client finds the prefix in effect on
+   * the server in the name the server lists this function under, so Catalog must keep it.
+   */
+  private[sedona] val MarkerFunctionName: String =
+    "__sedona_internal_coverage_invalid_edges_for_target"
+
   private val logger: Logger = LoggerFactory.getLogger(getClass)
   private val ValidPrefix = "^[A-Za-z_][A-Za-z0-9_]*$".r
 
@@ -39,28 +48,52 @@ object SedonaFunctionNames {
   private val lock = new Object
   // None means no prefix has been fixed yet; Some("") means it was fixed to the empty string.
   @volatile private var fixedPrefix: Option[String] = None
+  // Set when Sedona is loaded through spark.sql.extensions: the key's value in the application's
+  // Spark config ("" without the key). It then decides the prefix, whatever a session asks for.
+  @volatile private var applicationPrefix: Option[String] = None
   private val warnedValues = mutable.Set[String]()
-  // Spark Connect sessions and the prefix each one reported. Reading it costs two round trips to
-  // the server, and the server's prefix does not change, so each session is asked once.
+  // Spark Connect sessions and the prefix each one's server reported. Asking costs round trips
+  // to the server, and the server's prefix does not change, so each session asks once.
   private val connectPrefixes =
     Collections.synchronizedMap(new WeakHashMap[SparkSession, String]())
+  // The classes of the sessions that turned out to be Spark Connect sessions.
+  private val connectSessionClasses = ConcurrentHashMap.newKeySet[Class[_]]()
 
   private def isValid(prefix: String): Boolean =
     prefix.isEmpty || ValidPrefix.pattern.matcher(prefix).matches()
 
+  private def requireValid(prefix: String): Unit =
+    if (!isValid(prefix)) {
+      throw new IllegalArgumentException(
+        s"Invalid value '$prefix' for $PrefixConfigKey: the prefix must be empty or " +
+          "match ^[A-Za-z_][A-Za-z0-9_]*$")
+    }
+
   /**
-   * Reads the key from the session conf (default "") and calls initialize(String, plainNames).
-   * `plainNames` are the plain names of every function Sedona registers. Afterwards the key in
-   * the session's conf holds the prefix in effect.
+   * Makes the application's Spark config decide the prefix. SedonaSqlExtensions calls this when
+   * Spark loads it. With spark.sql.extensions Sedona registers for every session, also for the
+   * session of a Spark Connect client, and a client must not choose the names for the whole
+   * server by setting the key on its own session.
+   */
+  private[sedona] def useApplicationConf(conf: SparkConf): Unit =
+    applicationPrefix = Some(conf.get(PrefixConfigKey, ""))
+
+  // The prefix `sparkSession` asks for: the application's if that decides, else the session's.
+  private def requestedPrefix(sparkSession: SparkSession): String =
+    applicationPrefix.getOrElse(sparkSession.conf.get(PrefixConfigKey, ""))
+
+  /**
+   * Calls initialize(String, plainNames) with the key's value in the application's Spark config
+   * if Sedona was loaded through spark.sql.extensions, else with its value in the session conf
+   * (default ""). `plainNames` are the plain names of every function Sedona registers.
    */
   private[sedona] def initialize(
       sparkSession: SparkSession,
       plainNames: => Iterable[String]): Unit = {
-    val requested = sparkSession.conf.get(PrefixConfigKey, "")
-    val effective = initialize(requested, plainNames)
-    // A Spark Connect client names the functions after the key's value in its session, so the
-    // value must be the prefix the functions are registered under, not the one asked for.
-    if (requested != effective) sparkSession.conf.set(PrefixConfigKey, effective)
+    val effective = initialize(requestedPrefix(sparkSession), plainNames)
+    // The session may ask for something the application's config overrules.
+    val asked = sparkSession.conf.get(PrefixConfigKey, "")
+    if (asked != effective) lock.synchronized(warnIgnored(effective, asked))
   }
 
   /** initialize(requestedPrefix, plainNames) with no names to check against. */
@@ -77,11 +110,7 @@ object SedonaFunctionNames {
   private[sedona] def initialize(
       requestedPrefix: String,
       plainNames: => Iterable[String]): String = {
-    if (!isValid(requestedPrefix)) {
-      throw new IllegalArgumentException(
-        s"Invalid value '$requestedPrefix' for $PrefixConfigKey: the prefix must be empty or " +
-          "match ^[A-Za-z_][A-Za-z0-9_]*$")
-    }
+    requireValid(requestedPrefix)
     // Outside the lock, as computing the names can initialize the catalog objects. Two threads
     // may both check; the first to take the lock fixes the prefix.
     if (fixedPrefix.isEmpty) requireNoCollision(requestedPrefix, plainNames)
@@ -91,88 +120,116 @@ object SedonaFunctionNames {
           fixedPrefix = Some(requestedPrefix)
           requestedPrefix
         case Some(effective) =>
-          if (effective != requestedPrefix && warnedValues.add(requestedPrefix)) {
-            logger.warn(
-              s"$PrefixConfigKey is already fixed to '$effective' in this JVM; " +
-                s"ignoring the requested value '$requestedPrefix'")
-          }
+          if (effective != requestedPrefix) warnIgnored(effective, requestedPrefix)
           effective
       }
     }
   }
 
+  // Call with the lock held. One warning per ignored value.
+  private def warnIgnored(effective: String, ignored: String): Unit =
+    if (warnedValues.add(ignored)) {
+      logger.warn(
+        s"$PrefixConfigKey is already fixed to '$effective' in this JVM; " +
+          s"ignoring the requested value '$ignored'")
+    }
+
   /**
-   * The fixed prefix. Until one is fixed, the key's value in the conf of the active session, else
-   * of the default session (a stopped session is skipped), if that value is valid; otherwise "".
-   * Reading it fixes nothing. So a DataFrame column built before the first registrator runs
-   * already carries the name Sedona registers. Public so Python can read it over py4j.
+   * The prefix of the names Sedona's functions are registered under.
    *
-   * In a Spark Connect client no registrator runs, so the prefix is never fixed there. A Connect
-   * session asks the server once for the prefix in effect; a failure of that request propagates.
+   * If the active session is a Spark Connect session, the prefix in effect on its server: no
+   * registrator runs in a Connect client, and a prefix fixed by an earlier classic session of
+   * this JVM says nothing about the server. The session asks the server once; a failure of that
+   * request propagates.
+   *
+   * Otherwise the fixed prefix. Until one is fixed: the key's value in the application's Spark
+   * config if Sedona was loaded through spark.sql.extensions, else in the conf of the active
+   * session, else of the default session (a stopped session is skipped), if that value is valid;
+   * otherwise "". Reading it fixes nothing. So a DataFrame column built before the first
+   * registrator runs already carries the name Sedona registers.
+   *
+   * Public so Python can read it over py4j.
    */
-  def effectivePrefix: String = fixedPrefix match {
-    case Some(prefix) => prefix
-    case None => configuredPrefix
+  def effectivePrefix: String = {
+    val active = SparkSession.getActiveSession
+    active.filter(isConnect) match {
+      case Some(session) => connectPrefix(session)
+      case None => fixedPrefix.getOrElse(configuredPrefix(active))
+    }
   }
 
-  private def configuredPrefix: String =
-    sessionPrefix(SparkSession.getActiveSession)
-      .orElse(sessionPrefix(SparkSession.getDefaultSession))
-      .getOrElse("")
+  private def configuredPrefix(active: Option[SparkSession]): String =
+    applicationPrefix match {
+      case Some(prefix) => if (isValid(prefix)) prefix else ""
+      case None =>
+        sessionPrefix(active).orElse(sessionPrefix(SparkSession.getDefaultSession)).getOrElse("")
+    }
+
+  // A Spark Connect session has no SparkContext, and asking for one throws. The session's class
+  // is remembered, so the exception is paid once and not on every function name.
+  private def isConnect(session: SparkSession): Boolean =
+    connectSessionClasses.contains(session.getClass) || {
+      val connect = Try(session.sparkContext).isFailure
+      if (connect) connectSessionClasses.add(session.getClass)
+      connect
+    }
 
   // The prefix `session` asks for, or None for no session or a stopped one: a stopped session
-  // can stay the thread's active session. A Spark Connect session has no SparkContext, and
-  // asking for one throws; such a session is never taken for stopped.
+  // can stay the thread's active session.
   private def sessionPrefix(session: Option[SparkSession]): Option[String] =
     session.flatMap { s =>
-      // The cache first: a Connect client resolves every function name through here, and the
-      // exception below costs more than a map lookup.
-      Option(connectPrefixes.get(s)).orElse {
-        Try(s.sparkContext) match {
-          case Success(context) => if (context.isStopped) None else Some(confPrefix(s))
-          case Failure(_) => Some(connectPrefix(s))
-        }
-      }
+      if (isConnect(s)) Some(connectPrefix(s))
+      else if (s.sparkContext.isStopped) None
+      else Some(Try(s.conf.get(PrefixConfigKey, "")).toOption.filter(isValid).getOrElse(""))
     }
 
-  private def confPrefix(session: SparkSession): String =
-    Try(session.conf.get(PrefixConfigKey, "")).toOption.filter(isValid).getOrElse("")
-
+  // The server's function registry is the one place that says under which names Sedona's
+  // functions are registered, and a client cannot write to it as it can to its session's conf.
+  // Listing the function also makes a server that loads Sedona through spark.sql.extensions
+  // register Sedona for this session first. A failure propagates: a guessed plain name could
+  // call a platform's function.
   private def connectPrefix(session: SparkSession): String =
     Option(connectPrefixes.get(session)).getOrElse {
-      // With spark.sql.extensions the server registers Sedona for a session when it first
-      // analyses a plan there, and registering puts the prefix in effect into the session's
-      // conf. So analyse a trivial plan before reading the key.
-      session.range(0).schema
-      Try(session.conf.get(PrefixConfigKey, "")) match {
-        case Success(value) =>
-          val prefix = if (isValid(value)) value else ""
-          connectPrefixes.put(session, prefix)
-          prefix
-        case Failure(_) => "" // Asked again next time.
-      }
+      val listed =
+        session.sql(s"SHOW FUNCTIONS LIKE '*$MarkerFunctionName'").collect().map(_.getString(0))
+      val prefix = prefixOfListedNames(listed)
+      connectPrefixes.put(session, prefix)
+      prefix
     }
+
+  /**
+   * The prefix in the names a server lists for `SHOW FUNCTIONS LIKE '*<marker>'`: "" when it
+   * lists none (no Sedona there, or a Sedona from before the prefix). Spark lists function names
+   * in lower case, and resolves them ignoring case.
+   */
+  private[sedona] def prefixOfListedNames(listed: Iterable[String]): String = {
+    val marker = MarkerFunctionName.toLowerCase(Locale.ROOT)
+    val prefixes = listed
+      .map(_.toLowerCase(Locale.ROOT))
+      .filter(_.endsWith(marker))
+      .map(_.dropRight(marker.length))
+    if (prefixes.isEmpty) "" else prefixes.minBy(_.length)
+  }
 
   /** effectivePrefix + name. */
   def resolve(name: String): String = effectivePrefix + name
 
   /**
-   * The prefix dropAll resolves names with: the fixed prefix, else the key's value in the conf of
-   * `sparkSession` if that value is valid, else "". Reading it fixes nothing, so a drop before a
-   * session sets the key does not stop a later registrator from fixing what that session asks
-   * for. A value that initialize would reject for turning one of `plainNames` into another is
-   * rejected here too, before anything is dropped.
+   * The prefix dropAll resolves names with: the fixed prefix, else the value initialize would
+   * take for `sparkSession`. Reading it fixes nothing, so a drop before a session sets the key
+   * does not stop a later registrator from fixing what that session asks for. A value that
+   * initialize would reject is rejected here too, before anything is dropped: dropping under
+   * another prefix, or under none, could remove a platform's function.
    */
   private[sedona] def prefixToDrop(
       sparkSession: SparkSession,
       plainNames: => Iterable[String]): String = fixedPrefix match {
     case Some(prefix) => prefix
     case None =>
-      val requested = sparkSession.conf.get(PrefixConfigKey, "")
-      if (isValid(requested)) {
-        requireNoCollision(requested, plainNames)
-        requested
-      } else ""
+      val requested = requestedPrefix(sparkSession)
+      requireValid(requested)
+      requireNoCollision(requested, plainNames)
+      requested
   }
 
   // Under a prefix such as ST_, GeometryType would be registered as ST_GeometryType, the plain
@@ -196,6 +253,7 @@ object SedonaFunctionNames {
 
   private[sedona] def resetForTesting(): Unit = lock.synchronized {
     fixedPrefix = None
+    applicationPrefix = None
     warnedValues.clear()
     connectPrefixes.clear()
   }

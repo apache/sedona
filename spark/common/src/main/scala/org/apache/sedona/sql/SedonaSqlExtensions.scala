@@ -19,6 +19,7 @@
 package org.apache.sedona.sql
 
 import org.apache.sedona.spark.SedonaContext
+import org.apache.sedona.sql.UDF.SedonaFunctionNames
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SparkSessionExtensions
 import org.apache.spark.sql.parser.ParserFactory
@@ -32,6 +33,10 @@ class SedonaSqlExtensions extends (SparkSessionExtensions => Unit) {
     SparkContext.getOrCreate().getConf.get("spark.sedona.enableParserExtension", "true").toBoolean
 
   def apply(e: SparkSessionExtensions): Unit = {
+    // The check rule below registers Sedona for every session, also for the session of a Spark
+    // Connect client. So the function name prefix comes from the application's Spark config, not
+    // from the conf of whichever session is analysed first.
+    SedonaFunctionNames.useApplicationConf(SparkContext.getOrCreate().getConf)
     e.injectCheckRule(spark => {
       SedonaContext.create(spark)
       _ => ()
