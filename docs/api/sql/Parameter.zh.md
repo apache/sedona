@@ -61,7 +61,7 @@ sparkSession.conf.set("spark.sedona.global.index","false")
 | `sedona.global.index` | 是否启用空间索引（目前仅支持 SQL 范围连接与 SQL 距离连接） | `true` | `true`, `false` |
 | `sedona.global.indextype` | 空间索引类型，仅在 `sedona.global.index` 为 true 时生效 | `rtree` | `rtree`, `quadtree` |
 | `spark.sedona.enableParserExtension` | 启用解析器扩展，用于在 SQL DDL 语句中解析 GEOMETRY 数据类型 | `true` | `true`, `false` |
-| `spark.sedona.function.prefix` | 为 Sedona 注册的每个 SQL 函数名添加的前缀。设置为 `sedona_` 时，`ST_Buffer` 只会注册为 `sedona_ST_Buffer`，不带前缀的原名留给平台使用。请在集群或服务端的 Spark 配置中设置：同一个 JVM 中第一个 Sedona 会话会确定该 JVM 的取值。自 v2.0.0 起 | _（为空：不加前缀）_ | 字母、数字和下划线，且以字母或下划线开头 |
+| `spark.sedona.function.prefix` | 为 Sedona 注册的每个 SQL 函数名添加的前缀。设置为 `sedona_` 时，`ST_Buffer` 只会注册为 `sedona_ST_Buffer`，不带前缀的原名留给平台使用。请在集群或服务端的 Spark 配置中设置：同一个 JVM 中第一个 Sedona 会话会确定该 JVM 的取值。自 v2.0.0 起 | _（为空：不加前缀）_ | 字母、数字和下划线，且以字母或下划线开头。如果加上前缀后某个 Sedona 函数名会变成另一个 Sedona 函数名，Sedona 会拒绝该前缀。例如 `ST_` 会被拒绝：`GeometryType` 会变成 `ST_GeometryType`。 |
 
 ## 连接（Join）相关参数
 

@@ -79,7 +79,7 @@ sedona = SedonaContext.create(spark)
 sedona.sql("SELECT ST_GeomFromWKT('POINT (1 2)') AS geom").show()
 ```
 
-Sedona registers its functions on the server, and the first Sedona session in the server's JVM fixes the function name prefix. The Python client reads the prefix from the session configuration. So if you use the `spark.sedona.function.prefix` option, set it in the server's configuration, for example with `--conf spark.sedona.function.prefix=sedona_` when you start the server. See [Parameter](../api/sql/Parameter.md) for details.
+Sedona registers its functions on the server, and the first Sedona session in the server's JVM fixes the function name prefix. The client uses the prefix that the server has in effect. Setting a different value on the client has no effect. So if you use the `spark.sedona.function.prefix` option, set it in the server's configuration, for example with `--conf spark.sedona.function.prefix=sedona_` when you start the server. See [Parameter](../api/sql/Parameter.md) for details.
 
 The Sedona Python package on the client should use the same Sedona version as the server package. See [Install Sedona Python](install-python.md) for client installation details.
 
