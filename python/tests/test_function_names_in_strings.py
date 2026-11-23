@@ -65,6 +65,11 @@ ALLOWED_LITERALS = {
         # Name passed to call_sedona_function_by_name, which applies the prefix (two call sites).
         "__sedona_internal_coverage_invalid_edges_for_target",
     },
+    "sql/_function_names.py": {
+        # The marker function a Spark Connect client lists with SHOW FUNCTIONS to read the
+        # server's prefix. The pattern asks for any prefix in front of it.
+        "__sedona_internal_coverage_invalid_edges_for_target",
+    },
     "geopandas/tools/sjoin_nearest.py": {
         # Name passed to call_sedona_function_by_name for the nearest-neighbour join condition.
         "ST_KNN",
