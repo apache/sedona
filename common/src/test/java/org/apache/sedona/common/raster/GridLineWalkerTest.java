@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -210,11 +211,161 @@ public class GridLineWalkerTest {
   }
 
   private static String cells(Grid grid, double x0, double y0, double x1, double y1) {
+    return format(grid, walk(grid.walker(), grid, x0, y0, x1, y1, false, false));
+  }
+
+  private static String format(Grid grid, TreeSet<Integer> visited) {
     List<String> cells = new ArrayList<>();
-    for (int cell : walk(grid.walker(), grid, x0, y0, x1, y1, false, false)) {
+    for (int cell : visited) {
       cells.add("(" + cell % grid.width + "," + cell / grid.width + ")");
     }
     return cells.toString();
+  }
+
+  /** A range of the segment's parameter, each end of which is open or closed. */
+  private static final class Span {
+    static final Span ALL = new Span(Fraction.ZERO, false, Fraction.ONE, false);
+
+    final Fraction from;
+    final boolean fromOpen;
+    final Fraction to;
+    final boolean toOpen;
+
+    Span(Fraction from, boolean fromOpen, Fraction to, boolean toOpen) {
+      this.from = from;
+      this.fromOpen = fromOpen;
+      this.to = to;
+      this.toOpen = toOpen;
+    }
+
+    boolean isEmpty() {
+      int order = from.compareTo(to);
+      return order > 0 || (order == 0 && (fromOpen || toOpen));
+    }
+
+    Span intersect(Span other) {
+      int startOrder = from.compareTo(other.from);
+      Fraction newFrom = startOrder >= 0 ? from : other.from;
+      boolean newFromOpen =
+          startOrder > 0
+              ? fromOpen
+              : (startOrder < 0 ? other.fromOpen : fromOpen || other.fromOpen);
+      int endOrder = to.compareTo(other.to);
+      Fraction newTo = endOrder <= 0 ? to : other.to;
+      boolean newToOpen =
+          endOrder < 0 ? toOpen : (endOrder > 0 ? other.toOpen : toOpen || other.toOpen);
+      return new Span(newFrom, newFromOpen, newTo, newToOpen);
+    }
+  }
+
+  /**
+   * The range of the segment's parameter over which one pixel coordinate, (n0 + t * (n1 - n0)) /
+   * scale, lies in [low, high), or in [low, high] when {@code closed}; null when it never does.
+   */
+  private static Span parameterSpan(
+      BigDecimal n0, BigDecimal n1, BigDecimal scale, long low, long high, boolean closed) {
+    BigDecimal lowN = BigDecimal.valueOf(low).multiply(scale);
+    BigDecimal highN = BigDecimal.valueOf(high).multiply(scale);
+    BigDecimal delta = n1.subtract(n0);
+    if (delta.signum() == 0) {
+      int vsLow = new Fraction(n0, scale).compareTo(new Fraction(lowN, scale));
+      int vsHigh = new Fraction(n0, scale).compareTo(new Fraction(highN, scale));
+      return vsLow >= 0 && (closed ? vsHigh <= 0 : vsHigh < 0) ? Span.ALL : null;
+    }
+    Fraction atLow = new Fraction(lowN.subtract(n0), delta);
+    Fraction atHigh = new Fraction(highN.subtract(n0), delta);
+    boolean increasing = delta.signum() == scale.signum();
+    return increasing
+        ? new Span(atLow, false, atHigh, !closed)
+        : new Span(atHigh, !closed, atLow, false);
+  }
+
+  /**
+   * The cells the segment touches as GDAL's ALL_TOUCHED defines it, decided cell by cell in exact
+   * decimal arithmetic: the part of the segment inside the closed grid, without its last point in
+   * pixel order, selects every half-open cell that contains one of its points.
+   */
+  private static TreeSet<Integer> touchedOracle(
+      Grid grid, double x0, double y0, double x1, double y1) {
+    BigDecimal scaleX = dec(grid.scaleX);
+    BigDecimal scaleY = dec(grid.scaleY);
+    BigDecimal nx0 = dec(x0).subtract(dec(grid.originX));
+    BigDecimal nx1 = dec(x1).subtract(dec(grid.originX));
+    BigDecimal ny0 = dec(y0).subtract(dec(grid.originY));
+    BigDecimal ny1 = dec(y1).subtract(dec(grid.originY));
+    int stepX = nx1.subtract(nx0).signum() * scaleX.signum();
+    int stepY = ny1.subtract(ny0).signum() * scaleY.signum();
+    if (stepX == 0 && stepY == 0) {
+      return oracle(grid, x0, y0, x1, y1, false, false);
+    }
+    TreeSet<Integer> cells = new TreeSet<>();
+    Span insideX = parameterSpan(nx0, nx1, scaleX, 0, grid.width, true);
+    Span insideY = parameterSpan(ny0, ny1, scaleY, 0, grid.height, true);
+    if (insideX == null || insideY == null) {
+      return cells;
+    }
+    Span inside = Span.ALL.intersect(insideX).intersect(insideY);
+    if (inside.isEmpty() || inside.from.compareTo(inside.to) == 0) {
+      // Outside the grid, or meeting it at a single point.
+      return cells;
+    }
+    // The first end in pixel order: the one in the smaller column of cells, or the one with the
+    // smaller row when both are in the same column.
+    boolean sameColumn =
+        nx0.divide(scaleX, 0, RoundingMode.FLOOR)
+                .compareTo(nx1.divide(scaleX, 0, RoundingMode.FLOOR))
+            == 0;
+    boolean firstIsTail = sameColumn ? (stepY > 0 || (stepY == 0 && stepX > 0)) : stepX > 0;
+    Span part =
+        firstIsTail
+            ? new Span(inside.from, false, inside.to, true)
+            : new Span(inside.from, true, inside.to, false);
+    for (int row = 0; row < grid.height; row++) {
+      Span spanY = parameterSpan(ny0, ny1, scaleY, row, row + 1L, false);
+      if (spanY == null) {
+        continue;
+      }
+      for (int col = 0; col < grid.width; col++) {
+        Span spanX = parameterSpan(nx0, nx1, scaleX, col, col + 1L, false);
+        if (spanX != null && !part.intersect(spanX).intersect(spanY).isEmpty()) {
+          cells.add(row * grid.width + col);
+        }
+      }
+    }
+    return cells;
+  }
+
+  private static TreeSet<Integer> walkTouched(
+      GridLineWalker walker, Grid grid, double x0, double y0, double x1, double y1) {
+    TreeSet<Integer> cells = new TreeSet<>();
+    walker.walkTouched(
+        x0,
+        y0,
+        x1,
+        y1,
+        (col, row) -> {
+          assertTrue("column on the grid", col >= 0 && col < grid.width);
+          assertTrue("row on the grid", row >= 0 && row < grid.height);
+          assertTrue("cell visited once", cells.add(row * grid.width + col));
+        });
+    return cells;
+  }
+
+  private static String touchedCells(Grid grid, double x0, double y0, double x1, double y1) {
+    TreeSet<Integer> cells = walkTouched(grid.walker(), grid, x0, y0, x1, y1);
+    assertEquals("reversed", cells, walkTouched(grid.walker(), grid, x1, y1, x0, y0));
+    return format(grid, cells);
+  }
+
+  private static void assertTouchedMatchesOracle(
+      Grid grid, double x0, double y0, double x1, double y1) {
+    String segment = String.format("%s, touched segment (%s %s, %s %s)", grid, x0, y0, x1, y1);
+    TreeSet<Integer> expected = touchedOracle(grid, x0, y0, x1, y1);
+    GridLineWalker walker = grid.walker();
+    assertEquals(segment, expected, walkTouched(walker, grid, x0, y0, x1, y1));
+    assertEquals(segment + " reversed", expected, walkTouched(walker, grid, x1, y1, x0, y0));
+    // Every cell the segment passes through is among the cells it touches.
+    assertTrue(segment, expected.containsAll(oracle(grid, x0, y0, x1, y1, false, false)));
   }
 
   private static final Grid UNIT = new Grid(6, 6, 0, 6, 1, -1);
@@ -375,6 +526,70 @@ public class GridLineWalkerTest {
   }
 
   @Test
+  public void touchedSegmentCrossingGridCorners() {
+    // GH-3322. Each expectation is what GDAL 3.10 burns with ALL_TOUCHED on the same grid. These
+    // segments run towards smaller rows through the corners (3,17), (4,16), ..., (9,11); at each
+    // the cell after the corner, which the segment meets only there, is touched as well.
+    Grid north = new Grid(20, 20, 0, 20, 1, -1);
+    assertEquals(8, walk(north.walker(), north, 2.5, 2.5, 9.5, 9.5, false, false).size());
+    assertEquals(
+        "[(9,10), (8,11), (9,11), (7,12), (8,12), (6,13), (7,13), (5,14), (6,14), (4,15), (5,15),"
+            + " (3,16), (4,16), (2,17), (3,17)]",
+        touchedCells(north, 2.5, 2.5, 9.5, 9.5));
+    assertEquals(15, walkTouched(north.walker(), north, 1.5, 2.75, 10.5, 7.25).size());
+    assertEquals(15, walkTouched(north.walker(), north, 0.75, 1.25, 4.25, 11.75).size());
+    // Running towards larger rows, the cell after each corner is the next cell of the walk, so
+    // nothing is added.
+    assertEquals(
+        "[(2,10), (3,11), (4,12), (5,13), (6,14), (7,15), (8,16), (9,17)]",
+        touchedCells(north, 2.5, 9.5, 9.5, 2.5));
+    // Pixel rows run the other way on a bottom-up grid, and so does the rule.
+    Grid bottomUp = new Grid(20, 20, 0, 0, 1, 1);
+    assertEquals(8, walkTouched(bottomUp.walker(), bottomUp, 2.5, 2.5, 9.5, 9.5).size());
+    assertEquals(15, walkTouched(bottomUp.walker(), bottomUp, 2.5, 9.5, 9.5, 2.5).size());
+    // A segment that crosses no corner touches exactly the cells it passes through.
+    assertEquals(
+        walk(north.walker(), north, 1.3, 2.7, 8.6, 11.4, false, false),
+        walkTouched(north.walker(), north, 1.3, 2.7, 8.6, 11.4));
+
+    // Through the whole grid along its anti-diagonal: the corners on the grid's edge add nothing.
+    assertEquals(
+        "[(5,0), (4,1), (5,1), (3,2), (4,2), (2,3), (3,3), (1,4), (2,4), (0,5), (1,5)]",
+        touchedCells(UNIT, -1, -1, 7, 7));
+    assertEquals("[(0,0), (1,1), (2,2), (3,3), (4,4), (5,5)]", touchedCells(UNIT, -1, 7, 7, -1));
+  }
+
+  @Test
+  public void touchedSegmentEndingOnGridLines() {
+    // GH-3322. Each expectation is what GDAL 3.10 burns with ALL_TOUCHED on the same grid. The
+    // first point of a segment in pixel order selects the cell containing it; the last selects
+    // nothing.
+    // From the corner (3,3) towards smaller rows: the corner's own cell (3,3) is touched.
+    assertEquals("[(4,1), (3,2), (4,2), (3,3)]", touchedCells(UNIT, 3, 3, 4.5, 4.5));
+    assertEquals("[(4,1), (3,2)]", cells(UNIT, 3, 3, 4.5, 4.5));
+    // From the corner towards larger rows: it is the cell the segment starts in anyway.
+    assertEquals("[(3,3), (4,4)]", touchedCells(UNIT, 3, 3, 4.5, 1.5));
+    // Ending on the corner (3,3): the last point selects nothing.
+    assertEquals("[(2,3), (1,4), (2,4)]", touchedCells(UNIT, 1.5, 1.5, 3, 3));
+    assertEquals("[(1,1), (2,2)]", touchedCells(UNIT, 1.5, 4.5, 3, 3));
+    assertEquals("[(1,1), (2,1), (2,2), (3,2)]", touchedCells(UNIT, 1.5, 4.5, 3.8, 3));
+    // Starting on a row line and running towards smaller rows: the cell after the line too.
+    assertEquals("[(3,2), (4,2), (3,3)]", touchedCells(UNIT, 3.5, 3, 4.5, 3.9));
+    // Within one column of cells the ends are ordered by row instead, so the end on the row line
+    // is the last point and selects nothing.
+    assertEquals("[(3,2)]", touchedCells(UNIT, 3.5, 3, 3.9, 3.9));
+    // Horizontal and vertical segments keep their first point's cell and drop their last.
+    assertEquals("[(1,3), (2,3), (3,3)]", touchedCells(UNIT, 1.5, 2.5, 4, 2.5));
+    assertEquals("[(2,1), (2,2), (2,3)]", touchedCells(UNIT, 2.5, 4.5, 2.5, 2));
+    assertEquals("[(2,2), (2,3), (2,4)]", touchedCells(UNIT, 2.5, 1.5, 2.5, 4));
+    // Coming into the grid through its left edge exactly at a row line.
+    assertEquals("[(0,2), (1,2), (0,3)]", touchedCells(UNIT, -1, 2.5, 1.5, 3.75));
+    // Meeting the grid at a single point touches nothing.
+    assertEquals("[]", touchedCells(UNIT, 2.5, 6, 4, 7.5));
+    assertEquals("[]", touchedCells(UNIT, -1, 5, 1, 7));
+  }
+
+  @Test
   public void segmentWithNoLength() {
     assertEquals("[(2,3)]", cells(UNIT, 2.5, 2.5, 2.5, 2.5));
     assertEquals("[(3,3)]", cells(UNIT, 3, 3, 3, 3));
@@ -423,6 +638,7 @@ public class GridLineWalkerTest {
         double x1 = random.nextInt(8) == 0 ? x0 : randomCoordinate(random, grid, true);
         double y1 = random.nextInt(8) == 0 ? y0 : randomCoordinate(random, grid, false);
         assertMatchesOracle(grid, x0, y0, x1, y1, random.nextBoolean(), random.nextBoolean());
+        assertTouchedMatchesOracle(grid, x0, y0, x1, y1);
         segments++;
       }
     }

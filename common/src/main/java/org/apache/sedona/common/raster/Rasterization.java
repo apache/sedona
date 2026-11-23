@@ -168,7 +168,7 @@ public class Rasterization {
       case "LineString":
       case "MultiLineString":
       case "LinearRing":
-        rasterizeLineString(geom, params, value);
+        rasterizeLineString(geom, params, value, allTouched);
         break;
       default:
         rasterizePolygon(raster, metadata, geom, params, geomExtent, value, allTouched);
@@ -269,18 +269,29 @@ public class Rasterization {
   }
 
   /**
-   * Burns every cell a line passes through over a positive length. A cell the line meets only at a
-   * point is not burned, and a segment lying exactly on a grid line burns the half-open cells after
-   * the line, in the raster's own pixel order. See {@link GridLineWalker} for how a coordinate is
-   * matched to a grid line and how segments that leave the raster are clipped.
+   * Burns every cell a line passes through over a positive length. A segment lying exactly on a
+   * grid line burns the half-open cells after the line, in the raster's own pixel order.
+   *
+   * <p>Without allTouched, a cell the line meets only at a point is not burned. With allTouched,
+   * such a cell is burned when the point belongs to it under the half-open rule, as GDAL's
+   * ALL_TOUCHED does: the cell after a grid corner that a segment crosses exactly, and the cell
+   * containing a segment's first point in pixel order. See {@link GridLineWalker} for the exact
+   * rule, for how a coordinate is matched to a grid line, and for how segments that leave the
+   * raster are clipped.
    */
-  private static void rasterizeLineString(Geometry geom, RasterizationParams params, double value) {
+  private static void rasterizeLineString(
+      Geometry geom, RasterizationParams params, double value, boolean allTouched) {
     GridLineWalker walker = params.lineWalker();
     GridLineWalker.CellVisitor burn = (col, row) -> params.burnRasterCell(col, row, value);
     for (int i = 0; i < geom.getNumGeometries(); i++) {
       Coordinate[] coords = geom.getGeometryN(i).getCoordinates();
       for (int j = 0; j < coords.length - 1; j++) {
-        walker.walk(coords[j].x, coords[j].y, coords[j + 1].x, coords[j + 1].y, false, false, burn);
+        if (allTouched) {
+          walker.walkTouched(coords[j].x, coords[j].y, coords[j + 1].x, coords[j + 1].y, burn);
+        } else {
+          walker.walk(
+              coords[j].x, coords[j].y, coords[j + 1].x, coords[j + 1].y, false, false, burn);
+        }
       }
     }
   }

@@ -175,6 +175,44 @@ final class GridLineWalker {
       boolean flatTowardsNegativeX,
       boolean flatTowardsNegativeY,
       CellVisitor visitor) {
+    walk(x0, y0, x1, y1, flatTowardsNegativeX, flatTowardsNegativeY, false, visitor);
+  }
+
+  /**
+   * Visits every cell of the grid that the segment touches, as GDAL's ALL_TOUCHED does for lines.
+   *
+   * <p>These are the cells {@link #walk(double, double, double, double, boolean, boolean,
+   * CellVisitor)} visits, and also the cells the segment meets at a single point when that point
+   * belongs to them under the half-open rule. The ends of the segment are ordered by pixel: the
+   * first is the end in the smaller column of cells, or the end with the smaller row when both are
+   * in the same column. The part of the segment inside the grid is taken without its last point;
+   * every other point of it selects the cell [col, col + 1) x [row, row + 1) containing it. Beyond
+   * the cells the segment passes through, this adds:
+   *
+   * <ul>
+   *   <li>where the segment crosses a grid corner exactly, the cell after that corner, which is one
+   *       of the two cells the segment meets only there when it runs towards smaller rows;
+   *   <li>the cell containing the first point, which differs from the cell the segment starts in
+   *       when that point lies on a row line and the segment runs from it towards smaller rows.
+   * </ul>
+   *
+   * <p>GDAL computes the same set in double precision with tolerances: it treats a segment within
+   * 0.01 pixel of vertical or horizontal as exactly so, and trims 0.0001 pixel off the far end of
+   * such a segment. This walk has no tolerance, so it differs from GDAL for those segments.
+   */
+  void walkTouched(double x0, double y0, double x1, double y1, CellVisitor visitor) {
+    walk(x0, y0, x1, y1, false, false, true, visitor);
+  }
+
+  private void walk(
+      double x0,
+      double y0,
+      double x1,
+      double y1,
+      boolean flatTowardsNegativeX,
+      boolean flatTowardsNegativeY,
+      boolean touched,
+      CellVisitor visitor) {
     if (!(Double.isFinite(x0)
         && Double.isFinite(y0)
         && Double.isFinite(x1)
@@ -222,16 +260,31 @@ final class GridLineWalker {
       return;
     }
 
+    // The first point of the segment in pixel order is its end in the smaller column of cells, or
+    // its end with the smaller row when both ends are in the same column.
+    boolean firstIsHead = tail.fx != head.fx ? stepX < 0 : (stepY < 0 || (stepY == 0 && stepX < 0));
+
     if (!findEntry(false, tailCol, tailRow)) {
       return;
     }
     int col = (int) entryCol;
     int row = (int) entryRow;
+    boolean firstPointOnRowLine = !firstIsHead && entersOnRowLine(tail);
     if (!findEntry(true, headCol, headRow)) {
       return;
     }
     int endCol = (int) entryCol;
     int endRow = (int) entryRow;
+    if (firstIsHead) {
+      firstPointOnRowLine = entersOnRowLine(head);
+    }
+
+    if (touched && firstPointOnRowLine && (firstIsHead ? stepY > 0 : stepY < 0)) {
+      // The first point of the part inside the grid lies on a row line, and the segment leaves it
+      // towards smaller rows: the point belongs to the cell after the line, one row past the cell
+      // the segment starts in.
+      visitOnGrid(firstIsHead ? endCol : col, (firstIsHead ? endRow : row) + 1L, visitor);
+    }
 
     // Both cells are on the grid and the walk between them is monotone, so it stays on the grid
     // and takes at most width + height steps. The bound only guards against an endless loop.
@@ -251,7 +304,15 @@ final class GridLineWalker {
       } else if (stepY == 0) {
         order = -1;
       } else {
-        order = crossingOrder(stepX > 0 ? col + 1L : col, stepY > 0 ? row + 1L : row);
+        long cornerCol = stepX > 0 ? col + 1L : col;
+        long cornerRow = stepY > 0 ? row + 1L : row;
+        order = crossingOrder(cornerCol, cornerRow);
+        if (touched && order == 0 && stepX != stepY) {
+          // The corner belongs to the cell after it. Running towards larger columns and rows that
+          // is the next cell of the walk, and towards smaller ones the current cell; otherwise it
+          // is a cell the segment meets only at this corner.
+          visitOnGrid(cornerCol, cornerRow, visitor);
+        }
       }
       if (order <= 0) {
         col += stepX;
@@ -260,6 +321,21 @@ final class GridLineWalker {
         row += stepY;
       }
     }
+  }
+
+  private void visitOnGrid(long col, long row, CellVisitor visitor) {
+    if (col >= 0 && col < width && row >= 0 && row < height) {
+      visitor.visit((int) col, (int) row);
+    }
+  }
+
+  /**
+   * Whether the part of the segment inside the grid, travelled from the given endpoint as the last
+   * entry search did, starts on a row line: at the endpoint itself when that is on the grid, or
+   * where the segment comes in through a column line.
+   */
+  private boolean entersOnRowLine(End from) {
+    return entryClipped ? entryThroughColumnLine && entryOnGridLine : from.iy;
   }
 
   /**

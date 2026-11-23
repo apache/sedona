@@ -122,9 +122,10 @@ class TestRasterizeParity(TestBase):
         self._assert_matches_gdal(all_touched=True)
 
     def test_as_raster_linestring_matches_gdal(self):
-        """A line crossing a 6x6 unit grid: every pixel the line touches must
-        be burned, matching GDAL. Independent of allTouched (a line has no
-        interior) and of #3111 (square unit pixels)."""
+        """A line crossing a 6x6 unit grid: every pixel the line passes through
+        must be burned, matching GDAL. The line crosses no grid corner and
+        neither of its ends is on a grid line, so allTouched does not change
+        the result. Independent of #3111 (square unit pixels)."""
         wkt = "LINESTRING (3.97 1.57, 0.31 3.24)"
         band = self.spark.sql(
             "SELECT RS_BandAsArray(RS_AsRaster(ST_GeomFromWKT('" + wkt + "'), "
@@ -145,11 +146,9 @@ class TestRasterizeParity(TestBase):
     def test_as_raster_grid_aligned_vertices_match_gdal(self):
         """Vertices that land exactly on grid lines (GH-3120): a cell the
         geometry touches only at such a vertex point is not burned, matching
-        GDAL. Cases where a segment passes exactly through a lattice corner
-        mid-segment are excluded: there GDAL burns one extra off-diagonal cell
-        chosen by its internal scan order, which is slope-dependent and has no
-        consistent reference (see the Java RasterizationTest for Sedona's
-        direction-independent behaviour at those corners)."""
+        GDAL. Segments that pass exactly through a lattice corner mid-segment,
+        where GDAL burns one extra cell, are covered by
+        test_as_raster_all_touched_lines_match_gdal_at_grid_corners."""
         cases = [
             # id, width, height, ulx, uly, sx, sy, wkt
             # endpoint exactly on a horizontal grid line, arriving and leaving
@@ -245,6 +244,63 @@ class TestRasterizeParity(TestBase):
             )
             assert expected.any(), f"case {case_id}: {wkt}"
             assert np.array_equal(actual, expected), f"case {case_id}: {wkt}"
+
+    def test_as_raster_all_touched_lines_match_gdal_at_grid_corners(self):
+        """Lines under allTouched=true (GH-3322). Where a segment crosses a
+        grid corner exactly, GDAL also burns the cell after that corner in
+        pixel order, and it burns the cell containing a segment's first point
+        in pixel order but not its last. The first three lines cross 5, 4 and
+        7 corners and burn 15 cells each. All coordinates and slopes here are
+        exact in binary floating point, so GDAL's own arithmetic is exact."""
+        cases = [
+            # id, width, height, ulx, uly, sx, sy, wkt
+            (0, 20, 20, 0.0, 20.0, 1.0, -1.0, "LINESTRING (1.5 2.75, 10.5 7.25)"),
+            (1, 20, 20, 0.0, 20.0, 1.0, -1.0, "LINESTRING (0.75 1.25, 4.25 11.75)"),
+            (2, 20, 20, 0.0, 20.0, 1.0, -1.0, "LINESTRING (2.5 2.5, 9.5 9.5)"),
+            (3, 20, 20, 0.0, 20.0, 1.0, -1.0, "LINESTRING (9.5 9.5, 2.5 2.5)"),
+            # the mirrored diagonal runs towards larger rows and adds no cell
+            (4, 20, 20, 0.0, 20.0, 1.0, -1.0, "LINESTRING (2.5 9.5, 9.5 2.5)"),
+            # bottom-up: pixel rows run the other way, and so does the rule
+            (5, 20, 20, 0.0, 0.0, 1.0, 1.0, "LINESTRING (2.5 9.5, 9.5 2.5)"),
+            (6, 20, 20, 0.0, 0.0, 1.0, 1.0, "LINESTRING (2.5 2.5, 9.5 9.5)"),
+            # starting and ending on a grid corner
+            (7, 6, 6, 0.0, 6.0, 1.0, -1.0, "LINESTRING (3 3, 4.5 4.5)"),
+            (8, 6, 6, 0.0, 6.0, 1.0, -1.0, "LINESTRING (1.5 1.5, 3 3)"),
+            # through the whole raster, and in through its edge on a row line
+            (9, 6, 6, 0.0, 6.0, 1.0, -1.0, "LINESTRING (-1 -1, 7 7)"),
+            (10, 6, 6, 0.0, 6.0, 1.0, -1.0, "LINESTRING (-1 2.5, 1.5 3.75)"),
+            # starting on a row line, across two columns and within one
+            (11, 6, 6, 0.0, 6.0, 1.0, -1.0, "LINESTRING (3.5 3, 4.5 3.9)"),
+            (12, 6, 6, 0.0, 6.0, 1.0, -1.0, "LINESTRING (3.5 3, 3.9 3.9)"),
+            # non-square pixels
+            (13, 8, 8, 64.0, 16.0, 0.25, -0.5, "LINESTRING (64.25 15.5, 65.75 12.5)"),
+        ]
+        df = self.spark.createDataFrame(
+            cases,
+            "id INT, width INT, height INT, ulx DOUBLE, uly DOUBLE, "
+            "sx DOUBLE, sy DOUBLE, wkt STRING",
+        )
+        rows = df.selectExpr(
+            "id",
+            "RS_BandAsArray(RS_AsRaster(ST_GeomFromWKT(wkt), "
+            "RS_MakeEmptyRaster(1, 'd', width, height, ulx, uly, sx, sy, 0, 0, 0), "
+            "'d', true, 1.0, 0.0, false), 1) as band",
+        ).collect()
+        bands = {row["id"]: row["band"] for row in rows}
+
+        for case_id, width, height, ulx, uly, sx, sy, wkt in cases:
+            actual = np.array(bands[case_id], dtype=float).reshape(height, width)
+            expected = rasterio.features.rasterize(
+                [(wkt_loads(wkt), 1)],
+                out_shape=(height, width),
+                fill=0,
+                transform=Affine(sx, 0, ulx, 0, sy, uly),
+                all_touched=True,
+                dtype="uint8",
+            )
+            assert np.array_equal(actual, expected), f"case {case_id}: {wkt}"
+        for case_id in (0, 1, 2, 3, 5):
+            assert sum(bands[case_id]) == 15, f"case {case_id}"
 
     def test_as_raster_multipolygon_corner_apexes_match_gdal(self):
         """MultiPolygon whose diamond apex vertices land exactly on pixel
