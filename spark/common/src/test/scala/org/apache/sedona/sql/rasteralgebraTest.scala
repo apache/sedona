@@ -1952,21 +1952,23 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(3229013.0, actual)
 
       actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'count', true, true)").first().get(0)
-      // The left polygon edge is a steep diagonal (slope -3.8) whose grid-line crossings fall very
-      // close to lattice corners. The robust orientation predicate resolves each crossing exactly, so
-      // the traversal burns every boundary cell the edge truly touches; the earlier floating-point
-      // step comparison rounded past seven of those near-corner cells and dropped them. Every
-      // polygon vertex also sits exactly on a pixel corner (coordinates are multiples of the
+      // Every polygon vertex sits exactly on a pixel corner (coordinates are multiples of the
       // 0.25-degree pixel size), and cells the boundary merely touches at such a corner point are
-      // not burned (GH-3120), which trims twelve pixels against the pre-GH-3120 count. The count is
-      // direction-independent: rasterizing the ring in reverse order yields the same count.
+      // not burned (GH-3120). The count is direction-independent: rasterizing the ring in reverse
+      // order yields the same count.
+      //
+      // The left polygon edge is a steep diagonal (slope -3.8) that passes exactly through a lattice
+      // corner every 5 columns and 19 rows. Whether a coordinate is on a grid line is decided on
+      // decimal values (GH-3256), so the outline steps diagonally through each of those corners and
+      // burns only the two cells the edge passes through. Double-precision pixel coordinates used to
+      // put nine of those crossings just beside the corner, burning one more cell each (14366).
       //
       // The right edge (x = -155.25) and the bottom edge (y = 40.25) lie exactly on grid lines. They
       // touch the column and row beyond them but overlap none of their area, so, as in GDAL, those
-      // 289 cells (190 + 100 - 1 shared corner) are not burned (GH-3425). GDAL (rasterio,
-      // all_touched=True) counts 14357 here; the remaining nine cells are near-corner cells along
-      // the steep left edge, a separate difference.
-      assertEquals(14366.0, actual)
+      // 289 cells (190 + 100 - 1 shared corner) are not burned (GH-3425).
+      //
+      // GDAL (rasterio, all_touched=True) counts 14357 here as well.
+      assertEquals(14357.0, actual)
 
       actual =
         df.selectExpr("RS_ZonalStats(raster, geom, 1, 'mean', false, false)").first().get(0)
