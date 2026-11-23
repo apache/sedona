@@ -58,14 +58,16 @@ class FunctionPrefixBeforeRegistrationSuite extends AnyFunSpec with BeforeAndAft
     }
 
   // A platform function that owns a plain name.
-  private def registerPlatformMarker(id: FunctionIdentifier): Unit =
-    spark.sessionState.functionRegistry.registerFunction(
+  private def registerPlatformMarker(
+      id: FunctionIdentifier,
+      session: SparkSession = spark): Unit =
+    session.sessionState.functionRegistry.registerFunction(
       id,
       new ExpressionInfo("org.example.PlatformMarker", null, id.funcName),
       (_: Seq[Expression]) => Literal(42))
 
-  private def markerClass(id: FunctionIdentifier): Option[String] =
-    spark.sessionState.functionRegistry.lookupFunction(id).map(_.getClassName)
+  private def markerClass(id: FunctionIdentifier, session: SparkSession = spark): Option[String] =
+    session.sessionState.functionRegistry.lookupFunction(id).map(_.getClassName)
 
   private def withActiveSession(session: SparkSession)(body: => Unit): Unit = {
     val previous = SparkSession.getActiveSession
@@ -152,6 +154,31 @@ class FunctionPrefixBeforeRegistrationSuite extends AnyFunSpec with BeforeAndAft
               .getString(0) == "POINT (1 2)",
             s"drop $i")
         }
+      }
+    }
+
+    it("rejects a prefix that turns one Sedona name into another") {
+      // With ST_, GeometryType would be registered as ST_GeometryType, a plain name.
+      val calls: Seq[(String, SparkSession => Unit)] = Seq(
+        "Catalog.registerAll" -> (s => Catalog.registerAll(s)),
+        "RasterRegistrator.registerAll" -> (s => RasterRegistrator.registerAll(s)),
+        "SedonaVizRegistrator.registerAll" -> (s => SedonaVizRegistrator.registerAll(s)),
+        "Catalog.dropAll" -> (s => Catalog.dropAll(s)),
+        "RasterRegistrator.dropAll" -> (s => RasterRegistrator.dropAll(s)),
+        "SedonaVizRegistrator.dropAll" -> (s => SedonaVizRegistrator.dropAll(s)))
+      val id = identifier("ST_GeometryType", "builtin")
+      calls.foreach { case (call, run) =>
+        SedonaFunctionNames.resetForTesting()
+        val session = spark.newSession()
+        session.conf.set(SedonaFunctionNames.PrefixConfigKey, "ST_")
+        registerPlatformMarker(id, session)
+        val e = intercept[IllegalArgumentException](run(session))
+        Seq(SedonaFunctionNames.PrefixConfigKey, "'ST_'", " GeometryType ", "ST_GeometryType")
+          .foreach(text => assert(e.getMessage.contains(text), s"$call: ${e.getMessage}"))
+        assert(markerClass(id, session).contains("org.example.PlatformMarker"), call)
+        // Nothing was fixed, so a later request still fixes its prefix.
+        SedonaFunctionNames.initialize("sedona_")
+        assert(SedonaFunctionNames.effectivePrefix == "sedona_", call)
       }
     }
 

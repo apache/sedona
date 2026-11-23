@@ -103,6 +103,30 @@ class SedonaFunctionNamesTest extends AnyFunSpec with BeforeAndAfterAll with Bef
       SedonaFunctionNames.initialize("sedona_")
       assert(SedonaFunctionNames.effectivePrefix == "sedona_")
     }
+    it("rejects a prefix that turns one name into another, ignoring case, and does not fix it") {
+      Seq("ST_", "st_").foreach { p =>
+        val e = intercept[IllegalArgumentException](
+          SedonaFunctionNames.initialize(p, Seq("ST_GeometryType", "GeometryType")))
+        assert(e.getMessage.contains("spark.sedona.function.prefix"), p)
+        assert(e.getMessage.contains(s"'$p'"), p)
+        assert(e.getMessage.contains(s" GeometryType as ${p}GeometryType"), e.getMessage)
+        assert(SedonaFunctionNames.effectivePrefix == "", p)
+      }
+      SedonaFunctionNames.initialize("sedona_")
+      assert(SedonaFunctionNames.effectivePrefix == "sedona_")
+    }
+    it("accepts a prefix under which no Sedona name becomes another") {
+      Seq("sedona_", "st_x_").foreach { p =>
+        SedonaFunctionNames.resetForTesting()
+        SedonaFunctionNames.initialize(p, PlainFunctionNames.all)
+        assert(SedonaFunctionNames.effectivePrefix == p)
+      }
+    }
+    it("checks no names once a prefix is fixed") {
+      SedonaFunctionNames.initialize("sedona_")
+      SedonaFunctionNames.initialize("ST_", Seq("ST_GeometryType", "GeometryType")) // ignored
+      assert(SedonaFunctionNames.effectivePrefix == "sedona_")
+    }
     it("reads the active session's prefix before one is fixed, without fixing it") {
       withActiveSession(SedonaFunctionNames.PrefixConfigKey -> "sedona_") {
         assert(SedonaFunctionNames.resolve("ST_Point") == "sedona_ST_Point")

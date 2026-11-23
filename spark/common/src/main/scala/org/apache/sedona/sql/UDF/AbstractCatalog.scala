@@ -140,7 +140,7 @@ abstract class AbstractCatalog {
   }
 
   def registerAll(sparkSession: SparkSession): Unit = {
-    SedonaFunctionNames.initialize(sparkSession)
+    SedonaFunctionNames.initialize(sparkSession, PlainFunctionNames.all)
     val registry = sparkSession.sessionState.functionRegistry
     registeredExpressions.foreach { case (identifier, expressionInfo, functionBuilder) =>
       val functionIdentifier = resolvedIdentifier(identifier.funcName)
@@ -259,7 +259,7 @@ abstract class AbstractCatalog {
   }
 
   def dropAll(sparkSession: SparkSession): Unit = {
-    val prefix = SedonaFunctionNames.prefixToDrop(sparkSession)
+    val prefix = SedonaFunctionNames.prefixToDrop(sparkSession, PlainFunctionNames.all)
     val registry = sparkSession.sessionState.functionRegistry
     def drop(name: String): Unit = registry.dropFunction(prefixedIdentifier(prefix, name))
     registeredExpressions.foreach { case (identifier, _, _) => drop(identifier.funcName) }

@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.viz.sql.UDF
 
-import org.apache.sedona.sql.UDF.SedonaFunctionNames
+import org.apache.sedona.sql.UDF.{PlainFunctionNames, SedonaFunctionNames}
 import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
 import org.apache.spark.sql.catalyst.expressions.ExpressionInfo
@@ -36,10 +36,10 @@ object UdfRegistrator {
     }
 
   // A scalar is named after its builder, a companion object whose class name ends in "$".
-  private def plainScalarName(builder: FunctionBuilder): String =
+  private[sedona] def plainScalarName(builder: FunctionBuilder): String =
     builder.getClass.getSimpleName.dropRight(1)
 
-  private def plainAggregateName(aggregate: UserDefinedAggregateFunction): String =
+  private[sedona] def plainAggregateName(aggregate: UserDefinedAggregateFunction): String =
     aggregate.getClass.getSimpleName
 
   def registerAll(sqlContext: SQLContext): Unit = {
@@ -47,7 +47,7 @@ object UdfRegistrator {
   }
 
   def registerAll(sparkSession: SparkSession): Unit = {
-    SedonaFunctionNames.initialize(sparkSession)
+    SedonaFunctionNames.initialize(sparkSession, PlainFunctionNames.all)
     Catalog.expressions.foreach(f => {
       val identifier =
         functionIdentifier(SedonaFunctionNames.resolve(plainScalarName(f)), "builtin")
@@ -63,7 +63,7 @@ object UdfRegistrator {
   }
 
   def dropAll(sparkSession: SparkSession): Unit = {
-    val prefix = SedonaFunctionNames.prefixToDrop(sparkSession)
+    val prefix = SedonaFunctionNames.prefixToDrop(sparkSession, PlainFunctionNames.all)
     Catalog.expressions.foreach(f =>
       sparkSession.sessionState.functionRegistry.dropFunction(
         functionIdentifier(prefix + plainScalarName(f), "builtin")))

@@ -21,6 +21,7 @@ package org.apache.sedona.sql.UDF
 import org.apache.spark.sql.SparkSession
 import org.slf4j.{Logger, LoggerFactory}
 
+import java.util.Locale
 import scala.collection.mutable
 
 /**
@@ -42,20 +43,34 @@ object SedonaFunctionNames {
   private def isValid(prefix: String): Boolean =
     prefix.isEmpty || ValidPrefix.pattern.matcher(prefix).matches()
 
-  /** Reads the key from the session conf (default "") and calls initialize(String). */
-  def initialize(sparkSession: SparkSession): Unit =
-    initialize(sparkSession.conf.get(PrefixConfigKey, ""))
+  /**
+   * Reads the key from the session conf (default "") and calls initialize(String, plainNames).
+   * `plainNames` are the plain names of every function Sedona registers.
+   */
+  private[sedona] def initialize(
+      sparkSession: SparkSession,
+      plainNames: => Iterable[String]): Unit =
+    initialize(sparkSession.conf.get(PrefixConfigKey, ""), plainNames)
+
+  /** initialize(requestedPrefix, plainNames) with no names to check against. */
+  private[sedona] def initialize(requestedPrefix: String): Unit =
+    initialize(requestedPrefix, Nil)
 
   /**
    * Validates, then fixes the effective prefix if none is fixed yet; otherwise warns on a
-   * different value.
+   * different value. A prefix is fixed only if it turns none of `plainNames` into another.
    */
-  private[sedona] def initialize(requestedPrefix: String): Unit = {
+  private[sedona] def initialize(
+      requestedPrefix: String,
+      plainNames: => Iterable[String]): Unit = {
     if (!isValid(requestedPrefix)) {
       throw new IllegalArgumentException(
         s"Invalid value '$requestedPrefix' for $PrefixConfigKey: the prefix must be empty or " +
           "match ^[A-Za-z_][A-Za-z0-9_]*$")
     }
+    // Outside the lock, as computing the names can initialize the catalog objects. Two threads
+    // may both check; the first to take the lock fixes the prefix.
+    if (fixedPrefix.isEmpty) requireNoCollision(requestedPrefix, plainNames)
     lock.synchronized {
       fixedPrefix match {
         case None => fixedPrefix = Some(requestedPrefix)
@@ -96,12 +111,39 @@ object SedonaFunctionNames {
    * The prefix dropAll resolves names with: the fixed prefix, else the key's value in the conf of
    * `sparkSession` if that value is valid, else "". Reading it fixes nothing, so a drop before a
    * session sets the key does not stop a later registrator from fixing what that session asks
-   * for.
+   * for. A value that initialize would reject for turning one of `plainNames` into another is
+   * rejected here too, before anything is dropped.
    */
-  private[sedona] def prefixToDrop(sparkSession: SparkSession): String = fixedPrefix match {
+  private[sedona] def prefixToDrop(
+      sparkSession: SparkSession,
+      plainNames: => Iterable[String]): String = fixedPrefix match {
     case Some(prefix) => prefix
-    case None => Some(sparkSession.conf.get(PrefixConfigKey, "")).filter(isValid).getOrElse("")
+    case None =>
+      val requested = sparkSession.conf.get(PrefixConfigKey, "")
+      if (isValid(requested)) {
+        requireNoCollision(requested, plainNames)
+        requested
+      } else ""
   }
+
+  // Under a prefix such as ST_, GeometryType would be registered as ST_GeometryType, the plain
+  // name of another Sedona function and maybe of a platform function: the prefix exists so that
+  // Sedona never takes a plain name. Function names match ignoring case.
+  private def requireNoCollision(prefix: String, plainNames: => Iterable[String]): Unit =
+    if (prefix.nonEmpty) {
+      val names = plainNames
+      val byLowerCase = names.map(name => name.toLowerCase(Locale.ROOT) -> name).toMap
+      names.iterator
+        .map(name => (name, prefix + name))
+        .find { case (_, prefixed) => byLowerCase.contains(prefixed.toLowerCase(Locale.ROOT)) }
+        .foreach { case (name, prefixed) =>
+          val other = byLowerCase(prefixed.toLowerCase(Locale.ROOT))
+          throw new IllegalArgumentException(
+            s"Invalid value '$prefix' for $PrefixConfigKey: Sedona would register $name as " +
+              s"$prefixed, which is the name of the Sedona function $other. Choose a prefix " +
+              "under which no Sedona function name becomes another.")
+        }
+    }
 
   private[sedona] def resetForTesting(): Unit = lock.synchronized {
     fixedPrefix = None

@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.sql
 
-import org.apache.sedona.sql.UDF.{RasterUdafCatalog, SedonaFunctionNames}
+import org.apache.sedona.sql.UDF.{PlainFunctionNames, RasterUdafCatalog, SedonaFunctionNames}
 import org.apache.sedona.sql.utils.GeoToolsCoverageAvailability.{gridClassName, isGeoToolsAvailable}
 import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.sedona_sql.UDT.RasterUdtRegistratorWrapper
@@ -37,7 +37,7 @@ object RasterRegistrator {
     }
 
   def registerAll(sparkSession: SparkSession): Unit = {
-    SedonaFunctionNames.initialize(sparkSession)
+    SedonaFunctionNames.initialize(sparkSession, PlainFunctionNames.all)
     if (isGeoToolsAvailable) {
       RasterUdtRegistratorWrapper.registerAll(gridClassName)
       val functionName = SedonaFunctionNames.resolve(
@@ -52,7 +52,7 @@ object RasterRegistrator {
   }
 
   def dropAll(sparkSession: SparkSession): Unit = {
-    val prefix = SedonaFunctionNames.prefixToDrop(sparkSession)
+    val prefix = SedonaFunctionNames.prefixToDrop(sparkSession, PlainFunctionNames.all)
     if (isGeoToolsAvailable) {
       sparkSession.sessionState.functionRegistry.dropFunction(
         functionIdentifier(

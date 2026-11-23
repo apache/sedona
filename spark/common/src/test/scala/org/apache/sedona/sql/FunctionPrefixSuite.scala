@@ -19,7 +19,7 @@
 package org.apache.sedona.sql
 
 import org.apache.sedona.spark.SedonaContext
-import org.apache.sedona.sql.UDF.{Catalog, NativeFunctionRegistrationTest, RasterUdafCatalog, SedonaFunctionNames}
+import org.apache.sedona.sql.UDF.{Catalog, NativeFunctionRegistrationTest, PlainFunctionNames, RasterUdafCatalog, SedonaFunctionNames}
 import org.apache.sedona.sql.UDT.UdtRegistrator
 import org.apache.sedona.sql.utils.GeoToolsCoverageAvailability.{gridClassName, isGeoToolsAvailable}
 import org.apache.sedona.stats.outlierDetection.LocalOutlierFactor
@@ -126,6 +126,10 @@ class FunctionPrefixSuite extends AnyFunSpec with BeforeAndAfterAll {
     it("registers every function under the prefix") {
       val missing = allNames.filterNot(n => spark.catalog.functionExists(P + n))
       assert(missing.isEmpty, missing.mkString(", "))
+    }
+
+    it("checks the prefix against every name it registers") {
+      assert(PlainFunctionNames.all.toSet == allNames.toSet)
     }
 
     it("registers core functions in the JVM-wide builtin registry under the prefix") {
