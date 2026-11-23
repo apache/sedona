@@ -1075,8 +1075,21 @@ public class RasterConstructorsTest extends RasterTestBase {
     double[] expected = new double[] {3093151.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0};
     assertArrayEquals(expected, actual, 0.1d);
 
-    // Test bottom-up raster case
-    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d", false, 3093151, 0d);
+    // Test bottom-up raster case. Pixel rows run up a bottom-up raster, so y = -1 is its last row
+    // line: a line along it selects no pixel, as in GDAL, and there is nothing to crop to.
+    assertNull(RasterConstructors.asRaster(geom, raster_bottom_up, "d", false, 3093151, 0d));
+    // One row line further in, the line selects the pixels after it in pixel order, the last row.
+    // The output covers the rows on both sides of the line.
+    Geometry inner = Constructors.geomFromEWKT("LINESTRING(1 -3, 2 -3, 10 -3)");
+    rasterized = RasterConstructors.asRaster(inner, raster_bottom_up, "d", false, 3093151, 0d);
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    assertArrayEquals(
+        new double[] {0, 0, 0, 0, 0, 3093151.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0},
+        actual,
+        0.1d);
+    // Along its first row line, y = -511, the first row.
+    Geometry first = Constructors.geomFromEWKT("LINESTRING(1 -511, 2 -511, 10 -511)");
+    rasterized = RasterConstructors.asRaster(first, raster_bottom_up, "d", false, 3093151, 0d);
     actual = MapAlgebra.bandAsArray(rasterized, 1);
     assertArrayEquals(expected, actual, 0.1d);
 

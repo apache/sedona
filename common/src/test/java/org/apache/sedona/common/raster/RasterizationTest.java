@@ -761,6 +761,146 @@ public class RasterizationTest extends RasterTestBase {
     }
   }
 
+  @Test
+  public void testLineCrossingRasterWithBothEndpointsOutside()
+      throws ParseException, FactoryException {
+    // GH-3255: a segment whose endpoints are both outside the raster used to be dropped, so a line
+    // spanning the raster burned nothing.
+    GridCoverage2D raster = unitGrid6x6();
+    double[] row3 = {
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+      1, 1, 1, 1, 1, 1,
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+    };
+    assertRasterizedGrid(raster, "LINESTRING (-1 2.5, 7 2.5)", row3);
+    assertRasterizedGrid(raster, "LINESTRING (7 2.5, -1 2.5)", row3);
+    double[] diagonal = {
+      0, 0, 0, 0, 0, 1,
+      0, 0, 0, 0, 1, 0,
+      0, 0, 0, 1, 0, 0,
+      0, 0, 1, 0, 0, 0,
+      0, 1, 0, 0, 0, 0,
+      1, 0, 0, 0, 0, 0,
+    };
+    assertRasterizedGrid(raster, "LINESTRING (-1 -1, 7 7)", diagonal);
+    assertRasterizedGrid(raster, "LINESTRING (7 7, -1 -1)", diagonal);
+    // A middle segment with both vertices outside, between two that end inside.
+    double[] zigzag = {
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 1,
+      1, 1, 1, 1, 1, 1,
+      1, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+    };
+    assertRasterizedGrid(raster, "LINESTRING (0.5 2.5, -1 3.5, 7 3.5, 5.5 4.5)", zigzag);
+
+    // The other operations that rasterize a geometry see the same cells.
+    Geometry spanning = wktReader.read("LINESTRING (-1 2.5, 7 2.5)");
+    Assert.assertEquals(
+        Double.valueOf(6), RasterBandAccessors.getZonalStats(raster, spanning, 1, "count"));
+    GridCoverage2D cropped =
+        RasterConstructors.asRaster(spanning, raster, "d", false, 1d, 0d, true);
+    Assert.assertEquals(6, RasterAccessors.getWidth(cropped));
+    Assert.assertEquals(1, RasterAccessors.getHeight(cropped));
+    Assert.assertArrayEquals(
+        new double[] {1, 1, 1, 1, 1, 1}, MapAlgebra.bandAsArray(cropped, 1), 0d);
+
+    // Meeting the raster only at a corner, or only along a far edge, still burns nothing.
+    double[] nothing = new double[36];
+    assertRasterizedGrid(raster, "LINESTRING (-1 5, 1 7)", nothing);
+    assertRasterizedGrid(raster, "LINESTRING (5 -1, 7 1)", nothing);
+    assertRasterizedGrid(raster, "LINESTRING (6 -1, 6 7)", nothing);
+    assertRasterizedGrid(raster, "LINESTRING (-1 0, 7 0)", nothing);
+  }
+
+  @Test
+  public void testClippedLineKeepsItsSideOfAGridLine() throws ParseException, FactoryException {
+    // GH-3255: inside the raster this line runs strictly above y = 3 until its last point. Where it
+    // crosses the raster's left edge, y rounds to exactly 3 in double precision; taking that
+    // rounded point as the start used to move the line to the row below.
+    GridCoverage2D raster = unitGrid6x6();
+    double[] rowAbove = new double[36];
+    rowAbove[2 * 6] = 1;
+    double[] rowBelow = new double[36];
+    rowBelow[3 * 6] = 1;
+    String above = Double.toString(Math.nextUp(3.0));
+    String below = Double.toString(Math.nextDown(3.0));
+    assertRasterizedGrid(raster, "LINESTRING (-1 " + above + ", 1 3.0)", rowAbove);
+    assertRasterizedGrid(raster, "LINESTRING (1 3.0, -1 " + above + ")", rowAbove);
+    assertRasterizedGrid(raster, "LINESTRING (-1 " + below + ", 1 3.0)", rowBelow);
+    assertRasterizedGrid(raster, "LINESTRING (1 3.0, -1 " + below + ")", rowBelow);
+    // Exactly on the grid line, the half-open row after it.
+    assertRasterizedGrid(raster, "LINESTRING (-1 3.0, 1 3.0)", rowBelow);
+  }
+
+  @Test
+  public void testLineWithExtremeFiniteEndpoints() throws FactoryException {
+    // GH-3255: the difference of these endpoints overflows in double precision. They are valid
+    // coordinates, and the line still crosses the raster along one row or one column.
+    GridCoverage2D raster = unitGrid6x6();
+    GeometryFactory factory = new GeometryFactory();
+    for (boolean allTouched : new boolean[] {false, true}) {
+      double[] band = burn(line(factory, -1e308, 2.5, 1e308, 2.5), raster, allTouched);
+      double[] reversed = burn(line(factory, 1e308, 2.5, -1e308, 2.5), raster, allTouched);
+      double[] column = burn(line(factory, 2.5, -1e308, 2.5, 1e308), raster, allTouched);
+      for (int i = 0; i < 6; i++) {
+        Assert.assertEquals(1d, band[3 * 6 + i], 0d);
+        Assert.assertEquals(1d, column[i * 6 + 2], 0d);
+      }
+      Assert.assertEquals(6, Arrays.stream(band).filter(v -> v != 0).count());
+      Assert.assertEquals(6, Arrays.stream(column).filter(v -> v != 0).count());
+      Assert.assertArrayEquals(band, reversed, 0d);
+    }
+  }
+
+  @Test
+  public void testLineOnDecimalGridLines() throws ParseException, FactoryException {
+    // GH-3256: a coordinate is on a grid line when it is in decimal, as for points and extents.
+    // (0.3 - 0.6) / -0.1 is 2.9999999999999996 in binary floating point, but 0.3 is the grid line
+    // 3 of this raster: the line ends on the corner (0.3, 0.3) and does not reach the row above.
+    GridCoverage2D tenths =
+        RasterConstructors.makeEmptyRaster(1, "d", 6, 6, 0, 0.6, 0.1, -0.1, 0, 0, 0);
+    double[] oneCell = new double[36];
+    oneCell[3 * 6 + 2] = 1;
+    assertRasterizedGrid(tenths, "LINESTRING (0.22 0.22, 0.3 0.3)", oneCell);
+    assertRasterizedGrid(tenths, "LINESTRING (0.3 0.3, 0.22 0.22)", oneCell);
+    Assert.assertArrayEquals(
+        oneCell, burn(wktReader.read("LINESTRING (0.22 0.22, 0.3 0.3)"), tenths, true), 0d);
+
+    // 0.30000000000000004 is the next double above 0.3, and what 0.1 + 2 * 0.1 evaluates to. It is
+    // a different stored value, past the line: a line ending there reaches the next column.
+    double[] twoCells = oneCell.clone();
+    twoCells[3 * 6 + 3] = 1;
+    assertRasterizedGrid(tenths, "LINESTRING (0.22 0.25, 0.3 0.25)", oneCell);
+    assertRasterizedGrid(tenths, "LINESTRING (0.22 0.25, 0.30000000000000004 0.25)", twoCells);
+
+    // 0.030000000000000002 is the next double above 0.03, a real crossing into column 3. The
+    // double-precision quotient 0.030000000000000002 / 0.01 rounds to exactly 3, which used to stop
+    // the line at the grid line.
+    GridCoverage2D hundredths =
+        RasterConstructors.makeEmptyRaster(1, "d", 6, 6, 0, 0.06, 0.01, -0.01, 0, 0, 0);
+    double[] crossing = new double[36];
+    crossing[1 * 6 + 2] = 1;
+    crossing[1 * 6 + 3] = 1;
+    assertRasterizedGrid(
+        hundredths, "LINESTRING (0.025 0.045, 0.030000000000000002 0.045)", crossing);
+
+    // The same rule on a bottom-up raster with a large origin: 1000000.03 is its grid line 3,
+    // although (1000000.03 - 1000000.0) / 0.01 is 3.0000000027939677.
+    GridCoverage2D offset =
+        RasterConstructors.makeEmptyRaster(1, "d", 6, 6, 1000000.0, 50.0, 0.01, 0.01, 0, 0, 0);
+    double[] beforeLine = new double[36];
+    beforeLine[1 * 6 + 2] = 1;
+    double[] afterLine = new double[36];
+    afterLine[1 * 6 + 3] = 1;
+    assertRasterizedGrid(offset, "LINESTRING (1000000.025 50.015, 1000000.03 50.015)", beforeLine);
+    assertRasterizedGrid(offset, "LINESTRING (1000000.03 50.015, 1000000.035 50.015)", afterLine);
+  }
+
   private static LineString line(
       GeometryFactory factory, double x0, double y0, double x1, double y1) {
     return factory.createLineString(

@@ -192,6 +192,60 @@ class TestRasterizeParity(TestBase):
             )
             assert np.array_equal(actual, expected), f"case {case_id}: {wkt}"
 
+    def test_as_raster_lines_crossing_the_raster_match_gdal(self):
+        """Lines with segments whose two vertices are both outside the raster
+        (GH-3255). Such a segment used to be dropped, so a line spanning the
+        raster burned nothing. Every pixel the line passes through inside the
+        raster must be burned, matching GDAL."""
+        cases = [
+            # id, width, height, ulx, uly, sx, sy, wkt
+            (0, 6, 6, 0.0, 6.0, 1.0, -1.0, "LINESTRING (-1 2.5, 7 2.5)"),
+            (1, 6, 6, 0.0, 6.0, 1.0, -1.0, "LINESTRING (2.5 -3, 2.5 9)"),
+            (2, 6, 6, 0.0, 6.0, 1.0, -1.0, "LINESTRING (-1 0.3, 7 4.9)"),
+            (3, 6, 6, 0.0, 6.0, 1.0, -1.0, "LINESTRING (-2 5.2, 3.1 -1)"),
+            # a middle segment outside at both ends, between two that end inside
+            (
+                4,
+                6,
+                6,
+                0.0,
+                6.0,
+                1.0,
+                -1.0,
+                "LINESTRING (0.5 2.5, -1 3.5, 7 3.7, 5.5 4.5)",
+            ),
+            # bottom-up
+            (5, 6, 6, 0.0, 0.0, 1.0, 1.0, "LINESTRING (-1 0.3, 7 4.9)"),
+            (6, 6, 6, 0.0, 0.0, 1.0, 1.0, "LINESTRING (7 2.5, -1 2.5)"),
+            # decimal, non-square pixels
+            (7, 8, 5, 100.25, 50.5, 0.25, -0.5, "LINESTRING (99 49.3, 104 48.1)"),
+        ]
+        df = self.spark.createDataFrame(
+            cases,
+            "id INT, width INT, height INT, ulx DOUBLE, uly DOUBLE, "
+            "sx DOUBLE, sy DOUBLE, wkt STRING",
+        )
+        rows = df.selectExpr(
+            "id",
+            "RS_BandAsArray(RS_AsRaster(ST_GeomFromWKT(wkt), "
+            "RS_MakeEmptyRaster(1, 'd', width, height, ulx, uly, sx, sy, 0, 0, 0), "
+            "'d', true, 1.0, 0.0, false), 1) as band",
+        ).collect()
+        bands = {row["id"]: row["band"] for row in rows}
+
+        for case_id, width, height, ulx, uly, sx, sy, wkt in cases:
+            actual = np.array(bands[case_id], dtype=float).reshape(height, width)
+            expected = rasterio.features.rasterize(
+                [(wkt_loads(wkt), 1)],
+                out_shape=(height, width),
+                fill=0,
+                transform=Affine(sx, 0, ulx, 0, sy, uly),
+                all_touched=True,
+                dtype="uint8",
+            )
+            assert expected.any(), f"case {case_id}: {wkt}"
+            assert np.array_equal(actual, expected), f"case {case_id}: {wkt}"
+
     def test_as_raster_multipolygon_corner_apexes_match_gdal(self):
         """MultiPolygon whose diamond apex vertices land exactly on pixel
         corners (GH-3120): the cells beyond the apexes are touched only at

@@ -37,6 +37,10 @@ Pixel selection depends on the geometry type:
 
 For `LineString` geometries, `allTouched=true` can expand the geometry extent at grid boundaries. With `useGeometryExtent=true`, this can change both the output dimensions and the selected pixels.
 
+A line is rasterized wherever it crosses the raster, including along segments whose two vertices both lie outside the raster.
+
+Whether a coordinate lies on a grid line is decided in decimal. Each stored coordinate, the raster's upper-left corner and its pixel size are read as the shortest decimal number that converts back to the same double, and the pixel position is computed exactly from those decimals. For example, on a raster with upper-left `y = 0.6` and `ScaleY = -0.1`, the coordinate `0.3` is on the grid line three pixels down, although `(0.3 - 0.6) / -0.1` evaluates to `2.9999999999999996` in floating point. A coordinate next to a grid line is not moved onto it: `0.30000000000000004`, the next double above `0.3` and also the result of `0.1 + 2 * 0.1`, lies past that line, so a line ending there enters the next pixel. Coordinates computed in floating point from the raster's origin and pixel size are therefore on a grid line only if their decimal form is. This rule applies to points, to lines, to polygon outlines under `allTouched=true`, and to the geometry extent.
+
 Format:
 
 ```

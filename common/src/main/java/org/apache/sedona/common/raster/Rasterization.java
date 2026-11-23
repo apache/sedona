@@ -34,7 +34,6 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.locationtech.jts.algorithm.CGAlgorithmsDD;
 import org.locationtech.jts.algorithm.Orientation;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.util.PolygonExtracter;
@@ -169,7 +168,7 @@ public class Rasterization {
       case "LineString":
       case "MultiLineString":
       case "LinearRing":
-        rasterizeLineString(geom, params, value, geomExtent);
+        rasterizeLineString(geom, params, value);
         break;
       default:
         rasterizePolygon(raster, metadata, geom, params, geomExtent, value, allTouched);
@@ -269,217 +268,21 @@ public class Rasterization {
     return index.intValue();
   }
 
-  private static void rasterizeLineString(
-      Geometry geom, RasterizationParams params, double value, ReferencedEnvelope geomExtent) {
+  /**
+   * Burns every cell a line passes through over a positive length. A cell the line meets only at a
+   * point is not burned, and a segment lying exactly on a grid line burns the half-open cells after
+   * the line, in the raster's own pixel order. See {@link GridLineWalker} for how a coordinate is
+   * matched to a grid line and how segments that leave the raster are clipped.
+   */
+  private static void rasterizeLineString(Geometry geom, RasterizationParams params, double value) {
+    GridLineWalker walker = params.lineWalker();
+    GridLineWalker.CellVisitor burn = (col, row) -> params.burnRasterCell(col, row, value);
     for (int i = 0; i < geom.getNumGeometries(); i++) {
-      LineString line = (LineString) geom.getGeometryN(i);
-      Coordinate[] coords = line.getCoordinates();
-
+      Coordinate[] coords = geom.getGeometryN(i).getCoordinates();
       for (int j = 0; j < coords.length - 1; j++) {
-        // Extract start and end points for the segment
-        LineSegment clippedSegment =
-            clipSegmentToRasterBounds(coords[j], coords[j + 1], geomExtent);
-
-        Coordinate start;
-        Coordinate end;
-        if (clippedSegment != null) {
-          start = new Coordinate(clippedSegment.p0.x, clippedSegment.p0.y);
-          end = new Coordinate(clippedSegment.p1.x, clippedSegment.p1.y);
-        } else {
-          continue; // Skip case where segment is completely outside geomExtent
-        }
-
-        double x0 = (start.x - params.upperLeftX) / params.scaleX;
-        double y0 = (start.y - params.upperLeftY) / params.scaleY;
-        double x1 = (end.x - params.upperLeftX) / params.scaleX;
-        double y1 = (end.y - params.upperLeftY) / params.scaleY;
-
-        traverseSegment(params, x0, y0, x1, y1, value);
+        walker.walk(coords[j].x, coords[j].y, coords[j + 1].x, coords[j + 1].y, false, false, burn);
       }
     }
-  }
-
-  /**
-   * Burns every grid cell the segment passes through, in pixel space where cell (i, j) covers [i, i
-   * + 1) x [j, j + 1). Uses exact cell traversal (Amanatides-Woo): it steps from one cell-boundary
-   * crossing to the next, so a cell is burned whenever the segment enters it, however briefly. A
-   * fixed-step sampling walk instead misses cells crossed over a distance shorter than the step.
-   *
-   * <p>When an endpoint's pixel coordinate is exactly integral, its cell is selected from the side
-   * containing the segment interior. This avoids burning the neighboring cell that is contacted
-   * only at the endpoint, and it keeps an exact-corner end cell reachable by the traversal.
-   */
-  private static void traverseSegment(
-      RasterizationParams params, double x0, double y0, double x1, double y1, double value) {
-    traverseSegment(params, x0, y0, x1, y1, value, false, false);
-  }
-
-  /**
-   * As {@link #traverseSegment(RasterizationParams, double, double, double, double, double)}, for a
-   * segment that may lie exactly on a grid line. A segment with no extent along an axis whose pixel
-   * coordinate is integral runs between two rows (or columns) of cells; by default it burns the
-   * half-open one after the line, and {@code flatTowardsNegativeX} / {@code flatTowardsNegativeY}
-   * select the one before it instead.
-   */
-  private static void traverseSegment(
-      RasterizationParams params,
-      double x0,
-      double y0,
-      double x1,
-      double y1,
-      double value,
-      boolean flatTowardsNegativeX,
-      boolean flatTowardsNegativeY) {
-
-    int width = params.writableRaster.getWidth();
-    int height = params.writableRaster.getHeight();
-
-    double dx = x1 - x0;
-    double dy = y1 - y0;
-
-    int stepX = (int) Math.signum(dx);
-    int stepY = (int) Math.signum(dy);
-
-    boolean flatX = dx == 0 && flatTowardsNegativeX;
-    boolean flatY = dy == 0 && flatTowardsNegativeY;
-    int x = interiorCell(x0, dx < 0 || flatX);
-    int y = interiorCell(y0, dy < 0 || flatY);
-    int endX = interiorCell(x1, dx > 0 || flatX);
-    int endY = interiorCell(y1, dy > 0 || flatY);
-
-    // The endpoints are clipped to the geometry extent, so the walk covers at most the grid's
-    // width + height cells; the bound also guards against a floating-point overshoot never reaching
-    // the end cell.
-    int maxSteps = width + height + 2;
-    for (int i = 0; i <= maxSteps; i++) {
-      burnCell(params, x, y, value, width, height);
-      if (x == endX && y == endY) {
-        break;
-      }
-      // Decide which axis to advance from the side of the segment on which the next cell corner in
-      // the direction of travel lies. The robust double-double orientation predicate resolves that
-      // side exactly, so the crossing order is computed identically regardless of endpoint order. A
-      // corner off the segment steps the single axis that keeps the walk on the segment's side; a
-      // corner the segment passes exactly through steps both axes at once, burning only the two
-      // cells the segment truly crosses rather than the off-diagonal pair. This supersedes the
-      // parametric tMax comparison, whose floating-point tie was fragile: recomputed from opposite
-      // endpoints in the two directions it could round asymmetrically and flip the step near a
-      // corner, burning a direction-dependent off-diagonal cell.
-      int crossingOrder;
-      if (stepX == 0) {
-        crossingOrder = 1;
-      } else if (stepY == 0) {
-        crossingOrder = -1;
-      } else {
-        double gridX = stepX > 0 ? x + 1.0 : x;
-        double gridY = stepY > 0 ? y + 1.0 : y;
-        int orientation = CGAlgorithmsDD.orientationIndex(x0, y0, x1, y1, gridX, gridY);
-        crossingOrder = -orientation * stepX * stepY;
-      }
-      if (crossingOrder < 0) {
-        x += stepX;
-      } else if (crossingOrder > 0) {
-        y += stepY;
-      } else {
-        x += stepX;
-        y += stepY;
-      }
-    }
-  }
-
-  /**
-   * Grid index of the cell containing the segment interior next to an endpoint. Only an exactly
-   * integral pixel coordinate is biased to the negative-side cell; nearby nonintegral coordinates
-   * and axes with no extent retain the ordinary half-open {@code floor()} result.
-   */
-  private static int interiorCell(double coord, boolean extendsNegative) {
-    int cell = (int) Math.floor(coord);
-    if (extendsNegative && coord == cell) {
-      cell--;
-    }
-    return cell;
-  }
-
-  private static void burnCell(
-      RasterizationParams params, int x, int y, double value, int width, int height) {
-    // Reverse the y index for bottom-up rasters
-    int rasterY = params.bottomUp ? height - 1 - y : y;
-    if (x >= 0 && x < width && rasterY >= 0 && rasterY < height) {
-      params.burn(x, rasterY, value);
-    }
-  }
-
-  private static LineSegment clipSegmentToRasterBounds(
-      Coordinate p1, Coordinate p2, ReferencedEnvelope geomExtent) {
-    double minX = geomExtent.getMinX();
-    double maxX = geomExtent.getMaxX();
-    double minY = geomExtent.getMinY();
-    double maxY = geomExtent.getMaxY();
-
-    double x1 = p1.x, y1 = p1.y;
-    double x2 = p2.x, y2 = p2.y;
-
-    boolean p1Inside = isInsideBounds(x1, y1, minX, maxX, minY, maxY);
-    boolean p2Inside = isInsideBounds(x2, y2, minX, maxX, minY, maxY);
-
-    if (p1Inside && p2Inside) {
-      // Both points inside: no clipping needed
-      return new LineSegment(p1, p2);
-    }
-
-    if (!p1Inside && !p2Inside) {
-      // Both points outside: no clipping needed
-      return null;
-    }
-
-    double dx = x2 - x1;
-    double dy = y2 - y1;
-
-    // Clip using parametric line equation
-    double[] tValues = {0, 1}; // Stores valid segment proportions
-
-    // Clip against minX and maxX
-    if (dx != 0) {
-      double tMin = (minX - x1) / dx;
-      double tMax = (maxX - x1) / dx;
-      if (dx < 0) {
-        double temp = tMin;
-        tMin = tMax;
-        tMax = temp;
-      }
-      tValues[0] = Math.max(tValues[0], tMin);
-      tValues[1] = Math.min(tValues[1], tMax);
-    }
-
-    // Clip against minY and maxY
-    if (dy != 0) {
-      double tMin = (minY - y1) / dy;
-      double tMax = (maxY - y1) / dy;
-      if (dy < 0) {
-        double temp = tMin;
-        tMin = tMax;
-        tMax = temp;
-      }
-      tValues[0] = Math.max(tValues[0], tMin);
-      tValues[1] = Math.min(tValues[1], tMax);
-    }
-
-    // If tValues are invalid (segment is outside), return null
-    if (tValues[0] > tValues[1]) {
-      return null; // No valid clipped segment
-    }
-
-    // Compute new clipped endpoints
-    Coordinate newP1 = new Coordinate(x1 + tValues[0] * dx, y1 + tValues[0] * dy);
-    Coordinate newP2 = new Coordinate(x1 + tValues[1] * dx, y1 + tValues[1] * dy);
-
-    return new LineSegment(newP1, newP2);
-  }
-
-  // Helper function to check if a point is inside the bounding box
-  private static boolean isInsideBounds(
-      double x, double y, double minX, double maxX, double minY, double maxY) {
-    return x >= minX && x <= maxX && y >= minY && y <= maxY;
   }
 
   static ReferencedEnvelope rasterizeGeomExtent(
@@ -570,7 +373,7 @@ public class Rasterization {
     // for a MultiLineString, and with allTouched for a LineString).
     //
     // This only sizes the search window and the cropped output; which cells a line burns is decided
-    // by traverseSegment under GDAL's half-open rule. A line lying on a grid line burns the cells
+    // by GridLineWalker under GDAL's half-open rule. A line lying on a grid line burns the cells
     // after it, which sit outside the snapped window when the line is the window's right or bottom
     // edge. A polygon or point never burns a cell it touches only on its boundary, as in GDAL, so
     // its window is not widened.
@@ -695,7 +498,8 @@ public class Rasterization {
         upperLeftY,
         metadata[0],
         getRasterUpperLeftY(metadata),
-        bottomUp);
+        bottomUp,
+        metadata);
   }
 
   private static void validateRasterMetadata(double[] rasterMetadata) {
@@ -726,9 +530,56 @@ public class Rasterization {
     double rasterUpperLeftX;
     double rasterUpperLeftY;
     boolean bottomUp;
+    // The reference raster's grid in its own pixel order: its size, the world coordinates of its
+    // first column and row lines, and its signed pixel size.
+    int rasterWidth;
+    int rasterHeight;
+    double rasterOriginX;
+    double rasterOriginY;
+    double rasterPixelScaleX;
+    double rasterPixelScaleY;
+    // Where the output grid sits within the reference raster's grid, in cells from its left and
+    // from its geographic top: zero unless the output is cropped to the geometry extent.
+    int colOffset;
+    int rowOffset;
     // Whether any cell has been burned; a cropped output with nothing burned may have nothing in
     // it.
     boolean anyBurned;
+    private GridLineWalker lineWalker;
+
+    /** The walker for line segments over the reference raster's grid. */
+    GridLineWalker lineWalker() {
+      if (lineWalker == null) {
+        lineWalker =
+            new GridLineWalker(
+                rasterWidth,
+                rasterHeight,
+                rasterOriginX,
+                rasterOriginY,
+                rasterPixelScaleX,
+                rasterPixelScaleY);
+      }
+      return lineWalker;
+    }
+
+    /**
+     * Burns a cell given by its column and row on the reference raster, in the raster's own pixel
+     * order, if the output grid holds it. The cell is resolved on the reference grid and only the
+     * write index is local to the output, so a cropped output burns the same cells as a full-extent
+     * one.
+     */
+    void burnRasterCell(int col, int row, double value) {
+      // Count the row down from the geographic top, then move the cell onto the output grid.
+      int rowFromTop = bottomUp ? rasterHeight - 1 - row : row;
+      int x = col - colOffset;
+      int y = rowFromTop - rowOffset;
+      int height = writableRaster.getHeight();
+      if (x < 0 || x >= writableRaster.getWidth() || y < 0 || y >= height) {
+        return;
+      }
+      // Rows are written in the raster's own order; reverse them for bottom-up rasters.
+      burn(x, bottomUp ? height - 1 - y : y, value);
+    }
 
     /** Burns one cell of the output raster. */
     void burn(int x, int y, double value) {
@@ -756,7 +607,16 @@ public class Rasterization {
         double upperLeftY,
         double rasterUpperLeftX,
         double rasterUpperLeftY,
-        boolean bottomUp) {
+        boolean bottomUp,
+        double[] metadata) {
+      this.rasterWidth = (int) metadata[2];
+      this.rasterHeight = (int) metadata[3];
+      this.rasterOriginX = metadata[0];
+      this.rasterOriginY = metadata[1];
+      this.rasterPixelScaleX = metadata[4];
+      this.rasterPixelScaleY = metadata[5];
+      this.colOffset = (int) Math.round((upperLeftX - rasterUpperLeftX) / scaleX);
+      this.rowOffset = (int) Math.round((upperLeftY - rasterUpperLeftY) / scaleY);
       this.writableRaster = writableRaster;
       this.pixelType = pixelType;
       this.scaleX = scaleX;
@@ -886,7 +746,7 @@ public class Rasterization {
       int numPoints = coords.length;
 
       if (allTouched) {
-        burnRingOutline(coords, r == 0, params, value, geomExtent);
+        burnRingOutline(coords, r == 0, params, value);
       }
 
       for (int i = 0; i < numPoints - 1; i++) {
@@ -966,11 +826,7 @@ public class Rasterization {
    * polygon's side, found from the ring's orientation.
    */
   private static void burnRingOutline(
-      Coordinate[] coords,
-      boolean isShell,
-      RasterizationParams params,
-      double value,
-      ReferencedEnvelope geomExtent) {
+      Coordinate[] coords, boolean isShell, RasterizationParams params, double value) {
     if (coords.length < 4) {
       return;
     }
@@ -979,25 +835,24 @@ public class Rasterization {
     boolean interiorOnLeft = Orientation.isCCW(coords) == isShell;
     double side = interiorOnLeft ? 1 : -1;
 
+    GridLineWalker walker = params.lineWalker();
+    GridLineWalker.CellVisitor burn = (col, row) -> params.burnRasterCell(col, row, value);
     for (int i = 0; i < coords.length - 1; i++) {
-      LineSegment clipped = clipSegmentToRasterBounds(coords[i], coords[i + 1], geomExtent);
-      if (clipped == null) {
-        continue;
-      }
       // The left normal of the direction of travel is (-dy, dx) in world space. Pixel x grows with
-      // world x when scaleX is positive, and pixel y grows as world y falls (scaleY < 0 here).
+      // world x, and pixel y grows with world y only on a bottom-up raster.
       double worldDx = coords[i + 1].x - coords[i].x;
       double worldDy = coords[i + 1].y - coords[i].y;
-      boolean interiorTowardsNegativeWorldX = -worldDy * side < 0;
+      boolean flatTowardsNegativeX = -worldDy * side < 0;
       boolean interiorTowardsPositiveWorldY = worldDx * side > 0;
-      boolean flatTowardsNegativeX = interiorTowardsNegativeWorldX == (params.scaleX > 0);
-      boolean flatTowardsNegativeY = interiorTowardsPositiveWorldY;
-
-      double x0 = (clipped.p0.x - params.upperLeftX) / params.scaleX;
-      double y0 = (clipped.p0.y - params.upperLeftY) / params.scaleY;
-      double x1 = (clipped.p1.x - params.upperLeftX) / params.scaleX;
-      double y1 = (clipped.p1.y - params.upperLeftY) / params.scaleY;
-      traverseSegment(params, x0, y0, x1, y1, value, flatTowardsNegativeX, flatTowardsNegativeY);
+      boolean flatTowardsNegativeY = interiorTowardsPositiveWorldY != params.bottomUp;
+      walker.walk(
+          coords[i].x,
+          coords[i].y,
+          coords[i + 1].x,
+          coords[i + 1].y,
+          flatTowardsNegativeX,
+          flatTowardsNegativeY,
+          burn);
     }
   }
 
