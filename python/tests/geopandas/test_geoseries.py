@@ -3640,6 +3640,17 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         expected = pd.Series([True])
         self.check_pd_series_equal(result, expected)
 
+        # As in geopandas, only X and Y are compared, so a line whose ends differ only in Z
+        # is closed (ST_IsClosed also compares Z)
+        s = GeoSeries(
+            [
+                wkt.loads("LINESTRING Z (0 0 0, 1 1 0, 0 0 1)"),
+            ]
+        )
+        result = s.is_closed
+        expected = pd.Series([True])
+        self.check_pd_series_equal(result, expected)
+
     def test_has_z(self):
         s = sgpd.GeoSeries(
             [
