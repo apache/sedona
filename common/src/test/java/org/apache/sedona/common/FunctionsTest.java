@@ -3182,6 +3182,42 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void isClosedEmptyAndCollections() throws ParseException {
+    // An empty geometry is not closed. A multi-geometry or collection is closed when every member
+    // is, so an empty member makes it not closed. The expected values match PostGIS.
+    String[] closed = {
+      "POINT (1 2)",
+      "LINESTRING (0 0, 1 0, 1 1, 0 0)",
+      "POLYGON ((0 0, 1 0, 1 1, 0 0))",
+      "MULTIPOINT ((1 2), (3 4))",
+      "GEOMETRYCOLLECTION (POINT (1 2), POLYGON ((0 0, 1 0, 1 1, 0 0)))",
+      "GEOMETRYCOLLECTION (GEOMETRYCOLLECTION (POINT (1 2)), LINESTRING (0 0, 1 0, 1 1, 0 0))"
+    };
+    String[] notClosed = {
+      "POINT EMPTY",
+      "POINT Z EMPTY",
+      "LINESTRING EMPTY",
+      "POLYGON EMPTY",
+      "MULTIPOINT EMPTY",
+      "MULTILINESTRING EMPTY",
+      "MULTIPOLYGON EMPTY",
+      "GEOMETRYCOLLECTION EMPTY",
+      "MULTIPOINT (EMPTY, (1 2))",
+      "MULTILINESTRING ((0 0, 1 0, 1 1, 0 0), EMPTY)",
+      "MULTIPOLYGON (((0 0, 1 0, 1 1, 0 0)), EMPTY)",
+      "GEOMETRYCOLLECTION (POINT EMPTY)",
+      "GEOMETRYCOLLECTION (POINT (1 2), LINESTRING (0 0, 1 1))",
+      "GEOMETRYCOLLECTION (POINT (1 2), GEOMETRYCOLLECTION EMPTY)"
+    };
+    for (String wkt : closed) {
+      assertTrue(wkt, Functions.isClosed(Constructors.geomFromWKT(wkt, 0)));
+    }
+    for (String wkt : notClosed) {
+      assertFalse(wkt, Functions.isClosed(Constructors.geomFromWKT(wkt, 0)));
+    }
+  }
+
+  @Test
   public void forceCollection() throws ParseException {
     Geometry geom =
         Constructors.geomFromWKT("MULTIPOINT (30 10, 40 40, 20 20, 10 30, 10 10, 20 50)", 0);

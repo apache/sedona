@@ -1123,20 +1123,24 @@ public class Functions {
   }
 
   public static boolean isClosed(Geometry geometry) {
-    if (geometry instanceof Circle
-        || geometry instanceof MultiPoint
-        || geometry instanceof MultiPolygon
-        || geometry instanceof Point
-        || geometry instanceof Polygon) {
-      return true;
-    } else if (geometry instanceof LineString) {
-      return ((LineString) geometry).isClosed();
-    } else if (geometry instanceof MultiLineString) {
-      return ((MultiLineString) geometry).isClosed();
-    } else if (geometry instanceof GeometryCollection) {
+    // As in PostGIS: an empty geometry is not closed, and a multi-geometry or collection is
+    // closed when every member is, so an empty member makes it not closed.
+    if (geometry.isEmpty()) {
       return false;
     }
-    return false;
+    if (geometry instanceof LineString) {
+      return ((LineString) geometry).isClosed();
+    }
+    if (geometry instanceof GeometryCollection) {
+      for (int i = 0; i < geometry.getNumGeometries(); i++) {
+        if (!isClosed(geometry.getGeometryN(i))) {
+          return false;
+        }
+      }
+      return true;
+    }
+    // Points, polygons (whose rings are always closed) and circles
+    return true;
   }
 
   public static boolean isRing(Geometry geometry) {
