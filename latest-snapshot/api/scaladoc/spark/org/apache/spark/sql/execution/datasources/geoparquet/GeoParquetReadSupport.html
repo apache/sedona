@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetReadSupport</title>
@@ -210,6 +209,10 @@
                         <span class="separator"></span>
                         <a class="class" href="FirstGeometryOutputWriter.html" title="Writes a GeoParquet 2 file that has GeometryUDT columns without a CRS option."></a>
                         <a href="FirstGeometryOutputWriter.html" title="Writes a GeoParquet 2 file that has GeometryUDT columns without a CRS option.">FirstGeometryOutputWriter</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="class" href="GeoParquetColumnMismatchException.html" title="Raised for a file that stores a column in a way that the schema of the read does not take: a GEOGRAPHY column for a geometry column, for example, or another SRID than the type of the column names."></a>
+                        <a href="GeoParquetColumnMismatchException.html" title="Raised for a file that stores a column in a way that the schema of the read does not take: a GEOGRAPHY column for a geometry column, for example, or another SRID than the type of the column names.">GeoParquetColumnMismatchException</a>
                       </li><li class="current-entities indented7">
                         <a class="object" href="GeoParquetFileFormat$.html" title=""></a>
                         <a class="class" href="GeoParquetFileFormat.html" title=""></a>
@@ -910,6 +913,26 @@ readers. Responsible for figuring out Parquet requested schema used for column p
 Responsible for instantiating <span class="extype" name="RecordMaterializer">RecordMaterializer</span>, which is used for converting Parquet
 records to Catalyst <span class="extype" name="InternalRow">InternalRow</span>s.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetReadSupport">GeoParquetReadSupport</a> → <a href="internal/ParquetReadSupport.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetReadSupport">ParquetReadSupport</a> → ReadSupport</dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetReadSupport#requireReadable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="requireReadable(conf:org.apache.hadoop.conf.Configuration,fileMetaData:org.apache.parquet.hadoop.metadata.FileMetaData):Unit"></a><a id="requireReadable(Configuration,FileMetaData):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetReadSupport.html#requireReadable(conf:org.apache.hadoop.conf.Configuration,fileMetaData:org.apache.parquet.hadoop.metadata.FileMetaData):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">requireReadable</span><span class="params">(<span name="conf">conf: <span class="extype" name="org.apache.hadoop.conf.Configuration">Configuration</span></span>, <span name="fileMetaData">fileMetaData: <span class="extype" name="org.apache.parquet.hadoop.metadata.FileMetaData">FileMetaData</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Fails as a scan of a file does for what the footer of the file states about its columns: a
+GEOGRAPHY column that the schema of the read makes a geometry column, for example.</p><div class="fullcomment"><div class="comment cmt"><p>Fails as a scan of a file does for what the footer of the file states about its columns: a
+GEOGRAPHY column that the schema of the read makes a geometry column, for example. Nothing of
+the file is read for it.
+</p></div></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

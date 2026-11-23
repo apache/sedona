@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport</title>
@@ -509,6 +508,70 @@
       </span>
       
       
+    </li><li name="org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport#geographyFromWkb" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="geographyFromWkb(wkb:Array[Byte],srid:Int,dataType:org.apache.spark.sql.types.DataType):Any"></a><a id="geographyFromWkb(Array[Byte],Int,DataType):Any"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/types/SpatialTypeSupport$.html#geographyFromWkb(wkb:Array[Byte],srid:Int,dataType:org.apache.spark.sql.types.DataType):Any" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">geographyFromWkb</span><span class="params">(<span name="wkb">wkb: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>, <span name="srid">srid: <span class="extype" name="scala.Int">Int</span></span>, <span name="dataType">dataType: <span class="extype" name="org.apache.spark.sql.types.DataType">DataType</span></span>)</span><span class="result">: <span class="extype" name="scala.Any">Any</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">The value of a geography column for the geography that <code>wkb</code> is the WKB of.</p>
+    </li><li name="org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport#geographySrid" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="geographySrid(dataType:org.apache.spark.sql.types.DataType):Option[Int]"></a><a id="geographySrid(DataType):Option[Int]"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/types/SpatialTypeSupport$.html#geographySrid(dataType:org.apache.spark.sql.types.DataType):Option[Int]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">geographySrid</span><span class="params">(<span name="dataType">dataType: <span class="extype" name="org.apache.spark.sql.types.DataType">DataType</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport#geographyType" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="geographyType(srid:Int):org.apache.spark.sql.types.DataType"></a><a id="geographyType(Int):DataType"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/types/SpatialTypeSupport$.html#geographyType(srid:Int):org.apache.spark.sql.types.DataType" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">geographyType</span><span class="params">(<span name="srid">srid: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.types.DataType">DataType</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport#geographyType" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="geographyType:org.apache.spark.sql.types.DataType"></a><a id="geographyType:DataType"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/types/SpatialTypeSupport$.html#geographyType:org.apache.spark.sql.types.DataType" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">geographyType</span><span class="result">: <span class="extype" name="org.apache.spark.sql.types.DataType">DataType</span></span>
+      </span>
+      
+      
     </li><li name="org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport#geometrySrid" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="geometrySrid(dataType:org.apache.spark.sql.types.DataType):Option[Int]"></a><a id="geometrySrid(DataType):Option[Int]"></a>
       <span class="permalink">
@@ -851,6 +914,22 @@ Sedona uses no native values before Spark 4.2, so there is no WKB.
       </span>
       
       
+    </li><li name="org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport#supportsGeographySrid" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="supportsGeographySrid(srid:Int):Boolean"></a><a id="supportsGeographySrid(Int):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/types/SpatialTypeSupport$.html#supportsGeographySrid(srid:Int):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">supportsGeographySrid</span><span class="params">(<span name="srid">srid: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Sedona's own geography type takes any SRID.</p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

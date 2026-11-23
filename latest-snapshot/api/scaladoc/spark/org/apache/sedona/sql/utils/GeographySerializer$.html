@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.sedona.sql.utils.GeographySerializer</title>
@@ -549,6 +548,24 @@
       </span>
       
       
+    </li><li name="org.apache.sedona.sql.utils.GeographySerializer#serializeWkb" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="serializeWkb(source:Array[Byte],srid:Int):Array[Byte]"></a><a id="serializeWkb(Array[Byte],Int):Array[Byte]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/utils/GeographySerializer$.html#serializeWkb(source:Array[Byte],srid:Int):Array[Byte]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">serializeWkb</span><span class="params">(<span name="source">source: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>, <span name="srid">srid: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">The SQL transport of the geography that <code>source</code> is the WKB of.</p><div class="fullcomment"><div class="comment cmt"><p>The SQL transport of the geography that <code>source</code> is the WKB of. The coordinates are not
+parsed, so a geography that is only passed on costs no JTS or S2 object.
+</p></div></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

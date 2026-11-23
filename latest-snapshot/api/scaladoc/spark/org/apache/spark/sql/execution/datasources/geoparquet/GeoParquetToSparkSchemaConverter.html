@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetToSparkSchemaConverter</title>
@@ -210,6 +209,10 @@
                         <span class="separator"></span>
                         <a class="class" href="FirstGeometryOutputWriter.html" title="Writes a GeoParquet 2 file that has GeometryUDT columns without a CRS option."></a>
                         <a href="FirstGeometryOutputWriter.html" title="Writes a GeoParquet 2 file that has GeometryUDT columns without a CRS option.">FirstGeometryOutputWriter</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="class" href="GeoParquetColumnMismatchException.html" title="Raised for a file that stores a column in a way that the schema of the read does not take: a GEOGRAPHY column for a geometry column, for example, or another SRID than the type of the column names."></a>
+                        <a href="GeoParquetColumnMismatchException.html" title="Raised for a file that stores a column in a way that the schema of the read does not take: a GEOGRAPHY column for a geometry column, for example, or another SRID than the type of the column names.">GeoParquetColumnMismatchException</a>
                       </li><li class="current-entities indented7">
                         <a class="object" href="GeoParquetFileFormat$.html" title=""></a>
                         <a class="class" href="GeoParquetFileFormat.html" title=""></a>
@@ -511,10 +514,10 @@
       </span>
       
       <p class="shortcomment cmt">Converts Parquet <span class="extype" name="MessageType">MessageType</span> <code>parquetSchema</code> to a Spark SQL <span class="extype" name="StructType">StructType</span>.</p>
-    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetToSparkSchemaConverter#convertFieldWithGeo" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="convertFieldWithGeo(parquetType:org.apache.parquet.schema.Type):org.apache.spark.sql.types.DataType"></a><a id="convertFieldWithGeo(Type):DataType"></a>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetToSparkSchemaConverter#convertFieldWithGeo" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="convertFieldWithGeo(parquetType:org.apache.parquet.schema.Type,asStored:Boolean):org.apache.spark.sql.types.DataType"></a><a id="convertFieldWithGeo(Type,Boolean):DataType"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetToSparkSchemaConverter.html#convertFieldWithGeo(parquetType:org.apache.parquet.schema.Type):org.apache.spark.sql.types.DataType" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetToSparkSchemaConverter.html#convertFieldWithGeo(parquetType:org.apache.parquet.schema.Type,asStored:Boolean):org.apache.spark.sql.types.DataType" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -523,10 +526,14 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">convertFieldWithGeo</span><span class="params">(<span name="parquetType">parquetType: <span class="extype" name="org.apache.parquet.schema.Type">Type</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.types.DataType">DataType</span></span>
+        <span class="name">convertFieldWithGeo</span><span class="params">(<span name="parquetType">parquetType: <span class="extype" name="org.apache.parquet.schema.Type">Type</span></span>, <span name="asStored">asStored: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.types.DataType">DataType</span></span>
       </span>
       
-      <p class="shortcomment cmt">Converts a Parquet <span class="extype" name="Type">Type</span> to a Spark SQL <span class="extype" name="DataType">DataType</span>.</p>
+      <p class="shortcomment cmt">Converts a Parquet <span class="extype" name="Type">Type</span> to a Spark SQL <span class="extype" name="DataType">DataType</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Converts a Parquet <span class="extype" name="Type">Type</span> to a Spark SQL <span class="extype" name="DataType">DataType</span>.
+</p></div><dl class="paramcmts block"><dt class="param">asStored</dt><dd class="cmt"><p>
+  whether a geometry or geography column converts to the binary type that it is stored in.
+  The conversion then reads nothing of what such a column states, its CRS or its edges, so it
+  cannot fail for a column that the schema of a reader may still accept.</p></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -559,6 +566,30 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetToSparkSchemaConverter#geographySrid" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="geographySrid(field:org.apache.parquet.schema.Type,native:Boolean):Int"></a><a id="geographySrid(Type,Boolean):Int"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetToSparkSchemaConverter.html#geographySrid(field:org.apache.parquet.schema.Type,native:Boolean):Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">geographySrid</span><span class="params">(<span name="field">field: <span class="extype" name="org.apache.parquet.schema.Type">Type</span></span>, <span name="native">native: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol"><span class="name"><a href="../../../../../../index.html">SpatialTypeSupport.usesNativeTypes</a></span></span></span>)</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns the SRID of the geography column stored in <code>field</code>, a column of the GEOGRAPHY logical
+type, by the rules of <a href="#geometrySrid(field:org.apache.parquet.schema.Type,native:Boolean):Int" class="extmbr" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetToSparkSchemaConverter#geometrySrid">geometrySrid</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the SRID of the geography column stored in <code>field</code>, a column of the GEOGRAPHY logical
+type, by the rules of <a href="#geometrySrid(field:org.apache.parquet.schema.Type,native:Boolean):Int" class="extmbr" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetToSparkSchemaConverter#geometrySrid">geometrySrid</a>. Sedona computes on a sphere, as Spark's native
+geography type does, so a column whose edges follow another algorithm is rejected.
+</p></div><dl class="paramcmts block"><dt class="param">field</dt><dd class="cmt"><p>
+  Parquet field of the geography column</p></dd><dt class="param">native</dt><dd class="cmt"><p>
+  whether the column is read as a native Spark geography, whose type takes the SRID of a
+  geographic CRS only. A column read as GeographyUDT accepts any CRS, an unknown one as SRID
+  0.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetToSparkSchemaConverter#geometrySrid" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="geometrySrid(field:org.apache.parquet.schema.Type,native:Boolean):Int"></a><a id="geometrySrid(Type,Boolean):Int"></a>
       <span class="permalink">
@@ -583,9 +614,9 @@ plain binary.
   whether the column is read as a native Spark geometry, whose type must name the SRID. A
   column read as GeometryUDT accepts a CRS without an EPSG code as SRID 0.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetToSparkSchemaConverter#geospatialType" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="geospatialType(field:org.apache.parquet.schema.Type):Option[org.apache.spark.sql.types.DataType]"></a><a id="geospatialType(Type):Option[DataType]"></a>
+      <a id="geospatialType(field:org.apache.parquet.schema.Type,asStored:Boolean):Option[org.apache.spark.sql.types.DataType]"></a><a id="geospatialType(Type,Boolean):Option[DataType]"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetToSparkSchemaConverter.html#geospatialType(field:org.apache.parquet.schema.Type):Option[org.apache.spark.sql.types.DataType]" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetToSparkSchemaConverter.html#geospatialType(field:org.apache.parquet.schema.Type,asStored:Boolean):Option[org.apache.spark.sql.types.DataType]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -594,7 +625,7 @@ plain binary.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">geospatialType</span><span class="params">(<span name="field">field: <span class="extype" name="org.apache.parquet.schema.Type">Type</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.types.DataType">DataType</span>]</span>
+        <span class="name">geospatialType</span><span class="params">(<span name="field">field: <span class="extype" name="org.apache.parquet.schema.Type">Type</span></span>, <span name="asStored">asStored: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.types.DataType">DataType</span>]</span>
       </span>
       
       <p class="shortcomment cmt">The Spark type of a column that stores geometries or geographies, None for any other field.</p><div class="fullcomment"><div class="comment cmt"><p>The Spark type of a column that stores geometries or geographies, None for any other field.
