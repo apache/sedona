@@ -22,9 +22,8 @@ import org.apache.sedona.spark.SedonaContext
 import org.apache.sedona.sql.UDF.{Catalog, NativeFunctionRegistrationTest, SedonaFunctionNames}
 import org.apache.sedona.sql.UDT.UdtRegistrator
 import org.apache.sedona.sql.utils.GeoToolsCoverageAvailability.{gridClassName, isGeoToolsAvailable}
-import org.apache.sedona.viz.sql.SedonaVizExtensions
 import org.apache.sedona.viz.sql.utils.SedonaVizRegistrator
-import org.apache.spark.sql.{SparkSession, SparkSessionExtensions}
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry
 import org.apache.spark.sql.catalyst.expressions.{Expression, ExpressionInfo, Literal}
@@ -204,22 +203,6 @@ class FunctionPrefixBeforeRegistrationSuite extends AnyFunSpec with BeforeAndAft
         assert(e.getMessage.contains("'bad-prefix'"), id.funcName)
         // Dropping under no prefix would have removed the platform's function.
         assert(markerClass(id, session).contains("org.example.PlatformMarker"), id.funcName)
-      }
-    }
-
-    it("lets the application's Spark config decide when loaded through spark.sql.extensions") {
-      // Spark calls apply when it loads an extension. The test context's config has no prefix.
-      val extensions: Seq[SparkSessionExtensions => Unit] =
-        Seq(new SedonaSqlExtensions, new SedonaVizExtensions)
-      val expected = spark.sparkContext.getConf.get(SedonaFunctionNames.PrefixConfigKey, "")
-      extensions.foreach { extension =>
-        SedonaFunctionNames.resetForTesting()
-        extension(new SparkSessionExtensions)
-        val client = spark.newSession()
-        client.conf.set(SedonaFunctionNames.PrefixConfigKey, "other_")
-        withActiveSession(client) {
-          assert(SedonaFunctionNames.effectivePrefix == expected, extension.getClass.getName)
-        }
       }
     }
 

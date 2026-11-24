@@ -50,6 +50,12 @@ object SedonaFunctionNames {
   private[sedona] val MarkerLookupSql: String =
     s"SHOW FUNCTIONS IN spark_catalog.default LIKE '*$MarkerFunctionName'"
 
+  // Sedona's extensions, as an application names them in spark.sql.extensions.
+  private val ExtensionsConfigKey = "spark.sql.extensions"
+  private val ExtensionClassNames = Set(
+    "org.apache.sedona.sql.SedonaSqlExtensions",
+    "org.apache.sedona.viz.sql.SedonaVizExtensions")
+
   private val logger: Logger = LoggerFactory.getLogger(getClass)
   private val ValidPrefix = "^[A-Za-z_][A-Za-z0-9_]*$".r
 
@@ -57,7 +63,7 @@ object SedonaFunctionNames {
   private val lock = new Object
   // None means no prefix has been fixed yet; Some("") means it was fixed to the empty string.
   @volatile private var fixedPrefix: Option[String] = None
-  // Set when Sedona is loaded through spark.sql.extensions: the application's SparkContext and
+  // Set when a Sedona extension registers for a session: the SparkContext of that session and
   // the key's value in its Spark config ("" without the key). While that context runs, the value
   // decides the prefix, whatever a session asks for.
   @volatile private var application: Option[(WeakReference[SparkContext], String)] = None
@@ -81,9 +87,12 @@ object SedonaFunctionNames {
 
   /**
    * Makes the Spark config of the application that `context` runs decide the prefix. The Sedona
-   * extensions call this when Spark loads them. With spark.sql.extensions Sedona registers for
-   * every session, also for the session of a Spark Connect client, and a client must not choose
-   * the names for the whole server by setting the key on its own session.
+   * extensions call this with the SparkContext of each session they register for, before they
+   * register. They do not call it when Spark loads them: a builder can load an extension before
+   * the application's SparkContext exists, and asking for a SparkContext then would start one
+   * without the builder's options. As an extension Sedona registers for every session, also for
+   * the session of a Spark Connect client, and a client must not choose the names for the whole
+   * server by setting the key on its own session.
    */
   private[sedona] def useApplicationConf(context: SparkContext): Unit =
     useApplicationConf(context, context.getConf.get(PrefixConfigKey, ""))
@@ -91,22 +100,35 @@ object SedonaFunctionNames {
   private[sedona] def useApplicationConf(context: SparkContext, prefix: String): Unit =
     application = Some((new WeakReference(context), prefix))
 
-  // The prefix of the application that loaded the extension, while its SparkContext runs. A JVM
-  // has one running SparkContext, so an application that starts after that one stopped, and
-  // does not load the extension, decides through its sessions again.
+  // The prefix of the application a Sedona extension registered for, while its SparkContext
+  // runs. A JVM has one running SparkContext, so an application that starts after that one
+  // stopped, and does not load the extension, decides through its sessions again.
   private def applicationPrefix: Option[String] =
     application.collect {
       case (context, prefix) if Option(context.get).exists(!_.isStopped) => prefix
     }
 
+  // The prefix in the Spark config of the application that runs `sparkSession`, a classic
+  // session, if that config decides: a Sedona extension registered for one of the application's
+  // sessions, or the application names one in spark.sql.extensions. The second says so before
+  // the first analysis of a session. An extension that a builder installs with withExtensions
+  // is known only from the first.
+  private def applicationPrefix(sparkSession: SparkSession): Option[String] =
+    applicationPrefix.orElse {
+      val conf = sparkSession.sparkContext.getConf
+      val extensions = conf.get(ExtensionsConfigKey, "").split(",").map(_.trim)
+      if (extensions.exists(ExtensionClassNames.contains)) Some(conf.get(PrefixConfigKey, ""))
+      else None
+    }
+
   // The prefix `sparkSession` asks for: the application's if that decides, else the session's.
   private def requestedPrefix(sparkSession: SparkSession): String =
-    applicationPrefix.getOrElse(sparkSession.conf.get(PrefixConfigKey, ""))
+    applicationPrefix(sparkSession).getOrElse(sparkSession.conf.get(PrefixConfigKey, ""))
 
   /**
    * Calls initialize(String, plainNames) with the key's value in the application's Spark config
-   * if Sedona was loaded through spark.sql.extensions, else with its value in the session conf
-   * (default ""). `plainNames` are the plain names of every function Sedona registers.
+   * if the application loads a Sedona extension, else with its value in the session conf (default
+   * ""). `plainNames` are the plain names of every function Sedona registers.
    *
    * Returns the effective prefix. A registrator puts this value in front of the names it
    * registers for `sparkSession`. It must not ask effectivePrefix, which answers for the thread's
@@ -172,9 +194,12 @@ object SedonaFunctionNames {
    * propagates.
    *
    * Otherwise the fixed prefix. Until one is fixed: the key's value in the application's Spark
-   * config if Sedona was loaded through spark.sql.extensions, else in the conf of that session,
-   * if the value is valid; otherwise "". Reading it fixes nothing. So a DataFrame column built
-   * before the first registrator runs already carries the name Sedona registers.
+   * config if the application loads a Sedona extension, else in the conf of that session, if the
+   * value is valid; otherwise "". Reading it fixes nothing. So a DataFrame column built before
+   * the first registrator runs already carries the name Sedona registers. An extension that a
+   * builder installed with withExtensions is known only once it registers, at the first analysis
+   * of a session. Before that, the conf of the session is read, and it starts from the
+   * application's config.
    *
    * Public so Python can read it over py4j.
    */
@@ -192,8 +217,9 @@ object SedonaFunctionNames {
 
   // `current` is a classic session that runs, or None.
   private def configuredPrefix(current: Option[SparkSession]): String =
-    applicationPrefix
-      .orElse(current.flatMap(session => Try(session.conf.get(PrefixConfigKey, "")).toOption))
+    current
+      .map(session => Try(requestedPrefix(session)).toOption)
+      .getOrElse(applicationPrefix)
       .filter(isValid)
       .getOrElse("")
 
