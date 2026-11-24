@@ -2012,6 +2012,33 @@ class TestDataFrameAPI(TestBase):
         for future in futures:
             future.result()
 
+    @pytest.mark.skipif(
+        os.getenv("SPARK_REMOTE") is not None,
+        reason="Spark Connect has no py4j JVM view",
+    )
+    def test_wrappers_on_a_jvm_view_without_sedona_imports(self):
+        # A session that registered Sedona only through spark.sql.extensions never ran the
+        # Python SedonaContext.create, which adds Sedona's imports to the JVM view.
+        from pyspark import SparkContext
+
+        square = stc.ST_GeomFromWKT(f.lit("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))"))
+        x, y = f.lit(0.5), f.lit(0.5)
+        jvm = SparkContext._jvm
+        SparkContext._jvm = SparkContext._gateway.new_jvm_view()
+        try:
+            point = stc.ST_Point(x, y)
+            area = stf.ST_Area(square)
+            intersects = stp.ST_Intersects(square, square)
+            envelope = sta.ST_Envelope_Aggr(square)
+        finally:
+            SparkContext._jvm = jvm
+        # ST_AsText: on Spark 4.2 a geometry comes back as Spark's own type, without .wkt.
+        row = self.spark.range(1).select(stf.ST_AsText(point), area, intersects).head()
+        assert row[0] == "POINT (0.5 0.5)"
+        assert row[1] == 1.0
+        assert row[2] is True
+        assert self.spark.range(1).select(stf.ST_Area(envelope)).head()[0] == 1.0
+
     def test_st_h3_to_point(self):
         cell = 617700169958293503
         df = self.spark.createDataFrame([(cell,), (None,)], "cell long")

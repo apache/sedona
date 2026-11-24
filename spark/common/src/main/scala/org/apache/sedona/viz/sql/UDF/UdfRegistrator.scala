@@ -18,8 +18,11 @@
  */
 package org.apache.sedona.viz.sql.UDF
 
+import org.apache.sedona.sql.UDF.{PlainFunctionNames, SedonaFunctionNames}
 import org.apache.spark.sql.catalyst.FunctionIdentifier
+import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
 import org.apache.spark.sql.catalyst.expressions.ExpressionInfo
+import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.{SQLContext, SparkSession}
 
@@ -32,13 +35,21 @@ object UdfRegistrator {
       FunctionIdentifier(name)
     }
 
+  // A scalar is named after its builder, a companion object whose class name ends in "$".
+  private[sedona] def plainScalarName(builder: FunctionBuilder): String =
+    builder.getClass.getSimpleName.dropRight(1)
+
+  private[sedona] def plainAggregateName(aggregate: UserDefinedAggregateFunction): String =
+    aggregate.getClass.getSimpleName
+
   def registerAll(sqlContext: SQLContext): Unit = {
     registerAll(sqlContext.sparkSession)
   }
 
   def registerAll(sparkSession: SparkSession): Unit = {
+    val prefix = SedonaFunctionNames.initialize(sparkSession, PlainFunctionNames.all)
     Catalog.expressions.foreach(f => {
-      val identifier = functionIdentifier(f.getClass.getSimpleName.dropRight(1), "builtin")
+      val identifier = functionIdentifier(prefix + plainScalarName(f), "builtin")
       val expressionInfo = new ExpressionInfo(
         f.getClass.getCanonicalName,
         identifier.database.orNull,
@@ -47,15 +58,16 @@ object UdfRegistrator {
         .registerFunction(identifier, expressionInfo, SpatialTypeSupport.adaptFunction(f))
     })
     Catalog.aggregateExpressions.foreach(f =>
-      sparkSession.udf.register(f.getClass.getSimpleName, f))
+      sparkSession.udf.register(prefix + plainAggregateName(f), f))
   }
 
   def dropAll(sparkSession: SparkSession): Unit = {
+    val prefix = SedonaFunctionNames.prefixToDrop(sparkSession, PlainFunctionNames.all)
     Catalog.expressions.foreach(f =>
       sparkSession.sessionState.functionRegistry.dropFunction(
-        functionIdentifier(f.getClass.getSimpleName.dropRight(1), "builtin")))
+        functionIdentifier(prefix + plainScalarName(f), "builtin")))
     Catalog.aggregateExpressions.foreach(f =>
       sparkSession.sessionState.functionRegistry.dropFunction(
-        functionIdentifier(f.getClass.getSimpleName, "session")))
+        functionIdentifier(prefix + plainAggregateName(f), "session")))
   }
 }

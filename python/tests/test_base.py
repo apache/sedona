@@ -27,6 +27,9 @@ from sedona.spark.sql.types import to_shapely, to_spark_geometry
 from sedona.spark.utils.decorators import classproperty
 
 SPARK_REMOTE = os.getenv("SPARK_REMOTE")
+# Sets spark.sedona.function.prefix on the test session. The prefix is JVM-wide, so a run
+# with it set must be its own pytest process (see tests/prefix).
+FUNCTION_PREFIX = os.getenv("SEDONA_TEST_FUNCTION_PREFIX")
 EXTRA_JARS = os.getenv("SEDONA_PYTHON_EXTRA_JARS")
 
 import shapely
@@ -80,6 +83,11 @@ class TestBase:
             # pytest against a freshly-built development version of Sedona)
             if EXTRA_JARS:
                 builder.config("spark.jars", EXTRA_JARS)
+
+            if FUNCTION_PREFIX:
+                builder = builder.config(
+                    "spark.sedona.function.prefix", FUNCTION_PREFIX
+                )
 
             spark = SedonaContext.create(builder.getOrCreate())
 

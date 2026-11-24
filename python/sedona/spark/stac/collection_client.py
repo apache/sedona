@@ -27,6 +27,9 @@ import datetime as python_datetime
 from pyspark.sql import DataFrame, SparkSession
 from shapely.geometry.base import BaseGeometry
 
+from sedona.spark.sql import st_constructors as stc
+from sedona.spark.sql import st_predicates as stp
+
 _CLIENT_ITEMS_LIMIT_PER_REQUEST = 200
 
 
@@ -175,20 +178,17 @@ class CollectionClient:
                         ):
                             raise ValueError("Invalid geometry string")
                         geom_wkt = geom_str.strip()
-
-                    # Use Spark SQL functions with safe literal values
-                    from pyspark.sql.functions import expr
-
-                    geometry_conditions.append(
-                        expr(
-                            "st_intersects(ST_GeomFromText('{}'), geometry)".format(
-                                geom_wkt.replace("'", "''")
-                            )
-                        )
-                    )
                 except (ValueError, TypeError, AttributeError):
                     # Skip invalid geometries rather than failing
                     continue
+
+                # Outside the try: a failure to build the filter is not invalid input, and
+                # skipping it would return every item.
+                geometry_conditions.append(
+                    stp.ST_Intersects(
+                        stc.ST_GeomFromText(F.lit(geom_wkt)), F.col("geometry")
+                    )
+                )
 
             if geometry_conditions:
                 # Combine conditions with OR using reduce
@@ -234,15 +234,16 @@ class CollectionClient:
                         float(min_lat),
                     )
 
-                    bbox_conditions.append(
-                        F.expr(
-                            f"st_intersects(ST_GeomFromText('{polygon_wkt}'), geometry)"
-                        )
-                    )
-
                 except (ValueError, TypeError, IndexError):
                     # Skip invalid bbox items rather than failing
                     continue
+
+                # Outside the try, as for a geometry above.
+                bbox_conditions.append(
+                    stp.ST_Intersects(
+                        stc.ST_GeomFromText(F.lit(polygon_wkt)), F.col("geometry")
+                    )
+                )
 
             if bbox_conditions:
                 # Combine conditions with OR using reduce

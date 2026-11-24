@@ -22,9 +22,10 @@ from pyspark.pandas.internal import (
     InternalField,
 )
 from pyspark.pandas.utils import scol_for
-from pyspark.sql.functions import expr
+from pyspark.sql import functions as F
 
 from sedona.spark.geopandas import GeoDataFrame, GeoSeries
+from sedona.spark.sql import st_predicates as stp
 
 # Pre-compiled regex pattern for suffix validation.
 SUFFIX_PATTERN = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
@@ -70,16 +71,16 @@ def _frame_join(
     """
     # Predicate mapping.
     predicate_map = {
-        "intersects": "ST_Intersects",
-        "contains": "ST_Contains",
-        "within": "ST_Within",
-        "touches": "ST_Touches",
-        "crosses": "ST_Crosses",
-        "overlaps": "ST_Overlaps",
-        "dwithin": "ST_DWithin",
-        "covers": "ST_Covers",
-        "covered_by": "ST_CoveredBy",
-        # "contains_properly": "ST_ContainsProperly",  # Not supported by Sedona yet.
+        "intersects": stp.ST_Intersects,
+        "contains": stp.ST_Contains,
+        "within": stp.ST_Within,
+        "touches": stp.ST_Touches,
+        "crosses": stp.ST_Crosses,
+        "overlaps": stp.ST_Overlaps,
+        "dwithin": stp.ST_DWithin,
+        "covers": stp.ST_Covers,
+        "covered_by": stp.ST_CoveredBy,
+        # "contains_properly": stp.ST_ContainsProperly,  # Not supported by Sedona yet.
     }
 
     if predicate not in predicate_map:
@@ -134,28 +135,30 @@ def _frame_join(
     if predicate == "dwithin":
         if distance is None:
             raise ValueError("Distance parameter is required for 'dwithin' predicate")
-        spatial_condition = f"{spatial_func}(l_geometry, r_geometry, {distance})"
+        spatial_condition = spatial_func(
+            F.col("l_geometry"), F.col("r_geometry"), F.lit(distance)
+        )
     else:
-        spatial_condition = f"{spatial_func}(l_geometry, r_geometry)"
+        spatial_condition = spatial_func(F.col("l_geometry"), F.col("r_geometry"))
 
     # Add attribute-based join condition if specified.
     join_condition = spatial_condition
     if on_attribute:
         for attr in on_attribute:
-            join_condition += f" AND l_{attr} = r_{attr}"
+            join_condition = join_condition & (F.col(f"l_{attr}") == F.col(f"r_{attr}"))
 
     # Perform spatial join based on join type.
     if how == "inner":
         spatial_join_df = left_geo_df.alias("l").join(
-            right_geo_df.alias("r"), expr(join_condition)
+            right_geo_df.alias("r"), join_condition
         )
     elif how == "left":
         spatial_join_df = left_geo_df.alias("l").join(
-            right_geo_df.alias("r"), expr(join_condition), "left"
+            right_geo_df.alias("r"), join_condition, "left"
         )
     elif how == "right":
         spatial_join_df = left_geo_df.alias("l").join(
-            right_geo_df.alias("r"), expr(join_condition), "right"
+            right_geo_df.alias("r"), join_condition, "right"
         )
     else:
         raise ValueError(f"Join type '{how}' not supported")

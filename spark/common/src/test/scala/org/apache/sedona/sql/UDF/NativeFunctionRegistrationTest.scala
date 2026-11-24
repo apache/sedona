@@ -259,7 +259,7 @@ class NativeFunctionRegistrationTest extends AnyFunSpec with BeforeAndAfterAll {
   }
 }
 
-private[UDF] object NativeFunctionRegistrationTest {
+private[sql] object NativeFunctionRegistrationTest {
 
   /** Registration tests may reuse the context created while other suites are discovered. */
   final class SessionFixture(existingSession: Option[SparkSession]) extends AutoCloseable {

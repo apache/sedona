@@ -21,6 +21,7 @@ package org.apache.sedona.stats.outlierDetection
 import org.apache.sedona.util.DfUtils.getGeometryColumnName
 import org.apache.sedona.stats.SpatialRowHash
 import org.apache.spark.sql.sedona_sql.expressions.st_functions.{ST_Distance, ST_DistanceSphere}
+import org.apache.spark.sql.sedona_sql.expressions.st_predicates.ST_KNN
 import org.apache.spark.sql.{Column, DataFrame, SparkSession, functions => f}
 
 object LocalOutlierFactor {
@@ -72,12 +73,9 @@ object LocalOutlierFactor {
 
     val distanceFunction: (Column, Column) => Column =
       if (useSphere) ST_DistanceSphere else ST_Distance
-    val useSpheroidString = if (useSphere) "True" else "False" // for the SQL expression
 
     val geometryColumn =
       if (geometry == null) getGeometryColumnName(dataframe.schema) else geometry
-
-    val KNNFunction = "ST_KNN"
 
     // Store original contents, prep necessary columns
     val formattedDataframe = dataframe
@@ -92,8 +90,8 @@ object LocalOutlierFactor {
       .join(
         formattedDataframe.alias("r"),
         // k + 1 because we are not counting the row matching to itself
-        f.expr(f"$KNNFunction(l.geometry, r.geometry, $k + 1, $useSpheroidString)") && f.col(
-          f"l.$ID_COLUMN_NAME") =!= f.col(f"r.$ID_COLUMN_NAME"))
+        ST_KNN(f.col("l.geometry"), f.col("r.geometry"), f.lit(k + 1), f.lit(useSphere)) && f
+          .col(f"l.$ID_COLUMN_NAME") =!= f.col(f"r.$ID_COLUMN_NAME"))
       .groupBy(f"l.$ID_COLUMN_NAME")
       .agg(
         f.first("l.geometry").alias("geometry"),

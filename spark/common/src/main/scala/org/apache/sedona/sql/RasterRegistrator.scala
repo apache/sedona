@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.sql
 
-import org.apache.sedona.sql.UDF.RasterUdafCatalog
+import org.apache.sedona.sql.UDF.{PlainFunctionNames, RasterUdafCatalog, SedonaFunctionNames}
 import org.apache.sedona.sql.utils.GeoToolsCoverageAvailability.{gridClassName, isGeoToolsAvailable}
 import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.sedona_sql.UDT.RasterUdtRegistratorWrapper
@@ -37,9 +37,11 @@ object RasterRegistrator {
     }
 
   def registerAll(sparkSession: SparkSession): Unit = {
+    val prefix = SedonaFunctionNames.initialize(sparkSession, PlainFunctionNames.all)
     if (isGeoToolsAvailable) {
       RasterUdtRegistratorWrapper.registerAll(gridClassName)
-      val functionName = RasterUdafCatalog.rasterAggregateExpression.getClass.getSimpleName
+      val functionName =
+        prefix + RasterUdafCatalog.rasterAggregateExpression.getClass.getSimpleName
       val identifier = functionIdentifier(functionName)
       if (!sparkSession.sessionState.functionRegistry.functionExists(identifier)) {
         sparkSession.udf.register(
@@ -50,9 +52,11 @@ object RasterRegistrator {
   }
 
   def dropAll(sparkSession: SparkSession): Unit = {
+    val prefix = SedonaFunctionNames.prefixToDrop(sparkSession, PlainFunctionNames.all)
     if (isGeoToolsAvailable) {
       sparkSession.sessionState.functionRegistry.dropFunction(
-        functionIdentifier(RasterUdafCatalog.rasterAggregateExpression.getClass.getSimpleName))
+        functionIdentifier(
+          prefix + RasterUdafCatalog.rasterAggregateExpression.getClass.getSimpleName))
     }
   }
 }

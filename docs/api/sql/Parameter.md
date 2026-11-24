@@ -61,6 +61,7 @@ If you set the same parameter through both `sedona` and `spark.sedona` prefixes,
 | `sedona.global.index` | Use spatial index (currently, only supports in SQL range join and SQL distance join) | `true` | `true`, `false` |
 | `sedona.global.indextype` | Spatial index type, only valid when `sedona.global.index` is true | `rtree` | `rtree`, `quadtree` |
 | `spark.sedona.enableParserExtension` | Enable the parser extension to parse GEOMETRY data type in SQL DDL statements | `true` | `true`, `false` |
+| `spark.sedona.function.prefix` | Prefix added to the name of every SQL function that Sedona registers. With `sedona_`, `ST_Buffer` is registered as `sedona_ST_Buffer` only, and the plain name is left to the platform. Set it in the cluster or server Spark config: the first Sedona session in a JVM fixes the value for that JVM. When Sedona is loaded through `spark.sql.extensions`, Sedona reads the value from that config only and ignores a value set on a session. Since v2.0.0 | _(empty: no prefix)_ | Letters, digits and underscore, starting with a letter or underscore. Sedona rejects a prefix under which one Sedona function name would become another. For example, `ST_` is rejected: `GeometryType` would become `ST_GeometryType`. |
 
 ## Join Parameters
 

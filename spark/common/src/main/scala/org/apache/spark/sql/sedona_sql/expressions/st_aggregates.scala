@@ -18,6 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
+import org.apache.sedona.sql.UDF.SedonaFunctionNames
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.Column
 import org.apache.spark.sql.functions.{call_udf, col, udaf}
@@ -26,7 +27,7 @@ import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 object st_aggregates {
   def ST_Envelope_Aggr(geometry: Column): Column = {
     if (SpatialTypeSupport.usesNativeTypes) {
-      call_udf("ST_Envelope_Aggr", geometry)
+      call_udf(SedonaFunctionNames.resolve("ST_Envelope_Aggr"), geometry)
     } else {
       val aggrFunc = udaf(new ST_Envelope_Aggr)
       aggrFunc(geometry)
@@ -37,7 +38,7 @@ object st_aggregates {
 
   def ST_Intersection_Aggr(geometry: Column): Column = {
     if (SpatialTypeSupport.usesNativeTypes) {
-      call_udf("ST_Intersection_Aggr", geometry)
+      call_udf(SedonaFunctionNames.resolve("ST_Intersection_Aggr"), geometry)
     } else {
       val aggrFunc = udaf(new ST_Intersection_Aggr)
       aggrFunc(geometry)
@@ -48,7 +49,7 @@ object st_aggregates {
 
   def ST_Union_Aggr(geometry: Column): Column = {
     if (SpatialTypeSupport.usesNativeTypes) {
-      call_udf("ST_Union_Aggr", geometry)
+      call_udf(SedonaFunctionNames.resolve("ST_Union_Aggr"), geometry)
     } else {
       val aggrFunc = udaf(new ST_Union_Aggr)
       aggrFunc(geometry)
@@ -58,7 +59,7 @@ object st_aggregates {
   def ST_Union_Aggr(geometry: String): Column = ST_Union_Aggr(col(geometry))
 
   def ST_Collect_Agg(geometry: Column): Column = {
-    call_udf("ST_Collect_Agg", geometry)
+    call_udf(SedonaFunctionNames.resolve("ST_Collect_Agg"), geometry)
   }
 
   def ST_Collect_Agg(geometry: String): Column = {
@@ -67,7 +68,7 @@ object st_aggregates {
 
   def ST_Extent(geometry: Column): Column = {
     if (SpatialTypeSupport.usesNativeTypes) {
-      call_udf("ST_Extent", geometry)
+      call_udf(SedonaFunctionNames.resolve("ST_Extent"), geometry)
     } else {
       val aggrFunc = udaf(new ST_Extent)
       aggrFunc(geometry)
@@ -78,7 +79,7 @@ object st_aggregates {
 
   def ST_3DExtent(geometry: Column): Column = {
     if (SpatialTypeSupport.usesNativeTypes) {
-      call_udf("ST_3DExtent", geometry)
+      call_udf(SedonaFunctionNames.resolve("ST_3DExtent"), geometry)
     } else {
       val aggrFunc = udaf(new ST_3DExtent)
       aggrFunc(geometry)
