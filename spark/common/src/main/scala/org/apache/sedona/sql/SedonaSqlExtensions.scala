@@ -20,8 +20,7 @@ package org.apache.sedona.sql
 
 import org.apache.sedona.spark.SedonaContext
 import org.apache.sedona.sql.UDF.SedonaFunctionNames
-import org.apache.spark.SparkContext
-import org.apache.spark.sql.SparkSessionExtensions
+import org.apache.spark.sql.{SparkSession, SparkSessionExtensions}
 import org.apache.spark.sql.parser.ParserFactory
 import org.apache.spark.sql.sedona_sql.optimization.{Box2DCastResolutionRule, Box3DCastResolutionRule}
 import org.slf4j.{Logger, LoggerFactory}
@@ -29,8 +28,12 @@ import org.slf4j.{Logger, LoggerFactory}
 class SedonaSqlExtensions extends (SparkSessionExtensions => Unit) {
   val logger: Logger = LoggerFactory.getLogger(getClass)
 
-  private lazy val enableParser =
-    SparkContext.getOrCreate().getConf.get("spark.sedona.enableParserExtension", "true").toBoolean
+  // Whether the application that runs `session` wants the Sedona SQL parser. This is read from
+  // the SparkContext of a session, and not with SparkContext.getOrCreate() when Spark loads the
+  // extension: a session builder can load the extension before the application's SparkContext
+  // exists, and asking for one then would start it without the builder's options.
+  private def parserEnabled(session: SparkSession): Boolean =
+    session.sparkContext.getConf.get("spark.sedona.enableParserExtension", "true").toBoolean
 
   def apply(e: SparkSessionExtensions): Unit = {
     // The check rule below registers Sedona for every session, also for the session of a Spark
@@ -55,13 +58,14 @@ class SedonaSqlExtensions extends (SparkSessionExtensions => Unit) {
     // `ST_GeomFromBox3D` counterpart driven by a concrete consumer.
     e.injectResolutionRule(_ => new Box3DCastResolutionRule)
 
-    // Inject Sedona SQL parser
-    if (enableParser) {
-      // Try to inject the Sedona SQL parser but gracefully handle initialization failures.
-      // This prevents extension loading errors from causing the SparkSession initialization to fail,
-      // allowing the application to continue running without the Sedona parser extension.
-      // Common failures include version incompatibilities between Spark and Sedona.
-      e.injectParser { case (_, parser) =>
+    // Inject Sedona SQL parser. Spark calls this builder when it builds the state of a session,
+    // and the application's config decides then whether the parser is used.
+    e.injectParser { case (session, parser) =>
+      if (parserEnabled(session)) {
+        // Try to inject the Sedona SQL parser but gracefully handle initialization failures.
+        // This prevents extension loading errors from causing the SparkSession initialization to fail,
+        // allowing the application to continue running without the Sedona parser extension.
+        // Common failures include version incompatibilities between Spark and Sedona.
         try {
           ParserFactory.getParser("org.apache.sedona.sql.parser.SedonaSqlParser", parser)
         } catch {
@@ -72,6 +76,8 @@ class SedonaSqlExtensions extends (SparkSessionExtensions => Unit) {
             // Return the original parser instead of failing
             parser
         }
+      } else {
+        parser
       }
     }
   }

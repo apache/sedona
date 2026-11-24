@@ -187,6 +187,28 @@ class FunctionPrefixFreshApplicationSuite extends AnyFunSpec {
       assert(names.filter(_.endsWith("st_tilename")) == Seq(prefix + "st_tilename"))
     }
 
+    it("starts when the builder installs SedonaSqlExtensions") {
+      // Nothing gives the JVM a master or an application name. Only the builder does, after it
+      // has loaded the extension.
+      val names =
+        sedonaFunctionNames(Nil, "withExtensions", classOf[SedonaSqlExtensions].getName, "-", "-")
+      assertOnlyPrefixed(names, "st_point")
+    }
+
+    it("takes the builder's prefix with SedonaSqlExtensions when the JVM has a master too") {
+      // As under spark-submit: a SparkContext started when the extension is loaded would not
+      // have the builder's prefix.
+      val submitted = Seq("-Dspark.master=local[1]", "-Dspark.app.name=submitted")
+      val names =
+        sedonaFunctionNames(
+          submitted,
+          "withExtensions",
+          classOf[SedonaSqlExtensions].getName,
+          "-",
+          "-")
+      assertOnlyPrefixed(names, "st_point")
+    }
+
     it("keeps the application's prefix when the first session asks for another") {
       Seq(
         classOf[SedonaVizExtensions].getName -> "st_tilename",
