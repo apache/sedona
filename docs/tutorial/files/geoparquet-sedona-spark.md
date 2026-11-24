@@ -353,6 +353,8 @@ Set `geoparquet.crs` or `geoparquet.crs.<column_name>` to state the CRS yourself
 
 A geography column is stored in the `GEOGRAPHY` logical type with spherical edges, as WKB, and the GeoParquet metadata lists it with `"edges": "spherical"`. A file can have geography columns and no geometry column. Sedona writes no `bbox` for a geography column, because the `bbox` of the GeoParquet metadata is planar.
 
+The row groups of a geography column have geospatial statistics as well. The Parquet library has no algorithm for a geography column, so Sedona computes them: the geometry types, and a bounding box in longitude and latitude. The box covers the edges of the geographies on the sphere and not only their vertices. It reaches a pole for a polygon around that pole, and its `xmin` is above its `xmax` when it crosses the antimeridian, as the Parquet format defines. It has no bounds for Z and M. The Parquet options `parquet.column.statistics.enabled` and `parquet.column.statistics.enabled#<column_name>` turn these statistics off with the value `false`, as they do for the statistics of the Parquet library. An encrypted file gets none.
+
 The CRS of a geography column follows the rules of a geometry column, and `geoparquet.crs` and `geoparquet.crs.<column_name>` apply to it as well. There is one difference on Spark 4.1: a geography without an SRID is written as OGC:CRS84, and so is a column without any geography in the file.
 
 The `GEOGRAPHY` logical type takes a geographic CRS, with longitudes from -180 to 180 and latitudes from -90 to 90. Sedona's own geography type on Spark 4.1 takes any SRID and any coordinates, so a write fails for a geography column whose CRS is a projected one, and for a geography outside these bounds.

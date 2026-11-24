@@ -348,6 +348,8 @@ Sedona 必须在写出第一行之前知道 CRS，因此会把第一个几何对
 
 地理列以 WKB 存入边为球面（spherical）的 `GEOGRAPHY` 逻辑类型，GeoParquet 元数据中该列带有 `"edges": "spherical"`。文件可以只有地理列而没有几何列。Sedona 不为地理列写出 `bbox`，因为 GeoParquet 元数据中的 `bbox` 是平面的。
 
+地理列的行组同样带有地理空间统计信息。Parquet 库没有针对地理列的算法，因此由 Sedona 计算：几何类型，以及以经纬度表示的边界框。该边界框覆盖地理对象在球面上的边，而不仅是顶点。多边形包围极点时，边界框延伸到该极点；跨越 180° 经线时，其 `xmin` 大于 `xmax`，与 Parquet 格式的定义一致。边界框不含 Z 和 M 的范围。把 Parquet 选项 `parquet.column.statistics.enabled` 或 `parquet.column.statistics.enabled#<column_name>` 设为 `false` 即可关闭这些统计信息，与关闭 Parquet 库自身的统计信息相同。加密文件不带这些统计信息。
+
 地理列的 CRS 遵循几何列的规则，`geoparquet.crs` 和 `geoparquet.crs.<column_name>` 同样适用。在 Spark 4.1 上有一点不同：没有 SRID 的地理对象按 OGC:CRS84 写出，文件中没有任何地理对象的列也是如此。
 
 `GEOGRAPHY` 逻辑类型要求使用地理 CRS，经度范围为 -180 到 180，纬度范围为 -90 到 90。Spark 4.1 上 Sedona 自有的地理类型接受任意 SRID 和任意坐标，因此如果地理列的 CRS 是投影 CRS，或者某个地理对象超出上述范围，写入会失败。
