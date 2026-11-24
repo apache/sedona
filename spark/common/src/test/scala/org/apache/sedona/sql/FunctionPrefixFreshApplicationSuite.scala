@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql
 
+import org.apache.sedona.spark.SedonaContext
 import org.apache.sedona.sql.UDF.SedonaFunctionNames
 import org.apache.sedona.viz.sql.SedonaVizExtensions
 import org.apache.spark.sql.{SparkSession, SparkSessionExtensions}
@@ -37,7 +38,8 @@ import scala.collection.JavaConverters._
  * and the names that session has Sedona's functions under after it.
  *
  * Arguments: how the extension is loaded ("withExtensions" or "conf"), the extension's class
- * name, and the prefix the session asks for before its first query ("-" for none).
+ * name, the prefix the session asks for before its first query ("-" for none), and "create" if
+ * the application calls SedonaContext.create before that query ("-" if not).
  */
 object FunctionPrefixFreshApplication {
   val Prefix = "chart_"
@@ -52,7 +54,7 @@ object FunctionPrefixFreshApplication {
       .exists(c.startsWith)
 
   def main(args: Array[String]): Unit = {
-    val Array(how, extensionClass, sessionAsks) = args
+    val Array(how, extensionClass, sessionAsks, create) = args
     // The extension comes first, as in an application that builds its session in one chain: at
     // this point the builder has no master, no application name and no prefix yet.
     val builder = how match {
@@ -76,6 +78,8 @@ object FunctionPrefixFreshApplication {
       if (sessionAsks != "-") spark.conf.set(SedonaFunctionNames.PrefixConfigKey, sessionAsks)
       // What a DataFrame column built now would carry.
       val prefixBefore = SedonaFunctionNames.effectivePrefix
+      // Spark has not built the session's check rules yet, so the extension has not registered.
+      if (create == "create") SedonaContext.create(spark)
       // The first analysis of the session: Spark builds the check rules, and Sedona registers.
       spark.sql("SELECT 1").collect()
       val registry = spark.sessionState.functionRegistry
@@ -163,7 +167,7 @@ class FunctionPrefixFreshApplicationSuite extends AnyFunSpec {
   describe("A Sedona extension in a new Spark application with a function name prefix") {
     it("registers only chart_ST_TileName when the builder installs SedonaVizExtensions") {
       val names =
-        sedonaFunctionNames(Nil, "withExtensions", classOf[SedonaVizExtensions].getName, "-")
+        sedonaFunctionNames(Nil, "withExtensions", classOf[SedonaVizExtensions].getName, "-", "-")
       assertOnlyPrefixed(names, "st_tilename")
       assert(names.filter(_.endsWith("st_tilename")) == Seq(prefix + "st_tilename"))
     }
@@ -177,6 +181,7 @@ class FunctionPrefixFreshApplicationSuite extends AnyFunSpec {
           submitted,
           "withExtensions",
           classOf[SedonaVizExtensions].getName,
+          "-",
           "-")
       assertOnlyPrefixed(names, "st_tilename")
       assert(names.filter(_.endsWith("st_tilename")) == Seq(prefix + "st_tilename"))
@@ -190,7 +195,7 @@ class FunctionPrefixFreshApplicationSuite extends AnyFunSpec {
           withClue(extension) {
             // The application names the extension in spark.sql.extensions, so its config
             // decides from the start, also for a column built before the first query.
-            val (prefixBefore, names) = runApplication(Nil, "conf", extension, "other_")
+            val (prefixBefore, names) = runApplication(Nil, "conf", extension, "other_", "-")
             assert(prefixBefore == prefix)
             assertOnlyPrefixed(names, expected)
           }
@@ -198,10 +203,25 @@ class FunctionPrefixFreshApplicationSuite extends AnyFunSpec {
     }
 
     it("keeps the application's prefix when the builder installs the extension too") {
-      // Spark says that the session has the extension only when it builds the session's check
-      // rules, at the first query. From then on the application's config decides.
-      val (_, names) =
-        runApplication(Nil, "withExtensions", classOf[SedonaVizExtensions].getName, "other_")
+      val (prefixBefore, names) =
+        runApplication(Nil, "withExtensions", classOf[SedonaVizExtensions].getName, "other_", "-")
+      assert(prefixBefore == prefix)
+      assertOnlyPrefixed(names, "st_tilename")
+    }
+
+    it("keeps the application's prefix when SedonaContext.create runs before the first query") {
+      // The builder installed the extension, the session asks for another prefix, and the
+      // application registers by hand before Spark has called the extension for the session.
+      // That registration is the first in the JVM, so it fixes the prefix.
+      val (prefixBefore, names) =
+        runApplication(
+          Nil,
+          "withExtensions",
+          classOf[SedonaVizExtensions].getName,
+          "other_",
+          "create")
+      assert(prefixBefore == prefix)
+      assertOnlyPrefixed(names, "st_point")
       assertOnlyPrefixed(names, "st_tilename")
     }
   }

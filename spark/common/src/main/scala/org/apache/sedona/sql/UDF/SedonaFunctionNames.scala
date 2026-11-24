@@ -19,7 +19,7 @@
 package org.apache.sedona.sql.UDF
 
 import org.apache.spark.SparkContext
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{SparkSession, SparkSessionExtensions}
 import org.slf4j.{Logger, LoggerFactory}
 
 import java.lang.ref.WeakReference
@@ -67,6 +67,12 @@ object SedonaFunctionNames {
   // the key's value in its Spark config ("" without the key). While that context runs, the value
   // decides the prefix, whatever a session asks for.
   @volatile private var application: Option[(WeakReference[SparkContext], String)] = None
+  // The SparkSessionExtensions objects Spark handed to a Sedona extension. A session that has
+  // one of them has a Sedona extension, whether the application names it in
+  // spark.sql.extensions or its builder installed it with withExtensions. Spark hands the
+  // object over before the session exists, and the sessions of an application share it.
+  private val extendedBySedona =
+    Collections.synchronizedMap(new WeakHashMap[SparkSessionExtensions, java.lang.Boolean]())
   private val warnedValues = mutable.Set[String]()
   // Spark Connect sessions and the prefix each one's server reported. Asking costs round trips
   // to the server, and the server's prefix does not change, so each session asks once.
@@ -86,13 +92,31 @@ object SedonaFunctionNames {
     }
 
   /**
+   * Records that Spark loaded a Sedona extension into `extensions`. The Sedona extensions call
+   * this when Spark loads them. The Spark config of the application decides the prefix for every
+   * session that has `extensions`, from the start: also for a SedonaContext.create that runs
+   * before the first analysis of the session, when the extension has not registered yet.
+   *
+   * This asks for no SparkContext. A builder can load an extension before the application's
+   * SparkContext exists, and asking for one then would start it without the builder's options.
+   */
+  private[sedona] def extensionLoaded(extensions: SparkSessionExtensions): Unit =
+    extendedBySedona.put(extensions, java.lang.Boolean.TRUE)
+
+  // Whether Spark loaded a Sedona extension into the extensions of `sparkSession`, a classic
+  // session. Spark keeps that object in a member that is not part of its public API, and whose
+  // class differs between Spark 3.5 and 4, so it is read by name. Where it cannot be read, the
+  // answer is no, and the other two signs of an extension below still hold.
+  private def hasSedonaExtension(sparkSession: SparkSession): Boolean =
+    Try(sparkSession.getClass.getMethod("extensions").invoke(sparkSession)).toOption
+      .exists(extensions => extendedBySedona.containsKey(extensions))
+
+  /**
    * Makes the Spark config of the application that `context` runs decide the prefix. The Sedona
    * extensions call this with the SparkContext of each session they register for, before they
-   * register. They do not call it when Spark loads them: a builder can load an extension before
-   * the application's SparkContext exists, and asking for a SparkContext then would start one
-   * without the builder's options. As an extension Sedona registers for every session, also for
-   * the session of a Spark Connect client, and a client must not choose the names for the whole
-   * server by setting the key on its own session.
+   * register. As an extension Sedona registers for every session, also for the session of a Spark
+   * Connect client, and a client must not choose the names for the whole server by setting the
+   * key on its own session.
    */
   private[sedona] def useApplicationConf(context: SparkContext): Unit =
     useApplicationConf(context, context.getConf.get(PrefixConfigKey, ""))
@@ -109,16 +133,19 @@ object SedonaFunctionNames {
     }
 
   // The prefix in the Spark config of the application that runs `sparkSession`, a classic
-  // session, if that config decides: a Sedona extension registered for one of the application's
-  // sessions, or the application names one in spark.sql.extensions. The second says so before
-  // the first analysis of a session. An extension that a builder installs with withExtensions
-  // is known only from the first.
+  // session, if that config decides. It does when a Sedona extension registered for one of the
+  // application's sessions, when Spark loaded one into the extensions of `sparkSession`, or
+  // when the application names one in spark.sql.extensions. The last two say so before the
+  // first analysis of a session, so before the extension registers.
   private def applicationPrefix(sparkSession: SparkSession): Option[String] =
     applicationPrefix.orElse {
       val conf = sparkSession.sparkContext.getConf
-      val extensions = conf.get(ExtensionsConfigKey, "").split(",").map(_.trim)
-      if (extensions.exists(ExtensionClassNames.contains)) Some(conf.get(PrefixConfigKey, ""))
-      else None
+      def named = conf.get(ExtensionsConfigKey, "").split(",").map(_.trim)
+      if (hasSedonaExtension(sparkSession) || named.exists(ExtensionClassNames.contains)) {
+        Some(conf.get(PrefixConfigKey, ""))
+      } else {
+        None
+      }
     }
 
   // The prefix `sparkSession` asks for: the application's if that decides, else the session's.
@@ -196,10 +223,7 @@ object SedonaFunctionNames {
    * Otherwise the fixed prefix. Until one is fixed: the key's value in the application's Spark
    * config if the application loads a Sedona extension, else in the conf of that session, if the
    * value is valid; otherwise "". Reading it fixes nothing. So a DataFrame column built before
-   * the first registrator runs already carries the name Sedona registers. An extension that a
-   * builder installed with withExtensions is known only once it registers, at the first analysis
-   * of a session. Before that, the conf of the session is read, and it starts from the
-   * application's config.
+   * the first registrator runs already carries the name Sedona registers.
    *
    * Public so Python can read it over py4j.
    */
@@ -311,6 +335,7 @@ object SedonaFunctionNames {
   private[sedona] def resetForTesting(): Unit = lock.synchronized {
     fixedPrefix = None
     application = None
+    extendedBySedona.clear()
     warnedValues.clear()
     connectPrefixes.clear()
   }

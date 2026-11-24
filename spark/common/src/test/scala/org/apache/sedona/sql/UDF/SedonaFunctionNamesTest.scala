@@ -19,7 +19,7 @@
 package org.apache.sedona.sql.UDF
 
 import org.apache.spark.SparkContext
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{SparkSession, SparkSessionExtensions}
 import org.mockito.Mockito.{mock, when}
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatest.funspec.AnyFunSpec
@@ -168,6 +168,25 @@ class SedonaFunctionNamesTest extends AnyFunSpec with BeforeAndAfterAll with Bef
         assert(e.getMessage.contains("'bad-prefix'"))
         intercept[IllegalArgumentException](SedonaFunctionNames.prefixToDrop(session, Nil))
         assert(SedonaFunctionNames.resolve("ST_Point") == "ST_Point")
+      }
+    }
+    it("takes the application's prefix for a session that Spark loaded a Sedona extension into") {
+      // As after a builder installed the extension with withExtensions: Spark has handed the
+      // extension the SparkSessionExtensions object of the session, and nothing has registered.
+      val extensions = baseSession.getClass
+        .getMethod("extensions")
+        .invoke(baseSession)
+        .asInstanceOf[SparkSessionExtensions]
+      val expected = baseSession.sparkContext.getConf.get(SedonaFunctionNames.PrefixConfigKey, "")
+      withActiveSession(SedonaFunctionNames.PrefixConfigKey -> "other_") {
+        val session = SparkSession.getActiveSession.get
+        assert(SedonaFunctionNames.resolve("ST_Point") == "other_ST_Point")
+        SedonaFunctionNames.extensionLoaded(extensions)
+        assert(SedonaFunctionNames.resolve("ST_Point") == expected + "ST_Point")
+        assert(SedonaFunctionNames.prefixToDrop(session, Nil) == expected)
+        // As SedonaContext.create before the first analysis of the session.
+        assert(SedonaFunctionNames.initialize(session, Nil) == expected)
+        assert(SedonaFunctionNames.effectivePrefix == expected)
       }
     }
     it("lets a session decide again once the application that loaded the extension stopped") {

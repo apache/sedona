@@ -24,11 +24,13 @@ import org.apache.spark.sql.SparkSessionExtensions
 
 class SedonaVizExtensions extends (SparkSessionExtensions => Unit) {
   def apply(e: SparkSessionExtensions): Unit = {
+    // As in SedonaSqlExtensions: the check rule below registers for every session, so the
+    // function name prefix comes from the Spark config of the application that runs the
+    // session. apply must not ask for a SparkContext to read it: a builder can call apply
+    // before the application's SparkContext exists. So apply only records `e`, and the config
+    // is read from the SparkContext of the session.
+    SedonaFunctionNames.extensionLoaded(e)
     e.injectCheckRule(spark => {
-      // As in SedonaSqlExtensions: this registers for every session, so the function name
-      // prefix comes from the Spark config of the application that runs the session. The
-      // SparkContext is the session's. apply must not ask for one: a builder can call it before
-      // the application's SparkContext exists.
       SedonaFunctionNames.useApplicationConf(spark.sparkContext)
       SedonaVizRegistrator.registerAll(spark)
       _ => ()
