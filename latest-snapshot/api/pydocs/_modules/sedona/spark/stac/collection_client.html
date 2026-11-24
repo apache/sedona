@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.stac.collection_client &mdash; Apache Sedona Python Documentation</title>
@@ -242,6 +241,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">SparkSession</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseGeometry</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">st_constructors</span> <span class="k">as</span> <span class="n">stc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">st_predicates</span> <span class="k">as</span> <span class="n">stp</span>
+
 <span class="n">_CLIENT_ITEMS_LIMIT_PER_REQUEST</span> <span class="o">=</span> <span class="mi">200</span>
 
 
@@ -390,20 +392,17 @@
                         <span class="p">):</span>
                             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Invalid geometry string"</span><span class="p">)</span>
                         <span class="n">geom_wkt</span> <span class="o">=</span> <span class="n">geom_str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-
-                    <span class="c1"># Use Spark SQL functions with safe literal values</span>
-                    <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">expr</span>
-
-                    <span class="n">geometry_conditions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="n">expr</span><span class="p">(</span>
-                            <span class="s2">"st_intersects(ST_GeomFromText('</span><span class="si">{}</span><span class="s2">'), geometry)"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                                <span class="n">geom_wkt</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"'"</span><span class="p">,</span> <span class="s2">"''"</span><span class="p">)</span>
-                            <span class="p">)</span>
-                        <span class="p">)</span>
-                    <span class="p">)</span>
                 <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
                     <span class="c1"># Skip invalid geometries rather than failing</span>
                     <span class="k">continue</span>
+
+                <span class="c1"># Outside the try: a failure to build the filter is not invalid input, and</span>
+                <span class="c1"># skipping it would return every item.</span>
+                <span class="n">geometry_conditions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">stp</span><span class="o">.</span><span class="n">ST_Intersects</span><span class="p">(</span>
+                        <span class="n">stc</span><span class="o">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">geom_wkt</span><span class="p">)),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">geometry_conditions</span><span class="p">:</span>
                 <span class="c1"># Combine conditions with OR using reduce</span>
@@ -449,15 +448,16 @@
                         <span class="nb">float</span><span class="p">(</span><span class="n">min_lat</span><span class="p">),</span>
                     <span class="p">)</span>
 
-                    <span class="n">bbox_conditions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="n">F</span><span class="o">.</span><span class="n">expr</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">"st_intersects(ST_GeomFromText('</span><span class="si">{</span><span class="n">polygon_wkt</span><span class="si">}</span><span class="s2">'), geometry)"</span>
-                        <span class="p">)</span>
-                    <span class="p">)</span>
-
                 <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">):</span>
                     <span class="c1"># Skip invalid bbox items rather than failing</span>
                     <span class="k">continue</span>
+
+                <span class="c1"># Outside the try, as for a geometry above.</span>
+                <span class="n">bbox_conditions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">stp</span><span class="o">.</span><span class="n">ST_Intersects</span><span class="p">(</span>
+                        <span class="n">stc</span><span class="o">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">polygon_wkt</span><span class="p">)),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">bbox_conditions</span><span class="p">:</span>
                 <span class="c1"># Combine conditions with OR using reduce</span>

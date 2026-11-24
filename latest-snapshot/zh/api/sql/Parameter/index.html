@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5866,6 +5865,12 @@
 <td style="text-align: left;"><code>true</code></td>
 <td style="text-align: left;"><code>true</code>, <code>false</code></td>
 </tr>
+<tr>
+<td style="text-align: left;"><code>spark.sedona.function.prefix</code></td>
+<td style="text-align: left;">为 Sedona 注册的每个 SQL 函数名添加的前缀。设置为 <code>sedona_</code> 时，<code>ST_Buffer</code> 只会注册为 <code>sedona_ST_Buffer</code>，不带前缀的原名留给平台使用。请在集群或服务端的 Spark 配置中设置：同一个 JVM 中第一个 Sedona 会话会确定该 JVM 的取值。通过 <code>spark.sql.extensions</code> 加载 Sedona 时，Sedona 只从该配置读取取值，并忽略在会话上设置的值。自 v2.0.0 起</td>
+<td style="text-align: left;"><em>（为空：不加前缀）</em></td>
+<td style="text-align: left;">字母、数字和下划线，且以字母或下划线开头。如果加上前缀后某个 Sedona 函数名会变成另一个 Sedona 函数名，Sedona 会拒绝该前缀。例如 <code>ST_</code> 会被拒绝：<code>GeometryType</code> 会变成 <code>ST_GeometryType</code>。</td>
+</tr>
 </tbody>
 </table>
 <h2 id="join">连接（Join）相关参数<a class="headerlink" href="#join" title="Permanent link">&para;</a></h2>
@@ -6056,7 +6061,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年11月21日 07:09:31 UTC">2026年11月21日 07:09:31</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年11月24日 08:12:00 UTC">2026年11月24日 08:12:00</span>
   </span>
 
     

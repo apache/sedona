@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.tools.sjoin_nearest &mdash; Apache Sedona Python Documentation</title>
@@ -244,6 +243,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoDataFrame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._crs</span><span class="w"> </span><span class="kn">import</span> <span class="n">warn_crs_mismatch</span><span class="p">,</span> <span class="n">with_crs_metadata</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">st_functions</span> <span class="k">as</span> <span class="n">stf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql._function_names</span><span class="w"> </span><span class="kn">import</span> <span class="n">call_sedona_function_by_name</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_geometry_type</span>
 
 
@@ -429,7 +429,13 @@
     <span class="k">if</span> <span class="n">left_has_points</span> <span class="ow">and</span> <span class="n">right_has_points</span><span class="p">:</span>
         <span class="n">joined</span> <span class="o">=</span> <span class="n">left</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="n">right</span><span class="p">,</span>
-            <span class="n">F</span><span class="o">.</span><span class="n">expr</span><span class="p">(</span><span class="sa">f</span><span class="s2">"ST_KNN(</span><span class="si">{</span><span class="n">left_geometry</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">right_geometry</span><span class="si">}</span><span class="s2">, 1, false)"</span><span class="p">),</span>
+            <span class="n">call_sedona_function_by_name</span><span class="p">(</span>
+                <span class="s2">"ST_KNN"</span><span class="p">,</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_geometry</span><span class="p">),</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_geometry</span><span class="p">),</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">False</span><span class="p">),</span>
+            <span class="p">),</span>
             <span class="s2">"inner"</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>

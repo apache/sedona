@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -277,6 +276,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">st_constructors</span> <span class="k">as</span> <span class="n">stc</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">st_functions</span> <span class="k">as</span> <span class="n">stf</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">st_predicates</span> <span class="k">as</span> <span class="n">stp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql._function_names</span><span class="w"> </span><span class="kn">import</span> <span class="n">call_sedona_function_by_name</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">Column</span> <span class="k">as</span> <span class="n">PySparkColumn</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">functions</span> <span class="k">as</span> <span class="n">F</span>
@@ -1692,9 +1692,11 @@
         <span class="n">diagnostics</span> <span class="o">=</span> <span class="n">diagnostics</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="n">gap_width_name</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">gap_width</span><span class="p">))</span>
         <span class="n">diagnostics</span> <span class="o">=</span> <span class="n">diagnostics</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span>
             <span class="n">diagnostic_edges_name</span><span class="p">,</span>
-            <span class="n">F</span><span class="o">.</span><span class="n">expr</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">"__sedona_internal_coverage_invalid_edges_for_target("</span>
-                <span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">target_geometry_name</span><span class="si">}</span><span class="s2">`, `</span><span class="si">{</span><span class="n">neighbors_name</span><span class="si">}</span><span class="s2">`, `</span><span class="si">{</span><span class="n">gap_width_name</span><span class="si">}</span><span class="s2">`)"</span>
+            <span class="n">call_sedona_function_by_name</span><span class="p">(</span>
+                <span class="s2">"__sedona_internal_coverage_invalid_edges_for_target"</span><span class="p">,</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">target_geometry_name</span><span class="p">),</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">neighbors_name</span><span class="p">),</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">gap_width_name</span><span class="p">),</span>
             <span class="p">),</span>
         <span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
             <span class="n">target_geometry_name</span><span class="p">,</span>
@@ -1719,9 +1721,11 @@
         <span class="n">validation_rows</span> <span class="o">=</span> <span class="n">validation_rows</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span>
             <span class="n">neighbors_name</span><span class="p">,</span> <span class="n">empty_neighbors</span>
         <span class="p">)</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="n">gap_width_name</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">gap_width</span><span class="p">))</span>
-        <span class="n">unmatched_edges</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">expr</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">"__sedona_internal_coverage_invalid_edges_for_target("</span>
-            <span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">geometry_name</span><span class="si">}</span><span class="s2">`, `</span><span class="si">{</span><span class="n">neighbors_name</span><span class="si">}</span><span class="s2">`, `</span><span class="si">{</span><span class="n">gap_width_name</span><span class="si">}</span><span class="s2">`)"</span>
+        <span class="n">unmatched_edges</span> <span class="o">=</span> <span class="n">call_sedona_function_by_name</span><span class="p">(</span>
+            <span class="s2">"__sedona_internal_coverage_invalid_edges_for_target"</span><span class="p">,</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">geometry_name</span><span class="p">),</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">neighbors_name</span><span class="p">),</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">gap_width_name</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="n">validation_rows</span> <span class="o">=</span> <span class="n">validation_rows</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span>
             <span class="n">invalid_edges_name</span><span class="p">,</span>

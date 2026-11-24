@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5866,6 +5865,12 @@
 <td style="text-align: left;"><code>true</code></td>
 <td style="text-align: left;"><code>true</code>, <code>false</code></td>
 </tr>
+<tr>
+<td style="text-align: left;"><code>spark.sedona.function.prefix</code></td>
+<td style="text-align: left;">Prefix added to the name of every SQL function that Sedona registers. With <code>sedona_</code>, <code>ST_Buffer</code> is registered as <code>sedona_ST_Buffer</code> only, and the plain name is left to the platform. Set it in the cluster or server Spark config: the first Sedona session in a JVM fixes the value for that JVM. When Sedona is loaded through <code>spark.sql.extensions</code>, Sedona reads the value from that config only and ignores a value set on a session. Since v2.0.0</td>
+<td style="text-align: left;"><em>(empty: no prefix)</em></td>
+<td style="text-align: left;">Letters, digits and underscore, starting with a letter or underscore. Sedona rejects a prefix under which one Sedona function name would become another. For example, <code>ST_</code> is rejected: <code>GeometryType</code> would become <code>ST_GeometryType</code>.</td>
+</tr>
 </tbody>
 </table>
 <h2 id="join-parameters">Join Parameters<a class="headerlink" href="#join-parameters" title="Permanent link">&para;</a></h2>
@@ -6056,7 +6061,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="November 21, 2026 07:09:31 UTC">November 21, 2026 07:09:31</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="November 24, 2026 08:12:00 UTC">November 24, 2026 08:12:00</span>
   </span>
 
     
