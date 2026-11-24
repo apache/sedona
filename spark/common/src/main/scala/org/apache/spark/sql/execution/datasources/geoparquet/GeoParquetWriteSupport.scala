@@ -1135,7 +1135,9 @@ object GeoParquetWriteSupport {
    */
   def requireGeometryColumn(schema: StructType, version: String = VERSION): Unit = {
     val geospatialTypes = GeoParquetMetaData.usesGeospatialTypes(version)
-    schema.find(_.dataType.existsRecursively(SpatialTypeSupport.isNativeGeography)).foreach {
+    // Every field with a native geography, not only the first one: a column that passes here
+    // without a check is written with the CRS of an option, whatever SRID its geographies have
+    schema.filter(_.dataType.existsRecursively(SpatialTypeSupport.isNativeGeography)).foreach {
       field =>
         if (!geospatialTypes) {
           throw new IllegalArgumentException(

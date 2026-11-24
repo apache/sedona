@@ -1175,6 +1175,42 @@ class GeoParquetGeographySuite extends TestBaseScala {
             assert(messages(error).contains("GEOGRAPHY(<srid>)"))
           }
         }
+
+        // Every native geography column is checked, not only the first one of the schema. A CRS
+        // option states the CRS of the file, so without the check the geographies of such a
+        // column are read back with another SRID than they were written with.
+        Seq(
+          "without a CRS option" -> Seq.empty[(String, String)],
+          "with a CRS option" -> Seq("geoparquet.crs.other" -> "")).foreach {
+          case (name, options) =>
+            it(
+              "rejects a native geography column whose type names no SRID, after one whose type " +
+                s"names one ($name)") {
+              withDirectory { directory =>
+                val error = intercept[Exception] {
+                  writeVersion2(
+                    sparkSession.sql(
+                      s"""SELECT 1 AS id, ST_GeogFromWKT('$line', 4326) AS geography,
+                       |CAST(ST_GeogFromWKT('$line', 4269) AS GEOGRAPHY(ANY)) AS other""".stripMargin),
+                    new File(directory, "data").getPath,
+                    options: _*)
+                }
+                assert(messages(error).contains("GEOGRAPHY(<srid>)"))
+              }
+            }
+        }
+
+        it("rejects a native geography that is nested, after a geography column") {
+          withDirectory { directory =>
+            val error = intercept[Exception] {
+              writeVersion2(
+                sparkSession.sql(s"""SELECT 1 AS id, ST_GeogFromWKT('$line', 4326) AS geography,
+                     |named_struct('geography', ST_GeogFromWKT('$line', 4326)) AS holder""".stripMargin),
+                new File(directory, "data").getPath)
+            }
+            assert(messages(error).contains("at the root of the schema"))
+          }
+        }
       } else {
         // Sedona's own geography type has an SRID on each value, and a GEOGRAPHY column has one
         // CRS. A geography without an SRID is in OGC:CRS84, as a geography that Sedona
