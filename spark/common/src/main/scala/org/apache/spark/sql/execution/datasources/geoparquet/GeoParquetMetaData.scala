@@ -46,13 +46,17 @@ import org.json4s.{DefaultFormats, Extraction, JArray, JField, JInt, JNothing, J
  *   null, Some(value) if the crs is present and not null.
  * @param covering
  *   Object containing bounding box column names to help accelerate spatial data retrieval
+ * @param edges
+ *   How the edges of the geometries are interpreted. None stands for planar edges, which a
+ *   geometry column has. A geography column has "spherical" edges.
  */
 case class GeometryFieldMetaData(
     encoding: String,
     geometryTypes: Seq[String],
     bbox: Option[Seq[Double]],
     crs: Option[JValue] = None,
-    covering: Option[Covering] = None)
+    covering: Option[Covering] = None,
+    edges: Option[String] = None)
 
 case class Covering(bbox: CoveringBBox)
 
@@ -217,6 +221,37 @@ object GeoParquetMetaData {
         sridIdentifier(projjson).map(_._2).getOrElse(0)
     }
   }
+
+  /**
+   * Whether the CRS of a PROJJSON object is a geographic one, with longitudes and latitudes as
+   * its coordinates. The `type` of the object says so. An unknown CRS, which is null, and an
+   * object without a type that this method knows are taken for geographic ones: there is nothing
+   * to tell that they are not.
+   */
+  private[geoparquet] def isGeographicCrs(projjson: JValue): Boolean = projjson \ "type" match {
+    case JString("ProjectedCRS") | JString("DerivedProjectedCRS") | JString("EngineeringCRS") |
+        JString("VerticalCRS") | JString("TemporalCRS") | JString("ParametricCRS") =>
+      false
+    case JString("GeodeticCRS") =>
+      // Geocentric coordinates are distances from the centre of the earth
+      projjson \ "coordinate_system" \ "subtype" != JString("Cartesian")
+    case JString("BoundCRS") => isGeographicCrs(projjson \ "source_crs")
+    case JString("CompoundCRS") =>
+      projjson \ "components" match {
+        case JArray(horizontal :: _) => isGeographicCrs(horizontal)
+        case _ => true
+      }
+    case _ => true
+  }
+
+  /** What a message calls the CRS of a PROJJSON object: its name, or else its identifier. */
+  private[geoparquet] def crsName(projjson: JValue): String =
+    (projjson \ "name", projjson \ "id" \ "authority", projjson \ "id" \ "code") match {
+      case (JString(name), _, _) => name
+      case (_, JString(authority), JInt(code)) => s"$authority:$code"
+      case (_, JString(authority), JString(code)) => s"$authority:$code"
+      case _ => "a CRS without a name"
+    }
 
   /**
    * The identifier of a PROJJSON object that gives its SRID, together with that SRID: `id` when

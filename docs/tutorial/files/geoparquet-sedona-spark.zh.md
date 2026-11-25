@@ -179,6 +179,8 @@ df = (
 
 因上述原因被 Sedona 拒绝的文件并不是损坏的文件。即使设置了 `ignoreCorruptFiles` 选项，读取也会失败，而不会跳过该文件。
 
+同一数据集中的文件不必以相同的方式存储地理列。某个文件的该列中没有任何地理对象时，无论它自身声明了什么 CRS，都采用其他含有地理对象的文件的 CRS。如果某个文件把该列按 Sedona 自有的地理类型存储（GeoParquet 1.1 写入就是如此），它也可以与含有 `GEOGRAPHY` 列的文件一起读取。在 Spark 4.2 及更高版本上，这类文件中没有 SRID 的地理对象的 SRID 为 4326。
+
 对地理列的过滤条件，Sedona 会逐行计算，不会使用文件的边界框，因为这些边界框是平面的。
 
 Spark 3.5 和 4.0 自带的 Parquet 库早于这些逻辑类型，无法打开此类文件。
@@ -343,6 +345,14 @@ Sedona 的 `geoparquet` 读取器会把 GeoParquet 2.0 文件的几何列读取�
 Sedona 必须在写出第一行之前知道 CRS，因此会把第一个几何对象之前的行暂存在内存中，每个文件最多 16 MB。`geoparquet.srid.lookahead.bytes` 可以修改这一上限。到达上限时仍未出现几何对象的列会以未知 CRS 写出，之后如果出现带 SRID 的几何对象，写出会失败。
 
 设置 `geoparquet.crs` 或 `geoparquet.crs.<column_name>` 可以自行指定 CRS。此时 Sedona 按给定值写出，不再与几何对象的 SRID 比较。
+
+地理列以 WKB 存入边为球面（spherical）的 `GEOGRAPHY` 逻辑类型，GeoParquet 元数据中该列带有 `"edges": "spherical"`。文件可以只有地理列而没有几何列。Sedona 不为地理列写出 `bbox`，因为 GeoParquet 元数据中的 `bbox` 是平面的。
+
+地理列的 CRS 遵循几何列的规则，`geoparquet.crs` 和 `geoparquet.crs.<column_name>` 同样适用。在 Spark 4.1 上有一点不同：没有 SRID 的地理对象按 OGC:CRS84 写出，文件中没有任何地理对象的列也是如此。
+
+`GEOGRAPHY` 逻辑类型要求使用地理 CRS，经度范围为 -180 到 180，纬度范围为 -90 到 90。Spark 4.1 上 Sedona 自有的地理类型接受任意 SRID 和任意坐标，因此如果地理列的 CRS 是投影 CRS，或者某个地理对象超出上述范围，写入会失败。
+
+GeoParquet 1.1 文件没有地理类型。在 Spark 4.1 及更早版本上，Sedona 会把自己的地理类型的列以只有 Sedona 能读回的形式存入这样的文件。在 Spark 4.2 及更高版本上，把 Spark 原生地理类型的列写入 GeoParquet 1.1 文件会失败，请为此把 `geoparquet.version` 设为 `2.0.0`。
 
 Spark 3.5 和 4.0 自带的 Parquet 库早于 `GEOMETRY` 逻辑类型。Sedona 在这些版本上写出 GeoParquet 1.1，并拒绝把 `geoparquet.version` 设为 `2.0.0`。
 

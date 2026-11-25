@@ -61,10 +61,18 @@ object GeographySerializer {
     WKBGeography.fromWKB(Arrays.copyOfRange(value, Integer.BYTES, value.length), readSRID(value))
   }
 
+  /** Where the WKB of a serialized geography begins, after its SRID. */
+  val WKB_OFFSET: Int = Integer.BYTES
+
+  /** The WKB and the SRID of a serialized geography. The WKB is a copy that the caller owns. */
+  def wkbAndSrid(value: Array[Byte]): (Array[Byte], Int) =
+    (Arrays.copyOfRange(value, WKB_OFFSET, value.length), readSRID(value))
+
   def readSRID(value: Array[Byte]): Int = {
     if (value.length < Integer.BYTES) {
       throw new IllegalArgumentException("Truncated spatial SRID header")
     }
-    ByteBuffer.wrap(value).order(ByteOrder.LITTLE_ENDIAN).getInt
+    // Read without a buffer object: a writer and a reader call this for every value
+    (value(0) & 0xff) | (value(1) & 0xff) << 8 | (value(2) & 0xff) << 16 | (value(3) & 0xff) << 24
   }
 }

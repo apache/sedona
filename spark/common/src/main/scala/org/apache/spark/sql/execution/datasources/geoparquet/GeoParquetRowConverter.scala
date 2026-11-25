@@ -183,7 +183,11 @@ private[geoparquet] class GeoParquetRowConverter(
             "of its file and cannot be read as a geography")
       }
       // Converted field value should be set to the `fieldIndex`-th cell of `currentRow`
-      newConverter(parquetField, catalystField.dataType, new RowUpdater(currentRow, fieldIndex))
+      newConverter(
+        parquetField,
+        catalystField.dataType,
+        new RowUpdater(currentRow, fieldIndex),
+        column = parquetType.isInstanceOf[MessageType])
     }.toArray
   }
 
@@ -222,7 +226,8 @@ private[geoparquet] class GeoParquetRowConverter(
   private def newConverter(
       parquetType: Type,
       catalystType: DataType,
-      updater: ParentContainerUpdater): Converter with HasParentContainerUpdater = {
+      updater: ParentContainerUpdater,
+      column: Boolean = false): Converter with HasParentContainerUpdater = {
 
     catalystType match {
       case BooleanType | IntegerType | LongType | FloatType | DoubleType | BinaryType =>
@@ -238,7 +243,8 @@ private[geoparquet] class GeoParquetRowConverter(
         // Compute SRID once per column converter, not per row
         val srid = schemaConverter.geometrySrid(
           parquetType,
-          native = SpatialTypeSupport.isNativeGeometry(catalystType))
+          native = SpatialTypeSupport.isNativeGeometry(catalystType),
+          column = column)
         val targetSrid = SpatialTypeSupport.geometrySrid(catalystType)
         // A file states no CRS for a column that it has no geometry in, which fits any SRID.
         // The check for such a column therefore waits for a geometry.
@@ -289,19 +295,24 @@ private[geoparquet] class GeoParquetRowConverter(
       case dt if SpatialTypeSupport.isGeography(dt) =>
         val name = parquetType.getName
         ParquetGeospatialTypes.describe(parquetType) match {
-          case Some(column) if column.isGeography =>
+          case Some(described) if described.isGeography =>
             // Compute SRID once per column converter, not per row
             val srid = schemaConverter.geographySrid(
               parquetType,
-              native = SpatialTypeSupport.isNativeGeography(catalystType))
-            SpatialTypeSupport
-              .geographySrid(catalystType)
-              .foreach(GeoParquetNativeCrs.requireColumnSrid(name, _, srid))
+              native = SpatialTypeSupport.isNativeGeography(catalystType),
+              column = column)
+            // A file states a CRS for a column that it has no geography in, which fits any
+            // SRID. The check therefore waits for a geography.
+            val targetSrid = SpatialTypeSupport.geographySrid(catalystType).getOrElse(srid)
             new ParquetPrimitiveConverter(updater) {
               // The value takes the stored WKB as it is, without a JTS or S2 object in between
-              override def addBinary(value: Binary): Unit =
+              override def addBinary(value: Binary): Unit = {
+                if (targetSrid != srid) {
+                  GeoParquetNativeCrs.requireColumnSrid(name, targetSrid, srid)
+                }
                 this.updater.set(
                   SpatialTypeSupport.geographyFromWkb(value.getBytes, srid, catalystType))
+              }
             }
           case Some(_) =>
             throw new GeoParquetColumnMismatchException(
@@ -318,8 +329,10 @@ private[geoparquet] class GeoParquetRowConverter(
             val targetSrid = SpatialTypeSupport.geographySrid(catalystType)
             new ParquetPrimitiveConverter(updater) {
               override def addBinary(value: Binary): Unit = {
-                val serialized = value.getBytes
-                val srid = GeographySerializer.readSRID(serialized)
+                val (wkb, stored) = GeographySerializer.wkbAndSrid(value.getBytes)
+                // A geography without an SRID is in OGC:CRS84 for the native geography type,
+                // as a write of it to a GEOGRAPHY column states
+                val srid = GeoParquetNativeCrs.geographySrid(stored)
                 val expected = targetSrid match {
                   case Some(target) if target != srid =>
                     Some(s"The column is read with SRID $target")
@@ -330,10 +343,8 @@ private[geoparquet] class GeoParquetRowConverter(
                 expected.foreach { reason =>
                   throw new GeoParquetColumnMismatchException(
                     s"Column '$name' is stored as binary, which is read as values of Sedona's " +
-                      s"own geography type. A value of it states SRID $srid. $reason")
+                      s"own geography type. A value of it states SRID $stored. $reason")
                 }
-                val wkb =
-                  java.util.Arrays.copyOfRange(serialized, Integer.BYTES, serialized.length)
                 this.updater.set(SpatialTypeSupport.geographyFromWkb(wkb, srid, catalystType))
               }
             }
@@ -441,7 +452,8 @@ private[geoparquet] class GeoParquetRowConverter(
       // elements where the element type is the type of the field.
       case t: ArrayType if parquetType.getOriginalType != LIST =>
         if (parquetType.isPrimitive) {
-          new RepeatedPrimitiveConverter(parquetType, t.elementType, updater)
+          // The values of a repeated column are still those of a column of the file
+          new RepeatedPrimitiveConverter(parquetType, t.elementType, updater, column)
         } else {
           new RepeatedGroupConverter(parquetType, t.elementType, updater)
         }
@@ -833,7 +845,8 @@ private[geoparquet] class GeoParquetRowConverter(
   private final class RepeatedPrimitiveConverter(
       parquetType: Type,
       catalystType: DataType,
-      parentUpdater: ParentContainerUpdater)
+      parentUpdater: ParentContainerUpdater,
+      column: Boolean)
       extends PrimitiveConverter
       with RepeatedConverter
       with HasParentContainerUpdater {
@@ -841,7 +854,7 @@ private[geoparquet] class GeoParquetRowConverter(
     val updater: ParentContainerUpdater = newArrayUpdater(parentUpdater)
 
     private[this] val elementConverter: PrimitiveConverter =
-      newConverter(parquetType, catalystType, updater).asPrimitiveConverter()
+      newConverter(parquetType, catalystType, updater, column).asPrimitiveConverter()
 
     override def addBoolean(value: Boolean): Unit = elementConverter.addBoolean(value)
     override def addInt(value: Int): Unit = elementConverter.addInt(value)

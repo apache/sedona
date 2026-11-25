@@ -46,6 +46,14 @@ object SpatialTypeSupport {
   /** The value of a geography column for the geography that `wkb` is the WKB of. */
   def geographyFromWkb(wkb: Array[Byte], srid: Int, dataType: DataType): Any =
     GeographySerializer.serializeWkb(wkb, srid)
+
+  /** This build has no native geography type. */
+  def nativeGeographyWkb(
+      row: SpecializedGetters,
+      ordinal: Int,
+      dataType: DataType): (Array[Byte], Int) =
+    throw new IllegalArgumentException(s"Expected a native geography type, got $dataType")
+
   def geometrySrid(dataType: DataType): Option[Int] = None
 
   /** Spark has a registry of coordinate reference systems only where it has native types. */
