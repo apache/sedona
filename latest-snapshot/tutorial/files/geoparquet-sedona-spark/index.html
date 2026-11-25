@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6344,6 +6343,7 @@ coordinates themselves need to be swapped.</p>
 <p>Sedona has to know the CRS before it writes the first row, so it holds the rows before the first geometry in memory, up to 16 MB per file. <code>geoparquet.srid.lookahead.bytes</code> changes that limit. A column that has shown no geometry by then is written with an unknown CRS, and a later geometry with an SRID fails the write.</p>
 <p>Set <code>geoparquet.crs</code> or <code>geoparquet.crs.&lt;column_name&gt;</code> to state the CRS yourself. Sedona then writes it as given and does not compare it with the SRIDs of the geometries.</p>
 <p>A geography column is stored in the <code>GEOGRAPHY</code> logical type with spherical edges, as WKB, and the GeoParquet metadata lists it with <code>"edges": "spherical"</code>. A file can have geography columns and no geometry column. Sedona writes no <code>bbox</code> for a geography column, because the <code>bbox</code> of the GeoParquet metadata is planar.</p>
+<p>The row groups of a geography column have geospatial statistics as well. The Parquet library has no algorithm for a geography column, so Sedona computes them: the geometry types, and a bounding box in longitude and latitude. The box covers the edges of the geographies on the sphere and not only their vertices. It reaches a pole for a polygon around that pole, and its <code>xmin</code> is above its <code>xmax</code> when it crosses the antimeridian, as the Parquet format defines. It has no bounds for Z and M. The Parquet options <code>parquet.column.statistics.enabled</code> and <code>parquet.column.statistics.enabled#&lt;column_name&gt;</code> turn these statistics off with the value <code>false</code>, as they do for the statistics of the Parquet library. An encrypted file gets none.</p>
 <p>The CRS of a geography column follows the rules of a geometry column, and <code>geoparquet.crs</code> and <code>geoparquet.crs.&lt;column_name&gt;</code> apply to it as well. There is one difference on Spark 4.1: a geography without an SRID is written as OGC:CRS84, and so is a column without any geography in the file.</p>
 <p>The <code>GEOGRAPHY</code> logical type takes a geographic CRS, with longitudes from -180 to 180 and latitudes from -90 to 90. Sedona's own geography type on Spark 4.1 takes any SRID and any coordinates, so a write fails for a geography column whose CRS is a projected one, and for a geography outside these bounds.</p>
 <p>A GeoParquet 1.1 file has no geography type. On Spark 4.1 and earlier, Sedona stores a column of its own geography type there in a form that only Sedona reads back. On Spark 4.2 and later a write of a column of Spark's native geography type to a GeoParquet 1.1 file fails, so set <code>geoparquet.version</code> to <code>2.0.0</code> for it.</p>
@@ -6471,7 +6471,7 @@ ORDER BY geohash
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="November 25, 2026 07:11:16 UTC">November 25, 2026 07:11:16</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="November 25, 2026 21:52:39 UTC">November 25, 2026 21:52:39</span>
   </span>
 
     

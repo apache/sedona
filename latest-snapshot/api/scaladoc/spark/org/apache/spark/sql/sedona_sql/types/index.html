@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.types</title>
@@ -312,6 +311,10 @@
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.spark.sql.sedona_sql">sedona_sql</a></dd></dl></div>
     </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="class" href="GeographyBounds.html" title="The bounding box, in degrees of longitude and latitude, of geographies with edges on the sphere."></a>
+                        <a href="GeographyBounds.html" title="The bounding box, in degrees of longitude and latitude, of geographies with edges on the sphere.">GeographyBounds</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="class" href="GeographyWkbScanner.html" title="Walks the WKB of a geography that a writer is about to store, without an object for it."></a>
                         <a href="GeographyWkbScanner.html" title="Walks the WKB of a geography that a writer is about to store, without an object for it.">GeographyWkbScanner</a>
                       </li><li class="current-entities indented6">
@@ -385,7 +388,30 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="org.apache.spark.sql.sedona_sql.types.GeographyWkbScanner" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+              <ol><li name="org.apache.spark.sql.sedona_sql.types.GeographyBounds" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="GeographyBoundsextendsObject"></a><a id="GeographyBounds:GeographyBounds"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/types/GeographyBounds.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The bounding box, in degrees of longitude and latitude, of geographies with edges on the sphere." href="GeographyBounds.html"><span class="name">GeographyBounds</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">The bounding box, in degrees of longitude and latitude, of geographies with edges on the sphere.</p><div class="fullcomment"><div class="comment cmt"><p>The bounding box, in degrees of longitude and latitude, of geographies with edges on the sphere.
+It is the box that the statistics of a Parquet GEOGRAPHY column hold: it has the edges of the
+geographies and not only their vertices, it reaches a pole for a polygon around that pole, and
+its western bound is above its eastern bound when it crosses the antimeridian.</p><p>A point is added from its coordinates, without an object for it. A line and a ring give their
+vertices to the edge bounder of S2, which has the bounds of the edges between them. Only a ring
+that spans half of all longitudes or more becomes a loop of S2, which tells which side of such a
+ring is the inside and whether a pole is in it.
+</p></div></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.types.GeographyWkbScanner" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="GeographyWkbScannerextendsObject"></a><a id="GeographyWkbScanner:GeographyWkbScanner"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/spark/sql/sedona_sql/types/GeographyWkbScanner.html" title="Permalink">

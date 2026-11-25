@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6317,6 +6316,7 @@
 <p>Sedona 必须在写出第一行之前知道 CRS，因此会把第一个几何对象之前的行暂存在内存中，每个文件最多 16 MB。<code>geoparquet.srid.lookahead.bytes</code> 可以修改这一上限。到达上限时仍未出现几何对象的列会以未知 CRS 写出，之后如果出现带 SRID 的几何对象，写出会失败。</p>
 <p>设置 <code>geoparquet.crs</code> 或 <code>geoparquet.crs.&lt;column_name&gt;</code> 可以自行指定 CRS。此时 Sedona 按给定值写出，不再与几何对象的 SRID 比较。</p>
 <p>地理列以 WKB 存入边为球面（spherical）的 <code>GEOGRAPHY</code> 逻辑类型，GeoParquet 元数据中该列带有 <code>"edges": "spherical"</code>。文件可以只有地理列而没有几何列。Sedona 不为地理列写出 <code>bbox</code>，因为 GeoParquet 元数据中的 <code>bbox</code> 是平面的。</p>
+<p>地理列的行组同样带有地理空间统计信息。Parquet 库没有针对地理列的算法，因此由 Sedona 计算：几何类型，以及以经纬度表示的边界框。该边界框覆盖地理对象在球面上的边，而不仅是顶点。多边形包围极点时，边界框延伸到该极点；跨越 180° 经线时，其 <code>xmin</code> 大于 <code>xmax</code>，与 Parquet 格式的定义一致。边界框不含 Z 和 M 的范围。把 Parquet 选项 <code>parquet.column.statistics.enabled</code> 或 <code>parquet.column.statistics.enabled#&lt;column_name&gt;</code> 设为 <code>false</code> 即可关闭这些统计信息，与关闭 Parquet 库自身的统计信息相同。加密文件不带这些统计信息。</p>
 <p>地理列的 CRS 遵循几何列的规则，<code>geoparquet.crs</code> 和 <code>geoparquet.crs.&lt;column_name&gt;</code> 同样适用。在 Spark 4.1 上有一点不同：没有 SRID 的地理对象按 OGC:CRS84 写出，文件中没有任何地理对象的列也是如此。</p>
 <p><code>GEOGRAPHY</code> 逻辑类型要求使用地理 CRS，经度范围为 -180 到 180，纬度范围为 -90 到 90。Spark 4.1 上 Sedona 自有的地理类型接受任意 SRID 和任意坐标，因此如果地理列的 CRS 是投影 CRS，或者某个地理对象超出上述范围，写入会失败。</p>
 <p>GeoParquet 1.1 文件没有地理类型。在 Spark 4.1 及更早版本上，Sedona 会把自己的地理类型的列以只有 Sedona 能读回的形式存入这样的文件。在 Spark 4.2 及更高版本上，把 Spark 原生地理类型的列写入 GeoParquet 1.1 文件会失败，请为此把 <code>geoparquet.version</code> 设为 <code>2.0.0</code>。</p>
@@ -6438,7 +6438,7 @@ ORDER BY geohash
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年11月25日 07:11:16 UTC">2026年11月25日 07:11:16</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年11月25日 21:52:39 UTC">2026年11月25日 21:52:39</span>
   </span>
 
     
