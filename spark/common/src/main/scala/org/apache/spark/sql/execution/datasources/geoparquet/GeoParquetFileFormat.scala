@@ -179,7 +179,11 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
         // the first row
         val columns =
           GeoParquetWriteSupport.columnsWithoutCrs(dataSchema, context.getConfiguration)
-        if (columns.isEmpty) new ParquetOutputWriter(path, context)
+        // The row groups of its geography columns get statistics from Sedona, which needs the
+        // Parquet writer of the file for them
+        val statistics =
+          GeoParquetWriteSupport.collectsGeographyStatistics(dataSchema, context.getConfiguration)
+        if (columns.isEmpty && !statistics) new ParquetOutputWriter(path, context)
         else new FirstGeometryOutputWriter(path, context, dataSchema, columns)
       }
 

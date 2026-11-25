@@ -126,6 +126,11 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
   private val geographyColumnTypes: mutable.Map[Int, mutable.BitSet] =
     mutable.LinkedHashMap.empty
   private var geographyColumnCrs: Map[Int, Option[JValue]] = Map.empty
+  // The geography columns whose row groups get statistics, by their ordinal, and the statistics
+  // once the writer of the file has given the row groups of the file, see
+  // collectGeographyStatistics. Null without them.
+  private var geographyStatisticsColumns: Seq[Int] = Seq.empty
+  private var geographyStatistics: GeographyRowGroupStatistics = _
   private val geoParquetColumnCoveringMap: mutable.Map[String, Covering] = mutable.Map.empty
   private val generatedCoveringColumnOrdinals: mutable.Map[Int, Int] = mutable.Map.empty
   private var geoParquetCoveringMode: String = GEOPARQUET_COVERING_MODE_AUTO
@@ -262,6 +267,9 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       }
       ordinal -> crs
     }.toMap
+    geographyStatisticsColumns = geographyColumnTypes.keys.toSeq.filter { ordinal =>
+      GeographyRowGroupStatistics.enabled(configuration, schema(ordinal).name)
+    }
     Option(configuration.get(GEOPARQUET_COVERING_KEY)).foreach { coveringColumnName =>
       if (geometryColumnInfoMap.size > 1) {
         throw new IllegalArgumentException(
@@ -324,11 +332,31 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
     new WriteContext(messageType, metadata.asJava)
   }
 
+  /**
+   * Collects the statistics of the row groups of the geography columns, which the Parquet library
+   * does not collect, for the file that `recordWriter` writes with this write support. Called
+   * once the writer exists and before it has a row. Without the call, or when the row groups of
+   * the writer cannot be reached, the file has no such statistics.
+   */
+  private[geoparquet] def collectGeographyStatistics(recordWriter: AnyRef): Unit = {
+    if (geographyStatisticsColumns.nonEmpty) {
+      GeographyRowGroupStatistics.rowGroupsOf(recordWriter).foreach { rowGroups =>
+        val columns = new Array[String](schema.length)
+        geographyStatisticsColumns.foreach(ordinal => columns(ordinal) = schema(ordinal).name)
+        geographyStatistics = new GeographyRowGroupStatistics(columns, rowGroups)
+      }
+    }
+  }
+
   override def prepareForWrite(recordConsumer: RecordConsumer): Unit = {
     this.recordConsumer = recordConsumer
+    // The Parquet library calls this at the start of every row group
+    if (geographyStatistics != null) geographyStatistics.endRowGroup()
   }
 
   override def finalizeWrite(): WriteSupport.FinalizedWriteContext = {
+    // The Parquet library has flushed the last row group, and writes the footer after this
+    if (geographyStatistics != null) geographyStatistics.write()
     val metadata = new util.HashMap[String, String]()
     if (geometryColumnInfoMap.nonEmpty || geographyColumnTypes.nonEmpty) {
       // A geometry column comes first. A file can have geography columns alone.
@@ -387,6 +415,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
     consumeMessage {
       writeFields(row, schema, rootFieldWriters)
     }
+    if (geographyStatistics != null) geographyStatistics.endRow()
   }
 
   private def writeFields(
@@ -675,8 +704,10 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
         }
 
       case dt if rootOrdinal.exists(geographyColumnTypes.contains) =>
-        val column = schema(rootOrdinal.get).name
-        val typeCodes = geographyColumnTypes(rootOrdinal.get)
+        val columnOrdinal = rootOrdinal.get
+        val column = schema(columnOrdinal).name
+        val collectsStatistics = geographyStatisticsColumns.contains(columnOrdinal)
+        val typeCodes = geographyColumnTypes(columnOrdinal)
         val typeSrid = SpatialTypeSupport.geographySrid(dt)
         val firstSrid = firstGeometrySrids.get(rootOrdinal.get).flatten
         val native = SpatialTypeSupport.isNativeGeography(dt)
@@ -707,15 +738,18 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
           // Spark has checked the coordinates of a value of its native geography type. Sedona's
           // own type takes any, and a GEOGRAPHY column takes longitudes and latitudes.
           val scanned = GeographyWkbScanner.scan(bytes, offset, !native, column)
-          if ((scanned & GeographyWkbScanner.NOT_ISO) == 0) {
-            recordConsumer.addBinary(
-              Binary.fromConstantByteArray(bytes, offset, bytes.length - offset))
-          } else {
-            val wkb = java.util.Arrays.copyOfRange(bytes, offset, bytes.length)
-            recordConsumer.addBinary(
-              Binary.fromConstantByteArray(PublicWkbHeaderAdapter.toIsoWkbInPlace(wkb)))
+          val typeCode = scanned & ~GeographyWkbScanner.NOT_ISO
+          if ((scanned & GeographyWkbScanner.NOT_ISO) != 0) {
+            bytes = PublicWkbHeaderAdapter.toIsoWkbInPlace(
+              java.util.Arrays.copyOfRange(bytes, offset, bytes.length))
+            offset = 0
           }
-          typeCodes += scanned & ~GeographyWkbScanner.NOT_ISO
+          recordConsumer.addBinary(
+            Binary.fromConstantByteArray(bytes, offset, bytes.length - offset))
+          typeCodes += typeCode
+          if (collectsStatistics && geographyStatistics != null) {
+            geographyStatistics.add(columnOrdinal, bytes, offset, typeCode)
+          }
         }
 
       case t: UserDefinedType[_] => makeWriter(t.sqlType)
@@ -993,6 +1027,19 @@ object GeoParquetWriteSupport {
       }
       val stated = columnCrsOptions(configuration, candidates.map(_._1.name))
       candidates.collect { case (field, ordinal) if !stated.contains(field.name) => ordinal }
+    }
+  }
+
+  /**
+   * Whether a write of `schema` has geography columns whose row groups get statistics from
+   * Sedona: the geography columns at the root of the schema of a GeoParquet 2 file, unless the
+   * statistics of the Parquet library are turned off for them.
+   */
+  def collectsGeographyStatistics(schema: StructType, configuration: Configuration): Boolean = {
+    val version = Option(configuration.get(GEOPARQUET_VERSION_KEY)).getOrElse(VERSION)
+    GeoParquetMetaData.usesGeospatialTypes(version) && schema.fields.exists { field =>
+      SpatialTypeSupport.isGeography(field.dataType) &&
+      GeographyRowGroupStatistics.enabled(configuration, field.name)
     }
   }
 

@@ -25,6 +25,7 @@ import org.apache.hadoop.fs.Path
 import org.apache.hadoop.mapreduce.{RecordWriter, TaskAttemptContext}
 import org.apache.sedona.sql.utils.GeographySerializer
 import org.apache.parquet.hadoop.ParquetOutputFormat
+import org.apache.parquet.hadoop.api.WriteSupport
 import org.apache.parquet.hadoop.codec.CodecConfig
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{UnsafeProjection, UnsafeRow}
@@ -33,7 +34,8 @@ import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.types.StructType
 
 /**
- * Writes a GeoParquet 2 file that has GeometryUDT or GeographyUDT columns without a CRS option.
+ * Writes a GeoParquet 2 file that has GeometryUDT or GeographyUDT columns without a CRS option,
+ * or geography columns whose row groups get statistics.
  *
  * GeoParquet 2 states the CRS of a geometry column in the Parquet schema, which the Parquet
  * writer needs before the first row. A GeometryUDT column has an SRID on each geometry only. This
@@ -45,7 +47,8 @@ import org.apache.spark.sql.types.StructType
  * bytes. A column that has shown no geometry by then is written with an unknown CRS.
  *
  * @param columns
- *   the ordinals of the columns to look up, see [[GeoParquetWriteSupport.columnsWithoutCrs]]
+ *   the ordinals of the columns to look up, see [[GeoParquetWriteSupport.columnsWithoutCrs]].
+ *   Without any, the file is opened at its first row.
  */
 class FirstGeometryOutputWriter(
     val path: String,
@@ -118,8 +121,20 @@ class FirstGeometryOutputWriter(
         GeoParquetWriteSupport.FIRST_GEOMETRY_SRID_KEY + ordinal,
         srids.get(ordinal).map(_.toString).getOrElse(GeoParquetWriteSupport.NO_FIRST_GEOMETRY))
     }
-    recordWriter = new ParquetOutputFormat[InternalRow]()
+    // The write support is the one that the configuration names, as the Parquet library makes
+    // it. It is made here to give it the writer of the file.
+    val writeSupport = ParquetOutputFormat
+      .getWriteSupportClass(fileConfiguration)
+      .getDeclaredConstructor()
+      .newInstance()
+      .asInstanceOf[WriteSupport[InternalRow]]
+    recordWriter = new ParquetOutputFormat[InternalRow](writeSupport)
       .getRecordWriter(fileConfiguration, new Path(path), CodecConfig.from(context).getCodec)
+    writeSupport match {
+      case geoParquet: GeoParquetWriteSupport =>
+        geoParquet.collectGeographyStatistics(recordWriter)
+      case _ =>
+    }
     try heldBack.foreach(recordWriter.write(null, _))
     catch {
       case error: Throwable =>
