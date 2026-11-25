@@ -435,6 +435,27 @@ We can compare the metrics of querying the GeoParquet dataset with or without th
 
 Spatial predicate push-down to GeoParquet is enabled by default. Users can manually disable it by setting the Spark configuration `spark.sedona.geoparquet.spatialFilterPushDown` to `false`.
 
+## Push geography predicates to GeoParquet
+
+A predicate between a geography column and a geography of the query skips row groups of GeoParquet 2.0 files. Sedona reads the bounding box that the geospatial statistics of a row group have for the column, and skips the row group when the geography of the query is outside of that box. The box is one on the sphere: it covers the edges of the geographies and not only their vertices, and it can cross the antimeridian.
+
+```sql
+SELECT *
+FROM geoparquet_dataset
+WHERE ST_DWithin(geog, ST_GeogFromWKT('POINT (-122.33 47.61)', 4326), 5000.0)
+```
+
+The predicates are these, with the column as either argument:
+
+| Predicate | A row group is read when its box |
+| --- | --- |
+| [ST_Intersects](Predicates/ST_Intersects.md), [ST_Contains](Predicates/ST_Contains.md), [ST_Within](Predicates/ST_Within.md), [ST_Equals](Predicates/ST_Equals.md) | has a point in common with the box of the geography of the query |
+| [ST_DWithin](Predicates/ST_DWithin.md) with a distance that is a constant | has a point in common with that box, made larger by the distance |
+
+A row group is always read when it has no such box, which is the case for a file that was written without these statistics. Sedona writes them for GeoParquet 2.0 files, see [Write GeoParquet 2.0](../../tutorial/files/geoparquet-sedona-spark.md#write-geoparquet-20). Whole files are not skipped by their GeoParquet metadata, which has no bounding box for a geography column, so the footer of every file is read.
+
+This needs Spark 4.1 or later, whose Parquet library has the `GEOGRAPHY` logical type and its statistics. It is enabled by default, and `spark.sedona.geoparquet.spatialFilterPushDown` set to `false` turns it off. Sort the data by location before writing it, as for a geometry column, so that the geographies of a row group are close to each other.
+
 ## Box2D filter pushdown
 
 When a query filters on a `Box2D`-typed column (see [Box2D Functions](box2d/Box2D-Functions.md)) using [ST_Intersects](Predicates/ST_Intersects.md) or [ST_Contains](Predicates/ST_Contains.md) against a literal `Box2D`, Sedona translates the predicate into Parquet row-group inequalities on the column's underlying `xmin` / `ymin` / `xmax` / `ymax` leaves and pushes them down via `ParquetInputFormat.setFilterPredicate`. Parquet's row-group statistics machinery then skips row groups whose recorded min/max disprove the predicate — no file metadata scan is required.

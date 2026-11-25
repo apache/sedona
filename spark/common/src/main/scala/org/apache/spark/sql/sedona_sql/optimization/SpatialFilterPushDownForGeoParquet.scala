@@ -18,6 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.optimization
 
+import org.apache.sedona.common.S2Geography.Geography
 import org.apache.sedona.common.geometryObjects.Box2D
 import org.apache.sedona.common.sphere.Haversine
 import org.apache.sedona.core.spatialOperator.SpatialPredicate
@@ -45,6 +46,7 @@ import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFi
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.AndFilter
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.Box2DLeafFilter
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.Box2DPredicateKind
+import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.GeographyLeafFilter
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.LeafFilter
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.OrFilter
 import org.apache.spark.sql.catalyst.InternalRow
@@ -55,6 +57,8 @@ import org.apache.spark.sql.types.DoubleType
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.geom.Point
+
+import scala.util.Try
 
 class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rule[LogicalPlan] {
 
@@ -101,15 +105,63 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
     // A spatial filter compares the planar bounding box of the geometry of a query with the
     // bounding box of a file. The edges of a geography are arcs on the sphere, which leave the
     // planar bounding box of their end points, so a predicate on a geography column is not
-    // pushed down.
+    // pushed down as one on a geometry column. GeographyPredicate has its own filter for it.
     def unapply(expression: Expression): Option[String] =
       if (SpatialTypeSupport.isGeography(expression.dataType)) None
       else underlying.unapply(SpatialTypeSupport.unwrapGeometryInput(expression))
+
+    /** The name of a geography column that a filter can be pushed down for. */
+    def geography(expression: Expression): Option[String] =
+      if (!SpatialTypeSupport.isGeography(expression.dataType)) None
+      else underlying.unapply(SpatialTypeSupport.unwrapGeographyInput(expression))
+  }
+
+  /** A geography of the query. */
+  private object GeographyLiteral {
+    def unapply(expression: Expression): Option[Geography] = expression match {
+      case Literal(value, dataType)
+          if value != null && SpatialTypeSupport.isGeography(dataType) =>
+        Try(SpatialTypeSupport.deserializeGeography(value, dataType)).toOption.flatMap(Option(_))
+      case _ => None
+    }
+  }
+
+  /**
+   * The filter for a predicate between a geography column and a geography of the query, in either
+   * order. Each of these predicates holds only for two geographies that are within a distance of
+   * each other: no distance for the topological ones.
+   */
+  private def translateGeographyPredicate(
+      predicate: Expression,
+      pushableColumn: SpatialPushableColumn): Option[GeoParquetSpatialFilter] = {
+    val (operands, meters) = predicate match {
+      case ST_Intersects(Seq(left, right)) => (Seq(left, right), 0.0)
+      case ST_Contains(Seq(left, right)) => (Seq(left, right), 0.0)
+      case ST_Within(Seq(left, right)) => (Seq(left, right), 0.0)
+      case ST_Equals(Seq(left, right)) => (Seq(left, right), 0.0)
+      case ST_DWithin(Seq(left, right, Literal(distance: Double, DoubleType))) =>
+        (Seq(left, right), distance)
+      case _ => (Nil, 0.0)
+    }
+    val found = operands match {
+      case Seq(column, GeographyLiteral(query)) =>
+        pushableColumn.geography(column).map(_ -> query)
+      case Seq(GeographyLiteral(query), column) =>
+        pushableColumn.geography(column).map(_ -> query)
+      case _ => None
+    }
+    found.flatMap { case (name, query) =>
+      GeographyLeafFilter.within(unquote(name), query, meters)
+    }
   }
 
   private def translateToGeoParquetSpatialFilter(
       predicate: Expression,
       pushableColumn: SpatialPushableColumn): Option[GeoParquetSpatialFilter] = {
+    object GeographyPredicate {
+      def unapply(expression: Expression): Option[GeoParquetSpatialFilter] =
+        translateGeographyPredicate(expression, pushableColumn)
+    }
     predicate match {
       case And(left, right) =>
         val spatialFilterLeft = translateToGeoParquetSpatialFilter(left, pushableColumn)
@@ -128,6 +180,8 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
         } yield OrFilter(spatialFilterLeft, spatialFilterRight)
 
       case Not(_) => None
+
+      case GeographyPredicate(filter) => Some(filter)
 
       // Box2D-on-Box2D variants of ST_Intersects / ST_Contains push down as Parquet row-group
       // filters on the column's underlying (xmin, ymin, xmax, ymax) double leaves. Pruning is done
