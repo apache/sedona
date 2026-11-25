@@ -1879,6 +1879,61 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertTrue(expectedSummary4.equals(actualSummary4))
     }
 
+    it("Passed RS_ZonalStats on the output of RS_AsRaster") {
+      // RS_AsRaster returns a raster on the grid of the reference raster, so a line counts on the
+      // output the pixels it burned there. The output is serialized between the two projections
+      // below, and has to report the same grid afterwards. With the inputs cached, the reference
+      // raster is serialized before it is burned on as well.
+      def burnedAndCounted(
+          originY: Double,
+          scaleY: Double,
+          line: String,
+          cropped: Boolean,
+          cached: Boolean): (Double, Double) = {
+        var inputs = sparkSession.sql(s"""
+            |SELECT RS_MakeEmptyRaster(1, 'd', 6, 6, 0D, ${originY}D, 1D, ${scaleY}D, 0D, 0D, 0) AS r,
+            |  ST_GeomFromWKT('$line') AS g
+            |""".stripMargin)
+        if (cached) inputs = inputs.cache()
+        val row = inputs
+          .selectExpr(s"RS_AsRaster(g, r, 'd', false, 1D, 0D, $cropped) AS r", "g")
+          .selectExpr("RS_BandAsArray(r, 1)", "RS_ZonalStats(r, g, 1, 'count', false, true)")
+          .first()
+        inputs.unpersist()
+        (row.getSeq[Double](0).sum, row.getDouble(1))
+      }
+      val onRowLine = "LINESTRING (1.2 0.3, 4.5 0.3)"
+      for (cropped <- Seq(true, false); cached <- Seq(false, true)) {
+        for ((originY, scaleY) <- Seq((0.7, -0.1), (0.6, -0.1), (0.0, 0.1))) {
+          assertEquals(
+            s"origin $originY, pixel $scaleY, cropped=$cropped, cached=$cached",
+            (4.0, 4.0),
+            burnedAndCounted(originY, scaleY, onRowLine, cropped, cached))
+        }
+      }
+      // A serialized raster keeps its cell-centre transform and derives its corner from that, and
+      // no centre gives the corner 0.1 for a pixel size of 0.1: this raster reports
+      // 0.10000000000000002 once it has been serialized. Its outputs follow the corner it has when
+      // it is burned on.
+      for (cropped <- Seq(true, false)) {
+        assertEquals(
+          s"origin 0.1, cropped=$cropped, cached",
+          (4.0, 4.0),
+          burnedAndCounted(0.1, 0.1, onRowLine, cropped, cached = true))
+      }
+      assertEquals(
+        (4.0, 4.0),
+        burnedAndCounted(0.1, 0.1, onRowLine, cropped = true, cached = false))
+      // A cropped output cannot start on such a line either. Row line 1 of this raster is 0.1,
+      // where the window of the line starts, so the output starts a row earlier.
+      for (cached <- Seq(false, true)) {
+        assertEquals(
+          s"cached=$cached",
+          (4.0, 4.0),
+          burnedAndCounted(0.0, 0.1, "LINESTRING (1.2 0.2, 4.5 0.2)", cropped = true, cached))
+      }
+    }
+
     it("Passed RS_ZonalStats edge case") {
       val df = sparkSession.sql("""
           |with data as (
