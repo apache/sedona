@@ -175,8 +175,15 @@ public class PixelFunctionEditors {
     int heightOriginalRaster = RasterAccessors.getHeight(raster),
         widthOriginalRaster = RasterAccessors.getWidth(raster);
 
-    // Converting geometry to raster and then iterating through them
-    int[] pixelLocation = RasterUtils.getGridCoordinatesFromWorld(raster, colX, rowY);
+    // Converting geometry to raster and then iterating through them. The rasterized geometry
+    // starts on a grid line of the raster, and the cell index of a coordinate on a grid line,
+    // computed in floating point, can come out just short of the line and name the cell before
+    // it. So its first cell is located by its centre, half a pixel in from that corner.
+    int[] pixelLocation =
+        RasterUtils.getGridCoordinatesFromWorld(
+            raster,
+            colX + RasterAccessors.getScaleX(raster) / 2,
+            rowY + RasterAccessors.getScaleY(raster) / 2);
     int x = pixelLocation[0], y = pixelLocation[1];
 
     // rasterX & rasterY are the starting pixels for the target raster
