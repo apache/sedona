@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetWriteSupport</title>
@@ -208,8 +207,8 @@
                         <a href="CoveringBBox.html" title="">CoveringBBox</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
-                        <a class="class" href="FirstGeometryOutputWriter.html" title="Writes a GeoParquet 2 file that has GeometryUDT columns without a CRS option."></a>
-                        <a href="FirstGeometryOutputWriter.html" title="Writes a GeoParquet 2 file that has GeometryUDT columns without a CRS option.">FirstGeometryOutputWriter</a>
+                        <a class="class" href="FirstGeometryOutputWriter.html" title="Writes a GeoParquet 2 file that has GeometryUDT or GeographyUDT columns without a CRS option."></a>
+                        <a href="FirstGeometryOutputWriter.html" title="Writes a GeoParquet 2 file that has GeometryUDT or GeographyUDT columns without a CRS option.">FirstGeometryOutputWriter</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
                         <a class="class" href="GeoParquetColumnMismatchException.html" title="Raised for a file that stores a column in a way that the schema of the read does not take: a GEOGRAPHY column for a geometry column, for example, or another SRID than the type of the column names."></a>
@@ -683,9 +682,9 @@ and a GeoParquet 1 file states the CRS in metadata that is written after the las
               
         </dd></dl></div>
     </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetWriteSupport#requireGeometryColumn" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="requireGeometryColumn(schema:org.apache.spark.sql.types.StructType):Unit"></a><a id="requireGeometryColumn(StructType):Unit"></a>
+      <a id="requireGeometryColumn(schema:org.apache.spark.sql.types.StructType,version:String):Unit"></a><a id="requireGeometryColumn(StructType,String):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetWriteSupport$.html#requireGeometryColumn(schema:org.apache.spark.sql.types.StructType):Unit" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetWriteSupport$.html#requireGeometryColumn(schema:org.apache.spark.sql.types.StructType,version:String):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -694,13 +693,15 @@ and a GeoParquet 1 file states the CRS in metadata that is written after the las
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">requireGeometryColumn</span><span class="params">(<span name="schema">schema: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">requireGeometryColumn</span><span class="params">(<span name="schema">schema: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>, <span name="version">version: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol"><span class="name"><a href="../../../../../../index.html">VERSION</a></span></span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <p class="shortcomment cmt">Fails unless <code>schema</code> has a geometry column, which GeoParquet requires.</p><div class="fullcomment"><div class="comment cmt"><p>Fails unless <code>schema</code> has a geometry column, which GeoParquet requires. Called from
-<code>prepareWrite</code> on the driver, so a write without one fails before any task is launched rather
-than in every task.
-</p></div></div>
+      <p class="shortcomment cmt">Fails unless <code>schema</code> has a column that GeoParquet lists in its metadata: a geometry column,
+or in a GeoParquet 2 file a geography column.</p><div class="fullcomment"><div class="comment cmt"><p>Fails unless <code>schema</code> has a column that GeoParquet lists in its metadata: a geometry column,
+or in a GeoParquet 2 file a geography column. Called from <code>prepareWrite</code> on the driver, so a
+write without one fails before any task is launched rather than in every task.
+</p></div><dl class="paramcmts block"><dt class="param">version</dt><dd class="cmt"><p>
+  the GeoParquet version of the write</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetWriteSupport#requireSupportedVersion" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="requireSupportedVersion(configuration:org.apache.hadoop.conf.Configuration):Unit"></a><a id="requireSupportedVersion(Configuration):Unit"></a>
       <span class="permalink">

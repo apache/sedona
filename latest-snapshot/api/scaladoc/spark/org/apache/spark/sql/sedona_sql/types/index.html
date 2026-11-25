@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.types</title>
@@ -312,6 +311,10 @@
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.spark.sql.sedona_sql">sedona_sql</a></dd></dl></div>
     </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="class" href="GeographyWkbScanner.html" title="Walks the WKB of a geography that a writer is about to store, without an object for it."></a>
+                        <a href="GeographyWkbScanner.html" title="Walks the WKB of a geography that a writer is about to store, without an object for it.">GeographyWkbScanner</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="class" href="PublicWkbHeaderAdapter.html" title="Converts public WKB headers to ISO types without changing coordinate bytes."></a>
                         <a href="PublicWkbHeaderAdapter.html" title="Converts public WKB headers to ISO types without changing coordinate bytes.">PublicWkbHeaderAdapter</a>
                       </li><li class="current-entities indented6">
@@ -381,7 +384,25 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="org.apache.spark.sql.sedona_sql.types.PublicWkbHeaderAdapter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="org.apache.spark.sql.sedona_sql.types.GeographyWkbScanner" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="GeographyWkbScannerextendsObject"></a><a id="GeographyWkbScanner:GeographyWkbScanner"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/types/GeographyWkbScanner.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Walks the WKB of a geography that a writer is about to store, without an object for it." href="GeographyWkbScanner.html"><span class="name">GeographyWkbScanner</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Walks the WKB of a geography that a writer is about to store, without an object for it.</p><div class="fullcomment"><div class="comment cmt"><p>Walks the WKB of a geography that a writer is about to store, without an object for it. A writer
+calls this for every value, so it allocates nothing.
+</p></div></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.types.PublicWkbHeaderAdapter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="PublicWkbHeaderAdapterextendsObject"></a><a id="PublicWkbHeaderAdapter:PublicWkbHeaderAdapter"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/spark/sql/sedona_sql/types/PublicWkbHeaderAdapter.html" title="Permalink">

@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport</title>
@@ -167,6 +166,10 @@
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.spark.sql.sedona_sql">sedona_sql</a></dd></dl></div>
     </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="class" href="GeographyWkbScanner.html" title="Walks the WKB of a geography that a writer is about to store, without an object for it."></a>
+                        <a href="GeographyWkbScanner.html" title="Walks the WKB of a geography that a writer is about to store, without an object for it.">GeographyWkbScanner</a>
+                      </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="class" href="PublicWkbHeaderAdapter.html" title="Converts public WKB headers to ISO types without changing coordinate bytes."></a>
                         <a href="PublicWkbHeaderAdapter.html" title="Converts public WKB headers to ISO types without changing coordinate bytes.">PublicWkbHeaderAdapter</a>
@@ -759,6 +762,22 @@
       </span>
       
       
+    </li><li name="org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport#nativeGeographyWkb" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="nativeGeographyWkb(row:org.apache.spark.sql.catalyst.expressions.SpecializedGetters,ordinal:Int,dataType:org.apache.spark.sql.types.DataType):(Array[Byte],Int)"></a><a id="nativeGeographyWkb(SpecializedGetters,Int,DataType):(Array[Byte],Int)"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/types/SpatialTypeSupport$.html#nativeGeographyWkb(row:org.apache.spark.sql.catalyst.expressions.SpecializedGetters,ordinal:Int,dataType:org.apache.spark.sql.types.DataType):(Array[Byte],Int)" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">nativeGeographyWkb</span><span class="params">(<span name="row">row: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.SpecializedGetters">SpecializedGetters</span></span>, <span name="ordinal">ordinal: <span class="extype" name="scala.Int">Int</span></span>, <span name="dataType">dataType: <span class="extype" name="org.apache.spark.sql.types.DataType">DataType</span></span>)</span><span class="result">: (<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>], <span class="extype" name="scala.Int">Int</span>)</span>
+      </span>
+      
+      <p class="shortcomment cmt">This build has no native geography type.</p>
     </li><li name="org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport#nativeGeometryFromWkb" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="nativeGeometryFromWkb(wkb:Array[Byte],srid:Int,dataType:org.apache.spark.sql.types.DataType):Option[Any]"></a><a id="nativeGeometryFromWkb(Array[Byte],Int,DataType):Option[Any]"></a>
       <span class="permalink">

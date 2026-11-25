@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.sedona.sql.utils.GeographySerializer</title>
@@ -311,6 +310,22 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="org.apache.sedona.sql.utils.GeographySerializer#WKB_OFFSET" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="WKB_OFFSET:Int"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/utils/GeographySerializer$.html#WKB_OFFSET:Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">WKB_OFFSET</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Where the WKB of a serialized geography begins, after its SRID.</p>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -667,6 +682,22 @@ parsed, so a geography that is only passed on costs no JTS or S2 object.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="org.apache.sedona.sql.utils.GeographySerializer#wkbAndSrid" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wkbAndSrid(value:Array[Byte]):(Array[Byte],Int)"></a><a id="wkbAndSrid(Array[Byte]):(Array[Byte],Int)"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/utils/GeographySerializer$.html#wkbAndSrid(value:Array[Byte]):(Array[Byte],Int)" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wkbAndSrid</span><span class="params">(<span name="value">value: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>)</span><span class="result">: (<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>], <span class="extype" name="scala.Int">Int</span>)</span>
+      </span>
+      
+      <p class="shortcomment cmt">The WKB and the SRID of a serialized geography.</p><div class="fullcomment"><div class="comment cmt"><p>The WKB and the SRID of a serialized geography. The WKB is a copy that the caller owns.</p></div></div>
     </li>
               </ol>
             </div>

@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.execution.datasources.geoparquet.FirstGeometryOutputWriter</title>
@@ -208,8 +207,8 @@
                         <a href="CoveringBBox.html" title="">CoveringBBox</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
-                        <a class="class" href="" title="Writes a GeoParquet 2 file that has GeometryUDT columns without a CRS option."></a>
-                        <a href="" title="Writes a GeoParquet 2 file that has GeometryUDT columns without a CRS option.">FirstGeometryOutputWriter</a>
+                        <a class="class" href="" title="Writes a GeoParquet 2 file that has GeometryUDT or GeographyUDT columns without a CRS option."></a>
+                        <a href="" title="Writes a GeoParquet 2 file that has GeometryUDT or GeographyUDT columns without a CRS option.">FirstGeometryOutputWriter</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
                         <a class="class" href="GeoParquetColumnMismatchException.html" title="Raised for a file that stores a column in a way that the schema of the read does not take: a GEOGRAPHY column for a geometry column, for example, or another SRID than the type of the column names."></a>
@@ -294,7 +293,7 @@
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Writes a GeoParquet 2 file that has GeometryUDT columns without a CRS option.</p><p>GeoParquet 2 states the CRS of a geometry column in the Parquet schema, which the Parquet
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Writes a GeoParquet 2 file that has GeometryUDT or GeographyUDT columns without a CRS option.</p><p>GeoParquet 2 states the CRS of a geometry column in the Parquet schema, which the Parquet
 writer needs before the first row. A GeometryUDT column has an SRID on each geometry only. This
 writer therefore holds rows back until every such column has shown a geometry, then opens the
 file with those SRIDs. <a href="GeoParquetWriteSupport.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetWriteSupport">GeoParquetWriteSupport</a> turns them into the CRS of the columns and

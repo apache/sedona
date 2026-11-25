@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.execution.datasources.geoparquet</title>
@@ -208,8 +207,8 @@
                         <a href="CoveringBBox.html" title="">CoveringBBox</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
-                        <a class="class" href="FirstGeometryOutputWriter.html" title="Writes a GeoParquet 2 file that has GeometryUDT columns without a CRS option."></a>
-                        <a href="FirstGeometryOutputWriter.html" title="Writes a GeoParquet 2 file that has GeometryUDT columns without a CRS option.">FirstGeometryOutputWriter</a>
+                        <a class="class" href="FirstGeometryOutputWriter.html" title="Writes a GeoParquet 2 file that has GeometryUDT or GeographyUDT columns without a CRS option."></a>
+                        <a href="FirstGeometryOutputWriter.html" title="Writes a GeoParquet 2 file that has GeometryUDT or GeographyUDT columns without a CRS option.">FirstGeometryOutputWriter</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
                         <a class="class" href="GeoParquetColumnMismatchException.html" title="Raised for a file that stores a column in a way that the schema of the read does not take: a GEOGRAPHY column for a geometry column, for example, or another SRID than the type of the column names."></a>
@@ -389,10 +388,10 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Writes a GeoParquet 2 file that has GeometryUDT columns without a CRS option." href="FirstGeometryOutputWriter.html"><span class="name">FirstGeometryOutputWriter</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.sql.execution.datasources.OutputWriter">OutputWriter</span></span>
+        <a title="Writes a GeoParquet 2 file that has GeometryUDT or GeographyUDT columns without a CRS option." href="FirstGeometryOutputWriter.html"><span class="name">FirstGeometryOutputWriter</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.sql.execution.datasources.OutputWriter">OutputWriter</span></span>
       </span>
       
-      <p class="shortcomment cmt">Writes a GeoParquet 2 file that has GeometryUDT columns without a CRS option.</p><div class="fullcomment"><div class="comment cmt"><p>Writes a GeoParquet 2 file that has GeometryUDT columns without a CRS option.</p><p>GeoParquet 2 states the CRS of a geometry column in the Parquet schema, which the Parquet
+      <p class="shortcomment cmt">Writes a GeoParquet 2 file that has GeometryUDT or GeographyUDT columns without a CRS option.</p><div class="fullcomment"><div class="comment cmt"><p>Writes a GeoParquet 2 file that has GeometryUDT or GeographyUDT columns without a CRS option.</p><p>GeoParquet 2 states the CRS of a geometry column in the Parquet schema, which the Parquet
 writer needs before the first row. A GeometryUDT column has an SRID on each geometry only. This
 writer therefore holds rows back until every such column has shown a geometry, then opens the
 file with those SRIDs. <a href="GeoParquetWriteSupport.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetWriteSupport">GeoParquetWriteSupport</a> turns them into the CRS of the columns and
@@ -589,7 +588,7 @@ argument.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A case class that holds the metadata of geometry column in GeoParquet metadata" href="GeometryFieldMetaData.html"><span class="name">GeometryFieldMetaData</span></a><span class="params">(<span name="encoding">encoding: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="geometryTypes">geometryTypes: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="bbox">bbox: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Double">Double</span>]]</span>, <span name="crs">crs: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.json4s.JValue">JValue</span>] = <span class="symbol">None</span></span>, <span name="covering">covering: <span class="extype" name="scala.Option">Option</span>[<a href="Covering.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.Covering">Covering</a>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a title="A case class that holds the metadata of geometry column in GeoParquet metadata" href="GeometryFieldMetaData.html"><span class="name">GeometryFieldMetaData</span></a><span class="params">(<span name="encoding">encoding: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="geometryTypes">geometryTypes: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="bbox">bbox: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Double">Double</span>]]</span>, <span name="crs">crs: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.json4s.JValue">JValue</span>] = <span class="symbol">None</span></span>, <span name="covering">covering: <span class="extype" name="scala.Option">Option</span>[<a href="Covering.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.Covering">Covering</a>] = <span class="symbol">None</span></span>, <span name="edges">edges: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
       <p class="shortcomment cmt">A case class that holds the metadata of geometry column in GeoParquet metadata</p><div class="fullcomment"><div class="comment cmt"><p>A case class that holds the metadata of geometry column in GeoParquet metadata</p></div><dl class="paramcmts block"><dt class="param">encoding</dt><dd class="cmt"><p>
@@ -600,7 +599,9 @@ argument.
   be omitted when there is no extent to describe).</p></dd><dt class="param">crs</dt><dd class="cmt"><p>
   The CRS of the geometries in the file. None if crs metadata is absent, Some(JNull) if crs is
   null, Some(value) if the crs is present and not null.</p></dd><dt class="param">covering</dt><dd class="cmt"><p>
-  Object containing bounding box column names to help accelerate spatial data retrieval</p></dd></dl></div>
+  Object containing bounding box column names to help accelerate spatial data retrieval</p></dd><dt class="param">edges</dt><dd class="cmt"><p>
+  How the edges of the geometries are interpreted. None stands for planar edges, which a
+  geometry column has. A geography column has &quot;spherical&quot; edges.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.ParquetGeospatialColumn" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ParquetGeospatialColumnextendsProductwithSerializable"></a><a id="ParquetGeospatialColumn:ParquetGeospatialColumn"></a>
       <span class="permalink">
