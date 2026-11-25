@@ -251,8 +251,8 @@ public class Rasterization {
 
   /**
    * Computes floor((coord - upperLeft) / scale) exactly, on the same decimal values that {@link
-   * #toPixelIndex} snaps extents with, so a coordinate on a grid line is not pushed across it by
-   * floating-point error. Saturates at the int range for coordinates far off the raster.
+   * GridLines#enclosing} snaps extents with, so a coordinate on a grid line is not pushed across it
+   * by floating-point error. Saturates at the int range for coordinates far off the raster.
    */
   private static int floorPixelIndex(double coord, double upperLeft, double scale) {
     BigDecimal index =
@@ -324,93 +324,172 @@ public class Rasterization {
       return union;
     }
 
-    ReferencedEnvelope geomExtent =
-        new ReferencedEnvelope(geom.getEnvelopeInternal(), raster.getCoordinateReferenceSystem2D());
+    if (geom.isEmpty()) {
+      return null;
+    }
 
-    // Using BigDecimal to avoid floating point errors
+    // The window is found on the raster's own grid, from its stored origin and signed pixel size:
+    // the grid, and the decimal values, that also decide which cells a point or a line burns. A
+    // bottom-up raster does not store its top edge. That is origin + height * scale in floating
+    // point, and a row line located from there can be one rounding error away from the row line
+    // GridLineWalker sees, which would leave the cells it burns outside the window.
+    Envelope bounds = geom.getEnvelopeInternal();
+    int width = (int) metadata[2];
+    int height = (int) metadata[3];
+    boolean bottomUp = metadata[5] > 0;
+    GridLines columns =
+        GridLines.enclosing(bounds.getMinX(), bounds.getMaxX(), metadata[0], metadata[4]);
+    // Pixel rows grow with world y only on a bottom-up raster.
+    GridLines rows =
+        bottomUp
+            ? GridLines.enclosing(bounds.getMinY(), bounds.getMaxY(), metadata[1], metadata[5])
+            : GridLines.enclosing(bounds.getMaxY(), bounds.getMinY(), metadata[1], metadata[5]);
+
+    // Ensure the snapped AOI window is at least one pixel wide/tall.
+    // After snapping the continuous bbox to pixel edges, a thin line can
+    // collapse to first == last along an axis (i.e., a degenerate 0-width/0-height window).
+    // That would produce an empty search region and skip rasterization entirely.
+    //
+    // We grow the window by exactly one pixel on each side. This yields at least a
+    // 1-pixel-wide/1-pixel-tall search window and guarantees we visit the pixel(s)
+    // the geometry lies in.
+    columns.growIfCollapsed();
+    rows.growIfCollapsed();
+
+    // Widen the window of a line where it has to hold cells beyond the snapped bounding box.
+    //
+    // This only sizes the search window and the cropped output; which cells a line burns is decided
+    // by GridLineWalker under GDAL's half-open rule. A segment lying on a grid line burns the cells
+    // after it, which sit outside the snapped window when that line is the window's last edge in
+    // pixel order; with allTouched, so does a segment that starts on that line. The window of a
+    // MultiLineString, and of a LineString with allTouched, is widened by one pixel on every side
+    // that lies exactly on a grid line. The window of any other line is widened on a last edge
+    // that one of its segments lies on. A polygon or point never burns a cell it touches only on
+    // its boundary, as in GDAL, so its window is not widened.
+    if (geom instanceof Lineal) {
+      if (allTouched || geom instanceof MultiLineString) {
+        columns.widenWhereOnLine();
+        rows.widenWhereOnLine();
+      } else {
+        double lastY = bottomUp ? bounds.getMaxY() : bounds.getMinY();
+        if (columns.lastOnLine && hasSegmentAlong(geom, true, bounds.getMaxX())) {
+          columns.last++;
+        }
+        if (rows.lastOnLine && hasSegmentAlong(geom, false, lastY)) {
+          rows.last++;
+        }
+      }
+    }
+
+    // Quick bbox intersection test for when rasterizeGeomExtent gets called independently
+    // return null if they do not intersect
+    if (columns.misses(width) || rows.misses(height)) {
+      return null;
+    }
+
+    // The window in world coordinates. Its rows are counted down from the raster's geographic top,
+    // as the output grid counts them.
     double upperLeftX = metadata[0];
     double upperLeftY = getRasterUpperLeftY(metadata);
     double scaleX = metadata[4];
     double scaleY = getRasterScaleY(metadata);
-
-    // Compute the aligned min/max values
-    double alignedMinX =
-        toWorldCoordinate(
-            toPixelIndex(geomExtent.getMinX(), scaleX, upperLeftX, true), scaleX, upperLeftX);
-    double alignedMinY =
-        toWorldCoordinate(
-            toPixelIndex(geomExtent.getMinY(), scaleY, upperLeftY, true), scaleY, upperLeftY);
-    double alignedMaxX =
-        toWorldCoordinate(
-            toPixelIndex(geomExtent.getMaxX(), scaleX, upperLeftX, false), scaleX, upperLeftX);
-    double alignedMaxY =
-        toWorldCoordinate(
-            toPixelIndex(geomExtent.getMaxY(), scaleY, upperLeftY, false), scaleY, upperLeftY);
-
-    // Ensure the snapped AOI window is at least one pixel wide/tall.
-    // After snapping the continuous bbox to pixel edges, a thin line can
-    // collapse to min == max along an axis (i.e., a degenerate 0-width/0-height window).
-    // That would produce an empty search region and skip rasterization entirely.
-    //
-    // We grow the aligned window by exactly one pixel on each side, using the
-    // pixel size (scaleX > 0, scaleY < 0 for north-up). This yields at least a
-    // 1-pixel-wide/1-pixel-tall search window and guarantees we visit the pixel(s)
-    // the geometry lies in.
-    if (alignedMaxX == alignedMinX) {
-      alignedMinX -= scaleX;
-      alignedMaxX += scaleX;
-    }
-    if (alignedMaxY == alignedMinY) {
-      alignedMinY += scaleY;
-      alignedMaxY -= scaleY;
-    }
-
-    // Get the extent of the original raster
-    double originalMinX = raster.getEnvelope().getMinimum(0);
-    double originalMinY = raster.getEnvelope().getMinimum(1);
-    double originalMaxX = raster.getEnvelope().getMaximum(0);
-    double originalMaxY = raster.getEnvelope().getMaximum(1);
-
-    // Quick bbox intersection test for when rasterizeGeomExtent gets called independently
-    // return null if they do not intersect
-    if (alignedMinX >= originalMaxX
-        || alignedMaxX <= originalMinX
-        || alignedMinY >= originalMaxY
-        || alignedMaxY <= originalMinY) {
-      return null;
-    }
-
-    // Widen the window of a line by one pixel on any side that lies exactly on a grid line (always
-    // for a MultiLineString, and with allTouched for a LineString).
-    //
-    // This only sizes the search window and the cropped output; which cells a line burns is decided
-    // by GridLineWalker under GDAL's half-open rule. A line lying on a grid line burns the cells
-    // after it, which sit outside the snapped window when the line is the window's right or bottom
-    // edge. A polygon or point never burns a cell it touches only on its boundary, as in GDAL, so
-    // its window is not widened.
-    if (geom instanceof Lineal && (allTouched || geom instanceof MultiLineString)) {
-      alignedMinX -= (geomExtent.getMinX() == alignedMinX) ? scaleX : 0;
-      alignedMinY += (geomExtent.getMinY() == alignedMinY) ? scaleY : 0;
-      alignedMaxX += (geomExtent.getMaxX() == alignedMaxX) ? scaleX : 0;
-      alignedMaxY -= (geomExtent.getMaxY() == alignedMaxY) ? scaleY : 0;
-    }
+    long top = bottomUp ? height - rows.last : rows.first;
+    long bottom = bottomUp ? height - rows.first : rows.last;
+    double alignedMinX = toWorldCoordinate(columns.first, scaleX, upperLeftX);
+    double alignedMaxX = toWorldCoordinate(columns.last, scaleX, upperLeftX);
+    double alignedMaxY = toWorldCoordinate(top, scaleY, upperLeftY);
+    double alignedMinY = toWorldCoordinate(bottom, scaleY, upperLeftY);
 
     // Clamp the aligned extent to the original raster extent
-    alignedMinX = Math.max(alignedMinX, originalMinX);
-    alignedMinY = Math.max(alignedMinY, originalMinY);
-    alignedMaxX = Math.min(alignedMaxX, originalMaxX);
-    alignedMaxY = Math.min(alignedMaxY, originalMaxY);
+    alignedMinX = Math.max(alignedMinX, raster.getEnvelope().getMinimum(0));
+    alignedMinY = Math.max(alignedMinY, raster.getEnvelope().getMinimum(1));
+    alignedMaxX = Math.min(alignedMaxX, raster.getEnvelope().getMaximum(0));
+    alignedMaxY = Math.min(alignedMaxY, raster.getEnvelope().getMaximum(1));
 
     // Create the aligned raster extent
-    ReferencedEnvelope alignedRasterExtent =
-        new ReferencedEnvelope(
-            alignedMinX,
-            alignedMaxX,
-            alignedMinY,
-            alignedMaxY,
-            geomExtent.getCoordinateReferenceSystem());
+    return new ReferencedEnvelope(
+        alignedMinX,
+        alignedMaxX,
+        alignedMinY,
+        alignedMaxY,
+        raster.getCoordinateReferenceSystem2D());
+  }
 
-    return alignedRasterExtent;
+  /**
+   * Whether a line has a segment, possibly one with no length, that lies on the vertical line x =
+   * value, or on the horizontal line y = value.
+   */
+  private static boolean hasSegmentAlong(Geometry lineal, boolean vertical, double value) {
+    for (int i = 0; i < lineal.getNumGeometries(); i++) {
+      Coordinate[] coords = lineal.getGeometryN(i).getCoordinates();
+      for (int j = 0; j < coords.length - 1; j++) {
+        double a = vertical ? coords[j].x : coords[j].y;
+        double b = vertical ? coords[j + 1].x : coords[j + 1].y;
+        if (a == value && b == value) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * A run of grid lines along one axis of a raster, in its own pixel order: line 0 is at the
+   * raster's stored origin and line k at origin + k * scale.
+   */
+  private static final class GridLines {
+    // Lines far beyond any raster are folded onto these, which compare against a raster the same.
+    private static final BigDecimal FAR = BigDecimal.valueOf(1L << 60);
+
+    long first;
+    long last;
+    // Whether the coordinate each of the two lines was snapped from lies exactly on it.
+    boolean firstOnLine;
+    boolean lastOnLine;
+
+    /**
+     * The grid lines that enclose two world coordinates: the last line at or before {@code low} and
+     * the first line at or after {@code high}, where {@code low} is the coordinate with the smaller
+     * pixel coordinate. Decided on decimal values, as in {@link Rasterization#floorPixelIndex}.
+     */
+    static GridLines enclosing(double low, double high, double origin, double scale) {
+      BigDecimal decimalOrigin = BigDecimal.valueOf(origin);
+      BigDecimal decimalScale = BigDecimal.valueOf(scale);
+      BigDecimal lowOffset = BigDecimal.valueOf(low).subtract(decimalOrigin);
+      BigDecimal highOffset = BigDecimal.valueOf(high).subtract(decimalOrigin);
+      BigDecimal before = lowOffset.divide(decimalScale, 0, RoundingMode.FLOOR);
+      BigDecimal after = highOffset.divide(decimalScale, 0, RoundingMode.CEILING);
+      GridLines lines = new GridLines();
+      lines.first = before.max(FAR.negate()).min(FAR).longValue();
+      lines.last = after.max(FAR.negate()).min(FAR).longValue();
+      lines.firstOnLine = before.multiply(decimalScale).compareTo(lowOffset) == 0;
+      lines.lastOnLine = after.multiply(decimalScale).compareTo(highOffset) == 0;
+      return lines;
+    }
+
+    void growIfCollapsed() {
+      if (first == last) {
+        first--;
+        last++;
+        // Neither edge of the window is the line the coordinates lie on any more.
+        firstOnLine = false;
+        lastOnLine = false;
+      }
+    }
+
+    /** Whether no cell of an axis with {@code size} cells lies between the two lines. */
+    boolean misses(int size) {
+      return first >= size || last <= 0;
+    }
+
+    void widenWhereOnLine() {
+      if (firstOnLine) {
+        first--;
+      }
+      if (lastOnLine) {
+        last++;
+      }
+    }
   }
 
   /**
@@ -440,21 +519,6 @@ public class Rasterization {
     return cells.isNull()
         ? null
         : new ReferencedEnvelope(cells, raster.getCoordinateReferenceSystem2D());
-  }
-
-  private static double toPixelIndex(double coord, double scale, double upperLeft, boolean isMin) {
-    BigDecimal rel = BigDecimal.valueOf(coord).subtract(BigDecimal.valueOf(upperLeft));
-
-    BigDecimal px = rel.divide(BigDecimal.valueOf(scale), 16, RoundingMode.FLOOR);
-    if (scale > 0) {
-      return isMin
-          ? px.setScale(0, RoundingMode.FLOOR).doubleValue()
-          : px.setScale(0, RoundingMode.CEILING).doubleValue();
-    } else {
-      return isMin
-          ? px.setScale(0, RoundingMode.CEILING).doubleValue()
-          : px.setScale(0, RoundingMode.FLOOR).doubleValue();
-    }
   }
 
   private static double toWorldCoordinate(double pixelIndex, double scale, double upperLeft) {
@@ -652,22 +716,40 @@ public class Rasterization {
       throw new IllegalArgumentException("Only Polygon geometry is supported");
     }
 
-    // Clip polygon to rasterExtent
     // Using buffer(0) to avoid TopologyException : found non-noded intersection.
-    Geometry clippedGeom =
-        Functions.intersection(JTS.toGeometry((BoundingBox) geomExtent), Functions.buffer(geom, 0));
+    Geometry valid = Functions.buffer(geom, 0);
+
+    if (allTouched) {
+      // The outline is walked along the polygon's own edges, which GridLineWalker clips to the
+      // raster cell by cell. The copy clipped below gets new vertices where an edge crosses the
+      // window, and those are rounded: an edge passing exactly through a grid corner would then
+      // pass beside it, and burn a cell the polygon only touches there.
+      burnOutlines(valid, params, value);
+    }
+
+    // Clip polygon to rasterExtent, for the fill. The outline is burned by now, so the clipped
+    // parts are filled without allTouched.
+    Geometry clippedGeom = Functions.intersection(JTS.toGeometry((BoundingBox) geomExtent), valid);
+
+    if (allTouched) {
+      // Where the polygon continues beyond the window, the clip closes it with edges along the
+      // window's sides. The polygon overlaps the cells beside those edges, and the scanline fill
+      // below can leave some of them out, for example when a vertex lies on a scanline at the
+      // window's side.
+      burnWindowEdges(clippedGeom, geomExtent, params, value);
+    }
 
     if (clippedGeom instanceof MultiPolygon) {
       for (int i = 0; i < clippedGeom.getNumGeometries(); i++) {
         Geometry subGeom = clippedGeom.getGeometryN(i);
-        rasterizePolygon(raster, metadata, subGeom, params, geomExtent, value, allTouched);
+        rasterizePolygon(raster, metadata, subGeom, params, geomExtent, value, false);
       }
     } else if (clippedGeom instanceof Polygon) {
       Polygon polygon = (Polygon) clippedGeom;
 
       // Compute scanline X-intercepts
       Map<Double, TreeSet<Double>> scanlineIntersections =
-          computeScanlineIntersections(polygon, params, value, geomExtent, allTouched);
+          computeScanlineIntersections(polygon, params, geomExtent);
 
       // Process intersections to get startXs and endXs for each scanline
       Map<Integer, List<int[]>> scanlineFillRanges = computeFillRanges(scanlineIntersections);
@@ -683,7 +765,7 @@ public class Rasterization {
       // cell it touches only on its boundary, allTouched or not, so keep only the areal parts.
       Geometry toRasterize = arealComponents(clippedGeom);
       if (!toRasterize.isEmpty()) {
-        rasterizeGeometry(raster, metadata, toRasterize, params, geomExtent, value, allTouched);
+        rasterizeGeometry(raster, metadata, toRasterize, params, geomExtent, value, false);
       }
     }
   }
@@ -737,11 +819,7 @@ public class Rasterization {
 
   /** Computes scanline intersections by iterating over polygon edges. */
   private static Map<Double, TreeSet<Double>> computeScanlineIntersections(
-      Polygon polygon,
-      RasterizationParams params,
-      double value,
-      ReferencedEnvelope geomExtent,
-      boolean allTouched) {
+      Polygon polygon, RasterizationParams params, ReferencedEnvelope geomExtent) {
 
     Map<Double, TreeSet<Double>> scanlineIntersections = new HashMap<>();
     List<LineString> allRings = new ArrayList<>();
@@ -755,10 +833,6 @@ public class Rasterization {
       LineString ring = allRings.get(r);
       Coordinate[] coords = ring.getCoordinates();
       int numPoints = coords.length;
-
-      if (allTouched) {
-        burnRingOutline(coords, r == 0, params, value);
-      }
 
       for (int i = 0; i < numPoints - 1; i++) {
         Coordinate worldP1 = coords[i];
@@ -825,6 +899,51 @@ public class Rasterization {
       }
     }
     return scanlineIntersections;
+  }
+
+  /** Burns the outline of every polygon of a polygonal geometry, for allTouched. */
+  private static void burnOutlines(Geometry polygonal, RasterizationParams params, double value) {
+    for (int i = 0; i < polygonal.getNumGeometries(); i++) {
+      Geometry part = polygonal.getGeometryN(i);
+      if (!(part instanceof Polygon) || part.isEmpty()) {
+        continue;
+      }
+      Polygon polygon = (Polygon) part;
+      burnRingOutline(polygon.getExteriorRing().getCoordinates(), true, params, value);
+      for (int r = 0; r < polygon.getNumInteriorRing(); r++) {
+        burnRingOutline(polygon.getInteriorRingN(r).getCoordinates(), false, params, value);
+      }
+    }
+  }
+
+  /**
+   * Burns the cells beside the edges of a clipped polygon that run along a side of the window it
+   * was clipped to, for allTouched. Such an edge lies on a grid line, and the polygon is on the
+   * window's side of it.
+   */
+  private static void burnWindowEdges(
+      Geometry clipped, ReferencedEnvelope window, RasterizationParams params, double value) {
+    GridLineWalker walker = params.lineWalker();
+    GridLineWalker.CellVisitor burn = (col, row) -> params.burnRasterCell(col, row, value);
+    for (Object polygon : PolygonExtracter.getPolygons(clipped)) {
+      Polygon part = (Polygon) polygon;
+      for (int r = -1; r < part.getNumInteriorRing(); r++) {
+        Coordinate[] coords =
+            (r < 0 ? part.getExteriorRing() : part.getInteriorRingN(r)).getCoordinates();
+        for (int i = 0; i < coords.length - 1; i++) {
+          Coordinate a = coords[i];
+          Coordinate b = coords[i + 1];
+          if (a.x == b.x && (a.x == window.getMinX() || a.x == window.getMaxX())) {
+            walker.walk(a.x, a.y, b.x, b.y, a.x == window.getMaxX(), false, burn);
+          } else if (a.y == b.y && (a.y == window.getMinY() || a.y == window.getMaxY())) {
+            // Pixel y grows with world y only on a bottom-up raster.
+            boolean windowTowardsPositiveWorldY = a.y == window.getMinY();
+            walker.walk(
+                a.x, a.y, b.x, b.y, false, windowTowardsPositiveWorldY != params.bottomUp, burn);
+          }
+        }
+      }
+    }
   }
 
   /**

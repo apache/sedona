@@ -45,7 +45,8 @@ import java.math.RoundingMode;
  * each cell corner lies. Both the cell of a coordinate and the side of a corner are first computed
  * in double precision together with a bound on the error; only when the bound cannot settle the
  * answer, or the coordinates overflow, is it recomputed exactly in decimal arithmetic. Ordinary
- * segments therefore allocate nothing.
+ * segments therefore allocate nothing, and neither does a segment whose ends are both beyond the
+ * same side of the grid, whatever its coordinates.
  *
  * <p>An instance holds the state of one walk at a time and is not thread-safe.
  */
@@ -79,7 +80,9 @@ final class GridLineWalker {
 
   /** One endpoint of the segment being walked. */
   private static final class End {
-    boolean loaded;
+    // Whether the world and double-precision pixel coordinates are set, and whether the exact
+    // floors are.
+    boolean placed, resolved;
     // World coordinates.
     double wx, wy;
     // Pixel coordinates in double precision, and bounds on their distance from the exact ones.
@@ -183,11 +186,11 @@ final class GridLineWalker {
    *
    * <p>These are the cells {@link #walk(double, double, double, double, boolean, boolean,
    * CellVisitor)} visits, and also the cells the segment meets at a single point when that point
-   * belongs to them under the half-open rule. The ends of the segment are ordered by pixel: the
-   * first is the end in the smaller column of cells, or the end with the smaller row when both are
-   * in the same column. The part of the segment inside the grid is taken without its last point;
-   * every other point of it selects the cell [col, col + 1) x [row, row + 1) containing it. Beyond
-   * the cells the segment passes through, this adds:
+   * belongs to them under the half-open rule. The ends of the segment are ordered by their pixel
+   * coordinates: the first is the end with the smaller pixel x, or, for a segment along a column,
+   * the end with the smaller pixel y. The part of the segment inside the grid is taken without its
+   * last point; every other point of it selects the cell [col, col + 1) x [row, row + 1) containing
+   * it. Beyond the cells the segment passes through, this adds:
    *
    * <ul>
    *   <li>where the segment crosses a grid corner exactly, the cell after that corner, which is one
@@ -196,9 +199,15 @@ final class GridLineWalker {
    *       when that point lies on a row line and the segment runs from it towards smaller rows.
    * </ul>
    *
-   * <p>GDAL computes the same set in double precision with tolerances: it treats a segment within
-   * 0.01 pixel of vertical or horizontal as exactly so, and trims 0.0001 pixel off the far end of
-   * such a segment. This walk has no tolerance, so it differs from GDAL for those segments.
+   * <p>A part that is a single point is its own last point: a segment that meets the grid only at
+   * one point of its edge visits nothing, even when that point is the segment's first.
+   *
+   * <p>This is the order of GDAL 3.11 and later. Earlier versions ordered the ends of a sloped
+   * segment that stays within one column of cells by row instead, and so did not visit the cell
+   * containing its first point. GDAL also computes the set in double precision with tolerances: it
+   * treats a segment within 0.01 pixel of vertical or horizontal as exactly so, and trims 0.0001
+   * pixel off the far end of such a segment. This walk has no tolerance, so it differs from GDAL
+   * for those segments.
    */
   void walkTouched(double x0, double y0, double x1, double y1, CellVisitor visitor) {
     walk(x0, y0, x1, y1, false, false, true, visitor);
@@ -220,14 +229,21 @@ final class GridLineWalker {
       return;
     }
     // Consecutive segments of a line share a vertex; keep what is already known about it.
-    if (head.loaded && head.wx == x0 && head.wy == y0) {
+    if (head.placed && head.wx == x0 && head.wy == y0) {
       End shared = head;
       head = tail;
       tail = shared;
     } else {
-      load(tail, x0, y0);
+      place(tail, x0, y0);
     }
-    load(head, x1, y1);
+    place(head, x1, y1);
+    if (beyondOneSideOfTheGrid()) {
+      // Most segments of a geometry much larger than the raster end here, before anything exact
+      // is computed for them.
+      return;
+    }
+    resolve(tail);
+    resolve(head);
 
     // Shortest decimals keep the order of the doubles they stand for, so comparing the doubles
     // gives the exact direction.
@@ -260,9 +276,9 @@ final class GridLineWalker {
       return;
     }
 
-    // The first point of the segment in pixel order is its end in the smaller column of cells, or
-    // its end with the smaller row when both ends are in the same column.
-    boolean firstIsHead = tail.fx != head.fx ? stepX < 0 : (stepY < 0 || (stepY == 0 && stepX < 0));
+    // The first point of the segment in pixel order is its end with the smaller pixel x, or, for a
+    // segment along a column, its end with the smaller pixel y.
+    boolean firstIsHead = stepX != 0 ? stepX < 0 : stepY < 0;
 
     if (!findEntry(false, tailCol, tailRow)) {
       return;
@@ -288,8 +304,8 @@ final class GridLineWalker {
 
     // Both cells are on the grid and the walk between them is monotone, so it stays on the grid
     // and takes at most width + height steps. The bound only guards against an endless loop.
-    int maxSteps = width + height + 2;
-    for (int i = 0; i <= maxSteps; i++) {
+    long maxSteps = (long) width + height + 2;
+    for (long i = 0; i <= maxSteps; i++) {
       visitor.visit(col, row);
       if (col == endCol && row == endRow) {
         break;
@@ -493,20 +509,47 @@ final class GridLineWalker {
     return onGridLine && extendsNegative ? floor - 1 : floor;
   }
 
-  private void load(End end, double wx, double wy) {
-    end.loaded = true;
+  /** Sets an endpoint's world coordinates and its pixel coordinates in double precision. */
+  private void place(End end, double wx, double wy) {
+    end.placed = true;
+    end.resolved = false;
     end.wx = wx;
     end.wy = wy;
     end.nx = null;
     end.ny = null;
     end.px = (wx - originX) / scaleX;
     end.ex = Math.abs(wx) * errorPerWorldX + errorOfOriginX + Math.abs(end.px) * PIXEL_ROUNDING;
-    end.fx = floor(end.px, end.ex, end, true);
-    end.ix = integral;
     end.py = (wy - originY) / scaleY;
     end.ey = Math.abs(wy) * errorPerWorldY + errorOfOriginY + Math.abs(end.py) * PIXEL_ROUNDING;
+  }
+
+  /**
+   * Finds the cell of an endpoint. This is exact, and for a coordinate on a grid line, or within
+   * rounding error of one, it takes decimal arithmetic.
+   */
+  private void resolve(End end) {
+    if (end.resolved) {
+      return;
+    }
+    end.resolved = true;
+    end.fx = floor(end.px, end.ex, end, true);
+    end.ix = integral;
     end.fy = floor(end.py, end.ey, end, false);
     end.iy = integral;
+  }
+
+  /**
+   * Whether both endpoints lie strictly before the grid's first column line, or strictly after its
+   * last, or the same for its rows, so that the segment cannot reach a cell. The test is on the
+   * double-precision pixel coordinates and their error bounds, and it is conservative: an endpoint
+   * on one of those lines, or too close to one to tell, is left to the exact test that follows.
+   */
+  private boolean beyondOneSideOfTheGrid() {
+    // Written so that a NaN or infinite coordinate or bound is left to the exact test.
+    return (tail.px + tail.ex < 0 && head.px + head.ex < 0)
+        || (tail.px - tail.ex > width && head.px - head.ex > width)
+        || (tail.py + tail.ey < 0 && head.py + head.ey < 0)
+        || (tail.py - tail.ey > height && head.py - head.ey > height);
   }
 
   /** Floor of the exact pixel coordinate; sets {@link #integral} to whether it is whole. */

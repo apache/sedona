@@ -21,13 +21,14 @@ package org.apache.sedona.common.raster;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.management.ManagementFactory;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.TreeSet;
+import org.junit.Assume;
 import org.junit.Test;
 
 public class GridLineWalkerTest {
@@ -309,13 +310,9 @@ public class GridLineWalkerTest {
       // Outside the grid, or meeting it at a single point.
       return cells;
     }
-    // The first end in pixel order: the one in the smaller column of cells, or the one with the
-    // smaller row when both are in the same column.
-    boolean sameColumn =
-        nx0.divide(scaleX, 0, RoundingMode.FLOOR)
-                .compareTo(nx1.divide(scaleX, 0, RoundingMode.FLOOR))
-            == 0;
-    boolean firstIsTail = sameColumn ? (stepY > 0 || (stepY == 0 && stepX > 0)) : stepX > 0;
+    // The first end in pixel order: the one with the smaller pixel x, or, for a segment along a
+    // column, the one with the smaller pixel y.
+    boolean firstIsTail = stepX != 0 ? stepX > 0 : stepY > 0;
     Span part =
         firstIsTail
             ? new Span(inside.from, false, inside.to, true)
@@ -527,9 +524,9 @@ public class GridLineWalkerTest {
 
   @Test
   public void touchedSegmentCrossingGridCorners() {
-    // GH-3322. Each expectation is what GDAL 3.10 burns with ALL_TOUCHED on the same grid. These
-    // segments run towards smaller rows through the corners (3,17), (4,16), ..., (9,11); at each
-    // the cell after the corner, which the segment meets only there, is touched as well.
+    // GH-3322. Each expectation is what GDAL 3.10 and 3.12 burn with ALL_TOUCHED on the same grid.
+    // These segments run towards smaller rows through the corners (3,17), (4,16), ..., (9,11); at
+    // each the cell after the corner, which the segment meets only there, is touched as well.
     Grid north = new Grid(20, 20, 0, 20, 1, -1);
     assertEquals(8, walk(north.walker(), north, 2.5, 2.5, 9.5, 9.5, false, false).size());
     assertEquals(
@@ -561,8 +558,8 @@ public class GridLineWalkerTest {
 
   @Test
   public void touchedSegmentEndingOnGridLines() {
-    // GH-3322. Each expectation is what GDAL 3.10 burns with ALL_TOUCHED on the same grid. The
-    // first point of a segment in pixel order selects the cell containing it; the last selects
+    // GH-3322. Each expectation is what GDAL 3.10 and 3.12 burn with ALL_TOUCHED on the same grid.
+    // The first point of a segment in pixel order selects the cell containing it; the last selects
     // nothing.
     // From the corner (3,3) towards smaller rows: the corner's own cell (3,3) is touched.
     assertEquals("[(4,1), (3,2), (4,2), (3,3)]", touchedCells(UNIT, 3, 3, 4.5, 4.5));
@@ -575,18 +572,125 @@ public class GridLineWalkerTest {
     assertEquals("[(1,1), (2,1), (2,2), (3,2)]", touchedCells(UNIT, 1.5, 4.5, 3.8, 3));
     // Starting on a row line and running towards smaller rows: the cell after the line too.
     assertEquals("[(3,2), (4,2), (3,3)]", touchedCells(UNIT, 3.5, 3, 4.5, 3.9));
-    // Within one column of cells the ends are ordered by row instead, so the end on the row line
-    // is the last point and selects nothing.
-    assertEquals("[(3,2)]", touchedCells(UNIT, 3.5, 3, 3.9, 3.9));
     // Horizontal and vertical segments keep their first point's cell and drop their last.
     assertEquals("[(1,3), (2,3), (3,3)]", touchedCells(UNIT, 1.5, 2.5, 4, 2.5));
     assertEquals("[(2,1), (2,2), (2,3)]", touchedCells(UNIT, 2.5, 4.5, 2.5, 2));
     assertEquals("[(2,2), (2,3), (2,4)]", touchedCells(UNIT, 2.5, 1.5, 2.5, 4));
     // Coming into the grid through its left edge exactly at a row line.
     assertEquals("[(0,2), (1,2), (0,3)]", touchedCells(UNIT, -1, 2.5, 1.5, 3.75));
-    // Meeting the grid at a single point touches nothing.
+  }
+
+  @Test
+  public void touchedSegmentOrdersItsEndsByPixelX() {
+    // The first point is the end with the smaller pixel x, however short the segment is along x.
+    // This one stays within column 3 and leaves the row line y = 3 towards smaller rows: its left
+    // end is on the line, so the cell after the line is touched. GDAL burns the same two cells
+    // from 3.11 on; up to 3.10 it ordered the ends of a segment within one column of cells by row
+    // and burned only (3,2).
+    assertEquals("[(3,2), (3,3)]", touchedCells(UNIT, 3.5, 3, 3.9, 3.9));
+    assertEquals("[(3,2)]", cells(UNIT, 3.5, 3, 3.9, 3.9));
+    // Leaning the other way, the end on the row line is the right end: the last point.
+    assertEquals("[(3,2)]", touchedCells(UNIT, 3.5, 3, 3.1, 3.9));
+    // Only a segment along a column is ordered by pixel y, and its upper end comes first.
+    assertEquals("[(3,2)]", touchedCells(UNIT, 3.5, 3, 3.5, 3.9));
+    assertEquals("[(3,2), (3,3)]", touchedCells(UNIT, 3.5, 3.9, 3.5, 2.5));
+    // The same within one column of a bottom-up grid, where rows grow with y.
+    Grid bottomUp = new Grid(6, 6, 0, 0, 1, 1);
+    assertEquals("[(3,2), (3,3)]", touchedCells(bottomUp, 3.5, 3, 3.9, 2.1));
+    assertEquals("[(3,2)]", touchedCells(bottomUp, 3.5, 3, 3.1, 2.1));
+  }
+
+  @Test
+  public void touchedSegmentMeetingTheGridAtOnePoint() {
+    // The part of the segment inside the grid is one point, which is its last point as well as
+    // its first, so nothing is touched. This holds for a first point on the grid's first row
+    // line too, although a point there belongs to a cell of the first row: GDAL (3.10 and 3.12)
+    // burns nothing for these either.
     assertEquals("[]", touchedCells(UNIT, 2.5, 6, 4, 7.5));
+    assertEquals("[]", touchedCells(UNIT, 2.5, 6, 2.75, 7));
+    assertEquals("[]", touchedCells(UNIT, 2.5, 6, 2.5, 7));
+    assertEquals("[]", touchedCells(UNIT, 2.5, 6, 1, 7));
+    assertEquals("[]", touchedCells(UNIT, 0, 2.5, -1, 3));
     assertEquals("[]", touchedCells(UNIT, -1, 5, 1, 7));
+    // Running along the first row line instead of leaving it, the segment has a first point.
+    assertEquals("[(2,0), (3,0)]", touchedCells(UNIT, 2.5, 6, 4, 6));
+  }
+
+  @Test
+  public void segmentsBeyondOneSideOfTheGrid() {
+    // Both ends before the first column or row line, or after the last one: no cell, whether the
+    // ends are on grid nodes, between them or far away.
+    assertEquals("[]", cells(UNIT, -3, 1, -1, 5));
+    assertEquals("[]", cells(UNIT, -2.5, -4, -0.25, 30));
+    assertEquals("[]", cells(UNIT, 7, 1, 9, 5));
+    assertEquals("[]", cells(UNIT, 1, 7, 5, 9));
+    assertEquals("[]", cells(UNIT, 1, -1, 5, -3));
+    assertEquals("[]", cells(UNIT, 1e9, 2, 2e9, 4));
+    assertEquals("[]", touchedCells(UNIT, 7, 1, 9, 5));
+    // Ends on the last column and row lines are not beyond them, and still reach no cell. Ends on
+    // the first ones are in the first column and row.
+    assertEquals("[]", cells(UNIT, 6, 1, 8, 5));
+    assertEquals("[]", cells(UNIT, 1, 0, 5, -2));
+    assertEquals("[(0,1), (0,2), (0,3), (0,4)]", cells(UNIT, 0, 1.5, 0, 4.5));
+    assertEquals("[(0,3)]", cells(UNIT, -3, 1, 0.5, 2.5));
+    // A segment with its ends beyond two different sides can still cross the grid.
+    assertEquals("[(0,4), (0,5), (1,5)]", cells(UNIT, -1, 2.5, 2.5, -1));
+    // The walker keeps a vertex shared with the next segment, also when it skipped the first one.
+    GridLineWalker walker = UNIT.walker();
+    assertEquals(new TreeSet<Integer>(), walk(walker, UNIT, -3, 1, -1, 2.5, false, false));
+    assertEquals(
+        oracle(UNIT, -1, 2.5, 2.5, 2.5, false, false),
+        walk(walker, UNIT, -1, 2.5, 2.5, 2.5, false, false));
+  }
+
+  @Test
+  public void segmentsBeyondTheGridNeedNoDecimalArithmetic() {
+    // A line much larger than the raster has most of its vertices outside it. Finding the cell of
+    // a vertex on a grid node takes decimal arithmetic, which allocates; a segment with both ends
+    // beyond the same side of the grid has to be skipped before that. The 200,000 segments here
+    // allocated 97 MB when every vertex was resolved first.
+    java.lang.management.ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+    Assume.assumeTrue(bean instanceof com.sun.management.ThreadMXBean);
+    com.sun.management.ThreadMXBean threads = (com.sun.management.ThreadMXBean) bean;
+    Assume.assumeTrue(threads.isThreadAllocatedMemorySupported());
+    Assume.assumeTrue(threads.isThreadAllocatedMemoryEnabled());
+
+    Grid tile = new Grid(256, 256, 500000, 4100000, 30, -30);
+    GridLineWalker walker = tile.walker();
+    int[] visited = new int[1];
+    GridLineWalker.CellVisitor count = (col, row) -> visited[0]++;
+    long thread = Thread.currentThread().getId();
+    long before = threads.getThreadAllocatedBytes(thread);
+    // A staircase along grid nodes east of the tile, within its rows.
+    for (int i = 0; i < 100000; i++) {
+      double x = tile.originX + 30.0 * (300 + i);
+      double y = tile.originY - 30.0 * (i % 200);
+      walker.walk(x, y, x + 30, y, false, false, count);
+      walker.walk(x + 30, y, x + 30, y - 30, false, false, count);
+    }
+    long allocated = threads.getThreadAllocatedBytes(thread) - before;
+    assertEquals(0, visited[0]);
+    assertTrue("allocated " + allocated + " bytes", allocated < (1 << 20));
+  }
+
+  @Test
+  public void gridLargerThanTheIntRange() {
+    // The walk is bounded by width + height steps, a sum that does not fit an int here.
+    Grid huge = new Grid(Integer.MAX_VALUE, Integer.MAX_VALUE, 0, 0, 1, 1);
+    List<String> visited = new ArrayList<>();
+    huge.walker()
+        .walk(0.5, 0.5, 3.5, 2.5, false, false, (col, row) -> visited.add(col + "," + row));
+    assertEquals("[0,0, 1,0, 1,1, 2,1, 2,2, 3,2]", visited.toString());
+    visited.clear();
+    huge.walker()
+        .walkTouched(
+            2147483640.5,
+            2147483646.5,
+            2147483649.5,
+            2147483646.5,
+            (col, row) -> visited.add(col + "," + row));
+    assertEquals(7, visited.size());
+    assertEquals("2147483646,2147483646", visited.get(6));
   }
 
   @Test
