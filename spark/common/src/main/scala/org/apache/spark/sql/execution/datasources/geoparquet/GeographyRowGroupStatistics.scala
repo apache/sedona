@@ -94,17 +94,23 @@ object GeographyRowGroupStatistics extends Logging {
    */
   case class Column(box: Option[Array[Double]], types: Set[Int])
 
-  /**
-   * The key of the Parquet library that turns the statistics of the columns on and off, and with
-   * `#` and the name of a column after it those of that column.
-   */
+  /** The key of the Parquet library that turns the statistics of the columns on and off. */
   private val STATISTICS_ENABLED = "parquet.column.statistics.enabled"
 
-  /** Whether a write with `configuration` collects the statistics of `column`. */
-  def enabled(configuration: Configuration, column: String): Boolean =
-    library.isDefined && Option(configuration.get(STATISTICS_ENABLED + "#" + column))
-      .map(_.trim.toBoolean)
-      .getOrElse(configuration.getBoolean(STATISTICS_ENABLED, true))
+  /**
+   * Whether a write with `configuration` collects the statistics of `column`, a column at the
+   * root of the schema. It follows the switch of the Parquet library for the statistics of that
+   * column, as that library reads it.
+   */
+  def enabled(configuration: Configuration, column: String): Boolean = library.isDefined && {
+    // The key of one column has # and the path of the column after it, with a dot between the
+    // fields of the path. The path of a column at the root is its name, and a name with a dot
+    // is the path of a nested field, so such a column has no key of its own.
+    val key = STATISTICS_ENABLED + "#" + column
+    val ofColumn = !column.contains(".") && configuration.get(key) != null
+    // A value that is no boolean is the default of the Parquet library, which is true
+    configuration.getBoolean(if (ofColumn) key else STATISTICS_ENABLED, true)
+  }
 
   /**
    * The classes of the geospatial statistics, which parquet-java has since 1.16.0. Sedona also

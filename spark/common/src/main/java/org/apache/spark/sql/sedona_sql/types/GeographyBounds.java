@@ -18,12 +18,16 @@
  */
 package org.apache.spark.sql.sedona_sql.types;
 
+import com.google.common.geometry.R1Interval;
+import com.google.common.geometry.S1Interval;
+import com.google.common.geometry.S2;
 import com.google.common.geometry.S2EdgeUtil;
 import com.google.common.geometry.S2LatLng;
 import com.google.common.geometry.S2LatLngRect;
-import java.io.IOException;
-import org.apache.sedona.common.S2Geography.WKBReader;
-import org.locationtech.jts.io.InStream;
+import com.google.common.geometry.S2Loop;
+import com.google.common.geometry.S2Point;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The bounding box, in degrees of longitude and latitude, of geographies with edges on the sphere.
@@ -32,9 +36,9 @@ import org.locationtech.jts.io.InStream;
  * its western bound is above its eastern bound when it crosses the antimeridian.
  *
  * <p>A point is added from its coordinates, without an object for it. A line and a ring give their
- * vertices to the edge bounder of S2, which has the bounds of the edges between them. Only a
- * polygon whose ring spans half of all longitudes or more is read into its S2 form, which tells
- * which side of such a ring is the inside and whether a pole is in it.
+ * vertices to the edge bounder of S2, which has the bounds of the edges between them. Only a ring
+ * that spans half of all longitudes or more becomes a loop of S2, which tells which side of such a
+ * ring is the inside and whether a pole is in it.
  */
 public final class GeographyBounds {
   /**
@@ -46,9 +50,6 @@ public final class GeographyBounds {
 
   /** A little less than pi, so that rounding keeps a ring of half of all longitudes above it. */
   private static final double HALF_OF_ALL_LONGITUDES = Math.PI - 1e-9;
-
-  private final WKBReader reader = new WKBReader();
-  private final Slice slice = new Slice();
 
   // The points, by the sign of their longitude. The two ranges give the box of the points both
   // ways around the sphere, in the coordinates that the points have.
@@ -87,22 +88,14 @@ public final class GeographyBounds {
   public void add(byte[] wkb, int offset) {
     if (unknown) return;
     try {
-      if (!addShapes(wkb, offset)) {
-        slice.set(wkb, offset);
-        shapes = shapes.union(reader.read(slice).region().getRectBound());
-      }
-    } catch (Exception | AssertionError e) {
+      addShapes(wkb, offset);
+    } catch (RuntimeException | AssertionError e) {
       // Without the bounds of one geography there is no box for all of them
       unknown = true;
     }
   }
 
-  /**
-   * Adds the points, lines and polygons of a geography from their coordinates.
-   *
-   * @return false for a geography that has to be read into its S2 form instead
-   */
-  private boolean addShapes(byte[] wkb, int offset) {
+  private void addShapes(byte[] wkb, int offset) {
     int position = offset;
     long pending = 1;
     while (pending-- > 0) {
@@ -119,7 +112,7 @@ public final class GeographyBounds {
         case 2:
           {
             int count = readInt(wkb, position, little);
-            shapes = shapes.union(edges(wkb, position + 4, count, width, little));
+            shapes = shapes.union(edges(wkb, position + 4, count, width, little, false));
             position += 4 + count * width;
             break;
           }
@@ -131,13 +124,7 @@ public final class GeographyBounds {
               int count = readInt(wkb, position, little);
               // The polygon is within its first ring. The other rings are holes in it.
               if (ring == 0 && count > 0) {
-                S2LatLngRect bound = edges(wkb, position + 4, count, width, little);
-                // The inside of a ring is its smaller side. With edges over less than half of
-                // all longitudes that side has no pole, and it is within the bounds of the
-                // edges: the other side has every meridian that the edges do not reach, which
-                // is more than half of the sphere.
-                if (bound.lng().getLength() >= HALF_OF_ALL_LONGITUDES) return false;
-                shapes = shapes.union(bound);
+                shapes = shapes.union(ring(wkb, position + 4, count, width, little));
               }
               position += 4 + count * width;
             }
@@ -148,53 +135,118 @@ public final class GeographyBounds {
           position += 4;
       }
     }
-    return true;
   }
 
-  /** The bounds of the edges between {@code count} vertices in a row. */
-  private static S2LatLngRect edges(
-      byte[] wkb, int position, int count, int width, boolean little) {
-    if (count == 0) return S2LatLngRect.empty();
-    S2EdgeUtil.RectBounder bounder = new S2EdgeUtil.RectBounder();
+  /**
+   * The bounds of the edges between {@code count} vertices in a row, and with {@code close} of the
+   * edge from the last of them to the first. A vertex with a coordinate that is not a number has no
+   * edge, and gives its other coordinate as a point does.
+   */
+  private S2LatLngRect edges(
+      byte[] wkb, int position, int count, int width, boolean little, boolean close) {
+    S2EdgeUtil.RectBounder bounder = null;
+    S2LatLng first = null;
     for (int at = position, end = position + count * width; at < end; at += width) {
-      bounder.addPoint(
-          S2LatLng.fromDegrees(readDouble(wkb, at + 8, little), readDouble(wkb, at, little)));
+      double longitude = readDouble(wkb, at, little);
+      double latitude = readDouble(wkb, at + 8, little);
+      if (Double.isNaN(longitude) || Double.isNaN(latitude)) {
+        addPoint(longitude, latitude);
+      } else {
+        S2LatLng vertex = S2LatLng.fromDegrees(latitude, longitude);
+        if (bounder == null) {
+          bounder = new S2EdgeUtil.RectBounder();
+          first = vertex;
+        }
+        bounder.addPoint(vertex);
+      }
     }
+    if (bounder == null) return S2LatLngRect.empty();
+    if (close) bounder.addPoint(first);
     return bounder.getBound();
   }
 
-  private void addPoint(double longitude, double latitude) {
-    // The coordinates of an empty point are not numbers
-    if (Double.isNaN(longitude) || Double.isNaN(latitude)) return;
-    if (longitude < 0) {
-      if (longitude < westMin) westMin = longitude;
-      if (longitude > westMax) westMax = longitude;
-    } else {
-      if (longitude < eastMin) eastMin = longitude;
-      if (longitude > eastMax) eastMax = longitude;
+  /** The bounds of the inside of a ring. */
+  private S2LatLngRect ring(byte[] wkb, int position, int count, int width, boolean little) {
+    // The last vertex of a ring of WKB repeats the first. Sedona's own writer of the WKB of a
+    // geography leaves it out, and the ring still has the edge from its last vertex to its first.
+    int last = position + (count - 1) * width;
+    boolean open =
+        readDouble(wkb, position, little) != readDouble(wkb, last, little)
+            || readDouble(wkb, position + 8, little) != readDouble(wkb, last + 8, little);
+    S2LatLngRect bound = edges(wkb, position, count, width, little, open);
+    // The inside of a ring is its smaller side. With edges over less than half of all longitudes
+    // that side has no pole, and it is within the bounds of the edges: the other side has every
+    // meridian that the edges do not reach, which is more than half of the sphere.
+    if (bound.lng().getLength() < HALF_OF_ALL_LONGITUDES) return bound;
+
+    List<S2Point> vertices = new ArrayList<>(count);
+    for (int at = position, end = position + count * width; at < end; at += width) {
+      double longitude = readDouble(wkb, at, little);
+      double latitude = readDouble(wkb, at + 8, little);
+      if (Double.isNaN(longitude) || Double.isNaN(latitude)) continue;
+      S2Point vertex = S2LatLng.fromDegrees(latitude, longitude).toPoint();
+      // A loop of S2 has no vertex twice in a row
+      if (vertices.isEmpty() || !vertex.equalsPoint(vertices.get(vertices.size() - 1))) {
+        vertices.add(vertex);
+      }
     }
-    if (latitude < latMin) latMin = latitude;
-    if (latitude > latMax) latMax = latitude;
-    // The antimeridian is longitude 180 and longitude -180
-    if (longitude == 180 || longitude == -180) antimeridian = true;
+    while (vertices.size() > 1 && vertices.get(vertices.size() - 1).equalsPoint(vertices.get(0))) {
+      vertices.remove(vertices.size() - 1);
+    }
+    // Without three vertices a ring has no inside
+    if (vertices.size() < 3) return bound;
+    S2Loop loop = new S2Loop(vertices);
+    double turning = loop.getTurningAngle();
+    // The turning angle of a ring that halves the sphere is zero, and rounding gives it either
+    // sign. Sedona does not read the inside of such a ring the same way everywhere, and its two
+    // sides together are the sphere.
+    if (Math.abs(turning) <= 4 * S2.getTurningAngleMaxError(vertices.size())) {
+      return S2LatLngRect.full();
+    }
+    // The inside of a loop of S2 is on its left. A negative turning angle has the larger side
+    // there.
+    if (turning < 0) loop.invert();
+    return loop.getRectBound();
+  }
+
+  /**
+   * Adds the coordinates of a point. One that is not a number is left out by itself, as the Parquet
+   * format has it, and both of them are no numbers for an empty point.
+   */
+  private void addPoint(double longitude, double latitude) {
+    if (!Double.isNaN(longitude)) {
+      if (longitude < 0) {
+        if (longitude < westMin) westMin = longitude;
+        if (longitude > westMax) westMax = longitude;
+      } else {
+        if (longitude < eastMin) eastMin = longitude;
+        if (longitude > eastMax) eastMax = longitude;
+      }
+      // The antimeridian is longitude 180 and longitude -180
+      if (longitude == 180 || longitude == -180) antimeridian = true;
+    }
+    if (!Double.isNaN(latitude)) {
+      if (latitude < latMin) latMin = latitude;
+      if (latitude > latMax) latMax = latitude;
+    }
   }
 
   /**
    * The box of the geographies added since the last {@link #reset}.
    *
-   * @return the western, eastern, southern and northern bound in this order, or null when no
-   *     geography with a coordinate was added or one of them could not be read. The western bound
-   *     is above the eastern bound for a box that crosses the antimeridian.
+   * @return the western, eastern, southern and northern bound in this order, or null when the
+   *     geographies have no longitude or no latitude, or one of them could not be read. The western
+   *     bound is above the eastern bound for a box that crosses the antimeridian.
    */
   public double[] box() {
     if (unknown) return null;
-    boolean points = latMin <= latMax;
-    if (!points && shapes.isEmpty()) return null;
+    boolean hasWest = westMin <= westMax;
+    boolean hasEast = eastMin <= eastMax;
+    boolean longitudes = hasWest || hasEast;
+    boolean latitudes = latMin <= latMax;
     double west = 0;
     double east = 0;
-    if (points) {
-      boolean hasWest = westMin <= westMax;
-      boolean hasEast = eastMin <= eastMax;
+    if (longitudes) {
       west = hasWest ? westMin : eastMin;
       east = hasEast ? eastMax : westMax;
       // The other way around the sphere, across the antimeridian, when that is the shorter one
@@ -202,14 +254,24 @@ public final class GeographyBounds {
         west = eastMin;
         east = westMax;
       }
-      if (shapes.isEmpty() && !antimeridian) return new double[] {west, east, latMin, latMax};
+    }
+    if (shapes.isEmpty()) {
+      // A box has both dimensions
+      if (!longitudes || !latitudes) return null;
+      if (!antimeridian) return new double[] {west, east, latMin, latMax};
     }
     S2LatLngRect all = shapes;
-    if (points) {
-      all =
-          all.union(
-              new S2LatLngRect(
-                  S2LatLng.fromDegrees(latMin, west), S2LatLng.fromDegrees(latMax, east)));
+    if (longitudes || latitudes) {
+      // Points of which only one coordinate is a number widen that dimension alone
+      R1Interval latitude =
+          latitudes
+              ? new R1Interval(radians(latMin, S2.M_PI_2), radians(latMax, S2.M_PI_2))
+              : shapes.lat();
+      S1Interval longitude =
+          longitudes
+              ? new S1Interval(radians(west, S2.M_PI), radians(east, S2.M_PI))
+              : shapes.lng();
+      all = all.union(new S2LatLngRect(latitude, longitude));
     }
     all = all.expanded(S2LatLng.fromRadians(MARGIN, MARGIN));
     double south = Math.max(-90, all.latLo().degrees());
@@ -221,6 +283,10 @@ public final class GeographyBounds {
       south,
       north
     };
+  }
+
+  private static double radians(double degrees, double limit) {
+    return Math.max(-limit, Math.min(limit, Math.toRadians(degrees)));
   }
 
   private static int readInt(byte[] bytes, int at, boolean little) {
@@ -237,26 +303,5 @@ public final class GeographyBounds {
       value = value << 8 | (bytes[little ? at + 7 - i : at + i] & 0xffL);
     }
     return Double.longBitsToDouble(value);
-  }
-
-  /** The bytes of an array from an offset on, for a reader of WKB. */
-  private static final class Slice implements InStream {
-    private byte[] bytes;
-    private int position;
-
-    void set(byte[] bytes, int offset) {
-      this.bytes = bytes;
-      this.position = offset;
-    }
-
-    @Override
-    public int read(byte[] buffer) throws IOException {
-      if (buffer.length > bytes.length - position) {
-        throw new IOException("The WKB ends before the geography does");
-      }
-      System.arraycopy(bytes, position, buffer, 0, buffer.length);
-      position += buffer.length;
-      return buffer.length;
-    }
   }
 }

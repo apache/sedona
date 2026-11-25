@@ -18,6 +18,8 @@
  */
 package org.apache.spark.sql.sedona_sql.types
 
+import java.nio.{ByteBuffer, ByteOrder}
+
 import scala.util.{Random, Try}
 
 import com.google.common.geometry.{S1Interval, S2LatLngRect}
@@ -36,6 +38,39 @@ class GeographyBoundsTest extends AnyFunSuite {
   private def box(wkts: String*): Seq[Double] = {
     val bounds = new GeographyBounds
     wkts.foreach(wkt => add(bounds, wkb(wkt)))
+    Option(bounds.box()).map(_.toSeq).orNull
+  }
+
+  /** The WKB of a point with any coordinates, also ones that are not numbers. */
+  private def pointWkb(x: Double, y: Double): Array[Byte] =
+    ByteBuffer
+      .allocate(21)
+      .order(ByteOrder.LITTLE_ENDIAN)
+      .put(1.toByte)
+      .putInt(1)
+      .putDouble(x)
+      .putDouble(y)
+      .array()
+
+  /**
+   * The WKB of a line or a polygon with the vertices of `rings` as they are given: a ring is not
+   * closed for the caller, and a coordinate may be no number.
+   */
+  private def shapeWkb(typeCode: Int, rings: Seq[(Double, Double)]*): Array[Byte] = {
+    val size = 5 + (if (typeCode == 3) 4 else 0) + rings.map(4 + _.size * 16).sum
+    val buffer = ByteBuffer.allocate(size).order(ByteOrder.LITTLE_ENDIAN)
+    buffer.put(1.toByte).putInt(typeCode)
+    if (typeCode == 3) buffer.putInt(rings.size)
+    rings.foreach { ring =>
+      buffer.putInt(ring.size)
+      ring.foreach { case (x, y) => buffer.putDouble(x).putDouble(y) }
+    }
+    buffer.array()
+  }
+
+  private def boxOf(wkbs: Array[Byte]*): Seq[Double] = {
+    val bounds = new GeographyBounds
+    wkbs.foreach(add(bounds, _))
     Option(bounds.box()).map(_.toSeq).orNull
   }
 
@@ -257,5 +292,50 @@ class GeographyBoundsTest extends AnyFunSuite {
         "GEOMETRYCOLLECTION (POLYGON ((-5 -5, 7 -5, 7 8, -5 -5))))",
       1e-9)
     assertCovers("MULTILINESTRING ((0 50, 90 50), (-100 -20, -110 -30))", 1e-9)
+  }
+
+  test(
+    "is the whole sphere for a ring that halves the sphere, whose inside Sedona reads both ways") {
+    // The four vertices are on one great circle, so the two sides of the ring are of one size.
+    // Sedona's functions do not agree on the side that is the inside of such a ring.
+    val sphere = Seq(-180.0, 180.0, -90.0, 90.0)
+    assert(box("POLYGON ((0 0, 90 10, 180 0, -90 -10, 0 0))") == sphere)
+    assert(box("POLYGON ((0 0, -90 -10, 180 0, 90 10, 0 0))") == sphere)
+    // The equator
+    assert(box("POLYGON ((0 0, 90 0, 180 0, -90 0, 0 0))") == sphere)
+  }
+
+  test("has the edge that closes a ring whose last vertex is not its first") {
+    // Sedona's own writer of the WKB of a geography leaves the last vertex of a ring out. The
+    // edge between the two vertices on the 50th parallel reaches atan(tan(50) / cos(60)).
+    val north = math.toDegrees(math.atan(math.tan(math.toRadians(50)) / 0.5))
+    val open = boxOf(shapeWkb(3, Seq((-60.0, 50.0), (0.0, -10.0), (60.0, 50.0))))
+    assert(open(3) >= north && open(3) < north + 1e-6)
+    assert(open == box("POLYGON ((-60 50, 0 -10, 60 50, -60 50))"))
+    // A ring around the pole, which takes the other way to its bounds
+    val pole = boxOf(shapeWkb(3, Seq((0.0, 80.0), (90.0, 80.0), (180.0, 80.0), (-90.0, 80.0))))
+    assert(pole == box("POLYGON ((0 80, 90 80, 180 80, -90 80, 0 80))"))
+    assert(pole(3) == 90)
+    // The line of the same vertices has no such edge
+    val line = boxOf(shapeWkb(2, Seq((-60.0, 50.0), (0.0, -10.0), (60.0, 50.0))))
+    assert(line(3) < 51)
+  }
+
+  test("takes a coordinate that is a number from a point whose other coordinate is none") {
+    val nan = Double.NaN
+    assert(boxOf(pointWkb(75, nan), pointWkb(10, 20)) == Seq(10.0, 75.0, 20.0, 20.0))
+    assert(boxOf(pointWkb(nan, 30), pointWkb(10, 20)) == Seq(10.0, 10.0, 20.0, 30.0))
+    assert(boxOf(pointWkb(75, nan), pointWkb(nan, 30)) == Seq(75.0, 75.0, 30.0, 30.0))
+    // A box has both dimensions
+    assert(boxOf(pointWkb(75, nan)) == null)
+    assert(boxOf(pointWkb(nan, 30)) == null)
+    // With a line, whose bounds S2 gives
+    val withLine = boxOf(pointWkb(75, nan), wkb("LINESTRING (10 20, 30 40)"))
+    assert(near(withLine(0), 10) && near(withLine(1), 75))
+    assert(near(withLine(2), 20) && near(withLine(3), 40))
+    // A vertex of a line, which takes no part in the edges of the line
+    val vertex = boxOf(shapeWkb(2, Seq((10.0, 20.0), (75.0, nan), (30.0, 40.0))))
+    assert(near(vertex(0), 10) && near(vertex(1), 75))
+    assert(near(vertex(2), 20) && near(vertex(3), 40))
   }
 }

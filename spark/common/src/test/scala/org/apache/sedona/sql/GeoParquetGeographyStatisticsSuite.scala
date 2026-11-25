@@ -25,10 +25,11 @@ import org.apache.commons.io.FileUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.parquet.hadoop.ParquetFileReader
-import org.apache.parquet.hadoop.metadata.ColumnChunkMetaData
+import org.apache.parquet.hadoop.metadata.{ColumnChunkMetaData, ColumnPath}
 import org.apache.parquet.hadoop.util.HadoopInputFile
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.execution.datasources.geoparquet.{GeographyRowGroupStatistics, ParquetGeospatialTypes}
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 
 import scala.collection.JavaConverters._
 import scala.util.Random
@@ -78,7 +79,8 @@ class GeoParquetGeographyStatisticsSuite extends TestBaseScala {
     def number(box: AnyRef, name: String): Double =
       box.getClass.getMethod(name).invoke(box).asInstanceOf[Double]
     blocks.map { block =>
-      val chunk = block.getColumns.asScala.find(_.getPath.toDotString == column).get
+      // A column at the root, whose name may have a dot
+      val chunk = block.getColumns.asScala.find(_.getPath == ColumnPath.get(column)).get
       val found = Option(statistics.invoke(chunk))
       val box = found
         .flatMap(value => Option(value.getClass.getMethod("getBoundingBox").invoke(value)))
@@ -301,6 +303,79 @@ class GeoParquetGeographyStatisticsSuite extends TestBaseScala {
             path,
             "parquet.column.statistics.enabled#geography" -> "false")
           assert(rowGroups(path) == Seq(RowGroup(1, None, Set.empty)))
+        }
+      }
+
+      it("has the points that ST_Intersects finds in a polygon in the box of the polygon") {
+        // A ring on a great circle, whose two sides are of one size, in both directions, and a
+        // ring that Sedona's own writer left open: its last edge is between its last vertex and
+        // its first, and goes north of both
+        // POLYGON ((-60 50, 0 -10, 60 50)), with no fourth vertex
+        val open = "010300000001000000030000000000000000004EC00000000000004940" +
+          "000000000000000000000000000024C00000000000004E400000000000004940"
+        val cases = Seq(
+          "ST_GeogFromWKT('POLYGON ((0 0, 90 10, 180 0, -90 -10, 0 0))', 4326)" -> "POINT (0 85)",
+          "ST_GeogFromWKT('POLYGON ((0 0, 90 10, 180 0, -90 -10, 0 0))', 4326)" -> "POINT (0 -85)",
+          "ST_GeogFromWKT('POLYGON ((0 0, -90 -10, 180 0, 90 10, 0 0))', 4326)" -> "POINT (0 85)",
+          "ST_GeogFromWKT('POLYGON ((0 0, -90 -10, 180 0, 90 10, 0 0))', 4326)" -> "POINT (0 -85)") ++ {
+          // Spark's native geography type does not take a ring that is not closed
+          if (SpatialTypeSupport.usesNativeTypes) Seq.empty
+          else Seq(s"ST_GeogFromWKB(unhex('$open'))" -> "POINT (0 60)")
+        }
+        cases.foreach { case (polygon, point) =>
+          withDirectory { directory =>
+            val path = new File(directory, "data").getPath
+            writeVersion2(sparkSession.sql(s"SELECT 1 AS id, $polygon AS geography"), path)
+            val matched = sparkSession.read
+              .format("geoparquet")
+              .load(path)
+              .where(s"ST_Intersects(geography, ST_GeogFromWKT('$point', 4326))")
+              .count()
+            val Array(x, y) =
+              point.stripPrefix("POINT (").stripSuffix(")").split(" ").map(_.toDouble)
+            val box = rowGroups(path).head.box.get
+            assert(matched == 0 || box.contains(x, y), s"$box of $polygon has no $point")
+            // The point is north of the vertices of the open ring, and within its last edge
+            assert(matched == 1 || !polygon.contains(open), s"$polygon has no $point")
+          }
+        }
+      }
+
+      it("takes the switch of the statistics of a column from the path that the key names") {
+        withDirectory { directory =>
+          val path = new File(directory, "data").getPath
+          // The Parquet library reads sample.location as the field location of the column
+          // sample, and not as the column of that name
+          writeVersion2(
+            sparkSession.sql("""SELECT 1 AS id, named_struct('location', 7) AS sample,
+                |ST_GeogFromWKT('POINT (23 45)', 4326) AS `sample.location`""".stripMargin),
+            path,
+            "parquet.column.statistics.enabled" -> "false",
+            "parquet.column.statistics.enabled#sample.location" -> "true")
+          assert(rowGroups(path, "sample.location") == Seq(RowGroup(1, None, Set.empty)))
+        }
+      }
+
+      it("reads the value of the switch of the statistics as the Parquet library reads it") {
+        // A value that is no boolean leaves the statistics on, as they are without the key
+        Seq("", "yes", " TRUE ").foreach { value =>
+          withDirectory { directory =>
+            val path = new File(directory, "data").getPath
+            writeVersion2(
+              geographies("POINT (10 20)"),
+              path,
+              "parquet.column.statistics.enabled#geography" -> value)
+            assert(rowGroups(path).head.box.contains(Box(10, 10, 20, 20)), s"'$value'")
+          }
+        }
+        withDirectory { directory =>
+          val path = new File(directory, "data").getPath
+          writeVersion2(
+            geographies("POINT (10 20)"),
+            path,
+            "parquet.column.statistics.enabled" -> "false",
+            "parquet.column.statistics.enabled#geography" -> "true")
+          assert(rowGroups(path).head.box.contains(Box(10, 10, 20, 20)))
         }
       }
 
