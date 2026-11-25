@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.management.ManagementFactory;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -671,6 +672,94 @@ public class GridLineWalkerTest {
     long allocated = threads.getThreadAllocatedBytes(thread) - before;
     assertEquals(0, visited[0]);
     assertTrue("allocated " + allocated + " bytes", allocated < (1 << 20));
+  }
+
+  @Test
+  public void cornersWithinRoundingErrorNeedNoDecimalArithmetic() {
+    // A long diagonal a tenth of a nanometre beside the grid corners along its way. The
+    // double-precision determinant decides none of those corners, so each is decided exactly. That
+    // is done in 128-bit integers, which do not allocate; in decimal arithmetic the 14,336 corners
+    // of the 16 diagonals here took 3.4 MB.
+    java.lang.management.ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+    Assume.assumeTrue(bean instanceof com.sun.management.ThreadMXBean);
+    com.sun.management.ThreadMXBean threads = (com.sun.management.ThreadMXBean) bean;
+    Assume.assumeTrue(threads.isThreadAllocatedMemorySupported());
+    Assume.assumeTrue(threads.isThreadAllocatedMemoryEnabled());
+
+    Grid grid = new Grid(1024, 1024, 680000, 5020000, 30, -30);
+    // On either side of the corners, and through them, the cells are the oracle's.
+    for (double shift : new double[] {1e-10, -1e-10, 0}) {
+      double x = grid.originX + 30.0 * 5 + shift;
+      double y = grid.originY - 30.0 * 3;
+      assertMatchesOracle(grid, x, y, x + 30.0 * 40, y - 30.0 * 40, false, false);
+      assertMatchesOracle(grid, x, y - 30.0 * 40, x + 30.0 * 40, y, false, false);
+    }
+
+    GridLineWalker walker = grid.walker();
+    int[] visited = new int[1];
+    GridLineWalker.CellVisitor count = (col, row) -> visited[0]++;
+    long thread = Thread.currentThread().getId();
+    long before = threads.getThreadAllocatedBytes(thread);
+    for (int i = 0; i < 16; i++) {
+      double x = grid.originX + 30.0 * (2 * i) + 1e-10 * (i % 8 + 1);
+      double y = grid.originY - 30.0 * i;
+      walker.walk(x, y, x + 30.0 * 448, y - 30.0 * 448, false, false, count);
+    }
+    long allocated = threads.getThreadAllocatedBytes(thread) - before;
+    // Each of the 448 steps of a diagonal passes through a cell and a sliver of the next column.
+    assertEquals(16 * 2 * 448, visited[0]);
+    assertTrue("allocated " + allocated + " bytes", allocated < (1 << 18));
+  }
+
+  @Test
+  public void int128CornerDeterminantMatchesBigInteger() {
+    Random random = new Random(128);
+    int compared = 0;
+    for (int i = 0; i < 200000; i++) {
+      long m = random.nextInt(4) == 0 ? random.nextInt(3) : random.nextInt(Integer.MAX_VALUE);
+      long n = random.nextInt(4) == 0 ? random.nextInt(3) : random.nextInt(Integer.MAX_VALUE);
+      BigInteger a = randomInteger(random, 1 + random.nextInt(94));
+      BigInteger b = randomInteger(random, 1 + random.nextInt(94));
+      BigInteger exact =
+          b.multiply(BigInteger.valueOf(n)).subtract(a.multiply(BigInteger.valueOf(m)));
+      // Half the time the constant cancels the other two terms, or misses that by one.
+      BigInteger c =
+          random.nextBoolean()
+              ? exact.add(BigInteger.valueOf(random.nextInt(3) - 1))
+              : randomInteger(random, 1 + random.nextInt(125));
+      BigInteger largest =
+          a.abs()
+              .multiply(BigInteger.valueOf(m))
+              .add(b.abs().multiply(BigInteger.valueOf(n)))
+              .add(c.abs());
+      if (largest.bitLength() > 126) {
+        continue;
+      }
+      compared++;
+      int expected =
+          a.multiply(BigInteger.valueOf(m))
+              .subtract(b.multiply(BigInteger.valueOf(n)))
+              .add(c)
+              .signum();
+      assertEquals(
+          a + " * " + m + " - " + b + " * " + n + " + " + c,
+          expected,
+          GridLineWalker.signOfInt128Combination(
+              a.shiftRight(64).longValue(),
+              a.longValue(),
+              m,
+              b.shiftRight(64).longValue(),
+              b.longValue(),
+              n,
+              c.shiftRight(64).longValue(),
+              c.longValue()));
+    }
+    assertTrue("compared " + compared, compared > 100000);
+  }
+
+  private static BigInteger randomInteger(Random random, int bits) {
+    BigInteger magnitude = new BigInteger(bits, random);
+    return random.nextBoolean() ? magnitude : magnitude.negate();
   }
 
   @Test

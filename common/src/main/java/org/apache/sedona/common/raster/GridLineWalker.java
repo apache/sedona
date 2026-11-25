@@ -19,6 +19,7 @@
 package org.apache.sedona.common.raster;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 
 /**
@@ -120,9 +121,14 @@ final class GridLineWalker {
   private double dx, dy;
   // Per-segment parts of the error bound of the corner determinant; see orient.
   private double boundBase, boundPerRow, boundPerCol;
+  // The bound for any corner between the two endpoints, which the corners of the walk are.
+  private double walkBound;
   // Per-segment parts of the exact corner determinant, computed on demand; see exactOrient.
   private boolean exactTermsReady;
   private BigDecimal exactPerRow, exactPerCol, exactConstant;
+  // The same three as whole numbers of one decimal unit, in 128 bits each, when they fit.
+  private boolean exactTermsInt128;
+  private long perRowHigh, perRowLow, perColHigh, perColLow, constantHigh, constantLow;
 
   // Results of the last floor computation and the last entry search.
   private boolean integral;
@@ -258,6 +264,16 @@ final class GridLineWalker {
             * (Math.abs(dx) * tail.ey + Math.abs(dy) * tail.ex + errX * tail.ey + errY * tail.ex);
     boundPerRow = BOUND_SLACK * errX;
     boundPerCol = BOUND_SLACK * errY;
+    // A corner of the walk is at most three pixels further from the tail than the head is, along
+    // either axis: the walk runs between the cells next to the two endpoints.
+    double spanX = Math.abs(dx) + 3;
+    double spanY = Math.abs(dy) + 3;
+    walkBound =
+        BOUND_SLACK
+            * (boundBase
+                + spanY * boundPerRow
+                + spanX * boundPerCol
+                + DETERMINANT_ROUNDING * (Math.abs(dx) * spanY + Math.abs(dy) * spanX));
     exactTermsReady = false;
 
     boolean flatX = stepX == 0 && flatTowardsNegativeX;
@@ -322,7 +338,12 @@ final class GridLineWalker {
       } else {
         long cornerCol = stepX > 0 ? col + 1L : col;
         long cornerRow = stepY > 0 ? row + 1L : row;
-        order = crossingOrder(cornerCol, cornerRow);
+        // Most corners are far enough from the segment for the determinant to exceed the bound
+        // that holds along the whole walk. The others, and a determinant or bound that is not a
+        // number, go through the bound of the corner itself and the exact form.
+        double det = dx * (cornerRow - tail.py) - dy * (cornerCol - tail.px);
+        int side = det > walkBound ? 1 : (det < -walkBound ? -1 : orient(cornerCol, cornerRow));
+        order = -side * stepX * stepY;
         if (touched && order == 0 && stepX != stepY) {
           // The corner belongs to the cell after it. Running towards larger columns and rows that
           // is the next cell of the walk, and towards smaller ones the current cell; otherwise it
@@ -622,6 +643,12 @@ final class GridLineWalker {
       exactPerCol = deltaY.multiply(decScaleX());
       exactConstant = deltaY.multiply(x0).subtract(deltaX.multiply(y0));
       exactTermsReady = true;
+      prepareInt128Terms();
+    }
+    if (exactTermsInt128 && gx >= 0 && gx <= width && gy >= 0 && gy <= height) {
+      return signOfInt128Combination(
+              perRowHigh, perRowLow, gy, perColHigh, perColLow, gx, constantHigh, constantLow)
+          * signY;
     }
     return exactPerRow
             .multiply(BigDecimal.valueOf(gy))
@@ -629,6 +656,63 @@ final class GridLineWalker {
             .add(exactConstant)
             .signum()
         * signY;
+  }
+
+  /**
+   * Brings the three terms of the exact corner determinant to one decimal scale and keeps them as
+   * 128-bit whole numbers, when the determinant of every corner of the grid fits in 128 bits. A
+   * segment that passes within rounding error of many corners then decides each of them without
+   * allocating. Coordinates and pixel sizes of ordinary precision fit; the decimal form remains for
+   * the ones that do not.
+   */
+  private void prepareInt128Terms() {
+    int scale = Math.max(exactPerRow.scale(), Math.max(exactPerCol.scale(), exactConstant.scale()));
+    BigInteger perRow = exactPerRow.setScale(scale).unscaledValue();
+    BigInteger perCol = exactPerCol.setScale(scale).unscaledValue();
+    BigInteger constant = exactConstant.setScale(scale).unscaledValue();
+    BigInteger largest =
+        perRow
+            .abs()
+            .multiply(BigInteger.valueOf(height))
+            .add(perCol.abs().multiply(BigInteger.valueOf(width)))
+            .add(constant.abs());
+    exactTermsInt128 = largest.bitLength() <= 126;
+    if (exactTermsInt128) {
+      perRowHigh = perRow.shiftRight(64).longValue();
+      perRowLow = perRow.longValue();
+      perColHigh = perCol.shiftRight(64).longValue();
+      perColLow = perCol.longValue();
+      constantHigh = constant.shiftRight(64).longValue();
+      constantLow = constant.longValue();
+    }
+  }
+
+  /**
+   * The sign of {@code u * m - v * n + w} for three 128-bit two's complement numbers, each given as
+   * its high and low 64 bits, and two multipliers from 0 to 2^31. The result must fit in 128 bits,
+   * which the caller ensures.
+   */
+  static int signOfInt128Combination(
+      long uHigh, long uLow, long m, long vHigh, long vLow, long n, long wHigh, long wLow) {
+    long low = uLow * m;
+    long high = uHigh * m + unsignedMultiplyHigh(uLow, m);
+    long subtractedLow = vLow * n;
+    long subtractedHigh = vHigh * n + unsignedMultiplyHigh(vLow, n);
+    long differenceLow = low - subtractedLow;
+    long differenceHigh =
+        high - subtractedHigh - (Long.compareUnsigned(low, subtractedLow) < 0 ? 1 : 0);
+    long sumLow = differenceLow + wLow;
+    long sumHigh =
+        differenceHigh + wHigh + (Long.compareUnsigned(sumLow, differenceLow) < 0 ? 1 : 0);
+    if (sumHigh != 0) {
+      return sumHigh < 0 ? -1 : 1;
+    }
+    return sumLow != 0 ? 1 : 0;
+  }
+
+  /** The high 64 bits of an unsigned 64-bit value times a multiplier that is not negative. */
+  private static long unsignedMultiplyHigh(long unsigned, long multiplier) {
+    return Math.multiplyHigh(unsigned, multiplier) + (unsigned < 0 ? multiplier : 0);
   }
 
   private BigDecimal numeratorX(End end) {
