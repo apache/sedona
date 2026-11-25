@@ -66,6 +66,7 @@ public class Rasterization {
     // Validate the input geometry and raster metadata
     double[] metadata = RasterAccessors.metadata(raster);
     validateRasterMetadata(metadata);
+    startAtFirstCell(raster, metadata);
     geom = RasterUtils.transformToRasterCRS(raster, geom);
     if (!RasterPredicates.intersectsInRasterCoordinateSpace(raster, geom)) {
       throw new IllegalArgumentException("Geometry does not intersect Raster.");
@@ -118,14 +119,42 @@ public class Rasterization {
   }
 
   /**
+   * Makes the origin in the metadata the world coordinates of the raster's first cell.
+   *
+   * <p>The grid range of a raster does not have to start at zero. A GeoTools crop keeps the
+   * grid-to-world transform of its source and starts its range at the first cell it keeps. The
+   * translation of that transform, which the metadata report as the origin, is then the corner of
+   * grid cell (0, 0), while the first cell of the raster's data is cell (range.x, range.y). Cells
+   * are located, and the output is placed, from the corner of that first cell.
+   */
+  private static void startAtFirstCell(GridCoverage2D raster, double[] metadata) {
+    GridEnvelope2D range = raster.getGridGeometry().getGridRange2D();
+    if (range.x != 0) {
+      metadata[0] = gridLine(range.x, metadata[4], metadata[0]).doubleValue();
+    }
+    if (range.y != 0) {
+      metadata[1] = gridLine(range.y, metadata[5], metadata[1]).doubleValue();
+    }
+  }
+
+  /**
    * The grid of the output raster, which is the reference raster's grid: its pixel size, and an
    * origin on one of its grid lines.
    *
-   * <p>An output at full extent takes the reference raster's grid geometry as it is. A cropped
-   * output starts a whole number of cells into the reference grid, and its origin is that grid
-   * line, computed in decimal: the values {@link GridLineWalker} and {@link #floorPixelIndex} read
-   * the grid with. See {@link #firstCoordinateOfCell} for a grid line that is not a double, and
-   * {@link #startOnStorableLines} for the lines a cropped output starts on.
+   * <p>An output at full extent takes the reference raster's grid geometry as it is, when its grid
+   * range starts at zero as the output's does. A cropped output starts a whole number of cells into
+   * the reference grid, and its origin is that grid line, computed in decimal as {@link
+   * GridLineWalker} and {@link #floorPixelIndex} read the grid. See {@link #startOnStorableLines}
+   * for the lines a cropped output starts on.
+   *
+   * <p>When the reference raster's origin and pixel size are short decimals, so are its grid lines,
+   * and the output's grid lines are the same numbers. Otherwise a grid line is not a double. The
+   * output then starts at the double next to it, see {@link #firstCoordinateOfCell}, and all its
+   * grid lines are less than a unit in the last place of that origin away from the reference
+   * raster's. A coordinate that close to a grid line, such as a grid node computed from the origin
+   * and the pixel size in floating point, can be in the neighbouring cell on the output. No origin
+   * avoids that: a raster with a double origin cannot repeat the grid lines of another raster from
+   * a line of it that is not a double. Only the full-extent output is exact on such a grid.
    *
    * <p>A grid derived from the output's envelope, as (max - min) / cells, has a pixel size one
    * rounding error away from the reference raster's: 0.10000000000000002 for six rows of 0.1 down
@@ -175,11 +204,14 @@ public class Rasterization {
    * line origin + index * scale when a double has that decimal value, and otherwise the double next
    * to it on the cell's side.
    *
-   * <p>The line is not a double when the raster's own corner is not a short decimal. A raster that
-   * reports the corner 0.10000000000000002 for a pixel size of 0.1 has its grid line 1 at
-   * 0.20000000000000002, between two doubles. The nearest double, 0.2, lies before that line: as
-   * the origin of an output it would put the coordinate 0.3 on the output's row line 1, while on
-   * this raster 0.3 is inside row 1.
+   * <p>With that double as its origin, the first grid line of a cropped output separates all
+   * doubles exactly as the reference raster's grid line does. The double on the other side of the
+   * line would itself be on the output's first grid line while it is before the line on the
+   * reference raster, and it is often a coordinate that matters. A raster that reports the corner
+   * 0.10000000000000002 for a pixel size of 0.1, as the one made with the corner 0.1 does once it
+   * is serialized, has its grid line 1 at 0.20000000000000002. The nearest double is 0.2, which
+   * lies before that line: as the origin it would put the coordinate 0.3 on the output's row line
+   * 1, while on this raster 0.3 is inside row 1.
    */
   private static double firstCoordinateOfCell(int index, double scale, double origin) {
     BigDecimal line = gridLine(index, scale, origin);

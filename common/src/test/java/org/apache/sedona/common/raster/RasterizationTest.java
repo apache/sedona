@@ -30,9 +30,12 @@ import java.util.Random;
 import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.raster.serde.Serde;
+import org.geotools.api.parameter.ParameterValueGroup;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.processing.operation.Crop;
+import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.junit.Assert;
 import org.junit.Test;
@@ -1115,28 +1118,25 @@ public class RasterizationTest extends RasterTestBase {
   public void testOutputKeepsItsCellsWhenRastersAreSerialized() throws Exception {
     // Spark serializes a raster that passes from one projection to the next, and the serializer
     // keeps the cell-centre transform. The corner a raster reports is derived from that in floating
-    // point, as centre - scale / 2, so the raster made with origin 0.1 and pixel size 0.1 reports
-    // 0.10000000000000002 once stored: its row line 2 is 0.30000000000000002, and y = 0.3 is inside
-    // row 1. The outputs have to follow that grid as well. Row line 1 is 0.20000000000000002, which
-    // is not a double, and a cropped output starting at the nearest double, 0.2, would have y = 0.3
-    // on its own row line 1 and lose the row.
+    // point, as centre - scale / 2. An output has to report the same grid before and after, or the
+    // cells burned on it are not the cells the geometry selects there.
     Geometry line = wktReader.read("LINESTRING (1.2 0.3, 4.5 0.3)");
     double[][] grids = {{0.1, 0.1}, {0.7, -0.1}, {0.6, -0.1}, {0, 0.1}};
     for (double[] grid : grids) {
       GridCoverage2D made =
           RasterConstructors.makeEmptyRaster(1, "d", 6, 6, 0, grid[0], 1, grid[1], 0, 0, 0);
-      List<GridCoverage2D> references = new ArrayList<>();
-      references.add(serialized(made));
-      // A raster that reports the same grid before and after is also used as it was made. Its
-      // outputs are then burned in memory and serialized afterwards.
-      if (keepsItsGridWhenStored(made)) {
-        references.add(made);
-      }
-      for (GridCoverage2D raster : references) {
-        for (boolean allTouched : new boolean[] {false, true}) {
-          Assert.assertEquals(4, countBurned(burn(line, raster, allTouched)));
-          Assert.assertEquals(
-              1, assertOutputsKeepTheirCellsWhenSerialized(raster, line, allTouched));
+      GridCoverage2D stored = serialized(made);
+      // Not every raster keeps its corner: the one made with origin 0.1 and pixel size 0.1 reports
+      // 0.10000000000000002 once stored. Its row line 2 is then 0.30000000000000002, and y = 0.3 is
+      // inside row 1. Row line 1 is 0.20000000000000002, which is not a double: a cropped output
+      // starting at the nearest double, 0.2, would have y = 0.3 on its own row line 1 and lose the
+      // row, so it starts at the first double after the line.
+      for (boolean allTouched : new boolean[] {false, true}) {
+        Assert.assertEquals(4, countBurned(burn(line, stored, allTouched)));
+        Assert.assertEquals(1, assertOutputsKeepTheirCellsWhenSerialized(stored, line, allTouched));
+        if (keepsItsGridWhenStored(made)) {
+          // Burned on the raster as it was made, and serialized afterwards.
+          Assert.assertEquals(1, assertOutputsKeepTheirCellsWhenSerialized(made, line, allTouched));
         }
       }
     }
@@ -1176,6 +1176,146 @@ public class RasterizationTest extends RasterTestBase {
     Assert.assertTrue(keepsItsGridWhenStored(cropped));
     Assert.assertEquals(
         1, assertOutputsKeepTheirCellsWhenSerialized(columns, onColumnLine2, false));
+  }
+
+  @Test
+  public void testOutputOnAGridWhoseLinesAreNotDoubles() throws Exception {
+    // One arc second is 0.0002777777777777778 as a double, and the grid lines of a raster with
+    // that pixel size are not doubles: no coordinate lies on them, and a node of the grid computed
+    // in floating point lies within a unit in the last place of one, on either side.
+    //
+    // A full-extent output has the reference raster's grid, so such a node is on the same side of
+    // every grid line there, and a line along the nodes selects on the output the cells it burned.
+    // A cropped output starts at the double next to a grid line. Its grid lines are less than a
+    // unit in the last place away from the reference raster's, which is enough to put a node on the
+    // other side of one, and no other origin avoids that. So for a cropped output the cells are
+    // compared for lines that keep away from the grid lines.
+    double arcSecond = 1.0 / 3600;
+    GeometryFactory factory = new GeometryFactory();
+    Random random = new Random(3600);
+    int compared = 0;
+    for (double[] corner : new double[][] {{-122, 47}, {8, -33.9}, {116.5, 0.25}}) {
+      for (boolean bottomUp : new boolean[] {false, true}) {
+        double originX = corner[0] + random.nextInt(3600) * arcSecond;
+        double originY = corner[1] + random.nextInt(3600) * arcSecond;
+        double scaleY = bottomUp ? arcSecond : -arcSecond;
+        GridCoverage2D raster =
+            RasterConstructors.makeEmptyRaster(
+                1, "d", 8, 8, originX, originY, arcSecond, scaleY, 0, 0, 4326);
+        for (int i = 0; i < 60; i++) {
+          int col0 = random.nextInt(8);
+          int col1 = (col0 + 1 + random.nextInt(7)) % 8;
+          int row0 = random.nextInt(8);
+          int row1 = (row0 + 1 + random.nextInt(7)) % 8;
+          for (double within : new double[] {0, 0.5}) {
+            // An L along grid lines, or along the middles of a column and a row.
+            LineString line =
+                factory.createLineString(
+                    new Coordinate[] {
+                      new Coordinate(
+                          originX + (col0 + within) * arcSecond,
+                          originY + (row0 + within) * scaleY),
+                      new Coordinate(
+                          originX + (col0 + within) * arcSecond,
+                          originY + (row1 + within) * scaleY),
+                      new Coordinate(
+                          originX + (col1 + within) * arcSecond, originY + (row1 + within) * scaleY)
+                    });
+            line.setSRID(4326);
+            for (boolean allTouched : new boolean[] {false, true}) {
+              for (boolean cropped : new boolean[] {false, true}) {
+                if (cropped && within == 0) {
+                  continue;
+                }
+                GridCoverage2D output;
+                try {
+                  output =
+                      RasterConstructors.asRaster(line, raster, "d", allTouched, 1d, 0d, cropped);
+                } catch (IllegalArgumentException e) {
+                  // A line along the raster's edge may not intersect it at all.
+                  continue;
+                }
+                if (output == null) {
+                  continue;
+                }
+                double[] band = MapAlgebra.bandAsArray(output, 1);
+                if (countBurned(band) == 0) {
+                  continue;
+                }
+                String label = line.toText() + " allTouched=" + allTouched + " cropped=" + cropped;
+                Assert.assertArrayEquals(label, band, burn(line, output, allTouched), 0d);
+                Assert.assertEquals(
+                    label,
+                    Double.valueOf(countBurned(band)),
+                    RasterBandAccessors.getZonalStats(output, line, 1, "count", allTouched, true));
+                compared++;
+              }
+            }
+          }
+        }
+      }
+    }
+    Assert.assertTrue("outputs compared: " + compared, compared > 1500);
+  }
+
+  @Test
+  public void testReferenceRasterWhoseGridRangeDoesNotStartAtZero() throws Exception {
+    // A GeoTools crop keeps the grid-to-world transform of its source and starts its grid range at
+    // the first cell it keeps: here the cells 2..7 of a 10x10 unit raster, the square from (2, 2)
+    // to (8, 8). The origin the metadata report is still the corner of grid cell (0, 0), which is
+    // (0, 10). Cells have to be located from the corner of the raster's first cell, (2, 8), and the
+    // output has to start there: located from (0, 10), the output covered the square from (0, 4)
+    // to (6, 10).
+    GridCoverage2D whole =
+        RasterConstructors.makeEmptyRaster(1, "d", 10, 10, 0, 10, 1, -1, 0, 0, 0);
+    Crop crop = new Crop();
+    ParameterValueGroup parameters = crop.getParameters();
+    parameters.parameter("Source").setValue(whole);
+    parameters
+        .parameter(Crop.PARAMNAME_ROI)
+        .setValue(
+            JTS.toGeometry(
+                new ReferencedEnvelope(2, 8, 2, 8, whole.getCoordinateReferenceSystem2D())));
+    GridCoverage2D raster = (GridCoverage2D) crop.doOperation(parameters, null);
+    Assert.assertEquals(2, raster.getGridGeometry().getGridRange2D().x);
+    Assert.assertEquals(2, raster.getGridGeometry().getGridRange2D().y);
+
+    String[][] cases = {
+      // The cell holding the point, the five cells of the line's row, the nine of the polygon.
+      {"POINT (3.5 6.5)", "(1,1)"},
+      {"LINESTRING (2.5 7.5, 6.5 7.5)", "(0,0) (1,0) (2,0) (3,0) (4,0)"},
+      {
+        "POLYGON ((3 3, 6 3, 6 6, 3 6, 3 3))",
+        "(1,2) (2,2) (3,2) (1,3) (2,3) (3,3) (1,4) (2,4) (3,4)"
+      }
+    };
+    for (String[] expected : cases) {
+      Geometry geom = wktReader.read(expected[0]);
+      GridCoverage2D fullExtent =
+          RasterConstructors.asRaster(geom, raster, "d", false, 1d, 0d, false);
+      // The output is the raster's square, from its first cell.
+      Assert.assertArrayEquals(
+          expected[0],
+          new double[] {2, 8, 6, 6, 1, -1},
+          Arrays.copyOf(RasterAccessors.metadata(fullExtent), 6),
+          0d);
+      Assert.assertEquals(raster.getEnvelope2D(), fullExtent.getEnvelope2D());
+      assertBurnedCells(raster, geom, false, expected[1]);
+      // The cropped output holds the same cells, placed from the same corner.
+      GridCoverage2D cropped = RasterConstructors.asRaster(geom, raster, "d", false, 1d, 0d, true);
+      double[] full = MapAlgebra.bandAsArray(fullExtent, 1);
+      double[] window = RasterAccessors.metadata(cropped);
+      double[] band = MapAlgebra.bandAsArray(cropped, 1);
+      double[] placed = new double[full.length];
+      int colOffset = (int) Math.round(window[0] - 2);
+      int rowOffset = (int) Math.round(8 - window[1]);
+      for (int row = 0; row < (int) window[3]; row++) {
+        for (int col = 0; col < (int) window[2]; col++) {
+          placed[(row + rowOffset) * 6 + col + colOffset] = band[row * (int) window[2] + col];
+        }
+      }
+      Assert.assertArrayEquals(expected[0], full, placed, 0d);
+    }
   }
 
   /** Whether a raster reports the same grid after it has been serialized. */
