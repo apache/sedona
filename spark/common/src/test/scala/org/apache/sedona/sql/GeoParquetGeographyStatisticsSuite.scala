@@ -194,6 +194,11 @@ class GeoParquetGeographyStatisticsSuite extends TestBaseScala {
           assert(box.contains(180, 5) && box.contains(-180, 5) && box.contains(175, 6))
           assert(!box.contains(0, 5))
         }
+        // Points on both of them, in a row group with a line that is elsewhere
+        val both =
+          rowGroupOf("POINT (-180 55)", "POINT (180 80)", "LINESTRING (10 1, 20 2)").box.get
+        assert(both.contains(-180, 55) && both.contains(180, 80) && both.contains(20, 2))
+        assert(!both.contains(0, 30))
       }
 
       it("covers the members of a collection and of multi geographies") {

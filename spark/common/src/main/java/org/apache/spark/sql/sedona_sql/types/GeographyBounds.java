@@ -267,10 +267,7 @@ public final class GeographyBounds {
           latitudes
               ? new R1Interval(radians(latMin, S2.M_PI_2), radians(latMax, S2.M_PI_2))
               : shapes.lat();
-      S1Interval longitude =
-          longitudes
-              ? new S1Interval(radians(west, S2.M_PI), radians(east, S2.M_PI))
-              : shapes.lng();
+      S1Interval longitude = longitudes ? longitudes(west, east) : shapes.lng();
       all = all.union(new S2LatLngRect(latitude, longitude));
     }
     all = all.expanded(S2LatLng.fromRadians(MARGIN, MARGIN));
@@ -283,6 +280,16 @@ public final class GeographyBounds {
       south,
       north
     };
+  }
+
+  /** The longitudes from {@code west} eastwards to {@code east}, both in degrees. */
+  private static S1Interval longitudes(double west, double east) {
+    double lo = radians(west, S2.M_PI);
+    double hi = radians(east, S2.M_PI);
+    // From longitude 180 to longitude -180 is the antimeridian alone, which points on both of
+    // them give. S2 reads an interval from pi to -pi as one without a longitude.
+    if (lo == S2.M_PI && hi == -S2.M_PI) return S1Interval.fromPoint(S2.M_PI);
+    return new S1Interval(lo, hi);
   }
 
   private static double radians(double degrees, double limit) {

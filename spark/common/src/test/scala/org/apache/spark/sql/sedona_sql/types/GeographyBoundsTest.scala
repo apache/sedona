@@ -128,6 +128,59 @@ class GeographyBoundsTest extends AnyFunSuite {
       }
   }
 
+  test("has points on both longitudes of the antimeridian in the box with other geographies") {
+    val line = "LINESTRING (10 1, 20 2)"
+    Seq(
+      Seq("POINT (-180 55)", "POINT (180 80)", line),
+      Seq(line, "POINT (180 80)", "POINT (-180 55)"),
+      Seq("POINT (-180 55)", "POINT (180 80)"),
+      Seq("MULTIPOINT ((180 80), (-180 55))", "POLYGON ((10 1, 20 1, 20 2, 10 1))")).foreach {
+      wkts =>
+        val found = box(wkts: _*)
+        assert(contains(found, 180, 80) && contains(found, -180, 55), wkts)
+    }
+    val found = box("POINT (-180 55)", "POINT (180 80)", line)
+    assert(contains(found, 10, 1) && contains(found, 20, 2))
+    // From the line to the antimeridian, the shorter way
+    assert(contains(found, 100, 30) && !contains(found, 0, 30) && !contains(found, -90, 30))
+    // A point with no latitude has its longitude there as well
+    val nan = Double.NaN
+    val partial = boxOf(pointWkb(-180, nan), pointWkb(180, nan), wkb(line))
+    assert(contains(partial, 180, 1) && contains(partial, -180, 2))
+  }
+
+  test("has every point and vertex in the box, also on the antimeridian and at a pole") {
+    val random = new Random(7)
+    val special =
+      Seq(-180.0, 180.0, 0.0, -0.0, Math.nextDown(180.0), Math.nextUp(-180.0), 90.0)
+    def longitude(): Double =
+      if (random.nextInt(3) == 0) special(random.nextInt(special.size))
+      else random.nextDouble() * 360 - 180
+    def latitude(): Double = random.nextInt(8) match {
+      case 0 => 90
+      case 1 => -90
+      case _ => random.nextDouble() * 180 - 90
+    }
+    (1 to 2000).foreach { _ =>
+      // Every fourth time the points are on the antimeridian alone, with either longitude
+      val antimeridian = random.nextInt(4) == 0
+      val points = Seq.fill(random.nextInt(5))(
+        (if (antimeridian) special(random.nextInt(2)) else longitude(), latitude()))
+      val line = Seq.fill(if (random.nextBoolean()) 2 + random.nextInt(3) else 0)(
+        (longitude(), random.nextDouble() * 160 - 80))
+      val wkbs = points.map { case (x, y) =>
+        pointWkb(x, y)
+      } ++
+        (if (line.isEmpty) Nil else Seq(shapeWkb(2, line)))
+      if (wkbs.nonEmpty) {
+        val found = boxOf(random.shuffle(wkbs): _*)
+        (points ++ line).foreach { case (x, y) =>
+          assert(contains(found, x, y), s"($x $y) of $points and $line in $found")
+        }
+      }
+    }
+  }
+
   test("follows the edges of a line") {
     val found = box("LINESTRING (0 50, 90 50)")
     val north = math.toDegrees(math.atan(math.tan(math.toRadians(50)) / math.cos(math.Pi / 4)))
