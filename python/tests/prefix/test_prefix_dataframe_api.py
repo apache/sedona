@@ -86,6 +86,13 @@ class TestPrefixDataFrameApi(TestBase):
             == 2
         )
 
+    # The sessions of _in_second_connect_session, kept until the process ends. A Spark Connect
+    # session closes its client once more when it is garbage collected, and closing waits for
+    # the threads that all sessions release their finished queries with. The collector can run
+    # that inside a gRPC call, which holds a lock that those threads wait for, and the test
+    # that makes the call then never returns.
+    _second_sessions = []
+
     def _in_second_connect_session(self, body):
         """Return body(session) for a second Spark Connect session, run on a thread of its own."""
         from pyspark.sql.connect.session import SparkSession as ConnectSession
@@ -99,6 +106,7 @@ class TestPrefixDataFrameApi(TestBase):
             # A new thread has no active session, so the session created here becomes the
             # active one in this thread, and the wrappers resolve the prefix through it.
             second = ConnectSession.builder.remote(url).create()
+            self._second_sessions.append(second)
             try:
                 outcome["result"] = body(second)
             except Exception as error:
