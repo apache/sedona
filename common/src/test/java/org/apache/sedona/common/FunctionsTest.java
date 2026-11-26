@@ -5129,6 +5129,7 @@ public class FunctionsTest extends TestBase {
     assertEquals(actualResult, expectedResult);
   }
 
+  @Test
   public void affineEmpty3D() {
     LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
     String expected = emptyLineString.toText();
