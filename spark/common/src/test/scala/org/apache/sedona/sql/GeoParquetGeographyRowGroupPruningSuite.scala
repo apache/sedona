@@ -21,6 +21,7 @@ package org.apache.sedona.sql
 import java.io.File
 import java.nio.file.Files
 
+import com.google.common.geometry.S2LatLng
 import org.apache.commons.io.FileUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
@@ -39,7 +40,7 @@ import org.apache.spark.sql.execution.datasources.geoparquet.{GeoParquetFileForm
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.{AndFilter, GeographyLeafFilter, OrFilter}
 
 import org.apache.spark.sql.functions.{col, expr}
-import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
+import org.apache.spark.sql.sedona_sql.types.{GeographyBounds, SpatialTypeSupport}
 import org.apache.spark.sql.types.{LongType, MetadataBuilder, StringType, StructField, StructType}
 
 import scala.collection.JavaConverters._
@@ -431,13 +432,28 @@ class GeoParquetGeographyRowGroupPruningSuite extends TestBaseScala {
 
       it("keeps a row whose point is the point of the query after rounding") {
         withDirectory { directory =>
+          // Two longitudes next to each other that are one point of the sphere for the predicates,
+          // and whose boxes as they are written have no point in common. Which two are depends on
+          // how the platform rounds a sine and a cosine, so the test looks for them: near 45
+          // degrees some nine pairs of a hundred are
+          def point(longitude: Double) = S2LatLng.fromDegrees(0, longitude).toPoint
+          def box(longitude: Double) = Array(longitude, longitude, 0d, 0d)
+          val pair = Iterator
+            .iterate(45d)(Math.nextUp)
+            .take(4096)
+            .sliding(2)
+            .find { case Seq(one, other) =>
+              point(one) == point(other) && !GeographyBounds.intersects(box(one), box(other))
+            }
+          assert(pair.isDefined)
+          val Seq(stored, queried) = pair.get
+
           val path = new File(directory, "data").getPath
           write(
             sparkSession.sql(
-              "SELECT 0L AS id, ST_GeogFromWKT('POINT (4.05 0)', 4326) AS geography"),
+              s"SELECT 0L AS id, ST_GeogFromWKT('POINT ($stored 0)', 4326) AS geography"),
             path)
-          // The two longitudes are one point of the sphere for the predicates
-          val query = "ST_GeogFromWKT('POINT (4.050000000000001 0)', 4326)"
+          val query = s"ST_GeogFromWKT('POINT ($queried 0)', 4326)"
           Seq(
             s"ST_Intersects(geography, $query)",
             s"ST_Equals(geography, $query)",
