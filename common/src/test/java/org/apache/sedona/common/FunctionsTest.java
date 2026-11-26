@@ -110,6 +110,24 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void asWKTWritesEveryDigitOfTheCoordinate() throws Exception {
+    GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+    Geometry line =
+        geometryFactory.createLineString(
+            new Coordinate[] {
+              new Coordinate(0, 0),
+              new Coordinate(1e-17, 0.1 + 0.2),
+              new Coordinate(0.39452545497198344, 1e20)
+            });
+    String wkt =
+        "LINESTRING (0 0, 0.00000000000000001 0.30000000000000004, 0.39452545497198344 100000000000000000000)";
+    assertEquals(wkt, Functions.asWKT(line));
+    assertEquals("SRID=4326;" + wkt, Functions.asEWKT(line));
+    assertEquals(line, geomFromWKT(wkt, 4326));
+    assertEquals(line, geomFromEWKT(Functions.asEWKT(line)));
+  }
+
+  @Test
   public void asEWKT() throws Exception {
     GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4236);
     Geometry geometry = geometryFactory.createPoint(new Coordinate(1.0, 2.0));
@@ -1411,7 +1429,7 @@ public class FunctionsTest extends TestBase {
     Geometry[] polygons = Functions.s2ToGeom(cellIds);
     String actual = Functions.asWKT(Functions.union(polygons));
     String expected =
-        "POLYGON ((0.6014716838554667 -0.0000000000000254, 0.6014716838554158 -0.0000000000000254, -0.0000000000000254 -0.0000000000000254, -0.0000000000000254 0.6014385452363985, -0.0000000000000254 0.6014716838554667, -0.0000000000000254 1.2121321753162642, 0.6014716838554667 1.2121321753162642, 0.6014716838554667 1.2120654068310366, 1.2121321753162642 1.2120654068310366, 1.2121321753162642 0.6014385452364494, 1.2121321753162642 0.6013371003640015, 1.2121321753162642 -0.0000000000000254, 0.6014716838554667 -0.0000000000000254))";
+        "POLYGON ((0.6014716838554667 -0.000000000000025444437451708134, 0.6014716838554158 -0.000000000000025444437451708134, -0.000000000000025444437451708134 -0.000000000000025444437451708134, -0.000000000000025444437451708134 0.6014385452363985, -0.000000000000025444437451708134 0.6014716838554667, -0.000000000000025444437451708134 1.2121321753162642, 0.6014716838554667 1.2121321753162642, 0.6014716838554667 1.2120654068310366, 1.2121321753162642 1.2120654068310366, 1.2121321753162642 0.6014385452364494, 1.2121321753162642 0.6013371003640015, 1.2121321753162642 -0.000000000000025444437451708134, 0.6014716838554667 -0.000000000000025444437451708134))";
     assertEquals(expected, actual);
 
     Geometry[] points =
@@ -6491,13 +6509,13 @@ public class FunctionsTest extends TestBase {
     Geometry pointOrigin = Constructors.geomFromEWKT("POINT (0 0)");
     result = Functions.asEWKT(Functions.rotate(lineString, 10, pointOrigin));
     assertEquals(
-        "LINESTRING (0 0, -0.8390715290764524 -0.5440211108893698, -0.2950504181870827 -1.383092639965822, 0 0)",
+        "LINESTRING (0 0, -0.8390715290764524 -0.5440211108893698, -0.29505041818708266 -1.383092639965822, 0 0)",
         result);
 
     lineString = Constructors.geomFromEWKT("LINESTRING (0 0, 1 0, 1 1, 0 0)");
     result = Functions.asEWKT(Functions.rotate(lineString, 10, 0, 0));
     assertEquals(
-        "LINESTRING (0 0, -0.8390715290764524 -0.5440211108893698, -0.2950504181870827 -1.383092639965822, 0 0)",
+        "LINESTRING (0 0, -0.8390715290764524 -0.5440211108893698, -0.29505041818708266 -1.383092639965822, 0 0)",
         result);
   }
 

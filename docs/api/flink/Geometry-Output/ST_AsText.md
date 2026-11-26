@@ -21,6 +21,7 @@
 
 Introduction: Return the Well-Known Text string representation of a geometry.
 It will support M coordinate if present since v1.5.0.
+Since v2.0.0, coordinates are written with every digit needed to read the same value back, so the text round-trips exactly; earlier versions wrote at most 16 decimal places, which dropped digits from coordinates smaller than 1 and wrote values below 5e-17 as 0. Values are always written in decimal, never in scientific notation. To round coordinates before writing, use [ST_ReducePrecision](../Geometry-Processing/ST_ReducePrecision.md).
 
 Format: `ST_AsText (A: Geometry)`
 
@@ -62,4 +63,16 @@ Output:
 
 ```
 POINT ZM(1 1 1 1)
+```
+
+Example:
+
+```sql
+SELECT ST_AsText(ST_GeomFromWKT('POINT (0.30000000000000004 1e-17)'))
+```
+
+Output:
+
+```
+POINT (0.30000000000000004 0.00000000000000001)
 ```
