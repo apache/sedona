@@ -378,8 +378,10 @@ public class RasterBandAccessors {
       roi = Functions.setSRID(roi, RasterAccessors.srid(raster));
     }
 
-    // checking if the raster contains the geometry
-    if (!RasterPredicates.rsIntersects(raster, roi)) {
+    // Whether the geometry reaches the raster is decided on the footprint the rasterizer decides
+    // it on. A geometry that passed a test on another footprint could be rejected below, by an
+    // exception that the lenient mode is there to avoid.
+    if (!Rasterization.intersects(raster, roi)) {
       if (lenient) {
         return null;
       } else {

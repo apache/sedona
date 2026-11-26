@@ -139,8 +139,9 @@ public class PixelFunctionEditors {
     raster = pair.getLeft();
     geom = pair.getRight();
 
-    // checking if the raster contains the geometry
-    if (!RasterPredicates.rsIntersects(raster, geom)) {
+    // Whether the geometry reaches the raster is decided on the footprint the rasterizer decides
+    // it on, so the two cannot disagree.
+    if (!Rasterization.intersects(raster, geom)) {
       throw new IllegalArgumentException(
           "The provided geometry is not intersecting the raster. Please provide a geometry that is in the raster's extent.");
     }

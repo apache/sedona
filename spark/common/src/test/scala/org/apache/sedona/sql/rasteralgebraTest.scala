@@ -1950,6 +1950,47 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       }
     }
 
+    it("Passed RS_ZonalStats and RS_Clip at the edge of a raster that does not keep its corner") {
+      // Made with its left edge at 0.1, this raster reports 0.10000000000000002 once it has been
+      // serialized, and that is where its pixels start. A point at 0.1 is on the convex hull of
+      // the raster as it was made, and beside its pixels. The lenient functions return null for
+      // it and the strict ones reject it, whether the raster is made in the expression that uses
+      // it, where it has not been serialized, or read from a shuffled column. They used to test
+      // the hull themselves before rasterizing, so on the raster made in the same expression the
+      // rasterizer rejected the point in the lenient mode as well, and the query failed.
+      val made = "RS_MakeEmptyRaster(1, 'd', 5, 5, 0.1D, 5D, 0.1D, -1D, 0D, 0D, 0)"
+      val beside = "ST_GeomFromWKT('POINT (0.1 3.5)')"
+      val inside = "ST_GeomFromWKT('POINT (0.10000000000000002 3.5)')"
+      def calls(raster: String, lenient: Boolean): Seq[String] = Seq(
+        s"RS_ZonalStats($raster, $beside, 1, 'count', false, false, $lenient)",
+        s"RS_ZonalStatsAll($raster, $beside, 1, false, false, $lenient)",
+        s"RS_Clip($raster, 1, $beside, false, -9999D, false, $lenient)",
+        s"RS_Clip($raster, 1, $beside, false, -9999D, true, $lenient)")
+      for (shuffled <- Seq(false, true)) {
+        // A raster column used by several expressions of one projection is computed once and
+        // serialized, so without the shuffle every call nests its own constructor.
+        val (rasters, raster) =
+          if (shuffled) (sparkSession.sql(s"SELECT $made AS r").repartition(1), "r")
+          else (sparkSession.sql("SELECT 1 AS one"), made)
+        val counted = s"RS_ZonalStats($raster, $inside, 1, 'count', false, false, true)"
+        val row = rasters.selectExpr(calls(raster, lenient = true) :+ counted: _*).first()
+        for (column <- 0 until 4) {
+          assertTrue(s"shuffled=$shuffled, column $column", row.isNullAt(column))
+        }
+        assertEquals(s"shuffled=$shuffled", 1.0, row.getDouble(4), 0)
+        for (strict <- calls(raster, lenient = false)) {
+          val error = intercept[Exception] {
+            rasters.selectExpr(strict).first()
+          }
+          var cause: Throwable = error
+          while (cause.getCause != null) cause = cause.getCause
+          assertTrue(
+            s"shuffled=$shuffled, $strict: ${cause.getMessage}",
+            cause.getMessage.contains("intersect"))
+        }
+      }
+    }
+
     it("Passed RS_ZonalStats edge case") {
       val df = sparkSession.sql("""
           |with data as (

@@ -1618,6 +1618,269 @@ public class RasterizationTest extends RasterTestBase {
   }
 
   @Test
+  public void testGeometryAtTheEdgeOfARasterThatDoesNotKeepItsCorner() throws Exception {
+    // Made with its left edge at 0.1, this raster reports 0.10000000000000002 once it has been
+    // serialized, and that is where its cells start whether it has been serialized or not. A point
+    // at 0.1 is on the convex hull of the raster as it was made, and beside its cells.
+    // RS_ZonalStats and RS_Clip tested the hull and then rasterized, and the rasterizer rejected
+    // the point with an exception that the lenient mode is there to avoid. The same call on the
+    // raster read back answered null.
+    GeometryFactory factory = new GeometryFactory();
+    GridCoverage2D made =
+        numbered(RasterConstructors.makeEmptyRaster(1, "d", 5, 5, 0.1, 5, 0.1, -1, 0, 0, 0));
+    Assert.assertEquals(0.1, RasterAccessors.getUpperLeftX(made), 0d);
+    Assert.assertEquals(0.10000000000000002, RasterAccessors.getUpperLeftX(serialized(made)), 0d);
+    Geometry beside = factory.createPoint(new Coordinate(0.1, 3.5));
+    Assert.assertTrue(RasterPredicates.rsIntersects(made, beside));
+    Assert.assertFalse(RasterPredicates.rsIntersects(serialized(made), beside));
+    String notIntersecting = "The provided geometry is not intersecting the raster.";
+    for (GridCoverage2D raster : new GridCoverage2D[] {made, serialized(made)}) {
+      for (boolean allTouched : new boolean[] {false, true}) {
+        Assert.assertNull(
+            RasterBandAccessors.getZonalStats(raster, beside, 1, "count", allTouched, false, true));
+        Assert.assertNull(
+            RasterBandAccessors.getZonalStatsAll(raster, beside, 1, allTouched, false, true));
+        IllegalArgumentException rejected =
+            Assert.assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                    RasterBandAccessors.getZonalStats(
+                        raster, beside, 1, "count", allTouched, false, false));
+        Assert.assertTrue(rejected.getMessage(), rejected.getMessage().startsWith(notIntersecting));
+        for (boolean crop : new boolean[] {false, true}) {
+          Assert.assertNull(
+              RasterBandEditors.clip(raster, 1, beside, allTouched, -9999, crop, true));
+          rejected =
+              Assert.assertThrows(
+                  IllegalArgumentException.class,
+                  () -> RasterBandEditors.clip(raster, 1, beside, allTouched, -9999, crop, false));
+          Assert.assertEquals("Geometry does not intersect Raster.", rejected.getMessage());
+        }
+        rejected =
+            Assert.assertThrows(
+                IllegalArgumentException.class,
+                () -> PixelFunctionEditors.setValues(raster, 1, beside, 99, allTouched, false));
+        Assert.assertTrue(rejected.getMessage(), rejected.getMessage().startsWith(notIntersecting));
+      }
+    }
+
+    // The corner can move the other way. Made with its left edge at 2, this raster reports
+    // 1.9999999999999998, so a point there is in its first column, and outside the convex hull of
+    // the raster as it was made. The functions rejected it on that test and counted it on the
+    // raster read back.
+    GridCoverage2D other =
+        numbered(RasterConstructors.makeEmptyRaster(1, "d", 6, 6, 2, 32, 0.1, -0.1, 0, 0, 0));
+    Assert.assertEquals(1.9999999999999998, RasterAccessors.getUpperLeftX(serialized(other)), 0d);
+    Geometry inside = factory.createPoint(new Coordinate(1.9999999999999998, 31.73));
+    Assert.assertFalse(RasterPredicates.rsIntersects(other, inside));
+    Assert.assertTrue(RasterPredicates.rsIntersects(serialized(other), inside));
+    for (GridCoverage2D raster : new GridCoverage2D[] {other, serialized(other)}) {
+      // The first cell of the third row.
+      Assert.assertEquals(
+          13d,
+          RasterBandAccessors.getZonalStats(raster, inside, 1, "sum", false, false, false),
+          0d);
+      Assert.assertEquals(
+          1d,
+          RasterBandAccessors.getZonalStats(raster, inside, 1, "count", false, false, true),
+          0d);
+      Assert.assertArrayEquals(
+          new double[] {13},
+          MapAlgebra.bandAsArray(
+              RasterBandEditors.clip(raster, 1, inside, false, -9999, true, false), 1),
+          0d);
+      double[] set =
+          MapAlgebra.bandAsArray(
+              PixelFunctionEditors.setValues(raster, 1, inside, 99, false, false), 1);
+      Assert.assertEquals(99d, set[12], 0d);
+      Assert.assertEquals(1, Arrays.stream(set).filter(value -> value == 99).count());
+    }
+  }
+
+  @Test
+  public void testFunctionsThatRasterizeGiveTheSameOutcomeBeforeAndAfterTheRasterIsStored()
+      throws Exception {
+    // A raster as it was made and the same raster read back are one raster at two steps of a
+    // query, so RS_ZonalStats, RS_Clip and RS_SetValues have to give the same outcome on both: a
+    // value, null, or a rejection. None of these rasters reports the corner it was made with once
+    // it is serialized. The geometries are at the edges of the raster as it reads at either step
+    // and at the doubles next to them: points, lines along the edges, and rectangles that share an
+    // edge with the raster from inside and from outside.
+    double[][] grids = {
+      {0.1, 5, 0.1, -1},
+      {0, 0.1, 1, 0.1},
+      {0, -0.1, 0.1, -0.1},
+      {100, 0.05, 30, 0.05},
+      {0.1, 0.1, 0.1, 0.1},
+      {2, 32, 0.1, -0.1},
+      {0.05, 0.05, 0.05, -0.05},
+      {512, 2, 0.1, 0.1},
+    };
+    GeometryFactory factory = new GeometryFactory();
+    int compared = 0;
+    int nulls = 0;
+    int counted = 0;
+    for (int g = 0; g < grids.length; g++) {
+      double[] grid = grids[g];
+      // RS_SetValues gives a raster without an SRID one, which rebuilds its grid as the serializer
+      // does, so half of the rasters have an SRID already.
+      GridCoverage2D made =
+          numbered(
+              RasterConstructors.makeEmptyRaster(
+                  1, "d", 6, 6, grid[0], grid[1], grid[2], grid[3], 0, 0, g % 2 == 0 ? 0 : 4326));
+      GridCoverage2D stored = serialized(made);
+      Assert.assertFalse(Arrays.toString(grid), keepsItsGridWhenStored(made));
+      Envelope hull = GeometryFunctions.convexHull(made).getEnvelopeInternal();
+      Envelope storedHull = GeometryFunctions.convexHull(stored).getEnvelopeInternal();
+      double[] xs =
+          around(hull.getMinX(), storedHull.getMinX(), hull.getMaxX(), storedHull.getMaxX());
+      double[] ys =
+          around(hull.getMinY(), storedHull.getMinY(), hull.getMaxY(), storedHull.getMaxY());
+      double width = hull.getWidth();
+      double height = hull.getHeight();
+      // Inside a cell, off every grid line.
+      double midX = hull.getMinX() + width * 0.55;
+      double midY = hull.getMinY() + height * 0.55;
+      List<Geometry> geoms = new ArrayList<>();
+      for (double x : xs) {
+        geoms.add(factory.createPoint(new Coordinate(x, midY)));
+        geoms.add(line(factory, x, hull.getMinY() - height, x, hull.getMaxY() + height));
+        geoms.add(factory.toGeometry(new Envelope(x - width / 2, x, midY - height / 4, midY)));
+        geoms.add(factory.toGeometry(new Envelope(x, x + width / 2, midY - height / 4, midY)));
+      }
+      for (double y : ys) {
+        geoms.add(factory.createPoint(new Coordinate(midX, y)));
+        geoms.add(line(factory, hull.getMinX() - width, y, hull.getMaxX() + width, y));
+        geoms.add(factory.toGeometry(new Envelope(midX - width / 4, midX, y - height / 2, y)));
+        geoms.add(factory.toGeometry(new Envelope(midX - width / 4, midX, y, y + height / 2)));
+      }
+      for (double x : new double[] {hull.getMinX(), storedHull.getMinX(), hull.getMaxX()}) {
+        for (double y : new double[] {hull.getMinY(), storedHull.getMinY(), hull.getMaxY()}) {
+          geoms.add(factory.createPoint(new Coordinate(x, y)));
+        }
+      }
+      for (Geometry geom : geoms) {
+        for (boolean allTouched : new boolean[] {false, true}) {
+          String label = Arrays.toString(grid) + " " + geom.toText() + " allTouched=" + allTouched;
+          for (boolean lenient : new boolean[] {true, false}) {
+            String count =
+                outcome(
+                    made,
+                    stored,
+                    label + " RS_ZonalStats lenient=" + lenient,
+                    raster ->
+                        RasterBandAccessors.getZonalStats(
+                            raster, geom, 1, "sum", allTouched, false, lenient));
+            if (lenient && count.equals("null")) {
+              nulls++;
+            } else if (lenient) {
+              counted++;
+            }
+            for (boolean crop : new boolean[] {false, true}) {
+              outcome(
+                  made,
+                  stored,
+                  label + " RS_Clip crop=" + crop + " lenient=" + lenient,
+                  raster ->
+                      RasterBandEditors.clip(raster, 1, geom, allTouched, -9999, crop, lenient));
+              compared++;
+            }
+            compared++;
+          }
+          outcome(
+              made,
+              stored,
+              label + " RS_SetValues",
+              raster -> PixelFunctionEditors.setValues(raster, 1, geom, 99, allTouched, false));
+          compared++;
+        }
+      }
+    }
+    Assert.assertTrue("outcomes compared: " + compared, compared > 7000);
+    Assert.assertTrue("geometries beside the raster: " + nulls, nulls > 400);
+    Assert.assertTrue("geometries on the raster: " + counted, counted > 400);
+  }
+
+  /** A function of a raster, for {@link #outcome}. */
+  private interface RasterCall {
+    Object on(GridCoverage2D raster) throws Exception;
+  }
+
+  /**
+   * Asserts that a call has the same outcome on two rasters, and returns it: the number returned,
+   * the grid and the cells of the raster returned once that is serialized, "null", or the
+   * rejection.
+   */
+  private static String outcome(
+      GridCoverage2D raster, GridCoverage2D other, String label, RasterCall call) throws Exception {
+    String[] outcomes = new String[2];
+    GridCoverage2D[] rasters = {raster, other};
+    for (int i = 0; i < 2; i++) {
+      try {
+        Object result = call.on(rasters[i]);
+        if (result instanceof GridCoverage2D) {
+          GridCoverage2D read = serialized((GridCoverage2D) result);
+          outcomes[i] =
+              Arrays.toString(Arrays.copyOf(RasterAccessors.metadata(read), 6))
+                  + " "
+                  + Arrays.toString(MapAlgebra.bandAsArray(read, 1));
+        } else {
+          outcomes[i] = String.valueOf(result);
+        }
+      } catch (RuntimeException e) {
+        outcomes[i] = "rejected: " + e.getMessage();
+      }
+    }
+    Assert.assertEquals(label, outcomes[1], outcomes[0]);
+    return outcomes[0];
+  }
+
+  /** The given coordinates and the doubles next to each of them, without repeats. */
+  private static double[] around(double... coordinates) {
+    return Arrays.stream(coordinates)
+        .flatMap(c -> Arrays.stream(new double[] {Math.nextDown(c), c, Math.nextUp(c)}))
+        .distinct()
+        .toArray();
+  }
+
+  /** The raster with its band replaced by the numbers 1, 2, 3 and so on, in pixel order. */
+  private static GridCoverage2D numbered(GridCoverage2D raster) {
+    double[] values =
+        new double[RasterAccessors.getWidth(raster) * RasterAccessors.getHeight(raster)];
+    for (int i = 0; i < values.length; i++) {
+      values[i] = i + 1;
+    }
+    return MapAlgebra.addBandFromArray(raster, values, 1);
+  }
+
+  @Test
+  public void testRasterWithASkewIsTestedOnItsConvexHull() throws Exception {
+    // No cells are located on a raster with a skew, and a geometry that reaches one is rejected
+    // for the skew. A geometry that does not reach it gets the answer it gets on any other raster,
+    // which is null in the lenient mode.
+    GeometryFactory factory = new GeometryFactory();
+    GridCoverage2D skewed =
+        numbered(RasterConstructors.makeEmptyRaster(1, "d", 6, 6, 0, 6, 1, -1, 0.5, 0.25, 0));
+    Geometry far = factory.createPoint(new Coordinate(100, 100));
+    Geometry inside = factory.createPoint(new Coordinate(4.5, 3.75));
+    Assert.assertTrue(RasterPredicates.rsIntersects(skewed, inside));
+    Assert.assertNull(
+        RasterBandAccessors.getZonalStats(skewed, far, 1, "count", false, false, true));
+    Assert.assertNull(RasterBandEditors.clip(skewed, 1, far, false, -9999, false, true));
+    IllegalArgumentException rejected =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () ->
+                RasterBandAccessors.getZonalStats(skewed, inside, 1, "count", false, false, true));
+    Assert.assertTrue(rejected.getMessage(), rejected.getMessage().contains("skewX"));
+    rejected =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterBandEditors.clip(skewed, 1, inside, false, -9999, false, true));
+    Assert.assertTrue(rejected.getMessage(), rejected.getMessage().contains("skewX"));
+  }
+
+  @Test
   public void testCellsAreLocatedFromTheCornerAStoredRasterReports() throws Exception {
     // The rasterizer predicts the corner a raster reports once it is stored, and locates cells
     // from it whether the raster has been stored or not. The prediction has to be what the

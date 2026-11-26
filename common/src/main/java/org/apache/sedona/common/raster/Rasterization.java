@@ -122,6 +122,34 @@ public class Rasterization {
   }
 
   /**
+   * Whether a geometry reaches the raster, on the footprint {@link #rasterize} rejects a geometry
+   * by: the outline of the grid that cells are located on, see {@link ReferenceGrid}. A function
+   * that returns early for a geometry outside the raster and rasterizes the others has to decide
+   * that with this test. The raster's convex hull is not the same rectangle before the raster is
+   * stored: for a raster made with the corner 0.1 and a pixel size of 0.1 the hull starts at 0.1
+   * and the outline at 0.10000000000000002. A point at 0.1 passed a test on the hull and was
+   * rejected by the rasterizer, and the same point on the same raster read back from a shuffle
+   * failed both.
+   *
+   * <p>The two are compared as {@link RasterPredicates#rsIntersects(GridCoverage2D, Geometry)}
+   * compares them: as they are when the geometry is in the raster's CRS, which is then the test of
+   * the rasterizer itself, and in WGS84 otherwise.
+   *
+   * @param raster the raster
+   * @param geom the geometry, in any CRS
+   * @return true if the geometry intersects the outline of the raster's grid
+   */
+  static boolean intersects(GridCoverage2D raster, Geometry geom) throws FactoryException {
+    double[] rasterMetadata = RasterAccessors.metadata(raster);
+    if (!canLocateCells(rasterMetadata)) {
+      // No grid is read from such a raster, and rasterize rejects it for every geometry.
+      return RasterPredicates.rsIntersects(raster, geom);
+    }
+    Polygon outline = ReferenceGrid.of(raster, rasterMetadata).outline(geom.getFactory());
+    return RasterPredicates.intersects(outline, raster.getCoordinateReferenceSystem(), geom);
+  }
+
+  /**
    * The grid of the reference raster as cells are located on it: the origin and the pixel size
    * every function reads from the raster once it has been stored, with the origin moved to the
    * raster's first cell.
@@ -844,6 +872,11 @@ public class Rasterization {
         getRasterUpperLeftY(metadata),
         bottomUp,
         grid);
+  }
+
+  /** Whether {@link #validateRasterMetadata} accepts the raster. */
+  private static boolean canLocateCells(double[] rasterMetadata) {
+    return !(rasterMetadata[4] < 0 || rasterMetadata[6] != 0 || rasterMetadata[7] != 0);
   }
 
   private static void validateRasterMetadata(double[] rasterMetadata) {

@@ -69,6 +69,21 @@ public class RasterPredicates {
     return rasterGeometry.intersects(queryWindow);
   }
 
+  /**
+   * {@link #rsIntersects(GridCoverage2D, Geometry)} for a raster given by its footprint and its
+   * CRS, for a caller that does not test the raster's convex hull.
+   *
+   * @param rasterFootprint the raster's footprint, in the raster's CRS
+   * @param rasterCRS the raster's CRS
+   * @param geometry the query window
+   * @return true if the footprint intersects the query window
+   */
+  static boolean intersects(
+      Geometry rasterFootprint, CoordinateReferenceSystem rasterCRS, Geometry geometry) {
+    Pair<Geometry, Geometry> geometries = convertCRSIfNeeded(rasterFootprint, rasterCRS, geometry);
+    return geometries.getLeft().intersects(geometries.getRight());
+  }
+
   public static boolean rsContains(GridCoverage2D raster, Geometry geometry) {
     Pair<Geometry, Geometry> geometries = convertCRSIfNeeded(raster, geometry);
     Geometry rasterGeometry = geometries.getLeft();
@@ -290,8 +305,11 @@ public class RasterPredicates {
     } catch (FactoryException | TransformException e) {
       throw new RuntimeException("Failed to calculate the convex hull of the raster", e);
     }
+    return convertCRSIfNeeded(rasterGeometry, raster.getCoordinateReferenceSystem(), queryWindow);
+  }
 
-    CoordinateReferenceSystem rasterCRS = raster.getCoordinateReferenceSystem();
+  private static Pair<Geometry, Geometry> convertCRSIfNeeded(
+      Geometry rasterGeometry, CoordinateReferenceSystem rasterCRS, Geometry queryWindow) {
     if (rasterCRS == null || rasterCRS instanceof DefaultEngineeringCRS) {
       rasterCRS = DefaultGeographicCRS.WGS84;
     }
