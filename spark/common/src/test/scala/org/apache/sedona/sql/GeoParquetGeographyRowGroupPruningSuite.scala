@@ -38,7 +38,9 @@ import org.apache.spark.sql.execution.adaptive.AdaptiveSparkPlanExec
 import org.apache.spark.sql.execution.datasources.geoparquet.{GeoParquetFileFormat, GeoParquetRowGroupFilter, GeoParquetSpatialFilter, ParquetGeospatialTypes}
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.{AndFilter, GeographyLeafFilter, OrFilter}
 
-import org.apache.spark.sql.types.{LongType, StringType, StructField, StructType}
+import org.apache.spark.sql.functions.{col, expr}
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
+import org.apache.spark.sql.types.{LongType, MetadataBuilder, StringType, StructField, StructType}
 
 import scala.collection.JavaConverters._
 import scala.util.Random
@@ -67,6 +69,12 @@ class GeoParquetGeographyRowGroupPruningSuite extends TestBaseScala {
         case (key, None) => sparkSession.conf.unset(key)
       }
   }
+
+  private def messages(error: Throwable): String = Iterator
+    .iterate(error)(_.getCause)
+    .takeWhile(_ != null)
+    .flatMap(cause => Option(cause.getMessage))
+    .mkString("\n")
 
   /** A file of small row groups, in the order of `df`. */
   private def write(df: DataFrame, path: String, options: (String, String)*): Unit =
@@ -396,6 +404,133 @@ class GeoParquetGeographyRowGroupPruningSuite extends TestBaseScala {
           assert(matched > 0)
           // Less than a third of the rows is read
           assert(read < 40 * ROWS / 3)
+        }
+      }
+
+      it("prunes for a column whose name needs quotes in a query") {
+        withDirectory { directory =>
+          val path = new File(directory, "data").getPath
+          write(diagonal.withColumnRenamed("geography", "geo-site"), path)
+          val rows = scanned(path, s"ST_Intersects(`geo-site`, $window)")
+          assert(rows > 0 && rows < ROWS / 2)
+          assert(expected(path, s"ST_Intersects(`geo-site`, $window)") == (1001L to 1199L))
+
+          // A name with quotes of its own, next to a column of that name without them
+          val quoted = new File(directory, "quoted").getPath
+          write(
+            diagonal
+              .toDF("id", "`geography`")
+              .withColumn("geography", expr("ST_GeogFromWKT('POINT (-55 -15)', 4326)")),
+            quoted)
+          val condition = s"ST_Intersects(```geography```, $window)"
+          assert(expected(quoted, condition) == (1001L to 1199L))
+          val read = scanned(quoted, condition)
+          assert(read > 0 && read < ROWS / 2)
+        }
+      }
+
+      it("keeps a row whose point is the point of the query after rounding") {
+        withDirectory { directory =>
+          val path = new File(directory, "data").getPath
+          write(
+            sparkSession.sql(
+              "SELECT 0L AS id, ST_GeogFromWKT('POINT (4.05 0)', 4326) AS geography"),
+            path)
+          // The two longitudes are one point of the sphere for the predicates
+          val query = "ST_GeogFromWKT('POINT (4.050000000000001 0)', 4326)"
+          Seq(
+            s"ST_Intersects(geography, $query)",
+            s"ST_Equals(geography, $query)",
+            s"ST_DWithin(geography, $query, 0.0D)").foreach { condition =>
+            assert(expected(path, condition) == Seq(0L), condition)
+            assert(scanned(path, condition) == 1, condition)
+          }
+        }
+      }
+
+      it("leaves a column of another SRID than the read asks for to the scan") {
+        if (SpatialTypeSupport.usesNativeTypes) withDirectory { directory =>
+          val path = new File(directory, "data").getPath
+          write(
+            sparkSession.sql(s"""SELECT id, ST_GeogFromWKT(
+                |  concat('POINT (', CAST(id * 0.05 AS DOUBLE), ' 0)'), 4269) AS geography
+                |FROM range($ROWS)""".stripMargin),
+            path)
+          val schema = StructType(
+            Seq(
+              StructField("id", LongType),
+              StructField("geography", SpatialTypeSupport.geographyType(4326))))
+          // A scan rejects the file at its first geography, whatever the filter is. A query that
+          // is outside of all row groups, and one that reaches some of them.
+          for (query <- Seq(far, window); push <- Seq("false", "true")) {
+            withConf(PUSH_DOWN -> push) {
+              val error = intercept[Exception] {
+                sparkSession.read
+                  .schema(schema)
+                  .format("geoparquet")
+                  .load(path)
+                  .where(s"ST_Intersects(geography, $query)")
+                  .collect()
+              }
+              assert(
+                messages(error).contains("requires SRID 4326 but contains SRID 4269"),
+                s"$query $push")
+            }
+          }
+        }
+      }
+
+      it("reads the statistics of the column that the reader finds for a column of the read") {
+        withDirectory { directory =>
+          def fieldId(id: Long) = new MetadataBuilder().putLong("parquet.field.id", id).build()
+          val path = new File(directory, "data").getPath
+          withConf("spark.sql.caseSensitive" -> "true") {
+            write(
+              diagonal.select(
+                col("id"),
+                col("geography").as("TARGET", fieldId(1)),
+                expr("ST_GeogFromWKT('POINT (-55 -15)', 4326)").as("target", fieldId(2))),
+              path)
+          }
+          val cased = new File(directory, "cased").getPath
+          write(diagonal, cased)
+          val geography = sparkSession.read.format("geoparquet").load(cased).schema("geography")
+
+          /** The ids that a read with `schema` finds, and the rows that its scan has read. */
+          def find(file: String, schema: StructType, column: String, push: Boolean) = {
+            var found: (Seq[Long], Long) = (Nil, 0L)
+            withConf(PUSH_DOWN -> push.toString) {
+              val df = sparkSession.read
+                .schema(schema)
+                .format("geoparquet")
+                .load(file)
+                .where(s"ST_Intersects($column, $window)")
+              assert(pushed(df).isDefined == push)
+              found = run(df)
+            }
+            found
+          }
+          // The column of the file with the field id of the column of the read, which is not
+          // the column of its name
+          val byId = StructType(
+            Seq(
+              StructField("id", LongType),
+              StructField("target", geography.dataType, nullable = true, fieldId(1))))
+          withConf("spark.sql.parquet.fieldId.read.enabled" -> "true") {
+            assert(find(path, byId, "target", push = false)._1 == (1001L to 1199L))
+            val (ids, rows) = find(path, byId, "target", push = true)
+            assert(ids == (1001L to 1199L))
+            assert(rows > 0 && rows < ROWS / 2)
+          }
+
+          // The column of the file whose name is the name of the column of the read in another
+          // case
+          val upper = StructType(
+            Seq(StructField("id", LongType), StructField("GEOGRAPHY", geography.dataType)))
+          assert(find(cased, upper, "GEOGRAPHY", push = false)._1 == (1001L to 1199L))
+          val (ids, rows) = find(cased, upper, "GEOGRAPHY", push = true)
+          assert(ids == (1001L to 1199L))
+          assert(rows > 0 && rows < ROWS / 2)
         }
       }
 

@@ -140,9 +140,13 @@ class NativeResidualBoundarySuite extends AnyFunSuite {
       Literal.create(GeographySerializer.serialize(WKBGeography.fromJTS(point)), GeographyUDT())
     val spherical =
       SpatialTypeSupport.adaptFunction(ST_Contains.apply)(Seq(geography, geographyLiteral))
-    // Not a filter on the planar bbox of a file, but one on the boxes of row groups on the sphere
-    assert(
-      translator.translateToGeoParquetSpatialFilters(Seq(spherical)) ==
-        Seq(GeographyLeafFilter("globe", 1.0, 1.0, 2.0, 2.0)))
+    // Not a filter on the planar bbox of a file, but one on the boxes of row groups on the
+    // sphere: a box around the point (1 2), a little larger than the point
+    translator.translateToGeoParquetSpatialFilters(Seq(spherical)) match {
+      case Seq(GeographyLeafFilter("globe", west, east, south, north)) =>
+        assert(west < 1 && east > 1 && south < 2 && north > 2)
+        assert(east - west < 1e-4 && north - south < 1e-4)
+      case other => fail(other.toString)
+    }
   }
 }

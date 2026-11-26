@@ -321,8 +321,18 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
       // Prune the row groups of this split using their geospatial statistics
       val rowGroups = if (readsRowGroups) footer.getBlocks.asScala.toSeq else Seq.empty
       val keptRowGroups =
-        if (shouldScanFile)
-          spatialFilter.fold(rowGroups)(GeoParquetRowGroupFilter.select(rowGroups, _))
+        if (shouldScanFile) spatialFilter.fold(rowGroups) { filter =>
+          GeoParquetRowGroupFilter.select(
+            rowGroups,
+            filter,
+            // The filter names a column of the read, which is not always the name of the column
+            // of the file
+            name =>
+              requiredSchema
+                .find(_.name == name)
+                .flatMap(GeoParquetRowGroupFilter
+                  .geographyColumn(_, footerFileMetaData, sharedConf, options)))
+        }
         else rowGroups
       if (!shouldScanFile || (rowGroups.nonEmpty && keptRowGroups.isEmpty)) {
         // The entire file, or every row group of this split, is pruned so that we don't need to

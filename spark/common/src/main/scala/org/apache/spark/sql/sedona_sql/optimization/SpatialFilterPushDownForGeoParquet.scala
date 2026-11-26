@@ -150,9 +150,9 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
         pushableColumn.geography(column).map(_ -> query)
       case _ => None
     }
-    found.flatMap { case (name, query) =>
-      GeographyLeafFilter.within(unquote(name), query, meters)
-    }
+    // The name is the name of the column as it is, and not one to parse: a name with a dot, which
+    // is the one to quote, is not a pushable column
+    found.flatMap { case (name, query) => GeographyLeafFilter.within(name, query, meters) }
   }
 
   private def translateToGeoParquetSpatialFilter(

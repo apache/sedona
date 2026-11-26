@@ -204,8 +204,18 @@ object GeoParquetSpatialFilter {
   object GeographyLeafFilter {
 
     /**
+     * What the box of a query grows by on top of the distance of the predicate, in radians: some
+     * 60 centimetres. A predicate works on the points of the sphere that the coordinates round
+     * to, so two coordinates that differ can be one point for it. The distance between two points
+     * is rounded as well, most of all for two points on opposite sides of the sphere, where it is
+     * right to some 5e-8 radians.
+     */
+    private val ROUNDING = 1e-7
+
+    /**
      * The filter for the rows of `columnName` whose geography is within `meters` of `query`, on a
-     * sphere of the radius that Sedona measures the distance between geographies on. None for a
+     * sphere of the radius that Sedona measures the distance between geographies on. The box is a
+     * little larger than that, for the rounding of the predicates, at no distance too. None for a
      * query that has no box: an empty one, one with a coordinate that is no longitude or no
      * latitude, and one that cannot be read.
      */
@@ -227,10 +237,8 @@ object GeoParquetSpatialFilter {
           val bounds = new GeographyBounds
           bounds.add(bytes, offset)
           Option(bounds.box()).map { box =>
-            // A little more than the distance, for the rounding of the distance of a row
             val grown =
-              if (meters == 0) box
-              else GeographyBounds.expand(box, meters / Haversine.AVG_EARTH_RADIUS * (1 + 1e-9))
+              GeographyBounds.expand(box, meters / Haversine.AVG_EARTH_RADIUS + ROUNDING)
             GeographyLeafFilter(columnName, grown(0), grown(1), grown(2), grown(3))
           }
         }.toOption.flatten

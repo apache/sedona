@@ -22,7 +22,11 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.util.Try
 
-import org.apache.parquet.hadoop.metadata.{BlockMetaData, ColumnChunkMetaData, ColumnPath}
+import org.apache.hadoop.conf.Configuration
+import org.apache.parquet.hadoop.metadata.{BlockMetaData, ColumnChunkMetaData, ColumnPath, FileMetaData}
+import org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetReadSupport
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
+import org.apache.spark.sql.types.{StructField, StructType}
 
 /**
  * Picks the row groups of a Parquet file that a [[GeoParquetSpatialFilter]] has to read, from the
@@ -39,15 +43,67 @@ object GeoParquetRowGroupFilter {
   /**
    * The row groups of `rowGroups` that may have a row that `filter` keeps, in their order. A row
    * group that the filter can tell nothing about is one of them.
+   *
+   * @param columnOf
+   *   the column of the file for a column of the filter, as [[geographyColumn]] finds it. None
+   *   keeps every row group for that column.
    */
-  def select(rowGroups: Seq[BlockMetaData], filter: GeoParquetSpatialFilter): Seq[BlockMetaData] =
+  def select(
+      rowGroups: Seq[BlockMetaData],
+      filter: GeoParquetSpatialFilter,
+      columnOf: String => Option[String] = column => Some(column)): Seq[BlockMetaData] =
     if (!supported || !filter.usesRowGroupStatistics) rowGroups
-    else
+    else {
+      val columns = mutable.Map.empty[String, Option[String]]
       rowGroups.filter { rowGroup =>
         val boxes = mutable.Map.empty[String, Option[Array[Double]]]
-        filter.evaluateRowGroup(column =>
-          boxes.getOrElseUpdate(column, geographyBox(rowGroup, column)))
+        filter.evaluateRowGroup(name =>
+          boxes.getOrElseUpdate(
+            name,
+            columns.getOrElseUpdate(name, columnOf(name)).flatMap(geographyBox(rowGroup, _))))
       }
+    }
+
+  /**
+   * The column of a file that a read takes the geographies of `field` from, for a filter on
+   * `field` that skips row groups by the statistics of that column. It is the column that the
+   * reader of the file finds for the field: by the field id or by the name of the field, in
+   * whichever case, as `conf` says.
+   *
+   * None for a field that the reader finds no column for, and for a column whose SRID is not the
+   * one that the type of the field names. A scan rejects such a column at its first geography,
+   * and a row group that a filter skips must not keep the scan from it.
+   *
+   * @param field
+   *   a column of the schema of the read
+   * @param parameters
+   *   the options of the read
+   */
+  def geographyColumn(
+      field: StructField,
+      fileMetaData: FileMetaData,
+      conf: Configuration,
+      parameters: Map[String, String]): Option[String] =
+    Try {
+      val fileSchema = fileMetaData.getSchema
+      val requested = ParquetReadSupport.getRequestedSchema(
+        fileSchema,
+        GeoParquetSchemaConverter.physicalSchema(StructType(Seq(field))),
+        conf,
+        enableVectorizedReader = false)
+      if (requested.getFieldCount != 1) None
+      else {
+        val name = requested.getFieldName(0)
+        val stored =
+          new GeoParquetToSparkSchemaConverter(fileMetaData.getKeyValueMetaData, conf, parameters)
+            .geographySrid(
+              fileSchema.getType(fileSchema.getFieldIndex(name)),
+              native = SpatialTypeSupport.isNativeGeography(field.dataType),
+              column = true)
+        Some(name).filter(_ =>
+          SpatialTypeSupport.geographySrid(field.dataType).forall(_ == stored))
+      }
+    }.toOption.flatten
 
   /**
    * The bounding box that `rowGroup` has for the geographies of `column`: the western, eastern,
