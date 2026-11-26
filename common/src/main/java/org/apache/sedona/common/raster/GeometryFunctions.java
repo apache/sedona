@@ -24,6 +24,7 @@ import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.geom.*;
 
@@ -42,23 +43,34 @@ public class GeometryFunctions {
     int width = RasterAccessors.getWidth(raster), height = RasterAccessors.getHeight(raster);
     GeometryFactory geometryFactory =
         new GeometryFactory(new PrecisionModel(), RasterAccessors.srid(raster));
-    double upperLeftX = RasterAccessors.getUpperLeftX(raster),
-        upperLeftY = RasterAccessors.getUpperLeftY(raster);
+    // Corners are numbered from 1 at grid cell (0, 0). That is the raster's first cell unless its
+    // grid range starts elsewhere, as the range of a GeoTools crop does: the origin the raster
+    // reports is then a corner of the raster the crop was made from.
+    GridEnvelope2D range = raster.getGridGeometry().getGridRange2D();
+    int left = range.x + 1, top = range.y + 1;
     // First and last coord (Upper left)
-    Coordinate coordOne = new Coordinate(upperLeftX, upperLeftY);
+    Coordinate coordOne;
+    if (range.x == 0 && range.y == 0) {
+      coordOne =
+          new Coordinate(
+              RasterAccessors.getUpperLeftX(raster), RasterAccessors.getUpperLeftY(raster));
+    } else {
+      Point2D first = RasterUtils.getWorldCornerCoordinates(raster, left, top);
+      coordOne = new Coordinate(first.getX(), first.getY());
+    }
 
     // start clockwise rotation
 
     // upper right
-    Point2D point = RasterUtils.getWorldCornerCoordinates(raster, width + 1, 1);
+    Point2D point = RasterUtils.getWorldCornerCoordinates(raster, left + width, top);
     Coordinate coordTwo = new Coordinate(point.getX(), point.getY());
 
     // lower right
-    point = RasterUtils.getWorldCornerCoordinates(raster, width + 1, height + 1);
+    point = RasterUtils.getWorldCornerCoordinates(raster, left + width, top + height);
     Coordinate coordThree = new Coordinate(point.getX(), point.getY());
 
     // lower left
-    point = RasterUtils.getWorldCornerCoordinates(raster, 1, height + 1);
+    point = RasterUtils.getWorldCornerCoordinates(raster, left, top + height);
     Coordinate coordFour = new Coordinate(point.getX(), point.getY());
 
     return geometryFactory.createPolygon(

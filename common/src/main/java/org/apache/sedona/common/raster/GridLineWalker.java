@@ -110,7 +110,8 @@ final class GridLineWalker {
   private final double errorOfOriginX;
   private final double errorOfOriginY;
 
-  // Exact decimal origin and scale, computed on demand.
+  // Exact decimal origin and scale. Computed on demand from the doubles, unless the origin was
+  // given in decimal.
   private BigDecimal decOriginX, decOriginY, decScaleX, decScaleY;
 
   private End tail = new End();
@@ -163,6 +164,23 @@ final class GridLineWalker {
         Math.abs(originY) * errorPerWorldY
             + 4 * Double.MIN_VALUE / Math.abs(scaleY)
             + Double.MIN_VALUE;
+  }
+
+  /**
+   * A grid whose origin is given in decimal, for an origin that is not a double: the first cell of
+   * a raster that is a part of a larger grid lies a whole number of pixels from that grid's origin.
+   * The double-precision pixel coordinates are computed from the nearest doubles. Those stand for
+   * the decimal origin as closely as a double stands for its own shortest decimal, within half a
+   * unit in the last place, which is what the error bounds allow for.
+   *
+   * @param originX world x of the grid's first column line
+   * @param originY world y of the grid's first row line
+   */
+  GridLineWalker(
+      int width, int height, BigDecimal originX, BigDecimal originY, double scaleX, double scaleY) {
+    this(width, height, originX.doubleValue(), originY.doubleValue(), scaleX, scaleY);
+    this.decOriginX = originX;
+    this.decOriginY = originY;
   }
 
   /**

@@ -1883,46 +1883,70 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       // RS_AsRaster returns a raster on the grid of the reference raster, so a line counts on the
       // output the pixels it burned there. The output is serialized between the two projections
       // below, and has to report the same grid afterwards. With the reference raster shuffled
-      // first, it is serialized before it is burned on as well.
+      // first, it is serialized before it is burned on as well. The pixels burned are returned as
+      // the rows they are in.
       def burnedAndCounted(
           originY: Double,
           scaleY: Double,
           line: String,
           cropped: Boolean,
-          shuffled: Boolean): (Double, Double) = {
+          shuffled: Boolean): (Double, Double, Set[Int]) = {
         var rasters = sparkSession.sql(
           s"SELECT RS_MakeEmptyRaster(1, 'd', 6, 6, 0D, ${originY}D, 1D, ${scaleY}D, 0D, 0D, 0) AS r")
         if (shuffled) rasters = rasters.repartition(1)
         val geom = s"ST_GeomFromWKT('$line')"
         val row = rasters
           .selectExpr(s"RS_AsRaster($geom, r, 'd', false, 1D, 0D, $cropped) AS r")
-          .selectExpr("RS_BandAsArray(r, 1)", s"RS_ZonalStats(r, $geom, 1, 'count', false, true)")
+          .selectExpr(
+            "RS_BandAsArray(r, 1)",
+            s"RS_ZonalStats(r, $geom, 1, 'count', false, true)",
+            "RS_Width(r)")
           .first()
-        (row.getSeq[Double](0).sum, row.getDouble(1))
+        val band = row.getSeq[Double](0)
+        val rows = band.indices.filter(band(_) != 0).map(_ / row.getInt(2)).toSet
+        (band.sum, row.getDouble(1), rows)
       }
       val onRowLine = "LINESTRING (1.2 0.3, 4.5 0.3)"
       for (cropped <- Seq(true, false); shuffled <- Seq(false, true)) {
         for ((originY, scaleY) <- Seq((0.7, -0.1), (0.6, -0.1), (0.0, 0.1))) {
+          val (burned, counted, _) =
+            burnedAndCounted(originY, scaleY, onRowLine, cropped, shuffled)
           assertEquals(
             s"origin $originY, pixel $scaleY, cropped=$cropped, shuffled=$shuffled",
             (4.0, 4.0),
-            burnedAndCounted(originY, scaleY, onRowLine, cropped, shuffled))
+            (burned, counted))
         }
       }
       // A serialized raster keeps its cell-centre transform and derives its corner from that, and
-      // no centre gives the corner 0.1 for a pixel size of 0.1: this raster reports
-      // 0.10000000000000002 once it has been serialized. Shuffled, it is burned on as it is read
-      // afterwards, and at full extent the output has that grid.
-      assertEquals(
-        (4.0, 4.0),
-        burnedAndCounted(0.1, 0.1, onRowLine, cropped = false, shuffled = true))
+      // no centre gives the corner 0.1 for a pixel size of 0.1, or -0.1 for -0.1: these rasters
+      // report 0.10000000000000002 and -0.10000000000000002 once they have been serialized.
+      // Whether the reference raster has been serialized when it is burned on is the optimizer's
+      // choice: made in the same expression, as it is here unless it is shuffled, it has not been.
+      // Pixels are selected on the grid the raster reports afterwards in both cases, where the
+      // line is inside row 1 and not on row line 2, so the output holds the same row either way
+      // and the line counts it.
+      for ((originY, scaleY, line) <- Seq(
+          (0.1, 0.1, onRowLine),
+          (-0.1, -0.1, "LINESTRING (1.2 -0.3, 4.5 -0.3)"))) {
+        for (shuffled <- Seq(false, true)) {
+          assertEquals(
+            s"origin $originY, pixel $scaleY, shuffled=$shuffled",
+            (4.0, 4.0, Set(1)),
+            burnedAndCounted(originY, scaleY, line, cropped = false, shuffled))
+          val (burned, counted, _) =
+            burnedAndCounted(originY, scaleY, line, cropped = true, shuffled)
+          assertEquals(
+            s"origin $originY, pixel $scaleY, cropped, shuffled=$shuffled",
+            (4.0, 4.0),
+            (burned, counted))
+        }
+      }
       // A cropped output cannot start on such a line either. Row line 1 of this raster is 0.1,
       // where the window of the line starts, so the output starts a row earlier.
       for (shuffled <- Seq(false, true)) {
-        assertEquals(
-          s"shuffled=$shuffled",
-          (4.0, 4.0),
-          burnedAndCounted(0.0, 0.1, "LINESTRING (1.2 0.2, 4.5 0.2)", cropped = true, shuffled))
+        val (burned, counted, _) =
+          burnedAndCounted(0.0, 0.1, "LINESTRING (1.2 0.2, 4.5 0.2)", cropped = true, shuffled)
+        assertEquals(s"shuffled=$shuffled", (4.0, 4.0), (burned, counted))
       }
     }
 
