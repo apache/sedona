@@ -35,7 +35,6 @@ import org.apache.spark.sql.catalyst.expressions.SubqueryExpression
 import org.apache.spark.sql.catalyst.plans.logical.Filter
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.catalyst.rules.Rule
-import org.apache.spark.sql.connector.catalog.CatalogV2Implicits.parseColumnPath
 import org.apache.spark.sql.execution.datasources.DataSourceStrategy
 import org.apache.spark.sql.execution.datasources.HadoopFsRelation
 import org.apache.spark.sql.execution.datasources.LogicalRelation
@@ -101,6 +100,11 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
     }
   }
 
+  /**
+   * The name of a column that a filter can be pushed down for. It is the name of the column as it
+   * is, and not one to parse: a column with a dot in its name is not a pushable one, so the name
+   * has no quotes but its own.
+   */
   private class SpatialPushableColumn(underlying: PushableColumnBase) {
     // A spatial filter compares the planar bounding box of the geometry of a query with the
     // bounding box of a file. The edges of a geography are arcs on the sphere, which leave the
@@ -150,8 +154,6 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
         pushableColumn.geography(column).map(_ -> query)
       case _ => None
     }
-    // The name is the name of the column as it is, and not one to parse: a name with a dot, which
-    // is the one to quote, is not a pushable column
     found.flatMap { case (name, query) => GeographyLeafFilter.within(name, query, meters) }
   }
 
@@ -189,18 +191,16 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
       // regardless of how the writer chose the per-row Box2D values. Matched here before the
       // Geometry-typed cases so the Box2D arms don't fall through to `GeometryUDT.deserialize`.
       case ST_Intersects(Seq(pushableColumn(name), Literal(v, _: Box2DUDT))) =>
-        extractBox2DLiteral(v).map(qb =>
-          Box2DLeafFilter(unquote(name), Box2DPredicateKind.Intersects, qb))
+        extractBox2DLiteral(v).map(qb => Box2DLeafFilter(name, Box2DPredicateKind.Intersects, qb))
       case ST_Intersects(Seq(Literal(v, _: Box2DUDT), pushableColumn(name))) =>
-        extractBox2DLiteral(v).map(qb =>
-          Box2DLeafFilter(unquote(name), Box2DPredicateKind.Intersects, qb))
+        extractBox2DLiteral(v).map(qb => Box2DLeafFilter(name, Box2DPredicateKind.Intersects, qb))
 
       case ST_Contains(Seq(pushableColumn(name), Literal(v, _: Box2DUDT))) =>
         extractBox2DLiteral(v).map(qb =>
-          Box2DLeafFilter(unquote(name), Box2DPredicateKind.ColumnContainsLiteral, qb))
+          Box2DLeafFilter(name, Box2DPredicateKind.ColumnContainsLiteral, qb))
       case ST_Contains(Seq(Literal(v, _: Box2DUDT), pushableColumn(name))) =>
         extractBox2DLiteral(v).map(qb =>
-          Box2DLeafFilter(unquote(name), Box2DPredicateKind.LiteralContainsColumn, qb))
+          Box2DLeafFilter(name, Box2DPredicateKind.LiteralContainsColumn, qb))
 
       // Box3D-on-Box3D variants are not yet pushable (Box3D row-group filters are tracked as a
       // separate follow-up). Skip pushdown explicitly so the predicate falls through to per-row
@@ -214,35 +214,32 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
         None
 
       case ST_Contains(Seq(pushableColumn(name), Literal(v, _))) =>
-        Some(LeafFilter(unquote(name), SpatialPredicate.COVERS, GeometryUDT.deserialize(v)))
+        Some(LeafFilter(name, SpatialPredicate.COVERS, GeometryUDT.deserialize(v)))
       case ST_Contains(Seq(Literal(v, _), pushableColumn(name))) =>
-        Some(LeafFilter(unquote(name), SpatialPredicate.INTERSECTS, GeometryUDT.deserialize(v)))
+        Some(LeafFilter(name, SpatialPredicate.INTERSECTS, GeometryUDT.deserialize(v)))
 
       case ST_Covers(Seq(pushableColumn(name), Literal(v, _))) =>
-        Some(LeafFilter(unquote(name), SpatialPredicate.COVERS, GeometryUDT.deserialize(v)))
+        Some(LeafFilter(name, SpatialPredicate.COVERS, GeometryUDT.deserialize(v)))
       case ST_Covers(Seq(Literal(v, _), pushableColumn(name))) =>
-        Some(LeafFilter(unquote(name), SpatialPredicate.INTERSECTS, GeometryUDT.deserialize(v)))
+        Some(LeafFilter(name, SpatialPredicate.INTERSECTS, GeometryUDT.deserialize(v)))
 
       case ST_Within(Seq(pushableColumn(name), Literal(v, _))) =>
-        Some(LeafFilter(unquote(name), SpatialPredicate.INTERSECTS, GeometryUDT.deserialize(v)))
+        Some(LeafFilter(name, SpatialPredicate.INTERSECTS, GeometryUDT.deserialize(v)))
       case ST_Within(Seq(Literal(v, _), pushableColumn(name))) =>
-        Some(LeafFilter(unquote(name), SpatialPredicate.COVERS, GeometryUDT.deserialize(v)))
+        Some(LeafFilter(name, SpatialPredicate.COVERS, GeometryUDT.deserialize(v)))
 
       case ST_CoveredBy(Seq(pushableColumn(name), Literal(v, _))) =>
-        Some(LeafFilter(unquote(name), SpatialPredicate.INTERSECTS, GeometryUDT.deserialize(v)))
+        Some(LeafFilter(name, SpatialPredicate.INTERSECTS, GeometryUDT.deserialize(v)))
       case ST_CoveredBy(Seq(Literal(v, _), pushableColumn(name))) =>
-        Some(LeafFilter(unquote(name), SpatialPredicate.COVERS, GeometryUDT.deserialize(v)))
+        Some(LeafFilter(name, SpatialPredicate.COVERS, GeometryUDT.deserialize(v)))
 
       case ST_Equals(_) | ST_OrderingEquals(_) =>
         for ((name, value) <- resolveNameAndLiteral(predicate.children, pushableColumn))
-          yield LeafFilter(unquote(name), SpatialPredicate.COVERS, GeometryUDT.deserialize(value))
+          yield LeafFilter(name, SpatialPredicate.COVERS, GeometryUDT.deserialize(value))
 
       case ST_Intersects(_) | ST_Crosses(_) | ST_Overlaps(_) | ST_Touches(_) =>
         for ((name, value) <- resolveNameAndLiteral(predicate.children, pushableColumn))
-          yield LeafFilter(
-            unquote(name),
-            SpatialPredicate.INTERSECTS,
-            GeometryUDT.deserialize(value))
+          yield LeafFilter(name, SpatialPredicate.INTERSECTS, GeometryUDT.deserialize(value))
 
       case LessThan(ST_Distance(distArgs), Literal(d, DoubleType)) =>
         for ((name, value) <- resolveNameAndLiteral(distArgs, pushableColumn))
@@ -349,11 +346,7 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
         envelope.expandBy(distance)
         geom.getFactory.toGeometry(envelope)
     }
-    LeafFilter(unquote(name), SpatialPredicate.INTERSECTS, queryWindow)
-  }
-
-  private def unquote(name: String): String = {
-    parseColumnPath(name).mkString(".")
+    LeafFilter(name, SpatialPredicate.INTERSECTS, queryWindow)
   }
 
   /**

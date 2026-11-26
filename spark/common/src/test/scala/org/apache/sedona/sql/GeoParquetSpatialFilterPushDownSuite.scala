@@ -475,6 +475,64 @@ class GeoParquetSpatialFilterPushDownSuite extends TestBaseScala with TableDrive
     }
   }
 
+  describe("GeoParquet spatial filter push down for a column whose name needs quotes") {
+
+    /** The rows of `condition` with and without the filter of `condition` pushed down. */
+    def verify(data: DataFrame, condition: String, column: String): Unit = {
+      val filtered = data.where(condition)
+      val pushed = getPushedDownSpatialFilter(filtered)
+      assert(pushed.exists(_.simpleString.startsWith(column + " ")), condition)
+      val expected = withConf(Map("spark.sedona.geoparquet.spatialFilterPushDown" -> "false")) {
+        data.where(condition).orderBy("region", "id").select("region", "id").collect().toSeq
+      }
+      assert(expected.nonEmpty, condition)
+      assert(
+        filtered.orderBy("region", "id").select("region", "id").collect().toSeq == expected,
+        condition)
+    }
+
+    def withData(data: DataFrame)(run: DataFrame => Unit): Unit = {
+      val parent = Files.createTempDirectory("sedona_geoparquet_quoted_").toFile
+      try {
+        val path = parent.getAbsolutePath + "/data"
+        writeTestDataAsGeoParquet(data, path)
+        run(sparkSession.read.format("geoparquet").load(path))
+      } finally FileUtils.deleteDirectory(parent)
+    }
+
+    val window = "ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))')"
+
+    it("Push down a filter on a geometry column with a hyphen in its name") {
+      withData(df.withColumnRenamed("geom", "geo-site")) { data =>
+        verify(data, s"ST_Intersects(`geo-site`, $window)", "geo-site")
+        verify(data, s"ST_Intersects($window, `geo-site`)", "geo-site")
+        verify(data, s"ST_Within(`geo-site`, $window)", "geo-site")
+        verify(data, s"ST_Equals(`geo-site`, ST_GeomFromText('POINT (5 5)'))", "geo-site")
+        verify(data, "ST_DWithin(`geo-site`, ST_GeomFromText('POINT (5 5)'), 2.0)", "geo-site")
+        verify(data, "ST_Distance(`geo-site`, ST_GeomFromText('POINT (5 5)')) < 2.0", "geo-site")
+      }
+    }
+
+    it("Push down a filter on a geometry column with a backtick in its name") {
+      // Next to a column of that name without the backticks, whose geometries are elsewhere
+      val data = df
+        .withColumnRenamed("geom", "`geom`")
+        .withColumn("geom", expr("ST_Point(1000, 1000)"))
+      withData(data) { data =>
+        verify(data, s"ST_Intersects(```geom```, $window)", "`geom`")
+      }
+    }
+
+    it("Push down a filter on a Box2D column with a hyphen in its name") {
+      withData(df.withColumn("geom-bbox", expr("ST_Box2D(geom)"))) { data =>
+        val condition =
+          "ST_Intersects(`geom-bbox`, ST_MakeBox2D(ST_Point(5.0, 5.0), ST_Point(15.0, 15.0)))"
+        verify(data, condition, "geom-bbox")
+        verifyBox2DFilter(data, condition)
+      }
+    }
+  }
+
   private def setupBox2DCoveringFixture(): (DataFrame, String) = {
     val box2dParent =
       Files.createTempDirectory("sedona_geoparquet_box2d_").toFile.getAbsolutePath
