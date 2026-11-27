@@ -30,11 +30,13 @@ import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.geometry.BoundingBox;
 import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.datum.PixelInCell;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.coverage.grid.GridCoverageFactory;
+import org.geotools.coverage.grid.GridEnvelope2D;
+import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.locationtech.jts.algorithm.CGAlgorithmsDD;
+import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.locationtech.jts.algorithm.Orientation;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.util.PolygonExtracter;
@@ -62,16 +64,20 @@ public class Rasterization {
       throws FactoryException {
 
     // Validate the input geometry and raster metadata
-    double[] metadata = RasterAccessors.metadata(raster);
-    validateRasterMetadata(metadata);
+    double[] rasterMetadata = RasterAccessors.metadata(raster);
+    validateRasterMetadata(rasterMetadata);
+    ReferenceGrid grid = ReferenceGrid.of(raster, rasterMetadata);
     geom = RasterUtils.transformToRasterCRS(raster, geom);
-    if (!RasterPredicates.intersectsInRasterCoordinateSpace(raster, geom)) {
+    Polygon outline = grid.outline(geom.getFactory());
+    if (!outline.intersects(geom)) {
       throw new IllegalArgumentException("Geometry does not intersect Raster.");
     }
 
-    ReferencedEnvelope rasterExtent = raster.getEnvelope2D();
+    ReferencedEnvelope rasterExtent =
+        new ReferencedEnvelope(
+            outline.getEnvelopeInternal(), raster.getCoordinateReferenceSystem2D());
 
-    ReferencedEnvelope geomExtent = rasterizeGeomExtent(geom, raster, metadata, allTouched);
+    ReferencedEnvelope geomExtent = rasterizeGeomExtent(geom, raster, grid, allTouched);
     if (geomExtent == null && useGeometryExtent) {
       // The geometry's window holds no cell of the raster, for example a point on the raster's
       // right or bottom edge or a polygon that only touches one of its edges, so there is no
@@ -79,12 +85,15 @@ public class Rasterization {
       return null;
     }
 
+    // The geometry is burned within its window. The output can start a cell before it.
+    ReferencedEnvelope outputExtent =
+        useGeometryExtent ? startOnStorableLines(geomExtent, grid) : geomExtent;
     RasterizationParams params =
-        calculateRasterizationParams(raster, useGeometryExtent, metadata, geomExtent, pixelType);
+        calculateRasterizationParams(raster, useGeometryExtent, grid, outputExtent, pixelType);
 
     fillBackground(params.writableRaster, backgroundValue);
 
-    rasterizeGeometry(raster, metadata, geom, params, geomExtent, value, allTouched);
+    rasterizeGeometry(raster, grid, geom, params, geomExtent, value, allTouched);
 
     if (useGeometryExtent && !params.anyBurned && !overlapsRasterArea(geom, rasterExtent)) {
       // The window can hold cells that the geometry only touches, for example the corner cell of a
@@ -95,20 +104,14 @@ public class Rasterization {
       return null;
     }
 
-    // Create a GridCoverage2D for the rasterized result
-    GridCoverageFactory coverageFactory = new GridCoverageFactory();
-    GridCoverage2D rasterized;
-
-    if (useGeometryExtent) {
-      rasterized = coverageFactory.create("rasterized", params.writableRaster, geomExtent);
-    } else {
-      rasterized = coverageFactory.create("rasterized", params.writableRaster, rasterExtent);
-    }
-
-    // If original raster is bottom-up, flip the rasterized result vertically
-    if (params.bottomUp) {
-      rasterized = RasterUtils.flipVerticallyGridSpace(rasterized);
-    }
+    // Create a GridCoverage2D for the rasterized result, on the reference raster's grid. The rows
+    // of a bottom-up raster were written in its own order, so the grid needs no flipping.
+    GridCoverage2D rasterized =
+        RasterUtils.create(
+            params.writableRaster,
+            outputGridGeometry(raster, grid, params, useGeometryExtent),
+            null,
+            null);
 
     // Return results compatible with the original function
     List<Object> objects = new ArrayList<>();
@@ -116,6 +119,278 @@ public class Rasterization {
     objects.add(rasterized);
 
     return objects;
+  }
+
+  /**
+   * Whether a geometry reaches the raster, on the footprint {@link #rasterize} rejects a geometry
+   * by: the outline of the grid that cells are located on, see {@link ReferenceGrid}. A function
+   * that returns early for a geometry outside the raster and rasterizes the others has to decide
+   * that with this test. The raster's convex hull is not the same rectangle before the raster is
+   * stored: for a raster made with the corner 0.1 and a pixel size of 0.1 the hull starts at 0.1
+   * and the outline at 0.10000000000000002. A point at 0.1 passed a test on the hull and was
+   * rejected by the rasterizer, and the same point on the same raster read back from a shuffle
+   * failed both.
+   *
+   * <p>The two are compared as {@link RasterPredicates#rsIntersects(GridCoverage2D, Geometry)}
+   * compares them: as they are when the geometry is in the raster's CRS, which is then the test of
+   * the rasterizer itself, and in WGS84 otherwise.
+   *
+   * @param raster the raster
+   * @param geom the geometry, in any CRS
+   * @return true if the geometry intersects the outline of the raster's grid
+   */
+  static boolean intersects(GridCoverage2D raster, Geometry geom) throws FactoryException {
+    double[] rasterMetadata = RasterAccessors.metadata(raster);
+    if (!canLocateCells(rasterMetadata)) {
+      // No grid is read from such a raster, and rasterize rejects it for every geometry.
+      return RasterPredicates.rsIntersects(raster, geom);
+    }
+    Polygon outline = ReferenceGrid.of(raster, rasterMetadata).outline(geom.getFactory());
+    return RasterPredicates.intersects(outline, raster.getCoordinateReferenceSystem(), geom);
+  }
+
+  /**
+   * The grid of the reference raster as cells are located on it: the origin and the pixel size
+   * every function reads from the raster once it has been stored, with the origin moved to the
+   * raster's first cell.
+   *
+   * <p><b>The stored origin.</b> Spark serializes a raster when it passes from one projection to
+   * the next, but not between two functions nested in one expression, and which of the two happens
+   * is the optimizer's choice. The serializer keeps the cell-centre transform, and the corner a
+   * raster reports afterwards is derived from it in floating point, see {@link #storedCorner}. That
+   * is not always the corner the raster was made with: a raster made with the corner 0.1 and a
+   * pixel size of 0.1 reports 0.10000000000000002. On the decimal values that decide which cell a
+   * coordinate is in, those are two grids. The coordinate 0.3 is on a row line of the first and
+   * inside a row of the second. Cells are located on the second whether the raster has been stored
+   * yet or not, so a geometry selects the same cells at every step of a query.
+   *
+   * <p><b>The first cell.</b> The grid range of a raster does not have to start at zero. A GeoTools
+   * crop keeps the grid-to-world transform of its source and starts its range at the first cell it
+   * keeps, so the origin the metadata report is the corner of grid cell (0, 0), while the first
+   * cell of the raster's data is cell (range.x, range.y). Cells are counted from that first cell.
+   * Its corner, origin + range * scale, is kept in decimal because it need not be a double. Rounded
+   * to one, it would move every grid line of the raster by the rounding error, and a coordinate
+   * that close to a grid line would select another cell than on the raster the crop was made from.
+   */
+  static final class ReferenceGrid {
+    /** The raster's metadata, with the origin replaced by the doubles nearest to the two below. */
+    final double[] metadata;
+
+    /** World x of the first column line of the raster's first cell. */
+    final BigDecimal originX;
+
+    /** World y of the first row line, in pixel order, of the raster's first cell. */
+    final BigDecimal originY;
+
+    private ReferenceGrid(double[] metadata, BigDecimal originX, BigDecimal originY) {
+      this.metadata = metadata;
+      this.originX = originX;
+      this.originY = originY;
+    }
+
+    /**
+     * @param raster the reference raster
+     * @param rasterMetadata its metadata, as {@link RasterAccessors#metadata} returns them
+     */
+    static ReferenceGrid of(GridCoverage2D raster, double[] rasterMetadata) {
+      GridEnvelope2D range = raster.getGridGeometry().getGridRange2D();
+      BigDecimal originX = firstLine(range.x, rasterMetadata[4], rasterMetadata[0]);
+      BigDecimal originY = firstLine(range.y, rasterMetadata[5], rasterMetadata[1]);
+      double[] metadata = rasterMetadata.clone();
+      metadata[0] = originX.doubleValue();
+      metadata[1] = originY.doubleValue();
+      return new ReferenceGrid(metadata, originX, originY);
+    }
+
+    private static BigDecimal firstLine(int firstCell, double scale, double corner) {
+      BigDecimal origin = BigDecimal.valueOf(storedCorner(corner, scale));
+      return firstCell == 0 ? origin : gridLine(firstCell, scale, origin).stripTrailingZeros();
+    }
+
+    /**
+     * The raster's rectangle as this grid places it, to tell whether a geometry reaches the raster
+     * at all. The corners are computed as the raster's grid-to-world transform computes them, so
+     * for a raster that reports the corner it was made with this is its convex hull.
+     */
+    Polygon outline(GeometryFactory factory) {
+      double x0 = metadata[0];
+      double y0 = metadata[1];
+      double x1 = metadata[2] * metadata[4] + x0;
+      double y1 = metadata[3] * metadata[5] + y0;
+      return factory.createPolygon(
+          new Coordinate[] {
+            new Coordinate(x0, y0),
+            new Coordinate(x1, y0),
+            new Coordinate(x1, y1),
+            new Coordinate(x0, y1),
+            new Coordinate(x0, y0)
+          });
+    }
+  }
+
+  /**
+   * The corner that a raster with the given corner and pixel size reports once it has been stored.
+   * The serializer keeps the cell centre, corner + scale / 2, and the corner is read back from it
+   * as centre - scale / 2, both rounded. A raster made with a corner that was read back this way
+   * reports that corner again: in binary floating point with rounding to nearest, adding a number,
+   * subtracting it and adding it again gives what the first addition gave, so the centre is the
+   * same one.
+   */
+  static double storedCorner(double corner, double scale) {
+    double half = scale / 2;
+    return (corner + half) - half;
+  }
+
+  /**
+   * The grid of the output raster, which is the reference raster's grid: its pixel size, and an
+   * origin on one of its grid lines.
+   *
+   * <p>An output at full extent takes the reference raster's grid geometry as it is, when its grid
+   * range starts at zero as the output's does. Stored, the two report the same origin, the one
+   * cells were located from, see {@link ReferenceGrid}. A cropped output starts a whole number of
+   * cells into the reference grid, and its origin is that grid line, computed in decimal as {@link
+   * GridLineWalker} and {@link #floorPixelIndex} read the grid. See {@link #startOnStorableLines}
+   * for the lines a cropped output starts on. The output for a reference raster whose grid range
+   * does not start at zero is placed like a cropped one, at the raster's first cell.
+   *
+   * <p>When the reference raster's origin and pixel size are short decimals, so are its grid lines,
+   * and the output's grid lines are the same numbers. Otherwise a grid line is not a double. The
+   * output then starts at the double next to it, see {@link #firstCoordinateOfCell}, and all its
+   * grid lines are less than a unit in the last place of that origin away from the reference
+   * raster's. A coordinate that close to a grid line, such as a grid node computed from the origin
+   * and the pixel size in floating point, can be in the neighbouring cell on the output. No origin
+   * avoids that: a raster with a double origin cannot repeat the grid lines of another raster from
+   * a line of it that is not a double. Only the output that takes the reference raster's grid
+   * geometry is exact on such a grid.
+   *
+   * <p>A grid derived from the output's envelope, as (max - min) / cells, has a pixel size one
+   * rounding error away from the reference raster's: 0.10000000000000002 for six rows of 0.1 down
+   * from 0.7. A coordinate on a grid line of the reference raster is then beside that line on the
+   * output, and a geometry rasterized onto the output, or counted on it, selects other cells than
+   * the ones it burned.
+   */
+  private static GridGeometry2D outputGridGeometry(
+      GridCoverage2D raster, ReferenceGrid grid, RasterizationParams params, boolean cropped) {
+    double[] metadata = grid.metadata;
+    GridGeometry2D referenceGrid = raster.getGridGeometry();
+    GridEnvelope2D referenceRange = referenceGrid.getGridRange2D();
+    if (!cropped && referenceRange.x == 0 && referenceRange.y == 0) {
+      return referenceGrid;
+    }
+    int width = params.writableRaster.getWidth();
+    int height = params.writableRaster.getHeight();
+    // The offsets count cells from the reference raster's left and from its geographic top. Rows
+    // are stored in the raster's own order, so the first row of a bottom-up output is the bottom
+    // row of the window.
+    int firstRow =
+        params.bottomUp ? params.rasterHeight - params.rowOffset - height : params.rowOffset;
+    AffineTransform2D gridToWorld =
+        new AffineTransform2D(
+            metadata[4],
+            0,
+            0,
+            metadata[5],
+            firstCoordinateOfCell(params.colOffset, metadata[4], grid.originX),
+            firstCoordinateOfCell(firstRow, metadata[5], grid.originY));
+    return new GridGeometry2D(
+        new GridEnvelope2D(0, 0, width, height),
+        PixelInCell.CELL_CORNER,
+        gridToWorld,
+        raster.getCoordinateReferenceSystem2D(),
+        null);
+  }
+
+  /** The grid line origin + index * scale, in decimal. */
+  private static BigDecimal gridLine(long index, double scale, BigDecimal origin) {
+    return BigDecimal.valueOf(index).multiply(BigDecimal.valueOf(scale)).add(origin);
+  }
+
+  /**
+   * The first coordinate, in pixel order, that belongs to a cell of the raster's grid: the grid
+   * line origin + index * scale when a double has that decimal value, and otherwise the double next
+   * to it on the cell's side.
+   *
+   * <p>With that double as its origin, the first grid line of a cropped output separates all
+   * doubles exactly as the reference raster's grid line does. The double on the other side of the
+   * line would itself be on the output's first grid line while it is before the line on the
+   * reference raster, and it is often a coordinate that matters. A raster that reports the corner
+   * 0.10000000000000002 for a pixel size of 0.1, as the one made with the corner 0.1 does once it
+   * is serialized, has its grid line 1 at 0.20000000000000002. The nearest double is 0.2, which
+   * lies before that line: as the origin it would put the coordinate 0.3 on the output's row line
+   * 1, while on this raster 0.3 is inside row 1.
+   */
+  private static double firstCoordinateOfCell(long index, double scale, BigDecimal origin) {
+    BigDecimal line = gridLine(index, scale, origin);
+    double nearest = line.doubleValue();
+    int side = BigDecimal.valueOf(nearest).compareTo(line);
+    if (scale > 0 && side < 0) {
+      return Math.nextUp(nearest);
+    }
+    if (scale < 0 && side > 0) {
+      return Math.nextDown(nearest);
+    }
+    return nearest;
+  }
+
+  /**
+   * Moves the first column line and the first row line of a window, in the raster's own pixel
+   * order, back to lines that a stored raster can start on.
+   *
+   * <p>A cropped output starts on those two lines, and Spark serializes it when it passes from one
+   * projection to the next. The serializer keeps the cell-centre transform, and the corner a raster
+   * reports is derived from that in floating point, as centre - scale / 2. Not every corner comes
+   * out of that: for a pixel size of 0.1 the centres 0.15 and 0.15000000000000002 give the corners
+   * 0.09999999999999999 and 0.10000000000000002, and no centre gives 0.1. An output starting on
+   * such a line would report another origin once it is stored, and a segment lying on one of the
+   * reference raster's grid lines would then be beside the grid lines of the output. Whichever
+   * neighbouring corner the output took instead, either such a segment or one that ends on a grid
+   * line would select other cells on the output than it burned.
+   *
+   * <p>So the window starts a cell earlier instead. The output stays on the reference grid, with a
+   * first row or column that the geometry does not reach.
+   */
+  private static ReferencedEnvelope startOnStorableLines(
+      ReferencedEnvelope window, ReferenceGrid grid) {
+    double[] metadata = grid.metadata;
+    boolean bottomUp = metadata[5] > 0;
+    double firstY = bottomUp ? window.getMinY() : window.getMaxY();
+    long column = Math.round((window.getMinX() - metadata[0]) / metadata[4]);
+    long row = Math.round((firstY - metadata[1]) / metadata[5]);
+    long storableColumn = storableLine(column, metadata[4], grid.originX);
+    long storableRow = storableLine(row, metadata[5], grid.originY);
+    if (storableColumn == column && storableRow == row) {
+      return window;
+    }
+    double minX =
+        storableColumn == column
+            ? window.getMinX()
+            : toWorldCoordinate(storableColumn, metadata[4], metadata[0]);
+    double y =
+        storableRow == row ? firstY : toWorldCoordinate(storableRow, metadata[5], metadata[1]);
+    return new ReferencedEnvelope(
+        minX,
+        window.getMaxX(),
+        bottomUp ? y : window.getMinY(),
+        bottomUp ? window.getMaxY() : y,
+        window.getCoordinateReferenceSystem());
+  }
+
+  /**
+   * The last grid line at or before the given one, in pixel order, that a stored raster can start
+   * on. A line that is not a double is left as it is: the raster's corner is not a short decimal
+   * then, and no line of its grid is one. Line 0 is the raster's own origin.
+   */
+  private static long storableLine(long index, double scale, BigDecimal origin) {
+    while (index > 0) {
+      BigDecimal line = gridLine(index, scale, origin);
+      double corner = line.doubleValue();
+      boolean lineIsDouble = BigDecimal.valueOf(corner).compareTo(line) == 0;
+      if (!lineIsDouble || storedCorner(corner, scale) == corner) {
+        break;
+      }
+      index--;
+    }
+    return index;
   }
 
   /**
@@ -145,7 +420,7 @@ public class Rasterization {
 
   private static void rasterizeGeometry(
       GridCoverage2D raster,
-      double[] metadata,
+      ReferenceGrid grid,
       Geometry geom,
       RasterizationParams params,
       ReferencedEnvelope geomExtent,
@@ -161,25 +436,25 @@ public class Rasterization {
       case "GeometryCollection":
       case "MultiPolygon":
       case "MultiPoint":
-        rasterizeGeometryCollection(raster, metadata, geom, params, value, allTouched);
+        rasterizeGeometryCollection(raster, grid, geom, params, value, allTouched);
         break;
       case "Point":
-        rasterizePoint(geom, metadata, params, value);
+        rasterizePoint(geom, grid, params, value);
         break;
       case "LineString":
       case "MultiLineString":
       case "LinearRing":
-        rasterizeLineString(geom, params, value, geomExtent);
+        rasterizeLineString(geom, params, value, allTouched);
         break;
       default:
-        rasterizePolygon(raster, metadata, geom, params, geomExtent, value, allTouched);
+        rasterizePolygon(raster, grid, geom, params, geomExtent, value, allTouched);
         break;
     }
   }
 
   private static void rasterizeGeometryCollection(
       GridCoverage2D raster,
-      double[] metadata,
+      ReferenceGrid grid,
       Geometry geom,
       RasterizationParams params,
       double value,
@@ -187,8 +462,8 @@ public class Rasterization {
 
     for (int i = 0; i < geom.getNumGeometries(); i++) {
       Geometry subGeom = geom.getGeometryN(i);
-      ReferencedEnvelope subGeomExtent = rasterizeGeomExtent(subGeom, raster, metadata, allTouched);
-      rasterizeGeometry(raster, metadata, subGeom, params, subGeomExtent, value, allTouched);
+      ReferencedEnvelope subGeomExtent = rasterizeGeomExtent(subGeom, raster, grid, allTouched);
+      rasterizeGeometry(raster, grid, subGeom, params, subGeomExtent, value, allTouched);
     }
   }
 
@@ -203,11 +478,11 @@ public class Rasterization {
    * far edge burns none. See {@link #halfOpenCell}.
    */
   private static void rasterizePoint(
-      Geometry geom, double[] metadata, RasterizationParams params, double value) {
+      Geometry geom, ReferenceGrid grid, RasterizationParams params, double value) {
     if (geom.isEmpty()) {
       return;
     }
-    int[] cell = halfOpenCell(geom.getCoordinate(), metadata);
+    int[] cell = halfOpenCell(geom.getCoordinate(), grid);
     if (cell == null) {
       return;
     }
@@ -239,11 +514,12 @@ public class Rasterization {
    * order) belongs to no cell. The index is computed in the raster's own pixel order, so on a
    * bottom-up raster a point on a horizontal grid line falls in the cell above it, as in GDAL.
    */
-  private static int[] halfOpenCell(Coordinate coord, double[] metadata) {
+  private static int[] halfOpenCell(Coordinate coord, ReferenceGrid grid) {
+    double[] metadata = grid.metadata;
     int width = (int) metadata[2];
     int height = (int) metadata[3];
-    int col = floorPixelIndex(coord.x, metadata[0], metadata[4]);
-    int row = floorPixelIndex(coord.y, metadata[1], metadata[5]);
+    int col = floorPixelIndex(coord.x, grid.originX, metadata[4]);
+    int row = floorPixelIndex(coord.y, grid.originY, metadata[5]);
     if (col < 0 || col >= width || row < 0 || row >= height) {
       return null;
     }
@@ -252,13 +528,13 @@ public class Rasterization {
 
   /**
    * Computes floor((coord - upperLeft) / scale) exactly, on the same decimal values that {@link
-   * #toPixelIndex} snaps extents with, so a coordinate on a grid line is not pushed across it by
-   * floating-point error. Saturates at the int range for coordinates far off the raster.
+   * GridLines#enclosing} snaps extents with, so a coordinate on a grid line is not pushed across it
+   * by floating-point error. Saturates at the int range for coordinates far off the raster.
    */
-  private static int floorPixelIndex(double coord, double upperLeft, double scale) {
+  private static int floorPixelIndex(double coord, BigDecimal upperLeft, double scale) {
     BigDecimal index =
         BigDecimal.valueOf(coord)
-            .subtract(BigDecimal.valueOf(upperLeft))
+            .subtract(upperLeft)
             .divide(BigDecimal.valueOf(scale), 0, RoundingMode.FLOOR);
     if (index.compareTo(BigDecimal.valueOf(Integer.MAX_VALUE)) > 0) {
       return Integer.MAX_VALUE;
@@ -269,227 +545,47 @@ public class Rasterization {
     return index.intValue();
   }
 
-  private static void rasterizeLineString(
-      Geometry geom, RasterizationParams params, double value, ReferencedEnvelope geomExtent) {
-    for (int i = 0; i < geom.getNumGeometries(); i++) {
-      LineString line = (LineString) geom.getGeometryN(i);
-      Coordinate[] coords = line.getCoordinates();
-
-      for (int j = 0; j < coords.length - 1; j++) {
-        // Extract start and end points for the segment
-        LineSegment clippedSegment =
-            clipSegmentToRasterBounds(coords[j], coords[j + 1], geomExtent);
-
-        Coordinate start;
-        Coordinate end;
-        if (clippedSegment != null) {
-          start = new Coordinate(clippedSegment.p0.x, clippedSegment.p0.y);
-          end = new Coordinate(clippedSegment.p1.x, clippedSegment.p1.y);
-        } else {
-          continue; // Skip case where segment is completely outside geomExtent
-        }
-
-        double x0 = (start.x - params.upperLeftX) / params.scaleX;
-        double y0 = (start.y - params.upperLeftY) / params.scaleY;
-        double x1 = (end.x - params.upperLeftX) / params.scaleX;
-        double y1 = (end.y - params.upperLeftY) / params.scaleY;
-
-        traverseSegment(params, x0, y0, x1, y1, value);
-      }
-    }
-  }
-
   /**
-   * Burns every grid cell the segment passes through, in pixel space where cell (i, j) covers [i, i
-   * + 1) x [j, j + 1). Uses exact cell traversal (Amanatides-Woo): it steps from one cell-boundary
-   * crossing to the next, so a cell is burned whenever the segment enters it, however briefly. A
-   * fixed-step sampling walk instead misses cells crossed over a distance shorter than the step.
+   * Burns every cell a line passes through over a positive length. A segment lying exactly on a
+   * grid line burns the half-open cells after the line, in the raster's own pixel order.
    *
-   * <p>When an endpoint's pixel coordinate is exactly integral, its cell is selected from the side
-   * containing the segment interior. This avoids burning the neighboring cell that is contacted
-   * only at the endpoint, and it keeps an exact-corner end cell reachable by the traversal.
+   * <p>Without allTouched, a cell the line meets only at a point is not burned. With allTouched,
+   * such a cell is burned when the point belongs to it under the half-open rule, as GDAL's
+   * ALL_TOUCHED does: the cell after a grid corner that a segment crosses exactly, and the cell
+   * containing a segment's first point in pixel order. See {@link GridLineWalker} for the exact
+   * rule, for how a coordinate is matched to a grid line, and for how segments that leave the
+   * raster are clipped.
    */
-  private static void traverseSegment(
-      RasterizationParams params, double x0, double y0, double x1, double y1, double value) {
-    traverseSegment(params, x0, y0, x1, y1, value, false, false);
-  }
-
-  /**
-   * As {@link #traverseSegment(RasterizationParams, double, double, double, double, double)}, for a
-   * segment that may lie exactly on a grid line. A segment with no extent along an axis whose pixel
-   * coordinate is integral runs between two rows (or columns) of cells; by default it burns the
-   * half-open one after the line, and {@code flatTowardsNegativeX} / {@code flatTowardsNegativeY}
-   * select the one before it instead.
-   */
-  private static void traverseSegment(
-      RasterizationParams params,
-      double x0,
-      double y0,
-      double x1,
-      double y1,
-      double value,
-      boolean flatTowardsNegativeX,
-      boolean flatTowardsNegativeY) {
-
-    int width = params.writableRaster.getWidth();
-    int height = params.writableRaster.getHeight();
-
-    double dx = x1 - x0;
-    double dy = y1 - y0;
-
-    int stepX = (int) Math.signum(dx);
-    int stepY = (int) Math.signum(dy);
-
-    boolean flatX = dx == 0 && flatTowardsNegativeX;
-    boolean flatY = dy == 0 && flatTowardsNegativeY;
-    int x = interiorCell(x0, dx < 0 || flatX);
-    int y = interiorCell(y0, dy < 0 || flatY);
-    int endX = interiorCell(x1, dx > 0 || flatX);
-    int endY = interiorCell(y1, dy > 0 || flatY);
-
-    // The endpoints are clipped to the geometry extent, so the walk covers at most the grid's
-    // width + height cells; the bound also guards against a floating-point overshoot never reaching
-    // the end cell.
-    int maxSteps = width + height + 2;
-    for (int i = 0; i <= maxSteps; i++) {
-      burnCell(params, x, y, value, width, height);
-      if (x == endX && y == endY) {
-        break;
-      }
-      // Decide which axis to advance from the side of the segment on which the next cell corner in
-      // the direction of travel lies. The robust double-double orientation predicate resolves that
-      // side exactly, so the crossing order is computed identically regardless of endpoint order. A
-      // corner off the segment steps the single axis that keeps the walk on the segment's side; a
-      // corner the segment passes exactly through steps both axes at once, burning only the two
-      // cells the segment truly crosses rather than the off-diagonal pair. This supersedes the
-      // parametric tMax comparison, whose floating-point tie was fragile: recomputed from opposite
-      // endpoints in the two directions it could round asymmetrically and flip the step near a
-      // corner, burning a direction-dependent off-diagonal cell.
-      int crossingOrder;
-      if (stepX == 0) {
-        crossingOrder = 1;
-      } else if (stepY == 0) {
-        crossingOrder = -1;
-      } else {
-        double gridX = stepX > 0 ? x + 1.0 : x;
-        double gridY = stepY > 0 ? y + 1.0 : y;
-        int orientation = CGAlgorithmsDD.orientationIndex(x0, y0, x1, y1, gridX, gridY);
-        crossingOrder = -orientation * stepX * stepY;
-      }
-      if (crossingOrder < 0) {
-        x += stepX;
-      } else if (crossingOrder > 0) {
-        y += stepY;
-      } else {
-        x += stepX;
-        y += stepY;
+  private static void rasterizeLineString(
+      Geometry geom, RasterizationParams params, double value, boolean allTouched) {
+    GridLineWalker walker = params.lineWalker();
+    GridLineWalker.CellVisitor burn = (col, row) -> params.burnRasterCell(col, row, value);
+    for (int i = 0; i < geom.getNumGeometries(); i++) {
+      Coordinate[] coords = geom.getGeometryN(i).getCoordinates();
+      for (int j = 0; j < coords.length - 1; j++) {
+        if (allTouched) {
+          walker.walkTouched(coords[j].x, coords[j].y, coords[j + 1].x, coords[j + 1].y, burn);
+        } else {
+          walker.walk(
+              coords[j].x, coords[j].y, coords[j + 1].x, coords[j + 1].y, false, false, burn);
+        }
       }
     }
-  }
-
-  /**
-   * Grid index of the cell containing the segment interior next to an endpoint. Only an exactly
-   * integral pixel coordinate is biased to the negative-side cell; nearby nonintegral coordinates
-   * and axes with no extent retain the ordinary half-open {@code floor()} result.
-   */
-  private static int interiorCell(double coord, boolean extendsNegative) {
-    int cell = (int) Math.floor(coord);
-    if (extendsNegative && coord == cell) {
-      cell--;
-    }
-    return cell;
-  }
-
-  private static void burnCell(
-      RasterizationParams params, int x, int y, double value, int width, int height) {
-    // Reverse the y index for bottom-up rasters
-    int rasterY = params.bottomUp ? height - 1 - y : y;
-    if (x >= 0 && x < width && rasterY >= 0 && rasterY < height) {
-      params.burn(x, rasterY, value);
-    }
-  }
-
-  private static LineSegment clipSegmentToRasterBounds(
-      Coordinate p1, Coordinate p2, ReferencedEnvelope geomExtent) {
-    double minX = geomExtent.getMinX();
-    double maxX = geomExtent.getMaxX();
-    double minY = geomExtent.getMinY();
-    double maxY = geomExtent.getMaxY();
-
-    double x1 = p1.x, y1 = p1.y;
-    double x2 = p2.x, y2 = p2.y;
-
-    boolean p1Inside = isInsideBounds(x1, y1, minX, maxX, minY, maxY);
-    boolean p2Inside = isInsideBounds(x2, y2, minX, maxX, minY, maxY);
-
-    if (p1Inside && p2Inside) {
-      // Both points inside: no clipping needed
-      return new LineSegment(p1, p2);
-    }
-
-    if (!p1Inside && !p2Inside) {
-      // Both points outside: no clipping needed
-      return null;
-    }
-
-    double dx = x2 - x1;
-    double dy = y2 - y1;
-
-    // Clip using parametric line equation
-    double[] tValues = {0, 1}; // Stores valid segment proportions
-
-    // Clip against minX and maxX
-    if (dx != 0) {
-      double tMin = (minX - x1) / dx;
-      double tMax = (maxX - x1) / dx;
-      if (dx < 0) {
-        double temp = tMin;
-        tMin = tMax;
-        tMax = temp;
-      }
-      tValues[0] = Math.max(tValues[0], tMin);
-      tValues[1] = Math.min(tValues[1], tMax);
-    }
-
-    // Clip against minY and maxY
-    if (dy != 0) {
-      double tMin = (minY - y1) / dy;
-      double tMax = (maxY - y1) / dy;
-      if (dy < 0) {
-        double temp = tMin;
-        tMin = tMax;
-        tMax = temp;
-      }
-      tValues[0] = Math.max(tValues[0], tMin);
-      tValues[1] = Math.min(tValues[1], tMax);
-    }
-
-    // If tValues are invalid (segment is outside), return null
-    if (tValues[0] > tValues[1]) {
-      return null; // No valid clipped segment
-    }
-
-    // Compute new clipped endpoints
-    Coordinate newP1 = new Coordinate(x1 + tValues[0] * dx, y1 + tValues[0] * dy);
-    Coordinate newP2 = new Coordinate(x1 + tValues[1] * dx, y1 + tValues[1] * dy);
-
-    return new LineSegment(newP1, newP2);
-  }
-
-  // Helper function to check if a point is inside the bounding box
-  private static boolean isInsideBounds(
-      double x, double y, double minX, double maxX, double minY, double maxY) {
-    return x >= minX && x <= maxX && y >= minY && y <= maxY;
   }
 
   static ReferencedEnvelope rasterizeGeomExtent(
       Geometry geom, GridCoverage2D raster, double[] metadata, boolean allTouched) {
-
     validateRasterMetadata(metadata);
+    return rasterizeGeomExtent(geom, raster, ReferenceGrid.of(raster, metadata), allTouched);
+  }
+
+  private static ReferencedEnvelope rasterizeGeomExtent(
+      Geometry geom, GridCoverage2D raster, ReferenceGrid grid, boolean allTouched) {
+    double[] metadata = grid.metadata;
 
     // A point burns exactly the half-open cell it lies in, so its extent is that cell.
     if (geom instanceof Puntal) {
-      return pointCellsExtent(geom, raster, metadata);
+      return pointCellsExtent(geom, raster, grid);
     }
     // A mixed collection's window is the union of its members' windows, so each member keeps the
     // cells it burns.
@@ -497,7 +593,7 @@ public class Rasterization {
       ReferencedEnvelope union = null;
       for (int i = 0; i < geom.getNumGeometries(); i++) {
         ReferencedEnvelope member =
-            rasterizeGeomExtent(geom.getGeometryN(i), raster, metadata, allTouched);
+            rasterizeGeomExtent(geom.getGeometryN(i), raster, grid, allTouched);
         if (member == null) {
           continue;
         }
@@ -510,93 +606,185 @@ public class Rasterization {
       return union;
     }
 
-    ReferencedEnvelope geomExtent =
-        new ReferencedEnvelope(geom.getEnvelopeInternal(), raster.getCoordinateReferenceSystem2D());
+    if (geom.isEmpty()) {
+      return null;
+    }
 
-    // Using BigDecimal to avoid floating point errors
+    // The window is found on the raster's own grid, from its origin and signed pixel size: the
+    // grid, and the decimal values, that also decide which cells a point or a line burns. A
+    // bottom-up raster does not store its top edge. That is origin + height * scale in floating
+    // point, and a row line located from there can be one rounding error away from the row line
+    // GridLineWalker sees, which would leave the cells it burns outside the window.
+    Envelope bounds = geom.getEnvelopeInternal();
+    int width = (int) metadata[2];
+    int height = (int) metadata[3];
+    boolean bottomUp = metadata[5] > 0;
+    GridLines columns =
+        GridLines.enclosing(bounds.getMinX(), bounds.getMaxX(), grid.originX, metadata[4]);
+    // Pixel rows grow with world y only on a bottom-up raster.
+    GridLines rows =
+        bottomUp
+            ? GridLines.enclosing(bounds.getMinY(), bounds.getMaxY(), grid.originY, metadata[5])
+            : GridLines.enclosing(bounds.getMaxY(), bounds.getMinY(), grid.originY, metadata[5]);
+
+    // Ensure the snapped AOI window is at least one pixel wide/tall.
+    // After snapping the continuous bbox to pixel edges, a thin line can
+    // collapse to first == last along an axis (i.e., a degenerate 0-width/0-height window).
+    // That would produce an empty search region and skip rasterization entirely.
+    //
+    // We grow the window by exactly one pixel on each side. This yields at least a
+    // 1-pixel-wide/1-pixel-tall search window and guarantees we visit the pixel(s)
+    // the geometry lies in.
+    columns.growIfCollapsed();
+    rows.growIfCollapsed();
+
+    // Widen the window of a line where it has to hold cells beyond the snapped bounding box.
+    //
+    // This only sizes the search window and the cropped output; which cells a line burns is decided
+    // by GridLineWalker under GDAL's half-open rule. A segment lying on a grid line burns the cells
+    // after it, which sit outside the snapped window when that line is the window's last edge in
+    // pixel order; with allTouched, so does a segment that starts on that line. The window of a
+    // MultiLineString, and of a LineString with allTouched, is widened by one pixel on every side
+    // that lies exactly on a grid line. The window of any other line is widened on a last edge
+    // that one of its segments lies on. A polygon or point never burns a cell it touches only on
+    // its boundary, as in GDAL, so its window is not widened.
+    if (geom instanceof Lineal) {
+      if (allTouched || geom instanceof MultiLineString) {
+        columns.widenWhereOnLine();
+        rows.widenWhereOnLine();
+      } else {
+        // Finding such a segment takes a pass over the line's coordinates. A line whose window
+        // misses the raster even when widened is discarded before that, on its bounding box alone:
+        // of a collection rasterized onto one tile, most members are such lines. The cells after a
+        // last edge at or beyond the raster's far edge are off the raster as well, so that edge
+        // needs no pass either.
+        if (columns.missesEvenWidened(width) || rows.missesEvenWidened(height)) {
+          return null;
+        }
+        double lastY = bottomUp ? bounds.getMaxY() : bounds.getMinY();
+        if (columns.lastOnLine
+            && columns.last < width
+            && hasSegmentAlong(geom, true, bounds.getMaxX())) {
+          columns.last++;
+        }
+        if (rows.lastOnLine && rows.last < height && hasSegmentAlong(geom, false, lastY)) {
+          rows.last++;
+        }
+      }
+    }
+
+    // Quick bbox intersection test for when rasterizeGeomExtent gets called independently
+    // return null if they do not intersect
+    if (columns.misses(width) || rows.misses(height)) {
+      return null;
+    }
+
+    // The window in world coordinates, kept within the raster. Its rows are counted down from the
+    // raster's geographic top, as the output grid counts them. The edges of the raster are lines
+    // of the same grid as the rest of the window. The raster's envelope is not used for them: it
+    // starts at the corner the raster has in memory, which is not always the corner the grid
+    // starts at, see ReferenceGrid.
     double upperLeftX = metadata[0];
     double upperLeftY = getRasterUpperLeftY(metadata);
     double scaleX = metadata[4];
     double scaleY = getRasterScaleY(metadata);
-
-    // Compute the aligned min/max values
-    double alignedMinX =
-        toWorldCoordinate(
-            toPixelIndex(geomExtent.getMinX(), scaleX, upperLeftX, true), scaleX, upperLeftX);
-    double alignedMinY =
-        toWorldCoordinate(
-            toPixelIndex(geomExtent.getMinY(), scaleY, upperLeftY, true), scaleY, upperLeftY);
-    double alignedMaxX =
-        toWorldCoordinate(
-            toPixelIndex(geomExtent.getMaxX(), scaleX, upperLeftX, false), scaleX, upperLeftX);
-    double alignedMaxY =
-        toWorldCoordinate(
-            toPixelIndex(geomExtent.getMaxY(), scaleY, upperLeftY, false), scaleY, upperLeftY);
-
-    // Ensure the snapped AOI window is at least one pixel wide/tall.
-    // After snapping the continuous bbox to pixel edges, a thin line can
-    // collapse to min == max along an axis (i.e., a degenerate 0-width/0-height window).
-    // That would produce an empty search region and skip rasterization entirely.
-    //
-    // We grow the aligned window by exactly one pixel on each side, using the
-    // pixel size (scaleX > 0, scaleY < 0 for north-up). This yields at least a
-    // 1-pixel-wide/1-pixel-tall search window and guarantees we visit the pixel(s)
-    // the geometry lies in.
-    if (alignedMaxX == alignedMinX) {
-      alignedMinX -= scaleX;
-      alignedMaxX += scaleX;
-    }
-    if (alignedMaxY == alignedMinY) {
-      alignedMinY += scaleY;
-      alignedMaxY -= scaleY;
-    }
-
-    // Get the extent of the original raster
-    double originalMinX = raster.getEnvelope().getMinimum(0);
-    double originalMinY = raster.getEnvelope().getMinimum(1);
-    double originalMaxX = raster.getEnvelope().getMaximum(0);
-    double originalMaxY = raster.getEnvelope().getMaximum(1);
-
-    // Quick bbox intersection test for when rasterizeGeomExtent gets called independently
-    // return null if they do not intersect
-    if (alignedMinX >= originalMaxX
-        || alignedMaxX <= originalMinX
-        || alignedMinY >= originalMaxY
-        || alignedMaxY <= originalMinY) {
-      return null;
-    }
-
-    // Widen the window of a line by one pixel on any side that lies exactly on a grid line (always
-    // for a MultiLineString, and with allTouched for a LineString).
-    //
-    // This only sizes the search window and the cropped output; which cells a line burns is decided
-    // by traverseSegment under GDAL's half-open rule. A line lying on a grid line burns the cells
-    // after it, which sit outside the snapped window when the line is the window's right or bottom
-    // edge. A polygon or point never burns a cell it touches only on its boundary, as in GDAL, so
-    // its window is not widened.
-    if (geom instanceof Lineal && (allTouched || geom instanceof MultiLineString)) {
-      alignedMinX -= (geomExtent.getMinX() == alignedMinX) ? scaleX : 0;
-      alignedMinY += (geomExtent.getMinY() == alignedMinY) ? scaleY : 0;
-      alignedMaxX += (geomExtent.getMaxX() == alignedMaxX) ? scaleX : 0;
-      alignedMaxY -= (geomExtent.getMaxY() == alignedMaxY) ? scaleY : 0;
-    }
-
-    // Clamp the aligned extent to the original raster extent
-    alignedMinX = Math.max(alignedMinX, originalMinX);
-    alignedMinY = Math.max(alignedMinY, originalMinY);
-    alignedMaxX = Math.min(alignedMaxX, originalMaxX);
-    alignedMaxY = Math.min(alignedMaxY, originalMaxY);
+    long left = Math.max(columns.first, 0);
+    long right = Math.min(columns.last, width);
+    long top = Math.max(bottomUp ? height - rows.last : rows.first, 0);
+    long bottom = Math.min(bottomUp ? height - rows.first : rows.last, height);
+    double alignedMinX = toWorldCoordinate(left, scaleX, upperLeftX);
+    double alignedMaxX = toWorldCoordinate(right, scaleX, upperLeftX);
+    double alignedMaxY = toWorldCoordinate(top, scaleY, upperLeftY);
+    double alignedMinY = toWorldCoordinate(bottom, scaleY, upperLeftY);
 
     // Create the aligned raster extent
-    ReferencedEnvelope alignedRasterExtent =
-        new ReferencedEnvelope(
-            alignedMinX,
-            alignedMaxX,
-            alignedMinY,
-            alignedMaxY,
-            geomExtent.getCoordinateReferenceSystem());
+    return new ReferencedEnvelope(
+        alignedMinX,
+        alignedMaxX,
+        alignedMinY,
+        alignedMaxY,
+        raster.getCoordinateReferenceSystem2D());
+  }
 
-    return alignedRasterExtent;
+  /**
+   * Whether a line has a segment, possibly one with no length, that lies on the vertical line x =
+   * value, or on the horizontal line y = value.
+   */
+  private static boolean hasSegmentAlong(Geometry lineal, boolean vertical, double value) {
+    for (int i = 0; i < lineal.getNumGeometries(); i++) {
+      Coordinate[] coords = lineal.getGeometryN(i).getCoordinates();
+      for (int j = 0; j < coords.length - 1; j++) {
+        double a = vertical ? coords[j].x : coords[j].y;
+        double b = vertical ? coords[j + 1].x : coords[j + 1].y;
+        if (a == value && b == value) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * A run of grid lines along one axis of a raster, in its own pixel order: line 0 is at the origin
+   * of the raster's {@link ReferenceGrid} and line k at origin + k * scale.
+   */
+  private static final class GridLines {
+    // Lines far beyond any raster are folded onto these, which compare against a raster the same.
+    private static final BigDecimal FAR = BigDecimal.valueOf(1L << 60);
+
+    long first;
+    long last;
+    // Whether the coordinate each of the two lines was snapped from lies exactly on it.
+    boolean firstOnLine;
+    boolean lastOnLine;
+
+    /**
+     * The grid lines that enclose two world coordinates: the last line at or before {@code low} and
+     * the first line at or after {@code high}, where {@code low} is the coordinate with the smaller
+     * pixel coordinate. Decided on decimal values, as in {@link Rasterization#floorPixelIndex}.
+     */
+    static GridLines enclosing(double low, double high, BigDecimal decimalOrigin, double scale) {
+      BigDecimal decimalScale = BigDecimal.valueOf(scale);
+      BigDecimal lowOffset = BigDecimal.valueOf(low).subtract(decimalOrigin);
+      BigDecimal highOffset = BigDecimal.valueOf(high).subtract(decimalOrigin);
+      BigDecimal before = lowOffset.divide(decimalScale, 0, RoundingMode.FLOOR);
+      BigDecimal after = highOffset.divide(decimalScale, 0, RoundingMode.CEILING);
+      GridLines lines = new GridLines();
+      lines.first = before.max(FAR.negate()).min(FAR).longValue();
+      lines.last = after.max(FAR.negate()).min(FAR).longValue();
+      lines.firstOnLine = before.multiply(decimalScale).compareTo(lowOffset) == 0;
+      lines.lastOnLine = after.multiply(decimalScale).compareTo(highOffset) == 0;
+      return lines;
+    }
+
+    void growIfCollapsed() {
+      if (first == last) {
+        first--;
+        last++;
+        // Neither edge of the window is the line the coordinates lie on any more.
+        firstOnLine = false;
+        lastOnLine = false;
+      }
+    }
+
+    /** Whether no cell of an axis with {@code size} cells lies between the two lines. */
+    boolean misses(int size) {
+      return first >= size || last <= 0;
+    }
+
+    /** The same after the last line has moved one cell on, which is as far as a window widens. */
+    boolean missesEvenWidened(int size) {
+      return first >= size || last < 0;
+    }
+
+    void widenWhereOnLine() {
+      if (firstOnLine) {
+        first--;
+      }
+      if (lastOnLine) {
+        last++;
+      }
+    }
   }
 
   /**
@@ -604,7 +792,8 @@ public class Rasterization {
    * raster. See {@link #halfOpenCell}.
    */
   private static ReferencedEnvelope pointCellsExtent(
-      Geometry geom, GridCoverage2D raster, double[] metadata) {
+      Geometry geom, GridCoverage2D raster, ReferenceGrid grid) {
+    double[] metadata = grid.metadata;
     double upperLeftX = metadata[0];
     double upperLeftY = getRasterUpperLeftY(metadata);
     double scaleX = metadata[4];
@@ -612,7 +801,7 @@ public class Rasterization {
 
     Envelope cells = new Envelope();
     for (Coordinate coord : geom.getCoordinates()) {
-      int[] cell = halfOpenCell(coord, metadata);
+      int[] cell = halfOpenCell(coord, grid);
       if (cell == null) {
         continue;
       }
@@ -628,21 +817,6 @@ public class Rasterization {
         : new ReferencedEnvelope(cells, raster.getCoordinateReferenceSystem2D());
   }
 
-  private static double toPixelIndex(double coord, double scale, double upperLeft, boolean isMin) {
-    BigDecimal rel = BigDecimal.valueOf(coord).subtract(BigDecimal.valueOf(upperLeft));
-
-    BigDecimal px = rel.divide(BigDecimal.valueOf(scale), 16, RoundingMode.FLOOR);
-    if (scale > 0) {
-      return isMin
-          ? px.setScale(0, RoundingMode.FLOOR).doubleValue()
-          : px.setScale(0, RoundingMode.CEILING).doubleValue();
-    } else {
-      return isMin
-          ? px.setScale(0, RoundingMode.CEILING).doubleValue()
-          : px.setScale(0, RoundingMode.FLOOR).doubleValue();
-    }
-  }
-
   private static double toWorldCoordinate(double pixelIndex, double scale, double upperLeft) {
     return BigDecimal.valueOf(pixelIndex)
         .multiply(BigDecimal.valueOf(scale))
@@ -653,10 +827,11 @@ public class Rasterization {
   private static RasterizationParams calculateRasterizationParams(
       GridCoverage2D raster,
       boolean useGeometryExtent,
-      double[] metadata,
+      ReferenceGrid grid,
       ReferencedEnvelope geomExtent,
       String pixelType) {
 
+    double[] metadata = grid.metadata;
     double upperLeftX = 0;
     double upperLeftY = 0;
     if (useGeometryExtent) {
@@ -695,7 +870,13 @@ public class Rasterization {
         upperLeftY,
         metadata[0],
         getRasterUpperLeftY(metadata),
-        bottomUp);
+        bottomUp,
+        grid);
+  }
+
+  /** Whether {@link #validateRasterMetadata} accepts the raster. */
+  private static boolean canLocateCells(double[] rasterMetadata) {
+    return !(rasterMetadata[4] < 0 || rasterMetadata[6] != 0 || rasterMetadata[7] != 0);
   }
 
   private static void validateRasterMetadata(double[] rasterMetadata) {
@@ -726,9 +907,56 @@ public class Rasterization {
     double rasterUpperLeftX;
     double rasterUpperLeftY;
     boolean bottomUp;
+    // The reference raster's grid in its own pixel order: its size, the world coordinates of its
+    // first column and row lines, and its signed pixel size.
+    int rasterWidth;
+    int rasterHeight;
+    BigDecimal rasterOriginX;
+    BigDecimal rasterOriginY;
+    double rasterPixelScaleX;
+    double rasterPixelScaleY;
+    // Where the output grid sits within the reference raster's grid, in cells from its left and
+    // from its geographic top: zero unless the output is cropped to the geometry extent.
+    int colOffset;
+    int rowOffset;
     // Whether any cell has been burned; a cropped output with nothing burned may have nothing in
     // it.
     boolean anyBurned;
+    private GridLineWalker lineWalker;
+
+    /** The walker for line segments over the reference raster's grid. */
+    GridLineWalker lineWalker() {
+      if (lineWalker == null) {
+        lineWalker =
+            new GridLineWalker(
+                rasterWidth,
+                rasterHeight,
+                rasterOriginX,
+                rasterOriginY,
+                rasterPixelScaleX,
+                rasterPixelScaleY);
+      }
+      return lineWalker;
+    }
+
+    /**
+     * Burns a cell given by its column and row on the reference raster, in the raster's own pixel
+     * order, if the output grid holds it. The cell is resolved on the reference grid and only the
+     * write index is local to the output, so a cropped output burns the same cells as a full-extent
+     * one.
+     */
+    void burnRasterCell(int col, int row, double value) {
+      // Count the row down from the geographic top, then move the cell onto the output grid.
+      int rowFromTop = bottomUp ? rasterHeight - 1 - row : row;
+      int x = col - colOffset;
+      int y = rowFromTop - rowOffset;
+      int height = writableRaster.getHeight();
+      if (x < 0 || x >= writableRaster.getWidth() || y < 0 || y >= height) {
+        return;
+      }
+      // Rows are written in the raster's own order; reverse them for bottom-up rasters.
+      burn(x, bottomUp ? height - 1 - y : y, value);
+    }
 
     /** Burns one cell of the output raster. */
     void burn(int x, int y, double value) {
@@ -756,7 +984,17 @@ public class Rasterization {
         double upperLeftY,
         double rasterUpperLeftX,
         double rasterUpperLeftY,
-        boolean bottomUp) {
+        boolean bottomUp,
+        ReferenceGrid grid) {
+      double[] metadata = grid.metadata;
+      this.rasterWidth = (int) metadata[2];
+      this.rasterHeight = (int) metadata[3];
+      this.rasterOriginX = grid.originX;
+      this.rasterOriginY = grid.originY;
+      this.rasterPixelScaleX = metadata[4];
+      this.rasterPixelScaleY = metadata[5];
+      this.colOffset = (int) Math.round((upperLeftX - rasterUpperLeftX) / scaleX);
+      this.rowOffset = (int) Math.round((upperLeftY - rasterUpperLeftY) / scaleY);
       this.writableRaster = writableRaster;
       this.pixelType = pixelType;
       this.scaleX = scaleX;
@@ -771,7 +1009,7 @@ public class Rasterization {
 
   private static void rasterizePolygon(
       GridCoverage2D raster,
-      double[] metadata,
+      ReferenceGrid grid,
       Geometry geom,
       RasterizationParams params,
       ReferencedEnvelope geomExtent,
@@ -781,22 +1019,40 @@ public class Rasterization {
       throw new IllegalArgumentException("Only Polygon geometry is supported");
     }
 
-    // Clip polygon to rasterExtent
     // Using buffer(0) to avoid TopologyException : found non-noded intersection.
-    Geometry clippedGeom =
-        Functions.intersection(JTS.toGeometry((BoundingBox) geomExtent), Functions.buffer(geom, 0));
+    Geometry valid = Functions.buffer(geom, 0);
+
+    if (allTouched) {
+      // The outline is walked along the polygon's own edges, which GridLineWalker clips to the
+      // raster cell by cell. The copy clipped below gets new vertices where an edge crosses the
+      // window, and those are rounded: an edge passing exactly through a grid corner would then
+      // pass beside it, and burn a cell the polygon only touches there.
+      burnOutlines(valid, params, value);
+    }
+
+    // Clip polygon to rasterExtent, for the fill. The outline is burned by now, so the clipped
+    // parts are filled without allTouched.
+    Geometry clippedGeom = Functions.intersection(JTS.toGeometry((BoundingBox) geomExtent), valid);
+
+    if (allTouched) {
+      // Where the polygon continues beyond the window, the clip closes it with edges along the
+      // window's sides. The polygon overlaps the cells beside those edges, and the scanline fill
+      // below can leave some of them out, for example when a vertex lies on a scanline at the
+      // window's side.
+      burnWindowEdges(clippedGeom, geomExtent, params, value);
+    }
 
     if (clippedGeom instanceof MultiPolygon) {
       for (int i = 0; i < clippedGeom.getNumGeometries(); i++) {
         Geometry subGeom = clippedGeom.getGeometryN(i);
-        rasterizePolygon(raster, metadata, subGeom, params, geomExtent, value, allTouched);
+        rasterizePolygon(raster, grid, subGeom, params, geomExtent, value, false);
       }
     } else if (clippedGeom instanceof Polygon) {
       Polygon polygon = (Polygon) clippedGeom;
 
       // Compute scanline X-intercepts
       Map<Double, TreeSet<Double>> scanlineIntersections =
-          computeScanlineIntersections(polygon, params, value, geomExtent, allTouched);
+          computeScanlineIntersections(polygon, params, geomExtent);
 
       // Process intersections to get startXs and endXs for each scanline
       Map<Integer, List<int[]>> scanlineFillRanges = computeFillRanges(scanlineIntersections);
@@ -812,7 +1068,7 @@ public class Rasterization {
       // cell it touches only on its boundary, allTouched or not, so keep only the areal parts.
       Geometry toRasterize = arealComponents(clippedGeom);
       if (!toRasterize.isEmpty()) {
-        rasterizeGeometry(raster, metadata, toRasterize, params, geomExtent, value, allTouched);
+        rasterizeGeometry(raster, grid, toRasterize, params, geomExtent, value, false);
       }
     }
   }
@@ -866,11 +1122,7 @@ public class Rasterization {
 
   /** Computes scanline intersections by iterating over polygon edges. */
   private static Map<Double, TreeSet<Double>> computeScanlineIntersections(
-      Polygon polygon,
-      RasterizationParams params,
-      double value,
-      ReferencedEnvelope geomExtent,
-      boolean allTouched) {
+      Polygon polygon, RasterizationParams params, ReferencedEnvelope geomExtent) {
 
     Map<Double, TreeSet<Double>> scanlineIntersections = new HashMap<>();
     List<LineString> allRings = new ArrayList<>();
@@ -884,10 +1136,6 @@ public class Rasterization {
       LineString ring = allRings.get(r);
       Coordinate[] coords = ring.getCoordinates();
       int numPoints = coords.length;
-
-      if (allTouched) {
-        burnRingOutline(coords, r == 0, params, value, geomExtent);
-      }
 
       for (int i = 0; i < numPoints - 1; i++) {
         Coordinate worldP1 = coords[i];
@@ -956,6 +1204,51 @@ public class Rasterization {
     return scanlineIntersections;
   }
 
+  /** Burns the outline of every polygon of a polygonal geometry, for allTouched. */
+  private static void burnOutlines(Geometry polygonal, RasterizationParams params, double value) {
+    for (int i = 0; i < polygonal.getNumGeometries(); i++) {
+      Geometry part = polygonal.getGeometryN(i);
+      if (!(part instanceof Polygon) || part.isEmpty()) {
+        continue;
+      }
+      Polygon polygon = (Polygon) part;
+      burnRingOutline(polygon.getExteriorRing().getCoordinates(), true, params, value);
+      for (int r = 0; r < polygon.getNumInteriorRing(); r++) {
+        burnRingOutline(polygon.getInteriorRingN(r).getCoordinates(), false, params, value);
+      }
+    }
+  }
+
+  /**
+   * Burns the cells beside the edges of a clipped polygon that run along a side of the window it
+   * was clipped to, for allTouched. Such an edge lies on a grid line, and the polygon is on the
+   * window's side of it.
+   */
+  private static void burnWindowEdges(
+      Geometry clipped, ReferencedEnvelope window, RasterizationParams params, double value) {
+    GridLineWalker walker = params.lineWalker();
+    GridLineWalker.CellVisitor burn = (col, row) -> params.burnRasterCell(col, row, value);
+    for (Object polygon : PolygonExtracter.getPolygons(clipped)) {
+      Polygon part = (Polygon) polygon;
+      for (int r = -1; r < part.getNumInteriorRing(); r++) {
+        Coordinate[] coords =
+            (r < 0 ? part.getExteriorRing() : part.getInteriorRingN(r)).getCoordinates();
+        for (int i = 0; i < coords.length - 1; i++) {
+          Coordinate a = coords[i];
+          Coordinate b = coords[i + 1];
+          if (a.x == b.x && (a.x == window.getMinX() || a.x == window.getMaxX())) {
+            walker.walk(a.x, a.y, b.x, b.y, a.x == window.getMaxX(), false, burn);
+          } else if (a.y == b.y && (a.y == window.getMinY() || a.y == window.getMaxY())) {
+            // Pixel y grows with world y only on a bottom-up raster.
+            boolean windowTowardsPositiveWorldY = a.y == window.getMinY();
+            walker.walk(
+                a.x, a.y, b.x, b.y, false, windowTowardsPositiveWorldY != params.bottomUp, burn);
+          }
+        }
+      }
+    }
+  }
+
   /**
    * Burns every cell a polygon ring's outline passes through, for allTouched.
    *
@@ -966,11 +1259,7 @@ public class Rasterization {
    * polygon's side, found from the ring's orientation.
    */
   private static void burnRingOutline(
-      Coordinate[] coords,
-      boolean isShell,
-      RasterizationParams params,
-      double value,
-      ReferencedEnvelope geomExtent) {
+      Coordinate[] coords, boolean isShell, RasterizationParams params, double value) {
     if (coords.length < 4) {
       return;
     }
@@ -979,25 +1268,24 @@ public class Rasterization {
     boolean interiorOnLeft = Orientation.isCCW(coords) == isShell;
     double side = interiorOnLeft ? 1 : -1;
 
+    GridLineWalker walker = params.lineWalker();
+    GridLineWalker.CellVisitor burn = (col, row) -> params.burnRasterCell(col, row, value);
     for (int i = 0; i < coords.length - 1; i++) {
-      LineSegment clipped = clipSegmentToRasterBounds(coords[i], coords[i + 1], geomExtent);
-      if (clipped == null) {
-        continue;
-      }
       // The left normal of the direction of travel is (-dy, dx) in world space. Pixel x grows with
-      // world x when scaleX is positive, and pixel y grows as world y falls (scaleY < 0 here).
+      // world x, and pixel y grows with world y only on a bottom-up raster.
       double worldDx = coords[i + 1].x - coords[i].x;
       double worldDy = coords[i + 1].y - coords[i].y;
-      boolean interiorTowardsNegativeWorldX = -worldDy * side < 0;
+      boolean flatTowardsNegativeX = -worldDy * side < 0;
       boolean interiorTowardsPositiveWorldY = worldDx * side > 0;
-      boolean flatTowardsNegativeX = interiorTowardsNegativeWorldX == (params.scaleX > 0);
-      boolean flatTowardsNegativeY = interiorTowardsPositiveWorldY;
-
-      double x0 = (clipped.p0.x - params.upperLeftX) / params.scaleX;
-      double y0 = (clipped.p0.y - params.upperLeftY) / params.scaleY;
-      double x1 = (clipped.p1.x - params.upperLeftX) / params.scaleX;
-      double y1 = (clipped.p1.y - params.upperLeftY) / params.scaleY;
-      traverseSegment(params, x0, y0, x1, y1, value, flatTowardsNegativeX, flatTowardsNegativeY);
+      boolean flatTowardsNegativeY = interiorTowardsPositiveWorldY != params.bottomUp;
+      walker.walk(
+          coords[i].x,
+          coords[i].y,
+          coords[i + 1].x,
+          coords[i + 1].y,
+          flatTowardsNegativeX,
+          flatTowardsNegativeY,
+          burn);
     }
   }
 

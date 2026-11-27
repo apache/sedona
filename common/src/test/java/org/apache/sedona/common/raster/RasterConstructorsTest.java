@@ -1044,8 +1044,7 @@ public class RasterConstructorsTest extends RasterTestBase {
         };
     assertArrayEquals(expected, actual, 0.1d);
 
-    // A LineString goes through the same segment code regardless of allTouched
-    // (a line has no interior); every pixel it crosses must be burned.
+    // Without allTouched, a LineString (which has no interior) burns every pixel it crosses.
     Geometry line = Constructors.geomFromWKT("LINESTRING (3.97 1.57, 0.31 3.24)", 0);
     rasterized = RasterConstructors.asRaster(line, raster, "d", false, 1d, 0d, false);
     actual = MapAlgebra.bandAsArray(rasterized, 1);
@@ -1075,8 +1074,21 @@ public class RasterConstructorsTest extends RasterTestBase {
     double[] expected = new double[] {3093151.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0};
     assertArrayEquals(expected, actual, 0.1d);
 
-    // Test bottom-up raster case
-    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d", false, 3093151, 0d);
+    // Test bottom-up raster case. Pixel rows run up a bottom-up raster, so y = -1 is its last row
+    // line: a line along it selects no pixel, as in GDAL, and there is nothing to crop to.
+    assertNull(RasterConstructors.asRaster(geom, raster_bottom_up, "d", false, 3093151, 0d));
+    // One row line further in, the line selects the pixels after it in pixel order, the last row.
+    // The output covers the rows on both sides of the line.
+    Geometry inner = Constructors.geomFromEWKT("LINESTRING(1 -3, 2 -3, 10 -3)");
+    rasterized = RasterConstructors.asRaster(inner, raster_bottom_up, "d", false, 3093151, 0d);
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    assertArrayEquals(
+        new double[] {0, 0, 0, 0, 0, 3093151.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0},
+        actual,
+        0.1d);
+    // Along its first row line, y = -511, the first row.
+    Geometry first = Constructors.geomFromEWKT("LINESTRING(1 -511, 2 -511, 10 -511)");
+    rasterized = RasterConstructors.asRaster(first, raster_bottom_up, "d", false, 3093151, 0d);
     actual = MapAlgebra.bandAsArray(rasterized, 1);
     assertArrayEquals(expected, actual, 0.1d);
 

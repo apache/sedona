@@ -21,6 +21,7 @@ package org.apache.sedona.common.raster;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.util.Arrays;
 import org.apache.sedona.common.Constructors;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.operation.TransformException;
@@ -107,10 +108,16 @@ public class FunctionEditorsTest extends RasterTestBase {
 
     GridCoverage2D result = PixelFunctionEditors.setValues(raster, 1, geom, 10, true, false);
 
-    Geometry point = Constructors.geomFromWKT("POINT (236698.272 4204794.5)", 26918);
+    // The polygon's upper-left corner (236722, 4204770) is in pixel (548, 549) of this raster: row
+    // 549 starts at y = 4204771.0155. With allTouched that pixel is set, and the pixel above it,
+    // which the polygon does not reach, keeps its value.
+    Geometry point = Constructors.geomFromWKT("POINT (236698.272 4204770.5)", 26918);
     double actual = PixelFunctions.value(result, point, 1);
     double expected = 10.0;
     assertEquals(expected, actual, 0d);
+    point = Constructors.geomFromWKT("POINT (236698.272 4204794.5)", 26918);
+    assertEquals(
+        PixelFunctions.value(raster, point, 1), PixelFunctions.value(result, point, 1), 0d);
 
     result = PixelFunctionEditors.setValues(raster, 1, geom, 10, false);
 
@@ -126,6 +133,25 @@ public class FunctionEditorsTest extends RasterTestBase {
     point = Constructors.geomFromWKT("POINT (241800 4199660)", 26918);
     actual = PixelFunctions.value(result, point, 1);
     assertEquals(expected, actual, 0d);
+  }
+
+  @Test
+  public void testSetValuesWithGeomOnDecimalGrid()
+      throws ParseException, FactoryException, TransformException {
+    // The geometry is rasterized onto a mask cropped to it, and the mask is placed on the raster
+    // at the cell its origin falls in. The origin is on a grid line of the raster, and the cell
+    // index of a coordinate on a grid line, computed in floating point, can come out just short of
+    // it: 2.999999999999999 for row line 3 of this raster. The mask then lands one row early.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 6, 6, 0, 0.7, 1, -0.1, 0, 0, 4326);
+    Geometry line = Constructors.geomFromWKT("LINESTRING (1.5 0.35, 4.5 0.35)", 4326);
+    double[] expected = new double[36];
+    Arrays.fill(expected, 3 * 6 + 1, 3 * 6 + 5, 10);
+    for (boolean allTouched : new boolean[] {false, true}) {
+      GridCoverage2D result =
+          PixelFunctionEditors.setValues(raster, 1, line, 10, allTouched, false);
+      assertArrayEquals(expected, MapAlgebra.bandAsArray(result, 1), 0d);
+    }
   }
 
   @Test

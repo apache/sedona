@@ -22,15 +22,21 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 
+import java.awt.Rectangle;
 import java.io.IOException;
 import org.apache.sedona.common.Functions;
+import org.geotools.api.parameter.ParameterValueGroup;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.processing.operation.Crop;
+import org.geotools.geometry.GeneralBounds;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 
 public class GeometryFunctionsTest extends RasterTestBase {
 
@@ -51,6 +57,40 @@ public class GeometryFunctionsTest extends RasterTestBase {
     String expected = "POLYGON ((156 -132, 181 -107, 211 -7, 186 -32, 156 -132))";
     String actual = Functions.asWKT(convexHull);
     assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testConvexHullOfARasterWhoseGridRangeDoesNotStartAtZero()
+      throws FactoryException, TransformException {
+    // A GeoTools crop keeps the grid-to-world transform of its source and starts its grid range at
+    // the first cell it keeps, here cell (2, 2) of a 10x10 unit raster. The origin the crop
+    // reports is still the source's, and its hull is the square of its own cells, not that of the
+    // first six rows and columns of the grid.
+    GridCoverage2D source = RasterConstructors.makeEmptyRaster(1, 10, 10, 0, 10, 1);
+    Crop crop = new Crop();
+    ParameterValueGroup parameters = crop.getParameters();
+    parameters.parameter("Source").setValue(source);
+    parameters
+        .parameter(Crop.PARAMNAME_ENVELOPE)
+        .setValue(
+            new GeneralBounds(
+                new ReferencedEnvelope(
+                    2.25, 7.75, 2.25, 7.75, source.getCoordinateReferenceSystem2D())));
+    GridCoverage2D raster = (GridCoverage2D) crop.doOperation(parameters, null);
+    assertEquals(new Rectangle(2, 2, 6, 6), raster.getGridGeometry().getGridRange2D());
+    assertEquals(0, RasterAccessors.getUpperLeftX(raster), 0d);
+    assertEquals(10, RasterAccessors.getUpperLeftY(raster), 0d);
+
+    assertEquals(
+        "POLYGON ((2 8, 8 8, 8 2, 2 2, 2 8))",
+        Functions.asWKT(GeometryFunctions.convexHull(raster)));
+    // The far corner cell of the crop, and the first cell of the source.
+    assertEquals(true, RasterPredicates.rsIntersects(raster, point(7.5, 2.5)));
+    assertEquals(false, RasterPredicates.rsIntersects(raster, point(0.5, 9.5)));
+  }
+
+  private static Geometry point(double x, double y) {
+    return new GeometryFactory().createPoint(new Coordinate(x, y));
   }
 
   @Test

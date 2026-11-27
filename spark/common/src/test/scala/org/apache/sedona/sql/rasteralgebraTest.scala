@@ -1879,6 +1879,118 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertTrue(expectedSummary4.equals(actualSummary4))
     }
 
+    it("Passed RS_ZonalStats on the output of RS_AsRaster") {
+      // RS_AsRaster returns a raster on the grid of the reference raster, so a line counts on the
+      // output the pixels it burned there. The output is serialized between the two projections
+      // below, and has to report the same grid afterwards. With the reference raster shuffled
+      // first, it is serialized before it is burned on as well. The pixels burned are returned as
+      // the rows they are in.
+      def burnedAndCounted(
+          originY: Double,
+          scaleY: Double,
+          line: String,
+          cropped: Boolean,
+          shuffled: Boolean): (Double, Double, Set[Int]) = {
+        var rasters = sparkSession.sql(
+          s"SELECT RS_MakeEmptyRaster(1, 'd', 6, 6, 0D, ${originY}D, 1D, ${scaleY}D, 0D, 0D, 0) AS r")
+        if (shuffled) rasters = rasters.repartition(1)
+        val geom = s"ST_GeomFromWKT('$line')"
+        val row = rasters
+          .selectExpr(s"RS_AsRaster($geom, r, 'd', false, 1D, 0D, $cropped) AS r")
+          .selectExpr(
+            "RS_BandAsArray(r, 1)",
+            s"RS_ZonalStats(r, $geom, 1, 'count', false, true)",
+            "RS_Width(r)")
+          .first()
+        val band = row.getSeq[Double](0)
+        val rows = band.indices.filter(band(_) != 0).map(_ / row.getInt(2)).toSet
+        (band.sum, row.getDouble(1), rows)
+      }
+      val onRowLine = "LINESTRING (1.2 0.3, 4.5 0.3)"
+      for (cropped <- Seq(true, false); shuffled <- Seq(false, true)) {
+        for ((originY, scaleY) <- Seq((0.7, -0.1), (0.6, -0.1), (0.0, 0.1))) {
+          val (burned, counted, _) =
+            burnedAndCounted(originY, scaleY, onRowLine, cropped, shuffled)
+          assertEquals(
+            s"origin $originY, pixel $scaleY, cropped=$cropped, shuffled=$shuffled",
+            (4.0, 4.0),
+            (burned, counted))
+        }
+      }
+      // A serialized raster keeps its cell-centre transform and derives its corner from that, and
+      // no centre gives the corner 0.1 for a pixel size of 0.1, or -0.1 for -0.1: these rasters
+      // report 0.10000000000000002 and -0.10000000000000002 once they have been serialized.
+      // Whether the reference raster has been serialized when it is burned on is the optimizer's
+      // choice: made in the same expression, as it is here unless it is shuffled, it has not been.
+      // Pixels are selected on the grid the raster reports afterwards in both cases, where the
+      // line is inside row 1 and not on row line 2, so the output holds the same row either way
+      // and the line counts it.
+      for ((originY, scaleY, line) <- Seq(
+          (0.1, 0.1, onRowLine),
+          (-0.1, -0.1, "LINESTRING (1.2 -0.3, 4.5 -0.3)"))) {
+        for (shuffled <- Seq(false, true)) {
+          assertEquals(
+            s"origin $originY, pixel $scaleY, shuffled=$shuffled",
+            (4.0, 4.0, Set(1)),
+            burnedAndCounted(originY, scaleY, line, cropped = false, shuffled))
+          val (burned, counted, _) =
+            burnedAndCounted(originY, scaleY, line, cropped = true, shuffled)
+          assertEquals(
+            s"origin $originY, pixel $scaleY, cropped, shuffled=$shuffled",
+            (4.0, 4.0),
+            (burned, counted))
+        }
+      }
+      // A cropped output cannot start on such a line either. Row line 1 of this raster is 0.1,
+      // where the window of the line starts, so the output starts a row earlier.
+      for (shuffled <- Seq(false, true)) {
+        val (burned, counted, _) =
+          burnedAndCounted(0.0, 0.1, "LINESTRING (1.2 0.2, 4.5 0.2)", cropped = true, shuffled)
+        assertEquals(s"shuffled=$shuffled", (4.0, 4.0), (burned, counted))
+      }
+    }
+
+    it("Passed RS_ZonalStats and RS_Clip at the edge of a raster that does not keep its corner") {
+      // Made with its left edge at 0.1, this raster reports 0.10000000000000002 once it has been
+      // serialized, and that is where its pixels start. A point at 0.1 is on the convex hull of
+      // the raster as it was made, and beside its pixels. The lenient functions return null for
+      // it and the strict ones reject it, whether the raster is made in the expression that uses
+      // it, where it has not been serialized, or read from a shuffled column. They used to test
+      // the hull themselves before rasterizing, so on the raster made in the same expression the
+      // rasterizer rejected the point in the lenient mode as well, and the query failed.
+      val made = "RS_MakeEmptyRaster(1, 'd', 5, 5, 0.1D, 5D, 0.1D, -1D, 0D, 0D, 0)"
+      val beside = "ST_GeomFromWKT('POINT (0.1 3.5)')"
+      val inside = "ST_GeomFromWKT('POINT (0.10000000000000002 3.5)')"
+      def calls(raster: String, lenient: Boolean): Seq[String] = Seq(
+        s"RS_ZonalStats($raster, $beside, 1, 'count', false, false, $lenient)",
+        s"RS_ZonalStatsAll($raster, $beside, 1, false, false, $lenient)",
+        s"RS_Clip($raster, 1, $beside, false, -9999D, false, $lenient)",
+        s"RS_Clip($raster, 1, $beside, false, -9999D, true, $lenient)")
+      for (shuffled <- Seq(false, true)) {
+        // A raster column used by several expressions of one projection is computed once and
+        // serialized, so without the shuffle every call nests its own constructor.
+        val (rasters, raster) =
+          if (shuffled) (sparkSession.sql(s"SELECT $made AS r").repartition(1), "r")
+          else (sparkSession.sql("SELECT 1 AS one"), made)
+        val counted = s"RS_ZonalStats($raster, $inside, 1, 'count', false, false, true)"
+        val row = rasters.selectExpr(calls(raster, lenient = true) :+ counted: _*).first()
+        for (column <- 0 until 4) {
+          assertTrue(s"shuffled=$shuffled, column $column", row.isNullAt(column))
+        }
+        assertEquals(s"shuffled=$shuffled", 1.0, row.getDouble(4), 0)
+        for (strict <- calls(raster, lenient = false)) {
+          val error = intercept[Exception] {
+            rasters.selectExpr(strict).first()
+          }
+          var cause: Throwable = error
+          while (cause.getCause != null) cause = cause.getCause
+          assertTrue(
+            s"shuffled=$shuffled, $strict: ${cause.getMessage}",
+            cause.getMessage.contains("intersect"))
+        }
+      }
+    }
+
     it("Passed RS_ZonalStats edge case") {
       val df = sparkSession.sql("""
           |with data as (
@@ -1952,21 +2064,23 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(3229013.0, actual)
 
       actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'count', true, true)").first().get(0)
-      // The left polygon edge is a steep diagonal (slope -3.8) whose grid-line crossings fall very
-      // close to lattice corners. The robust orientation predicate resolves each crossing exactly, so
-      // the traversal burns every boundary cell the edge truly touches; the earlier floating-point
-      // step comparison rounded past seven of those near-corner cells and dropped them. Every
-      // polygon vertex also sits exactly on a pixel corner (coordinates are multiples of the
+      // Every polygon vertex sits exactly on a pixel corner (coordinates are multiples of the
       // 0.25-degree pixel size), and cells the boundary merely touches at such a corner point are
-      // not burned (GH-3120), which trims twelve pixels against the pre-GH-3120 count. The count is
-      // direction-independent: rasterizing the ring in reverse order yields the same count.
+      // not burned (GH-3120). The count is direction-independent: rasterizing the ring in reverse
+      // order yields the same count.
+      //
+      // The left polygon edge is a steep diagonal (slope -3.8) that passes exactly through a lattice
+      // corner every 5 columns and 19 rows. Whether a coordinate is on a grid line is decided on
+      // decimal values (GH-3256), so the outline steps diagonally through each of those corners and
+      // burns only the two cells the edge passes through. Double-precision pixel coordinates used to
+      // put nine of those crossings just beside the corner, burning one more cell each (14366).
       //
       // The right edge (x = -155.25) and the bottom edge (y = 40.25) lie exactly on grid lines. They
       // touch the column and row beyond them but overlap none of their area, so, as in GDAL, those
-      // 289 cells (190 + 100 - 1 shared corner) are not burned (GH-3425). GDAL (rasterio,
-      // all_touched=True) counts 14357 here; the remaining nine cells are near-corner cells along
-      // the steep left edge, a separate difference.
-      assertEquals(14366.0, actual)
+      // 289 cells (190 + 100 - 1 shared corner) are not burned (GH-3425).
+      //
+      // GDAL (rasterio, all_touched=True) counts 14357 here as well.
+      assertEquals(14357.0, actual)
 
       actual =
         df.selectExpr("RS_ZonalStats(raster, geom, 1, 'mean', false, false)").first().get(0)

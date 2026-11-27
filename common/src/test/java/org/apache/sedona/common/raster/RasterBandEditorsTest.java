@@ -597,6 +597,42 @@ public class RasterBandEditorsTest extends RasterTestBase {
   }
 
   @Test
+  public void testClipLenientBesideTheCurvedEdgeOfAProjectedRaster()
+      throws FactoryException, TransformException, ParseException {
+    // The edges of a UTM raster are curved in WGS84, and its convex hull has straight edges there.
+    // A point given in WGS84 between the two is inside that hull and outside the raster. RS_Clip
+    // tests a geometry in another CRS than the raster's in WGS84 first, so this point passed, and
+    // the rasterizer, which works in the raster's CRS, rejected it with an exception that the
+    // lenient mode is there to avoid. RS_ZonalStats, which projects the geometry before it tests
+    // it, answered null.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(
+            1, "d", 100, 100, 200000, 5100000, 1000, -1000, 0, 0, 32610);
+    Geometry beside =
+        Constructors.geomFromWKT("POINT (-125.55588033744766 45.12484364516547)", 4326);
+    assertTrue(RasterPredicates.rsIntersects(raster, beside));
+    Geometry projected = FunctionsGeoTools.transform(beside, "EPSG:4326", "EPSG:32610");
+    assertFalse(GeometryFunctions.convexHull(raster).intersects(projected));
+
+    for (boolean crop : new boolean[] {false, true}) {
+      assertNull(RasterBandEditors.clip(raster, 1, beside, false, -9999, crop, true));
+      IllegalArgumentException rejected =
+          assertThrows(
+              IllegalArgumentException.class,
+              () -> RasterBandEditors.clip(raster, 1, beside, false, -9999, crop, false));
+      assertEquals("Geometry does not intersect Raster.", rejected.getMessage());
+    }
+    assertNull(RasterBandAccessors.getZonalStats(raster, beside, 1, "count", false, false, true));
+
+    // A point inside the raster is clipped as before.
+    Geometry inside =
+        FunctionsGeoTools.transform(
+            Constructors.geomFromWKT("POINT (250500 5050500)", 32610), "EPSG:32610", "EPSG:4326");
+    inside.setSRID(4326);
+    assertNotNull(RasterBandEditors.clip(raster, 1, inside, false, -9999, false, true));
+  }
+
+  @Test
   public void testRasterUnion() throws FactoryException {
     double[][] rasterData1 =
         new double[][] {

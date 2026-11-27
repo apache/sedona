@@ -378,8 +378,10 @@ public class RasterBandAccessors {
       roi = Functions.setSRID(roi, RasterAccessors.srid(raster));
     }
 
-    // checking if the raster contains the geometry
-    if (!RasterPredicates.rsIntersects(raster, roi)) {
+    // Whether the geometry reaches the raster is decided on the footprint the rasterizer decides
+    // it on. A geometry that passed a test on another footprint could be rejected below, by an
+    // exception that the lenient mode is there to avoid.
+    if (!Rasterization.intersects(raster, roi)) {
       if (lenient) {
         return null;
       } else {
@@ -397,10 +399,15 @@ public class RasterBandAccessors {
     Raster rasterizedData = RasterUtils.getRaster(rasterizedGeom.getRenderedImage());
     int width = RasterAccessors.getWidth(rasterizedGeom),
         height = RasterAccessors.getHeight(rasterizedGeom);
+    // The mask has the raster's size, and its first pixel is the raster's first pixel. Each of the
+    // two is read from its own first pixel: the image of a raster whose grid range does not start
+    // at zero, such as a GeoTools crop, does not start at (0, 0) either.
     double[] rasterizedPixelData =
-        rasterizedData.getSamples(0, 0, width, height, 0, (double[]) null);
+        rasterizedData.getSamples(
+            rasterizedData.getMinX(), rasterizedData.getMinY(), width, height, 0, (double[]) null);
     double[] rasterPixelData =
-        rasterData.getSamples(0, 0, width, height, band - 1, (double[]) null);
+        rasterData.getSamples(
+            rasterData.getMinX(), rasterData.getMinY(), width, height, band - 1, (double[]) null);
 
     List<Double> pixelData = new ArrayList<>();
 

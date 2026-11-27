@@ -342,17 +342,27 @@ public class RasterBandEditors {
       boolean lenient)
       throws FactoryException, TransformException {
 
-    if (!RasterPredicates.rsIntersects(raster, geometry)) {
+    // Whether the geometry reaches the raster is decided on the footprint the rasterizer decides
+    // it on. A geometry that passed a test on another footprint could be rejected below, by an
+    // exception that the lenient mode is there to avoid. The geometry is tested as it is given
+    // first, in WGS84 when its CRS is not the raster's, because a geometry far from the raster
+    // cannot always be projected into the raster's CRS. It is tested again once it is in the
+    // raster's CRS, where the rasterizer tests it: the raster's edges are not the straight lines in
+    // WGS84 that the first test takes them for.
+    boolean intersects = Rasterization.intersects(raster, geometry);
+    if (intersects) {
+      // Selecting the band from original raster
+      RasterUtils.ensureBand(raster, band);
+      Pair<GridCoverage2D, Geometry> pair = RasterUtils.setDefaultCRSAndTransform(raster, geometry);
+      geometry = pair.getRight();
+      intersects = Rasterization.intersects(raster, geometry);
+    }
+    if (!intersects) {
       if (lenient) {
         return null;
       }
       throw new IllegalArgumentException("Geometry does not intersect Raster.");
     }
-
-    // Selecting the band from original raster
-    RasterUtils.ensureBand(raster, band);
-    Pair<GridCoverage2D, Geometry> pair = RasterUtils.setDefaultCRSAndTransform(raster, geometry);
-    geometry = pair.getRight();
 
     double[] rasterMetadata = RasterAccessors.metadata(raster);
     int rasterWidth = (int) rasterMetadata[2], rasterHeight = (int) rasterMetadata[3];
