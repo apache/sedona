@@ -396,6 +396,15 @@ public class FunctionTest {
   }
 
   @Test
+  public void asText_writesEveryDigitOfTheCoordinate() throws ParseException {
+    String wkt = "LINESTRING (0 0, 0.00000000000000001 0.30000000000000004)";
+    Geography geography = Constructors.geogFromWKT(wkt, 4326);
+
+    assertEquals(wkt, Functions.asText(geography));
+    assertEquals("SRID=4326; " + wkt, Functions.asEWKT(geography));
+  }
+
+  @Test
   public void makeLine_points() throws ParseException {
     Geography start = Constructors.geogFromWKT("POINT (0 0)", 4326);
     Geography end = Constructors.geogFromWKT("POINT (1 0)", 4326);

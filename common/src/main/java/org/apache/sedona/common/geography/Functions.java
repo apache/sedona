@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.sedona.common.S2Geography.*;
 import org.apache.sedona.common.sphere.Haversine;
+import org.apache.sedona.common.utils.GeomUtils;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -270,10 +271,14 @@ public class Functions {
     return "ST_" + toJTS(g).getGeometryType();
   }
 
-  /** Return WKT from the geography's structural WKB/JTS representation. */
+  /**
+   * Return WKT from the geography's structural WKB/JTS representation. Written by the same
+   * full-precision writer as {@link org.apache.sedona.common.Functions#asWKT(Geometry)}, so the
+   * text reads back to the same coordinates.
+   */
   public static String asText(Geography g) {
     if (g == null) return null;
-    return toJTS(g).toText();
+    return GeomUtils.getWKT(toJTS(g));
   }
 
   /** Return the longitude (X coordinate) of a point geography, or null for non-point inputs. */
