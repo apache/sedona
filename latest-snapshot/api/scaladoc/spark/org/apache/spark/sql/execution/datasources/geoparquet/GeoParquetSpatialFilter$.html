@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter</title>
@@ -235,6 +234,10 @@
                         <a class="class" href="GeoParquetRecordMaterializer.html" title="A RecordMaterializer for Catalyst rows."></a>
                         <a href="GeoParquetRecordMaterializer.html" title="A RecordMaterializer for Catalyst rows.">GeoParquetRecordMaterializer</a>
                       </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="object" href="GeoParquetRowGroupFilter$.html" title="Picks the row groups of a Parquet file that a GeoParquetSpatialFilter has to read, from the geospatial statistics of the row groups."></a>
+                        <a href="GeoParquetRowGroupFilter$.html" title="Picks the row groups of a Parquet file that a GeoParquetSpatialFilter has to read, from the geospatial statistics of the row groups.">GeoParquetRowGroupFilter</a>
+                      </li><li class="current-entities indented7">
                         <a class="object" href="" title=""></a>
                         <a class="trait" href="GeoParquetSpatialFilter.html" title="Filters containing spatial predicates such as ST_Within(geom, ST_GeomFromText(...)) will be converted to GeoParquetSpatialFilter and get pushed down to GeoParquetFileFormat by org.apache.spark.sql.sedona_sql.optimization.SpatialFilterPushDownForGeoParquet."></a>
                         <a href="GeoParquetSpatialFilter.html" title="Filters containing spatial predicates such as ST_Within(geom, ST_GeomFromText(...)) will be converted to GeoParquetSpatialFilter and get pushed down to GeoParquetFileFormat by org.apache.spark.sql.sedona_sql.optimization.SpatialFilterPushDownForGeoParquet.">GeoParquetSpatialFilter</a>
@@ -411,6 +414,32 @@ path uses the Box2D column's actual recorded min/max, so it is sound for any wri
 Parquet filter against the four (xmin, ymin, xmax, ymax) leaf columns of a Box2D-typed
 column.
 </p></div></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.GeographyLeafFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="GeographyLeafFilterextendsGeoParquetSpatialFilterwithProductwithSerializable"></a><a id="GeographyLeafFilter:GeographyLeafFilter"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetSpatialFilter$$GeographyLeafFilter.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="A predicate between a geography column and a geography of the query that holds for no row whose geography is outside of a box around the geography of the query." href="GeoParquetSpatialFilter$$GeographyLeafFilter.html"><span class="name">GeographyLeafFilter</span></a><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="west">west: <span class="extype" name="scala.Double">Double</span></span>, <span name="east">east: <span class="extype" name="scala.Double">Double</span></span>, <span name="south">south: <span class="extype" name="scala.Double">Double</span></span>, <span name="north">north: <span class="extype" name="scala.Double">Double</span></span>)</span><span class="result"> extends <a href="GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A predicate between a geography column and a geography of the query that holds for no row
+whose geography is outside of a box around the geography of the query.</p><div class="fullcomment"><div class="comment cmt"><p>A predicate between a geography column and a geography of the query that holds for no row
+whose geography is outside of a box around the geography of the query. Two geographies that
+intersect have a point in common, and so have one that contains the other and two that are
+equal, so one box serves these predicates. For a predicate on the distance between the two,
+the box is larger by that distance.</p><p>The <code>geo</code> metadata of a file has no bounding box for a geography column, so no file is
+skipped by its metadata. A row group is skipped when the bounding box in its geospatial
+statistics and the box of the query have no point in common.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>
+  name of the filtered geography column</p></dd><dt class="param">west</dt><dd class="cmt"><p>
+  western bound of the box of the query in degrees, above <code>east</code> across the antimeridian</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.LeafFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="LeafFilterextendsGeoParquetSpatialFilterwithProductwithSerializable"></a><a id="LeafFilter:LeafFilter"></a>
       <span class="permalink">
@@ -807,6 +836,22 @@ metadata to prune unrelated files.
       </span>
       <span class="symbol">
         <a title="" href="GeoParquetSpatialFilter$$Box2DPredicateKind$.html"><span class="name">Box2DPredicateKind</span></a>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.GeographyLeafFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GeographyLeafFilter"></a><a id="GeographyLeafFilter:GeographyLeafFilter"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetSpatialFilter$$GeographyLeafFilter$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="GeoParquetSpatialFilter$$GeographyLeafFilter$.html"><span class="name">GeographyLeafFilter</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
       

@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.5_2.12 2.0.0-SNAPSHOT API  - org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.Box2DLeafFilter</title>
@@ -210,6 +209,10 @@
                         <a class="object" href="GeoParquetSpatialFilter$$Box2DPredicateKind$.html" title=""></a>
                         <a class="trait" href="GeoParquetSpatialFilter$$Box2DPredicateKind.html" title="Semantic kind of a Box2D leaf predicate."></a>
                         <a href="GeoParquetSpatialFilter$$Box2DPredicateKind.html" title="Semantic kind of a Box2D leaf predicate.">Box2DPredicateKind</a>
+                      </li><li class="current-entities indented8">
+                        <a class="object" href="GeoParquetSpatialFilter$$GeographyLeafFilter$.html" title=""></a>
+                        <a class="class" href="GeoParquetSpatialFilter$$GeographyLeafFilter.html" title="A predicate between a geography column and a geography of the query that holds for no row whose geography is outside of a box around the geography of the query."></a>
+                        <a href="GeoParquetSpatialFilter$$GeographyLeafFilter.html" title="A predicate between a geography column and a geography of the query that holds for no row whose geography is outside of a box around the geography of the query.">GeographyLeafFilter</a>
                       </li><li class="current-entities indented8">
                         <span class="separator"></span>
                         <a class="class" href="GeoParquetSpatialFilter$$LeafFilter.html" title="Spatial predicate pushed down to GeoParquet data source."></a>
@@ -471,6 +474,28 @@ path uses the Box2D column's actual recorded min/max, so it is sound for any wri
 before reading row-group statistics. Filters that cannot soundly prune at the file metadata
 level should return <code>true</code> here and emit their pruning predicate via <a href="#toParquetFilter:Option[org.apache.parquet.filter2.predicate.FilterPredicate]" class="extmbr" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.Box2DLeafFilter#toParquetFilter">toParquetFilter</a>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.Box2DLeafFilter">Box2DLeafFilter</a> → <a href="GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a></dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter#evaluateRowGroup" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="evaluateRowGroup(geographyBox:String=&gt;Option[Array[Double]]):Boolean"></a><a id="evaluateRowGroup((String)⇒Option[Array[Double]]):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetSpatialFilter$$Box2DLeafFilter.html#evaluateRowGroup(geographyBox:String=&gt;Option[Array[Double]]):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">evaluateRowGroup</span><span class="params">(<span name="geographyBox">geographyBox: (<span class="extype" name="scala.Predef.String">String</span>) ⇒ <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Double">Double</span>]]</span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Whether a row group may have a row that this filter keeps.</p><div class="fullcomment"><div class="comment cmt"><p>Whether a row group may have a row that this filter keeps. A filter that reads nothing of a
+row group keeps it.
+</p></div><dl class="paramcmts block"><dt class="param">geographyBox</dt><dd class="cmt"><p>
+  the bounding box that the geospatial statistics of the row group have for a GEOGRAPHY
+  column with spherical edges: its western, eastern, southern and northern bound in degrees,
+  with the western bound above the eastern bound across the antimeridian. None for a column
+  without such a box.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -650,6 +675,22 @@ evaluate against row-group statistics.</p><div class="fullcomment"><div class="c
 evaluate against row-group statistics. Returns <code>None</code> if the filter cannot be expressed as a
 Parquet predicate (e.g. arbitrary JTS predicates on a geometry column).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.Box2DLeafFilter">Box2DLeafFilter</a> → <a href="GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a></dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter#usesRowGroupStatistics" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="usesRowGroupStatistics:Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetSpatialFilter$$Box2DLeafFilter.html#usesRowGroupStatistics:Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">usesRowGroupStatistics</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Whether <a href="GeoParquetSpatialFilter.html#evaluateRowGroup(geographyBox:String=&gt;Option[Array[Double]]):Boolean" class="extmbr" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter#evaluateRowGroup">evaluateRowGroup</a> reads the statistics of a row group at all.</p><div class="fullcomment"><div class="comment cmt"><p>Whether <a href="GeoParquetSpatialFilter.html#evaluateRowGroup(geographyBox:String=&gt;Option[Array[Double]]):Boolean" class="extmbr" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter#evaluateRowGroup">evaluateRowGroup</a> reads the statistics of a row group at all.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a></dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">

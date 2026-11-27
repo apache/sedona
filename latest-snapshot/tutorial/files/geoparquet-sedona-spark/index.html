@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6176,7 +6175,7 @@
 <p>A <code>GEOGRAPHY</code> column is not read as a geometry column. Sedona rejects a schema that gives it a geometry type, and it rejects files in which a column is a geometry column in some and a <code>GEOGRAPHY</code> column in others. This holds for a geometry column of a GeoParquet 1.x file as well as for a <code>GEOMETRY</code> column.</p>
 <p>A file that Sedona rejects for one of these reasons is not a corrupt file. The read fails for it with the option <code>ignoreCorruptFiles</code> as well, and does not leave the file out.</p>
 <p>The files of a dataset do not have to store a geography column in the same way. A file without a geography in the column takes the CRS of the files that have one, whatever CRS it states itself. And a file in which Sedona stored the column as its own geography type, as a GeoParquet 1.1 write does, is read next to files with a <code>GEOGRAPHY</code> column. On Spark 4.2 and later a geography without an SRID in such a file has SRID 4326.</p>
-<p>Sedona applies a filter on a geography column to the rows and does not use the bounding boxes of the files for it, because these are planar.</p>
+<p>A filter on a geography column skips the row groups that the geography of the query is outside of. Sedona reads the bounding box in the geospatial statistics of each row group for it, which is a box on the sphere. It does not use the <code>bbox</code> of the GeoParquet metadata of a file, which is planar. See <a href="../../../api/sql/Optimizer/#push-geography-predicates-to-geoparquet">Push geography predicates to GeoParquet</a>.</p>
 <p>Spark 3.5 and 4.0 ship a Parquet library that predates these logical types and cannot open such files.</p>
 <h2 id="inspect-geoparquet-metadata">Inspect GeoParquet metadata<a class="headerlink" href="#inspect-geoparquet-metadata" title="Permanent link">&para;</a></h2>
 <p>Since v<code>1.5.1</code>, Sedona provides a Spark SQL data source <code>"geoparquet.metadata"</code> for inspecting GeoParquet metadata. The resulting dataframe contains
@@ -6472,7 +6471,7 @@ ORDER BY geohash
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="November 25, 2026 21:52:39 UTC">November 25, 2026 21:52:39</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="November 27, 2026 16:35:41 UTC">November 27, 2026 16:35:41</span>
   </span>
 
     

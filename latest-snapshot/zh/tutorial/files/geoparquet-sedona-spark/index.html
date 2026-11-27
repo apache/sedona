@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6154,7 +6153,7 @@
 <p><code>GEOGRAPHY</code> 列不会被读取为几何列。如果 schema 为它指定几何类型，Sedona 会拒绝读取；如果同一列在一部分文件中是几何列、在另一部分文件中是 <code>GEOGRAPHY</code> 列，Sedona 也会拒绝读取。这既适用于 <code>GEOMETRY</code> 列，也适用于 GeoParquet 1.x 文件中的几何列。</p>
 <p>因上述原因被 Sedona 拒绝的文件并不是损坏的文件。即使设置了 <code>ignoreCorruptFiles</code> 选项，读取也会失败，而不会跳过该文件。</p>
 <p>同一数据集中的文件不必以相同的方式存储地理列。某个文件的该列中没有任何地理对象时，无论它自身声明了什么 CRS，都采用其他含有地理对象的文件的 CRS。如果某个文件把该列按 Sedona 自有的地理类型存储（GeoParquet 1.1 写入就是如此），它也可以与含有 <code>GEOGRAPHY</code> 列的文件一起读取。在 Spark 4.2 及更高版本上，这类文件中没有 SRID 的地理对象的 SRID 为 4326。</p>
-<p>对地理列的过滤条件，Sedona 会逐行计算，不会使用文件的边界框，因为这些边界框是平面的。</p>
+<p>对地理列的过滤条件会跳过查询的地理对象不在其中的行组。Sedona 为此读取每个行组的地理空间统计信息中的边界框，它是球面上的边界框。Sedona 不使用文件的 GeoParquet 元数据中的 <code>bbox</code>，因为它是平面的。参见<a href="../../../api/sql/Optimizer/">查询优化器</a>中的“将地理谓词下推到 GeoParquet”一节。</p>
 <p>Spark 3.5 和 4.0 自带的 Parquet 库早于这些逻辑类型，无法打开此类文件。</p>
 <h2 id="geoparquet">检查 GeoParquet 元数据<a class="headerlink" href="#geoparquet" title="Permanent link">&para;</a></h2>
 <p>自 v<code>1.5.1</code> 起，Sedona 提供了一个 Spark SQL 数据源 <code>"geoparquet.metadata"</code>，可用于检查 GeoParquet 元数据。返回的 DataFrame 中包含每个输入文件的 “geo” 元数据。</p>
@@ -6439,7 +6438,7 @@ ORDER BY geohash
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年11月25日 21:52:39 UTC">2026年11月25日 21:52:39</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年11月27日 16:35:41 UTC">2026年11月27日 16:35:41</span>
   </span>
 
     
