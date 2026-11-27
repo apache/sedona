@@ -313,20 +313,21 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
         pushed
       }
 
+      // A scan rejects some columns at their first value only. A file or a row group that a
+      // filter leaves out must not keep the scan from that value, in whichever column of the
+      // read it is, so nothing is left out of a file with such a column.
+      lazy val rejectsAtValue = requiredSchema.exists(
+        GeoParquetRowGroupFilter.rejectsAtValue(_, footerFileMetaData, sharedConf, options))
       // Prune file scans using pushed down spatial filters and per-column bboxes in geoparquet metadata
       val shouldScanFile =
         GeoParquetMetaData.parseKeyValueMetaData(footerFileMetaData.getKeyValueMetaData).forall {
           metadata => spatialFilter.forall(_.evaluate(metadata.columns))
-        }
+        } || rejectsAtValue
       // Prune the row groups of this split using their geospatial statistics
       val rowGroups = if (readsRowGroups) footer.getBlocks.asScala.toSeq else Seq.empty
       val keptRowGroups =
         if (shouldScanFile) spatialFilter.fold(rowGroups) { filter =>
-          // A scan rejects some columns at their first value only. A row group that is skipped
-          // must not keep the scan from that value, in whichever column of the read it is.
-          val rejectsAtValue = rowGroups.nonEmpty && requiredSchema.exists(
-            GeoParquetRowGroupFilter.rejectsAtValue(_, footerFileMetaData, sharedConf, options))
-          if (rejectsAtValue) rowGroups
+          if (rowGroups.isEmpty || rejectsAtValue) rowGroups
           else
             GeoParquetRowGroupFilter.select(
               rowGroups,

@@ -435,6 +435,8 @@ We can compare the metrics of querying the GeoParquet dataset with or without th
 
 Spatial predicate push-down to GeoParquet is enabled by default. Users can manually disable it by setting the Spark configuration `spark.sedona.geoparquet.spatialFilterPushDown` to `false`.
 
+A file is always scanned when a column of the read has another SRID in the file than the schema of the read gives that column, whether the filter is on that column or not: the read of such a file fails as it does without the filter. This applies on Spark 4.2 and later, where the type of a column names its SRID.
+
 ## Push geography predicates to GeoParquet
 
 A predicate between a geography column and a geography of the query skips row groups of GeoParquet 2.0 files. Sedona reads the bounding box that the geospatial statistics of a row group have for the column, and skips the row group when the geography of the query is outside of that box. The box is one on the sphere: it covers the edges of the geographies and not only their vertices, and it can cross the antimeridian.
