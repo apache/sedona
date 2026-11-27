@@ -434,6 +434,6 @@ WHERE ST_DWithin(geog, ST_GeogFromWKT('POINT (-122.33 47.61)', 4326), 5000.0)
 | [ST_Intersects](Predicates/ST_Intersects.md)、[ST_Contains](Predicates/ST_Contains.md)、[ST_Within](Predicates/ST_Within.md)、[ST_Equals](Predicates/ST_Equals.md) | 与查询的地理对象的边界框有公共点 |
 | 距离为常量的 [ST_DWithin](Predicates/ST_DWithin.md) | 与按该距离扩大后的上述边界框有公共点 |
 
-没有这种边界框的行组总是会被读取，写入时未生成这些统计信息的文件就是如此。如果文件中该列的 SRID 与读取时模式为该列指定的 SRID 不同，该文件的所有行组也都会被读取：读取这样的文件会像没有过滤器时一样失败。Sedona 会为 GeoParquet 2.0 文件写出这些统计信息。文件的 GeoParquet 元数据没有地理列的边界框，因此不会据此跳过整个文件，每个文件的页脚都会被读取。
+没有这种边界框的行组总是会被读取，写入时未生成这些统计信息的文件就是如此。如果读取的任意一列（不论过滤器是否作用于该列）在文件中的 SRID 与读取时模式为该列指定的 SRID 不同，该文件的所有行组也都会被读取：读取这样的文件会像没有过滤器时一样失败。Sedona 会为 GeoParquet 2.0 文件写出这些统计信息。文件的 GeoParquet 元数据没有地理列的边界框，因此不会据此跳过整个文件，每个文件的页脚都会被读取。
 
 该功能需要 Spark 4.1 或更高版本，其 Parquet 库具有 `GEOGRAPHY` 逻辑类型及其统计信息。它默认启用，把 `spark.sedona.geoparquet.spatialFilterPushDown` 设为 `false` 即可关闭。与几何列一样，写入前请按位置对数据排序，使同一行组中的地理对象彼此靠近。

@@ -31,7 +31,7 @@ import org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl
 import org.apache.parquet.example.data.Group
 import org.apache.parquet.hadoop.{ParquetFileReader, ParquetRecordReader}
 import org.apache.parquet.hadoop.example.GroupReadSupport
-import org.apache.parquet.hadoop.metadata.{BlockMetaData, ColumnPath}
+import org.apache.parquet.hadoop.metadata.{BlockMetaData, ColumnPath, ParquetMetadata}
 import org.apache.parquet.hadoop.util.HadoopInputFile
 import org.apache.spark.sql.{DataFrame, Row}
 import org.apache.spark.sql.execution.{FileSourceScanExec, SparkPlan}
@@ -41,7 +41,7 @@ import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFi
 
 import org.apache.spark.sql.functions.{col, expr}
 import org.apache.spark.sql.sedona_sql.types.{GeographyBounds, SpatialTypeSupport}
-import org.apache.spark.sql.types.{LongType, MetadataBuilder, StringType, StructField, StructType}
+import org.apache.spark.sql.types.{DataType, LongType, MetadataBuilder, StringType, StructField, StructType}
 
 import scala.collection.JavaConverters._
 import scala.util.Random
@@ -97,14 +97,16 @@ class GeoParquetGeographyRowGroupPruningSuite extends TestBaseScala {
         |  4326) AS geography
         |FROM range($ROWS)""".stripMargin)
 
-  private def blocks(path: String): Seq[BlockMetaData] = {
+  private def footer(path: String): ParquetMetadata = {
     val files = new File(path).listFiles().filter(_.getName.endsWith(".parquet"))
     assert(files.length == 1)
     val reader = ParquetFileReader.open(
       HadoopInputFile.fromPath(new Path(files.head.getPath), new Configuration()))
-    try reader.getFooter.getBlocks.asScala.toSeq
+    try reader.getFooter
     finally reader.close()
   }
+
+  private def blocks(path: String): Seq[BlockMetaData] = footer(path).getBlocks.asScala.toSeq
 
   private def read(path: String, condition: String): DataFrame =
     sparkSession.read.format("geoparquet").load(path).where(condition)
@@ -492,6 +494,72 @@ class GeoParquetGeographyRowGroupPruningSuite extends TestBaseScala {
                 messages(error).contains("requires SRID 4326 but contains SRID 4269"),
                 s"$query $push")
             }
+          }
+        }
+      }
+
+      it(
+        "leaves a file to the scan when the scan rejects a value of another column of the read") {
+        if (SpatialTypeSupport.usesNativeTypes) withDirectory { directory =>
+          val gate = diagonal.withColumnRenamed("geography", "gate")
+          def schema(payload: DataType) = StructType(
+            Seq(
+              StructField("id", LongType),
+              StructField("gate", SpatialTypeSupport.geographyType(4326)),
+              StructField("payload", payload)))
+          // The filter is on the column gate, and the read takes the column payload as well,
+          // whose type names another SRID than the file has for it. A scan finds that at the
+          // first value of the column. A geometry without an SRID is written without a CRS.
+          Seq(
+            (
+              "ST_GeogFromWKT('POINT (1 2)', 4269)",
+              SpatialTypeSupport.geographyType(4326),
+              "requires SRID 4326 but contains SRID 4269"),
+            (
+              "ST_Point(1, 2)",
+              SpatialTypeSupport.geometryType(4326),
+              "requires SRID 4326 but contains SRID 0")).zipWithIndex.foreach {
+            case ((payload, dataType, expected), index) =>
+              val path = new File(directory, s"data$index").getPath
+              write(gate.withColumn("payload", expr(payload)), path)
+              // A query that is outside of all row groups, and one that reaches some of them
+              for (query <- Seq(far, window); push <- Seq("false", "true")) {
+                withConf(PUSH_DOWN -> push) {
+                  val error = intercept[Exception] {
+                    sparkSession.read
+                      .schema(schema(dataType))
+                      .format("geoparquet")
+                      .load(path)
+                      .where(s"ST_Intersects(gate, $query)")
+                      .collect()
+                  }
+                  assert(messages(error).contains(expected), s"$payload $query $push")
+                }
+              }
+
+              // With the SRID that the file has for the column, row groups are skipped
+              val df = read(path, s"ST_Intersects(gate, $window)")
+              assert(df.schema("payload").dataType != dataType)
+              assert(df.collect().length == 199)
+              val rows = scan(df).metrics("numOutputRows").value
+              assert(rows >= 199 && rows < ROWS / 2)
+
+              val fileMetaData = footer(path).getFileMetaData
+              // What the reader of a file has of the session
+              val conf = new Configuration()
+              Seq(
+                "spark.sql.parquet.binaryAsString",
+                "spark.sql.parquet.int96AsTimestamp",
+                "spark.sql.parquet.inferTimestampNTZ.enabled").foreach(key =>
+                conf.set(key, sparkSession.conf.get(key)))
+              def rejects(field: StructField) =
+                GeoParquetRowGroupFilter.rejectsAtValue(field, fileMetaData, conf, Map.empty)
+              assert(rejects(StructField("payload", dataType)))
+              assert(!rejects(df.schema("payload")))
+              assert(!rejects(df.schema("gate")))
+              assert(!rejects(df.schema("id")))
+              // A geography inside of a struct is not looked into
+              assert(rejects(StructField("payload", StructType(Seq(df.schema("gate"))))))
           }
         }
       }

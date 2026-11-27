@@ -322,16 +322,22 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
       val rowGroups = if (readsRowGroups) footer.getBlocks.asScala.toSeq else Seq.empty
       val keptRowGroups =
         if (shouldScanFile) spatialFilter.fold(rowGroups) { filter =>
-          GeoParquetRowGroupFilter.select(
-            rowGroups,
-            filter,
-            // The filter names a column of the read, which is not always the name of the column
-            // of the file
-            name =>
-              requiredSchema
-                .find(_.name == name)
-                .flatMap(GeoParquetRowGroupFilter
-                  .geographyColumn(_, footerFileMetaData, sharedConf, options)))
+          // A scan rejects some columns at their first value only. A row group that is skipped
+          // must not keep the scan from that value, in whichever column of the read it is.
+          val rejectsAtValue = rowGroups.nonEmpty && requiredSchema.exists(
+            GeoParquetRowGroupFilter.rejectsAtValue(_, footerFileMetaData, sharedConf, options))
+          if (rejectsAtValue) rowGroups
+          else
+            GeoParquetRowGroupFilter.select(
+              rowGroups,
+              filter,
+              // The filter names a column of the read, which is not always the name of the
+              // column of the file
+              name =>
+                requiredSchema
+                  .find(_.name == name)
+                  .flatMap(
+                    GeoParquetRowGroupFilter.geographyColumn(_, footerFileMetaData, sharedConf)))
         }
         else rowGroups
       if (!shouldScanFile || (rowGroups.nonEmpty && keptRowGroups.isEmpty)) {
