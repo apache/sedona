@@ -552,14 +552,53 @@ class GeoParquetGeographyRowGroupPruningSuite extends TestBaseScala {
                 "spark.sql.parquet.int96AsTimestamp",
                 "spark.sql.parquet.inferTimestampNTZ.enabled").foreach(key =>
                 conf.set(key, sparkSession.conf.get(key)))
-              def rejects(field: StructField) =
-                GeoParquetRowGroupFilter.rejectsAtValue(field, fileMetaData, conf, Map.empty)
+              def rejects(field: StructField) = GeoParquetRowGroupFilter.rejectsValue(
+                field,
+                fileMetaData,
+                blocks(path),
+                conf,
+                Map.empty)
               assert(rejects(StructField("payload", dataType)))
               assert(!rejects(df.schema("payload")))
               assert(!rejects(df.schema("gate")))
               assert(!rejects(df.schema("id")))
-              // A geography inside of a struct is not looked into
-              assert(rejects(StructField("payload", StructType(Seq(df.schema("gate"))))))
+          }
+        }
+      }
+
+      it("skips row groups in which no column of the read has a value that a scan rejects") {
+        if (SpatialTypeSupport.usesNativeTypes) withDirectory { directory =>
+          val path = new File(directory, "data").getPath
+          // A column of SRID 4269 without a value in it, which a read takes for any SRID
+          write(
+            diagonal
+              .withColumnRenamed("geography", "gate")
+              .withColumn(
+                "payload",
+                expr("CASE WHEN id < 0 THEN ST_GeogFromWKT('POINT (1 2)', 4269) END")),
+            path)
+          val condition = s"ST_Intersects(gate, $window)"
+          assert(
+            read(path, condition).schema("payload").dataType ==
+              SpatialTypeSupport.geographyType(4269))
+          // And a column that the file does not have, which is read as nulls
+          val schema = StructType(
+            Seq(
+              StructField("id", LongType),
+              StructField("gate", SpatialTypeSupport.geographyType(4326)),
+              StructField("payload", SpatialTypeSupport.geographyType(4326)),
+              StructField("absent", SpatialTypeSupport.geographyType(4326))))
+          for (nestedSchemaPruning <- Seq("true", "false")) {
+            withConf("spark.sql.optimizer.nestedSchemaPruning.enabled" -> nestedSchemaPruning) {
+              val df =
+                sparkSession.read.schema(schema).format("geoparquet").load(path).where(condition)
+              assert(pushed(df).isDefined)
+              val rows = df.collect()
+              assert(rows.map(_.getLong(0)).sorted.toSeq == (1001L to 1199L))
+              assert(rows.forall(row => row.isNullAt(2) && row.isNullAt(3)))
+              val read = scan(df).metrics("numOutputRows").value
+              assert(read >= 199 && read < ROWS / 2, nestedSchemaPruning)
+            }
           }
         }
       }

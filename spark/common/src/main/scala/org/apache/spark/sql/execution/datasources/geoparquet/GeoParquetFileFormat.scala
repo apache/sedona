@@ -313,21 +313,33 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
         pushed
       }
 
+      // The row groups of this split, which a filter on their statistics reads
+      val rowGroups = if (readsRowGroups) footer.getBlocks.asScala.toSeq else Seq.empty
       // A scan rejects some columns at their first value only. A file or a row group that a
       // filter leaves out must not keep the scan from that value, in whichever column of the
-      // read it is, so nothing is left out of a file with such a column.
-      lazy val rejectsAtValue = requiredSchema.exists(
-        GeoParquetRowGroupFilter.rejectsAtValue(_, footerFileMetaData, sharedConf, options))
+      // read it is, so nothing is left out of a split with such a value.
+      lazy val rejectsValue = {
+        lazy val ofSplit =
+          if (readsRowGroups) rowGroups
+          else
+            ParquetFooterReader
+              .readFooter(sharedConf, file, ParquetFooterReader.WITH_ROW_GROUPS)
+              .getBlocks
+              .asScala
+              .toSeq
+        requiredSchema.exists(
+          GeoParquetRowGroupFilter
+            .rejectsValue(_, footerFileMetaData, ofSplit, sharedConf, options))
+      }
       // Prune file scans using pushed down spatial filters and per-column bboxes in geoparquet metadata
       val shouldScanFile =
         GeoParquetMetaData.parseKeyValueMetaData(footerFileMetaData.getKeyValueMetaData).forall {
           metadata => spatialFilter.forall(_.evaluate(metadata.columns))
-        } || rejectsAtValue
+        } || rejectsValue
       // Prune the row groups of this split using their geospatial statistics
-      val rowGroups = if (readsRowGroups) footer.getBlocks.asScala.toSeq else Seq.empty
       val keptRowGroups =
         if (shouldScanFile) spatialFilter.fold(rowGroups) { filter =>
-          if (rowGroups.isEmpty || rejectsAtValue) rowGroups
+          if (rowGroups.isEmpty || rejectsValue) rowGroups
           else
             GeoParquetRowGroupFilter.select(
               rowGroups,
