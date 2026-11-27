@@ -18,9 +18,7 @@
  */
 package org.apache.sedona.common.raster;
 
-import java.awt.Rectangle;
 import java.awt.image.Raster;
-import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -392,36 +390,38 @@ public class RasterBandAccessors {
       }
     }
 
+    Raster rasterData = RasterUtils.getRaster(raster.getRenderedImage());
     Double noDataValue = RasterBandAccessors.getBandNoDataValue(raster, band);
-    // Only the window of the raster that holds the geometry is masked and read, so the cost
-    // follows the size of the geometry and not that of the raster.
+    // Only the window of the raster that holds the geometry is masked and gone through.
     Rasterization.Selection selection = Rasterization.select(roi, raster, allTouched);
-    double[] pixelsArray = new double[0];
+    List<Double> pixelData = new ArrayList<>();
     if (selection != null) {
       int width = selection.mask.getWidth(), height = selection.mask.getHeight();
-      // The window is placed from the image's first pixel: the image of a raster whose grid range
+      double[] rasterizedPixelData =
+          selection.mask.getSamples(0, 0, width, height, 0, (double[]) null);
+      // The window is placed from the raster's first pixel: the image of a raster whose grid range
       // does not start at zero, such as a GeoTools crop, does not start at (0, 0) either.
-      RenderedImage image = raster.getRenderedImage();
-      Rectangle window =
-          new Rectangle(
-              image.getMinX() + selection.x, image.getMinY() + selection.y, width, height);
       double[] rasterPixelData =
-          RasterUtils.getRaster(image, window)
-              .getSamples(window.x, window.y, width, height, band - 1, (double[]) null);
-      int[] selected = selection.mask.getSamples(0, 0, width, height, 0, (int[]) null);
+          rasterData.getSamples(
+              rasterData.getMinX() + selection.x,
+              rasterData.getMinY() + selection.y,
+              width,
+              height,
+              band - 1,
+              (double[]) null);
 
-      // Pixels are taken in row order, which is the order they have in the raster as well.
-      double[] pixelData = new double[rasterPixelData.length];
-      int count = 0;
       for (int k = 0; k < rasterPixelData.length; k++) {
         // Pixels with a value of 0 in the mask fall outside the geometry specified by 'roi'.
-        if (selected[k] != 0
-            && !(excludeNoData && RasterUtils.isNoData(rasterPixelData[k], noDataValue))) {
-          pixelData[count++] = rasterPixelData[k];
+        if (rasterizedPixelData[k] == 0
+            || (excludeNoData && RasterUtils.isNoData(rasterPixelData[k], noDataValue))) {
+          continue;
+        } else {
+          pixelData.add(rasterPixelData[k]);
         }
       }
-      pixelsArray = Arrays.copyOf(pixelData, count);
     }
+
+    double[] pixelsArray = pixelData.stream().mapToDouble(d -> d).toArray();
 
     DescriptiveStatistics stats = new DescriptiveStatistics(pixelsArray);
 

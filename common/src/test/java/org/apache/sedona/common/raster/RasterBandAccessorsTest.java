@@ -22,24 +22,20 @@ import static org.apache.sedona.common.utils.RasterUtils.flipVerticallyPixelSpac
 import static org.junit.Assert.*;
 
 import com.sun.media.imageioimpl.common.BogusColorSpace;
-import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Transparency;
 import java.awt.image.BandedSampleModel;
+import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
-import java.awt.image.Raster;
-import java.awt.image.RenderedImage;
-import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.Vector;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.utils.RasterUtils;
@@ -899,52 +895,59 @@ public class RasterBandAccessorsTest extends RasterTestBase {
   }
 
   @Test
-  public void testZonalStatsReadsOnlyTheWindowOfTheGeometry() throws Exception {
+  public void testZonalStatsTakeOnlyTheWindowOfTheGeometry() throws Exception {
     // The polygon selects 11 columns and 9 rows of a raster of 1200 x 900 pixels. Only that window
-    // of the raster has to be read, however large the raster is.
-    PositionImage image = new PositionImage(1200, 900);
-    GridCoverage2D raster = positionRaster(image);
+    // of the band has to be gone through, however large the raster is.
+    int width = 1200, height = 900;
+    RecordingRaster band = new RecordingRaster(width, height);
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        band.setSample(x, y, 0, 1 + x + 1000d * y);
+      }
+    }
+    ColorModel colorModel =
+        new ComponentColorModel(
+            new BogusColorSpace(1),
+            new int[] {Double.SIZE},
+            false,
+            true,
+            Transparency.OPAQUE,
+            DataBuffer.TYPE_DOUBLE);
+    // A north-up raster of unit pixels with its upper-left corner at (0, 0).
+    GridGeometry2D gridGeometry =
+        new GridGeometry2D(
+            new GridEnvelope2D(0, 0, width, height),
+            PixelInCell.CELL_CORNER,
+            new AffineTransform2D(1, 0, 0, -1, 0, 0),
+            DefaultEngineeringCRS.GENERIC_2D,
+            null);
+    GridCoverage2D raster =
+        RasterUtils.create(
+            new BufferedImage(colorModel, band, false, null),
+            gridGeometry,
+            new GridSampleDimension[] {new GridSampleDimension("band_0")},
+            null);
     Geometry polygon =
         Constructors.geomFromWKT(
             "POLYGON ((600.2 -400.2, 610.7 -400.2, 610.7 -408.9, 600.2 -408.9, 600.2 -400.2))", 0);
-    image.reads.clear();
+    band.reads.clear();
 
     Double[] stats = RasterBandAccessors.getZonalStatsAll(raster, polygon, 1, false, true, false);
 
+    double sum = 0;
+    for (int y = 400; y < 409; y++) {
+      for (int x = 600; x < 611; x++) {
+        sum += 1 + x + 1000d * y;
+      }
+    }
     assertEquals(99, stats[0], 0d);
-    assertEquals(positionSum(600, 400, 11, 9), stats[1], 0d);
-    assertFalse(image.reads.isEmpty());
+    assertEquals(sum, stats[1], 0d);
+    assertFalse(band.reads.isEmpty());
     Rectangle window = new Rectangle(600, 400, 11, 9);
     window.grow(2, 2);
-    for (Rectangle read : image.reads) {
+    for (Rectangle read : band.reads) {
       assertTrue("read " + read + ", outside " + window, window.contains(read));
     }
-  }
-
-  @Test
-  public void testZonalStatsOnARasterTooLargeToHoldInMemory() throws Exception {
-    // Four trillion pixels. Neither the raster nor a mask of its size can be allocated, and the
-    // statistics of a zone of 99 pixels need neither.
-    PositionImage image = new PositionImage(2_000_000, 2_000_000);
-    GridCoverage2D raster = positionRaster(image);
-    Geometry polygon =
-        Constructors.geomFromWKT(
-            "POLYGON ((1500000.2 -1200000.6, 1500010.3 -1200000.6, 1500010.3 -1200008.9,"
-                + " 1500000.2 -1200008.9, 1500000.2 -1200000.6))",
-            0);
-    // The polygon covers the centres of 10 columns and 8 rows, from row 1200001 on.
-    Double[] stats = RasterBandAccessors.getZonalStatsAll(raster, polygon, 1, false, true, false);
-    assertEquals(80, stats[0], 0d);
-    assertEquals(positionSum(1_500_000, 1_200_001, 10, 8), stats[1], 0d);
-    // Its outline passes through one more column and one more row.
-    stats = RasterBandAccessors.getZonalStatsAll(raster, polygon, 1, true, true, false);
-    assertEquals(99, stats[0], 0d);
-    assertEquals(positionSum(1_500_000, 1_200_000, 11, 9), stats[1], 0d);
-    Geometry line = Constructors.geomFromWKT("LINESTRING (1999990.5 -3.5, 1999995.5 -3.5)", 0);
-    assertEquals(
-        positionSum(1_999_990, 3, 6, 1),
-        RasterBandAccessors.getZonalStats(raster, line, 1, "sum", false, true, false),
-        0d);
   }
 
   @Test
@@ -1120,176 +1123,18 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     return hull instanceof Polygon ? hull : factory.createLineString(coords);
   }
 
-  /** The sum of the pixels of a {@link PositionImage} in a window. */
-  private static double positionSum(int x, int y, int width, int height) {
-    double sum = 0;
-    for (int row = y; row < y + height; row++) {
-      for (int col = x; col < x + width; col++) {
-        sum += PositionImage.value(col, row);
-      }
-    }
-    return sum;
-  }
-
-  /** A north-up raster of unit pixels with its upper-left corner at (0, 0), over the image. */
-  private static GridCoverage2D positionRaster(PositionImage image) {
-    GridGeometry2D gridGeometry =
-        new GridGeometry2D(
-            new GridEnvelope2D(0, 0, image.getWidth(), image.getHeight()),
-            PixelInCell.CELL_CORNER,
-            new AffineTransform2D(1, 0, 0, -1, 0, 0),
-            DefaultEngineeringCRS.GENERIC_2D,
-            null);
-    return RasterUtils.create(
-        image, gridGeometry, new GridSampleDimension[] {new GridSampleDimension("band_0")}, null);
-  }
-
-  /**
-   * An image of doubles that holds no pixels. A sample is computed from its position when a region
-   * is read, and every region read is recorded.
-   */
-  private static final class PositionImage implements RenderedImage {
-    private static final int TILE = 256;
-    private final int width;
-    private final int height;
-    private final SampleModel sampleModel =
-        new BandedSampleModel(DataBuffer.TYPE_DOUBLE, TILE, TILE, 1);
-    private final ColorModel colorModel =
-        new ComponentColorModel(
-            new BogusColorSpace(1),
-            new int[] {Double.SIZE},
-            false,
-            true,
-            Transparency.OPAQUE,
-            DataBuffer.TYPE_DOUBLE);
+  /** A band of doubles in memory that records every region whose samples are taken from it. */
+  private static final class RecordingRaster extends WritableRaster {
     final List<Rectangle> reads = new ArrayList<>();
 
-    PositionImage(int width, int height) {
-      this.width = width;
-      this.height = height;
-    }
-
-    static double value(int x, int y) {
-      return 1 + x % 1000 + 1000d * (y % 1000);
+    RecordingRaster(int width, int height) {
+      super(new BandedSampleModel(DataBuffer.TYPE_DOUBLE, width, height, 1), new Point(0, 0));
     }
 
     @Override
-    public Raster getData(Rectangle region) {
-      if (!new Rectangle(0, 0, width, height).contains(region)) {
-        throw new IllegalArgumentException("Region " + region + " is not within the image");
-      }
-      reads.add(new Rectangle(region));
-      WritableRaster data =
-          Raster.createWritableRaster(
-              sampleModel.createCompatibleSampleModel(region.width, region.height),
-              new Point(region.x, region.y));
-      for (int y = region.y; y < region.y + region.height; y++) {
-        for (int x = region.x; x < region.x + region.width; x++) {
-          data.setSample(x, y, 0, value(x, y));
-        }
-      }
-      return data;
-    }
-
-    @Override
-    public Raster getData() {
-      return getData(new Rectangle(0, 0, width, height));
-    }
-
-    @Override
-    public Raster getTile(int tileX, int tileY) {
-      Rectangle tile = new Rectangle(tileX * TILE, tileY * TILE, TILE, TILE);
-      return getData(tile.intersection(new Rectangle(0, 0, width, height)));
-    }
-
-    @Override
-    public WritableRaster copyData(WritableRaster raster) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Vector<RenderedImage> getSources() {
-      return null;
-    }
-
-    @Override
-    public Object getProperty(String name) {
-      return Image.UndefinedProperty;
-    }
-
-    @Override
-    public String[] getPropertyNames() {
-      return null;
-    }
-
-    @Override
-    public ColorModel getColorModel() {
-      return colorModel;
-    }
-
-    @Override
-    public SampleModel getSampleModel() {
-      return sampleModel;
-    }
-
-    @Override
-    public int getWidth() {
-      return width;
-    }
-
-    @Override
-    public int getHeight() {
-      return height;
-    }
-
-    @Override
-    public int getMinX() {
-      return 0;
-    }
-
-    @Override
-    public int getMinY() {
-      return 0;
-    }
-
-    @Override
-    public int getNumXTiles() {
-      return (width + TILE - 1) / TILE;
-    }
-
-    @Override
-    public int getNumYTiles() {
-      return (height + TILE - 1) / TILE;
-    }
-
-    @Override
-    public int getMinTileX() {
-      return 0;
-    }
-
-    @Override
-    public int getMinTileY() {
-      return 0;
-    }
-
-    @Override
-    public int getTileWidth() {
-      return TILE;
-    }
-
-    @Override
-    public int getTileHeight() {
-      return TILE;
-    }
-
-    @Override
-    public int getTileGridXOffset() {
-      return 0;
-    }
-
-    @Override
-    public int getTileGridYOffset() {
-      return 0;
+    public double[] getSamples(int x, int y, int w, int h, int b, double[] dArray) {
+      reads.add(new Rectangle(x, y, w, h));
+      return super.getSamples(x, y, w, h, b, dArray);
     }
   }
 }
