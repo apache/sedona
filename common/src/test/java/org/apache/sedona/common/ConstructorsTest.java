@@ -326,6 +326,23 @@ public class ConstructorsTest {
   }
 
   @Test
+  public void envelopeCoordinatesAreEditedOnce() {
+    String shifted = "POLYGON ((10 20, 10 21, 12 21, 12 20, 10 20))";
+    Geometry geom = Functions.translate(Constructors.makeEnvelope(0, 0, 2, 1), 10, 20);
+    assertEquals(shifted, Functions.asWKT(geom));
+    assertEquals(2.0, Functions.area(geom), 0.0);
+
+    geom = Functions.affine(Constructors.makeEnvelope(0, 0, 2, 1, 4326), 1, 0, 0, 1, 10, 20);
+    assertEquals(shifted, Functions.asWKT(geom));
+    assertEquals(2.0, Functions.area(geom), 0.0);
+    assertEquals(4326, geom.getSRID());
+
+    geom = Functions.flipCoordinates(Constructors.polygonFromEnvelope(1, 2, 2, 4));
+    assertEquals("POLYGON ((2 1, 4 1, 4 2, 2 2, 2 1))", Functions.asWKT(geom));
+    assertEquals(2.0, Functions.area(geom), 0.0);
+  }
+
+  @Test
   public void geomFromBox2D() {
     // 2-D box → POLYGON
     Geometry polygon = Constructors.geomFromBox2D(new Box2D(1.0, 2.0, 4.0, 5.0));
