@@ -257,14 +257,19 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
       assert(file.partitionValues.numFields == partitionSchema.size)
 
       val filePath = file.toPath
-      val split = new FileSplit(filePath, file.start, file.length, Array.empty[String])
+      val wholeSplit = new FileSplit(filePath, file.start, file.length, Array.empty[String])
 
       val sharedConf = broadcastedHadoopConf.value.value
 
-      val footerFileMetaData =
-        ParquetFooterReader
-          .readFooter(sharedConf, file, ParquetFooterReader.SKIP_ROW_GROUPS)
-          .getFileMetaData
+      // A filter that reads the statistics of row groups needs the row groups of this split
+      val readsRowGroups =
+        GeoParquetRowGroupFilter.supported && spatialFilter.exists(_.usesRowGroupStatistics)
+      val footer = ParquetFooterReader.readFooter(
+        sharedConf,
+        file,
+        if (readsRowGroups) ParquetFooterReader.WITH_ROW_GROUPS
+        else ParquetFooterReader.SKIP_ROW_GROUPS)
+      val footerFileMetaData = footer.getFileMetaData
       val datetimeRebaseSpec = InternalDataSourceUtils.datetimeRebaseSpec(
         footerFileMetaData.getKeyValueMetaData.get,
         datetimeRebaseModeInRead)
@@ -308,15 +313,51 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
         pushed
       }
 
+      // The row groups of this split, which a filter on their statistics reads
+      val rowGroups = if (readsRowGroups) footer.getBlocks.asScala.toSeq else Seq.empty
+      // A scan rejects some columns at their first value only. A file or a row group that a
+      // filter leaves out must not keep the scan from that value, in whichever column of the
+      // read it is, so nothing is left out of a split with such a value.
+      lazy val rejectsValue = {
+        lazy val ofSplit =
+          if (readsRowGroups) rowGroups
+          else
+            ParquetFooterReader
+              .readFooter(sharedConf, file, ParquetFooterReader.WITH_ROW_GROUPS)
+              .getBlocks
+              .asScala
+              .toSeq
+        requiredSchema.exists(
+          GeoParquetRowGroupFilter
+            .rejectsValue(_, footerFileMetaData, ofSplit, sharedConf, options))
+      }
       // Prune file scans using pushed down spatial filters and per-column bboxes in geoparquet metadata
       val shouldScanFile =
         GeoParquetMetaData.parseKeyValueMetaData(footerFileMetaData.getKeyValueMetaData).forall {
           metadata => spatialFilter.forall(_.evaluate(metadata.columns))
+        } || rejectsValue
+      // Prune the row groups of this split using their geospatial statistics
+      val keptRowGroups =
+        if (shouldScanFile) spatialFilter.fold(rowGroups) { filter =>
+          if (rowGroups.isEmpty || rejectsValue) rowGroups
+          else
+            GeoParquetRowGroupFilter.select(
+              rowGroups,
+              filter,
+              // The filter names a column of the read, which is not always the name of the
+              // column of the file
+              name =>
+                requiredSchema
+                  .find(_.name == name)
+                  .flatMap(
+                    GeoParquetRowGroupFilter.geographyColumn(_, footerFileMetaData, sharedConf)))
         }
-      if (!shouldScanFile) {
-        // The entire file is pruned so that we don't need to scan this file. A scan rejects a
-        // file that stores a column in a way that the schema of the read does not take, and
-        // the filter must not decide whether a read fails, so such a file is rejected here too.
+        else rowGroups
+      if (!shouldScanFile || (rowGroups.nonEmpty && keptRowGroups.isEmpty)) {
+        // The entire file, or every row group of this split, is pruned so that we don't need to
+        // scan it. A scan rejects a file that stores a column in a way that the schema of the
+        // read does not take, and the filter must not decide whether a read fails, so such a
+        // file is rejected here too.
         val readSupport = new GeoParquetReadSupport(
           None,
           enableVectorizedReader = false,
@@ -369,18 +410,34 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
           datetimeRebaseSpec,
           int96RebaseSpec,
           options)
-        val reader = if (combinedPushed.isDefined && enableRecordFilter) {
-          val parquetFilter = FilterCompat.get(combinedPushed.get, null)
-          new ParquetRecordReader[InternalRow](readSupport, parquetFilter)
-        } else {
-          new ParquetRecordReader[InternalRow](readSupport)
+        def open(split: InputSplit): RecordReaderIterator[InternalRow] = {
+          val reader = if (combinedPushed.isDefined && enableRecordFilter) {
+            val parquetFilter = FilterCompat.get(combinedPushed.get, null)
+            new ParquetRecordReader[InternalRow](readSupport, parquetFilter)
+          } else {
+            new ParquetRecordReader[InternalRow](readSupport)
+          }
+          val readerWithRowIndexes =
+            ParquetRowIndexUtil.addRowIndexToRecordReaderIfNeeded(reader, requiredSchema)
+          val iter = new RecordReaderIterator[InternalRow](readerWithRowIndexes)
+          try {
+            readerWithRowIndexes.initialize(split, hadoopAttemptContext)
+            iter
+          } catch {
+            case e: Throwable =>
+              // SPARK-23457: In case there is an exception in initialization, close the iterator
+              // to avoid leaking resources.
+              iter.close()
+              throw e
+          }
         }
-        val readerWithRowIndexes =
-          ParquetRowIndexUtil.addRowIndexToRecordReaderIfNeeded(reader, requiredSchema)
-        val iter = new RecordReaderIterator[InternalRow](readerWithRowIndexes)
+        val iter =
+          if (keptRowGroups.size == rowGroups.size) open(wholeSplit)
+          else {
+            val starts = keptRowGroups.map(_.getStartingPos).toArray
+            GeoParquetFileFormat.openRowGroups(wholeSplit, starts, sharedConf)(open)
+          }
         try {
-          readerWithRowIndexes.initialize(split, hadoopAttemptContext)
-
           val fullSchema =
             DataTypeUtils.toAttributes(requiredSchema) ++ DataTypeUtils.toAttributes(
               partitionSchema)
@@ -395,8 +452,6 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
           }
         } catch {
           case e: Throwable =>
-            // SPARK-23457: In case there is an exception in initialization, close the iterator to
-            // avoid leaking resources.
             iter.close()
             throw e
         }
@@ -420,6 +475,41 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
 }
 
 object GeoParquetFileFormat extends Logging {
+
+  /**
+   * Opens the row groups of a file that start at `starts`, and no other row group, with `open`.
+   * The Parquet reader finds the row groups of such a split by where they start, not by the bytes
+   * of the split. It fails when it does not find each of them, and leaves the file open that it
+   * was looking in. So the footer is read here first, with the filter that the reader will use.
+   * `whole`, the split with all of these row groups, is opened when one of them is not found: a
+   * filter drops the rows of the other row groups.
+   */
+  private[apache] def openRowGroups[T](
+      whole: FileSplit,
+      starts: Array[Long],
+      configuration: Configuration)(open: InputSplit => T): T = {
+    val found = ParquetFooterReader
+      .readFooter(configuration, whole.getPath, ParquetMetadataConverter.offsets(starts: _*))
+      .getBlocks
+      .size
+    if (found == starts.length) {
+      open(
+        new ParquetInputSplit(
+          whole.getPath,
+          whole.getStart,
+          whole.getStart + whole.getLength,
+          whole.getLength,
+          Array.empty[String],
+          starts))
+    } else {
+      logWarning(
+        s"Reading every row group of ${whole.getPath} in bytes ${whole.getStart} to " +
+          s"${whole.getStart + whole.getLength}: the footer has $found of the " +
+          s"${starts.length} row groups that the spatial filter keeps at the offsets that " +
+          "the row groups start at")
+      open(whole)
+    }
+  }
 
   /**
    * Rejects a file that a filter leaves out of a scan if the scan would reject it for the way it

@@ -25,6 +25,7 @@ import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.sedona_sql.UDT.{GeographyUDT, GeometryUDT}
 import org.apache.spark.sql.sedona_sql.expressions.{DataframePhysicalFunction, ST_BinaryDistanceBandColumn, ST_Contains, ST_WeightedDistanceBandColumn}
+import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.GeographyLeafFilter
 import org.apache.spark.sql.sedona_sql.optimization.SpatialFilterPushDownForGeoParquet
 import org.apache.spark.sql.types._
 import org.locationtech.jts.geom.{Coordinate, GeometryFactory, PrecisionModel}
@@ -122,7 +123,8 @@ class NativeResidualBoundarySuite extends AnyFunSuite {
     assert(result("neighbor").dataType == attributes.dataType)
   }
 
-  test("GeoParquet pushdown sees through native geometry input adapters only") {
+  test(
+    "GeoParquet pushdown sees through native input adapters, with a filter of its own for a geography") {
     val point = new GeometryFactory(new PrecisionModel(), 4326).createPoint(new Coordinate(1, 2))
     val literal = Literal.create(GeometrySerializer.serialize(point), GeometryUDT())
     val translator = new SpatialFilterPushDownForGeoParquet(null)
@@ -138,6 +140,13 @@ class NativeResidualBoundarySuite extends AnyFunSuite {
       Literal.create(GeographySerializer.serialize(WKBGeography.fromJTS(point)), GeographyUDT())
     val spherical =
       SpatialTypeSupport.adaptFunction(ST_Contains.apply)(Seq(geography, geographyLiteral))
-    assert(translator.translateToGeoParquetSpatialFilters(Seq(spherical)).isEmpty)
+    // Not a filter on the planar bbox of a file, but one on the boxes of row groups on the
+    // sphere: a box around the point (1 2), a little larger than the point
+    translator.translateToGeoParquetSpatialFilters(Seq(spherical)) match {
+      case Seq(GeographyLeafFilter("globe", west, east, south, north)) =>
+        assert(west < 1 && east > 1 && south < 2 && north > 2)
+        assert(east - west < 1e-4 && north - south < 1e-4)
+      case other => fail(other.toString)
+    }
   }
 }

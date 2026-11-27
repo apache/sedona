@@ -1,0 +1,232 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.spark.sql.execution.datasources.geoparquet
+
+import scala.collection.JavaConverters._
+import scala.collection.mutable
+import scala.util.Try
+
+import org.apache.hadoop.conf.Configuration
+import org.apache.parquet.hadoop.metadata.{BlockMetaData, ColumnChunkMetaData, ColumnPath, FileMetaData}
+import org.apache.parquet.schema.{MessageType, PrimitiveType, Type}
+import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName
+import org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetReadSupport
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
+import org.apache.spark.sql.types.{ArrayType, DataType, MapType, StructField, StructType}
+
+/**
+ * Picks the row groups of a Parquet file that a [[GeoParquetSpatialFilter]] has to read, from the
+ * geospatial statistics of the row groups. The Parquet library has no filter on these statistics.
+ */
+object GeoParquetRowGroupFilter {
+  // Sedona also compiles against Parquet libraries without geospatial statistics
+  private val statistics =
+    Try(classOf[ColumnChunkMetaData].getMethod("getGeospatialStatistics")).toOption
+
+  /** Whether the Parquet library on the classpath reads the geospatial statistics of a file. */
+  val supported: Boolean = statistics.isDefined
+
+  /**
+   * The row groups of `rowGroups` that may have a row that `filter` keeps, in their order. A row
+   * group that the filter can tell nothing about is one of them.
+   *
+   * @param columnOf
+   *   the column of the file for a column of the filter, as [[geographyColumn]] finds it. None
+   *   keeps every row group for that column.
+   */
+  def select(
+      rowGroups: Seq[BlockMetaData],
+      filter: GeoParquetSpatialFilter,
+      columnOf: String => Option[String] = column => Some(column)): Seq[BlockMetaData] =
+    if (!supported || !filter.usesRowGroupStatistics) rowGroups
+    else {
+      val columns = mutable.Map.empty[String, Option[String]]
+      rowGroups.filter { rowGroup =>
+        val boxes = mutable.Map.empty[String, Option[Array[Double]]]
+        filter.evaluateRowGroup(name =>
+          boxes.getOrElseUpdate(
+            name,
+            columns.getOrElseUpdate(name, columnOf(name)).flatMap(geographyBox(rowGroup, _))))
+      }
+    }
+
+  /**
+   * The column of a file that a read takes the geographies of `field` from, for a filter on
+   * `field` that skips row groups by the statistics of that column. It is the column that the
+   * reader of the file finds for the field: by the field id or by the name of the field, in
+   * whichever case, as `conf` says. None for a field that the reader finds no column for, or more
+   * than one.
+   *
+   * @param field
+   *   a column of the schema of the read
+   */
+  def geographyColumn(
+      field: StructField,
+      fileMetaData: FileMetaData,
+      conf: Configuration): Option[String] =
+    Try(columns(field, fileMetaData.getSchema, conf)).toOption.collect { case Seq(column) =>
+      column.getName
+    }
+
+  /**
+   * Whether a scan may reject a value that `rowGroups` have for `field`. A scan compares the SRID
+   * of some columns with the SRID that the type of the field names at their first value only,
+   * because a file without a value in a column fits any SRID. A file or a row group that a filter
+   * leaves out must not keep a scan from that value, so nothing of `rowGroups` is left out for a
+   * read with such a field.
+   *
+   * It is so for a field of a native Spark type, which names an SRID, with a value in
+   *   - a GEOGRAPHY column of another SRID
+   *   - a GEOMETRY column that the file states no CRS for
+   *   - a binary column that is read as geographies, each of which states its SRID
+   *
+   * A field with a struct, an array or a map is compared as a whole: each geography of the file
+   * in it with each geography of its type, and not only with the one that it is read as.
+   *
+   * @param field
+   *   a column of the schema of the read
+   * @param rowGroups
+   *   the row groups of the read, which are looked at for a column that a scan may reject only
+   * @param parameters
+   *   the options of the read
+   */
+  def rejectsValue(
+      field: StructField,
+      fileMetaData: FileMetaData,
+      rowGroups: => Seq[BlockMetaData],
+      conf: Configuration,
+      parameters: Map[String, String]): Boolean =
+    // Whatever cannot be told of the column is left to a scan
+    Try(rejected(field, fileMetaData, conf, parameters)).toOption.flatten.forall { columns =>
+      columns.nonEmpty && rowGroups.exists(rowGroup => columns.exists(hasValue(rowGroup, _)))
+    }
+
+  /**
+   * The columns of a file whose values a scan may reject for `field`, by their paths. None for a
+   * field that the reader finds more than one column for.
+   */
+  private def rejected(
+      field: StructField,
+      fileMetaData: FileMetaData,
+      conf: Configuration,
+      parameters: Map[String, String]): Option[Seq[ColumnPath]] = {
+    def native(dataType: DataType): Seq[DataType] = dataType match {
+      case array: ArrayType => native(array.elementType)
+      case map: MapType => native(map.keyType) ++ native(map.valueType)
+      case struct: StructType => struct.flatMap(inner => native(inner.dataType))
+      case other => Seq(other).filter(SpatialTypeSupport.isNativeSpatial)
+    }
+    val types = native(field.dataType)
+    val fileSchema = fileMetaData.getSchema
+    if (types.isEmpty) Some(Nil)
+    else
+      columns(field, fileSchema, conf) match {
+        // No value is read for a field that the file has no column for
+        case Seq() => Some(Nil)
+        case Seq(column) =>
+          val converter =
+            new GeoParquetToSparkSchemaConverter(
+              fileMetaData.getKeyValueMetaData,
+              conf,
+              parameters)
+          val geographies = types.filter(SpatialTypeSupport.isGeography)
+          val srids = geographies.flatMap(SpatialTypeSupport.geographySrid)
+          val geometryWithSrid = types.exists(dataType =>
+            SpatialTypeSupport.isGeometry(dataType) &&
+              SpatialTypeSupport.geometrySrid(dataType).exists(_ != 0))
+          // The GeoParquet metadata names the columns of a file and no field within them
+          val top = column.isPrimitive
+          def withoutCrs(leaf: PrimitiveType) = geometryWithSrid &&
+            converter.geometrySrid(leaf, native = true, column = top) == 0
+          Some(leaves(column, Seq(column.getName)).collect {
+            case (path, leaf)
+                if fileSchema.containsPath(path.toArray) && (
+                  ParquetGeospatialTypes.describe(leaf) match {
+                    case Some(described) if described.isGeography =>
+                      val stored = converter.geographySrid(leaf, native = true, column = top)
+                      srids.exists(_ != stored)
+                    case Some(_) => withoutCrs(leaf)
+                    case None =>
+                      leaf.getPrimitiveTypeName == PrimitiveTypeName.BINARY &&
+                      leaf.getLogicalTypeAnnotation == null &&
+                      (geographies.nonEmpty || withoutCrs(leaf))
+                  }
+                ) =>
+              ColumnPath.get(path: _*)
+          })
+        case _ => None
+      }
+  }
+
+  private def leaves(field: Type, path: Seq[String]): Seq[(Seq[String], PrimitiveType)] =
+    if (field.isPrimitive) Seq(path -> field.asPrimitiveType)
+    else
+      field.asGroupType.getFields.asScala.toSeq.flatMap(inner =>
+        leaves(inner, path :+ inner.getName))
+
+  /** Whether `rowGroup` has a value in `column`, as far as its statistics tell. */
+  private def hasValue(rowGroup: BlockMetaData, column: ColumnPath): Boolean =
+    rowGroup.getColumns.asScala.find(_.getPath == column).forall { chunk =>
+      val statistics = chunk.getStatistics
+      statistics == null || !statistics.isNumNullsSet ||
+      statistics.getNumNulls < chunk.getValueCount
+    }
+
+  /**
+   * The columns of a file that the reader of the file finds for `field`, with the fields that the
+   * read takes of them.
+   */
+  private def columns(field: StructField, fileSchema: MessageType, conf: Configuration) =
+    ParquetReadSupport
+      .getRequestedSchema(
+        fileSchema,
+        GeoParquetSchemaConverter.physicalSchema(StructType(Seq(field))),
+        conf,
+        enableVectorizedReader = false)
+      .getFields
+      .asScala
+      .toSeq
+      // A field that the file does not have is one of them when the read takes whole columns
+      .filter(found => fileSchema.containsField(found.getName))
+
+  /**
+   * The bounding box that `rowGroup` has for the geographies of `column`: the western, eastern,
+   * southern and northern bound in degrees. None for a column that is not a GEOGRAPHY column with
+   * spherical edges at the root of the file, whose box is of another kind, and without a box of
+   * longitudes and latitudes.
+   */
+  private def geographyBox(rowGroup: BlockMetaData, column: String): Option[Array[Double]] =
+    for {
+      // A column at the root, whose name may have a dot
+      chunk <- rowGroup.getColumns.asScala.find(_.getPath == ColumnPath.get(column))
+      described <- ParquetGeospatialTypes.describe(chunk.getPrimitiveType)
+      if described.isGeography
+      if described.edges.forall(_ == ParquetGeospatialTypes.DEFAULT_EDGES)
+      found <- Try(Option(statistics.get.invoke(chunk))).toOption.flatten
+      box <- Try(
+        Option(found.getClass.getMethod("getBoundingBox").invoke(found))).toOption.flatten
+      bounds <- Try(Array("getXMin", "getXMax", "getYMin", "getYMax").map(name =>
+        box.getClass.getMethod(name).invoke(box).asInstanceOf[Double])).toOption
+      // The western bound is above the eastern bound across the antimeridian. Other bounds that
+      // are not in order, or not a longitude or a latitude, are not a box of the sphere.
+      if bounds.forall(bound => !bound.isNaN && !bound.isInfinity)
+      if bounds(0) >= -180 && bounds(0) <= 180 && bounds(1) >= -180 && bounds(1) <= 180
+      if bounds(2) >= -90 && bounds(3) <= 90 && bounds(2) <= bounds(3)
+    } yield bounds
+}

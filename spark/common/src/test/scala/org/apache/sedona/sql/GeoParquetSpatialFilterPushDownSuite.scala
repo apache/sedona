@@ -33,6 +33,8 @@ import org.apache.sedona.core.spatialOperator.SpatialPredicate
 import org.apache.spark.sql.execution.datasources.geoparquet.{GeoParquetFileFormat, GeoParquetMetaData, GeoParquetSpatialFilter, GeometryFieldMetaData}
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.LeafFilter
 import org.apache.spark.sql.functions.expr
+import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
+import org.apache.spark.sql.types.{DataType, LongType, StructField, StructType}
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.geom.GeometryFactory
@@ -471,6 +473,136 @@ class GeoParquetSpatialFilterPushDownSuite extends TestBaseScala with TableDrive
         verifyBox2DFilter(box2dDf, reversedFilter)
       } finally {
         FileUtils.deleteDirectory(new File(box2dDir).getParentFile)
+      }
+    }
+  }
+
+  describe("GeoParquet spatial filter push down for a column whose name needs quotes") {
+
+    /** The rows of `condition` with and without the filter of `condition` pushed down. */
+    def verify(data: DataFrame, condition: String, column: String): Unit = {
+      val filtered = data.where(condition)
+      val pushed = getPushedDownSpatialFilter(filtered)
+      assert(pushed.exists(_.simpleString.startsWith(column + " ")), condition)
+      val expected = withConf(Map("spark.sedona.geoparquet.spatialFilterPushDown" -> "false")) {
+        data.where(condition).orderBy("region", "id").select("region", "id").collect().toSeq
+      }
+      assert(expected.nonEmpty, condition)
+      assert(
+        filtered.orderBy("region", "id").select("region", "id").collect().toSeq == expected,
+        condition)
+    }
+
+    def withData(data: DataFrame)(run: DataFrame => Unit): Unit = {
+      val parent = Files.createTempDirectory("sedona_geoparquet_quoted_").toFile
+      try {
+        val path = parent.getAbsolutePath + "/data"
+        writeTestDataAsGeoParquet(data, path)
+        run(sparkSession.read.format("geoparquet").load(path))
+      } finally FileUtils.deleteDirectory(parent)
+    }
+
+    val window = "ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))')"
+
+    it("Push down a filter on a geometry column with a hyphen in its name") {
+      withData(df.withColumnRenamed("geom", "geo-site")) { data =>
+        verify(data, s"ST_Intersects(`geo-site`, $window)", "geo-site")
+        verify(data, s"ST_Intersects($window, `geo-site`)", "geo-site")
+        verify(data, s"ST_Within(`geo-site`, $window)", "geo-site")
+        verify(data, s"ST_Equals(`geo-site`, ST_GeomFromText('POINT (5 5)'))", "geo-site")
+        verify(data, "ST_DWithin(`geo-site`, ST_GeomFromText('POINT (5 5)'), 2.0)", "geo-site")
+        verify(data, "ST_Distance(`geo-site`, ST_GeomFromText('POINT (5 5)')) < 2.0", "geo-site")
+      }
+    }
+
+    it("Push down a filter on a geometry column with a backtick in its name") {
+      // Next to a column of that name without the backticks, whose geometries are elsewhere
+      val data = df
+        .withColumnRenamed("geom", "`geom`")
+        .withColumn("geom", expr("ST_Point(1000, 1000)"))
+      withData(data) { data =>
+        verify(data, s"ST_Intersects(```geom```, $window)", "`geom`")
+      }
+    }
+
+    it("Push down a filter on a Box2D column with a hyphen in its name") {
+      withData(df.withColumn("geom-bbox", expr("ST_Box2D(geom)"))) { data =>
+        val condition =
+          "ST_Intersects(`geom-bbox`, ST_MakeBox2D(ST_Point(5.0, 5.0), ST_Point(15.0, 15.0)))"
+        verify(data, condition, "geom-bbox")
+        verifyBox2DFilter(data, condition)
+      }
+    }
+  }
+
+  describe("GeoParquet spatial filter push down for a file that a scan rejects at a value") {
+    it("Reads a file that the filter leaves out when a scan rejects another column of it") {
+      if (SpatialTypeSupport.usesNativeTypes) {
+        val parent = Files.createTempDirectory("sedona_geoparquet_rejected_").toFile
+        try {
+          def schema(payload: DataType) = StructType(
+            Seq(
+              StructField("id", LongType),
+              StructField("geom", SpatialTypeSupport.geometryType(4326)),
+              StructField("payload", payload)))
+          // The bounding box of the file is far from the window of the query
+          val condition =
+            "ST_Intersects(geom, ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326))"
+          // The read takes the column payload as well, whose type names another SRID than the
+          // file has for it. A scan finds that at the first value of the column. A geometry
+          // without an SRID is written without a CRS.
+          Seq(
+            (
+              "ST_GeogFromWKT('POINT (1 2)', 4269)",
+              SpatialTypeSupport.geographyType(4326),
+              "requires SRID 4326 but contains SRID 4269"),
+            (
+              "ST_Point(1, 2)",
+              SpatialTypeSupport.geometryType(4326),
+              "requires SRID 4326 but contains SRID 0")).zipWithIndex.foreach {
+            case ((payload, dataType, expected), index) =>
+              val path = parent.getAbsolutePath + s"/data$index"
+              sparkSession
+                .range(10)
+                .selectExpr(
+                  "id",
+                  "ST_SetSRID(ST_Point(45 + id, 68.2), 4326) AS geom",
+                  s"$payload AS payload")
+                .coalesce(1)
+                .write
+                .format("geoparquet")
+                .option("geoparquet.version", "2.0.0")
+                .save(path)
+              for (push <- Seq("false", "true")) {
+                withConf(Map("spark.sedona.geoparquet.spatialFilterPushDown" -> push)) {
+                  val error = intercept[Exception] {
+                    sparkSession.read
+                      .schema(schema(dataType))
+                      .format("geoparquet")
+                      .load(path)
+                      .where(condition)
+                      .collect()
+                  }
+                  val messages = Iterator
+                    .iterate[Throwable](error)(_.getCause)
+                    .takeWhile(_ != null)
+                    .flatMap(cause => Option(cause.getMessage))
+                    .mkString("\n")
+                  assert(messages.contains(expected), s"$payload $push")
+                }
+              }
+
+              // With the SRID that the file has for the column, the file is left out
+              val data = sparkSession.read.format("geoparquet").load(path).where(condition)
+              assert(data.schema("payload").dataType != dataType)
+              assert(getPushedDownSpatialFilter(data).isDefined)
+              assert(data.collect().isEmpty)
+              val scan = data.queryExecution.executedPlan.collectFirst {
+                case scan: FileSourceScanExec => scan
+              }
+              assert(scan.get.metrics("numOutputRows").value == 0)
+          }
+        } finally FileUtils.deleteDirectory(parent)
       }
     }
   }

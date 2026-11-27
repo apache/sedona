@@ -37,6 +37,7 @@ import org.apache.parquet.io.api.Binary
 import org.apache.parquet.schema.{GroupType, LogicalTypeAnnotation, MessageType, Type, Types}
 import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName.{BINARY, INT32}
 import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.execution.FileSourceScanExec
 import org.apache.spark.sql.execution.datasources.geoparquet.{ParquetGeospatialColumn, ParquetGeospatialTypes}
 import org.apache.spark.sql.sedona_sql.UDT.GeographyUDT
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
@@ -753,6 +754,77 @@ class GeoParquetGeographySuite extends TestBaseScala {
           val error = intercept[Exception](df.where(s"ST_Intersects(geography, $window)").count())
           assert(messages(error).contains(
             "Column 'geography' is a Parquet GEOGRAPHY column and cannot be read as a geometry"))
+        }
+      }
+
+      it("leaves out a file by a filter on a geometry column next to a geography in a struct") {
+        withDirectory { directory =>
+          // The bounding box of the file is far from the window of the query
+          val geo =
+            """{"version":"2.0.0","primary_column":"geom","columns":{"geom":
+              |{"encoding":"WKB","geometry_types":["Point"],
+              |"bbox":[45.0,68.2,45.0,68.2]}}}""".stripMargin.replace("\n", "")
+          val window = "ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326)"
+
+          /** A file of one row, whose column trip has the geography stop, null without a WKT. */
+          def writeTrip(name: String, crs: Option[String], stop: String): String = {
+            val schema = Types
+              .buildMessage()
+              .required(INT32)
+              .named("id")
+              .addField(geometry("geom"))
+              .addField(
+                Types.optionalGroup().addField(geography("stop", crs, "spherical")).named("trip"))
+              .named("data")
+            val folder = new File(directory, name)
+            folder.mkdir()
+            write(new File(folder, "part-0.parquet"), schema, Map("geo" -> geo)) { id =>
+              val group: Group = new SimpleGroup(schema)
+              group.add("id", id)
+              group.add("geom", Binary.fromConstantByteArray(wkb("POINT (45 68.2)")))
+              val trip = group.addGroup("trip")
+              if (stop != null) trip.add("stop", Binary.fromConstantByteArray(wkb(stop)))
+              group
+            }
+            folder.getPath
+          }
+
+          /** The rows that the scan of a query on the column geom has read. */
+          def scanned(df: DataFrame): Long = {
+            val query = df.where(s"ST_Intersects(geom, $window)").selectExpr("id", "trip.stop")
+            assert(query.collect().isEmpty)
+            query.queryExecution.executedPlan
+              .collectFirst { case scan: FileSourceScanExec => scan }
+              .get
+              .metrics("numOutputRows")
+              .value
+          }
+
+          // The type of the read has the SRID of the file for the geography
+          assert(scanned(read(writeTrip("same", None, "POINT (1 2)"))) == 0)
+
+          if (SpatialTypeSupport.usesNativeTypes) {
+            val schema = StructType(
+              Seq(
+                StructField("id", IntegerType),
+                StructField("geom", SpatialTypeSupport.geometryType(4326)),
+                StructField(
+                  "trip",
+                  StructType(Seq(StructField("stop", SpatialTypeSupport.geographyType(4326)))))))
+            def as4326(path: String) =
+              sparkSession.read.schema(schema).format("geoparquet").load(path)
+            // A file of another SRID is one that a scan rejects at the geography, and is
+            // left out without one
+            val other = as4326(writeTrip("other", Some("EPSG:4269"), "POINT (1 2)"))
+            for (push <- Seq("false", "true")) {
+              withConf(Map("spark.sedona.geoparquet.spatialFilterPushDown" -> push)) {
+                val error = intercept[Exception](
+                  other.where(s"ST_Intersects(geom, $window)").selectExpr("trip.stop").collect())
+                assert(messages(error).contains("4269"), push)
+              }
+            }
+            assert(scanned(as4326(writeTrip("none", Some("EPSG:4269"), null))) == 0)
+          }
         }
       }
 

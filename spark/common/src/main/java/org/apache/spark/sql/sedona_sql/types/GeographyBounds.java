@@ -19,6 +19,7 @@
 package org.apache.spark.sql.sedona_sql.types;
 
 import com.google.common.geometry.R1Interval;
+import com.google.common.geometry.S1Angle;
 import com.google.common.geometry.S1Interval;
 import com.google.common.geometry.S2;
 import com.google.common.geometry.S2EdgeUtil;
@@ -270,7 +271,36 @@ public final class GeographyBounds {
       S1Interval longitude = longitudes ? longitudes(west, east) : shapes.lng();
       all = all.union(new S2LatLngRect(latitude, longitude));
     }
-    all = all.expanded(S2LatLng.fromRadians(MARGIN, MARGIN));
+    return degrees(all);
+  }
+
+  /**
+   * Whether two boxes have a point in common. A box is the western, eastern, southern and northern
+   * bound in degrees, with the western bound above the eastern bound across the antimeridian, as
+   * {@link #box} gives it and as the statistics of a Parquet GEOGRAPHY column have it. Longitude
+   * 180 and longitude -180 are one meridian.
+   */
+  public static boolean intersects(double[] first, double[] second) {
+    return rectangle(first).intersects(rectangle(second));
+  }
+
+  /**
+   * The box of every point that is within {@code radians} of a point of {@code box}, as an angle on
+   * the sphere. It is not smaller than that.
+   */
+  public static double[] expand(double[] box, double radians) {
+    return degrees(rectangle(box).expandedByDistance(S1Angle.radians(radians)));
+  }
+
+  private static S2LatLngRect rectangle(double[] box) {
+    return new S2LatLngRect(
+        new R1Interval(radians(box[2], S2.M_PI_2), radians(box[3], S2.M_PI_2)),
+        longitudes(box[0], box[1]));
+  }
+
+  /** The box of a rectangle of S2, which is a little larger than the rectangle. */
+  private static double[] degrees(S2LatLngRect rectangle) {
+    S2LatLngRect all = rectangle.expanded(S2LatLng.fromRadians(MARGIN, MARGIN));
     double south = Math.max(-90, all.latLo().degrees());
     double north = Math.min(90, all.latHi().degrees());
     if (all.lng().isFull()) return new double[] {-180, 180, south, north};

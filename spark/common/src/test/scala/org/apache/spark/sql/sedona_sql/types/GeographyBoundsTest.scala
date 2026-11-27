@@ -22,7 +22,7 @@ import java.nio.{ByteBuffer, ByteOrder}
 
 import scala.util.{Random, Try}
 
-import com.google.common.geometry.{S1Interval, S2LatLngRect}
+import com.google.common.geometry.{S1Interval, S2LatLng, S2LatLngRect}
 import org.apache.sedona.common.S2Geography.{WKBReader => GeographyReader}
 import org.locationtech.jts.io.{ByteOrderValues, WKBWriter, WKTReader}
 import org.scalatest.funsuite.AnyFunSuite
@@ -390,5 +390,89 @@ class GeographyBoundsTest extends AnyFunSuite {
     val vertex = boxOf(shapeWkb(2, Seq((10.0, 20.0), (75.0, nan), (30.0, 40.0))))
     assert(near(vertex(0), 10) && near(vertex(1), 75))
     assert(near(vertex(2), 20) && near(vertex(3), 40))
+  }
+
+  private def meet(a: Seq[Double], b: Seq[Double]): Boolean = {
+    val forth = GeographyBounds.intersects(a.toArray, b.toArray)
+    assert(GeographyBounds.intersects(b.toArray, a.toArray) == forth)
+    forth
+  }
+
+  test("tells whether two boxes have a point in common") {
+    val box = Seq(10.0, 20.0, 30.0, 40.0)
+    assert(meet(box, Seq(15.0, 16.0, 35.0, 36.0)))
+    assert(meet(box, Seq(0.0, 50.0, 0.0, 50.0)))
+    assert(meet(box, Seq(19.0, 25.0, 39.0, 45.0)))
+    // A bound in common is a point in common
+    assert(meet(box, Seq(20.0, 25.0, 40.0, 45.0)))
+    assert(!meet(box, Seq(21.0, 25.0, 30.0, 40.0)))
+    assert(!meet(box, Seq(10.0, 20.0, 41.0, 45.0)))
+    assert(!meet(box, Seq(-20.0, -10.0, 30.0, 40.0)))
+  }
+
+  test("tells whether boxes across the antimeridian have a point in common") {
+    val across = Seq(170.0, -170.0, 0.0, 10.0)
+    assert(meet(across, Seq(175.0, 176.0, 1.0, 2.0)))
+    assert(meet(across, Seq(-176.0, -175.0, 1.0, 2.0)))
+    assert(meet(across, Seq(160.0, 170.0, 1.0, 2.0)))
+    assert(meet(across, Seq(175.0, -175.0, 1.0, 2.0)))
+    assert(meet(across, Seq(-175.0, 175.0, 1.0, 2.0)))
+    assert(!meet(across, Seq(-169.0, 169.0, 1.0, 2.0)))
+    assert(!meet(across, Seq(0.0, 10.0, 1.0, 2.0)))
+    assert(!meet(across, Seq(175.0, 176.0, 11.0, 12.0)))
+    // Longitude 180 and longitude -180 are one meridian
+    assert(meet(Seq(170.0, 180.0, 0.0, 10.0), Seq(-180.0, -170.0, 0.0, 10.0)))
+    assert(meet(Seq(180.0, 180.0, 0.0, 10.0), Seq(-180.0, -180.0, 5.0, 6.0)))
+    // All longitudes
+    assert(meet(Seq(-180.0, 180.0, 0.0, 10.0), Seq(175.0, -175.0, 1.0, 2.0)))
+    assert(meet(Seq(-180.0, 180.0, 0.0, 10.0), Seq(-180.0, 180.0, 10.0, 20.0)))
+  }
+
+  test("grows a box by a distance on the sphere") {
+    val degree = math.toRadians(1)
+    val grown = GeographyBounds.expand(Array(10.0, 20.0, 30.0, 40.0), degree).toSeq
+    assert(contains(grown, 10, 29.01) && contains(grown, 20, 40.99))
+    assert(!contains(grown, 10, 28.9) && !contains(grown, 20, 41.1))
+    // A degree of distance is more than a degree of longitude away from the equator
+    assert(grown(0) < 9 && grown(0) > 8 && grown(1) > 21 && grown(1) < 22)
+    // Nothing is added for no distance
+    assert(
+      GeographyBounds
+        .expand(Array(10.0, 20.0, 30.0, 40.0), 0)
+        .toSeq
+        .zip(Seq(10.0, 20.0, 30.0, 40.0))
+        .forall { case (found, expected) => near(found, expected) })
+    // Across the antimeridian, over a pole, and around the sphere
+    val across = GeographyBounds.expand(Array(179.5, 179.9, 0.0, 1.0), degree).toSeq
+    assert(across(0) > across(1) && contains(across, -179.5, 0.5) && !contains(across, -178, 0.5))
+    val polar = GeographyBounds.expand(Array(10.0, 20.0, 88.0, 89.5), degree).toSeq
+    assert(polar == Seq(-180.0, 180.0, polar(2), 90.0) && polar(2) < 87.01 && polar(2) > 86.9)
+    assert(
+      GeographyBounds.expand(Array(10.0, 20.0, 30.0, 40.0), 4).toSeq ==
+        Seq(-180.0, 180.0, -90.0, 90.0))
+  }
+
+  test("has every point within a distance of a geography in the box grown by that distance") {
+    val random = new Random(23)
+    (1 to 2000).foreach { _ =>
+      val center =
+        S2LatLng.fromDegrees(random.nextDouble() * 178 - 89, random.nextDouble() * 360 - 180)
+      val box = boxOf(pointWkb(center.lngDegrees(), center.latDegrees()))
+      val radius = math.pow(10, random.nextDouble() * 4 - 4) * math.Pi
+      val grown = GeographyBounds.expand(box.toArray, radius).toSeq
+      // A point on the circle of that radius around the center
+      val bearing = random.nextDouble() * 2 * math.Pi
+      val (lat, lng) = (center.latRadians(), center.lngRadians())
+      val reachedLat =
+        math.asin(
+          math.sin(lat) * math.cos(radius) + math.cos(lat) * math.sin(radius) * math.cos(bearing))
+      val reachedLng = lng + math.atan2(
+        math.sin(bearing) * math.sin(radius) * math.cos(lat),
+        math.cos(radius) - math.sin(lat) * math.sin(reachedLat))
+      val reached = S2LatLng.fromRadians(reachedLat, reachedLng).normalized()
+      assert(
+        contains(grown, reached.lngDegrees(), reached.latDegrees()),
+        s"$reached, ${math.toDegrees(radius)} degrees from $center, in $grown")
+    }
   }
 }
