@@ -29,6 +29,7 @@ import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName
 import org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetReadSupport
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.types.{ArrayType, DataType, MapType, StructField, StructType}
+import org.locationtech.jts.geom.Envelope
 
 /**
  * Picks the row groups of a Parquet file that a [[GeoParquetSpatialFilter]] has to read, from the
@@ -47,8 +48,8 @@ object GeoParquetRowGroupFilter {
    * group that the filter can tell nothing about is one of them.
    *
    * @param columnOf
-   *   the column of the file for a column of the filter, as [[geographyColumn]] finds it. None
-   *   keeps every row group for that column.
+   *   the column of the file for a column of the filter, as [[fileColumn]] finds it. None keeps
+   *   every row group for that column.
    */
   def select(
       rowGroups: Seq[BlockMetaData],
@@ -58,25 +59,28 @@ object GeoParquetRowGroupFilter {
     else {
       val columns = mutable.Map.empty[String, Option[String]]
       rowGroups.filter { rowGroup =>
-        val boxes = mutable.Map.empty[String, Option[Array[Double]]]
-        filter.evaluateRowGroup(name =>
-          boxes.getOrElseUpdate(
-            name,
-            columns.getOrElseUpdate(name, columnOf(name)).flatMap(geographyBox(rowGroup, _))))
+        val geographies = mutable.Map.empty[String, Option[Array[Double]]]
+        val geometries = mutable.Map.empty[String, Option[Envelope]]
+        def column(name: String) = columns.getOrElseUpdate(name, columnOf(name))
+        filter.evaluateRowGroup(new GeoParquetSpatialFilter.RowGroupBoxes {
+          override def geography(name: String): Option[Array[Double]] =
+            geographies.getOrElseUpdate(name, column(name).flatMap(geographyBox(rowGroup, _)))
+          override def geometry(name: String): Option[Envelope] =
+            geometries.getOrElseUpdate(name, column(name).flatMap(geometryBox(rowGroup, _)))
+        })
       }
     }
 
   /**
-   * The column of a file that a read takes the geographies of `field` from, for a filter on
-   * `field` that skips row groups by the statistics of that column. It is the column that the
-   * reader of the file finds for the field: by the field id or by the name of the field, in
-   * whichever case, as `conf` says. None for a field that the reader finds no column for, or more
-   * than one.
+   * The column of a file that a read takes the values of `field` from, for a filter on `field`
+   * that skips row groups by the statistics of that column. It is the column that the reader of
+   * the file finds for the field: by the field id or by the name of the field, in whichever case,
+   * as `conf` says. None for a field that the reader finds no column for, or more than one.
    *
    * @param field
    *   a column of the schema of the read
    */
-  def geographyColumn(
+  def fileColumn(
       field: StructField,
       fileMetaData: FileMetaData,
       conf: Configuration): Option[String] =
@@ -213,20 +217,48 @@ object GeoParquetRowGroupFilter {
    */
   private def geographyBox(rowGroup: BlockMetaData, column: String): Option[Array[Double]] =
     for {
+      bounds <- bounds(
+        rowGroup,
+        column,
+        described =>
+          described.isGeography &&
+            described.edges.forall(_ == ParquetGeospatialTypes.DEFAULT_EDGES))
+      // The western bound is above the eastern bound across the antimeridian. Other bounds that
+      // are not in order, or not a longitude or a latitude, are not a box of the sphere.
+      if bounds(0) >= -180 && bounds(0) <= 180 && bounds(1) >= -180 && bounds(1) <= 180
+      if bounds(2) >= -90 && bounds(3) <= 90 && bounds(2) <= bounds(3)
+    } yield bounds
+
+  /**
+   * The bounding box that `rowGroup` has for the geometries of `column`, in X and Y. None for a
+   * column that is not a GEOMETRY column at the root of the file, and without a box whose bounds
+   * are in order, as that of a row group without a geometry is.
+   */
+  private def geometryBox(rowGroup: BlockMetaData, column: String): Option[Envelope] =
+    for {
+      bounds <- bounds(rowGroup, column, described => !described.isGeography)
+      if bounds(0) <= bounds(1) && bounds(2) <= bounds(3)
+    } yield new Envelope(bounds(0), bounds(1), bounds(2), bounds(3))
+
+  /**
+   * The bounds of X and of Y that the geospatial statistics of `rowGroup` have for `column`, a
+   * column at the root of the file of a type that `ofType` takes: the lower and the upper bound
+   * of X, and those of Y. None when one of them is no number.
+   */
+  private def bounds(
+      rowGroup: BlockMetaData,
+      column: String,
+      ofType: ParquetGeospatialColumn => Boolean): Option[Array[Double]] =
+    for {
       // A column at the root, whose name may have a dot
       chunk <- rowGroup.getColumns.asScala.find(_.getPath == ColumnPath.get(column))
       described <- ParquetGeospatialTypes.describe(chunk.getPrimitiveType)
-      if described.isGeography
-      if described.edges.forall(_ == ParquetGeospatialTypes.DEFAULT_EDGES)
+      if ofType(described)
       found <- Try(Option(statistics.get.invoke(chunk))).toOption.flatten
       box <- Try(
         Option(found.getClass.getMethod("getBoundingBox").invoke(found))).toOption.flatten
       bounds <- Try(Array("getXMin", "getXMax", "getYMin", "getYMax").map(name =>
         box.getClass.getMethod(name).invoke(box).asInstanceOf[Double])).toOption
-      // The western bound is above the eastern bound across the antimeridian. Other bounds that
-      // are not in order, or not a longitude or a latitude, are not a box of the sphere.
       if bounds.forall(bound => !bound.isNaN && !bound.isInfinity)
-      if bounds(0) >= -180 && bounds(0) <= 180 && bounds(1) >= -180 && bounds(1) <= 180
-      if bounds(2) >= -90 && bounds(3) <= 90 && bounds(2) <= bounds(3)
     } yield bounds
 }

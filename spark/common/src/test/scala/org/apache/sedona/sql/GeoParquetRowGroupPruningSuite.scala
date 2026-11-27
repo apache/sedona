@@ -37,20 +37,24 @@ import org.apache.spark.sql.{DataFrame, Row}
 import org.apache.spark.sql.execution.{FileSourceScanExec, SparkPlan}
 import org.apache.spark.sql.execution.adaptive.AdaptiveSparkPlanExec
 import org.apache.spark.sql.execution.datasources.geoparquet.{GeoParquetFileFormat, GeoParquetRowGroupFilter, GeoParquetSpatialFilter, ParquetGeospatialTypes}
-import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.{AndFilter, GeographyLeafFilter, OrFilter}
+import org.apache.sedona.core.spatialOperator.SpatialPredicate
+import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.{AndFilter, GeographyLeafFilter, LeafFilter, OrFilter, RowGroupBoxes}
 
 import org.apache.spark.sql.functions.{col, expr}
 import org.apache.spark.sql.sedona_sql.types.{GeographyBounds, SpatialTypeSupport}
 import org.apache.spark.sql.types.{DataType, LongType, MetadataBuilder, StringType, StructField, StructType}
 
+import org.locationtech.jts.geom.{Envelope, GeometryFactory}
+
 import scala.collection.JavaConverters._
 import scala.util.Random
 
 /**
- * A filter on a geography column of a GeoParquet 2 file skips the row groups whose bounding box,
- * in the geospatial statistics of the row group, the geography of the query is outside of.
+ * A filter on a geography or a geometry column of a GeoParquet 2 file skips the row groups whose
+ * bounding box, in the geospatial statistics of the row group, the geography or the geometry of
+ * the query is outside of.
  */
-class GeoParquetGeographyRowGroupPruningSuite extends TestBaseScala {
+class GeoParquetRowGroupPruningSuite extends TestBaseScala {
 
   private val PUSH_DOWN = "spark.sedona.geoparquet.spatialFilterPushDown"
 
@@ -748,6 +752,247 @@ class GeoParquetGeographyRowGroupPruningSuite extends TestBaseScala {
           val nowhere = GeographyLeafFilter("geography", -60, -50, -20, -10)
           assert(GeoParquetRowGroupFilter.select(groups, nowhere) == groups)
         }
+      }
+    }
+  }
+
+  /** Points from (0 0) to the upper right, a twentieth of a unit of X apart. */
+  private def planar: DataFrame =
+    sparkSession.sql(s"SELECT id, ST_Point(id * 0.05, id * 0.025) AS geom FROM range($ROWS)")
+
+  /** Squares of two units around the points of [[planar]]. */
+  private def squares: DataFrame = sparkSession.sql(s"""SELECT id, ST_PolygonFromEnvelope(
+      |  id * 0.05 - 1, id * 0.025 - 1, id * 0.05 + 1, id * 0.025 + 1) AS geom
+      |FROM range($ROWS)""".stripMargin)
+
+  private val area = "ST_GeomFromWKT('POLYGON ((50 20, 60 20, 60 35, 50 35, 50 20))')"
+  // Inside of the bounding box of a file of planar, and away from its points
+  private val aside = "ST_GeomFromWKT('POLYGON ((100 10, 110 10, 110 20, 100 20, 100 10))')"
+
+  describe("Row group pruning for geometry columns of GeoParquet 2 files") {
+    if (ParquetGeospatialTypes.supported) {
+      it("reads the row groups whose box the geometry of the query reaches, and no other") {
+        withDirectory { directory =>
+          val path = new File(directory, "data").getPath
+          write(planar, path)
+          val groups = blocks(path)
+          assert(groups.size > 4)
+
+          val df = read(path, s"ST_Intersects(geom, $area)")
+          val filter = pushed(df).get
+          val kept = GeoParquetRowGroupFilter.select(groups, filter)
+          assert(kept.nonEmpty && kept.size < groups.size / 2)
+          val (ids, rows) = run(df)
+          // Between the X of 50 and 60 are the ids 1000 to 1200
+          assert(ids == (1000L to 1200L))
+          assert(rows == kept.map(_.getRowCount).sum)
+          assert(ids == expected(path, s"ST_Intersects(geom, $area)"))
+
+          // The bounding box of the file has the geometry of this query, and no row group has
+          assert(scanned(path, s"ST_Intersects(geom, $aside)") == 0)
+          val all = "ST_GeomFromWKT('POLYGON ((-10 -10, 170 -10, 170 80, -10 80, -10 -10))')"
+          assert(scanned(path, s"ST_Intersects(geom, $all)") == ROWS)
+        }
+      }
+
+      it("prunes for every predicate between a geometry column and a geometry") {
+        withDirectory { directory =>
+          val points = new File(directory, "points").getPath
+          write(planar, points)
+          Seq(
+            s"ST_Intersects(geom, $area)",
+            s"ST_Intersects($area, geom)",
+            s"ST_Within(geom, $area)",
+            s"ST_Contains($area, geom)",
+            s"ST_CoveredBy(geom, $area)",
+            s"ST_Covers($area, geom)",
+            "ST_Equals(geom, ST_Point(55, 27.5))",
+            "ST_DWithin(geom, ST_Point(55, 27.5), 3.0)",
+            "ST_Distance(geom, ST_Point(55, 27.5)) <= 3.0",
+            "ST_Distance(ST_Point(55, 27.5), geom) < 3.0").foreach { condition =>
+            val rows = scanned(points, condition)
+            assert(rows > 0 && rows < ROWS / 2, condition)
+            assert(expected(points, condition).nonEmpty, condition)
+          }
+
+          // The predicates that a row keeps only if its geometry has all of the geometry of
+          // the query: a row group is read when its box has all of it
+          val polygons = new File(directory, "polygons").getPath
+          write(squares, polygons)
+          val inner = "ST_GeomFromWKT('POLYGON ((54.8 27, 55.2 27, 55.2 28, 54.8 28, 54.8 27))')"
+          Seq(
+            s"ST_Contains(geom, $inner)",
+            s"ST_Covers(geom, $inner)",
+            s"ST_Within($inner, geom)",
+            s"ST_CoveredBy($inner, geom)").foreach { condition =>
+            val rows = scanned(polygons, condition)
+            assert(rows > 0 && rows < ROWS / 2, condition)
+            assert(expected(polygons, condition).nonEmpty, condition)
+          }
+          val crossing = "ST_Crosses(ST_GeomFromWKT('LINESTRING (50 20, 60 35)'), geom)"
+          val crossed = scanned(polygons, crossing)
+          assert(crossed > 0 && crossed < ROWS / 2)
+          assert(expected(polygons, crossing).nonEmpty)
+          // No square has all of the area, and the box of no row group has
+          assert(scanned(polygons, s"ST_Contains(geom, $area)") == 0)
+        }
+      }
+
+      it("reads every row group of a file without the statistics of a geometry column") {
+        withDirectory { directory =>
+          // A GeoParquet 1.1 file, whose geometry column is a binary column
+          val old = new File(directory, "old").getPath
+          write(planar, old, "geoparquet.version" -> "1.1.0")
+          assert(scanned(old, s"ST_Intersects(geom, $area)") == ROWS)
+
+          val plain = new File(directory, "plain").getPath
+          write(planar, plain, "parquet.column.statistics.enabled" -> "false")
+          assert(scanned(plain, s"ST_Intersects(geom, $area)") == ROWS)
+        }
+      }
+
+      it("reads the row groups of nulls and of empty geometries as the scan needs them") {
+        withDirectory { directory =>
+          val path = new File(directory, "data").getPath
+          write(
+            sparkSession.sql(s"""SELECT id, CASE
+                |  WHEN id < 1000 THEN NULL
+                |  WHEN id < 2000 THEN ST_GeomFromWKT('POINT EMPTY')
+                |  ELSE ST_Point(id * 0.05, id * 0.025) END AS geom
+                |FROM range($ROWS)""".stripMargin),
+            path)
+          val window = "ST_GeomFromWKT('POLYGON ((120 50, 130 50, 130 70, 120 70, 120 50))')"
+          val rows = scanned(path, s"ST_Intersects(geom, $window)")
+          assert(rows < ROWS)
+          assert(expected(path, s"ST_Intersects(geom, $window)") == (2400L to 2600L))
+        }
+      }
+
+      it("prunes with a filter on a geometry column next to one on a geography column") {
+        withDirectory { directory =>
+          val path = new File(directory, "data").getPath
+          write(
+            planar.withColumn(
+              "geography",
+              expr("ST_GeogFromWKT(concat('POINT (', 150 - id * 0.05, ' 0)'), 4326)")),
+            path)
+          // The geographies between the longitudes 50 and 60 are the ids 1800 to 2000
+          val line = "ST_GeogFromWKT('LINESTRING (50 0, 60 0)', 4326)"
+          val one = scanned(path, s"ST_Intersects(geom, $area)")
+          val other = scanned(path, s"ST_DWithin(geography, $line, 1.0)")
+          assert(one > 0 && other > 0 && one < ROWS / 2 && other < ROWS / 2)
+          val either =
+            scanned(path, s"ST_Intersects(geom, $area) OR ST_DWithin(geography, $line, 1.0)")
+          assert(either > one && either > other && either < ROWS)
+          assert(
+            scanned(
+              path,
+              s"ST_Intersects(geom, $area) AND ST_DWithin(geography, $line, 1.0)") == 0)
+        }
+      }
+
+      it("keeps the rows that the predicates keep, for geometries and queries anywhere") {
+        withDirectory { directory =>
+          val random = new Random(47)
+          def text(points: Seq[(Double, Double)]): String =
+            points.map { case (x, y) => s"$x $y" }.mkString("(", ", ", ")")
+          // Points, lines and triangles, in the order of the cell of 100 units that they are in
+          val geometries = Seq
+            .fill(ROWS.toInt) {
+              val (x, y) = (random.nextDouble() * 1000, random.nextDouble() * 1000)
+              val (dx, dy) = (random.nextDouble() * 20 + 0.1, random.nextDouble() * 20 + 0.1)
+              val wkt = random.nextInt(3) match {
+                case 0 => s"POINT ${text(Seq((x, y)))}"
+                case 1 => s"LINESTRING ${text(Seq((x, y), (x + dx, y + dy)))}"
+                case _ => s"POLYGON (${text(Seq((x, y), (x + dx, y), (x, y + dy), (x, y)))})"
+              }
+              ((math.floor(x / 100), math.floor(y / 100)), wkt)
+            }
+            .sortBy(_._1)
+            .map(_._2)
+            .zipWithIndex
+            .map { case (wkt, id) => Row(id.toLong, wkt) }
+          val schema =
+            StructType(Seq(StructField("id", LongType), StructField("wkt", StringType)))
+          val path = new File(directory, "data").getPath
+          write(
+            sparkSession
+              .createDataFrame(sparkSession.sparkContext.parallelize(geometries, 1), schema)
+              .selectExpr("id", "ST_GeomFromWKT(wkt) AS geom"),
+            path)
+
+          var read = 0L
+          var matched = 0L
+          (1 to 40).foreach { _ =>
+            val (x, y) = (random.nextDouble() * 1000, random.nextDouble() * 1000)
+            val (dx, dy) = (random.nextDouble() * 60 + 1, random.nextDouble() * 60 + 1)
+            val box = "ST_GeomFromWKT('POLYGON (" +
+              text(Seq((x, y), (x + dx, y), (x + dx, y + dy), (x, y + dy), (x, y))) + ")')"
+            val point = s"ST_Point(${x + dx / 8}, ${y + dy / 8})"
+            val distance = random.nextDouble() * 50
+            val condition = random.nextInt(7) match {
+              case 0 => s"ST_Intersects(geom, $box)"
+              case 1 => s"ST_Within(geom, $box)"
+              case 2 => s"ST_Contains($box, geom)"
+              case 3 => s"ST_Contains(geom, $point)"
+              case 4 => s"ST_Covers(geom, $point)"
+              case 5 => s"ST_DWithin(geom, $point, $distance)"
+              case _ => s"ST_Distance($point, geom) < $distance"
+            }
+            read += scanned(path, condition)
+            matched += expected(path, condition).size
+          }
+          assert(matched > 0)
+          // Less than a third of the rows is read
+          assert(read < 40 * ROWS / 3)
+        }
+      }
+    }
+  }
+
+  describe("The row groups that a filter on a geometry column keeps") {
+    if (ParquetGeospatialTypes.supported) {
+      it("keeps a row group without a box of a plane for the column") {
+        withDirectory { directory =>
+          val path = new File(directory, "data").getPath
+          write(planar, path)
+          val groups = blocks(path)
+          val factory = new GeometryFactory()
+          def filter(column: String, predicate: SpatialPredicate, envelope: Envelope) =
+            LeafFilter(column, predicate, factory.toGeometry(envelope))
+          val nowhere =
+            filter("geom", SpatialPredicate.INTERSECTS, new Envelope(100, 110, 10, 20))
+          assert(GeoParquetRowGroupFilter.select(groups, nowhere).isEmpty)
+          val somewhere =
+            filter("geom", SpatialPredicate.INTERSECTS, new Envelope(50, 60, 20, 35))
+          val some = GeoParquetRowGroupFilter.select(groups, somewhere)
+          assert(some.nonEmpty && some.size < groups.size / 2)
+          // No row group has all of the query
+          val whole = filter("geom", SpatialPredicate.COVERS, new Envelope(50, 60, 20, 35))
+          assert(GeoParquetRowGroupFilter.select(groups, whole).isEmpty)
+          val missing =
+            filter("other", SpatialPredicate.INTERSECTS, new Envelope(100, 110, 10, 20))
+          assert(GeoParquetRowGroupFilter.select(groups, missing) == groups)
+
+          // The box of a geography column is one on the sphere
+          val sphere = new File(directory, "sphere").getPath
+          write(diagonal.withColumnRenamed("geography", "geom"), sphere)
+          assert(GeoParquetRowGroupFilter.select(blocks(sphere), nowhere).size == groups.size)
+        }
+      }
+
+      it("keeps a row group that has no box for the column, and asks the box of one that has") {
+        def boxes(box: Option[Envelope]) = new RowGroupBoxes {
+          override def geography(column: String): Option[Array[Double]] = None
+          override def geometry(column: String): Option[Envelope] = box
+        }
+        val filter = LeafFilter(
+          "geom",
+          SpatialPredicate.INTERSECTS,
+          new GeometryFactory().toGeometry(new Envelope(0, 1, 0, 1)))
+        assert(filter.evaluateRowGroup(boxes(None)))
+        assert(filter.evaluateRowGroup(boxes(Some(new Envelope(0.5, 2, 0.5, 2)))))
+        assert(!filter.evaluateRowGroup(boxes(Some(new Envelope(5, 6, 5, 6)))))
       }
     }
   }

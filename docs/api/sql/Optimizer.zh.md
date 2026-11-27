@@ -396,6 +396,8 @@ Sedona 支持对 GeoParquet 文件进行空间谓词下推。当对由 GeoParque
 来判断该文件中的全部数据是否会被该空间谓词过滤掉。当 GeoParquet 数据集按空间临近性进行分区时，
 这种优化可以减少需要扫描的文件数量。
 
+在 GeoParquet 2.0 文件内部，Sedona 还会跳过行组。Sedona 读取行组的地理空间统计信息中该几何列的边界框，并用对文件 `bbox` 所做的同一判断来跳过行组。因此，几何对象按空间临近性排序的文件只会被部分读取，即使它是数据集中唯一的文件。这适用于 Spark 4.1 及以上版本。GeoParquet 1.1 文件没有这种统计信息，未被跳过的文件的所有行组都会被读取。Sedona 会为 GeoParquet 2.0 文件写出这些统计信息，参见[写出 GeoParquet 2.0](../../tutorial/files/geoparquet-sedona-spark.md)。
+
 为了最大化 Sedona 对 GeoParquet 的过滤下推性能，建议按几何对象的 geohash 值（参见 [ST_GeoHash](Geometry-Output/ST_GeoHash.md)）对数据排序后再保存为 GeoParquet 文件。示例如下：
 
 ```

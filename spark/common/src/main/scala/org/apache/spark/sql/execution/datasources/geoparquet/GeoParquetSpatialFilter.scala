@@ -55,13 +55,10 @@ trait GeoParquetSpatialFilter {
    * Whether a row group may have a row that this filter keeps. A filter that reads nothing of a
    * row group keeps it.
    *
-   * @param geographyBox
-   *   the bounding box that the geospatial statistics of the row group have for a GEOGRAPHY
-   *   column with spherical edges: its western, eastern, southern and northern bound in degrees,
-   *   with the western bound above the eastern bound across the antimeridian. None for a column
-   *   without such a box.
+   * @param boxes
+   *   the bounding boxes that the geospatial statistics of the row group have
    */
-  def evaluateRowGroup(geographyBox: String => Option[Array[Double]]): Boolean = true
+  def evaluateRowGroup(boxes: GeoParquetSpatialFilter.RowGroupBoxes): Boolean = true
 
   /** Whether [[evaluateRowGroup]] reads the statistics of a row group at all. */
   def usesRowGroupStatistics: Boolean = false
@@ -85,8 +82,8 @@ object GeoParquetSpatialFilter {
         case _ => None
       }
 
-    override def evaluateRowGroup(geographyBox: String => Option[Array[Double]]): Boolean =
-      left.evaluateRowGroup(geographyBox) && right.evaluateRowGroup(geographyBox)
+    override def evaluateRowGroup(boxes: RowGroupBoxes): Boolean =
+      left.evaluateRowGroup(boxes) && right.evaluateRowGroup(boxes)
 
     override def usesRowGroupStatistics: Boolean =
       left.usesRowGroupStatistics || right.usesRowGroupStatistics
@@ -106,8 +103,8 @@ object GeoParquetSpatialFilter {
         r <- right.toParquetFilter
       } yield FilterApi.or(l, r)
 
-    override def evaluateRowGroup(geographyBox: String => Option[Array[Double]]): Boolean =
-      left.evaluateRowGroup(geographyBox) || right.evaluateRowGroup(geographyBox)
+    override def evaluateRowGroup(boxes: RowGroupBoxes): Boolean =
+      left.evaluateRowGroup(boxes) || right.evaluateRowGroup(boxes)
 
     override def usesRowGroupStatistics: Boolean =
       left.usesRowGroupStatistics || right.usesRowGroupStatistics
@@ -116,8 +113,26 @@ object GeoParquetSpatialFilter {
   }
 
   /**
+   * The bounding boxes that the geospatial statistics of a row group have for the columns of a
+   * filter.
+   */
+  trait RowGroupBoxes {
+
+    /**
+     * The box of a GEOGRAPHY column with spherical edges: its western, eastern, southern and
+     * northern bound in degrees, with the western bound above the eastern bound across the
+     * antimeridian. None for a column without such a box.
+     */
+    def geography(column: String): Option[Array[Double]]
+
+    /** The box of a GEOMETRY column, in X and Y. None for a column without such a box. */
+    def geometry(column: String): Option[Envelope]
+  }
+
+  /**
    * Spatial predicate pushed down to GeoParquet data source. We'll use the bbox in column
-   * metadata to prune unrelated files.
+   * metadata to prune unrelated files, and the bounding boxes in the geospatial statistics of a
+   * GeoParquet 2 file to prune unrelated row groups.
    *
    * @param columnName
    *   name of filtered geometry column
@@ -150,19 +165,29 @@ object GeoParquetSpatialFilter {
           return true
         }
 
-        val columnEnvelope =
-          queryWindow.getFactory.toGeometry(new Envelope(xmin, xmax, ymin, ymax))
-        predicateType match {
-          case SpatialPredicate.COVERS => columnEnvelope.covers(queryWindow)
-          case SpatialPredicate.INTERSECTS =>
-            // XXX: We must call the intersects method of queryWindow instead of columnEnvelope, since queryWindow
-            // may be a Circle object and geom.intersects(circle) may not work correctly.
-            queryWindow.intersects(columnEnvelope)
-          case _ =>
-            throw new IllegalArgumentException(s"Unexpected predicate type: $predicateType")
-        }
+        keeps(new Envelope(xmin, xmax, ymin, ymax))
       }
     }
+
+    override def evaluateRowGroup(boxes: RowGroupBoxes): Boolean =
+      boxes.geometry(columnName).forall(keeps)
+
+    override def usesRowGroupStatistics: Boolean = true
+
+    /** Whether a file or a row group with the bounding box `envelope` may have a row to keep. */
+    private def keeps(envelope: Envelope): Boolean = {
+      val columnEnvelope = queryWindow.getFactory.toGeometry(envelope)
+      predicateType match {
+        case SpatialPredicate.COVERS => columnEnvelope.covers(queryWindow)
+        case SpatialPredicate.INTERSECTS =>
+          // XXX: We must call the intersects method of queryWindow instead of columnEnvelope, since queryWindow
+          // may be a Circle object and geom.intersects(circle) may not work correctly.
+          queryWindow.intersects(columnEnvelope)
+        case _ =>
+          throw new IllegalArgumentException(s"Unexpected predicate type: $predicateType")
+      }
+    }
+
     override def simpleString: String = s"$columnName ${predicateType.name} $queryWindow"
   }
 
@@ -191,9 +216,10 @@ object GeoParquetSpatialFilter {
       extends GeoParquetSpatialFilter {
     override def evaluate(columns: Map[String, GeometryFieldMetaData]): Boolean = true
 
-    override def evaluateRowGroup(geographyBox: String => Option[Array[Double]]): Boolean =
-      geographyBox(columnName).forall(
-        GeographyBounds.intersects(_, Array(west, east, south, north)))
+    override def evaluateRowGroup(boxes: RowGroupBoxes): Boolean =
+      boxes
+        .geography(columnName)
+        .forall(GeographyBounds.intersects(_, Array(west, east, south, north)))
 
     override def usesRowGroupStatistics: Boolean = true
 

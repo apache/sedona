@@ -414,6 +414,8 @@ Sedona supports spatial predicate push-down for GeoParquet files. When spatial f
 to determine if all data in the file will be discarded by the spatial predicate. This optimization could reduce the number of files scanned
 when the queried GeoParquet dataset was partitioned by spatial proximity.
 
+Within a GeoParquet 2.0 file, Sedona also skips row groups. It reads the bounding box that the geospatial statistics of a row group have for the geometry column, and skips the row group by the test that it applies to the `bbox` of a file. A file of geometries that are sorted by spatial proximity is therefore read in part, also when it is the only file of the dataset. This applies on Spark 4.1 and later. A GeoParquet 1.1 file has no such statistics, and all row groups of a file that is not skipped are read. Sedona writes the statistics for GeoParquet 2.0 files, see [Write GeoParquet 2.0](../../tutorial/files/geoparquet-sedona-spark.md#write-geoparquet-20).
+
 To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see [ST_GeoHash](Geometry-Output/ST_GeoHash.md)) and then save as a GeoParquet file. An example is as follows:
 
 ```

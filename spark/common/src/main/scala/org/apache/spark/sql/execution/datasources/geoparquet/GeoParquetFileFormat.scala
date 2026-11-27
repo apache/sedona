@@ -350,7 +350,7 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
                 requiredSchema
                   .find(_.name == name)
                   .flatMap(
-                    GeoParquetRowGroupFilter.geographyColumn(_, footerFileMetaData, sharedConf)))
+                    GeoParquetRowGroupFilter.fileColumn(_, footerFileMetaData, sharedConf)))
         }
         else rowGroups
       if (!shouldScanFile || (rowGroups.nonEmpty && keptRowGroups.isEmpty)) {
