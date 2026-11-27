@@ -868,4 +868,75 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     assertEquals(2, RasterBandAccessors.getCount(raster, 1, true));
     assertEquals(4, RasterBandAccessors.getCount(raster, 1, false));
   }
+
+  // 10x10 raster over [0,10] x [0,10]; the pixel at row r, column c holds r * 10 + c + 1.
+  private static GridCoverage2D rowMajorRaster() throws FactoryException {
+    double[] values = new double[100];
+    for (int i = 0; i < values.length; i++) {
+      values[i] = i + 1;
+    }
+    return RasterConstructors.makeNonEmptyRaster(
+        1, "d", 10, 10, 0, 10, 1, -1, 0, 0, 0, new double[][] {values});
+  }
+
+  private static void assertZonalWindow(
+      Double[] stats,
+      double count,
+      double sum,
+      double mean,
+      double median,
+      double min,
+      double max) {
+    assertEquals(count, stats[0].doubleValue(), 0d);
+    assertEquals(sum, stats[1].doubleValue(), FP_TOLERANCE);
+    assertEquals(mean, stats[2].doubleValue(), FP_TOLERANCE);
+    assertEquals(median, stats[3].doubleValue(), FP_TOLERANCE);
+    assertEquals(min, stats[7].doubleValue(), 0d);
+    assertEquals(max, stats[8].doubleValue(), 0d);
+  }
+
+  @Test
+  public void testZonalStatsSmallPolygonOnLargerRaster() throws Exception {
+    GridCoverage2D raster = rowMajorRaster();
+    // covers rows 2-4 and columns 2-4: values 23-25, 33-35, 43-45
+    Geometry geom = Constructors.geomFromWKT("POLYGON ((2 8, 5 8, 5 5, 2 5, 2 8))", 0);
+    // the same result for a top-down and a bottom-up raster, with and without allTouched
+    for (GridCoverage2D r : new GridCoverage2D[] {raster, flipVerticallyPixelSpace(raster)}) {
+      for (boolean allTouched : new boolean[] {false, true}) {
+        assertZonalWindow(
+            RasterBandAccessors.getZonalStatsAll(r, geom, 1, allTouched), 9, 306, 34, 34, 23, 45);
+      }
+    }
+  }
+
+  @Test
+  public void testZonalStatsPolygonPartlyOutsideRaster() throws Exception {
+    GridCoverage2D raster = rowMajorRaster();
+    // only x in [8, 10] is inside the raster: columns 8-9, rows 2-4 (29, 30, 39, 40, 49, 50)
+    Geometry geom = Constructors.geomFromWKT("POLYGON ((8 8, 13 8, 13 5, 8 5, 8 8))", 0);
+    for (GridCoverage2D r : new GridCoverage2D[] {raster, flipVerticallyPixelSpace(raster)}) {
+      assertZonalWindow(
+          RasterBandAccessors.getZonalStatsAll(r, geom, 1, false), 6, 237, 39.5, 39.5, 29, 50);
+    }
+  }
+
+  @Test
+  public void testZonalStatsNoDataInsideClippedWindow() throws Exception {
+    // the centre pixel of the 3x3 block (34) is nodata
+    GridCoverage2D raster = RasterBandEditors.setBandNoDataValue(rowMajorRaster(), 1, 34d);
+    Geometry geom = Constructors.geomFromWKT("POLYGON ((2 8, 5 8, 5 5, 2 5, 2 8))", 0);
+    assertZonalWindow(
+        RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false, true), 8, 272, 34, 34, 23, 45);
+    assertEquals(9d, RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false, false)[0], 0d);
+  }
+
+  @Test
+  public void testZonalStatsPolygonOnlyTouchingRasterBoundary() throws Exception {
+    GridCoverage2D raster = rowMajorRaster();
+    // shares only the raster's right edge, so it covers no pixel
+    Geometry geom = Constructors.geomFromWKT("POLYGON ((10 8, 12 8, 12 5, 10 5, 10 8))", 0);
+    for (boolean allTouched : new boolean[] {false, true}) {
+      assertEquals(0d, RasterBandAccessors.getZonalStatsAll(raster, geom, 1, allTouched)[0], 0d);
+    }
+  }
 }
