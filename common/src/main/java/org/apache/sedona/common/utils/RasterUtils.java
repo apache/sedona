@@ -21,6 +21,7 @@ package org.apache.sedona.common.utils;
 import com.sun.media.imageioimpl.common.BogusColorSpace;
 import java.awt.Color;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 import java.awt.geom.Point2D;
@@ -584,6 +585,27 @@ public class RasterUtils {
       return ((BufferedImage) renderedImage).getRaster();
     } else {
       return renderedImage.getData();
+    }
+  }
+
+  /**
+   * The pixels of a region of an image, for a caller that reads a part of it. An image that does
+   * not hold its pixels in memory is asked for the region only, so that its other tiles are not
+   * read.
+   *
+   * @param renderedImage the image
+   * @param region the region to read, in the image's pixel coordinates
+   * @return a raster that holds at least the region, at the image's pixel coordinates
+   */
+  public static Raster getRaster(RenderedImage renderedImage, Rectangle region) {
+    while (renderedImage instanceof RenderedImageAdapter) {
+      renderedImage = ((RenderedImageAdapter) renderedImage).getWrappedImage();
+    }
+    if (renderedImage instanceof BufferedImage) {
+      // The raster of a BufferedImage is not copied.
+      return ((BufferedImage) renderedImage).getRaster();
+    } else {
+      return renderedImage.getData(region);
     }
   }
 

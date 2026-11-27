@@ -21,6 +21,7 @@ package org.apache.sedona.common.raster;
 import static org.apache.sedona.common.utils.RasterUtils.getRasterScaleY;
 import static org.apache.sedona.common.utils.RasterUtils.getRasterUpperLeftY;
 
+import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -62,6 +63,127 @@ public class Rasterization {
       boolean allTouched,
       Double backgroundValue)
       throws FactoryException {
+    RasterizationParams params =
+        burn(
+            geom,
+            raster,
+            pixelType,
+            value,
+            useGeometryExtent ? Extent.GEOMETRY : Extent.RASTER,
+            allTouched,
+            backgroundValue);
+    if (params == null) {
+      return null;
+    }
+
+    // Create a GridCoverage2D for the rasterized result, on the reference raster's grid. The rows
+    // of a bottom-up raster were written in its own order, so the grid needs no flipping.
+    GridCoverage2D rasterized =
+        RasterUtils.create(
+            params.writableRaster,
+            outputGridGeometry(raster, params.grid, params, useGeometryExtent),
+            null,
+            null);
+
+    // Return results compatible with the original function
+    List<Object> objects = new ArrayList<>();
+    objects.add(params.writableRaster);
+    objects.add(rasterized);
+
+    return objects;
+  }
+
+  /**
+   * The pixels of a raster that a geometry selects, as a mask over the window of the raster that
+   * holds them.
+   *
+   * <p>This is for a function that reads the raster's pixels under a geometry. The mask is as large
+   * as the geometry, not as the raster, and it comes with its place in the raster in whole pixels.
+   * The place of a raster cropped to the geometry would have to be found again from its
+   * georeference, which is a rounded number for a grid line that is not a double.
+   *
+   * <p>The pixels are those the geometry burns on an output at the raster's full extent, see {@link
+   * Extent#WINDOW}.
+   */
+  static final class Selection {
+    /**
+     * One sample per pixel of the window, non-zero where the geometry selects the pixel. Rows are
+     * in the raster's own pixel order, and the first sample is at (0, 0).
+     */
+    final Raster mask;
+
+    /** The column of the window's first pixel, counted from the raster's first pixel. */
+    final int x;
+
+    /** The row of the window's first pixel, counted from the raster's first pixel in its order. */
+    final int y;
+
+    private Selection(Raster mask, int x, int y) {
+      this.mask = mask;
+      this.x = x;
+      this.y = y;
+    }
+  }
+
+  /**
+   * Selects the pixels of a raster under a geometry: the pixels that {@link #rasterize} burns.
+   *
+   * @param geom the geometry, in any CRS
+   * @param raster the raster
+   * @param allTouched whether to select every pixel the geometry touches
+   * @return the selection, or null when the geometry selects no pixel and overlaps none
+   * @throws IllegalArgumentException if the geometry does not intersect the raster
+   */
+  static Selection select(Geometry geom, GridCoverage2D raster, boolean allTouched)
+      throws FactoryException {
+    RasterizationParams params = burn(geom, raster, "B", 1, Extent.WINDOW, allTouched, null);
+    if (params == null) {
+      return null;
+    }
+    int height = params.writableRaster.getHeight();
+    // Row offsets count from the raster's geographic top, and the rows of the mask are in the
+    // raster's own order, as in outputGridGeometry.
+    int firstRow =
+        params.bottomUp ? params.rasterHeight - params.rowOffset - height : params.rowOffset;
+    return new Selection(params.writableRaster, params.colOffset, firstRow);
+  }
+
+  /** What the band a geometry is burned into covers. */
+  private enum Extent {
+    /** The reference raster. */
+    RASTER,
+
+    /**
+     * The geometry's window, for an output raster of its own: the band starts on grid lines that a
+     * stored raster can start on, see {@link #startOnStorableLines}.
+     */
+    GEOMETRY,
+
+    /**
+     * The geometry's window as it is, for a mask that is placed in the reference raster by whole
+     * pixels. The polygon fill is computed as for {@link #RASTER}, so the mask holds the pixels
+     * that an output at full extent holds, see {@link RasterizationParams#fillInRasterFrame}.
+     */
+    WINDOW
+  }
+
+  /**
+   * Burns a geometry into a new band on the grid of a raster.
+   *
+   * @param extent what the band covers
+   * @return the band and its place in the raster, or null when the band would cover the geometry's
+   *     window and the geometry neither burns nor overlaps any pixel
+   */
+  private static RasterizationParams burn(
+      Geometry geom,
+      GridCoverage2D raster,
+      String pixelType,
+      double value,
+      Extent extent,
+      boolean allTouched,
+      Double backgroundValue)
+      throws FactoryException {
+    boolean useGeometryExtent = extent != Extent.RASTER;
 
     // Validate the input geometry and raster metadata
     double[] rasterMetadata = RasterAccessors.metadata(raster);
@@ -86,10 +208,17 @@ public class Rasterization {
     }
 
     // The geometry is burned within its window. The output can start a cell before it.
-    ReferencedEnvelope outputExtent =
-        useGeometryExtent ? startOnStorableLines(geomExtent, grid) : geomExtent;
+    ReferencedEnvelope outputExtent = geomExtent;
+    if (extent == Extent.GEOMETRY) {
+      outputExtent = startOnStorableLines(geomExtent, grid);
+    } else if (extent == Extent.WINDOW) {
+      outputExtent = withColumnAfter(geomExtent, grid);
+    }
     RasterizationParams params =
         calculateRasterizationParams(raster, useGeometryExtent, grid, outputExtent, pixelType);
+    if (extent == Extent.WINDOW) {
+      params.fillInRasterFrame();
+    }
 
     fillBackground(params.writableRaster, backgroundValue);
 
@@ -103,22 +232,7 @@ public class Rasterization {
       // pixel without covering its centre keeps its cropped, unburned output.
       return null;
     }
-
-    // Create a GridCoverage2D for the rasterized result, on the reference raster's grid. The rows
-    // of a bottom-up raster were written in its own order, so the grid needs no flipping.
-    GridCoverage2D rasterized =
-        RasterUtils.create(
-            params.writableRaster,
-            outputGridGeometry(raster, grid, params, useGeometryExtent),
-            null,
-            null);
-
-    // Return results compatible with the original function
-    List<Object> objects = new ArrayList<>();
-    objects.add(params.writableRaster);
-    objects.add(rasterized);
-
-    return objects;
+    return params;
   }
 
   /**
@@ -376,6 +490,28 @@ public class Rasterization {
   }
 
   /**
+   * Widens a window by the column after it, where the raster has one.
+   *
+   * <p>The polygon fill burns an unpaired x-intercept of a scanline as a single pixel, see {@link
+   * #fillPolygon}. For a vertical edge on the window's last column line that pixel is in the column
+   * after the window, outside the polygon. An output at full extent holds it, and a mask that has
+   * to select the pixels of the full extent needs room for it.
+   */
+  private static ReferencedEnvelope withColumnAfter(ReferencedEnvelope window, ReferenceGrid grid) {
+    double[] metadata = grid.metadata;
+    long lastLine = Math.round((window.getMaxX() - metadata[0]) / metadata[4]);
+    if (lastLine >= (long) metadata[2]) {
+      return window;
+    }
+    return new ReferencedEnvelope(
+        window.getMinX(),
+        toWorldCoordinate(lastLine + 1, metadata[4], metadata[0]),
+        window.getMinY(),
+        window.getMaxY(),
+        window.getCoordinateReferenceSystem());
+  }
+
+  /**
    * The last grid line at or before the given one, in pixel order, that a stored raster can start
    * on. A line that is not a double is left as it is: the raster's corner is not a short decimal
    * then, and no line of its grid is one. Line 0 is the raster's own origin.
@@ -490,10 +626,8 @@ public class Rasterization {
     // Where the output grid sits within the reference raster's grid: zero unless the output was
     // cropped to the geometry extent. The cell is resolved on the reference grid and only the
     // write index is crop-local, so a cropped output burns the same cell as a full-extent one.
-    int colOffset = (int) Math.round((params.upperLeftX - params.rasterUpperLeftX) / params.scaleX);
-    int rowOffset = (int) Math.round((params.upperLeftY - params.rasterUpperLeftY) / params.scaleY);
-    int col = cell[0] - colOffset;
-    int row = cell[1] - rowOffset;
+    int col = cell[0] - params.colOffset;
+    int row = cell[1] - params.rowOffset;
 
     int width = params.writableRaster.getWidth();
     int height = params.writableRaster.getHeight();
@@ -922,7 +1056,53 @@ public class Rasterization {
     // Whether any cell has been burned; a cropped output with nothing burned may have nothing in
     // it.
     boolean anyBurned;
+    // The grid of the reference raster that cells are located on.
+    final ReferenceGrid grid;
+    // The frame the polygon fill computes its scanlines in: its origin is (upperLeftX,
+    // upperLeftY), this is its size in pixels, and the band starts at this column and row of it,
+    // the row counted from the frame's geographic top. The frame is the band itself unless
+    // fillInRasterFrame has been called.
+    int frameWidth;
+    int frameHeight;
+    int frameCol;
+    int frameRow;
     private GridLineWalker lineWalker;
+
+    /**
+     * Makes the polygon fill compute in the frame of the whole reference raster, as it does for an
+     * output at full extent, while the band stays the geometry's window.
+     *
+     * <p>The fill selects a pixel when its centre is between two x-intercepts of the polygon's
+     * edges, and it computes an intercept in floating point from the origin of its frame. When a
+     * pixel centre lies exactly on an edge, the intercept comes out a rounding error to one side or
+     * the other, and which side depends on that origin. So the fill of one polygon can differ by
+     * such a pixel between a band cropped to the geometry and a band at full extent. A mask that
+     * has to select the pixels of the full extent is filled in its frame.
+     */
+    void fillInRasterFrame() {
+      upperLeftX = rasterUpperLeftX;
+      upperLeftY = rasterUpperLeftY;
+      frameWidth = rasterWidth;
+      frameHeight = rasterHeight;
+      frameCol = colOffset;
+      frameRow = rowOffset;
+    }
+
+    /**
+     * Burns an inclusive span of a row of the fill's frame, as far as the band holds it. The row is
+     * counted from the frame's geographic top.
+     */
+    void burnFrameSpan(int xStart, int xEnd, int rowFromTop, double value) {
+      int height = writableRaster.getHeight();
+      int row = rowFromTop - frameRow;
+      if (row < 0 || row >= height) {
+        return;
+      }
+      int first = Math.max(xStart - frameCol, 0);
+      int last = Math.min(xEnd - frameCol, writableRaster.getWidth() - 1);
+      // Rows are written in the raster's own order; reverse them for bottom-up rasters.
+      burnSpan(first, last, bottomUp ? height - 1 - row : row, value);
+    }
 
     /** The walker for line segments over the reference raster's grid. */
     GridLineWalker lineWalker() {
@@ -1004,6 +1184,9 @@ public class Rasterization {
       this.rasterUpperLeftX = rasterUpperLeftX;
       this.rasterUpperLeftY = rasterUpperLeftY;
       this.bottomUp = bottomUp;
+      this.grid = grid;
+      this.frameWidth = writableRaster.getWidth();
+      this.frameHeight = writableRaster.getHeight();
     }
   }
 
@@ -1170,7 +1353,7 @@ public class Rasterization {
 
         // Contain y range within geomExtent; Use centroid y line as scan line
         yEnd = Math.max(0.5, Math.abs(yEnd) + 0.5);
-        yStart = Math.min((params.writableRaster.getHeight() - 0.5), Math.abs(yStart) - 0.5);
+        yStart = Math.min((params.frameHeight - 0.5), Math.abs(yStart) - 0.5);
 
         double p1X = (worldP1.x - params.upperLeftX) / params.scaleX;
         double p1Y = (worldP1.y - params.upperLeftY) / params.scaleY;
@@ -1334,15 +1517,9 @@ public class Rasterization {
       Map<Integer, List<int[]>> scanlineFillRanges, RasterizationParams params, double value) {
 
     for (Map.Entry<Integer, List<int[]>> entry : scanlineFillRanges.entrySet()) {
+      // The scanline's row in the fill's frame, counted from its geographic top.
       int y = entry.getKey();
-
-      // Adjust for bottom-up rasters
-      // Reverse the y index
-      if (params.bottomUp) {
-        y = params.writableRaster.getHeight() - 1 - y;
-      }
-
-      int width = params.writableRaster.getWidth();
+      int width = params.frameWidth;
 
       for (int[] range : entry.getValue()) {
         if (range.length == 1) {
@@ -1352,14 +1529,14 @@ public class Rasterization {
           // edge pixel: unlike the point path there is no per-cell intersection test here, so
           // folding would burn a pixel the polygon does not reach.
           if (range[0] >= 0 && range[0] < width) {
-            params.burn(range[0], y, value);
+            params.burnFrameSpan(range[0], range[0], y, value);
           }
           continue;
         }
         int xStart = clampToGrid(range[0], width);
         int xEnd = clampToGrid(range[1], width);
 
-        params.burnSpan(xStart, xEnd, y, value);
+        params.burnFrameSpan(xStart, xEnd, y, value);
       }
     }
   }
