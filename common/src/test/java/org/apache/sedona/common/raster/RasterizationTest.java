@@ -1479,7 +1479,7 @@ public class RasterizationTest extends RasterTestBase {
    * which gives a raster with pixels of its own, or to an envelope, which gives a view of the
    * source image. Either way the grid range of the result starts at (2, 2).
    */
-  private static GridCoverage2D geotoolsCrop(GridCoverage2D whole, boolean byEnvelope)
+  static GridCoverage2D geotoolsCrop(GridCoverage2D whole, boolean byEnvelope)
       throws FactoryException {
     double[] grid = RasterAccessors.metadata(whole);
     // A quarter of a pixel inside the cells to keep. GeoTools rounds the region out to whole cells.

@@ -391,38 +391,33 @@ public class RasterBandAccessors {
     }
 
     Raster rasterData = RasterUtils.getRaster(raster.getRenderedImage());
-    String datatype = RasterBandAccessors.getBandType(raster, band);
     Double noDataValue = RasterBandAccessors.getBandNoDataValue(raster, band);
-    // Adding an arbitrary value '150' for the pixels that are under the geometry.
-    GridCoverage2D rasterizedGeom =
-        RasterConstructors.asRasterWithRasterExtent(roi, raster, datatype, allTouched, 150, null);
-    Raster rasterizedData = RasterUtils.getRaster(rasterizedGeom.getRenderedImage());
-    int width = RasterAccessors.getWidth(rasterizedGeom),
-        height = RasterAccessors.getHeight(rasterizedGeom);
-    // The mask has the raster's size, and its first pixel is the raster's first pixel. Each of the
-    // two is read from its own first pixel: the image of a raster whose grid range does not start
-    // at zero, such as a GeoTools crop, does not start at (0, 0) either.
-    double[] rasterizedPixelData =
-        rasterizedData.getSamples(
-            rasterizedData.getMinX(), rasterizedData.getMinY(), width, height, 0, (double[]) null);
-    double[] rasterPixelData =
-        rasterData.getSamples(
-            rasterData.getMinX(), rasterData.getMinY(), width, height, band - 1, (double[]) null);
-
+    // Only the window of the raster that holds the geometry is masked and gone through.
+    Rasterization.Selection selection = Rasterization.select(roi, raster, allTouched);
     List<Double> pixelData = new ArrayList<>();
+    if (selection != null) {
+      int width = selection.mask.getWidth(), height = selection.mask.getHeight();
+      double[] rasterizedPixelData =
+          selection.mask.getSamples(0, 0, width, height, 0, (double[]) null);
+      // The window is placed from the raster's first pixel: the image of a raster whose grid range
+      // does not start at zero, such as a GeoTools crop, does not start at (0, 0) either.
+      double[] rasterPixelData =
+          rasterData.getSamples(
+              rasterData.getMinX() + selection.x,
+              rasterData.getMinY() + selection.y,
+              width,
+              height,
+              band - 1,
+              (double[]) null);
 
-    for (int k = 0; k < rasterPixelData.length; k++) {
-
-      // Pixels with a value of 0 in the rasterizedPixelData are skipped during computation,
-      // as they fall outside the geometry specified by 'roi'.
-      // The region of interest defined by 'roi' contains pixel values of 150,
-      // as initialized when constructing the raster via
-      // RasterConstructors.asRasterWithRasterExtent.
-      if (rasterizedPixelData[k] == 0
-          || (excludeNoData && RasterUtils.isNoData(rasterPixelData[k], noDataValue))) {
-        continue;
-      } else {
-        pixelData.add(rasterPixelData[k]);
+      for (int k = 0; k < rasterPixelData.length; k++) {
+        // Pixels with a value of 0 in the mask fall outside the geometry specified by 'roi'.
+        if (rasterizedPixelData[k] == 0
+            || (excludeNoData && RasterUtils.isNoData(rasterPixelData[k], noDataValue))) {
+          continue;
+        } else {
+          pixelData.add(rasterPixelData[k]);
+        }
       }
     }
 

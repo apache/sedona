@@ -21,13 +21,39 @@ package org.apache.sedona.common.raster;
 import static org.apache.sedona.common.utils.RasterUtils.flipVerticallyPixelSpace;
 import static org.junit.Assert.*;
 
+import com.sun.media.imageioimpl.common.BogusColorSpace;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Transparency;
+import java.awt.image.BandedSampleModel;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.WritableRaster;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.sedona.common.Constructors;
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.datum.PixelInCell;
+import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.GridEnvelope2D;
+import org.geotools.coverage.grid.GridGeometry2D;
+import org.geotools.referencing.crs.DefaultEngineeringCRS;
+import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
 
 public class RasterBandAccessorsTest extends RasterTestBase {
@@ -867,5 +893,338 @@ public class RasterBandAccessorsTest extends RasterTestBase {
             0.0);
     assertEquals(2, RasterBandAccessors.getCount(raster, 1, true));
     assertEquals(4, RasterBandAccessors.getCount(raster, 1, false));
+  }
+
+  @Test
+  public void testZonalStatsTakeOnlyTheWindowOfTheGeometry() throws Exception {
+    // The polygon selects 11 columns and 9 rows of a raster of 1200 x 900 pixels. Only that window
+    // of the band has to be gone through, however large the raster is.
+    int width = 1200, height = 900;
+    RecordingRaster band = new RecordingRaster(width, height);
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        band.setSample(x, y, 0, 1 + x + 1000d * y);
+      }
+    }
+    ColorModel colorModel =
+        new ComponentColorModel(
+            new BogusColorSpace(1),
+            new int[] {Double.SIZE},
+            false,
+            true,
+            Transparency.OPAQUE,
+            DataBuffer.TYPE_DOUBLE);
+    // A north-up raster of unit pixels with its upper-left corner at (0, 0).
+    GridGeometry2D gridGeometry =
+        new GridGeometry2D(
+            new GridEnvelope2D(0, 0, width, height),
+            PixelInCell.CELL_CORNER,
+            new AffineTransform2D(1, 0, 0, -1, 0, 0),
+            DefaultEngineeringCRS.GENERIC_2D,
+            null);
+    GridCoverage2D raster =
+        RasterUtils.create(
+            new BufferedImage(colorModel, band, false, null),
+            gridGeometry,
+            new GridSampleDimension[] {new GridSampleDimension("band_0")},
+            null);
+    Geometry polygon =
+        Constructors.geomFromWKT(
+            "POLYGON ((600.2 -400.2, 610.7 -400.2, 610.7 -408.9, 600.2 -408.9, 600.2 -400.2))", 0);
+    band.reads.clear();
+
+    Double[] stats = RasterBandAccessors.getZonalStatsAll(raster, polygon, 1, false, true, false);
+
+    double sum = 0;
+    for (int y = 400; y < 409; y++) {
+      for (int x = 600; x < 611; x++) {
+        sum += 1 + x + 1000d * y;
+      }
+    }
+    assertEquals(99, stats[0], 0d);
+    assertEquals(sum, stats[1], 0d);
+    assertFalse(band.reads.isEmpty());
+    Rectangle window = new Rectangle(600, 400, 11, 9);
+    window.grow(2, 2);
+    for (Rectangle read : band.reads) {
+      assertTrue("read " + read + ", outside " + window, window.contains(read));
+    }
+  }
+
+  @Test
+  public void testZonalStatsAreThoseOfThePixelsOfTheFullExtentMask() throws Exception {
+    // Whatever window of the raster is read, the statistics are those of the pixels that
+    // RS_AsRaster burns for the geometry at the raster's full extent, taken in row order.
+    GeometryFactory factory = new GeometryFactory();
+    Random random = new Random(2409);
+    List<Object[]> rasters = new ArrayList<>();
+    for (double[] grid :
+        new double[][] {
+          {37, 29, 10.5, 80.25, 0.5, -0.25, 0},
+          {37, 29, 10.5, 73, 0.5, 0.25, 0},
+          {30, 30, -123, 48, 1.0 / 3600, -1.0 / 3600, 4326},
+          // Pixel sizes that are not binary fractions: a coordinate on a grid line of these,
+          // divided
+          // by the pixel size in floating point, can come out on either side of the line's index.
+          {40, 30, 0, 0, 0.1, -0.1, 0},
+          {40, 30, 0, 0, 0.1, 0.1, 0}
+        }) {
+      int width = (int) grid[0], height = (int) grid[1];
+      double[] cells = new double[width * height];
+      for (int i = 0; i < cells.length; i++) {
+        cells[i] = (i * 7919L) % 211;
+      }
+      GridCoverage2D raster =
+          RasterConstructors.makeNonEmptyRaster(
+              1,
+              "d",
+              width,
+              height,
+              grid[2],
+              grid[3],
+              grid[4],
+              grid[5],
+              0,
+              0,
+              (int) grid[6],
+              new double[][] {cells});
+      rasters.add(new Object[] {RasterBandEditors.setBandNoDataValue(raster, 1, 3.0), cells});
+    }
+    // A raster whose grid range and image start at (2, 2): the cells 2..7 of a 10x10 raster.
+    double[] source = new double[100];
+    for (int i = 0; i < source.length; i++) {
+      source[i] = i + 1;
+    }
+    GridCoverage2D whole =
+        RasterConstructors.makeNonEmptyRaster(
+            1, "d", 10, 10, 0, 10, 1, -1, 0, 0, 0, new double[][] {source});
+    double[] cropped = new double[36];
+    for (int row = 0; row < 6; row++) {
+      for (int col = 0; col < 6; col++) {
+        cropped[row * 6 + col] = source[(row + 2) * 10 + col + 2];
+      }
+    }
+    for (boolean byEnvelope : new boolean[] {false, true}) {
+      rasters.add(new Object[] {RasterizationTest.geotoolsCrop(whole, byEnvelope), cropped});
+    }
+
+    int compared = 0, empty = 0, outside = 0;
+    for (Object[] entry : rasters) {
+      GridCoverage2D raster = (GridCoverage2D) entry[0];
+      double[] cells = (double[]) entry[1];
+      Double noData = RasterBandAccessors.getBandNoDataValue(raster, 1);
+      Envelope extent = GeometryFunctions.convexHull(raster).getEnvelopeInternal();
+      double[] metadata = RasterAccessors.metadata(raster);
+      for (int i = 0; i < 400; i++) {
+        Geometry geom = randomGeometry(factory, random, extent, metadata[4], Math.abs(metadata[5]));
+        geom.setSRID((int) metadata[8]);
+        for (boolean allTouched : new boolean[] {false, true}) {
+          for (boolean excludeNoData : new boolean[] {false, true}) {
+            Double[] stats =
+                RasterBandAccessors.getZonalStatsAll(
+                    raster, geom, 1, allTouched, excludeNoData, true);
+            if (stats == null) {
+              assertFalse(geom.toText(), Rasterization.intersects(raster, geom));
+              outside++;
+              continue;
+            }
+            double[] mask =
+                MapAlgebra.bandAsArray(
+                    RasterConstructors.asRasterWithRasterExtent(
+                        geom, raster, "d", allTouched, 1, null),
+                    1);
+            assertEquals(cells.length, mask.length);
+            DescriptiveStatistics expected = new DescriptiveStatistics();
+            for (int k = 0; k < mask.length; k++) {
+              if (mask[k] != 0 && !(excludeNoData && noData != null && cells[k] == noData)) {
+                expected.addValue(cells[k]);
+              }
+            }
+            String label = geom.toText() + " allTouched=" + allTouched;
+            assertEquals(label, expected.getN(), stats[0], 0d);
+            if (expected.getN() == 0) {
+              assertNull(label, stats[1]);
+              empty++;
+            } else {
+              assertEquals(label, expected.getSum(), stats[1], 0d);
+              assertEquals(label, expected.getMean(), stats[2], 0d);
+              assertEquals(label, expected.getPercentile(50), stats[3], 0d);
+              assertEquals(label, expected.getMin(), stats[7], 0d);
+              assertEquals(label, expected.getMax(), stats[8], 0d);
+            }
+            compared++;
+          }
+        }
+      }
+    }
+    assertTrue("compared: " + compared, compared > 5000);
+    assertTrue("with no pixel: " + empty, empty > 50);
+    assertTrue("outside the raster: " + outside, outside > 50);
+  }
+
+  @Test
+  public void testZonalStatsWhereTheFillBurnsAPixelBesideThePolygon() throws Exception {
+    // The right edge of this polygon lies on a column line of the raster, and one of its vertices
+    // on the centre line of a pixel row. The fill then burns a pixel in the column after the
+    // polygon. The statistics have to be those of the pixels the full-extent mask holds, with
+    // that pixel as long as the mask has it.
+    GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+    Geometry polygon =
+        Constructors.geomFromWKT(
+            "POLYGON ((-13060268.29632965 4019852.3408444976, -13060340.62494237"
+                + " 4020430.9697462684, -13060015.146185124 4020611.7912780717,"
+                + " -13059653.503121518 4020611.7912780717, -13059653.503121518"
+                + " 4020177.8196017435, -13060268.29632965 4019852.3408444976))",
+            RasterAccessors.srid(raster));
+    assertStatsOfTheFullExtentMask(raster, polygon, MapAlgebra.bandAsArray(raster, 1));
+  }
+
+  @Test
+  public void testZonalStatsWhereTheFillBurnsAPixelBeforeThePolygon() throws Exception {
+    // The left edge of each triangle lies on a column line of a raster with pixels of 0.1, and its
+    // lower end on the centre line of a pixel row. The fill burns the pixel that end falls in, by
+    // the floor of x / 0.1 in floating point. 0.3 / 0.1 is 2.9999999999999996, so for the triangle
+    // at 0.3 that is the pixel in the column before the triangle. The statistics have to be those
+    // of the pixels the full-extent mask holds, with that pixel as long as the mask has it.
+    int width = 110, height = 24;
+    double[] cells = new double[width * height];
+    for (int i = 0; i < cells.length; i++) {
+      cells[i] = i + 1;
+    }
+    GridCoverage2D raster =
+        RasterConstructors.makeNonEmptyRaster(
+            1, "d", width, height, 0, 0, 0.1, -0.1, 0, 0, 0, new double[][] {cells});
+    GeometryFactory factory = new GeometryFactory();
+    for (int column = 1; column <= 100; column++) {
+      int row = 2 + column % 18;
+      Coordinate tip = new Coordinate(column / 10d, -(row + 0.5) / 10);
+      Coordinate top = new Coordinate(column / 10d, -row / 10d);
+      Coordinate right = new Coordinate((column + 1) / 10d, -row / 10d);
+      Geometry triangle = factory.createPolygon(new Coordinate[] {tip, top, right, tip});
+      assertStatsOfTheFullExtentMask(raster, triangle, cells);
+    }
+  }
+
+  @Test
+  public void testZonalStatsOnAGridWithPixelsNearTheSpacingOfDoubles() throws Exception {
+    // Doubles are 0.125 apart at 1e15 and the row lines of this raster 0.15, so written as doubles
+    // the two lines of a row are 0.125 or 0.25 apart. A window measured between two such lines can
+    // come out a row higher than it is, and in the raster's last row it would then reach beyond
+    // the raster. The window is counted in whole pixels instead.
+    double top = 1e15;
+    double[] cells = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    GridCoverage2D raster =
+        RasterConstructors.makeNonEmptyRaster(
+            1, "d", 3, 3, 0, top, 1, -0.15, 0, 0, 0, new double[][] {cells});
+    GeometryFactory factory = new GeometryFactory();
+    // Every double between the raster's top and bottom edges.
+    int points = 0;
+    for (double y = Math.nextDown(top); y > top - 0.45; y = Math.nextDown(y)) {
+      assertStatsOfTheFullExtentMask(raster, factory.createPoint(new Coordinate(1.5, y)), cells);
+      points++;
+    }
+    assertEquals(3, points);
+
+    Geometry inTheLastRow = Constructors.geomFromWKT("POINT (1 999999999999999.6)", 0);
+    Double[] stats =
+        RasterBandAccessors.getZonalStatsAll(raster, inTheLastRow, 1, false, false, false);
+    assertEquals(1, stats[0], 0d);
+    assertEquals(8, stats[1], 0d);
+  }
+
+  /**
+   * Asserts that the count and the sum of a geometry's zonal statistics are those of the pixels
+   * that RS_AsRaster burns for it at the raster's full extent, with and without allTouched.
+   *
+   * @param cells the raster's first band, in row order
+   */
+  private static void assertStatsOfTheFullExtentMask(
+      GridCoverage2D raster, Geometry geom, double[] cells) throws FactoryException {
+    for (boolean allTouched : new boolean[] {false, true}) {
+      double[] mask =
+          MapAlgebra.bandAsArray(
+              RasterConstructors.asRasterWithRasterExtent(geom, raster, "d", allTouched, 1, null),
+              1);
+      int count = 0;
+      double sum = 0;
+      for (int k = 0; k < mask.length; k++) {
+        if (mask[k] != 0) {
+          count++;
+          sum += cells[k];
+        }
+      }
+      Double[] stats =
+          RasterBandAccessors.getZonalStatsAll(raster, geom, 1, allTouched, false, false);
+      String label = geom.toText() + " allTouched=" + allTouched;
+      assertEquals(label, count, stats[0], 0d);
+      if (count == 0) {
+        assertNull(label, stats[1]);
+      } else {
+        assertEquals(label, sum, stats[1], 0d);
+      }
+    }
+  }
+
+  /**
+   * A point, a line or a polygon in and around an extent, half of them with their coordinates on
+   * the grid lines of the pixel size given or halfway between two of them, where the pixel centres
+   * are.
+   */
+  private static Geometry randomGeometry(
+      GeometryFactory factory, Random random, Envelope extent, double pixelX, double pixelY) {
+    boolean onGrid = random.nextBoolean();
+    int vertices = 1 + random.nextInt(4);
+    Coordinate[] coords = new Coordinate[vertices];
+    // Geometries are a few pixels across, so that many of them lie beside the raster.
+    double centreX = extent.getMinX() + (random.nextDouble() * 1.3 - 0.15) * extent.getWidth();
+    double centreY = extent.getMinY() + (random.nextDouble() * 1.3 - 0.15) * extent.getHeight();
+    for (int i = 0; i < vertices; i++) {
+      double x = centreX + (random.nextDouble() - 0.5) * 12 * pixelX;
+      double y = centreY + (random.nextDouble() - 0.5) * 12 * pixelY;
+      if (onGrid) {
+        x =
+            halfPixelsFrom(
+                extent.getMinX(), Math.round((x - extent.getMinX()) / pixelX * 2), pixelX);
+        y =
+            halfPixelsFrom(
+                extent.getMinY(), Math.round((y - extent.getMinY()) / pixelY * 2), pixelY);
+      }
+      coords[i] = new Coordinate(x, y);
+    }
+    if (vertices == 1) {
+      return factory.createPoint(coords[0]);
+    }
+    if (vertices == 2 || random.nextBoolean()) {
+      return factory.createLineString(coords);
+    }
+    Geometry hull = factory.createMultiPointFromCoords(coords).convexHull();
+    return hull instanceof Polygon ? hull : factory.createLineString(coords);
+  }
+
+  /**
+   * The coordinate a number of half pixels from an origin, as the decimal number it is: 0.3 for six
+   * half pixels of 0.1 from 0, where 0 + 6 * 0.05 in floating point is 0.30000000000000004.
+   */
+  private static double halfPixelsFrom(double origin, long halfPixels, double pixel) {
+    return BigDecimal.valueOf(halfPixels)
+        .multiply(BigDecimal.valueOf(pixel))
+        .divide(BigDecimal.valueOf(2))
+        .add(BigDecimal.valueOf(origin))
+        .doubleValue();
+  }
+
+  /** A band of doubles in memory that records every region whose samples are taken from it. */
+  private static final class RecordingRaster extends WritableRaster {
+    final List<Rectangle> reads = new ArrayList<>();
+
+    RecordingRaster(int width, int height) {
+      super(new BandedSampleModel(DataBuffer.TYPE_DOUBLE, width, height, 1), new Point(0, 0));
+    }
+
+    @Override
+    public double[] getSamples(int x, int y, int w, int h, int b, double[] dArray) {
+      reads.add(new Rectangle(x, y, w, h));
+      return super.getSamples(x, y, w, h, b, dArray);
+    }
   }
 }
