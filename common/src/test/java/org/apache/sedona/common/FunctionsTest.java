@@ -2932,6 +2932,20 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void removeRepeatedPointsMultiPointWithInterveningPoints() throws ParseException {
+    for (String wkt :
+        new String[] {
+          "MULTIPOINT ((0 0), (0.125 0), (0 10))",
+          "MULTIPOINT ((0 10), (0.125 0), (0 0))",
+          "MULTIPOINT ((0 0), (0 10), (0.125 0), (0.25 10))"
+        }) {
+      Geometry geom = Constructors.geomFromWKT(wkt, 0);
+      assertEquals(
+          "MULTIPOINT ((0 0), (0 10))", Functions.asWKT(Functions.removeRepeatedPoints(geom, 1)));
+    }
+  }
+
+  @Test
   public void removeRepeatedPointsLineString() throws ParseException {
     Geometry geom = Constructors.geomFromWKT("LINESTRING (0 0, 0 0, 1 1, 0 0, 1 1, 2 2)", 2000);
     Geometry actualGeom = Functions.removeRepeatedPoints(geom);

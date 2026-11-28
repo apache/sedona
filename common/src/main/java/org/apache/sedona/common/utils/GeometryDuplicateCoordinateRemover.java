@@ -18,10 +18,16 @@
  */
 package org.apache.sedona.common.utils;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import org.locationtech.jts.geom.*;
 
 public class GeometryDuplicateCoordinateRemover {
@@ -83,14 +89,58 @@ public class GeometryDuplicateCoordinateRemover {
             .sorted()
             .toArray(Coordinate[]::new);
 
+    // Preserve the existing comparison behavior for non-positive or non-finite values.
+    if (!(TOLERANCE > 0)
+        || !Double.isFinite(TOLERANCE)
+        || Arrays.stream(deduplicated)
+            .anyMatch(c -> !Double.isFinite(c.x) || !Double.isFinite(c.y))) {
+      return removeDuplicatePointsByScanning(deduplicated);
+    }
+
+    Deque<Coordinate> active = new ArrayDeque<>();
+    NavigableMap<Double, Deque<Coordinate>> byY = new TreeMap<>();
+    List<Coordinate> result = new ArrayList<>();
+    for (Coordinate point : deduplicated) {
+      while (!active.isEmpty() && point.x - active.peekFirst().x >= TOLERANCE) {
+        Coordinate expired = active.removeFirst();
+        Deque<Coordinate> sameY = byY.get(expired.y);
+        sameY.removeFirst();
+        if (sameY.isEmpty()) byY.remove(expired.y);
+      }
+
+      boolean duplicate = false;
+      // Include rounded boundary values; the distance check still uses strict tolerance.
+      double minY = Math.nextDown(point.y - TOLERANCE);
+      double maxY = Math.nextUp(point.y + TOLERANCE);
+      for (Deque<Coordinate> candidates : byY.subMap(minY, true, maxY, true).values()) {
+        for (Coordinate candidate : candidates) {
+          if (candidate.distance(point) < TOLERANCE) {
+            duplicate = true;
+            break;
+          }
+        }
+        if (duplicate) break;
+      }
+      if (!duplicate) {
+        result.add(point);
+        active.addLast(point);
+        byY.computeIfAbsent(point.y, y -> new ArrayDeque<>()).addLast(point);
+      }
+    }
+    return result.toArray(new Coordinate[0]);
+  }
+
+  private static Coordinate[] removeDuplicatePointsByScanning(Coordinate[] deduplicated) {
     for (int i = 0; i < deduplicated.length; i++) {
+      if (deduplicated[i] == null) continue;
       for (int j = i + 1; j < deduplicated.length; j++) {
-        if (deduplicated[i] != null
-            && deduplicated[j] != null
-            && deduplicated[i].distance(deduplicated[j]) < TOLERANCE) {
-          deduplicated[j] = null;
-        } else {
+        if (deduplicated[j] == null) continue;
+        // Only X distance is monotonic in the sorted coordinates.
+        if (deduplicated[j].getX() - deduplicated[i].getX() >= TOLERANCE) {
           break;
+        }
+        if (deduplicated[i].distance(deduplicated[j]) < TOLERANCE) {
+          deduplicated[j] = null;
         }
       }
     }
