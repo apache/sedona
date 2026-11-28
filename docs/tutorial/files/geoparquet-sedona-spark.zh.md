@@ -181,7 +181,9 @@ df = (
 
 同一数据集中的文件不必以相同的方式存储地理列。某个文件的该列中没有任何地理对象时，无论它自身声明了什么 CRS，都采用其他含有地理对象的文件的 CRS。如果某个文件把该列按 Sedona 自有的地理类型存储（GeoParquet 1.1 写入就是如此），它也可以与含有 `GEOGRAPHY` 列的文件一起读取。在 Spark 4.2 及更高版本上，这类文件中没有 SRID 的地理对象的 SRID 为 4326。
 
-对地理列的过滤条件会跳过查询的地理对象不在其中的行组。Sedona 为此读取每个行组的地理空间统计信息中的边界框，它是球面上的边界框。Sedona 不使用文件的 GeoParquet 元数据中的 `bbox`，因为它是平面的。参见[查询优化器](../../api/sql/Optimizer.md)中的“将地理谓词下推到 GeoParquet”一节。
+对地理列的过滤条件会跳过查询的地理对象不在其中的行组。Sedona 为此读取每个行组的地理空间统计信息中的边界框，它是球面上的边界框。Sedona 不使用文件的 GeoParquet 元数据中的 `bbox`，因为它是平面的。参见[查询优化器](../../api/sql/Optimizer.md)中的“将地理谓词下推到 GeoParquet”一节。对几何列的过滤条件同样会跳过行组：先按文件的 `bbox` 跳过文件，再按每个行组统计信息中的平面边界框跳过行组。参见[查询优化器](../../api/sql/Optimizer.md)中的“将空间谓词下推到 GeoParquet”一节。
+
+按以米为单位的距离过滤时，只有地理列才会跳过行组。对几何列使用 `ST_DistanceSphere`、`ST_DistanceSpheroid` 以及 `useSpheroid` 为 `true` 的 `ST_DWithin` 时，谓词会对每一行计算。要按以米为单位的距离过滤，推荐的做法是把该列存为地理列，并用 `ST_DWithin` 过滤。参见[查询优化器](../../api/sql/Optimizer.md)中的“按距离过滤”一节。
 
 Spark 3.5 和 4.0 自带的 Parquet 库早于这些逻辑类型，无法打开此类文件。
 

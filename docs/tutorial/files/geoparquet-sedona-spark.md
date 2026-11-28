@@ -181,7 +181,9 @@ A file that Sedona rejects for one of these reasons is not a corrupt file. The r
 
 The files of a dataset do not have to store a geography column in the same way. A file without a geography in the column takes the CRS of the files that have one, whatever CRS it states itself. And a file in which Sedona stored the column as its own geography type, as a GeoParquet 1.1 write does, is read next to files with a `GEOGRAPHY` column. On Spark 4.2 and later a geography without an SRID in such a file has SRID 4326.
 
-A filter on a geography column skips the row groups that the geography of the query is outside of. Sedona reads the bounding box in the geospatial statistics of each row group for it, which is a box on the sphere. It does not use the `bbox` of the GeoParquet metadata of a file, which is planar. See [Push geography predicates to GeoParquet](../../api/sql/Optimizer.md#push-geography-predicates-to-geoparquet).
+A filter on a geography column skips the row groups that the geography of the query is outside of. Sedona reads the bounding box in the geospatial statistics of each row group for it, which is a box on the sphere. It does not use the `bbox` of the GeoParquet metadata of a file, which is planar. See [Push geography predicates to GeoParquet](../../api/sql/Optimizer.md#push-geography-predicates-to-geoparquet). A filter on a geometry column skips row groups as well, by the planar box in the statistics of each row group, after it has skipped files by their `bbox`. See [Push spatial predicates to GeoParquet](../../api/sql/Optimizer.md#push-spatial-predicates-to-geoparquet).
+
+A filter by a distance in meters skips row groups for a geography column only. `ST_DistanceSphere`, `ST_DistanceSpheroid` and `ST_DWithin` with `useSpheroid` set to `true` on a geometry column are applied to every row. To filter by a distance in meters, the recommended way is to store the column as a geography column and filter it with `ST_DWithin`. See [Filter by a distance](../../api/sql/Optimizer.md#filter-by-a-distance).
 
 Spark 3.5 and 4.0 ship a Parquet library that predates these logical types and cannot open such files.
 

@@ -329,7 +329,7 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
               .toSeq
         requiredSchema.exists(
           GeoParquetRowGroupFilter
-            .rejectsValue(_, footerFileMetaData, ofSplit, sharedConf, options))
+            .rejectsValue(_, footerFileMetaData, ofSplit, sharedConf, options, requiredSchema))
       }
       // Prune file scans using pushed down spatial filters and per-column bboxes in geoparquet metadata
       val shouldScanFile =
@@ -349,8 +349,8 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
               name =>
                 requiredSchema
                   .find(_.name == name)
-                  .flatMap(
-                    GeoParquetRowGroupFilter.geographyColumn(_, footerFileMetaData, sharedConf)))
+                  .flatMap(GeoParquetRowGroupFilter
+                    .fileColumn(_, footerFileMetaData, sharedConf, requiredSchema)))
         }
         else rowGroups
       if (!shouldScanFile || (rowGroups.nonEmpty && keptRowGroups.isEmpty)) {
@@ -433,10 +433,14 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
         }
         val iter =
           if (keptRowGroups.size == rowGroups.size) open(wholeSplit)
-          else {
-            val starts = keptRowGroups.map(_.getStartingPos).toArray
-            GeoParquetFileFormat.openRowGroups(wholeSplit, starts, sharedConf)(open)
-          }
+          else
+            // A row group starts where its first column does. The footer of a file whose first
+            // column is encrypted says where that is to a reader with the key of that column
+            // only, which a read of other columns need not have. The split is then read as a
+            // whole: a filter drops the rows of the other row groups.
+            Try(keptRowGroups.map(_.getStartingPos).toArray).toOption.fold(open(wholeSplit)) {
+              starts => GeoParquetFileFormat.openRowGroups(wholeSplit, starts, sharedConf)(open)
+            }
         try {
           val fullSchema =
             DataTypeUtils.toAttributes(requiredSchema) ++ DataTypeUtils.toAttributes(

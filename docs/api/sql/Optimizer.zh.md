@@ -396,6 +396,8 @@ Sedona 支持对 GeoParquet 文件进行空间谓词下推。当对由 GeoParque
 来判断该文件中的全部数据是否会被该空间谓词过滤掉。当 GeoParquet 数据集按空间临近性进行分区时，
 这种优化可以减少需要扫描的文件数量。
 
+在 GeoParquet 2.0 文件内部，Sedona 还会跳过行组。Sedona 读取行组的地理空间统计信息中该几何列的边界框，并用对文件 `bbox` 所做的同一判断来跳过行组。因此，几何对象按空间临近性排序的文件只会被部分读取，即使它是数据集中唯一的文件。这适用于 Spark 4.1 及以上版本。GeoParquet 1.1 文件没有这种统计信息，未被跳过的文件的所有行组都会被读取。Sedona 会为 GeoParquet 2.0 文件写出这些统计信息，参见[写出 GeoParquet 2.0](../../tutorial/files/geoparquet-sedona-spark.md)。
+
 为了最大化 Sedona 对 GeoParquet 的过滤下推性能，建议按几何对象的 geohash 值（参见 [ST_GeoHash](Geometry-Output/ST_GeoHash.md)）对数据排序后再保存为 GeoParquet 文件。示例如下：
 
 ```
@@ -418,6 +420,53 @@ ORDER BY geohash
 将空间谓词下推到 GeoParquet 默认启用。用户可以通过将 Spark 配置 `spark.sedona.geoparquet.spatialFilterPushDown` 设置为 `false` 来手动禁用。
 
 如果读取的任意一列（不论过滤器是否作用于该列）在文件中有值，且其 SRID 与读取时模式为该列指定的 SRID 不同，该文件总是会被扫描：读取这样的文件会像没有过滤器时一样失败。这适用于 Spark 4.2 及以上版本，其列类型会指定 SRID。
+
+### 按距离过滤
+
+[ST_DWithin](Predicates/ST_DWithin.md)，以及用 `<` 或 `<=` 把 [ST_Distance](Measurement-Functions/ST_Distance.md) 与常量比较的谓词，在距离是平面距离（单位与坐标相同）时会跳过文件和行组。文件或行组的边界框与查询几何对象的边界框之间的距离不超过该距离时，才会读取这个文件或行组。
+
+两个几何对象之间以米为单位的距离不会跳过任何文件或行组。[ST_DistanceSphere](Measurement-Functions/ST_DistanceSphere.md)、[ST_DistanceSpheroid](Measurement-Functions/ST_DistanceSpheroid.md) 以及 `useSpheroid` 为 `true` 的 `ST_DWithin` 都是如此。它们在球面或椭球面上度量两个几何对象质心之间的距离，并且可以跨越 180° 经线。文件或行组的边界框是平面上的边界框，无法限定这种距离，因此 Sedona 会对每一行计算这样的谓词。
+
+!!!tip
+    要按以米为单位的距离过滤 GeoParquet 数据集，请把该列存为地理列，并用 `ST_DWithin` 过滤。这是推荐的做法。该过滤条件按球面上的边界框跳过行组，参见下文“将地理谓词下推到 GeoParquet”一节，并且度量的是两个地理对象之间的最短距离，而不是它们质心之间的距离。
+
+对于经纬度数据集，把几何列作为地理列写出一次，写成 GeoParquet 2.0 文件。这需要 Spark 4.1 及以上版本。
+
+=== "Spark 4.2 及以上版本"
+
+    ```python
+    (
+        df.selectExpr("*", "ST_GeogFromWKB(ST_AsBinary(geom)) AS geog")
+        .write.format("geoparquet")
+        .option("geoparquet.version", "2.0.0")
+        .save(path)
+    )
+    ```
+
+=== "Spark 4.1"
+
+    ```python
+    (
+        df.selectExpr("*", "ST_GeomToGeography(geom) AS geog")
+        .write.format("geoparquet")
+        .option("geoparquet.version", "2.0.0")
+        .save(path)
+    )
+    ```
+
+在 Spark 4.2 及以上版本中，地理列使用 Spark 原生的地理类型，其类型会指定该列的 SRID。此时只带一个参数的 `ST_GeogFromWKB` 是 Spark 自带的函数，返回 SRID 为 4326 的地理对象。[ST_GeomToGeography](geography/Geography-Constructors/ST_GeomToGeography.md) 返回的地理对象沿用其几何对象的 SRID，所在列的类型不指定 SRID，GeoParquet 文件不接受这样的列。
+
+然后对地理列进行过滤：
+
+```sql
+SELECT *
+FROM geoparquet_dataset
+WHERE ST_DWithin(geog, ST_GeogFromWKT('POINT (-122.33 47.61)', 4326), 5000.0)
+```
+
+查询也可以用同样的函数逐行转换几何对象，例如 `ST_DWithin(ST_GeomToGeography(geom), ...)`。这样得到的行相同，但不会跳过任何数据：过滤条件只对列下推，不对函数的结果下推，而且几何列的边界框是平面上的边界框。
+
+在 Spark 3.5 和 4.0 中，GeoParquet 文件没有地理列。此时请在以米为单位的距离谓词旁边加上一个平面谓词，例如用覆盖查询范围的矩形做 `ST_Intersects`。Sedona 会按这个谓词跳过文件。
 
 ## 将地理谓词下推到 GeoParquet
 

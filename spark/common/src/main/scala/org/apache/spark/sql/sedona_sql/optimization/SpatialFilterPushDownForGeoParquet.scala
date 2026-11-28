@@ -20,9 +20,7 @@ package org.apache.spark.sql.sedona_sql.optimization
 
 import org.apache.sedona.common.S2Geography.Geography
 import org.apache.sedona.common.geometryObjects.Box2D
-import org.apache.sedona.common.sphere.Haversine
 import org.apache.sedona.core.spatialOperator.SpatialPredicate
-import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.expressions.And
 import org.apache.spark.sql.catalyst.expressions.Expression
@@ -45,14 +43,15 @@ import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFi
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.AndFilter
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.Box2DLeafFilter
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.Box2DPredicateKind
+import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.DistanceLeafFilter
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.GeographyLeafFilter
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.LeafFilter
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.OrFilter
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.sedona_sql.UDT.{Box2DUDT, Box3DUDT, GeometryUDT}
-import org.apache.spark.sql.sedona_sql.expressions.{ST_AsEWKT, ST_Buffer, ST_Contains, ST_CoveredBy, ST_Covers, ST_Crosses, ST_DWithin, ST_Distance, ST_DistanceSphere, ST_DistanceSpheroid, ST_Equals, ST_Intersects, ST_OrderingEquals, ST_Overlaps, ST_Touches, ST_Within}
+import org.apache.spark.sql.sedona_sql.expressions.{ST_AsEWKT, ST_Contains, ST_CoveredBy, ST_Covers, ST_Crosses, ST_DWithin, ST_Distance, ST_Equals, ST_Intersects, ST_OrderingEquals, ST_Overlaps, ST_Touches, ST_Within}
 import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils.splitConjunctivePredicates
-import org.apache.spark.sql.types.DoubleType
+import org.apache.spark.sql.types.{BooleanType, DoubleType}
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.geom.Point
@@ -241,113 +240,50 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
         for ((name, value) <- resolveNameAndLiteral(predicate.children, pushableColumn))
           yield LeafFilter(name, SpatialPredicate.INTERSECTS, GeometryUDT.deserialize(value))
 
-      case LessThan(ST_Distance(distArgs), Literal(d, DoubleType)) =>
-        for ((name, value) <- resolveNameAndLiteral(distArgs, pushableColumn))
-          yield distanceFilter(name, GeometryUDT.deserialize(value), d.asInstanceOf[Double])
+      case LessThan(ST_Distance(operands), Literal(distance: Double, DoubleType)) =>
+        distanceFilter(operands, distance, pushableColumn)
+      case LessThanOrEqual(ST_Distance(operands), Literal(distance: Double, DoubleType)) =>
+        distanceFilter(operands, distance, pushableColumn)
 
-      case LessThanOrEqual(ST_Distance(distArgs), Literal(d, DoubleType)) =>
-        for ((name, value) <- resolveNameAndLiteral(distArgs, pushableColumn))
-          yield distanceFilter(name, GeometryUDT.deserialize(value), d.asInstanceOf[Double])
+      // A distance on the plane, which is what ST_DWithin measures unless it is told to measure
+      // on the spheroid. No filter is pushed down for a distance in meters: not for ST_DWithin on
+      // the spheroid, and not for ST_DistanceSphere and ST_DistanceSpheroid. They measure between
+      // the centroids of two geometries, on a sphere or a spheroid, and across the antimeridian,
+      // and a bounding box of X and Y bounds none of that. A geography column is what a filter
+      // on a distance in meters is pushed down for, see translateGeographyPredicate.
+      case ST_DWithin(Seq(left, right, Literal(distance: Double, DoubleType))) =>
+        distanceFilter(Seq(left, right), distance, pushableColumn)
+      case ST_DWithin(
+            Seq(
+              left,
+              right,
+              Literal(distance: Double, DoubleType),
+              Literal(false, BooleanType))) =>
+        distanceFilter(Seq(left, right), distance, pushableColumn)
 
-      case LessThan(ST_DistanceSpheroid(distArgs), Literal(d, DoubleType)) =>
-        for ((name, value) <- resolveNameAndLiteral(distArgs, pushableColumn))
-          yield distanceFilter(
-            name,
-            GeometryUDT.deserialize(value),
-            d.asInstanceOf[Double],
-            distanceType = "spheroid")
-
-      case LessThanOrEqual(ST_DistanceSpheroid(distArgs), Literal(d, DoubleType)) =>
-        for ((name, value) <- resolveNameAndLiteral(distArgs, pushableColumn))
-          yield distanceFilter(
-            name,
-            GeometryUDT.deserialize(value),
-            d.asInstanceOf[Double],
-            distanceType = "spheroid")
-
-      case LessThan(ST_DistanceSphere(distArgs), Literal(d, DoubleType)) =>
-        val radiusOpt = distArgs.lift(2).collect {
-          case Literal(customRadius: Double, DoubleType) => customRadius
-        }
-
-        resolveNameAndLiteral(distArgs.take(2), pushableColumn).map { case (name, value) =>
-          distanceFilter(
-            name,
-            GeometryUDT.deserialize(value),
-            d.asInstanceOf[Double],
-            distanceType = "sphere",
-            sphereRadiusOverride = radiusOpt)
-        }
-
-      case LessThanOrEqual(ST_DistanceSphere(distArgs), Literal(d, DoubleType)) =>
-        val radiusOpt = distArgs.lift(2).collect {
-          case Literal(customRadius: Double, DoubleType) => customRadius
-        }
-
-        resolveNameAndLiteral(distArgs.take(2), pushableColumn).map { case (name, value) =>
-          distanceFilter(
-            name,
-            GeometryUDT.deserialize(value),
-            d.asInstanceOf[Double],
-            distanceType = "sphere",
-            sphereRadiusOverride = radiusOpt)
-        }
-
-      case ST_DWithin(args) if args.length == 3 || args.length == 4 =>
-        val distanceLit = args(2)
-        val distanceType = args.lift(3) match {
-          case Some(Literal(flag: Boolean, _)) => if (flag) "spheroid" else "planar"
-          case _ => "planar"
-        }
-
-        distanceLit match {
-          case Literal(distance: Double, DoubleType) =>
-            resolveNameAndLiteral(args.take(2), pushableColumn).map { case (name, value) =>
-              distanceFilter(name, GeometryUDT.deserialize(value), distance, distanceType)
-            }
-          case _ => None
-        }
       case _ => None
     }
   }
 
+  /**
+   * The filter for a predicate that keeps the rows whose geometry is within `distance` of a
+   * geometry of the query, on the plane. None for a distance that is no number, below zero or
+   * without an end, and for a geometry of the query without a bounding box of numbers, as an
+   * empty one: ST_Distance gives a distance of 0 to an empty geometry.
+   */
   private def distanceFilter(
-      name: String,
-      geom: Geometry,
+      operands: Seq[Expression],
       distance: Double,
-      distanceType: String = "planar",
-      sphereRadiusOverride: Option[Double] = None): GeoParquetSpatialFilter = {
-    val queryWindow: Geometry = distanceType match {
-      case "spheroid" =>
-        // Spheroidal buffer
-        // Increase buffer distance by 3% to account for false negatives with Spheroidal Buffer calculations
-        val distanceLit = Literal(distance * 1.03)
-        val spheroidLit = Literal(true)
-        val geomLit = Literal.create(GeometrySerializer.serialize(geom), new GeometryUDT())
-
-        val bufferGeometry = {
-          val bufferExpr = ST_Buffer(
-            scala.collection.immutable.Seq(geomLit, distanceLit, spheroidLit))
-          val wkb = bufferExpr.eval().asInstanceOf[Array[Byte]]
-          GeometrySerializer.deserialize(wkb)
-        }
-        bufferGeometry
-
-      case "sphere" =>
-        // The Haversine expandEnvelope already conservatively expands envelope by 10% to avoid false negatives
-        val radius = sphereRadiusOverride.getOrElse(Haversine.AVG_EARTH_RADIUS)
-        val expandedEnvelope =
-          Haversine.expandEnvelope(geom.getEnvelopeInternal, distance, radius)
-        geom.getFactory.toGeometry(expandedEnvelope)
-
-      case _ =>
-        // Euclidean distance
-        val envelope = geom.getEnvelopeInternal
-        envelope.expandBy(distance)
-        geom.getFactory.toGeometry(envelope)
-    }
-    LeafFilter(name, SpatialPredicate.INTERSECTS, queryWindow)
-  }
+      pushableColumn: SpatialPushableColumn): Option[GeoParquetSpatialFilter] =
+    for {
+      (name, value) <- resolveNameAndLiteral(operands, pushableColumn)
+      if distance >= 0 && !distance.isInfinity
+      query <- Try(GeometryUDT.deserialize(value)).toOption.flatMap(Option(_))
+      envelope = query.getEnvelopeInternal
+      if !envelope.isNull
+      if Seq(envelope.getMinX, envelope.getMaxX, envelope.getMinY, envelope.getMaxY).forall(
+        bound => !bound.isNaN && !bound.isInfinity)
+    } yield DistanceLeafFilter(name, envelope, distance)
 
   /**
    * Extract a [[Box2D]] from a Catalyst literal value. Box2DUDT serializes to an InternalRow of

@@ -414,6 +414,8 @@ Sedona supports spatial predicate push-down for GeoParquet files. When spatial f
 to determine if all data in the file will be discarded by the spatial predicate. This optimization could reduce the number of files scanned
 when the queried GeoParquet dataset was partitioned by spatial proximity.
 
+Within a GeoParquet 2.0 file, Sedona also skips row groups. It reads the bounding box that the geospatial statistics of a row group have for the geometry column, and skips the row group by the test that it applies to the `bbox` of a file. A file of geometries that are sorted by spatial proximity is therefore read in part, also when it is the only file of the dataset. This applies on Spark 4.1 and later. A GeoParquet 1.1 file has no such statistics, and all row groups of a file that is not skipped are read. Sedona writes the statistics for GeoParquet 2.0 files, see [Write GeoParquet 2.0](../../tutorial/files/geoparquet-sedona-spark.md#write-geoparquet-20).
+
 To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see [ST_GeoHash](Geometry-Output/ST_GeoHash.md)) and then save as a GeoParquet file. An example is as follows:
 
 ```
@@ -436,6 +438,53 @@ We can compare the metrics of querying the GeoParquet dataset with or without th
 Spatial predicate push-down to GeoParquet is enabled by default. Users can manually disable it by setting the Spark configuration `spark.sedona.geoparquet.spatialFilterPushDown` to `false`.
 
 A file is always scanned when a column of the read has values of another SRID in the file than the schema of the read gives that column, whether the filter is on that column or not: the read of such a file fails as it does without the filter. This applies on Spark 4.2 and later, where the type of a column names its SRID.
+
+### Filter by a distance
+
+[ST_DWithin](Predicates/ST_DWithin.md) and a comparison of [ST_Distance](Measurement-Functions/ST_Distance.md) with a constant, by `<` or `<=`, skip files and row groups when the distance is one on the plane, in the units of the coordinates. A file or a row group is read when its bounding box is within that distance of the bounding box of the geometry of the query.
+
+A distance in meters between two geometries skips no file and no row group. This is so for [ST_DistanceSphere](Measurement-Functions/ST_DistanceSphere.md), [ST_DistanceSpheroid](Measurement-Functions/ST_DistanceSpheroid.md) and `ST_DWithin` with `useSpheroid` set to `true`. They measure between the centroids of the two geometries, on a sphere or a spheroid and across the antimeridian. The bounding box of a file or a row group is one of a plane and does not bound that distance, so Sedona applies such a predicate to every row.
+
+!!!tip
+    To filter a GeoParquet dataset by a distance in meters, store the column as a geography column and filter it with `ST_DWithin`. This is the recommended way. The filter skips row groups by a bounding box on the sphere, see [Push geography predicates to GeoParquet](#push-geography-predicates-to-geoparquet), and it measures the shortest distance between the two geographies, not the distance between their centroids.
+
+Write the geometry column of a dataset of longitudes and latitudes as a geography column once, to GeoParquet 2.0 files. This needs Spark 4.1 or later.
+
+=== "Spark 4.2 and later"
+
+    ```python
+    (
+        df.selectExpr("*", "ST_GeogFromWKB(ST_AsBinary(geom)) AS geog")
+        .write.format("geoparquet")
+        .option("geoparquet.version", "2.0.0")
+        .save(path)
+    )
+    ```
+
+=== "Spark 4.1"
+
+    ```python
+    (
+        df.selectExpr("*", "ST_GeomToGeography(geom) AS geog")
+        .write.format("geoparquet")
+        .option("geoparquet.version", "2.0.0")
+        .save(path)
+    )
+    ```
+
+On Spark 4.2 and later a geography column is of Spark's native geography type, which names the SRID of the column. `ST_GeogFromWKB` with one argument is Spark's function there, and gives a geography of SRID 4326. [ST_GeomToGeography](geography/Geography-Constructors/ST_GeomToGeography.md) gives a geography of the SRID of its geometry, in a column whose type names no SRID, and a GeoParquet file does not take such a column.
+
+Then filter the geography column:
+
+```sql
+SELECT *
+FROM geoparquet_dataset
+WHERE ST_DWithin(geog, ST_GeogFromWKT('POINT (-122.33 47.61)', 4326), 5000.0)
+```
+
+A query can also convert the geometry of each row with the same function, as in `ST_DWithin(ST_GeomToGeography(geom), ...)`. It keeps the same rows and skips nothing: a filter is pushed down for a column, not for the result of a function, and the bounding boxes of a geometry column are those of a plane.
+
+On Spark 3.5 and 4.0, where a GeoParquet file has no geography column, put a predicate on the plane next to the distance in meters, such as `ST_Intersects` with a box that covers the area of the query. Sedona skips files by that predicate.
 
 ## Push geography predicates to GeoParquet
 
