@@ -363,6 +363,12 @@ object StacUtils {
           leftEnvelope
         case leaf: GeoParquetSpatialFilter.LeafFilter =>
           leaf.queryWindow.getEnvelopeInternal
+        case within: GeoParquetSpatialFilter.DistanceLeafFilter =>
+          // The box of the geometry of the query, made larger by the distance of the predicate
+          // for items anywhere in longitude and latitude
+          val envelope = new Envelope(within.queryEnvelope)
+          envelope.expandBy(within.reach(new Envelope(-180, 180, -90, 90)))
+          envelope
       }
     }
 

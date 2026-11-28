@@ -31,7 +31,7 @@ import org.apache.spark.sql.execution.FileSourceScanExec
 import org.apache.spark.sql.execution.SimpleMode
 import org.apache.sedona.core.spatialOperator.SpatialPredicate
 import org.apache.spark.sql.execution.datasources.geoparquet.{GeoParquetFileFormat, GeoParquetMetaData, GeoParquetSpatialFilter, GeometryFieldMetaData}
-import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.LeafFilter
+import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.{DistanceLeafFilter, LeafFilter}
 import org.apache.spark.sql.functions.expr
 import org.apache.spark.sql.sedona_sql.types.SpatialTypeSupport
 import org.apache.spark.sql.types.{DataType, LongType, StructField, StructType}
@@ -178,96 +178,66 @@ class GeoParquetSpatialFilterPushDownSuite extends TestBaseScala with TableDrive
       testFilter("ST_DWithin(geom, ST_GeomFromText('POINT (3 4)'), 1)", Seq(1))
       testFilter("ST_DWithin(geom, ST_GeomFromText('POINT (0 0)'), 1)", Seq.empty)
       testFilter("ST_DWithin(geom, ST_GeomFromText('POINT (0 0)'), 3.9)", Seq.empty)
-      testFilter("ST_DWithin(geom, ST_GeomFromText('POINT (3 4)'), 1000000, true)", Seq(0, 1, 3))
-      testFilter("ST_DWithin(geom, ST_GeomFromText('POINT (0 0)'), 5)", Seq(0, 1, 2, 3))
+      // The corner of the bounding box of each file that is next to (0 0) is 4 units from it
+      // in X and in Y, which is a distance of some 5.66
+      testFilter("ST_DWithin(geom, ST_GeomFromText('POINT (0 0)'), 5)", Seq.empty)
+      testFilter("ST_DWithin(geom, ST_GeomFromText('POINT (0 0)'), 5.7)", Seq(0, 1, 2, 3))
       testFilter("ST_DWithin(geom, ST_GeomFromText('POINT (-5 -5)'), 1)", Seq(2))
       testFilter(
         "ST_DWithin(geom, ST_GeomFromText('POLYGON ((-16 -16, -16 -14, -14 -14, -14 -16, -16 -16))'), 10)",
         Seq(2))
       testFilter("ST_DWithin(ST_GeomFromText('POINT (-5 -5)'), geom, 1)", Seq(2))
       testFilter("ST_DWithin(ST_GeomFromText('POINT (-5 -5)'), geom, 1, false)", Seq(2))
-      testFilter("ST_DWithin(ST_GeomFromText('POINT (0 0)'), geom, 100, true)", Seq.empty)
     }
 
-    forAll(Table("<", "<=")) { op =>
+    forAll(Table("op", "<", "<=")) { op =>
       it(s"Push down ST_Distance $op d") {
         testFilter(s"ST_Distance(geom, ST_GeomFromText('POINT (0 0)')) $op 1", Seq.empty)
         testFilter(s"ST_Distance(geom, ST_GeomFromText('POINT (0 0)')) $op 3.9", Seq.empty)
         testFilter(s"ST_Distance(geom, ST_GeomFromText('POINT (3 4)')) $op 1", Seq(1))
-        testFilter(s"ST_Distance(geom, ST_GeomFromText('POINT (0 0)')) $op 5", Seq(0, 1, 2, 3))
+        testFilter(s"ST_Distance(geom, ST_GeomFromText('POINT (0 0)')) $op 5", Seq.empty)
+        testFilter(s"ST_Distance(geom, ST_GeomFromText('POINT (0 0)')) $op 5.7", Seq(0, 1, 2, 3))
         testFilter(s"ST_Distance(geom, ST_GeomFromText('POINT (-5 -5)')) $op 1", Seq(2))
         testFilter(
           s"ST_Distance(geom, ST_GeomFromText('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))')) $op 2",
           Seq.empty)
         testFilter(
-          s"ST_Distance(geom, ST_GeomFromText('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))')) $op 3",
+          s"ST_Distance(geom, ST_GeomFromText('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))')) $op 4.3",
           Seq(0, 1, 2, 3))
         testFilter(
           s"ST_Distance(geom, ST_GeomFromText('LINESTRING (17 17, 18 18)')) $op 1",
+          Seq.empty)
+        testFilter(
+          s"ST_Distance(geom, ST_GeomFromText('LINESTRING (17 17, 18 18)')) $op 1.5",
           Seq(1))
       }
+    }
 
-      it(s"Push down ST_DistanceSpheroid $op d") {
-        testFilter(
-          s"ST_DistanceSpheroid(geom, ST_GeomFromText('POINT (0 0)')) $op 100",
-          Seq.empty)
-        testFilter(
-          s"ST_DistanceSpheroid(geom, ST_GeomFromText('POINT (0 0)')) $op 500",
-          Seq.empty)
-        testFilter(
-          s"ST_DistanceSpheroid(geom, ST_GeomFromText('POINT (3 4)')) $op 500000",
-          Seq(1))
-        testFilter(
-          s"ST_DistanceSpheroid(geom, ST_GeomFromText('POINT (0 0)')) $op 7100000",
-          Seq(0, 1, 2, 3))
-        testFilter(
-          s"ST_DistanceSpheroid(geom, ST_GeomFromText('POINT (-5 -5)')) $op 500000",
-          Seq(2))
-        testFilter(
-          s"ST_DistanceSpheroid(geom, ST_GeomFromText('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))')) $op 2",
-          Seq.empty)
-        testFilter(
-          s"ST_DistanceSpheroid(geom, ST_GeomFromText('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))')) $op 500000",
-          Seq(0, 1, 2, 3))
-        testFilter(
-          s"ST_DistanceSpheroid(geom, ST_GeomFromText('LINESTRING (17 17, 18 18)')) $op 500000",
-          Seq(1))
+    it("Pushes no filter for a distance on the sphere or on the spheroid") {
+      // The bounding box of a file is one of a plane. A distance in meters is measured between
+      // the centroids of two geometries, on a sphere or a spheroid that the box says nothing of.
+      Seq(
+        "ST_DistanceSpheroid(geom, ST_GeomFromText('POINT (3 4)')) < 500000",
+        "ST_DistanceSpheroid(geom, ST_GeomFromText('POINT (3 4)')) <= 500000",
+        "ST_DistanceSphere(geom, ST_GeomFromText('POINT (-5 -5)')) < 500000",
+        "ST_DistanceSphere(geom, ST_GeomFromText('POINT (-5 -5)')) <= 500000",
+        "ST_DistanceSphere(geom, ST_GeomFromText('POINT (-5 -5)'), 5000000) <= 400000",
+        "ST_DWithin(geom, ST_GeomFromText('POINT (3 4)'), 1000000, true)",
+        "ST_DWithin(ST_GeomFromText('POINT (3 4)'), geom, 1000000, true)").foreach { condition =>
+        val filtered = geoParquetDf.where(condition)
+        assert(getPushedDownSpatialFilter(filtered).isEmpty, condition)
+        val expected = df.where(condition).orderBy("region", "id").select("region", "id")
+        assert(expected.count() > 0, condition)
+        assert(
+          filtered.orderBy("region", "id").select("region", "id").collect() sameElements
+            expected.collect(),
+          condition)
       }
-
-      it(s"Push down ST_DistanceSphere $op d") {
-        testFilter(s"ST_DistanceSphere(geom, ST_GeomFromText('POINT (0 0)')) $op 100", Seq.empty)
-        testFilter(s"ST_DistanceSphere(geom, ST_GeomFromText('POINT (0 0)')) $op 500", Seq.empty)
-        testFilter(
-          s"ST_DistanceSphere(geom, ST_GeomFromText('POINT (3 4)')) $op 808691.391",
-          Seq(0, 1))
-        testFilter(
-          s"ST_DistanceSphere(geom, ST_GeomFromText('POINT (0 0)')) $op 7100000",
-          Seq(0, 1, 2, 3))
-        testFilter(
-          s"ST_DistanceSphere(geom, ST_GeomFromText('POINT (-5 -5)')) $op 500000",
-          Seq(2))
-        testFilter(
-          s"ST_DistanceSphere(geom, ST_GeomFromText('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))')) $op 2",
-          Seq.empty)
-        testFilter(
-          s"ST_DistanceSphere(geom, ST_GeomFromText('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))')) $op 500000",
-          Seq(0, 1, 2, 3))
-        testFilter(
-          s"ST_DistanceSphere(geom, ST_GeomFromText('LINESTRING (17 17, 18 18)')) $op 500000",
-          Seq(1))
-        testFilter(
-          s"ST_DistanceSphere(geom, ST_GeomFromText('POINT (3 4)'), 5000000) $op 808691.391",
-          Seq(0, 1, 2, 3))
-        testFilter(
-          s"ST_DistanceSphere(geom, ST_GeomFromText('POINT (-5 -5)'), 5000000) $op 400000",
-          Seq(2))
-        testFilter(
-          s"ST_DistanceSphere(geom, ST_GeomFromText('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))'), 7000000) $op 500000",
-          Seq(0, 1, 2, 3))
-        testFilter(
-          s"ST_DistanceSphere(geom, ST_GeomFromText('LINESTRING (17 17, 18 18)'), 6000000) $op 500000",
-          Seq(1))
-      }
+      // Next to a predicate that is pushed down, the file is left out by that predicate
+      testFilter(
+        "ST_DistanceSphere(geom, ST_GeomFromText('POINT (5 5)')) < 500000 AND " +
+          "ST_Intersects(geom, ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'))",
+        Seq(1))
     }
 
     it("Push down And(filters...)") {
@@ -559,8 +529,13 @@ class GeoParquetSpatialFilterPushDownSuite extends TestBaseScala with TableDrive
             (
               "ST_Point(1, 2)",
               SpatialTypeSupport.geometryType(4326),
-              "requires SRID 4326 but contains SRID 0")).zipWithIndex.foreach {
-            case ((payload, dataType, expected), index) =>
+              "requires SRID 4326 but contains SRID 0"),
+            // A column of strings, which are no geographies
+            (
+              "'POINT (1 2)'",
+              SpatialTypeSupport.geographyType(4326),
+              "is stored as binary, which is read as values of Sedona's own geography type")).zipWithIndex
+            .foreach { case ((payload, dataType, expected), index) =>
               val path = parent.getAbsolutePath + s"/data$index"
               sparkSession
                 .range(10)
@@ -601,8 +576,191 @@ class GeoParquetSpatialFilterPushDownSuite extends TestBaseScala with TableDrive
                 case scan: FileSourceScanExec => scan
               }
               assert(scan.get.metrics("numOutputRows").value == 0)
-          }
+            }
         } finally FileUtils.deleteDirectory(parent)
+      }
+    }
+  }
+
+  describe("GeoParquet spatial filter push down keeps the files with a row of the predicate") {
+    val PUSH_DOWN = "spark.sedona.geoparquet.spatialFilterPushDown"
+
+    /** A file of the rows of `sql`, which have an id and a geometry `geom`. */
+    def withFile(sql: String)(run: DataFrame => Unit): Unit = {
+      val parent = Files.createTempDirectory("sedona_geoparquet_kept_").toFile
+      try {
+        val path = parent.getAbsolutePath + "/data"
+        sparkSession.sql(sql).coalesce(1).write.format("geoparquet").save(path)
+        run(sparkSession.read.format("geoparquet").load(path))
+      } finally FileUtils.deleteDirectory(parent)
+    }
+
+    /**
+     * Reads the rows of `condition` with and without its filter pushed down, which have to be the
+     * same rows and more than none, and gives the filter that was pushed down.
+     */
+    def compare(data: DataFrame, condition: String): Option[GeoParquetSpatialFilter] = {
+      def ids(df: DataFrame) = df.select("id").collect().map(_.getLong(0)).sorted.toSeq
+      val expected = withConf(Map(PUSH_DOWN -> "false")) {
+        val unfiltered = data.where(condition)
+        assert(getPushedDownSpatialFilter(unfiltered).isEmpty)
+        ids(unfiltered)
+      }
+      assert(expected.nonEmpty, condition)
+      val filtered = data.where(condition)
+      assert(ids(filtered) == expected, condition)
+      getPushedDownSpatialFilter(filtered)
+    }
+
+    it("Keeps a file whose geometries are at the distance of the predicate after rounding") {
+      // The distance from -2 to 0.3 rounds to 2.3, and -2 + 2.3 is below 0.3
+      assert(0.3 - -2.0 == 2.3 && -2.0 + 2.3 < 0.3)
+      withFile("SELECT id, ST_Point(0.3, 0.0) AS geom FROM range(3)") { data =>
+        Seq(
+          "ST_DWithin(geom, ST_Point(-2.0, 0.0), 2.3)",
+          "ST_DWithin(ST_Point(-2.0, 0.0), geom, 2.3)",
+          "ST_Distance(geom, ST_Point(-2.0, 0.0)) <= 2.3").foreach(condition =>
+          assert(compare(data, condition).isDefined, condition))
+      }
+      // The distance from 9.999999999999998 to 100 rounds to 90
+      assert(100.0 - 9.999999999999998 == 90.0 && 100.0 - 90.0 > 9.999999999999998)
+      withFile("SELECT id, ST_Point(9.999999999999998, 0.0) AS geom FROM range(3)") { data =>
+        Seq(
+          "ST_DWithin(geom, ST_Point(100.0, 0.0), 90.0)",
+          "ST_Distance(geom, ST_Point(100.0, 0.0)) <= 90.0").foreach(condition =>
+          assert(compare(data, condition).isDefined, condition))
+      }
+      // Coordinates of a projected CRS, and a distance to a line
+      withFile("SELECT id, ST_Point(500000.3, 4649776.1) AS geom FROM range(3)") { data =>
+        val line = "ST_GeomFromWKT('LINESTRING (499998 4649000, 499998 4650000)')"
+        assert(compare(data, s"ST_DWithin(geom, $line, 2.3)").isDefined)
+        assert(compare(data, s"ST_Distance($line, geom) <= 2.3").isDefined)
+      }
+    }
+
+    it("Keeps a file with a geometry that is at the distance of the predicate, anywhere") {
+      // A geometry of a row and one of the query, and the distance between them as the
+      // predicate computes it. A predicate with that distance keeps the row, so its filter has
+      // to keep a file whose bounding box is that of the geometry of the row.
+      val random = new scala.util.Random(53)
+      val factory = new GeometryFactory()
+      def geometry(scale: Double, extent: Double): Geometry = {
+        def coordinate() = new Coordinate(
+          (random.nextDouble() - 0.5) * scale + (random.nextDouble() - 0.5) * extent,
+          (random.nextDouble() - 0.5) * scale + (random.nextDouble() - 0.5) * extent)
+        random.nextInt(4) match {
+          case 0 => factory.createPoint(coordinate())
+          case 1 => factory.createLineString(Array(coordinate(), coordinate(), coordinate()))
+          // A line along an axis is as far from a geometry next to it as its bounding box is,
+          // and the distance to it is not computed as the distance to that box is
+          case 2 =>
+            val (start, end) = (coordinate(), coordinate())
+            factory.createLineString(Array(start, new Coordinate(start.x, end.y)))
+          case _ =>
+            val (start, end) = (coordinate(), coordinate())
+            factory.createLineString(Array(start, new Coordinate(end.x, start.y)))
+        }
+      }
+      var apart = 0
+      var rounded = 0
+      (1 to 20000).foreach { _ =>
+        // Coordinates from thousandths to tens of millions, and geometries of any extent
+        val scale = math.pow(10, random.nextInt(11) - 3)
+        val row = geometry(scale, scale * math.pow(10, -random.nextInt(8)))
+        val query = geometry(scale, scale * math.pow(10, -random.nextInt(8)))
+        val distance = row.distance(query)
+        val box = row.getEnvelopeInternal
+        if (box.distance(query.getEnvelopeInternal) > 0) apart += 1
+        if (box.distance(query.getEnvelopeInternal) > distance) rounded += 1
+        val columns = Map(
+          "geom" -> GeometryFieldMetaData(
+            "WKB",
+            Seq.empty,
+            Some(Seq(box.getMinX, box.getMinY, box.getMaxX, box.getMaxY))))
+        val filter = DistanceLeafFilter("geom", query.getEnvelopeInternal, distance)
+        assert(filter.evaluate(columns), s"$row $query $distance")
+      }
+      assert(apart > 10000)
+      // The distance of some of these predicates is below the distance between the boxes
+      assert(rounded > 0)
+    }
+
+    it("Leaves out a file that is farther away than the distance of the predicate") {
+      withFile("SELECT id, ST_Point(0.3, 0.0) AS geom FROM range(3)") { data =>
+        Seq(
+          "ST_DWithin(geom, ST_Point(-2.0, 0.0), 2.299)",
+          "ST_Distance(geom, ST_Point(-2.0, 0.0)) < 2.299").foreach { condition =>
+          val filtered = data.where(condition)
+          val bbox = Map(
+            "geom" -> GeometryFieldMetaData("WKB", Seq("Point"), Some(Seq(0.3, 0.0, 0.3, 0.0))))
+          assert(!getPushedDownSpatialFilter(filtered).get.evaluate(bbox), condition)
+          assert(filtered.collect().isEmpty, condition)
+        }
+      }
+    }
+
+    it("Keeps a file with an empty geometry for a query that is equal to an empty geometry") {
+      withFile("""SELECT id, CASE WHEN id = 0 THEN ST_GeomFromWKT('POINT EMPTY')
+          |  ELSE ST_Point(CAST(id AS DOUBLE), CAST(id AS DOUBLE)) END AS geom
+          |FROM range(10)""".stripMargin) { data =>
+        val empty = "ST_GeomFromWKT('POINT EMPTY')"
+        Seq(
+          s"ST_Equals(geom, $empty)",
+          s"ST_Equals($empty, geom)",
+          s"ST_OrderingEquals(geom, $empty)",
+          s"ST_Equals(geom, $empty) OR ST_Intersects(geom, ST_Point(9.0, 9.0))").foreach(
+          compare(data, _))
+      }
+    }
+
+    it("Pushes no filter for a distance that is no number, below zero or without an end") {
+      withFile("SELECT id, ST_Point(0.3, 0.0) AS geom FROM range(3)") { data =>
+        Seq(
+          "ST_DWithin(geom, ST_Point(-2.0, 0.0), double('NaN'))",
+          "ST_DWithin(geom, ST_Point(-2.0, 0.0), double('Infinity'))",
+          "ST_DWithin(geom, ST_Point(-2.0, 0.0), -1.0)",
+          "ST_Distance(geom, ST_Point(-2.0, 0.0)) <= double('Infinity')",
+          "ST_Distance(geom, ST_Point(-2.0, 0.0)) < double('NaN')").foreach { condition =>
+          val filtered = data.where(condition)
+          assert(getPushedDownSpatialFilter(filtered).isEmpty, condition)
+          val expected = withConf(Map(PUSH_DOWN -> "false")) {
+            data.where(condition).select("id").collect().map(_.getLong(0)).sorted.toSeq
+          }
+          assert(
+            filtered.select("id").collect().map(_.getLong(0)).sorted.toSeq == expected,
+            condition)
+        }
+        assert(
+          compare(data, "ST_Distance(geom, ST_Point(-2.0, 0.0)) <= double('Infinity')").isEmpty)
+      }
+    }
+
+    it("Pushes no filter for a distance whose model is not a constant of the query") {
+      // Points to the west of the antimeridian, some 22 centimetres from a point to its east
+      withFile("""SELECT id, id % 2 = 0 AS spheroid, CAST(1 + id % 2 AS DOUBLE) AS radius,
+          |  ST_Point(-179.999999, 0.0) AS geom
+          |FROM range(6)""".stripMargin) { data =>
+        val east = "ST_Point(179.999999, 0.0)"
+        // On the spheroid for every second row, in meters, and on the plane for the others
+        assert(compare(data, s"ST_DWithin(geom, $east, 1.0, spheroid)").isEmpty)
+        // On a sphere of a radius of one or two meters
+        assert(compare(data, s"ST_DistanceSphere(geom, $east, radius) <= 0.1").isEmpty)
+        // In meters across the antimeridian
+        assert(compare(data, s"ST_DWithin(geom, $east, 300.0, true)").isEmpty)
+        assert(compare(data, s"ST_DistanceSpheroid(geom, $east) <= 300.0").isEmpty)
+        assert(compare(data, s"ST_DistanceSphere(geom, $east) <= 300.0").isEmpty)
+        // On the plane, by a constant
+        assert(compare(data, "ST_DWithin(geom, ST_Point(-179.0, 0.0), 1.5, false)").isDefined)
+      }
+    }
+
+    it("Keeps a file for a distance to the centroid of a geometry of the query") {
+      // The centroid of the two points is (0 0), which is far from both of them
+      withFile("SELECT id, ST_Point(0.0, 0.0) AS geom FROM range(3)") { data =>
+        val ends = "ST_GeomFromWKT('MULTIPOINT ((-20 0), (20 0))')"
+        assert(compare(data, s"ST_DistanceSpheroid(geom, $ends) <= 100.0").isEmpty)
+        assert(compare(data, s"ST_DWithin(geom, $ends, 100.0, true)").isEmpty)
+        assert(compare(data, s"ST_DistanceSphere(geom, $ends) <= 100.0").isEmpty)
       }
     }
   }

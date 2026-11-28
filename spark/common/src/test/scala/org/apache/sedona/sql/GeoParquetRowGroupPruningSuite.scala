@@ -28,8 +28,10 @@ import org.apache.hadoop.fs.Path
 import org.apache.hadoop.mapred.FileSplit
 import org.apache.hadoop.mapreduce.{JobID, TaskAttemptID, TaskID, TaskType}
 import org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl
+import org.apache.parquet.crypto.{ColumnEncryptionProperties, EncryptionPropertiesFactory, FileEncryptionProperties, ParquetCryptoRuntimeException}
 import org.apache.parquet.example.data.Group
 import org.apache.parquet.hadoop.{ParquetFileReader, ParquetRecordReader}
+import org.apache.parquet.hadoop.api.WriteSupport
 import org.apache.parquet.hadoop.example.GroupReadSupport
 import org.apache.parquet.hadoop.metadata.{BlockMetaData, ColumnPath, ParquetMetadata}
 import org.apache.parquet.hadoop.util.HadoopInputFile
@@ -522,8 +524,13 @@ class GeoParquetRowGroupPruningSuite extends TestBaseScala {
             (
               "ST_Point(1, 2)",
               SpatialTypeSupport.geometryType(4326),
-              "requires SRID 4326 but contains SRID 0")).zipWithIndex.foreach {
-            case ((payload, dataType, expected), index) =>
+              "requires SRID 4326 but contains SRID 0"),
+            // A column of strings, which are no geographies
+            (
+              "'POINT (1 2)'",
+              SpatialTypeSupport.geographyType(4326),
+              "is stored as binary, which is read as values of Sedona's own geography type")).zipWithIndex
+            .foreach { case ((payload, dataType, expected), index) =>
               val path = new File(directory, s"data$index").getPath
               write(gate.withColumn("payload", expr(payload)), path)
               // A query that is outside of all row groups, and one that reaches some of them
@@ -566,7 +573,7 @@ class GeoParquetRowGroupPruningSuite extends TestBaseScala {
               assert(!rejects(df.schema("payload")))
               assert(!rejects(df.schema("gate")))
               assert(!rejects(df.schema("id")))
-          }
+            }
         }
       }
 
@@ -648,6 +655,17 @@ class GeoParquetRowGroupPruningSuite extends TestBaseScala {
             val (ids, rows) = find(path, byId, "target", push = true)
             assert(ids == (1001L to 1199L))
             assert(rows > 0 && rows < ROWS / 2)
+
+            // The column with the field id of the column of the read, next to a column of
+            // another field id that the read takes too. The read gives the values of both to
+            // the column of their name, so the statistics of neither are those of its values.
+            val both = StructType(
+              Seq(
+                StructField("id", LongType),
+                StructField("target", geography.dataType, nullable = true, fieldId(2)),
+                StructField("other", geography.dataType, nullable = true, fieldId(1))))
+            val unfiltered = find(path, both, "target", push = false)._1
+            assert(find(path, both, "target", push = true)._1 == unfiltered)
           }
 
           // The column of the file whose name is the name of the column of the read in another
@@ -947,6 +965,179 @@ class GeoParquetRowGroupPruningSuite extends TestBaseScala {
           assert(read < 40 * ROWS / 3)
         }
       }
+
+      it("prunes by a distance in meters for a geography column, and not for a geometry one") {
+        withDirectory { directory =>
+          val geometries = new File(directory, "geometries").getPath
+          write(planar, geometries)
+          val point = "ST_GeogFromWKT('POINT (55 27.5)', 4326)"
+          // The geography of a geometry. The type of a column of Spark's native geography type
+          // names its SRID, which the geography that ST_GeomToGeography gives does not: it has
+          // the SRID of its geometry. Spark's own function reads WKB as longitudes and latitudes.
+          val geography =
+            if (SpatialTypeSupport.usesNativeTypes) "ST_GeogFromWKB(ST_AsBinary(geom))"
+            else "ST_GeomToGeography(geom)"
+          // A distance in meters between geometries is none of the plane of their bounding box
+          Seq(
+            "ST_DWithin(geom, ST_Point(55, 27.5), 50000.0, true)",
+            "ST_DistanceSphere(geom, ST_Point(55, 27.5)) <= 50000.0",
+            "ST_DistanceSpheroid(geom, ST_Point(55, 27.5)) <= 50000.0",
+            // Nor is the distance to a geography that the query makes of each geometry
+            s"ST_DWithin($geography, $point, 50000.0)").foreach { condition =>
+            val df = read(geometries, condition)
+            assert(pushed(df).isEmpty, condition)
+            val (ids, rows) = run(df)
+            assert(ids.nonEmpty && ids.size < 20 && rows == ROWS, condition)
+          }
+
+          // The geometries as a geography column, which a filter on that distance is for
+          val geographies = new File(directory, "geographies").getPath
+          write(
+            sparkSession.read
+              .format("geoparquet")
+              .load(geometries)
+              .selectExpr("id", s"$geography AS geog"),
+            geographies)
+          val condition = s"ST_DWithin(geog, $point, 50000.0)"
+          assert(scanned(geographies, condition) < ROWS / 2)
+          assert(
+            expected(geographies, condition) ==
+              run(read(geometries, s"ST_DWithin($geography, $point, 50000.0)"))._1)
+        }
+      }
+
+      it("keeps the row groups at the distance of the predicate after rounding") {
+        withDirectory { directory =>
+          // The distance from 9.999999999999998 to 100 rounds to 90
+          val rounded = new File(directory, "rounded").getPath
+          write(
+            sparkSession.sql(s"""SELECT id,
+                |  ST_Point(IF(id < 1500, 9.999999999999998D, 100.0D), 0.0D) AS geom
+                |FROM range($ROWS)""".stripMargin),
+            rounded)
+          assert(blocks(rounded).size > 4)
+          Seq(
+            "ST_DWithin(geom, ST_Point(100.0, 0.0), 90.0)",
+            "ST_DWithin(ST_Point(100.0, 0.0), geom, 90.0)",
+            "ST_Distance(geom, ST_Point(100.0, 0.0)) <= 90.0").foreach(condition =>
+            assert(scanned(rounded, condition) == ROWS, condition))
+          // A row group that is farther away is skipped
+          val nearer = scanned(rounded, "ST_DWithin(geom, ST_Point(100.0, 0.0), 89.99)")
+          assert(nearer >= 1500 && nearer < ROWS)
+
+          // The distance from -2 to 0.3 rounds to 2.3, and -2 + 2.3 is below 0.3
+          val added = new File(directory, "added").getPath
+          write(
+            sparkSession.sql(s"""SELECT id,
+                |  ST_Point(IF(id < 1500, 0.3D, 30.0D), 0.0D) AS geom
+                |FROM range($ROWS)""".stripMargin),
+            added)
+          Seq(
+            "ST_DWithin(geom, ST_Point(-2.0, 0.0), 2.3)",
+            "ST_Distance(geom, ST_Point(-2.0, 0.0)) <= 2.3").foreach { condition =>
+            assert(expected(added, condition) == (0L until 1500L), condition)
+            val rows = scanned(added, condition)
+            assert(rows >= 1500 && rows < ROWS, condition)
+          }
+        }
+      }
+
+      it("keeps the row groups with an empty geometry for a query that is equal to one") {
+        withDirectory { directory =>
+          val path = new File(directory, "data").getPath
+          write(
+            sparkSession.sql(s"""SELECT id, CASE WHEN id = 0 THEN ST_GeomFromWKT('POINT EMPTY')
+                |  ELSE ST_Point(CAST(id AS DOUBLE), CAST(id AS DOUBLE)) END AS geom
+                |FROM range($ROWS)""".stripMargin),
+            path)
+          val empty = "ST_GeomFromWKT('POINT EMPTY')"
+          // The box of the first row group is that of its points, which has no empty geometry
+          Seq(s"ST_Equals(geom, $empty)", s"ST_OrderingEquals(geom, $empty)").foreach {
+            condition =>
+              assert(expected(path, condition) == Seq(0L), condition)
+              scanned(path, condition)
+          }
+          val either = s"ST_Equals(geom, $empty) OR ST_Intersects(geom, ST_Point(2999.0, 2999.0))"
+          assert(expected(path, either) == Seq(0L, 2999L))
+          scanned(path, either)
+        }
+      }
+
+      it("skips no row group by a column that the read does not take the values of") {
+        withDirectory { directory =>
+          def fieldId(id: Long) = new MetadataBuilder().putLong("parquet.field.id", id).build()
+          val path = new File(directory, "data").getPath
+          write(
+            sparkSession
+              .sql("SELECT id, ST_Point(45.0, 45.0) AS a, ST_Point(0.0, 0.0) AS b FROM range(10)")
+              .select(col("id"), col("a").as("a", fieldId(1)), col("b").as("b", fieldId(2))),
+            path)
+          val geometry = sparkSession.read.format("geoparquet").load(path).schema("a").dataType
+          // The field ids of the two columns the other way around. The reader of a file finds
+          // the column of a field id, and takes the values of the column of the name.
+          val swapped = StructType(
+            Seq(
+              StructField("id", LongType),
+              StructField("a", geometry, nullable = true, fieldId(2)),
+              StructField("b", geometry, nullable = true, fieldId(1))))
+          def rows(condition: String, push: Boolean): Seq[String] = {
+            var found = Seq.empty[String]
+            withConf(PUSH_DOWN -> push.toString) {
+              val df =
+                sparkSession.read.schema(swapped).format("geoparquet").load(path).where(condition)
+              assert(pushed(df).isDefined == push)
+              found = df
+                .selectExpr("id", "ST_AsText(a)", "ST_AsText(b)")
+                .collect()
+                .map(_.toString)
+                .sorted
+                .toSeq
+            }
+            found
+          }
+          withConf("spark.sql.parquet.fieldId.read.enabled" -> "true") {
+            val read = for {
+              column <- Seq("a", "b")
+              point <- Seq("ST_Point(45.0, 45.0)", "ST_Point(0.0, 0.0)")
+            } yield {
+              val condition = s"ST_Intersects($column, $point)"
+              val unfiltered = rows(condition, push = false)
+              assert(rows(condition, push = true) == unfiltered, condition)
+              unfiltered.size
+            }
+            assert(read.sum == 20)
+          }
+        }
+      }
+
+      it("reads a split as a whole when its footer does not say where a row group starts") {
+        withDirectory { directory =>
+          val path = new File(directory, "data").getPath
+          // A file with a footer that anyone can read, and a first column that is encrypted.
+          // A row group starts where its first column does, which is with the encrypted part
+          // of the footer.
+          write(
+            planar,
+            path,
+            EncryptionPropertiesFactory.CRYPTO_FACTORY_CLASS_PROPERTY_NAME ->
+              classOf[FirstColumnEncryption].getName)
+          val groups = blocks(path)
+          assert(groups.size > 4)
+          assert(groups.head.getColumns.get(0).isEncrypted)
+          assert(!groups.head.getColumns.get(1).isEncrypted)
+          intercept[ParquetCryptoRuntimeException](groups.head.getStartingPos)
+
+          for (ignoreCorruptFiles <- Seq("false", "true"); push <- Seq("false", "true")) {
+            withConf(
+              "spark.sql.files.ignoreCorruptFiles" -> ignoreCorruptFiles,
+              PUSH_DOWN -> push) {
+              val df = read(path, s"ST_Intersects(geom, $area)").select("geom")
+              assert(pushed(df).isDefined == push.toBoolean)
+              assert(df.count() == 201, s"$ignoreCorruptFiles $push")
+            }
+          }
+        }
+      }
     }
   }
 
@@ -995,5 +1186,27 @@ class GeoParquetRowGroupPruningSuite extends TestBaseScala {
         assert(!filter.evaluateRowGroup(boxes(Some(new Envelope(5, 6, 5, 6)))))
       }
     }
+  }
+}
+
+/**
+ * Encrypts the first column of [[GeoParquetRowGroupPruningSuite]]'s files of geometries, and
+ * leaves the footer for anyone to read.
+ */
+class FirstColumnEncryption extends EncryptionPropertiesFactory {
+  override def getFileEncryptionProperties(
+      conf: Configuration,
+      path: Path,
+      context: WriteSupport.WriteContext): FileEncryptionProperties = {
+    val key = Array.tabulate[Byte](16)(_.toByte)
+    val column = ColumnPath.get("id")
+    FileEncryptionProperties
+      .builder(key)
+      .withPlaintextFooter()
+      .withEncryptedColumns(
+        java.util.Collections.singletonMap(
+          column,
+          ColumnEncryptionProperties.builder(column).withKey(key).withKeyID("id").build()))
+      .build()
   }
 }

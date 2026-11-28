@@ -106,6 +106,13 @@ so queries that use it fail until rewritten:
 * **Mixed coordinate layouts are rejected.** Serializing a polygon or multi-geometry whose parts
   mix XY, XYZ, XYM or XYZM (for example from `ST_Collect`) now raises an error instead of
   corrupting ordinates. Normalize the parts to one layout, or use a `GeometryCollection`.
+* **Distance filters in meters no longer skip GeoParquet files.** `ST_DistanceSphere`,
+  `ST_DistanceSpheroid` and `ST_DWithin` with `useSpheroid` set to `true` on a geometry column
+  are applied to every row of a GeoParquet dataset, and of a STAC collection. They used to skip
+  files by a planar bounding box, which could lose rows across the antimeridian and for
+  geometries that are not points. Store the column as a geography column and filter it with `ST_DWithin`
+  to skip data by a distance in meters. See
+  [Filter by a distance](../api/sql/Optimizer.md#filter-by-a-distance).
 * **`RS_Resample` and `RS_ReprojectMatch`** raise an error for an unknown algorithm name.
   Previously they silently fell back to nearest neighbour.
 * **`RS_SetBandNoDataValue(raster, band, NULL)`** now removes that band's no-data value from

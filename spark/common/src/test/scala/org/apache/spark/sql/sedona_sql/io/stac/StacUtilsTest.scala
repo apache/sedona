@@ -610,6 +610,15 @@ class StacUtilsTest extends AnyFunSuite {
     assert(bbox == "bbox=10.0%2C10.0%2C20.0%2C20.0")
   }
 
+  test("getFilterBBox with DistanceLeafFilter") {
+    val filter =
+      GeoParquetSpatialFilter.DistanceLeafFilter("geometry", new Envelope(10, 20, 10, 20), 2.5)
+    val bounds = getFilterBBox(filter).stripPrefix("bbox=").split("%2C").map(_.toDouble)
+    // The box of the query, larger by the distance and by its rounding
+    Seq(7.5 - bounds(0), 7.5 - bounds(1), bounds(2) - 22.5, bounds(3) - 22.5).foreach(grown =>
+      assert(grown > 0 && grown < 1e-6))
+  }
+
   test("getFilterBBox with AndFilter") {
     val queryWindow1: Polygon =
       wktReader.read("POLYGON((10 10, 20 10, 20 20, 10 20, 10 10))").asInstanceOf[Polygon]

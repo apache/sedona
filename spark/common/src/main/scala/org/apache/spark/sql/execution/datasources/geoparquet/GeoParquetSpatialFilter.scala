@@ -146,28 +146,8 @@ object GeoParquetSpatialFilter {
       predicateType: SpatialPredicate,
       queryWindow: Geometry)
       extends GeoParquetSpatialFilter {
-    def evaluate(columns: Map[String, GeometryFieldMetaData]): Boolean = {
-      columns.get(columnName).forall { column =>
-        val bbox = column.bbox.getOrElse(return true)
-        // A bbox lists the minimum of every dimension and then the maximum of every dimension:
-        // four values for XY, six for XYZ and eight for XYZM. X and Y come first in each half.
-        // A file whose bbox has another number of values is kept.
-        if (bbox.length != 4 && bbox.length != 6 && bbox.length != 8) {
-          return true
-        }
-
-        val dimensions = bbox.length / 2
-        val (xmin, ymin, xmax, ymax) = (bbox(0), bbox(1), bbox(dimensions), bbox(dimensions + 1))
-        // A bbox that crosses the antimeridian lists the west bound first, as RFC 7946 says, so
-        // its xmin is greater than its xmax. An envelope cannot express that range, and the file
-        // is kept. So is a file with any other bounds that are not in order, NaN included.
-        if (!(xmin <= xmax && ymin <= ymax)) {
-          return true
-        }
-
-        keeps(new Envelope(xmin, xmax, ymin, ymax))
-      }
-    }
+    def evaluate(columns: Map[String, GeometryFieldMetaData]): Boolean =
+      fileBox(columns, columnName).forall(keeps)
 
     override def evaluateRowGroup(boxes: RowGroupBoxes): Boolean =
       boxes.geometry(columnName).forall(keeps)
@@ -178,7 +158,9 @@ object GeoParquetSpatialFilter {
     private def keeps(envelope: Envelope): Boolean = {
       val columnEnvelope = queryWindow.getFactory.toGeometry(envelope)
       predicateType match {
-        case SpatialPredicate.COVERS => columnEnvelope.covers(queryWindow)
+        // The box is that of the geometries that have a coordinate. An empty geometry is equal
+        // to an empty one of the query, and no box says whether a file or a row group has one.
+        case SpatialPredicate.COVERS => queryWindow.isEmpty || columnEnvelope.covers(queryWindow)
         case SpatialPredicate.INTERSECTS =>
           // XXX: We must call the intersects method of queryWindow instead of columnEnvelope, since queryWindow
           // may be a Circle object and geom.intersects(circle) may not work correctly.
@@ -190,6 +172,90 @@ object GeoParquetSpatialFilter {
 
     override def simpleString: String = s"$columnName ${predicateType.name} $queryWindow"
   }
+
+  /**
+   * A predicate that keeps the rows whose geometry is within a distance of a geometry of the
+   * query, on the plane. No such row is in a file or a row group whose bounding box is farther
+   * than that from the bounding box of the geometry of the query.
+   *
+   * The distance of a predicate is a rounded one, so a row can be within the distance by it and a
+   * little farther away than that. The distance between the two boxes is therefore compared with
+   * a distance that is larger by [[DistanceLeafFilter.ROUNDING]] of the largest coordinate of the
+   * two boxes: the rounding of a distance grows with the coordinates that it is computed from,
+   * which are those of the geometries of the rows as well.
+   *
+   * @param columnName
+   *   name of the filtered geometry column
+   * @param queryEnvelope
+   *   bounding box of the geometry of the query
+   * @param distance
+   *   distance of the predicate, in the units of the coordinates
+   */
+  case class DistanceLeafFilter(columnName: String, queryEnvelope: Envelope, distance: Double)
+      extends GeoParquetSpatialFilter {
+    override def evaluate(columns: Map[String, GeometryFieldMetaData]): Boolean =
+      fileBox(columns, columnName).forall(keeps)
+
+    override def evaluateRowGroup(boxes: RowGroupBoxes): Boolean =
+      boxes.geometry(columnName).forall(keeps)
+
+    override def usesRowGroupStatistics: Boolean = true
+
+    /** Whether a file or a row group with the bounding box `box` may have a row to keep. */
+    private def keeps(box: Envelope): Boolean =
+      // A distance that is no number keeps the box
+      !(box.distance(queryEnvelope) > reach(box))
+
+    /**
+     * The distance from the bounding box of the geometry of the query within which every row of
+     * the predicate is, for rows whose geometries are in `box`.
+     */
+    def reach(box: Envelope): Double = {
+      val largest = Seq(box, queryEnvelope)
+        .flatMap(envelope =>
+          Seq(envelope.getMinX, envelope.getMaxX, envelope.getMinY, envelope.getMaxY))
+        .map(math.abs)
+        .max
+      distance + (largest + distance) * DistanceLeafFilter.ROUNDING
+    }
+
+    override def simpleString: String =
+      s"$columnName WITHIN $distance OF BOX(${queryEnvelope.getMinX} ${queryEnvelope.getMinY}, " +
+        s"${queryEnvelope.getMaxX} ${queryEnvelope.getMaxY})"
+  }
+
+  object DistanceLeafFilter {
+
+    /**
+     * What the distance of a predicate grows by, as a part of the largest coordinate that the
+     * distance is computed from. A distance between a point and a line is right to some 20 times
+     * the precision of a double of the largest of their coordinates, which is 2.2e-15 of it.
+     */
+    val ROUNDING = 1e-12
+  }
+
+  /**
+   * The bounding box that the GeoParquet metadata of a file has for the geometries of a column,
+   * in X and Y. None for a file whose metadata says nothing of the column, and for a column
+   * without a box that a filter can read, both of which a filter keeps.
+   */
+  private def fileBox(
+      columns: Map[String, GeometryFieldMetaData],
+      columnName: String): Option[Envelope] =
+    columns.get(columnName).flatMap(_.bbox).flatMap { bbox =>
+      // A bbox lists the minimum of every dimension and then the maximum of every dimension:
+      // four values for XY, six for XYZ and eight for XYZM. X and Y come first in each half.
+      // A file whose bbox has another number of values is kept.
+      if (bbox.length != 4 && bbox.length != 6 && bbox.length != 8) None
+      else {
+        val dimensions = bbox.length / 2
+        val (xmin, ymin, xmax, ymax) = (bbox(0), bbox(1), bbox(dimensions), bbox(dimensions + 1))
+        // A bbox that crosses the antimeridian lists the west bound first, as RFC 7946 says, so
+        // its xmin is greater than its xmax. An envelope cannot express that range, and the file
+        // is kept. So is a file with any other bounds that are not in order, NaN included.
+        if (xmin <= xmax && ymin <= ymax) Some(new Envelope(xmin, xmax, ymin, ymax)) else None
+      }
+    }
 
   /**
    * A predicate between a geography column and a geography of the query that holds for no row
